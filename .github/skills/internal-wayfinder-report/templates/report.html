@@ -57,6 +57,14 @@ ul, ol { padding-left: 1.35rem; }
 .timeline { display: grid; gap: .8rem; list-style: none; padding-left: 0; counter-reset: step; }
 .timeline li { counter-increment: step; display: grid; grid-template-columns: 2.4rem 1fr; gap: .75rem; align-items: start; }
 .timeline li::before { content: counter(step); display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+.decision-board { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.decision-group { background: var(--surface); border: 1px solid var(--line); border-top: .35rem solid var(--accent); border-radius: .65rem; padding: 1rem; }
+.decision-group[data-decision-state="open"] { border-top-color: var(--warning); }
+.decision-group[data-decision-state="not-specified"] { border-top-color: var(--line); }
+.decision-group h3 { display: flex; gap: .5rem; align-items: baseline; justify-content: space-between; }
+.count { color: var(--muted); font-size: .85rem; }
+.decision-group ol { margin: 0; }
+.decision-group li + li { margin-top: 1rem; }
 .badge { display: inline-block; border-radius: 999px; padding: .12rem .55rem; margin: .1rem .2rem .1rem 0; background: var(--accent-soft); color: var(--accent); font-size: .76rem; font-weight: 700; }
 .badge.warning { background: var(--warning-soft); color: var(--warning); }
 .badge.critical { background: var(--critical-soft); color: var(--critical); }
@@ -67,24 +75,47 @@ tr:last-child td { border-bottom: none; }
 .finding-card { border-left: .4rem solid var(--accent); margin-top: 1rem; scroll-margin-top: 6rem; }
 .finding-card.secondary { border-left-color: var(--line); }
 .finding-meta { color: var(--muted); font-size: .88rem; }
+.finding-queue { display: grid; gap: .75rem; }
+.finding-disclosure { scroll-margin-top: 6rem; }
+.finding-disclosure > summary { display: grid; gap: .35rem; grid-template-columns: minmax(7rem, auto) 1fr; align-items: center; }
+.finding-id { font-weight: 800; }
+.finding-rank { grid-column: 1 / -1; color: var(--muted); font-size: .88rem; font-weight: 400; }
+.finding-body { border-top: 1px solid var(--line); margin-top: .75rem; padding-top: .75rem; }
+.finding-block + .finding-block, .copy-request { border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 1rem; }
+.finding-block h4, .copy-request h4 { margin: 0 0 .35rem; }
+.copy-request p { white-space: pre-wrap; }
+button { border: 1px solid var(--accent); border-radius: .4rem; background: var(--accent-soft); color: var(--ink); cursor: pointer; font: inherit; padding: .35rem .65rem; }
+.copy-status { color: var(--muted); font-size: .85rem; margin-left: .5rem; }
 details { background: var(--surface); border: 1px solid var(--line); border-radius: .65rem; padding: .8rem 1rem; }
 details.sources { background: transparent; border: none; border-top: 1px solid var(--line); border-radius: 0; padding: .5rem 0 0; }
 summary { cursor: pointer; font-weight: 800; }
 .diagram { margin: 1rem 0 0; }
+.diagram-target { min-height: 0; overflow-x: auto; padding: .25rem 0; }
 .diagram-source { overflow-x: auto; background: #0f172a; color: #e0f2fe; border-radius: .5rem; padding: 1rem; white-space: pre; font-size: .85rem; }
 .diagram-target svg { max-width: 100%; height: auto; }
+.diagram-fallback { color: var(--muted); font-style: italic; }
+.diagram-error[role="alert"] { color: var(--critical); font-weight: 700; }
+.diagram-debug { margin-top: .75rem; }
 .empty { color: var(--muted); font-style: italic; }
 .section-anchor { scroll-margin-top: 6rem; }
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   header { position: static; }
   .header-inner { align-items: flex-start; flex-direction: column; }
+  .decision-board { grid-template-columns: 1fr; }
+  .finding-disclosure > summary { grid-template-columns: 1fr; }
 }
 @media print {
+  @page { margin: 1.5cm; }
   header { position: static; background: #fff; color: #000; }
   body { background: #fff; }
-  details { border: none; }
-  details > summary { display: none; }
-  details[open] > summary { display: none; }
+  nav, button, .copy-status { display: none !important; }
+  details { border: 1px solid #999; break-inside: avoid; }
+  details > summary { display: block; }
+  details > *:not(summary) { display: block; }
+  .finding-body, .diagram-debug { border-top-color: #999; }
+  .diagram-target:empty { display: none; }
+  .diagram-fallback, .diagram-debug { display: block; }
+  .diagram-error[hidden] { display: none; }
   .diagram-source { background: #fff; color: #000; border: 1px solid #999; }
 }
 </style>
@@ -98,8 +129,11 @@ summary { cursor: pointer; font-weight: 800; }
       <span class="badge ${status_class}">${status_label}</span>
     </div>
     <nav aria-label="Sezioni del report">
-      <a href="#comprendi">Comprendi il risultato</a>
-      <a href="#revisiona">Revisiona la coerenza</a>
+      <a href="#overview">Panoramica</a>
+      <a href="#solution">Soluzione</a>
+      <a href="#decisions">Decisioni</a>
+      <a href="#scope">Ambito</a>
+      <a href="#review">Revisione</a>
     </nav>
   </div>
 </header>
@@ -109,35 +143,62 @@ summary { cursor: pointer; font-weight: 800; }
   ${understand}
   ${review}
 </main>
-<!--
-  Blocco Mermaid opzionale.
-  Elimina i due <script> qui sotto per ottenere un report completamente offline:
-  i diagrammi restano visibili come codice sorgente.
-  Hash SRI: curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A
--->
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"
         integrity="sha384-zkWMJO4sgpPUzyuOgDx8HB/K55glbAwajEpk1Go2NWRuPkPA/wIhoEJTuSkmOYrV"
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 (function () {
-  if (!window.mermaid) { return; }
-  window.mermaid.initialize({
-    startOnLoad: false,
-    securityLevel: 'strict',
-    flowchart: { htmlLabels: false }
-  });
-  var figures = document.querySelectorAll('.diagram');
-  Array.prototype.forEach.call(figures, function (figure, index) {
-    var source = figure.querySelector('.diagram-source');
-    var target = figure.querySelector('.diagram-target');
-    if (!source || !target) { return; }
-    window.mermaid.render('wayfinder-diagram-' + index, source.textContent)
-      .then(function (result) {
-        target.innerHTML = result.svg;
-        target.hidden = false;
-        source.hidden = true;
-      })
-      .catch(function () { /* il sorgente resta visibile */ });
+  function showDiagramError(figure) {
+    var error = figure.querySelector('.diagram-error');
+    if (!error) { return; }
+    error.textContent = 'Diagramma non renderizzato: sintassi Mermaid non valida.';
+    error.hidden = false;
+  }
+
+  if (window.mermaid) {
+    window.mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      flowchart: { htmlLabels: false }
+    });
+    var figures = document.querySelectorAll('.diagram');
+    Array.prototype.forEach.call(figures, function (figure, index) {
+      var source = figure.querySelector('.diagram-source');
+      var target = figure.querySelector('.diagram-target');
+      var fallback = figure.querySelector('.diagram-fallback');
+      if (!source || !target) { return; }
+      Promise.resolve(window.mermaid.parse(source.textContent))
+        .then(function () {
+          return window.mermaid.render('wayfinder-diagram-' + index, source.textContent);
+        })
+        .then(function (result) {
+          target.innerHTML = result.svg;
+          if (fallback) { fallback.hidden = true; }
+        })
+        .catch(function (error) {
+          showDiagramError(figure);
+        });
+    });
+  }
+
+  var copyButtons = document.querySelectorAll('[data-copy-target]');
+  if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+    return;
+  }
+  Array.prototype.forEach.call(copyButtons, function (button) {
+    button.hidden = false;
+    button.addEventListener('click', function () {
+      var request = document.getElementById(button.getAttribute('data-copy-target'));
+      var status = button.parentElement.querySelector('.copy-status');
+      if (!request || !status) { return; }
+      navigator.clipboard.writeText(request.textContent)
+        .then(function () {
+          status.textContent = 'Copiata';
+        })
+        .catch(function (error) {
+          status.textContent = 'Copia non riuscita';
+        });
+    });
   });
 })();
 </script>

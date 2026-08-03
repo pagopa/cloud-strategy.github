@@ -5,11 +5,11 @@ description: Use when an active local Wayfinder workspace needs a traceable HTML
 
 # Internal Wayfinder Report
 
-Turn one local Wayfinder workspace into a traceable single-page report with two
-sections. The report is an evidence projection: it explains what the workspace
-says and surfaces
-coherence questions, while source maps, analysis, and tickets remain the
-authoritative artifacts.
+Turn one local Wayfinder workspace into a traceable single-page report with
+progressive overview, solution, decision, scope, and review sections. The
+report is an evidence projection: it explains what the workspace says and
+surfaces coherence questions, while source maps, analysis, and tickets remain
+the authoritative artifacts.
 
 ## When to use
 
@@ -82,8 +82,9 @@ Each review finding must keep these layers distinct:
 
 Use only the model enums. Give every finding a unique ID, non-empty evidence,
 and one or more sources on every claim. Rank is computed by impact level,
-certainty, propagation, and ID; provide all findings and let the renderer expose
-the five highest-ranked findings first.
+certainty, propagation, and ID; provide every finding and let the renderer
+expose the complete ranked queue with only the highest-ranked detail open
+initially.
 
 ## Render the report
 
@@ -102,12 +103,14 @@ The renderer writes exactly one page:
 tmp/.wayfinder/<analysis-slug>/report/index.html
 ```
 
-The page contains `Comprendi il risultato` first and `Revisiona la coerenza`
-second. It includes a derived indicator strip, a decision-path flowchart when
-the model declares no diagram, collapsed but complete source blocks, and a
-findings table followed by five visible cards and one disclosure for the rest.
-Output is deterministic: the displayed timestamp comes from the model file
-`mtime`, not the current clock. Local source links are relative to `report/`.
+The page presents `overview`, `solution`, `decisions`, `scope`, and `review` in
+that order. It includes a derived indicator strip, truthful decision-state
+groups without inferred dependencies, collapsed but complete source blocks,
+and every finding as a ranked progressive disclosure. Only diagrams explicitly
+declared by the model use Mermaid; no decision flowchart is fabricated when no
+diagram exists. Output is deterministic: the displayed timestamp comes from
+the model file `mtime`, not the current clock. Local source links are relative
+to `report/`.
 
 ## Template and preview
 
@@ -125,9 +128,12 @@ to materialize the bundled sample workspace and render it to
 `tmp/.wayfinder-report-preview/` by default. A missing or unsupported template
 placeholder fails before any report file is written.
 
-Mermaid is optional, pinned, isolated in the template, and removable. Without
-the script, the escaped Mermaid source stays visible. The renderer itself
-never performs network access.
+Mermaid is optional, pinned, isolated in the template, and removable. The
+renderer parses each explicit diagram before attempting to render it. A
+missing library or invalid diagram leaves an accessible fallback, an explicit
+diagnostic state, and escaped Mermaid source available for inspection. Without
+the script, the source and fallback remain usable. The renderer itself never
+performs network access.
 
 ## Completion gate
 

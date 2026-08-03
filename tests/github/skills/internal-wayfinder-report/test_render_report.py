@@ -98,8 +98,8 @@ def test_render_writes_one_page_and_preserves_sources(tmp_path: Path) -> None:
 
     assert index_path == workspace / "report" / "index.html"
     markup = index_path.read_text(encoding="utf-8")
-    assert "Comprendi il risultato" in markup
-    assert "Revisiona la coerenza" in markup
+    assert 'id="overview"' in markup
+    assert 'id="review"' in markup
     assert snapshot_source_bytes(workspace) == before
 
 
@@ -199,7 +199,7 @@ def test_renderer_cli_rejects_invalid_model_without_partial_output(tmp_path: Pat
     assert not (workspace / "report" / "review.html").exists()
 
 
-def test_render_writes_one_page_with_both_sections(tmp_path: Path) -> None:
+def test_report_uses_progressive_section_order(tmp_path: Path) -> None:
     workspace = make_workspace_with_fixture(tmp_path)
     model_path = workspace / "report" / "report-model.v1.json"
 
@@ -208,11 +208,11 @@ def test_render_writes_one_page_with_both_sections(tmp_path: Path) -> None:
     assert index_path == workspace / "report" / "index.html"
     assert not (workspace / "report" / "review.html").exists()
     markup = index_path.read_text(encoding="utf-8")
-    assert 'id="comprendi"' in markup
-    assert 'id="revisiona"' in markup
-    assert markup.index('id="comprendi"') < markup.index('id="revisiona"')
-    assert 'href="#comprendi"' in markup
-    assert 'href="#revisiona"' in markup
+    offsets = [
+        markup.index(f'id="{section}"')
+        for section in ("overview", "solution", "decisions", "scope", "review")
+    ]
+    assert offsets == sorted(offsets)
 
 
 def test_render_is_byte_identical_on_repeated_runs(tmp_path: Path) -> None:
@@ -284,7 +284,7 @@ def test_sources_are_collapsed_but_complete(tmp_path: Path) -> None:
     assert 'href="../map.md"' in markup
 
 
-def test_render_generates_decision_flowchart_when_model_declares_no_diagram(
+def test_decision_status_has_no_generated_mermaid_edges(
     tmp_path: Path,
 ) -> None:
     workspace = make_workspace_with_fixture(tmp_path)
@@ -295,43 +295,28 @@ def test_render_generates_decision_flowchart_when_model_declares_no_diagram(
 
     markup = render_report(workspace, model_path).read_text(encoding="utf-8")
 
-    assert 'class="diagram' in markup
-    assert "flowchart TD" in markup
-    assert "Percorso decisionale" in markup
+    assert 'class="decision-board"' in markup
+    assert 'data-decision-state="resolved"' in markup
+    assert 'class="diagram"' not in markup
+    assert "-->" not in markup
 
 
-def test_findings_table_lists_every_finding_and_links_to_its_card(
+def test_ranked_findings_are_complete_with_only_first_open(
     tmp_path: Path,
 ) -> None:
     workspace = make_workspace_with_fixture(tmp_path)
-    model_path = workspace / "report" / "report-model.v1.json"
-    payload = json.loads(model_path.read_text(encoding="utf-8"))
-    identifiers = [finding["id"] for finding in payload["review"]["findings"]]
+    markup = render_report(
+        workspace, workspace / "report" / "report-model.v1.json"
+    ).read_text(encoding="utf-8")
 
-    markup = render_report(workspace, model_path).read_text(encoding="utf-8")
-
-    assert markup.count("<tr>") == len(identifiers) + 1
-    for identifier in identifiers:
-        anchor = render_report_module._finding_anchor(identifier)
-        assert f'href="#{anchor}"' in markup
-        assert f'id="{anchor}"' in markup
+    assert markup.count('class="finding-disclosure"') == 6
+    assert markup.count('class="finding-disclosure" open') == 1
+    assert markup.index('data-finding-id="finding-01"') < markup.index(
+        'data-finding-id="finding-06"'
+    )
 
 
-def test_review_keeps_five_cards_visible_and_discloses_the_rest(tmp_path: Path) -> None:
-    workspace = make_workspace_with_fixture(tmp_path)
-    model_path = workspace / "report" / "report-model.v1.json"
-    payload = json.loads(model_path.read_text(encoding="utf-8"))
-    total = len(payload["review"]["findings"])
-    assert total > 5
-
-    markup = render_report(workspace, model_path).read_text(encoding="utf-8")
-
-    assert markup.count('data-finding-card="primary"') == 5
-    assert markup.count('data-finding-card="secondary"') == total - 5
-    assert f"Mostra gli altri {total - 5} findings" in markup
-
-
-def test_primary_finding_cards_explain_their_rank(tmp_path: Path) -> None:
+def test_finding_summary_explains_its_rank(tmp_path: Path) -> None:
     workspace = make_workspace_with_fixture(tmp_path)
     markup = render_report(
         workspace, workspace / "report" / "report-model.v1.json"
@@ -364,8 +349,8 @@ def test_preview_renders_the_bundled_sample_into_the_target_directory(
     assert (target / "map.md").is_file()
     assert (target / "analysis.md").is_file()
     markup = index_path.read_text(encoding="utf-8")
-    assert 'id="comprendi"' in markup
-    assert 'id="revisiona"' in markup
+    assert 'id="overview"' in markup
+    assert 'id="review"' in markup
 
 
 def test_preview_default_directory_is_outside_the_wayfinder_slug_namespace() -> None:
@@ -416,6 +401,16 @@ def test_template_mermaid_block_is_pinned_and_hardened() -> None:
     assert "startOnLoad: false" in template_text
     assert "source.textContent" in template_text
     assert "innerHTML = result.svg" in template_text
+    assert "window.mermaid.parse" in template_text
+    assert "diagram-fallback" in template_text
+    assert "diagram-error" in template_text
+    assert 'role="alert"' in template_text
+    assert "catch(function (error)" in template_text
+    assert "data-copy-target" in template_text
+    assert "navigator.clipboard" in template_text
+    assert "prefers-color-scheme: dark" in template_text
+    assert "@media print" in template_text
+    assert "@media (max-width: 720px)" in template_text
 
 
 def test_template_never_ships_a_placeholder_integrity_value() -> None:
@@ -433,7 +428,12 @@ def test_diagram_source_stays_visible_without_javascript(tmp_path: Path) -> None
         workspace, workspace / "report" / "report-model.v1.json"
     ).read_text(encoding="utf-8")
 
+    target_position = markup.index('class="diagram-target"')
+    fallback_position = markup.index('class="diagram-fallback"')
     source_position = markup.index('class="diagram-source"')
-    target_position = markup.index('class="diagram-target" hidden')
-    assert source_position < target_position
+    assert target_position < fallback_position < source_position
+    assert '<p class="diagram-fallback">' in markup
+    assert '<p class="diagram-error" role="alert" hidden>' in markup
+    assert '<details class="diagram-debug">' in markup
+    assert "A[Sources] --&gt; B[Model] --&gt; C[Views]" in markup
     assert 'class="diagram-source" hidden' not in markup

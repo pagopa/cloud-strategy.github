@@ -104,7 +104,7 @@ def test_derive_metrics_reports_decisions_findings_and_verification(
     assert metrics["Findings"].value == str(len(model.review.findings))
 
 
-def test_decision_path_flowchart_links_entries_and_marks_states(
+def test_group_decisions_preserves_entries_and_groups_by_state(
     tmp_path: Path,
 ) -> None:
     model = load_fixture_model(
@@ -112,43 +112,25 @@ def test_decision_path_flowchart_links_entries_and_marks_states(
         lambda payload: append_decision(payload, "Scegliere il formato", "open"),
     )
 
-    flowchart = report_view.decision_path_flowchart(model)
+    groups = report_view.group_decisions(model)
 
-    assert flowchart is not None
-    assert flowchart.startswith("flowchart TD")
-    assert "D1 --> D2" in flowchart
-    assert "classDef resolved" in flowchart
-    assert flowchart.count("-->") == len(model.understand.decision_path) - 1
-    assert "class D1 resolved;" in flowchart
-    assert "class D2 open;" in flowchart
-
-
-def test_decision_path_flowchart_is_none_without_entries(tmp_path: Path) -> None:
-    model = load_fixture_model(
-        tmp_path,
-        lambda payload: payload["understand"].update({"decision_path": []}),
+    assert [group.state for group in groups] == ["resolved", "open"]
+    assert groups[0].entries == (model.understand.decision_path[0],)
+    assert groups[1].entries == (model.understand.decision_path[1],)
+    assert sum(len(group.entries) for group in groups) == len(
+        model.understand.decision_path
     )
 
-    assert report_view.decision_path_flowchart(model) is None
 
+def test_group_decisions_omits_empty_states_without_inventing_relations(
+    tmp_path: Path,
+) -> None:
+    model = load_fixture_model(tmp_path)
 
-@pytest.mark.parametrize(
-    ("raw", "expected"),
-    [
-        ('Titolo "critico" [urgente]', "Titolo 'critico' urgente"),
-        ("A --> B; class X", "A B class X"),
-        ("   ", "(senza titolo)"),
-    ],
-)
-def test_mermaid_label_neutralizes_syntax_characters(raw: str, expected: str) -> None:
-    assert report_view.mermaid_label(raw) == expected
+    serialized = repr(report_view.group_decisions(model))
 
-
-def test_mermaid_label_truncates_long_titles() -> None:
-    label = report_view.mermaid_label("parola " * 40)
-
-    assert len(label) <= 80
-    assert label.endswith("…")
+    assert "-->" not in serialized
+    assert all(group.entries for group in report_view.group_decisions(model))
 
 
 def test_rank_reason_names_impact_certainty_and_propagation(tmp_path: Path) -> None:

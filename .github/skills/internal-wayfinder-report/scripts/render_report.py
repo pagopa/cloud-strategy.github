@@ -31,8 +31,8 @@ from report_view import (
     FINDING_TYPE_LABELS,
     IMPACT_LABELS,
     STATUS_LABELS,
-    decision_path_flowchart,
     derive_metrics,
+    group_decisions,
     rank_reason,
 )
 
@@ -203,8 +203,13 @@ def _diagram_figure(title: str, kind: str, mermaid: str, body: str) -> str:
         '<figure class="diagram card">'
         f"<h3>{_escape(title)}</h3>"
         f'<span class="badge">{_escape(kind)}</span>'
+        '<div class="diagram-target" aria-live="polite"></div>'
+        '<p class="diagram-fallback">Anteprima non disponibile. Il sorgente del diagramma resta consultabile.</p>'
+        '<p class="diagram-error" role="alert" hidden></p>'
+        '<details class="diagram-debug">'
+        '<summary>Mostra sorgente Mermaid</summary>'
         f'<pre class="diagram-source">{_escape(mermaid)}</pre>'
-        '<div class="diagram-target" hidden></div>'
+        "</details>"
         f"{body}"
         "</figure>"
     )
@@ -215,26 +220,6 @@ def _finding_anchor(finding_id: str) -> str:
         character.lower() if character.isalnum() else "-" for character in finding_id
     ).strip("-")
     return f"finding-{slug or 'senza-id'}"
-
-
-def _findings_table(findings: tuple[Finding, ...]) -> str:
-    if not findings:
-        return '<p class="empty">Nessun finding registrato.</p>'
-    rows = "".join(
-        "<tr>"
-        f'<td><a href="#{_escape(_finding_anchor(finding.id))}">{_escape(finding.id)}</a></td>'
-        f"<td>{_escape(FINDING_TYPE_LABELS[finding.type])}</td>"
-        f"<td>{_escape(CERTAINTY_LABELS[finding.certainty])}</td>"
-        f"<td>{_escape(IMPACT_LABELS[finding.impact_level])}</td>"
-        f"<td>{finding.propagation}</td>"
-        "</tr>"
-        for finding in rank_findings(findings)
-    )
-    return (
-        "<table><thead><tr><th>ID</th><th>Tipo</th><th>Certezza</th>"
-        "<th>Impatto</th><th>Propagazione</th></tr></thead>"
-        f"<tbody>{rows}</tbody></table>"
-    )
 
 
 def _load_template(template_path: Path) -> str:
@@ -278,29 +263,30 @@ def _metrics_strip(model: ReportModel) -> str:
     )
 
 
-def _understand_section(model: ReportModel, workspace: Path, report_dir: Path) -> str:
+def _overview_section(
+    model: ReportModel, workspace: Path, report_dir: Path
+) -> str:
     summary = model.understand.summary
-    implementation = model.understand.implementation
-    behaviors = model.understand.behaviors
-    decision_path = model.understand.decision_path
-    implemented_block = (
-        _claim_list(implementation.implemented, workspace, report_dir)
-        if implementation.implemented
-        else '<p class="empty">Nessuna prova di implementazione registrata.</p>'
+    return "".join(
+        [
+            '<section id="overview" class="section-anchor">',
+            "<h2>Panoramica</h2>",
+            "<p class=\"lede\">Il risultato, la motivazione e l'esito atteso in una sola vista.</p>",
+            '<div class="grid overview-grid">',
+            _claim_card("Specifica", summary.specification, workspace, report_dir),
+            _claim_card("Problema", summary.problem, workspace, report_dir),
+            _claim_card("Decisione", summary.decision, workspace, report_dir),
+            _claim_card("Risultato atteso", summary.expected_result, workspace, report_dir),
+            "</div>",
+            "</section>",
+        ]
     )
-    diagrams: list[str] = []
-    generated = decision_path_flowchart(model)
-    if generated is not None:
-        diagrams.append(
-            _diagram_figure(
-                "Percorso decisionale",
-                "generato dal percorso decisionale",
-                generated,
-                '<figcaption class="metric-detail">Diagramma derivato'
-                " automaticamente dalle decisioni registrate nel modello.</figcaption>",
-            )
-        )
-    diagrams.extend(
+
+
+def _solution_section(
+    model: ReportModel, workspace: Path, report_dir: Path
+) -> str:
+    diagrams = [
         _diagram_figure(
             diagram.title,
             diagram.kind,
@@ -309,59 +295,142 @@ def _understand_section(model: ReportModel, workspace: Path, report_dir: Path) -
             + _source_links(diagram.claim.sources, workspace, report_dir),
         )
         for diagram in model.understand.diagrams
-    )
-    body: list[str] = [
-        '<section id="comprendi" class="section-anchor">',
-        "<h2>Comprendi il risultato</h2>",
-        "<h3>Sintesi</h3>",
-        '<div class="grid">',
-        _claim_card("Specifica", summary.specification, workspace, report_dir),
-        _claim_card("Problema", summary.problem, workspace, report_dir),
-        _claim_card("Decisione", summary.decision, workspace, report_dir),
-        _claim_card("Risultato atteso", summary.expected_result, workspace, report_dir),
-        "</div>",
-        "<h3>Flusso di lavoro</h3>",
-        *(diagrams or ['<p class="empty">Nessun diagramma disponibile.</p>']),
-        "<h3>Percorso decisionale</h3>",
-        '<ol class="timeline">'
-        + "".join(
-            _decision_entry(entry, workspace, report_dir) for entry in decision_path
-        )
-        + "</ol>"
-        if decision_path
-        else '<p class="empty">Nessun percorso decisionale registrato.</p>',
-        "<h3>Comportamenti</h3>",
-        '<div class="grid">'
-        + "".join(
-            _behavior_card(behavior, workspace, report_dir) for behavior in behaviors
-        )
-        + "</div>"
-        if behaviors
-        else '<p class="empty">Nessun comportamento registrato.</p>',
-        "<h3>Regole</h3>",
-        _claim_list(model.understand.rules, workspace, report_dir),
-        "<h3>Ambito</h3>",
-        '<div class="grid">',
-        '<article class="card"><h3>Incluso</h3>'
-        f"{_claim_list(model.understand.scope.included, workspace, report_dir)}</article>",
-        '<article class="card"><h3>Escluso</h3>'
-        f"{_claim_list(model.understand.scope.excluded, workspace, report_dir)}</article>",
-        "</div>",
-        "<h3>Specificato rispetto a implementato</h3>",
-        '<div class="grid">',
-        '<article class="card"><h3>Specificato</h3>'
-        f"{_claim_list(implementation.specified, workspace, report_dir)}</article>",
-        f'<article class="card"><h3>Implementato</h3>{implemented_block}</article>',
-        "</div>",
-        "<h3>Come leggere questo report</h3>",
-        _claim_card("Metodo", model.understand.operation, workspace, report_dir),
-        "</section>",
     ]
-    return "".join(body)
+    return "".join(
+        [
+            '<section id="solution" class="section-anchor">',
+            "<h2>Soluzione</h2>",
+            '<p class="lede">Comportamenti, regole e flussi tecnici dichiarati dal modello.</p>',
+            "<h3>Comportamenti</h3>",
+            '<div class="grid">'
+            + "".join(
+                _behavior_card(behavior, workspace, report_dir)
+                for behavior in model.understand.behaviors
+            )
+            + "</div>"
+            if model.understand.behaviors
+            else '<p class="empty">Nessun comportamento registrato.</p>',
+            "<h3>Regole</h3>",
+            _claim_list(model.understand.rules, workspace, report_dir),
+            "<h3>Flussi tecnici espliciti</h3>",
+            *(diagrams or ['<p class="empty">Nessun diagramma dichiarato.</p>']),
+            "</section>",
+        ]
+    )
+
+
+def _decision_board(
+    model: ReportModel, workspace: Path, report_dir: Path
+) -> str:
+    groups = group_decisions(model)
+    if not groups:
+        return '<p class="empty">Nessuna decisione registrata.</p>'
+    return '<div class="decision-board">' + "".join(
+        '<section class="decision-group" '
+        f'data-decision-state="{_escape(group.state)}" '
+        f'data-decision-tone="{_escape(group.tone)}">'
+        f'<h3>{_escape(group.label)} <span class="count">{len(group.entries)}</span></h3>'
+        + "<ol>"
+        + "".join(
+            _decision_entry(entry, workspace, report_dir)
+            for entry in group.entries
+        )
+        + "</ol></section>"
+        for group in groups
+    ) + "</div>"
+
+
+def _decisions_section(
+    model: ReportModel, workspace: Path, report_dir: Path
+) -> str:
+    return "".join(
+        [
+            '<section id="decisions" class="section-anchor">',
+            "<h2>Decisioni</h2>",
+            '<p class="lede">Ogni decisione resta nel suo stato dichiarato; il report non inferisce relazioni o causalità.</p>',
+            _decision_board(model, workspace, report_dir),
+            "</section>",
+        ]
+    )
+
+
+def _scope_section(
+    model: ReportModel, workspace: Path, report_dir: Path
+) -> str:
+    implementation = model.understand.implementation
+    implemented_block = (
+        _claim_list(implementation.implemented, workspace, report_dir)
+        if implementation.implemented
+        else '<p class="empty">Nessuna prova di implementazione registrata.</p>'
+    )
+    return "".join(
+        [
+            '<section id="scope" class="section-anchor">',
+            "<h2>Ambito</h2>",
+            '<p class="lede">Cosa è incluso, escluso, specificato e dimostrato come implementato.</p>',
+            '<div class="grid">',
+            '<article class="card"><h3>Incluso</h3>',
+            _claim_list(model.understand.scope.included, workspace, report_dir),
+            "</article>",
+            '<article class="card"><h3>Escluso</h3>',
+            _claim_list(model.understand.scope.excluded, workspace, report_dir),
+            "</article>",
+            "</div>",
+            "<h3>Specificato rispetto a implementato</h3>",
+            '<div class="grid">',
+            '<article class="card"><h3>Specificato</h3>',
+            _claim_list(implementation.specified, workspace, report_dir),
+            "</article>",
+            '<article class="card"><h3>Implementato</h3>',
+            implemented_block,
+            "</article>",
+            "</div>",
+            "<h3>Come leggere questo report</h3>",
+            _claim_card("Metodo", model.understand.operation, workspace, report_dir),
+            "</section>",
+        ]
+    )
+
+
+def _understand_section(model: ReportModel, workspace: Path, report_dir: Path) -> str:
+    return "".join(
+        (
+            _overview_section(model, workspace, report_dir),
+            _solution_section(model, workspace, report_dir),
+            _decisions_section(model, workspace, report_dir),
+            _scope_section(model, workspace, report_dir),
+        )
+    )
+
+
+def _finding_claim(
+    heading: str, claim: Claim, workspace: Path, report_dir: Path
+) -> str:
+    return (
+        f'<section class="finding-block"><h4>{_escape(heading)}</h4>'
+        f'<p class="claim-text">{_text(claim.text)}</p>'
+        f"{_source_links(claim.sources, workspace, report_dir)}"
+        "</section>"
+    )
+
+
+def _copyable_request(
+    finding: Finding, workspace: Path, report_dir: Path
+) -> str:
+    request_id = f"request-{_finding_anchor(finding.id)}"
+    return (
+        '<section class="copy-request">'
+        "<h4>Richiesta copiabile</h4>"
+        f'<p id="{_escape(request_id)}">{_text(finding.copyable_request.text)}</p>'
+        f"{_source_links(finding.copyable_request.sources, workspace, report_dir)}"
+        f'<button type="button" data-copy-target="{_escape(request_id)}" hidden>Copia richiesta</button>'
+        '<span class="copy-status" role="status" aria-live="polite"></span>'
+        "</section>"
+    )
 
 
 def _finding_card(
-    finding: Finding, workspace: Path, report_dir: Path, card_kind: str
+    finding: Finding, workspace: Path, report_dir: Path, *, is_open: bool
 ) -> str:
     metadata = (
         f'<span class="badge">{_escape(FINDING_TYPE_LABELS[finding.type])}</span>'
@@ -369,61 +438,47 @@ def _finding_card(
         f'<span class="badge">{_escape(IMPACT_LABELS[finding.impact_level])}</span>'
         f'<span class="badge">propagazione {finding.propagation}</span>'
     )
-    rank_note = (
-        f'<p class="finding-meta">Perché è in cima: {_escape(rank_reason(finding))}</p>'
-        if card_kind == "primary"
-        else ""
-    )
+    open_attribute = " open" if is_open else ""
     return (
-        f'<article class="card finding-card {"secondary" if card_kind == "secondary" else "primary"}" '
+        f'<details class="finding-disclosure"{open_attribute} '
         f'id="{_escape(_finding_anchor(finding.id))}" '
-        f'data-finding-card="{_escape(card_kind)}" data-finding-id="{_escape(finding.id)}">'
-        f"<h3>{_escape(finding.id)}</h3>"
-        f'<p class="finding-meta">{metadata}</p>'
-        f"{rank_note}"
-        f"<h4>Evidenza</h4>{_source_links(finding.evidence, workspace, report_dir)}"
-        f"{_claim_card('Interpretazione', finding.interpretation, workspace, report_dir)}"
-        f"{_claim_card('Impatto sulla specifica', finding.specification_impact, workspace, report_dir)}"
-        f"{_claim_card('Proposta di riparazione', finding.repair, workspace, report_dir)}"
-        f"{_claim_card('Richiesta copiabile', finding.copyable_request, workspace, report_dir)}"
-        "</article>"
+        f'data-finding-id="{_escape(finding.id)}">'
+        "<summary>"
+        f'<span class="finding-id">{_escape(finding.id)}</span>'
+        f'<span class="finding-meta">{metadata}</span>'
+        f'<span class="finding-rank">Perché è in cima: {_escape(rank_reason(finding))}</span>'
+        "</summary>"
+        '<div class="finding-body">'
+        f'<section class="finding-block"><h4>Evidenza</h4>{_source_links(finding.evidence, workspace, report_dir)}</section>'
+        f'{_finding_claim("Interpretazione", finding.interpretation, workspace, report_dir)}'
+        f'{_finding_claim("Impatto sulla specifica", finding.specification_impact, workspace, report_dir)}'
+        f'{_finding_claim("Proposta di riparazione", finding.repair, workspace, report_dir)}'
+        f'{_copyable_request(finding, workspace, report_dir)}'
+        "</div></details>"
     )
 
 
 def _review_section(model: ReportModel, workspace: Path, report_dir: Path) -> str:
     ranked = rank_findings(model.review.findings)
-    primary = ranked[:5]
-    secondary = ranked[5:]
     body: list[str] = [
-        '<section id="revisiona" class="section-anchor">',
-        "<h2>Revisiona la coerenza</h2>",
-        '<p class="lede">Ogni finding separa evidenza, interpretazione, impatto'
-        " sulla specifica e proposta di riparazione.</p>",
-        "<h3>Quadro dei findings</h3>",
-        _findings_table(model.review.findings),
-        "<h3>Findings prioritari</h3>",
+        '<section id="review" class="section-anchor">',
+        "<h2>Revisione</h2>",
+        '<p class="lede">Ogni finding resta completo, ordinato per priorità e progressivamente apribile.</p>',
+        '<div class="finding-queue">',
     ]
-    if primary:
+    if ranked:
         body.extend(
-            _finding_card(finding, workspace, report_dir, "primary")
-            for finding in primary
+            _finding_card(
+                finding,
+                workspace,
+                report_dir,
+                is_open=index == 0,
+            )
+            for index, finding in enumerate(ranked)
         )
     else:
         body.append('<p class="empty">Nessun finding registrato.</p>')
-    if secondary:
-        body.extend(
-            [
-                "<details>"
-                f"<summary>Mostra gli altri {len(secondary)} findings</summary>"
-                '<div class="secondary-list">',
-                *(
-                    _finding_card(finding, workspace, report_dir, "secondary")
-                    for finding in secondary
-                ),
-                "</div></details>",
-            ]
-        )
-    body.append("</section>")
+    body.extend(["</div>", "</section>"])
     return "".join(body)
 
 
