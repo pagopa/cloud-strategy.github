@@ -123,12 +123,43 @@ title, slug, status_label, status_class, generated_at, destination, metrics,
 understand, review, preview_attributes
 ```
 
+Keep progressive section order in the rendered body:
+`overview` → `solution` → `decisions` → `scope` → `reading` → `review`.
+The `reading` block is its own section after scope; do not bury the reading
+guide inside Ambito. Nav links must match those ids.
+
+### Visual shell contract
+
+The default template is a light editorial shell with one coherent visual
+language:
+
+- teal primary family (`--accent`, `--accent-mid`, `--accent-deep`,
+  `--accent-soft`) on a warm paper/neutral base;
+- one restrained warm secondary (`--warm-accent`) used sparingly for lead
+  emphasis and soft edges, not a different hue per section;
+- semantic warning/critical tones only for open or critical states;
+- no multi-accent rainbow, no per-section heading color jumps, no metric
+  nth-child color cycling, no OS `prefers-color-scheme: dark` flip;
+- liveliness from depth, serif headings, soft surfaces, and a single teal
+  gradient on `h2` bars—not from competing accent families.
+
+Layout rules that stay in CSS (do not invent new renderer classes):
+
+- `.decision-board` uses `auto-fit` with a sensible `minmax`; a lone group
+  spans full width via `:has(> :only-child)`;
+- long decision text may wrap (`overflow-wrap`) so narrow columns stay
+  readable;
+- `.section-anchor` panels separate major sections; sticky header and
+  print/a11y rules remain.
+
 Pass `--template PATH` to render with a custom shell. Pass `--preview [PATH]`
 to materialize the bundled sample workspace and render it to
 `tmp/.wayfinder-report-preview/` by default. A missing or unsupported template
 placeholder fails before any report file is written. The preview renders the
 same template with a visible structure overlay and uses only the bundled sample
 workspace, so the layout can be adjusted before real report data is supplied.
+Custom visual experiments may live under `tmp/templates/` first; promote only
+the chosen shell back into `templates/report.html` when the language is stable.
 
 Mermaid is optional, pinned, isolated in the template, and removable. The
 renderer parses each explicit diagram before attempting to render it. A

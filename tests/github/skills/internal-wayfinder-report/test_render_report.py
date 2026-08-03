@@ -448,9 +448,15 @@ def test_template_mermaid_block_is_pinned_and_hardened() -> None:
     assert "catch(function (error)" in template_text
     assert "data-copy-target" in template_text
     assert "navigator.clipboard" in template_text
-    assert "prefers-color-scheme: dark" in template_text
+    assert "color-scheme: light" in template_text
+    assert "--accent-mid" in template_text
+    assert "--warm-accent" in template_text
+    assert "decision-board:has(> :only-child)" in template_text
+    assert 'href="#reading"' in template_text
+    assert "prefers-color-scheme: dark" not in template_text
+    assert "--accent-2" not in template_text
     assert "@media print" in template_text
-    assert "@media (max-width: 720px)" in template_text
+    assert "@media (max-width: 820px)" in template_text
 
 
 def test_template_never_ships_a_placeholder_integrity_value() -> None:
