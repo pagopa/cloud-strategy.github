@@ -10,6 +10,20 @@
 - Keep standards-repository-only policy separate from the shared baseline.
 - Keep architecture and local context in `docs/` knowledge documents.
 
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs are tracked as local Markdown files under `.scratch/<feature-slug>`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default canonical triage labels for local issues. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repository uses the single-context domain documentation layout. See `docs/agents/domain.md`.
+
 This file applies only to this standards repository. Do not treat these rules
 as consumer-repository defaults without an explicit sync contract change.
 

@@ -115,20 +115,6 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
 - An unapproved protected-skill finding is a stop condition; do not create an
   allowlist to bypass it.
 
-## Agent skills
-
-### Issue tracker
-
-Issues and PRDs are tracked in GitHub Issues for `pagopa/cloud-strategy.github`. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Use the default canonical triage labels. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-This repository uses the single-context domain documentation layout. See `docs/agents/domain.md`.
-
 ## graphify
 
 For any question about this repo's architecture, structure, components, or how to add/modify/find
