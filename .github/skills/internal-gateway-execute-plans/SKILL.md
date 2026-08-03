@@ -40,6 +40,45 @@ or contract data are blocking findings. Status files require the minimal
 resumable core plus closeout evidence for serialized routes. Conversational
 approval and runtime safety remain gateway responsibilities.
 
+## Control coverage
+
+Before the delegated loop, read the plan's `## Control Inventory` or
+reconstruct the same inventory from its tasks, acceptance criteria, and
+versioned `## Execution Contract`. Classify every obligation exactly once as
+`automatable-local`, `observable-runtime`, `external-capability`,
+`authority-or-scope`, or `genuine-human-judgment`. Do not confuse these control
+classes with the six executor-owned runtime discovery categories.
+
+- `automatable-local` and `observable-runtime` controls must use a required
+  executable validation or capability probe with a clear pass/fail signal and
+  reproducible evidence, and the check must fail when the requirement is
+  violated. Establish red-first evidence before implementation when the control
+  changes executable or evaluable behavior.
+- `external-capability` controls fail closed when the service, network,
+  credential, or tool is unavailable. Use a safe fallback only when the plan
+  permits it; otherwise keep the obligation unresolved and request authority
+  or route to the contract's review state. A warning or user certification is
+  not a technical pass.
+- `authority-or-scope` controls use the plan's authority boundary. Do not
+  expand scope or modify the approved plan without the required approval and a
+  refreshed fingerprint.
+- `genuine-human-judgment` controls remain explicit human obligations with
+  acceptance evidence; do not disguise them as automated validation.
+
+Every control row must map to a contract validation, manual obligation, or
+authority boundary and retain its requirement, owner, trigger, pass/fail
+signal, evidence, and fallback. An uncovered local/runtime control is a plan
+gap: stop before editing or request the plan-authorized correction; never mark
+it satisfied to reach `DONE`. If correcting or completing the plan is explicitly
+authorized, add the missing control or gate without weakening the requirement,
+rerun preflight, and obtain refreshed approval and fingerprint before execution.
+Otherwise, do not modify the approved plan.
+
+Ask the user only after local checks are exhausted and only for new authority,
+access, a product or scope choice, genuine human judgment, or an explicit
+requirement conflict. Report the checks already performed and ask one focused
+question; never ask the user to run a local check or certify technical output.
+
 ## Gateway boundary
 
 The gateway is a repository-owned extension of `/superpowers-executing-plans`. The
@@ -49,6 +88,9 @@ only these local responsibilities here:
 - bind the exact plan path and explicit approval state;
 - compute the SHA-256 fingerprint, run dirty-worktree preflight, and capture
   the plan-required validation baseline;
+- verify control coverage before execution and preserve the mapping from each
+  obligation to its executable validation, external/human obligation, or
+  authority boundary;
 - apply task-level `/internal-tdd` and evidence hooks;
 - classify closeout evidence with `closeout-check`, continue while a safe route exists,
   and preserve the baseline/final delta;
@@ -58,10 +100,12 @@ only these local responsibilities here:
 
 ## Gateway phases
 
-1. **Bind** the approved retained plan, fingerprint, workspace overlap, and native
-   validation commands. Completion: preflight passes and the baseline is recorded.
+1. **Bind** the approved retained plan, fingerprint, workspace overlap, control
+   inventory, and native validation commands. Completion: preflight passes,
+   every control has an owner, and the baseline is recorded.
 2. **Execute** the delegated plan task-by-task with task-level red-first gates.
-   Completion: each task has fresh focused evidence or a recorded safe pause.
+   Completion: each task and control has fresh focused evidence or a recorded
+   safe pause.
 3. **Recover** through `references/recovery-contract.md` whenever validation or
    execution is unresolved. Completion: the next candidate was tried, authority
    was requested when required, or exhaustion evidence is complete.
@@ -88,7 +132,9 @@ authorized by the plan.
 
 Before a task transition or closeout, apply
 `references/recovery-contract.md`. Preserve the native authoritative command,
-continue on a safe `continue-*` route, and keep bounded search and retry evidence.
+continue on a safe `continue-*` route, keep bounded search and retry evidence,
+and do not convert an uncovered or unresolved control into a user question
+when a local check or probe can still be performed.
 
 On pause or resume, preserve the plan fingerprint and use the status and resume
 checks from `scripts/plan_execution.py`. At closeout, run the required broader
@@ -117,7 +163,10 @@ mutation steps, skip them and record the plan drift in the status sibling.
 
 The writer-owned versioned `## Execution Contract` is authoritative for
 validation IDs, native commands, required flags, equivalence policy, manual
-obligations, and authority boundaries. The executor owns all six discovery
-categories, recovery candidates, attempts, rejection evidence, authority
-state, and closeout routing. `request-authority` keeps execution active and
-does not produce a status sibling.
+obligations, and authority boundaries. The control inventory is a traceability
+layer over that contract, not a competing schema. The executor owns all six
+discovery categories, recovery candidates, attempts, rejection evidence,
+authority state, and closeout routing. `DONE` requires fresh evidence for every
+task and every automatable or observable control; `request-authority` keeps
+execution active and does not produce a status sibling. The final report must
+also name control gates added or updated, their evidence, and any residual gap.

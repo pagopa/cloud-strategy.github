@@ -25,20 +25,37 @@ description: Use when repository-owned work needs an approved implementation pla
 ## Contract
 
 1. Capture the target, anti-scope, nearest owner, validation path, stop
-   conditions, and observable acceptance. Keep the no-version-control-mutation
-   rule in scope. Completion: all six facts and the no-mutation rule are
-   recorded before delegation.
+   conditions, and observable acceptance. Build a control inventory before
+   delegation: classify every task, acceptance criterion, and declared
+   `manual_obligation` exactly once as `automatable-local`,
+   `observable-runtime`, `external-capability`, `authority-or-scope`, or
+   `genuine-human-judgment`. Keep the no-version-control-mutation rule in
+   scope. Completion: all six facts, the no-mutation rule, and one owner for
+   every obligation are recorded before delegation.
 2. Load `/superpowers-writing-plans` and produce one reviewable retained plan
    under `tmp/superpowers/plans/` with ordered actionable tasks, concrete file
-   targets, focused validation, and an execution handoff. Completion: one plan
-   exists at the retained path and contains those four artifact properties plus
-   one versioned `## Execution Contract` fenced JSON object.
+   targets, focused validation, a compact `## Control Inventory`, and an
+   execution handoff. Each inventory row records a stable ID, preserved
+   requirement, nearest owner, command or trigger, pass/fail signal, evidence,
+   and safe fallback or authority boundary. Link local/runtime rows to
+   `validations` and residual external/human rows to the existing contract
+   fields; the inventory is traceability, not a second parser contract.
+   Completion: one plan exists at the retained path and contains those
+   artifact properties plus one versioned `## Execution Contract` fenced JSON
+   object.
 3. Perform human review for task actionability, approved scope, focused
-   validation, safety, and handoff quality. The contract must declare native
-   authoritative validation commands and phases, equivalence policy, manual
-   obligations, and authority boundaries. It must not predict runtime
-   discovery results or recovery candidates. Completion: each review concern
-   is accepted or has a recorded revision.
+   validation, control coverage, safety, and handoff quality. Every
+   `automatable-local` or `observable-runtime` row must map to a required
+   executable validation. An `external-capability` row must have an explicit
+   probe and safe fallback, or a declared residual external obligation.
+   `authority-or-scope` and `genuine-human-judgment` rows must remain explicit
+   authority or human obligations; a user assertion cannot substitute for a
+   technical gate. The contract must declare native authoritative validation
+   commands and phases, equivalence policy, manual obligations, and authority
+   boundaries. A local/runtime gate must fail when its requirement is violated;
+   a warning or printout is not a gate. It must not predict runtime discovery
+   results or recovery candidates. Completion: each review concern and control
+   row is accepted or has a recorded revision.
 4. Report the retained plan path, name `/internal-gateway-execute-plans` as
    the next owner, and wait for explicit execution approval. Completion: the
    path and next owner are reported and execution has not started without
@@ -58,7 +75,9 @@ The executor owns the single mechanical plan validator. Do not add a
 writer-local validator, draft-only lifecycle, or duplicate parser contract.
 Before handoff, run the executor-owned `preflight` against the written plan and
 revise it until there are zero blocking findings. Plans without the versioned
-contract are not actionable.
+contract are not actionable. Do not leave an automatable obligation as
+narrative-only evidence or downgrade it to a manual obligation to make
+preflight or closeout pass.
 
 ## No-Commit Rule
 
