@@ -5,187 +5,119 @@ description: Use when an active local Wayfinder workspace needs a traceable HTML
 
 # Internal Wayfinder Report
 
-Turn one local Wayfinder workspace into a traceable single-page report with
-progressive overview, solution, decision, scope, reading, and review sections. The
-report is an evidence projection: it explains what the workspace says and
-surfaces coherence questions, while source maps, analysis, and tickets remain
-the authoritative artifacts.
+Turn one local Wayfinder workspace into a traceable single-page report. The
+report explains what the workspace says and surfaces coherence questions, while
+the map, analysis, and issue files remain authoritative.
 
 ## When to use
 
-Use this skill when a local `tmp/.wayfinder/<analysis-slug>/` workspace needs a
-readable report for handoff or coherence review. Use the existing Wayfinder
-workflow to chart or resolve decisions; use this skill after source analysis is
-available and before a user needs the single report page.
+Use this skill after a local Wayfinder workspace has source analysis and needs a
+readable handoff or coherence review. Use the existing Wayfinder workflow to
+chart or resolve decisions; use this skill to project the result into HTML.
 
-## Active workspace
+## Active workspace and source authority
 
-Use the repository-local workspace contract:
-
-```text
-tmp/.wayfinder/<analysis-slug>/
-├── map.md
-├── analysis.md
-└── issues/
-```
-
-The active workspace is the directory whose name is the analysis slug. Require
-`map.md` and `analysis.md`. Enumerate and read every regular local source file
-before writing a summary, including every file under `issues/` and any local
-analysis assets. Read generated files under `report/` only when resuming an
-existing report. Keep the model and rendered pages inside the active workspace.
-
-The map's `Decisions so far` section is an index. Use it to find the full
-ticket answer, then cite the ticket itself; an index line never replaces the
-answer it points to.
-
-## Trace the evidence
-
-Apply this authority order when sources disagree about the same material point:
-
-1. An explicit correction or replacement.
-2. The final answer of a resolved ticket.
-3. A confirmed comment decision.
-4. A question or recommendation.
-5. A preliminary-analysis hypothesis.
-
-Keep the source class visible in the claim wording. Treat deductions as
-interpretation or a finding, not as canonical decisions. Every material claim
-must include one or more `sources` with a workspace-relative `path` and a short
-faithful `excerpt`. Source paths must resolve to regular files below the active
-workspace; use the exact relative path that the renderer can link from
-`report/`.
-
-## Write model v1
-
-Read [`references/report-model-v1.schema.json`](references/report-model-v1.schema.json)
-before writing `report/report-model.v1.json`. Use exactly these top-level fields:
+The active workspace is `tmp/.wayfinder/<analysis-slug>/` and must contain:
 
 ```text
-schema_version, analysis_slug, title, status, destination, understand, review
+map.md
+analysis.md
+issues/
+report/report.json
 ```
 
-Use `schema_version: 1`. `destination` and every material claim are a
-`{text, sources}` object. Populate `understand` with `summary`, `operation`,
-`behaviors`, `rules`, `scope`, `decision_path`, `implementation`, and optional
-`diagrams`. Keep `understand.implementation.specified` separate from
-`understand.implementation.implemented`; an empty implemented list means that
-the workspace specifies work without evidence that it is implemented.
+Read `map.md`, `analysis.md`, every regular local file below `issues/`, and
+other local analysis assets before writing the report input. Generated files
+under `report/` may be read when resuming, but are not source authority.
 
-Each review finding must keep these layers distinct:
+When sources disagree, use this authority order:
 
-- `evidence`: the source excerpts that establish the observation;
-- `interpretation`: what the evidence means;
-- `specification_impact`: how the observation affects the intended result;
-- `repair`: a proposed correction, still only a proposal;
-- `copyable_request`: text the user may send to request that correction.
+1. an explicit correction or replacement;
+2. the final answer of a resolved issue;
+3. a confirmed comment decision;
+4. a question or recommendation;
+5. a preliminary-analysis hypothesis.
 
-Use only the model enums. Give every finding a unique ID, non-empty evidence,
-and one or more sources on every claim. Rank is computed by impact level,
-certainty, propagation, and ID; provide every finding and let the renderer
-expose the complete ranked queue with only the highest-ranked detail open
-initially.
+Keep the source class visible in claim wording. Treat deductions as
+interpretation or a finding, not as a canonical decision. Do not modify
+`map.md`, `analysis.md`, issue files, or other Wayfinder source artifacts.
 
-## Render the report
+## Report input
 
-Run the native standard-library renderer with the model path under the active
-workspace's `report/` directory:
+Write `report/report.json` with exactly these top-level keys:
+
+```text
+title, slug, status, destination, evidence, sections, findings
+```
+
+`destination` and every claim use `{text, evidence}`. The evidence registry
+declares each source path and exact non-empty excerpt once:
+
+```json
+{
+  "E01": {"path": "map.md", "excerpt": "exact source text"}
+}
+```
+
+Evidence paths are relative to the active workspace and must resolve to local
+regular files. Do not use URLs, directories, missing files, traversal, or a
+symlink whose resolved target leaves the workspace. Every referenced evidence
+ID must exist, and every excerpt must occur exactly in its declared source.
+
+Sections are required in this order:
+
+```text
+overview, solution, decisions, scope, reading, review
+```
+
+Each section has a title, optional lede, and ordered blocks. The closed block
+vocabulary is `claim`, `list`, `comparison`, `decision-board`, and `diagram`.
+Do not add domain-specific fields or infer causal, sequential, or dependency
+edges that are absent from the sources.
+
+Decision boards use only `resolved`, `open`, and `not-specified`. Findings keep
+these layers distinct: evidence, interpretation, specification impact, repair,
+and copyable request. Each finding has a unique ID and is ranked
+deterministically by impact, certainty, descending propagation, then ID.
+
+## Mermaid diagrams
+
+Use a diagram block only when its source relationships are supported by the
+Wayfinder evidence. A diagram has a title, `diagram_type`, non-empty Mermaid
+`source`, and a normal evidence-backed `claim`. Place two to four useful
+diagrams in the sections where they belong when the workspace benefits from
+them; do not fabricate a flowchart to fill a quota.
+
+The HTML shell loads the pinned Mermaid browser asset with strict security
+settings. Mermaid is optional at runtime. The escaped source, an explanatory
+fallback, and an accessible error remain readable when JavaScript is absent or
+rendering fails.
+
+## Render
+
+Run the standard-library renderer:
 
 ```bash
-python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
-  --workspace tmp/.wayfinder/<analysis-slug> \
-  --model tmp/.wayfinder/<analysis-slug>/report/report-model.v1.json
+python3 .github/skills/internal-wayfinder-report/scripts/render_report.py --workspace tmp/.wayfinder/<analysis-slug> --data tmp/.wayfinder/<analysis-slug>/report/report.json
 ```
 
-The renderer writes exactly one page:
-
-```text
-tmp/.wayfinder/<analysis-slug>/report/index.html
-```
-
-The page presents `overview`, `solution`, `decisions`, `scope`, `reading`, and
-`review` in that order. It includes a derived indicator strip, truthful decision-state
-groups without inferred dependencies, collapsed but complete source blocks,
-and every finding as a ranked progressive disclosure. Only diagrams explicitly
-declared by the model use Mermaid; no decision flowchart is fabricated when no
-diagram exists. Output is deterministic: the displayed timestamp comes from
-the model file `mtime`, not the current clock. Local source links are relative
-to `report/`.
-
-## Template and preview
-
-The editable shell is
-`.github/skills/internal-wayfinder-report/templates/report.html`. It declares
-these exact placeholders:
-
-```text
-title, slug, status_label, status_class, generated_at, destination, metrics,
-understand, review, preview_attributes
-```
-
-Keep progressive section order in the rendered body:
-`overview` → `solution` → `decisions` → `scope` → `reading` → `review`.
-The `reading` block is its own section after scope; do not bury the reading
-guide inside Ambito. Nav links must match those ids.
-
-### Visual shell contract
-
-The default template is a light editorial shell with one coherent visual
-language:
-
-- teal primary family (`--accent`, `--accent-mid`, `--accent-deep`,
-  `--accent-soft`) on a warm paper/neutral base;
-- one restrained warm secondary (`--warm-accent`) used sparingly for lead
-  emphasis and soft edges, not a different hue per section;
-- semantic warning/critical tones only for open or critical states;
-- no multi-accent rainbow, no per-section heading color jumps, no metric
-  nth-child color cycling, no OS `prefers-color-scheme: dark` flip;
-- liveliness from depth, serif headings, soft surfaces, and a single teal
-  gradient on `h2` bars—not from competing accent families.
-
-Layout rules that stay in CSS (do not invent new renderer classes):
-
-- `.decision-board` uses `auto-fit` with a sensible `minmax`; a lone group
-  spans full width via `:has(> :only-child)`;
-- long decision text may wrap (`overflow-wrap`) so narrow columns stay
-  readable;
-- `.section-anchor` panels separate major sections; sticky header and
-  print/a11y rules remain.
-
-Pass `--template PATH` to render with a custom shell. Pass `--preview [PATH]`
-to materialize the bundled sample workspace and render it to
-`tmp/.wayfinder-report-preview/` by default. A missing or unsupported template
-placeholder fails before any report file is written. The preview renders the
-same template with a visible structure overlay and uses only the bundled sample
-workspace, so the layout can be adjusted before real report data is supplied.
-Custom visual experiments may live under `tmp/templates/` first; promote only
-the chosen shell back into `templates/report.html` when the language is stable.
-
-Mermaid is optional, pinned, isolated in the template, and removable. The
-renderer parses each explicit diagram before attempting to render it. A
-missing library or invalid diagram leaves an accessible fallback, an explicit
-diagnostic state, and escaped Mermaid source available for inspection. Without
-the script, the source and fallback remain usable. The renderer itself never
-performs network access.
+The renderer writes only
+`tmp/.wayfinder/<analysis-slug>/report/index.html`. It validates the complete
+input before loading the template or replacing the output and writes the page
+atomically. A custom shell may be supplied with `--template PATH`.
 
 ## Completion gate
 
-Before reporting completion, confirm that:
+Before handoff, confirm that:
 
-- all source files were read and every material claim is traceable;
-- the model is accepted as v1 and the renderer accepts workspace confinement;
-- the generated `index.html` exists under the active workspace's `report/` directory;
-- source maps, analysis, tickets, and other Wayfinder source files are byte-for-
-  byte unchanged; and
-- unresolved `to-verify` findings and their source links are reported to the
-  user.
+- all source files were read and every material claim has evidence;
+- the report input uses only the generic contract and closed block vocabulary;
+- `report/index.html` exists under the active workspace's `report/` directory;
+- all Wayfinder source files are byte-for-byte unchanged; and
+- unresolved `to-verify` findings and their source links are reported.
 
-If a required source is missing, a claim cannot be traced, a path leaves the
-workspace, or the renderer rejects the model, stop with the exact gap. Keep the
-report model or finding proposal as the next actionable artifact; do not
-silently downgrade the claim.
-
-This skill creates a single-page report only. It does not apply repairs, edit `map.md`,
-`analysis.md`, `issues/`, or other source artifacts; persist review state;
-compare analysis versions; contact a remote tracker; or generate PDF,
-dashboard, or network-fetched diagram output.
+Visual review of the generated report is an offline human follow-up. This skill
+does not apply repairs, persist review state, contact remote trackers, generate
+PDFs or dashboards, install dependencies, or provide compatibility with an
+older input contract. SOPS is only a real-world benchmark and does not define
+the generic contract.

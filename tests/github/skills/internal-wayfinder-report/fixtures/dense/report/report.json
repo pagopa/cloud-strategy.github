@@ -1,0 +1,322 @@
+{
+  "title": "Dense migration report",
+  "slug": "dense",
+  "status": "in-progress",
+  "destination": {
+    "text": "Coordinate a multi-stage migration.",
+    "evidence": [
+      "E01"
+    ]
+  },
+  "evidence": {
+    "E01": {
+      "path": "map.md",
+      "excerpt": "Destination: coordinate a multi-stage migration."
+    },
+    "E02": {
+      "path": "map.md",
+      "excerpt": "Relationship: the migration is staged."
+    },
+    "E03": {
+      "path": "analysis.md",
+      "excerpt": "Coordinate a multi-stage migration with explicit ownership."
+    },
+    "E04": {
+      "path": "analysis.md",
+      "excerpt": "A dependency must be resolved before the cutover."
+    },
+    "E05": {
+      "path": "issues/01-decision.md",
+      "excerpt": "Resolve ownership before cutover."
+    },
+    "E06": {
+      "path": "issues/02-dependency.md",
+      "excerpt": "The data handoff depends on the validation gate."
+    }
+  },
+  "sections": {
+    "overview": {
+      "title": "Overview",
+      "lede": "A staged destination with explicit ownership.",
+      "blocks": [
+        {
+          "kind": "claim",
+          "title": "Destination",
+          "text": "Coordinate a multi-stage migration.",
+          "evidence": [
+            "E01"
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "Signals",
+          "items": [
+            {
+              "text": "The migration is staged.",
+              "evidence": [
+                "E02"
+              ]
+            },
+            {
+              "text": "Ownership is explicit.",
+              "evidence": [
+                "E03"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "solution": {
+      "title": "Solution",
+      "blocks": [
+        {
+          "kind": "diagram",
+          "title": "Migration stages",
+          "diagram_type": "flowchart",
+          "source": "flowchart LR\n  A[Prepare] --> B[Validate] --> C[Cut over]",
+          "claim": {
+            "text": "The source describes a staged migration.",
+            "evidence": [
+              "E02",
+              "E03"
+            ]
+          }
+        },
+        {
+          "kind": "comparison",
+          "title": "Coordination focus",
+          "left": {
+            "title": "Ownership",
+            "items": [
+              {
+                "text": "Name the responsible group.",
+                "evidence": [
+                  "E03"
+                ]
+              }
+            ]
+          },
+          "right": {
+            "title": "Validation",
+            "items": [
+              {
+                "text": "Resolve the gate before cutover.",
+                "evidence": [
+                  "E04"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "decisions": {
+      "title": "Decisions",
+      "blocks": [
+        {
+          "kind": "diagram",
+          "title": "Ownership before cutover",
+          "diagram_type": "flowchart",
+          "source": "flowchart LR\n  A[Ownership] --> B[Cut over]",
+          "claim": {
+            "text": "The decision states that ownership comes before cutover.",
+            "evidence": [
+              "E05"
+            ]
+          }
+        },
+        {
+          "kind": "decision-board",
+          "title": "Decision state",
+          "decisions": [
+            {
+              "title": "Ownership",
+              "state": "resolved",
+              "text": "Resolve ownership before cutover.",
+              "evidence": [
+                "E05"
+              ]
+            },
+            {
+              "title": "Validation gate",
+              "state": "open",
+              "text": "The validation gate remains a dependency.",
+              "evidence": [
+                "E06"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "scope": {
+      "title": "Scope",
+      "blocks": [
+        {
+          "kind": "diagram",
+          "title": "Handoff dependency",
+          "diagram_type": "flowchart",
+          "source": "flowchart LR\n  A[Data handoff] --> B[Validation gate]",
+          "claim": {
+            "text": "The source declares a dependency for the data handoff.",
+            "evidence": [
+              "E06"
+            ]
+          }
+        },
+        {
+          "kind": "list",
+          "title": "Included",
+          "items": [
+            {
+              "text": "Migration stages and their declared dependencies.",
+              "evidence": [
+                "E01",
+                "E04"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "reading": {
+      "title": "Reading",
+      "blocks": [
+        {
+          "kind": "claim",
+          "title": "Read the sequence",
+          "text": "Read ownership and validation as declared source statements.",
+          "evidence": [
+            "E03",
+            "E04"
+          ]
+        }
+      ]
+    },
+    "review": {
+      "title": "Review",
+      "blocks": [
+        {
+          "kind": "list",
+          "title": "Review focus",
+          "items": [
+            {
+              "text": "Confirm the validation gate before cutover.",
+              "evidence": [
+                "E04",
+                "E06"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "F01",
+      "impact": "medium",
+      "certainty": "probable",
+      "propagation": 1,
+      "evidence": [
+        "E04"
+      ],
+      "interpretation": {
+        "text": "The validation gate may delay the handoff.",
+        "evidence": [
+          "E04",
+          "E06"
+        ]
+      },
+      "specification_impact": {
+        "text": "The migration needs an explicit gate.",
+        "evidence": [
+          "E04"
+        ]
+      },
+      "repair": {
+        "text": "Name the validation owner.",
+        "evidence": [
+          "E03",
+          "E04"
+        ]
+      },
+      "request": {
+        "text": "Please name the validation owner before cutover.",
+        "evidence": [
+          "E04"
+        ]
+      }
+    },
+    {
+      "id": "F02",
+      "impact": "critical",
+      "certainty": "confirmed",
+      "propagation": 2,
+      "evidence": [
+        "E06"
+      ],
+      "interpretation": {
+        "text": "The data handoff depends on a validation gate.",
+        "evidence": [
+          "E06"
+        ]
+      },
+      "specification_impact": {
+        "text": "The cutover cannot omit validation.",
+        "evidence": [
+          "E04",
+          "E06"
+        ]
+      },
+      "repair": {
+        "text": "Resolve the validation dependency.",
+        "evidence": [
+          "E06"
+        ]
+      },
+      "request": {
+        "text": "Please resolve the validation dependency before cutover.",
+        "evidence": [
+          "E06"
+        ]
+      }
+    },
+    {
+      "id": "F03",
+      "impact": "high",
+      "certainty": "to-verify",
+      "propagation": 4,
+      "evidence": [
+        "E03",
+        "E05"
+      ],
+      "interpretation": {
+        "text": "Ownership is stated but needs confirmation.",
+        "evidence": [
+          "E03",
+          "E05"
+        ]
+      },
+      "specification_impact": {
+        "text": "The handoff contract may remain incomplete.",
+        "evidence": [
+          "E03"
+        ]
+      },
+      "repair": {
+        "text": "Confirm the owner in the decision record.",
+        "evidence": [
+          "E05"
+        ]
+      },
+      "request": {
+        "text": "Please confirm the owner in the decision record.",
+        "evidence": [
+          "E05"
+        ]
+      }
+    }
+  ]
+}

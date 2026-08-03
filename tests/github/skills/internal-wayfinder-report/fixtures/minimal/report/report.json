@@ -1,0 +1,187 @@
+{
+  "title": "Minimal delivery report",
+  "slug": "minimal",
+  "status": "ready",
+  "destination": {
+    "text": "Choose a safe delivery path.",
+    "evidence": [
+      "E01"
+    ]
+  },
+  "evidence": {
+    "E01": {
+      "path": "map.md",
+      "excerpt": "Destination: choose a safe delivery path."
+    },
+    "E02": {
+      "path": "analysis.md",
+      "excerpt": "The delivery path should be explicit and traceable."
+    },
+    "E03": {
+      "path": "issues/01-decision.md",
+      "excerpt": "Choose a safe delivery path after reviewing the local evidence."
+    }
+  },
+  "sections": {
+    "overview": {
+      "title": "Overview",
+      "lede": "The destination and its evidence in one view.",
+      "blocks": [
+        {
+          "kind": "claim",
+          "title": "Goal",
+          "text": "Choose a safe delivery path.",
+          "evidence": [
+            "E01"
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "Signals",
+          "items": [
+            {
+              "text": "The destination is explicit.",
+              "evidence": [
+                "E01"
+              ]
+            },
+            {
+              "text": "The path is traceable.",
+              "evidence": [
+                "E02"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "solution": {
+      "title": "Solution",
+      "blocks": [
+        {
+          "kind": "comparison",
+          "title": "Options",
+          "left": {
+            "title": "Direct",
+            "items": [
+              {
+                "text": "Short route",
+                "evidence": [
+                  "E01"
+                ]
+              }
+            ]
+          },
+          "right": {
+            "title": "Traceable",
+            "items": [
+              {
+                "text": "Reviewable route",
+                "evidence": [
+                  "E02"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "decisions": {
+      "title": "Decisions",
+      "blocks": [
+        {
+          "kind": "decision-board",
+          "title": "Decision state",
+          "decisions": [
+            {
+              "title": "Delivery path",
+              "state": "resolved",
+              "text": "Use the declared local route.",
+              "evidence": [
+                "E03"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "scope": {
+      "title": "Scope",
+      "blocks": [
+        {
+          "kind": "claim",
+          "title": "Included",
+          "text": "Local report generation.",
+          "evidence": [
+            "E02"
+          ]
+        }
+      ]
+    },
+    "reading": {
+      "title": "Reading",
+      "blocks": [
+        {
+          "kind": "list",
+          "title": "Read the evidence",
+          "items": [
+            {
+              "text": "Start with the destination.",
+              "evidence": [
+                "E01"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "review": {
+      "title": "Review",
+      "blocks": [
+        {
+          "kind": "claim",
+          "title": "Review note",
+          "text": "The declared route can be checked locally.",
+          "evidence": [
+            "E03"
+          ]
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "F01",
+      "impact": "low",
+      "certainty": "confirmed",
+      "propagation": 0,
+      "evidence": [
+        "E02"
+      ],
+      "interpretation": {
+        "text": "The local route is explicit.",
+        "evidence": [
+          "E02"
+        ]
+      },
+      "specification_impact": {
+        "text": "The specification remains readable.",
+        "evidence": [
+          "E01"
+        ]
+      },
+      "repair": {
+        "text": "Keep the route traceable.",
+        "evidence": [
+          "E02"
+        ]
+      },
+      "request": {
+        "text": "Please keep the route traceable.",
+        "evidence": [
+          "E02"
+        ]
+      }
+    }
+  ]
+}
