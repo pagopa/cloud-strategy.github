@@ -64,12 +64,7 @@
               ]
             }
           ]
-        }
-      ]
-    },
-    "solution": {
-      "title": "Solution",
-      "blocks": [
+        },
         {
           "kind": "diagram",
           "title": "Migration stages",
@@ -82,7 +77,12 @@
               "E03"
             ]
           }
-        },
+        }
+      ]
+    },
+    "solution": {
+      "title": "Solution",
+      "blocks": [
         {
           "kind": "comparison",
           "title": "Coordination focus",
@@ -154,6 +154,31 @@
       "title": "Scope",
       "blocks": [
         {
+          "kind": "list",
+          "title": "Included",
+          "items": [
+            {
+              "text": "Migration stages and their declared dependencies.",
+              "evidence": [
+                "E01",
+                "E04"
+              ]
+            },
+            {
+              "text": "Read ownership and validation as declared source statements.",
+              "evidence": [
+                "E03",
+                "E04"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "review": {
+      "title": "Review",
+      "blocks": [
+        {
           "kind": "diagram",
           "title": "Handoff dependency",
           "diagram_type": "flowchart",
@@ -165,38 +190,6 @@
             ]
           }
         },
-        {
-          "kind": "list",
-          "title": "Included",
-          "items": [
-            {
-              "text": "Migration stages and their declared dependencies.",
-              "evidence": [
-                "E01",
-                "E04"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "reading": {
-      "title": "Reading",
-      "blocks": [
-        {
-          "kind": "claim",
-          "title": "Read the sequence",
-          "text": "Read ownership and validation as declared source statements.",
-          "evidence": [
-            "E03",
-            "E04"
-          ]
-        }
-      ]
-    },
-    "review": {
-      "title": "Review",
-      "blocks": [
         {
           "kind": "list",
           "title": "Review focus",
@@ -216,6 +209,7 @@
   "findings": [
     {
       "id": "F01",
+      "title": "Validation gate may delay handoff",
       "impact": "medium",
       "certainty": "probable",
       "propagation": 1,
@@ -251,6 +245,7 @@
     },
     {
       "id": "F02",
+      "title": "Handoff depends on validation",
       "impact": "critical",
       "certainty": "confirmed",
       "propagation": 2,
@@ -285,6 +280,7 @@
     },
     {
       "id": "F03",
+      "title": "Ownership needs confirmation",
       "impact": "high",
       "certainty": "to-verify",
       "propagation": 4,

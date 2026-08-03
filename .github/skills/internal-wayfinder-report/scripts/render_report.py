@@ -19,13 +19,22 @@ from typing import NamedTuple
 
 BUNDLE_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_TEMPLATE = BUNDLE_ROOT / "templates" / "report.html"
-SECTION_IDS = ("overview", "solution", "decisions", "scope", "reading", "review")
+SECTION_IDS = ("overview", "solution", "decisions", "scope", "review")
 BLOCK_KINDS = ("claim", "list", "comparison", "decision-board", "diagram")
 DECISION_STATES = ("resolved", "open", "not-specified")
 IMPACT_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 CERTAINTY_RANK = {"confirmed": 0, "probable": 1, "to-verify": 2}
 REQUIRED_PLACEHOLDERS = frozenset(
-    {"title", "slug", "status_label", "generated_at", "destination", "metrics", "body"}
+    {
+        "title",
+        "slug",
+        "status_label",
+        "generated_at",
+        "destination",
+        "metrics",
+        "priorities",
+        "body",
+    }
 )
 URI_SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 
@@ -166,6 +175,8 @@ def _load_evidence(
     if not entries:
         raise _error("evidence", "must contain at least one entry")
     resolved: dict[str, ResolvedEvidence] = {}
+    source_cache: dict[Path, str] = {}
+    registry: set[tuple[Path, str]] = set()
     for evidence_id, raw_entry in entries.items():
         if not isinstance(evidence_id, str) or not evidence_id.strip():
             raise _error("evidence", "ids must be non-empty strings")
@@ -174,13 +185,23 @@ def _load_evidence(
         _exact_fields(entry, {"path", "excerpt"}, location)
         source_path = _string(entry["path"], f"{location}.path")
         excerpt = _string(entry["excerpt"], f"{location}.excerpt")
+        if "\n" in excerpt or "\r" in excerpt:
+            raise _error(
+                f"{location}.excerpt", "must be one physical line without line breaks"
+            )
         resolved_path = _resolve_source_path(source_path, workspace, f"{location}.path")
-        try:
-            source_text = resolved_path.read_text(encoding="utf-8")
-        except (OSError, UnicodeError) as exc:
-            raise _error(location, f"source cannot be read as UTF-8: {exc}") from exc
-        if excerpt not in source_text:
-            raise _error(location, "excerpt is absent from its declared source")
+        registry_key = (resolved_path, excerpt)
+        if registry_key in registry:
+            raise _error(location, "duplicate (path, excerpt) evidence entry")
+        registry.add(registry_key)
+        if resolved_path not in source_cache:
+            try:
+                source_cache[resolved_path] = resolved_path.read_text(encoding="utf-8")
+            except (OSError, UnicodeError) as exc:
+                raise _error(location, f"source cannot be read as UTF-8: {exc}") from exc
+        source_text = source_cache[resolved_path]
+        if source_text.count(excerpt) != 1:
+            raise _error(location, "excerpt must occur exactly once in its declared source")
         resolved[evidence_id] = ResolvedEvidence(resolved_path, source_path, excerpt)
     return resolved
 
@@ -339,6 +360,11 @@ def _validate_sections(
             else "",
             "blocks": blocks,
         }
+    for section_id in ("overview", "review"):
+        if not any(block["kind"] == "diagram" for block in validated[section_id]["blocks"]):
+            raise _error(
+                f"sections.{section_id}", "must contain at least one diagram block"
+            )
     return validated
 
 
@@ -355,6 +381,7 @@ def _validate_findings(
             finding,
             {
                 "id",
+                "title",
                 "impact",
                 "certainty",
                 "propagation",
@@ -376,6 +403,7 @@ def _validate_findings(
         findings.append(
             {
                 "id": finding_id,
+                "title": _string(finding["title"], f"{location}.title"),
                 "impact": _enum(finding["impact"], f"{location}.impact", tuple(IMPACT_RANK)),
                 "certainty": _enum(
                     finding["certainty"], f"{location}.certainty", tuple(CERTAINTY_RANK)
@@ -423,6 +451,50 @@ def load_report_data(data_path: Path, workspace: Path) -> dict[str, object]:
         "sections": _validate_sections(item["sections"], evidence),
         "findings": _validate_findings(item["findings"], evidence),
         "data_path": resolved_data,
+    }
+
+
+def report_metrics(report: dict[str, object]) -> dict[str, int]:
+    """Return bounded section, evidence, finding, and diagram counts."""
+
+    sections = report["sections"]
+    diagrams = sum(
+        block["kind"] == "diagram"
+        for section in sections.values()
+        for block in section["blocks"]
+    )
+    return {
+        "sections": len(sections),
+        "evidence": len(report["evidence"]),
+        "findings": len(report["findings"]),
+        "diagrams": diagrams,
+    }
+
+
+def editorial_warnings(metrics: dict[str, int]) -> tuple[str, ...]:
+    """Report soft deviations from the compact editorial defaults."""
+
+    warnings: list[str] = []
+    evidence_count = metrics["evidence"]
+    if evidence_count < 12:
+        warnings.append("evidence count is below the editorial default of 12")
+    elif evidence_count > 15:
+        warnings.append("evidence count exceeds the editorial default of 15")
+    if metrics["findings"] > 3:
+        warnings.append("finding count exceeds the editorial default of 3")
+    if metrics["diagrams"] != 2:
+        warnings.append("diagram count differs from the normal editorial default of 2")
+    return tuple(warnings)
+
+
+def validation_summary(report: dict[str, object]) -> dict[str, object]:
+    """Return the bounded result shared by validation-only callers."""
+
+    metrics = report_metrics(report)
+    return {
+        "status": "valid",
+        "metrics": metrics,
+        "warnings": list(editorial_warnings(metrics)),
     }
 
 
@@ -686,7 +758,8 @@ def _render_finding(
         f'data-finding-id="{_escape(finding_id)}">'
         "<summary>"
         f'<span class="finding-id">{_escape(finding_id)}</span>'
-        f'<span class="finding-meta"><span class="badge">{_escape(str(finding["impact"]))}</span>'
+        f'<span class="finding-meta"><strong class="finding-title">{_escape(str(finding["title"]))}</strong>'
+        f' <span class="badge">{_escape(str(finding["impact"]))}</span>'
         f' <span class="badge">{_escape(str(finding["certainty"]))}</span>'
         f' <span class="badge">propagation {finding["propagation"]}</span></span>'
         f'<span class="finding-rank">Ranked by impact, certainty, propagation, then ID.</span>'
@@ -729,6 +802,35 @@ def _render_findings(
     return "".join(content)
 
 
+def _render_executive_priorities(
+    findings: tuple[dict[str, object], ...],
+) -> str:
+    ranked = sorted(findings, key=_finding_sort_key)[:3]
+    content = [
+        '<section class="executive-priorities" aria-labelledby="priority-heading">',
+        '<h2 id="priority-heading">Priority findings</h2>',
+    ]
+    if not ranked:
+        content.append('<p class="empty">No priority findings.</p>')
+    else:
+        content.append('<ol class="priority-list">')
+        for finding in ranked:
+            anchor = _finding_anchor(str(finding["id"]))
+            content.append(
+                "<li>"
+                f'<a class="priority-link" href="#{_escape(anchor)}">'
+                f'<span class="priority-id">{_escape(str(finding["id"]))}</span>'
+                f'<span class="priority-title">{_escape(str(finding["title"]))}</span>'
+                f'<span class="badge">{_escape(str(finding["impact"]))}</span>'
+                f'<span class="badge">{_escape(str(finding["certainty"]))}</span>'
+                "</a>"
+                "</li>"
+            )
+        content.append("</ol>")
+    content.append("</section>")
+    return "".join(content)
+
+
 def _render_body(report: dict[str, object], report_dir: Path) -> str:
     sections = report["sections"]
     evidence = report["evidence"]
@@ -766,12 +868,12 @@ def _metrics_strip(report: dict[str, object]) -> str:
                 decisions.extend(block["decisions"])
             if block["kind"] == "diagram":
                 diagrams += 1
-    resolved = sum(decision["state"] == "resolved" for decision in decisions)
+    unresolved = sum(decision["state"] in {"open", "not-specified"} for decision in decisions)
     findings = report["findings"]
     to_verify = sum(finding["certainty"] == "to-verify" for finding in findings)
     metrics = (
         ("Status", str(report["status"]), "declared status", "neutral"),
-        ("Decisions", f"{resolved}/{len(decisions)}", "resolved over total", "neutral"),
+        ("Open decisions", str(unresolved), "unresolved decision states", "warning" if unresolved else "neutral"),
         ("Findings", str(len(findings)), "complete ranked findings", "critical" if findings else "neutral"),
         ("To verify", str(to_verify), "findings requiring confirmation", "warning" if to_verify else "neutral"),
         ("Diagrams", str(diagrams), "evidence-backed diagram blocks", "neutral"),
@@ -858,6 +960,7 @@ def render_report(
             "Destination", report["destination"], report["evidence"], report_dir
         ),
         "metrics": _metrics_strip(report),
+        "priorities": _render_executive_priorities(report["findings"]),
         "body": body,
     }
     page = _fill_template(template_text, values)
@@ -873,6 +976,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--template", type=Path)
+    parser.add_argument("--check", action="store_true")
+    parser.add_argument("--format", choices=("text", "json"), default="text")
     return parser
 
 
@@ -880,6 +985,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     try:
+        if args.check:
+            summary = validation_summary(load_report_data(args.data, args.workspace))
+            if args.format == "json":
+                print(json.dumps(summary, sort_keys=True))
+            else:
+                print(f"status: {summary['status']}")
+                for name, count in summary["metrics"].items():
+                    print(f"{name}: {count}")
+                for warning in summary["warnings"]:
+                    print(f"warning: {warning}")
+            return 0
         render_report(args.workspace, args.data, args.template)
     except (ReportError, OSError, ValueError) as exc:
         print(f"render_report: {exc}", file=sys.stderr)

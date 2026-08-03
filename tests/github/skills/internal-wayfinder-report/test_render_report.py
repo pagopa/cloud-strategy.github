@@ -19,7 +19,7 @@ REPO_ROOT = next(
 BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report"
 FIXTURES_ROOT = REPO_ROOT / "tests/github/skills/internal-wayfinder-report/fixtures"
 RENDERER = BUNDLE_ROOT / "scripts/render_report.py"
-SECTION_IDS = ("overview", "solution", "decisions", "scope", "reading", "review")
+SECTION_IDS = ("overview", "solution", "decisions", "scope", "review")
 MERMAID_PINNED_VERSION = "mermaid@11.6.0"
 
 
@@ -92,6 +92,141 @@ def test_one_evidence_entry_can_support_multiple_blocks(tmp_path: Path) -> None:
     markup = render_report(workspace, report_path(workspace)).read_text()
 
     assert markup.count('href="../map.md"') >= 2
+
+
+def test_compact_sections_render_once_in_order(tmp_path: Path) -> None:
+    workspace = copy_workspace(tmp_path, "dense")
+    markup = render_report(workspace, report_path(workspace)).read_text()
+    offsets = [markup.index(f'id="{section_id}"') for section_id in SECTION_IDS]
+
+    assert offsets == sorted(offsets)
+    assert 'id="reading"' not in markup
+
+
+def test_overview_and_review_diagrams_are_required(tmp_path: Path) -> None:
+    workspace = copy_workspace(tmp_path, "minimal")
+    payload = load_payload(workspace)
+    payload["sections"]["review"]["blocks"] = []
+    write_payload(workspace, payload)
+
+    with pytest.raises(ReportError, match="review.*diagram"):
+        render_report(workspace, report_path(workspace))
+
+
+def test_multiline_evidence_is_rejected_before_output(tmp_path: Path) -> None:
+    workspace = copy_workspace(tmp_path, "minimal")
+    payload = load_payload(workspace)
+    source = workspace / "map.md"
+    source.write_text(source.read_text() + "Second source line.\n", encoding="utf-8")
+    payload["evidence"]["E01"]["excerpt"] = (
+        "Destination: choose a safe delivery path.\nSecond source line."
+    )
+    write_payload(workspace, payload)
+
+    with pytest.raises(ReportError, match="physical line"):
+        render_report(workspace, report_path(workspace))
+    assert not (workspace / "report" / "index.html").exists()
+
+
+def test_ambiguous_evidence_excerpt_is_rejected(tmp_path: Path) -> None:
+    workspace = copy_workspace(tmp_path, "minimal")
+    payload = load_payload(workspace)
+    source = workspace / "map.md"
+    source.write_text(source.read_text() * 2, encoding="utf-8")
+    write_payload(workspace, payload)
+
+    with pytest.raises(ReportError, match="exactly once"):
+        render_report(workspace, report_path(workspace))
+
+
+def test_duplicate_evidence_registry_entries_are_rejected(tmp_path: Path) -> None:
+    workspace = copy_workspace(tmp_path, "minimal")
+    payload = load_payload(workspace)
+    payload["evidence"]["E02"] = dict(payload["evidence"]["E01"])
+    write_payload(workspace, payload)
+
+    with pytest.raises(ReportError, match="duplicate"):
+        render_report(workspace, report_path(workspace))
+
+
+def test_evidence_sources_are_read_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    workspace = copy_workspace(tmp_path, "dense")
+    read_paths: list[Path] = []
+    original_read_text = Path.read_text
+
+    def instrumented_read_text(path: Path, *args: object, **kwargs: object) -> str:
+        if path.resolve() == (workspace / "map.md").resolve():
+            read_paths.append(path)
+        return original_read_text(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", instrumented_read_text)
+    render_report(workspace, report_path(workspace))
+
+    assert len(read_paths) == 1
+
+
+def test_check_cli_returns_bounded_json_without_writing_output(tmp_path: Path) -> None:
+    workspace = copy_workspace(tmp_path, "minimal")
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(RENDERER),
+            "--workspace",
+            str(workspace),
+            "--data",
+            str(report_path(workspace)),
+            "--check",
+            "--format",
+            "json",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    summary = json.loads(result.stdout)
+    assert summary["status"] == "valid"
+    assert summary["metrics"] == {
+        "sections": 5,
+        "evidence": 3,
+        "findings": 1,
+        "diagrams": 2,
+    }
+    assert "excerpt" not in result.stdout
+    assert "Destination: choose a safe delivery path." not in result.stdout
+    assert not (workspace / "report" / "index.html").exists()
+
+
+def test_check_cli_warns_for_soft_finding_budget(tmp_path: Path) -> None:
+    workspace = copy_workspace(tmp_path, "dense")
+    payload = load_payload(workspace)
+    finding = dict(payload["findings"][0])
+    finding["id"] = "F04"
+    payload["findings"].append(finding)
+    write_payload(workspace, payload)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(RENDERER),
+            "--workspace",
+            str(workspace),
+            "--data",
+            str(report_path(workspace)),
+            "--check",
+            "--format",
+            "json",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    summary = json.loads(result.stdout)
+    assert summary["metrics"]["findings"] == 4
+    assert summary["warnings"]
 
 
 @pytest.mark.parametrize(
@@ -271,6 +406,24 @@ def test_sections_render_once_in_canonical_order(tmp_path: Path) -> None:
     assert all(markup.count(f'id="{section_id}"') == 1 for section_id in SECTION_IDS)
 
 
+def test_executive_status_and_priorities_precede_detailed_sections(tmp_path: Path) -> None:
+    workspace = copy_workspace(tmp_path, "dense")
+    markup = render_report(workspace, report_path(workspace)).read_text()
+
+    status_offset = markup.index('class="executive-status"')
+    priorities_offset = markup.index('class="executive-priorities"')
+    overview_offset = markup.index('id="overview"')
+    finding_queue_offset = markup.index('class="finding-queue"')
+
+    assert status_offset < overview_offset
+    assert priorities_offset < overview_offset
+    assert priorities_offset < finding_queue_offset
+    assert markup.count('class="priority-link"') <= 3
+    executive_status = markup[status_offset:overview_offset]
+    for signal in ("Destination", "Status", "Open decisions", "Findings", "To verify"):
+        assert signal in executive_status
+
+
 def test_diagrams_are_evidence_backed_and_stay_in_declared_sections(
     tmp_path: Path,
 ) -> None:
@@ -325,7 +478,9 @@ def test_template_mermaid_block_is_pinned_and_hardened() -> None:
     assert "--accent-mid" in template_text
     assert "--warm-accent" in template_text
     assert "decision-board:has(> :only-child)" in template_text
-    assert 'href="#reading"' in template_text
+    for section_id in SECTION_IDS:
+        assert f'href="#{section_id}"' in template_text
+    assert 'href="#reading"' not in template_text
     assert "prefers-color-scheme: dark" not in template_text
     assert "--accent-2" not in template_text
     assert "@media print" in template_text

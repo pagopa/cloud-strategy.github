@@ -52,6 +52,18 @@
               ]
             }
           ]
+        },
+        {
+          "kind": "diagram",
+          "title": "Destination signal",
+          "diagram_type": "flowchart",
+          "source": "flowchart LR\n  A[Destination]",
+          "claim": {
+            "text": "The destination is the first review signal.",
+            "evidence": [
+              "E01"
+            ]
+          }
         }
       ]
     },
@@ -115,15 +127,10 @@
           "evidence": [
             "E02"
           ]
-        }
-      ]
-    },
-    "reading": {
-      "title": "Reading",
-      "blocks": [
+        },
         {
           "kind": "list",
-          "title": "Read the evidence",
+          "title": "Reading order",
           "items": [
             {
               "text": "Start with the destination.",
@@ -145,6 +152,18 @@
           "evidence": [
             "E03"
           ]
+        },
+        {
+          "kind": "diagram",
+          "title": "Review path",
+          "diagram_type": "flowchart",
+          "source": "flowchart LR\n  A[Review]",
+          "claim": {
+            "text": "The review path stays local.",
+            "evidence": [
+              "E03"
+            ]
+          }
         }
       ]
     }
@@ -152,6 +171,7 @@
   "findings": [
     {
       "id": "F01",
+      "title": "Traceable local route",
       "impact": "low",
       "certainty": "confirmed",
       "propagation": 0,
