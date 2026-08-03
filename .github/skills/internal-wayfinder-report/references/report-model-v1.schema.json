@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "internal-wayfinder-report/report-model.v1.schema.json",
+  "title": "Internal Wayfinder Report Model v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "analysis_slug",
+    "title",
+    "status",
+    "destination",
+    "understand",
+    "review"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "analysis_slug": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "status": {
+      "enum": ["analysis-in-progress", "ready-for-execution", "implemented", "unknown"]
+    },
+    "destination": {"$ref": "#/$defs/claim"},
+    "understand": {"$ref": "#/$defs/understand"},
+    "review": {"$ref": "#/$defs/review"}
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "excerpt"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "excerpt": {"type": "string", "minLength": 1}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "sources"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/source"}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["specification", "problem", "decision", "expected_result"],
+      "properties": {
+        "specification": {"$ref": "#/$defs/claim"},
+        "problem": {"$ref": "#/$defs/claim"},
+        "decision": {"$ref": "#/$defs/claim"},
+        "expected_result": {"$ref": "#/$defs/claim"}
+      }
+    },
+    "behavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "claim"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "claim": {"$ref": "#/$defs/claim"}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["included", "excluded"],
+      "properties": {
+        "included": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+        "excluded": {"type": "array", "items": {"$ref": "#/$defs/claim"}}
+      }
+    },
+    "decision_path_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "state", "claim"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "state": {"enum": ["resolved", "open", "not-specified"]},
+        "claim": {"$ref": "#/$defs/claim"}
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["specified", "implemented"],
+      "properties": {
+        "specified": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+        "implemented": {"type": "array", "items": {"$ref": "#/$defs/claim"}}
+      }
+    },
+    "diagram": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "kind", "mermaid", "claim"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "minLength": 1},
+        "mermaid": {"type": "string", "minLength": 1},
+        "claim": {"$ref": "#/$defs/claim"}
+      }
+    },
+    "understand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "operation",
+        "behaviors",
+        "rules",
+        "scope",
+        "decision_path",
+        "implementation",
+        "diagrams"
+      ],
+      "properties": {
+        "summary": {"$ref": "#/$defs/summary"},
+        "operation": {"$ref": "#/$defs/claim"},
+        "behaviors": {"type": "array", "items": {"$ref": "#/$defs/behavior"}},
+        "rules": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+        "scope": {"$ref": "#/$defs/scope"},
+        "decision_path": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/decision_path_entry"}
+        },
+        "implementation": {"$ref": "#/$defs/implementation"},
+        "diagrams": {"type": "array", "items": {"$ref": "#/$defs/diagram"}}
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "certainty",
+        "impact_level",
+        "propagation",
+        "evidence",
+        "interpretation",
+        "specification_impact",
+        "repair",
+        "copyable_request"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "type": {
+          "enum": [
+            "contradiction",
+            "superseded-decision",
+            "missing-dependency",
+            "stale-map",
+            "ambiguity"
+          ]
+        },
+        "certainty": {"enum": ["confirmed", "probable", "to-verify"]},
+        "impact_level": {"enum": ["critical", "high", "medium", "low"]},
+        "propagation": {"type": "integer", "minimum": 0},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/source"}
+        },
+        "interpretation": {"$ref": "#/$defs/claim"},
+        "specification_impact": {"$ref": "#/$defs/claim"},
+        "repair": {"$ref": "#/$defs/claim"},
+        "copyable_request": {"$ref": "#/$defs/claim"}
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["findings"],
+      "properties": {
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+      }
+    }
+  }
+}
