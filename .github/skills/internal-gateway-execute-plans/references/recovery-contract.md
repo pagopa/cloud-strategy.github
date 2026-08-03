@@ -1,8 +1,16 @@
 # Continuation-First Recovery Contract
 
-This is the authoritative recovery ladder for the gateway. Keep the native
-authoritative command as the evidence label even when a supported override or
-optional accelerator invokes it.
+This is the authoritative recovery ladder for
+`/internal-gateway-execute-plans`. The gateway owns route selection, recovery,
+stopping, worktree/finishing decisions, and closeout; imported execution
+mechanics do not override it. Keep the native authoritative command as the
+evidence label even when a supported override or optional accelerator invokes
+it.
+
+Before recovery begins, the binding gate must have passed current-plan
+`## Control Inventory` and explicit no-Git checks. A plan identified as
+`legacy/imported` must be reconstructed through the writing gateway with
+refreshed approval and fingerprint before execution or recovery can proceed.
 
 ## 1. Attribute
 
@@ -78,7 +86,9 @@ Continue immediately for `continue-execution` or `continue-recovery`; do not
 write an intermediate status sibling. Write exactly one status sibling only
 for `DONE`, `PARTIAL` with an explicit pause, `BLOCKED` with exhausted fatal
 evidence, or `NEEDS_REVIEW` with completed work and exhausted human, external,
-or non-substitutable environmental evidence.
+or non-substitutable environmental evidence. The local gateway makes this
+decision; imported core mechanics cannot create a status sibling or change the
+route.
 
 ## Bounded graphify fallback
 

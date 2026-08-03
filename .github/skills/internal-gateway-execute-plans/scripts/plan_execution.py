@@ -648,6 +648,21 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
     for required in REQUIRED_EXECUTION_FIELDS:
         if not re.search(rf"(?im)^\s*(?:[-*]\s+)?(?:\*\*)?{re.escape(required)}(?:\*\*)?\s*:", text):
             findings.append(Finding("missing-execution-field", f"Plan missing required execution field: {required}"))
+    if "Control Inventory" not in headings:
+        findings.append(
+            Finding(
+                "missing-control-inventory",
+                "Current plan missing required heading: Control Inventory",
+            )
+        )
+    global_constraints = _extract_section(text, "Global Constraints")
+    if not re.search(r"(?im)^\s*[-*]\s+.*\bno[- ]git\b.*$", global_constraints):
+        findings.append(
+            Finding(
+                "missing-no-git-constraint",
+                "Current plan missing an explicit no-Git constraint",
+            )
+        )
     if not (TASK_HEADING_RE.search(text) or UNCHECKED_TASK_RE.search(text)):
         findings.append(Finding("missing-task", "Plan must contain at least one task heading"))
     try:

@@ -1,6 +1,7 @@
-# Legacy Draft Plan
+# Legacy / Imported Draft Plan
 
-**Status:** Draft-only until a writer-side check passes.
+**Status:** `legacy/imported`; non-actionable until reconstructed through
+`/internal-gateway-writing-plans` with refreshed approval and fingerprint.
 
 **Goal:** Demonstrate compatibility with an older retained plan.
 

@@ -1,13 +1,19 @@
 # Execution Contract
 
-This reference maps repository-local hooks around the delegated
-`/superpowers-executing-plans` loop. It does not duplicate that skill's plan
-review, todo, task execution, or core stop procedure.
+This reference is authoritative for the repository-local execution gateway
+around delegated `/superpowers-executing-plans` mechanics. The gateway owns
+routing, recovery, stopping, worktree/finishing decisions, status, and
+closeout. The imported bundle contributes only critical review, todo tracking,
+and task-by-task mechanics.
 
 ## Before the delegated loop
 
 - Require the exact retained plan path under `tmp/superpowers/plans/`.
 - Treat the writer-owned versioned `## Execution Contract` as authoritative.
+- Require a current plan's `## Control Inventory` and explicit no-Git constraint
+  through executor preflight. An explicitly `legacy/imported` document remains
+  non-actionable until the writing gateway reconstructs it and approval and
+  fingerprint are refreshed.
 - Accept `Preflight Gate` as the canonical plan heading and
   `Repository Preflight` or `Preflight` as compatibility aliases.
 - Confirm explicit user approval is present in the current conversation.
@@ -20,6 +26,13 @@ review, todo, task execution, or core stop procedure.
 - Run every broad validation named by `Baseline Validation` before edits and
   retain its command, exit status, and bounded failure summary.
 - Preserve the no-Git-mutation rule throughout execution.
+
+Before any plan-writing or plan-execution delegation, probe
+`gpt-5.6-luna` at `max` reasoning. If unavailable, select the least expensive
+available model suitable for the task and record timestamp/context, probe
+result, selected model, reasoning level, suitability evidence, and
+cost/fallback rationale. `gpt-5.6-terra/high` is the known drafting fallback,
+not a guaranteed selection.
 
 ## Control coverage
 
@@ -64,6 +77,9 @@ fields are blocking. The validator does not interpret textual states such as
 - State the task's observable outcome, dependency set, and focused validation.
 - For executable or evaluable behavior, load `/internal-tdd` and establish
   red-first evidence before the first implementation edit.
+- The local gateway retains routing, status, fixtures, approval, recovery,
+  stop, worktree/finishing, and closeout decisions; do not delegate those
+  decisions to imported core skills.
 - Keep repository-owned routing, status, fixtures, and approval gates in scope;
   do not edit imported core skills.
 
@@ -125,6 +141,8 @@ fields are blocking. The validator does not interpret textual states such as
 
 ## Closeout
 
+- The local gateway alone decides whether execution continues, requests
+  authority, pauses, or writes a terminal status sibling.
 - Run all broader validation required by the retained plan.
 - Use the same commands as the baseline and record the baseline/final delta.
 - Preserve the native authoritative command and evidence label even when an

@@ -1,6 +1,13 @@
 # Status Contract
 
-Status transition rules, required core, optional evidence, and exact sibling filenames for plan closeout.
+Status transition rules, required core, optional evidence, and exact sibling
+filenames for `/internal-gateway-execute-plans` closeout.
+
+The local execution gateway owns status transitions, status binding, and
+closeout. Imported task mechanics may report evidence but may not pause,
+resume, or create a status sibling. A terminal or paused sibling is legal only
+after current-plan control inventory/no-Git binding, required validation, and
+the gateway's closeout decision have passed.
 
 ## Status Transition Table
 

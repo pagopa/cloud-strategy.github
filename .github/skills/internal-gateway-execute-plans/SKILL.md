@@ -14,7 +14,7 @@ description: "Use when executing or resuming an approved repository-owned retain
 
 ## Referenced skills
 
-- `/superpowers-executing-plans` owns critical plan review, todo tracking, task execution, and its core stop behavior.
+- `/superpowers-executing-plans` supplies only critical plan review, todo tracking, and task-by-task mechanics.
 - `/internal-tdd` owns executable-behavior test-first guidance at the local task gate.
 - `/superpowers-verification-before-completion` owns final evidence before completion claims.
 - `/addyosmani-code-simplification` is conditional and may be loaded only when the approved task explicitly authorizes simplification.
@@ -81,9 +81,11 @@ question; never ask the user to run a local check or certify technical output.
 
 ## Gateway boundary
 
-The gateway is a repository-owned extension of `/superpowers-executing-plans`. The
-delegated owner supplies the core review, todo, execution, and stop loop. Keep
-only these local responsibilities here:
+`/internal-gateway-execute-plans` is the authoritative local execution route. It
+controls routing, recovery, stopping, worktree and finishing decisions, status
+transitions, and closeout. The imported `/superpowers-executing-plans` bundle is
+delegated only critical review, todo tracking, and task-by-task mechanics; it
+does not regain any local gateway responsibility.
 
 - bind the exact plan path and explicit approval state;
 - compute the SHA-256 fingerprint, run dirty-worktree preflight, and capture
@@ -92,6 +94,8 @@ only these local responsibilities here:
   obligation to its executable validation, external/human obligation, or
   authority boundary;
 - apply task-level `/internal-tdd` and evidence hooks;
+- decide routing, recovery candidates, stop conditions, and worktree/finishing
+  behavior;
 - classify closeout evidence with `closeout-check`, continue while a safe route exists,
   and preserve the baseline/final delta;
 - enforce the no-Git-mutation policy;
@@ -118,9 +122,13 @@ only these local responsibilities here:
 
 ## Delegation checkpoints
 
-Before loading `/superpowers-executing-plans`, bind the retained plan, record
-approval, fingerprint the plan, capture the workspace baseline, and run the
-plan's broad baseline validation. At each
+Before delegating task mechanics to `/superpowers-executing-plans`, bind the
+retained plan, record approval, fingerprint the plan, capture the workspace
+baseline, and run the plan's broad baseline validation. The binding gate must
+also confirm the current plan has `## Control Inventory` and an explicit no-Git
+constraint. A document identified as `legacy/imported` is non-actionable until
+the writing gateway reconstructs it and approval and fingerprint are refreshed.
+At each
 task boundary, load `/internal-tdd` when the task changes executable or
 evaluable behavior and require its red-first evidence before implementation.
 After each delegated task, run the plan's focused validation, retain fresh
@@ -143,6 +151,17 @@ delta, verify `git diff --check`, and write exactly one status sibling according
 to `references/status-contract.md`. Always provide a concise user-facing report
 with the outcome, changed work, validation, blocker or gap, recovery attempts,
 and exact next action.
+
+## Subagent model selection
+
+Before any plan-writing or plan-execution delegation, probe whether
+`gpt-5.6-luna` is available at `max` reasoning. If it is unavailable, select the
+least expensive available model that is suitable for the specific task. Record
+the timestamp and context, probe and availability result, selected model,
+reasoning level, suitability evidence, and cost/fallback rationale. The known
+drafting fallback is `gpt-5.6-terra` at `high` reasoning; it is not a guarantee
+or a substitute for the probe. Luna's absence alone is not a blocker when the
+fallback evidence is complete; lack of a suitable approved fallback is.
 
 ## No-Commit Rule
 
