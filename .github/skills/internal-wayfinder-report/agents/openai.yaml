@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Wayfinder Report"
   short_description: "Render and audit a local Wayfinder workspace"
-  default_prompt: "Use /internal-wayfinder-report on an active tmp/.wayfinder/<analysis-slug>/ workspace. Read map.md, analysis.md, and local issues, write report/report-model.v1.json, run the bundled renderer for index.html and review.html, and leave all Wayfinder sources unchanged."
+  default_prompt: "Use /internal-wayfinder-report on an active tmp/.wayfinder/<analysis-slug>/ workspace. Read map.md, analysis.md, and local issues, write report/report-model.v1.json, run the bundled renderer for the single-page index.html, and leave all Wayfinder sources unchanged."

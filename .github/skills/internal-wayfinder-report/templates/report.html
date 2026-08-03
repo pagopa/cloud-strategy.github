@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${title}</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --ink: #17202a; --muted: #52616b; --line: #c7d1d8;
+  --surface: #ffffff; --soft: #f2f6f8;
+  --accent: #075985; --accent-soft: #e0f2fe;
+  --warning: #92400e; --warning-soft: #ffedd5;
+  --critical: #991b1b; --critical-soft: #fee2e2;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8eef2; --muted: #a3b1bb; --line: #33424d;
+    --surface: #16212a; --soft: #0f1820;
+    --accent: #7dd3fc; --accent-soft: #0c4a6e;
+    --warning: #fcd34d; --warning-soft: #4a2f08;
+    --critical: #fca5a5; --critical-soft: #4c1111;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--soft); color: var(--ink); line-height: 1.55; }
+a { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
+header { position: sticky; top: 0; z-index: 10; background: #0f172a; color: #e2e8f0; }
+.header-inner, .page { max-width: 1120px; margin: 0 auto; padding: 1rem 1.25rem; }
+.header-inner { display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+header a { color: #7dd3fc; }
+.eyebrow { font-size: .74rem; letter-spacing: .09em; text-transform: uppercase; opacity: .8; }
+h1 { margin: .2rem 0; font-size: 1.35rem; line-height: 1.2; }
+h2 { margin-top: 2.6rem; border-bottom: 2px solid var(--line); padding-bottom: .45rem; }
+h3 { margin-top: 0; }
+nav { display: flex; gap: .75rem; flex-wrap: wrap; }
+.page { padding-bottom: 4rem; }
+.lede { color: var(--muted); max-width: 75ch; font-size: 1.05rem; }
+.metrics { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 1.5rem 0 0; }
+.metric { background: var(--surface); border: 1px solid var(--line); border-left: .35rem solid var(--accent); border-radius: .6rem; padding: .8rem; }
+.metric.warning { border-left-color: var(--warning); }
+.metric.critical { border-left-color: var(--critical); }
+.metric-label { font-size: .74rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.metric-value { font-size: 1.5rem; font-weight: 800; }
+.metric-detail { font-size: .82rem; color: var(--muted); }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: .65rem; padding: 1rem; }
+.card > :first-child { margin-top: 0; }
+.sources { margin-top: .8rem; border-top: 1px solid var(--line); padding-top: .5rem; font-size: .9rem; }
+.sources > summary { color: var(--muted); font-weight: 600; }
+.source { margin-top: .6rem; }
+.source-link { font-weight: 700; }
+blockquote { margin: .25rem 0 0; padding: .4rem .7rem; border-left: 3px solid var(--accent); color: var(--muted); background: var(--soft); white-space: pre-wrap; }
+ul, ol { padding-left: 1.35rem; }
+.timeline { display: grid; gap: .8rem; list-style: none; padding-left: 0; counter-reset: step; }
+.timeline li { counter-increment: step; display: grid; grid-template-columns: 2.4rem 1fr; gap: .75rem; align-items: start; }
+.timeline li::before { content: counter(step); display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+.badge { display: inline-block; border-radius: 999px; padding: .12rem .55rem; margin: .1rem .2rem .1rem 0; background: var(--accent-soft); color: var(--accent); font-size: .76rem; font-weight: 700; }
+.badge.warning { background: var(--warning-soft); color: var(--warning); }
+.badge.critical { background: var(--critical-soft); color: var(--critical); }
+table { display: block; width: 100%; max-width: 100%; overflow-x: auto; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: .65rem; }
+th, td { text-align: left; padding: .55rem .7rem; border-bottom: 1px solid var(--line); font-size: .92rem; }
+th { background: var(--accent-soft); color: var(--accent); }
+tr:last-child td { border-bottom: none; }
+.finding-card { border-left: .4rem solid var(--accent); margin-top: 1rem; scroll-margin-top: 6rem; }
+.finding-card.secondary { border-left-color: var(--line); }
+.finding-meta { color: var(--muted); font-size: .88rem; }
+details { background: var(--surface); border: 1px solid var(--line); border-radius: .65rem; padding: .8rem 1rem; }
+details.sources { background: transparent; border: none; border-top: 1px solid var(--line); border-radius: 0; padding: .5rem 0 0; }
+summary { cursor: pointer; font-weight: 800; }
+.diagram { margin: 1rem 0 0; }
+.diagram-source { overflow-x: auto; background: #0f172a; color: #e0f2fe; border-radius: .5rem; padding: 1rem; white-space: pre; font-size: .85rem; }
+.diagram-target svg { max-width: 100%; height: auto; }
+.empty { color: var(--muted); font-style: italic; }
+.section-anchor { scroll-margin-top: 6rem; }
+@media (max-width: 640px) {
+  header { position: static; }
+  .header-inner { align-items: flex-start; flex-direction: column; }
+}
+@media print {
+  header { position: static; background: #fff; color: #000; }
+  body { background: #fff; }
+  details { border: none; }
+  details > summary { display: none; }
+  details[open] > summary { display: none; }
+  .diagram-source { background: #fff; color: #000; border: 1px solid #999; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="eyebrow">Wayfinder · ${slug} · generato il ${generated_at}</div>
+      <h1>${title}</h1>
+      <span class="badge ${status_class}">${status_label}</span>
+    </div>
+    <nav aria-label="Sezioni del report">
+      <a href="#comprendi">Comprendi il risultato</a>
+      <a href="#revisiona">Revisiona la coerenza</a>
+    </nav>
+  </div>
+</header>
+<main class="page">
+  <p class="lede">${destination}</p>
+  <div class="metrics">${metrics}</div>
+  ${understand}
+  ${review}
+</main>
+<!--
+  Blocco Mermaid opzionale.
+  Elimina i due <script> qui sotto per ottenere un report completamente offline:
+  i diagrammi restano visibili come codice sorgente.
+  Hash SRI: curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A
+-->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"
+        integrity="sha384-zkWMJO4sgpPUzyuOgDx8HB/K55glbAwajEpk1Go2NWRuPkPA/wIhoEJTuSkmOYrV"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+(function () {
+  if (!window.mermaid) { return; }
+  window.mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'strict',
+    flowchart: { htmlLabels: false }
+  });
+  var figures = document.querySelectorAll('.diagram');
+  Array.prototype.forEach.call(figures, function (figure, index) {
+    var source = figure.querySelector('.diagram-source');
+    var target = figure.querySelector('.diagram-target');
+    if (!source || !target) { return; }
+    window.mermaid.render('wayfinder-diagram-' + index, source.textContent)
+      .then(function (result) {
+        target.innerHTML = result.svg;
+        target.hidden = false;
+        source.hidden = true;
+      })
+      .catch(function () { /* il sorgente resta visibile */ });
+  });
+})();
+</script>
+</body>
+</html>

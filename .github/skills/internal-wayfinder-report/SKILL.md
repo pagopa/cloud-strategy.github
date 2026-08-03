@@ -5,8 +5,9 @@ description: Use when an active local Wayfinder workspace needs a traceable HTML
 
 # Internal Wayfinder Report
 
-Turn one local Wayfinder workspace into a traceable two-view report. The report
-is an evidence projection: it explains what the workspace says and surfaces
+Turn one local Wayfinder workspace into a traceable single-page report with two
+sections. The report is an evidence projection: it explains what the workspace
+says and surfaces
 coherence questions, while source maps, analysis, and tickets remain the
 authoritative artifacts.
 
@@ -15,7 +16,7 @@ authoritative artifacts.
 Use this skill when a local `tmp/.wayfinder/<analysis-slug>/` workspace needs a
 readable report for handoff or coherence review. Use the existing Wayfinder
 workflow to chart or resolve decisions; use this skill after source analysis is
-available and before a user needs the two report views.
+available and before a user needs the single report page.
 
 ## Active workspace
 
@@ -84,7 +85,7 @@ and one or more sources on every claim. Rank is computed by impact level,
 certainty, propagation, and ID; provide all findings and let the renderer expose
 the five highest-ranked findings first.
 
-## Render the two views
+## Render the report
 
 Run the native standard-library renderer with the model path under the active
 workspace's `report/` directory:
@@ -95,20 +96,38 @@ python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
   --model tmp/.wayfinder/<analysis-slug>/report/report-model.v1.json
 ```
 
-The renderer writes only:
+The renderer writes exactly one page:
 
 ```text
 tmp/.wayfinder/<analysis-slug>/report/index.html
-tmp/.wayfinder/<analysis-slug>/report/review.html
 ```
 
-`index.html` is `Comprendi il risultato`: destination, summary, operation,
-behaviors, rules, scope, decision path, relationships, and specified-versus-
-implemented status. `review.html` is `Revisiona la coerenza`: five prioritized
-findings are visible, remaining findings are inside one disclosure block, and
-each finding exposes evidence, interpretation, specification impact, repair,
-and copyable request. Local source links are relative to `report/` and remain
-usable without a network or client-side diagram dependency.
+The page contains `Comprendi il risultato` first and `Revisiona la coerenza`
+second. It includes a derived indicator strip, a decision-path flowchart when
+the model declares no diagram, collapsed but complete source blocks, and a
+findings table followed by five visible cards and one disclosure for the rest.
+Output is deterministic: the displayed timestamp comes from the model file
+`mtime`, not the current clock. Local source links are relative to `report/`.
+
+## Template and preview
+
+The editable shell is
+`.github/skills/internal-wayfinder-report/templates/report.html`. It declares
+these exact placeholders:
+
+```text
+title, slug, status_label, status_class, generated_at, destination, metrics,
+understand, review
+```
+
+Pass `--template PATH` to render with a custom shell. Pass `--preview [PATH]`
+to materialize the bundled sample workspace and render it to
+`tmp/.wayfinder-report-preview/` by default. A missing or unsupported template
+placeholder fails before any report file is written.
+
+Mermaid is optional, pinned, isolated in the template, and removable. Without
+the script, the escaped Mermaid source stays visible. The renderer itself
+never performs network access.
 
 ## Completion gate
 
@@ -116,7 +135,7 @@ Before reporting completion, confirm that:
 
 - all source files were read and every material claim is traceable;
 - the model is accepted as v1 and the renderer accepts workspace confinement;
-- both generated paths exist under the active workspace's `report/` directory;
+- the generated `index.html` exists under the active workspace's `report/` directory;
 - source maps, analysis, tickets, and other Wayfinder source files are byte-for-
   byte unchanged; and
 - unresolved `to-verify` findings and their source links are reported to the
@@ -127,7 +146,7 @@ workspace, or the renderer rejects the model, stop with the exact gap. Keep the
 report model or finding proposal as the next actionable artifact; do not
 silently downgrade the claim.
 
-This skill creates a report only. It does not apply repairs, edit `map.md`,
+This skill creates a single-page report only. It does not apply repairs, edit `map.md`,
 `analysis.md`, `issues/`, or other source artifacts; persist review state;
 compare analysis versions; contact a remote tracker; or generate PDF,
 dashboard, or network-fetched diagram output.
