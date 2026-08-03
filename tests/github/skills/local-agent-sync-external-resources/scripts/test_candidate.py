@@ -280,15 +280,38 @@ def test_normalization_rewrites_mattpocock_legacy_workspace_paths(
     assert expected in content
 
 
-def test_normalization_enforces_mattpocock_wayfinder_workspace_contract(
+def test_normalization_updates_wayfinder_contracts_without_changing_lifecycle(
     tmp_path: Path,
 ) -> None:
     candidate = tmp_path / "candidate"
     local = ".github/skills/mattpocock-wayfinder"
     skill = candidate / local / "SKILL.md"
     skill.parent.mkdir(parents=True)
+    upstream_lifecycle = """\
+## Invocation
+
+### Chart the map
+
+1. Name the destination.
+2. Map the frontier.
+3. Create the map and its ticket batch.
+
+### Work through the map
+
+1. Load the map.
+2. Claim one ticket before any work.
+3. Resolve that ticket only.
+4. Record the resolution and update the map.
+"""
     skill.write_text(
-        "Capture findings on a throwaway `research/<name>` branch.\n",
+        upstream_lifecycle
+        + "\nCapture findings on a throwaway `research/<name>` branch.\n\n"
+        + "<!-- local-sync:wayfinder-critical-validation:start -->\n"
+        + "Run the gate before every artifact.\n"
+        + "<!-- local-sync:wayfinder-critical-validation:end -->\n\n"
+        + "<!-- local-sync:wayfinder-grilling:start -->\n"
+        + "Ask one question at a time.\n"
+        + "<!-- local-sync:wayfinder-grilling:end -->\n",
         encoding="utf-8",
     )
     asset = ManagedAsset(
@@ -315,10 +338,26 @@ def test_normalization_enforces_mattpocock_wayfinder_workspace_contract(
     second_changed = normalize_candidate(resources, candidate)
 
     wayfinder_content = skill.read_text(encoding="utf-8")
+    normalized_text = " ".join(wayfinder_content.split())
     assert f"{local}/SKILL.md" in first_changed
     assert second_changed == ()
+    assert wayfinder_content.startswith(upstream_lifecycle)
     assert "local-sync:wayfinder-workspace:start" in wayfinder_content
     assert "local-sync:wayfinder-workspace:end" in wayfinder_content
+    assert wayfinder_content.count("local-sync:wayfinder-critical-validation:start") == 1
+    assert wayfinder_content.count("local-sync:wayfinder-critical-validation:end") == 1
+    assert "`/internal-gateway-critical-master`" in wayfinder_content
+    assert "Counter-validate every material critique" in wayfinder_content
+    assert "one analysis unit" in wayfinder_content
+    assert "entire batch of content-producing writes" in normalized_text
+    assert "ticket claim remains the first coordination action" in normalized_text
+    assert "Do not rerun the critic against unchanged evidence" in normalized_text
+    assert "Run the gate before every artifact." not in wayfinder_content
+    assert wayfinder_content.count("local-sync:wayfinder-grilling:start") == 1
+    assert wayfinder_content.count("local-sync:wayfinder-grilling:end") == 1
+    assert "one numbered bulk block" in wayfinder_content
+    for field in ("Question", "Recommendation", "Why", "Default if accepted"):
+        assert f"`{field}`" in wayfinder_content
     assert "`tmp/.wayfinder/<analysis-slug>/`" in wayfinder_content
     assert "throwaway `research/<name>` branch" not in wayfinder_content
 

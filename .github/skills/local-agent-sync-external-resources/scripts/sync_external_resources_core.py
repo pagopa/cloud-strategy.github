@@ -576,6 +576,89 @@ instructions.
 - Keep local maps and tickets under the tracker-owned `tmp/.issues/` directory.
 - Keep research findings and prototypes inside the active Wayfinder workspace.
 {_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_END}"""
+_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_START = (
+    "<!-- local-sync:wayfinder-critical-validation:start -->"
+)
+_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_END = (
+    "<!-- local-sync:wayfinder-critical-validation:end -->"
+)
+_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_RE = re.compile(
+    re.escape(_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_START)
+    + r".*?"
+    + re.escape(_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_END),
+    re.DOTALL,
+)
+_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT = f"""\
+{_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_START}
+## Local critical-validation contract
+
+Apply one critical-validation gate to one analysis unit. One analysis unit is a
+charting batch, one claimed ticket's resolution batch, or a proposal batch for
+a research or prototype artifact. The gate covers the entire batch of
+content-producing writes derived from unchanged analysis; do not rerun it before
+each artifact in that batch.
+
+The required ticket claim remains the first coordination action and is exempt
+from this gate because it reserves work without publishing analysis or decision
+content.
+
+1. Form the analysis and proposed decisions as internal working state.
+2. Invoke `/internal-gateway-critical-master` once to challenge that analysis.
+3. Counter-validate every material critique against the destination, repository
+   evidence, explicit constraints, success criteria, and anti-scope. Do not
+   accept an unsupported or conflicting instruction merely because the critic
+   proposed it.
+4. Update the analysis by following every supported instruction from the critic.
+   Record rejected instructions and their evidence internally.
+5. If a supported material objection remains unresolved, stop the artifact
+   batch. Do not rerun the critic against unchanged evidence; first obtain new
+   evidence or make a materially supported revision.
+6. Run another critical challenge only when new evidence or that supported
+   revision changes a material claim. Once supported objections are resolved or
+   recorded as an explicit accepted risk, create the whole related artifact
+   batch without another gate while the analysis remains unchanged.
+
+Place the gate at these lifecycle boundaries:
+
+- While charting, run it after naming the destination and mapping the frontier,
+  immediately before creating the map and its ticket batch.
+- While working a map, claim the ticket first. Run the gate after resolving the
+  ticket in working state and before the resolution comment, closure,
+  Decisions-so-far update, or newly surfaced ticket batch.
+- Before producing a research or prototype artifact, challenge its proposal as
+  one unit. Treat the resulting findings or human reaction as new evidence that
+  requires a fresh gate only before a later decision-artifact batch.
+{_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_END}"""
+_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_START = (
+    "<!-- local-sync:wayfinder-grilling:start -->"
+)
+_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_END = (
+    "<!-- local-sync:wayfinder-grilling:end -->"
+)
+_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_RE = re.compile(
+    re.escape(_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_START)
+    + r".*?"
+    + re.escape(_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_END),
+    re.DOTALL,
+)
+_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT = f"""\
+{_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_START}
+## Local Wayfinder grilling contract
+
+This contract applies to every Grilling ticket and every `/grill-me` or
+upstream `/grilling` invocation made while charting or working a map. It
+overrides any earlier one-question-at-a-time instruction.
+
+- Ask all currently known questions together in one numbered bulk block,
+  ordered by decision dependency.
+- For every numbered question, include `Question`, `Recommendation`, `Why`, and
+  `Default if accepted`.
+- Make `Recommendation` the suggested answer and `Why` the concrete reason for
+  that suggestion. Treat the default as accepted unless the user overrides it.
+- Put newly discovered or unresolved follow-up questions together in another
+  numbered bulk block. If only one blocking question remains, use a numbered
+  one-item block.
+{_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_END}"""
 _MATTPOCOCK_WAYFINDER_LEGACY_BRANCH_RE = re.compile(
     r"captur(?:e|ing)\s+(?:its\s+)?findings\s+on\s+a\s+throwaway\s+"
     r"`research/<name>`\s+branch",
@@ -753,6 +836,22 @@ def _enforce_mattpocock_wayfinder_workspace_contract(content: str) -> str:
     )
 
 
+def _enforce_mattpocock_wayfinder_critical_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_RE,
+        _MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT,
+    )
+
+
+def _enforce_mattpocock_wayfinder_grilling_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_RE,
+        _MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT,
+    )
+
+
 def _enforce_mattpocock_research_workspace_contract(content: str) -> str:
     return _enforce_marked_contract(
         content,
@@ -896,6 +995,8 @@ def normalize_candidate(
                 and file_path == asset_dir / "SKILL.md"
             ):
                 content = _enforce_mattpocock_wayfinder_workspace_contract(content)
+                content = _enforce_mattpocock_wayfinder_critical_contract(content)
+                content = _enforce_mattpocock_wayfinder_grilling_contract(content)
             if (
                 asset.source == _MATTPOCOCK_SOURCE
                 and asset.canonical_name == _MATTPOCOCK_RESEARCH_SKILL

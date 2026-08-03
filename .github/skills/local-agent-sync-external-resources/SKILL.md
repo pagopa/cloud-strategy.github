@@ -115,6 +115,24 @@ This catalog is commit-pinned, not release-pinned:
 - The append is marker-based and idempotent. Do not replace it with a
   context-sensitive replay patch.
 
+## Wayfinder Critical Validation And Grilling Contracts
+
+- Candidate normalization appends two repository-owned contracts to
+  `mattpocock-wayfinder`.
+- Before Wayfinder creates or updates an artifact, it must have
+  `internal-gateway-critical-master` challenge the analysis, counter-validate
+  every material critique against evidence and constraints, incorporate every
+  supported instruction, and stop when a supported objection remains unresolved.
+- One gate covers one analysis unit and its related content-producing write
+  batch. The required ticket claim is exempt and remains the first coordination
+  action. Rerun the critic only after new evidence or a materially supported
+  revision changes the analysis; never rerun it against unchanged evidence.
+- Every Wayfinder Grilling ticket and `grill-me` invocation asks all currently
+  known questions in numbered bulk blocks. Every question includes `Question`,
+  `Recommendation`, `Why`, and `Default if accepted`.
+- Both contracts are canonical-name-scoped, marker-based, and idempotent. Do
+  not replace them with replay patches.
+
 ## Repository-Owned Skill Contracts
 
 - Express additive repository-owned behavior, workspace, and output-path
