@@ -398,7 +398,7 @@ def test_closeout_routes_incomplete_work_and_explicit_pause(valid_plan: Path) ->
     assert classify_closeout(_contract(valid_plan), paused).route == "PARTIAL"
 
 
-def test_closeout_requires_review_for_pending_manual_obligation(tmp_path: Path) -> None:
+def test_closeout_completes_with_pending_offline_human_review(tmp_path: Path) -> None:
     plan = _stage_valid_plan(
         tmp_path,
         _fixture("valid-plan.md")
@@ -412,6 +412,27 @@ def test_closeout_requires_review_for_pending_manual_obligation(tmp_path: Path) 
         plan,
         manual_obligations=[
             {"id": "owner-check", "satisfied": False, "evidence": "Awaiting owner."}
+        ],
+    )
+    decision = classify_closeout(_contract(plan), evidence)
+    assert decision.route == "DONE"
+    assert "offline-human-review-pending" in decision.reasons
+
+
+def test_closeout_keeps_pending_external_obligation_in_review(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(
+        tmp_path,
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            '"manual_obligations": []',
+            '"manual_obligations": [{"id": "capability-check", "kind": "external", "required": true, "acceptance": "External capability is available."}]',
+        ),
+    )
+    evidence = _closeout_evidence(
+        plan,
+        manual_obligations=[
+            {"id": "capability-check", "satisfied": False, "evidence": "Capability unavailable."}
         ],
     )
     assert classify_closeout(_contract(plan), evidence).route == "NEEDS_REVIEW"
@@ -435,6 +456,21 @@ def test_needs_review_requires_bound_reason(tmp_path: Path, valid_plan: Path) ->
     status.write_text(
         _minimal_status(valid_plan, "NEEDS_REVIEW").replace(
             "Recovery exhausted for an environmental validation.", "Pending work."
+        )
+    )
+    assert "needs-review-without-bound-reason" in {
+        item.code for item in validate_status(status)
+    }
+
+
+def test_needs_review_rejects_offline_human_review_only(
+    tmp_path: Path, valid_plan: Path
+) -> None:
+    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
+    status.write_text(
+        _minimal_status(valid_plan, "NEEDS_REVIEW").replace(
+            "Recovery exhausted for an environmental validation.",
+            "Pending human review.",
         )
     )
     assert "needs-review-without-bound-reason" in {

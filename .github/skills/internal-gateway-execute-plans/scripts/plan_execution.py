@@ -576,9 +576,33 @@ def classify_closeout(contract: ExecutionContract, evidence: CloseoutEvidence | 
             raise ValueError(f"structured recovery has an unclassified candidate for {validation.id}")
     if unresolved:
         return _closeout_decision("NEEDS_REVIEW", ["recovery-exhausted"], "Resolve the environmental or external obligation, then rerun closeout-check.")
-    pending_manual = [item.id for item in evidence.manual_obligations if not item.satisfied]
-    if pending_manual:
-        return _closeout_decision("NEEDS_REVIEW", ["manual-obligation-pending", f"obligation:{pending_manual[0]}"], "Complete the pending plan-declared obligation, then rerun closeout-check.")
+    declared_manual = {item.id: item for item in contract.manual_obligations}
+    pending_external = [
+        item.id
+        for item in evidence.manual_obligations
+        if not item.satisfied
+        and declared_manual[item.id].required
+        and declared_manual[item.id].kind == "external"
+    ]
+    if pending_external:
+        return _closeout_decision(
+            "NEEDS_REVIEW",
+            ["external-obligation-pending", f"obligation:{pending_external[0]}"],
+            "Resolve the pending external obligation, then rerun closeout-check.",
+        )
+    pending_human = [
+        item.id
+        for item in evidence.manual_obligations
+        if not item.satisfied
+        and declared_manual[item.id].required
+        and declared_manual[item.id].kind == "human"
+    ]
+    if pending_human:
+        return _closeout_decision(
+            "DONE",
+            ["all-required-validations-passed", "offline-human-review-pending"],
+            "No further execution is required; complete the pending human review offline.",
+        )
     return _closeout_decision("DONE", ["all-required-validations-passed"], "No further execution is required.")
 
 
@@ -707,8 +731,8 @@ def _validate_status_evidence(text: str, status: str | None) -> list[Finding]:
         findings.append(Finding("missing-recovery-exhaustion", f"{status} requires ## Recovery Exhaustion"))
     if status == "NEEDS_REVIEW":
         lowered = (decision + "\n" + classification + "\n" + exhaustion).lower()
-        if not any(marker in lowered for marker in ("manual-obligation", "human", "external", "environmental", "recovery-exhausted")):
-            findings.append(Finding("needs-review-without-bound-reason", "NEEDS_REVIEW requires a bound manual, external, or environmental reason"))
+        if not any(marker in lowered for marker in ("external", "environmental", "recovery-exhausted", "authority-declined")):
+            findings.append(Finding("needs-review-without-bound-reason", "NEEDS_REVIEW requires a bound external, environmental, or authority-declined reason"))
     if status == "BLOCKED":
         lowered = (decision + "\n" + classification + "\n" + exhaustion).lower()
         if not any(marker in lowered for marker in ("fatal", "task-local regression", "unsafe")):

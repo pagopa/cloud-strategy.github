@@ -63,7 +63,10 @@ classes with the six executor-owned runtime discovery categories.
   expand scope or modify the approved plan without the required approval and a
   refreshed fingerprint.
 - `genuine-human-judgment` controls remain explicit human obligations with
-  acceptance evidence; do not disguise them as automated validation.
+  acceptance evidence, but their verification is an offline follow-up and does
+  not block `DONE` after execution and required validations complete. Do not
+  disguise them as automated validation. Authority and approval gates needed
+  before execution remain gateway preconditions.
 
 Every control row must map to a contract validation, manual obligation, or
 authority boundary and retain its requirement, owner, trigger, pass/fail
@@ -75,9 +78,10 @@ rerun preflight, and obtain refreshed approval and fingerprint before execution.
 Otherwise, do not modify the approved plan.
 
 Ask the user only after local checks are exhausted and only for new authority,
-access, a product or scope choice, genuine human judgment, or an explicit
-requirement conflict. Report the checks already performed and ask one focused
-question; never ask the user to run a local check or certify technical output.
+access, a product or scope choice, or an explicit requirement conflict. Report
+the checks already performed and ask one focused question; never ask the user
+to run a local check or certify technical output. Record pending human
+judgment as offline follow-up after a successful closeout.
 
 ## Gateway boundary
 
@@ -114,8 +118,10 @@ does not regain any local gateway responsibility.
    execution is unresolved. Completion: the next candidate was tried, authority
    was requested when required, or exhaustion evidence is complete.
 4. **Decide** with `closeout-check`. Completion: continue immediately on a
-  `continue-*` or `request-authority` route, or write one legal status sibling for a terminal or explicit
-   pause route.
+  `continue-*` or `request-authority` route, or write one legal status sibling
+  for a terminal or explicit pause route. A pending human review is recorded
+  as offline follow-up evidence and does not change a successful closeout to
+  `NEEDS_REVIEW`.
 5. **Close** with broader validation, `git diff --check`, status binding, and the
    verification-before-completion gate. Completion: the status sibling and report
    contain the same fresh evidence.
@@ -187,5 +193,8 @@ layer over that contract, not a competing schema. The executor owns all six
 discovery categories, recovery candidates, attempts, rejection evidence,
 authority state, and closeout routing. `DONE` requires fresh evidence for every
 task and every automatable or observable control; `request-authority` keeps
-execution active and does not produce a status sibling. The final report must
-also name control gates added or updated, their evidence, and any residual gap.
+execution active and does not produce a status sibling. Required unresolved
+external obligations still route to `NEEDS_REVIEW`; pending human judgment is
+reported as offline follow-up and is not a closeout blocker. The final report
+must also name control gates added or updated, their evidence, and any
+residual gap.

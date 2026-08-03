@@ -10,7 +10,9 @@ interface:
     a control inventory that classifies every task,
     acceptance criterion, and declared obligation exactly once; map local and
     runtime controls to required validations and external, authority, or human
-    controls to explicit contract boundaries. Use only imported drafting
+    controls to explicit contract boundaries. Treat genuine human judgment as
+    offline review follow-up after successful execution; it does not block
+    DONE. Use only imported drafting
     mechanics from /superpowers-writing-plans to produce one reviewable plan
     under tmp/superpowers/plans/ with ordered tasks,
     concrete targets, focused validation, a traceable ## Control Inventory,

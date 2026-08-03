@@ -49,17 +49,22 @@ description: Use when repository-owned work needs an approved implementation pla
    to `validations` and residual external/human rows to the existing contract
    fields; the inventory is traceability, not a second parser contract. When
    plan-writing or execution delegation is used, include the external
-   `model-selection` acceptance evidence in `manual_obligations`. Completion:
-   one plan exists at the retained path and contains those artifact properties
-   plus one versioned `## Execution Contract` fenced JSON object.
+   `model-selection` acceptance evidence in `manual_obligations`. Treat
+   `genuine-human-judgment` rows as explicit offline review follow-up; they are
+   reported after a successful `DONE` closeout and do not block completion.
+   Authority and approval rows remain pre-execution gates. Completion: one
+   plan exists at the retained path and contains those artifact properties plus
+   one versioned `## Execution Contract` fenced JSON object.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every
    `automatable-local` or `observable-runtime` row must map to a required
    executable validation. An `external-capability` row must have an explicit
    probe and safe fallback, or a declared residual external obligation.
    `authority-or-scope` and `genuine-human-judgment` rows must remain explicit
-   authority or human obligations; a user assertion cannot substitute for a
-   technical gate. The contract must declare native authoritative validation
+   authority or human obligations; human judgment is verified offline after
+   successful execution, while authority and approval remain pre-execution
+   gates. A user assertion cannot substitute for a technical gate. The
+   contract must declare native authoritative validation
    commands and phases, equivalence policy, manual obligations, and authority
    boundaries. A local/runtime gate must fail when its requirement is violated;
    a warning or printout is not a gate. It must not predict runtime discovery

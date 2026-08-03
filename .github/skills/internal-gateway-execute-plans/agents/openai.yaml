@@ -7,7 +7,8 @@ interface:
     Execution Contract and verify a control inventory for every task,
     acceptance criterion, and declared obligation. Execute local and runtime
     gates with reproducible evidence; probe external capabilities explicitly and
-    fail closed; keep authority and genuine human judgment explicit. Preserve
+    fail closed; keep authority and genuine human judgment explicit as offline
+    follow-up that does not block DONE. Preserve
     native validation commands, record all six executor-owned discovery
     categories and structured recovery evidence, and continue through safe
     recovery. Request authority while execution remains active. Use

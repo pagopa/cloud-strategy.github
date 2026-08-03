@@ -49,8 +49,11 @@ exactly one class: `automatable-local`, `observable-runtime`,
   Use only a plan-permitted safe fallback; otherwise preserve the unresolved
   external obligation and follow the authority/review route.
 - Map authority or scope controls to the plan's approval boundary and genuine
-  human judgment to a declared human obligation. Do not use a user assertion,
-  warning, or narrative-only note as a technical pass.
+  human judgment to a declared human obligation. Human-judgment evidence is an
+  offline post-closeout review and does not block `DONE`; do not claim it was
+  satisfied before it occurs. Do not use a user assertion, warning, or
+  narrative-only note as a technical pass. Approval and authority gates needed
+  before execution remain gateway preconditions.
 - Keep stable IDs and traceability to the existing `Execution Contract`; do not
   introduce a competing schema. If a local/runtime obligation has no gate,
   stop before editing or obtain the plan-authorized correction. An authorized
@@ -59,9 +62,10 @@ exactly one class: `automatable-local`, `observable-runtime`,
   immutable.
 
 Ask the user only after local checks are exhausted and only for new authority,
-access, a product or scope choice, genuine human judgment, or an explicit
-requirement conflict. Report the checks already performed and ask one focused
-question; never ask the user to run a local check or certify technical output.
+access, a product or scope choice, or an explicit requirement conflict. Report
+the checks already performed and ask one focused question; never ask the user
+to run a local check or certify technical output. Record pending human
+judgment as offline follow-up after a successful closeout.
 
 ## Mechanical safety boundary
 
@@ -160,5 +164,6 @@ fields are blocking. The validator does not interpret textual states such as
   sibling.
 - Run `completion-check` only when every task and broader check has fresh
   passing evidence and every automatable or observable-runtime control is
-  covered. Pending external or human obligations remain `NEEDS_REVIEW` unless
-  the contract records the required evidence.
+  covered. Pending required external obligations remain `NEEDS_REVIEW`;
+  pending human obligations are reported as offline follow-up and do not block
+  `DONE`.

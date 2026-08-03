@@ -14,15 +14,18 @@ the gateway's closeout decision have passed.
 | Current condition | Status | Continuation |
 | --- | --- | --- |
 | All tasks and broader validation have fresh exact or classifier-approved equivalent evidence | `DONE` | none |
+| All tasks and required validations pass while a declared human review remains pending | `DONE` | offline review |
 | The caller explicitly paused while executable tasks remain | `PARTIAL` | continuing |
 | An exhausted fatal condition prevents safe further execution | `BLOCKED` | waiting |
-| Implementation is complete, recovery is exhausted, and a human, external, or non-substitutable environmental obligation remains | `NEEDS_REVIEW` | waiting |
+| Implementation is complete, recovery is exhausted, and a required external or non-substitutable environmental obligation remains | `NEEDS_REVIEW` | waiting |
 
 Use `DONE` only when every task and every automatable or observable control
 passed its transition gate, all in-scope work is complete, and required broader
-validation has fresh passing evidence. A final broad check does not
-retroactively validate skipped task gates or uncovered controls. Active
-classifier routes (`continue-execution`, `continue-recovery`, and
+validation has fresh passing evidence. A pending human-judgment review is
+recorded in the closeout evidence and user-facing report as offline follow-up;
+it does not change a successful closeout to `NEEDS_REVIEW`. A final broad check
+does not retroactively validate skipped task gates or uncovered controls.
+Active classifier routes (`continue-execution`, `continue-recovery`, and
 `request-authority`) do not produce status siblings.
 
 Do not use `BLOCKED` only because a broad validation failed. Compare the same
@@ -32,8 +35,8 @@ passes only when all four equivalence conditions are true. `PARTIAL` requires
 `pause_requested: true`. `BLOCKED` requires an exhausted fatal condition,
 unknown attribution, or unresolved task-local regression. `NEEDS_REVIEW` requires
 completed implementation, no safe recovery candidate, exhaustion evidence, and
-a remaining human, external, or non-substitutable environmental obligation;
-`environmental` alone is insufficient.
+a remaining required external or non-substitutable environmental obligation;
+`environmental` alone is insufficient. Human review is not a closeout blocker.
 
 ## Required Core
 
@@ -126,7 +129,7 @@ When resuming from `NEEDS_REVIEW`:
 
 1. Verify the status file exists and contains all required headings.
 2. Rerun discovery because the environment may have changed.
-3. Confirm the human or external verification is complete.
+3. Confirm the required external or environmental verification is complete.
 4. If verification passed, update the status to `DONE` with fresh broader-validation evidence.
 5. If verification still has only a proven pre-existing or unrelated external
    failure, keep `NEEDS_REVIEW` and refresh the evidence. Use `BLOCKED` only if

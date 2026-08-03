@@ -85,10 +85,11 @@ python3 scripts/plan_execution.py closeout-check <plan-file> <evidence-file> --f
 Continue immediately for `continue-execution` or `continue-recovery`; do not
 write an intermediate status sibling. Write exactly one status sibling only
 for `DONE`, `PARTIAL` with an explicit pause, `BLOCKED` with exhausted fatal
-evidence, or `NEEDS_REVIEW` with completed work and exhausted human, external,
-or non-substitutable environmental evidence. The local gateway makes this
-decision; imported core mechanics cannot create a status sibling or change the
-route.
+evidence, or `NEEDS_REVIEW` with completed work and exhausted required
+external or non-substitutable environmental evidence. Pending human review is
+recorded as offline follow-up on a successful `DONE` closeout. The local
+gateway makes this decision; imported core mechanics cannot create a status
+sibling or change the route.
 
 ## Bounded graphify fallback
 
