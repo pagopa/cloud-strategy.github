@@ -4,53 +4,10 @@ Use this procedure to author one bounded report from an active Wayfinder
 workspace. Keep source files authoritative and keep generated output under the
 workspace's `report/` directory.
 
-## 1. Inventory sources
+## 1. Preflight the existing report
 
-Set the workspace to `tmp/.wayfinder/<analysis-slug>`. Confirm `map.md`,
-`analysis.md`, `issues/`, and `report/report.json` exist. Inventory paths,
-byte sizes, issue-file counts, and obvious anomalies without printing full
-files:
-
-```bash
-find "$workspace" -type f ! -path '*/report/*' -print | LC_ALL=C sort | while IFS= read -r file_path; do wc -c "$file_path"; done
-```
-
-Use the inventory to identify the source files that need one controlled read.
-Do not treat existing files under `report/` as source authority.
-
-## 2. Hash source authority
-
-Before changing report files, save a deterministic manifest for every
-authoritative file outside `report/`:
-
-```bash
-find tmp/.wayfinder/<analysis-slug> -type f ! -path '*/report/*' -print | LC_ALL=C sort | while IFS= read -r file_path; do shasum -a 256 "$file_path"; done > tmp/.wayfinder/<analysis-slug>/report/source-before.sha256
-```
-
-## 3. Read once and retain notes
-
-Read each distinct source path once in controlled chunks. Retain only
-material notes: destination, declared decisions, unresolved questions,
-relationships, impacts, and verification boundaries. Use exact physical source
-lines for evidence. Do not repair, rewrite, or normalize source files.
-
-## 4. Draft the compact report
-
-Write one generic `report/report.json` with exactly five sections:
-`overview`, `solution`, `decisions`, `scope`, and `review`. Include at least
-one evidence-backed diagram in `overview` and one in `review`. Keep Mermaid
-relationships inside the evidence; do not infer unsupported edges.
-
-Use 12-15 unique evidence entries, no more than three titled findings, and
-normally two diagrams as editorial defaults. These are bounded warnings, not
-hard rejection limits. Every evidence excerpt must be one non-empty physical
-line, occur exactly once in its declared workspace-relative regular file, and
-use a unique `(path, excerpt)` pair. Keep findings complete through evidence,
-interpretation, specification impact, repair, and request layers.
-
-## 5. Preflight before rendering
-
-Run the validation-only command and fix every contract error before rendering:
+Set the workspace to `tmp/.wayfinder/<analysis-slug>`. Validate the existing
+`report/report.json` before reading source bodies:
 
 ```bash
 python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
@@ -59,11 +16,83 @@ python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
   --check --format json
 ```
 
-The command emits only bounded metrics and warnings. It must not load the
-HTML template or create or replace `report/index.html`. A valid result may
-contain editorial warnings for a complex report.
+This validation-only check emits bounded metrics and warnings. It must not load
+the template or create or replace `report/index.html`.
 
-## 6. Render once
+## 2. Inventory and hash source authority
+
+Confirm `map.md`, `analysis.md`, `issues/`, and `report/report.json` exist.
+Inventory paths, byte sizes, issue-file counts, and obvious anomalies without
+printing full files:
+
+```bash
+find "$workspace" -type f ! -path '*/report/*' -print | LC_ALL=C sort | while IFS= read -r file_path; do wc -c "$file_path"; done
+```
+
+Use the inventory to identify every authoritative source path. Before changing
+report files, save a deterministic manifest for every authoritative file
+outside `report/`:
+
+```bash
+find tmp/.wayfinder/<analysis-slug> -type f ! -path '*/report/*' -print | LC_ALL=C sort | while IFS= read -r file_path; do shasum -a 256 "$file_path"; done > tmp/.wayfinder/<analysis-slug>/report/source-before.sha256
+```
+
+Do not treat existing files under `report/` as source authority.
+
+## 3. Build one bounded navigation index
+
+Run the read-only helper once after inventory and hashing:
+
+```bash
+python3 .github/skills/internal-wayfinder-report/scripts/collect_source_notes.py \
+  --workspace tmp/.wayfinder/<analysis-slug> \
+  --format json \
+  --max-preview-lines 12
+```
+
+The helper output is navigation-only, not source authority. It must remain
+bounded and must not be redirected into a source or report input file.
+
+## 4. Read every source once and retain bounded notes
+
+Read every authoritative source path once in controlled ranges guided by the
+index. Complete coverage is required for `map.md`, `analysis.md`, every regular
+file below `issues/`, and other local analysis assets. Retain only destination,
+final decisions, explicit corrections, unresolved questions, relationships,
+impacts, and verification boundaries. Use exact physical source lines for
+evidence; the helper's windows never replace those lines.
+
+Full source dumps, raw debug logs, repeated reads, and iterative warning cleanup
+are out of scope. Do not repair, rewrite, or normalize source files.
+
+## 5. Draft the compact report shape
+
+Choose the generic five-section skeleton, evidence IDs, findings, and two
+diagram roles before editing. Write one `report/report.json` with exactly five
+sections: `overview`, `solution`, `decisions`, `scope`, and `review`. Include at
+least one evidence-backed diagram in `overview` and one in `review`.
+
+Use 12-15 unique evidence entries, no more than three titled findings, and
+normally two diagrams as editorial defaults. These are bounded warnings, not
+hard rejection limits. Every evidence excerpt must be one non-empty physical
+line, occur exactly once in its declared workspace-relative regular file, and
+use a unique `(path, excerpt)` pair. Keep findings complete through evidence,
+interpretation, specification impact, repair, and request layers.
+
+Keep Mermaid relationships inside the evidence; do not infer unsupported
+edges.
+
+## 6. Validate, render, and preserve once
+
+Write `report/report.json` once, then run validation-only preflight again and
+fix every contract error before rendering:
+
+```bash
+python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
+  --workspace tmp/.wayfinder/<analysis-slug> \
+  --data tmp/.wayfinder/<analysis-slug>/report/report.json \
+  --check --format json
+```
 
 After preflight is valid, render the single artifact:
 
@@ -73,8 +102,9 @@ python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
   --data tmp/.wayfinder/<analysis-slug>/report/report.json
 ```
 
-The renderer validates before loading the template and replaces only
-`report/index.html` atomically.
+The renderer validates the complete input before loading the template or
+replacing the output and writes only
+`tmp/.wayfinder/<analysis-slug>/report/index.html` atomically.
 
 ## 7. Run bounded HTML checks
 

@@ -526,7 +526,7 @@ def test_template_never_ships_a_placeholder_integrity_value() -> None:
 def test_bundle_has_one_runtime_script_and_no_legacy_contract() -> None:
     scripts = sorted(path.name for path in (BUNDLE_ROOT / "scripts").glob("*.py"))
 
-    assert scripts == ["render_report.py"]
+    assert scripts == ["collect_source_notes.py", "render_report.py"]
     assert not (BUNDLE_ROOT / "references/report-model-v1.schema.json").exists()
     assert not (BUNDLE_ROOT / "templates/sample").exists()
 
@@ -540,3 +540,13 @@ def test_bundle_has_one_runtime_script_and_no_legacy_contract() -> None:
     assert "--data" in result.stdout
     assert "--model" not in result.stdout
     assert "--preview" not in result.stdout
+
+    collector_result = subprocess.run(
+        [sys.executable, str(BUNDLE_ROOT / "scripts/collect_source_notes.py"), "--help"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert collector_result.returncode == 0
+    for flag in ("--workspace", "--format", "--max-preview-lines"):
+        assert flag in collector_result.stdout

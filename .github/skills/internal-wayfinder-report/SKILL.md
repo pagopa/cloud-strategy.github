@@ -28,10 +28,13 @@ report/report.json
 ```
 
 Read `map.md`, `analysis.md`, every regular local file below `issues/`, and
-other local analysis assets before writing the report input. Read each distinct
-source path once in a bounded pass and retain only decision-relevant notes.
-Generated files under `report/` may be read when resuming, but are not source
-authority.
+other local analysis assets before writing the report input. See
+[compact-authoring.md](references/compact-authoring.md) for the preflight-first
+bounded authoring sequence. “Read each distinct source path once in a bounded
+pass” means complete file coverage with bounded retained notes; it does not
+authorize skipping an issue. The source-note helper is navigation-only, and
+`render_report.py` remains the final evidence validator. Generated files under
+`report/` may be read when resuming, but are not source authority.
 
 When sources disagree, use this authority order:
 
