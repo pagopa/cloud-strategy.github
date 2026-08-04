@@ -1,5 +1,12 @@
 version: 1
 sources:
+  antonbabenko-terraform-skill:
+    repository: https://github.com/antonbabenko/terraform-skill.git
+    ref: 0a3a4a66e99001347d36a41e10260a825be3ab62
+    assets:
+      - upstream: skills/terraform-skill
+        local: .github/skills/antonbabenko-terraform-skill
+        canonical_name: antonbabenko-terraform-skill
   github-awesome-copilot:
     repository: https://github.com/github/awesome-copilot.git
     ref: aa280f28b1b73f9b6e6917b607eb92127b67b419
@@ -81,12 +88,9 @@ sources:
     repository: https://github.com/hashicorp/agent-skills.git
     ref: 8c6573abbd21e8094fab8f538eb5f97db63133fd
     assets:
-      - upstream: terraform/code-generation/skills/terraform-search-import
-        local: .github/skills/terraform-terraform-search-import
-        canonical_name: terraform-terraform-search-import
       - upstream: terraform/code-generation/skills/terraform-test
-        local: .github/skills/terraform-terraform-test
-        canonical_name: terraform-terraform-test
+        local: .github/skills/ibm-terraform-test
+        canonical_name: ibm-terraform-test
   mattpocock-skills:
     repository: https://github.com/mattpocock/skills.git
     ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d

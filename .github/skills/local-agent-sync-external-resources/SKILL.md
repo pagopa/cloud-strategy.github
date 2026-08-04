@@ -22,6 +22,7 @@ inspect the exact upstream commit.
 
 | Source ID | Repository | Pinned `ref` | Commit date (UTC) | Release/tag |
 | --- | --- | --- | --- | --- |
+| `antonbabenko-terraform-skill` | [`antonbabenko/terraform-skill`](https://github.com/antonbabenko/terraform-skill) | [`0a3a4a66e99001347d36a41e10260a825be3ab62`](https://github.com/antonbabenko/terraform-skill/commit/0a3a4a66e99001347d36a41e10260a825be3ab62) | 2026-07-03 | not tagged |
 | `github-awesome-copilot` | [`github/awesome-copilot`](https://github.com/github/awesome-copilot) | [`aa280f28b1b73f9b6e6917b607eb92127b67b419`](https://github.com/github/awesome-copilot/commit/aa280f28b1b73f9b6e6917b607eb92127b67b419) | 2026-07-24 | not tagged |
 | `obra-superpowers` | [`obra/superpowers`](https://github.com/obra/superpowers) | [`3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9`](https://github.com/obra/superpowers/commit/3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9) | 2026-07-24 | [v6.2.0](https://github.com/obra/superpowers/releases/tag/v6.2.0) |
 | `hashicorp-agent-skills` | [`hashicorp/agent-skills`](https://github.com/hashicorp/agent-skills) | [`8c6573abbd21e8094fab8f538eb5f97db63133fd`](https://github.com/hashicorp/agent-skills/commit/8c6573abbd21e8094fab8f538eb5f97db63133fd) | 2026-07-15 | not tagged |

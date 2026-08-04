@@ -45,6 +45,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`
 - `.github/skills/antigravity-kubernetes-architect/SKILL.md`
 - `.github/skills/antigravity-network-engineer/SKILL.md`
+- `.github/skills/antonbabenko-terraform-skill/SKILL.md`
 - `.github/skills/awesome-copilot-agentic-eval/SKILL.md`
 - `.github/skills/awesome-copilot-azure-devops-cli/SKILL.md`
 - `.github/skills/awesome-copilot-azure-pricing/SKILL.md`
@@ -56,6 +57,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/awesome-copilot-security-review/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
+- `.github/skills/ibm-terraform-test/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-lambda/SKILL.md`
@@ -159,8 +161,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/superpowers-using-superpowers/SKILL.md`
 - `.github/skills/superpowers-verification-before-completion/SKILL.md`
 - `.github/skills/superpowers-writing-plans/SKILL.md`
-- `.github/skills/terraform-terraform-search-import/SKILL.md`
-- `.github/skills/terraform-terraform-test/SKILL.md`
 - `.github/skills/vercel-find-skills/SKILL.md`
 
 ### Support-only imported document skills
