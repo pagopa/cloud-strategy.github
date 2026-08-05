@@ -10,7 +10,7 @@ Use this format for new updates:
 
 ## 2026-08-05
 
-- Split Terraform language ownership into `.github/skills/internal-tf/` for HCL, `.tf`, `.tfvars`, and typed configuration, and refactored `.github/skills/internal-terraform/` into the stable router for language, native Terraform tests, and operational Terraform specialists; refreshed related routing, security, lessons, and inventory surfaces.
+- Breaking Terraform catalog change: narrowed `.github/skills/internal-tf/` to Terraform/OpenTofu language and HCL, converted `.github/skills/internal-terraform/` into the thin Anton wrapper for native tests and all non-language work, retired `.github/skills/ibm-terraform-test/` immediately under the approved exception, and documented the portable-agent boundary for `.github/instructions/**`.
 
 ## 2026-06-14
 

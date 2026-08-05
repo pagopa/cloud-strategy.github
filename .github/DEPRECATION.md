@@ -41,6 +41,11 @@ Immediate removal is allowed only for security or compliance issues. The removal
 
 ## Current deprecations
 
+- `.github/skills/ibm-terraform-test/`: **Removed immediately under the approved
+  architecture-migration exception** on 2026-08-05 with explicit user
+  authorization. Native tests and all non-language Terraform work now use
+  `/internal-terraform` → `/antonbabenko-terraform-skill`. Roll back by restoring
+  the last Git revision containing the complete bundle.
 - `.github/workflows/_terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/_pre-commit.yml` after
   duplicate pre-commit workflows were consolidated into one canonical entrypoint.
 - `.github/workflows/terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/_pre-commit.yml` so the

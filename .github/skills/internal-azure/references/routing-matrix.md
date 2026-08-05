@@ -28,8 +28,8 @@
 | Choosing between landing-zone alternatives | `/internal-azure-strategic` |
 | Concrete Terraform edit | `/internal-terraform` |
 | Terraform HCL or `.tfvars` language edit | `/internal-tf` |
-| Native `.tftest.hcl` or `.tftest.json` test | `/ibm-terraform-test` |
-| Terraform module, state, or drift decision | `/antonbabenko-terraform-skill` |
+| Native `.tftest.hcl` or `.tftest.json` test | `/internal-terraform` → `/antonbabenko-terraform-skill` |
+| Terraform module, state, or drift decision | `/internal-terraform` → `/antonbabenko-terraform-skill` |
 | Concrete Azure Policy definition | `/internal-cloud-policy` |
 | Current SKU price | `/awesome-copilot-azure-pricing` |
 | Generic application code hosted on Azure | No forced Azure specialist; use the application's owner. |

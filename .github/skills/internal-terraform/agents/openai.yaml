@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Terraform Router"
-  short_description: "Route Terraform tasks to the right specialist"
-  default_prompt: "Use $internal-terraform to classify this Terraform/OpenTofu task and invoke the narrowest specialist."
+  short_description: "Wrap Anton for non-language Terraform work"
+  default_prompt: "Use $internal-terraform as the stable Terraform/OpenTofu wrapper; delegate pure language directly to $internal-tf and use Anton for every other branch."

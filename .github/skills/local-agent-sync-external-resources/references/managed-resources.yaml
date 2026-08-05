@@ -84,13 +84,6 @@ sources:
       - upstream: skills/writing-plans
         local: .github/skills/superpowers-writing-plans
         canonical_name: superpowers-writing-plans
-  hashicorp-agent-skills:
-    repository: https://github.com/hashicorp/agent-skills.git
-    ref: 8c6573abbd21e8094fab8f538eb5f97db63133fd
-    assets:
-      - upstream: terraform/code-generation/skills/terraform-test
-        local: .github/skills/ibm-terraform-test
-        canonical_name: ibm-terraform-test
   mattpocock-skills:
     repository: https://github.com/mattpocock/skills.git
     ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
