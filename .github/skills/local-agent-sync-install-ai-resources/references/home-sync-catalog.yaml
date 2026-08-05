@@ -18,3 +18,12 @@ resources:
       - agents.md
     target_support: See runtime support matrix
     notes: Portable global baseline generated without optional AGENTS.local.md policy.
+  - resource_id: internal-tf
+    source_family: skills
+    source_path: .github/skills/internal-tf
+    include_targets:
+      - codex
+      - copilot
+      - opencode
+    target_support: See runtime support matrix
+    notes: Explicitly sync-managed Terraform configuration skill bundle.
