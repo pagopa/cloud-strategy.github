@@ -1,6 +1,6 @@
 # Terraform Template Examples
 
-## Minimal Feature Example
+## Minimal feature
 
 ```hcl
 variable "project_id" {
@@ -17,15 +17,14 @@ resource "aws_s3_bucket" "logs" {
 }
 
 output "logs_bucket_id" {
-  description = "Logs bucket id"
+  description = "Created logs bucket identifier"
   value       = aws_s3_bucket.logs.id
 }
 ```
 
-## Minimal Module Example
+## Minimal typed module interface
 
 ```hcl
-# variables.tf
 variable "name" {
   description = "Resource base name"
   type        = string
@@ -41,19 +40,10 @@ variable "environment" {
   }
 }
 
-# main.tf
-resource "aws_s3_bucket" "this" {
-  bucket = "${var.name}-${var.environment}"
-
-  tags = {
-    Name        = var.name
-    Environment = var.environment
-  }
-}
-
-# outputs.tf
-output "bucket_id" {
-  description = "Created bucket id"
-  value       = aws_s3_bucket.this.id
+output "resource_name" {
+  description = "Stable name exposed by the module"
+  value       = "${var.name}-${var.environment}"
 }
 ```
+
+Use the router for module architecture, provider behavior, state, and delivery decisions beyond this language-level interface.

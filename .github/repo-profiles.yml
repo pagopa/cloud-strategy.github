@@ -89,6 +89,7 @@ profiles:
     description: Infrastructure repositories with Terraform as primary language.
     recommended_skills:
       - skills/internal-terraform/SKILL.md
+      - skills/internal-tf/SKILL.md
       - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
       - skills/internal-github-action-composite/SKILL.md
@@ -99,6 +100,7 @@ profiles:
     description: Azure platform, landing-zone, or governance repositories that need cost-aware guidance.
     recommended_skills:
       - skills/internal-terraform/SKILL.md
+      - skills/internal-tf/SKILL.md
       - skills/internal-yaml/SKILL.md
       - skills/internal-markdown/SKILL.md
       - skills/internal-azure/SKILL.md
@@ -120,3 +122,4 @@ profiles:
       - skills/internal-github-actions/SKILL.md
       - skills/internal-github-action-composite/SKILL.md
       - skills/internal-terraform/SKILL.md
+      - skills/internal-tf/SKILL.md

@@ -8,6 +8,10 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-08-05
+
+- Split Terraform language ownership into `.github/skills/internal-tf/` for HCL, `.tf`, `.tfvars`, and typed configuration, and refactored `.github/skills/internal-terraform/` into the stable router for language, native Terraform tests, and operational Terraform specialists; refreshed related routing, security, lessons, and inventory surfaces.
+
 ## 2026-06-14
 
 - Added field-level consumer sync for `.vscode/settings.json` so only `github.copilot.chat.codeGeneration.useInstructionFiles=false` and `chat.instructionsFilesLocations[".github/instructions"]=false` are enforced with JSONC-aware merge semantics, explicit malformed/duplicate-key blockers, and manifest tracking that stays settings-scoped instead of whole-file ownership.

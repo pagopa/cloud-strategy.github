@@ -3,7 +3,7 @@
 ## Scope
 
 - This standard applies to repository-owned Terraform or OpenTofu root configurations.
-- Reusable modules keep the module layout documented in `../SKILL.md`; they do not use numbered root files.
+- Reusable modules keep the module layout documented in `SKILL.md`; they do not use numbered root files.
 - Use this as the default for new root configurations unless the target repository or folder already has another credible structure.
 
 ## Default root layout
@@ -40,7 +40,7 @@
 - `00-09`: init, bootstrap wiring, or fundamental data sources required before the rest of the root can make sense.
 - `10-97`: dynamic dependency-led bands. Start with the first real prerequisite layer, then keep moving downstream through the root as each layer depends on the previous one.
 - Use tens to cluster nearby resource families or responsibility slices while keeping space for inserts such as `11-`, `12-`, or `21-` when a branch needs finer separation.
-- Do not treat the middle bands as a fixed universal map such as "20 always means X" or "30 always means Y"; adapt them to the project's dependency tree.
+- Do not treat the middle bands as a fixed universal map; adapt them to the project's dependency tree.
 - `98`: locals reserved for derived values.
 - `99`: providers, variables, and outputs reserved for the root interface.
 
@@ -73,16 +73,9 @@ env/
 - `terraform.tfvars` contains the environment-specific input values for that target environment.
 - Keep secrets out of committed `terraform.tfvars` files unless the repository already has an approved secret-management pattern for that surface.
 
-## `terraform.sh` contract
-
-- `terraform.sh` should treat the environment name as the selector for both backend and variable inputs.
-- The script should resolve `env/<selected-env>/backend.ini` for backend configuration.
-- The script should resolve `env/<selected-env>/terraform.tfvars` for plan and apply input values.
-- Keep the runner contract explicit so operators can infer the active environment from the folder structure alone.
-
 ## Existing layouts and migration
 
 - Do not force this structure onto an existing root that already has a stable, business-meaningful layout.
 - When an existing root only partially matches the default, adapt this standard to the local shape instead of damaging the business logic to satisfy naming purity.
 - Use this structure as the target shape for migration only when migration is explicitly requested.
-- During migration, preserve resource addresses and state intent; if a structural refactor changes addresses, document the required `terraform state mv`, `terraform import`, or other migration steps alongside the change.
+- During migration, preserve resource addresses and state intent; if a structural refactor changes addresses, hand off the state migration to `antonbabenko-terraform-skill`.

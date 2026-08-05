@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Terraform Language"
+  short_description: "Handle Terraform HCL and typed configuration"
+  default_prompt: "Use $internal-tf for Terraform/OpenTofu HCL, .tf, or .tfvars language work."
