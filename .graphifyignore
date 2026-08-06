@@ -1,6 +1,11 @@
 /graphify-out/
-/tmp/
-tmp/
+tmp/*
+!/tmp/
+!tmp/.wayfinder/
+!tmp/.teach/
+!tmp/.research/
+!tmp/.handoff/
+!tmp/.codebase-improve/
 tmp/external-refresh/
 tmp/upstream-refresh/
 **/.git/
