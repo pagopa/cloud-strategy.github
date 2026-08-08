@@ -404,6 +404,61 @@ def test_normalization_enforces_mattpocock_research_workspace_contract(
     assert "`tmp/.research/YYYY-MM-DD-<slug>.md`" in research_content
 
 
+def test_normalization_enforces_mattpocock_research_luna_delegation_contract(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/mattpocock-research"
+    skill = candidate / local / "SKILL.md"
+    metadata = candidate / local / "agents/openai.yaml"
+    skill.parent.mkdir(parents=True)
+    metadata.parent.mkdir(parents=True)
+    skill.write_text("Investigate the question and report the findings.\n", encoding="utf-8")
+    metadata.write_text(
+        'interface:\n  display_name: "Research"\n'
+        '  short_description: "Research from high-trust sources"\n',
+        encoding="utf-8",
+    )
+    asset = ManagedAsset(
+        source="mattpocock-skills",
+        upstream="skills/engineering/research",
+        local=local,
+        canonical_name="mattpocock-research",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    research_content = skill.read_text(encoding="utf-8")
+    metadata_content = metadata.read_text(encoding="utf-8")
+    assert f"{local}/SKILL.md" in first_changed
+    assert f"{local}/agents/openai.yaml" in first_changed
+    assert second_changed == ()
+    assert "local-sync:research-delegation:start" in research_content
+    assert "local-sync:research-delegation:end" in research_content
+    assert "`internal-luna-executor`" in research_content
+    assert "self-contained brief" in research_content
+    assert "report a blocker instead of switching to another agent" in research_content
+    assert "local-sync:research-description:start" in metadata_content
+    assert 'short_description: "Research from high-trust sources via Luna"' in metadata_content
+    assert yaml.safe_load(metadata_content)["interface"]["short_description"] == (
+        "Research from high-trust sources via Luna"
+    )
+
+
 def test_normalization_enforces_mattpocock_handoff_workspace_contract(
     tmp_path: Path,
 ) -> None:

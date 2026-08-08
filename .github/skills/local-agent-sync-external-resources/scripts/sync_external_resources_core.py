@@ -689,6 +689,54 @@ instructions.
 - Save the default one-file research output to `tmp/.research/YYYY-MM-DD-<slug>.md`.
 - An explicit caller-owned output path may override this default.
 {_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_END}"""
+_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_START = (
+    "<!-- local-sync:research-delegation:start -->"
+)
+_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_END = (
+    "<!-- local-sync:research-delegation:end -->"
+)
+_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_RE = re.compile(
+    re.escape(_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_START)
+    + r".*?"
+    + re.escape(_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_END),
+    re.DOTALL,
+)
+_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT = f"""\
+{_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_START}
+## Local research-delegation contract
+
+This repository-owned contract replaces the generic background-agent
+instruction for research execution.
+
+- Delegate every research run to the `internal-luna-executor` subagent.
+- Give Luna a self-contained brief with the question, context, primary-source
+  and citation requirements, output path, and validation expectations.
+- Luna must research the question and write the single Markdown report directly
+  to the requested path. The caller verifies the result and does not repeat the
+  research or write a second report.
+- Verify that the report exists, is non-empty, and includes source citations.
+- If `internal-luna-executor` is unavailable or cannot complete the brief,
+  report a blocker instead of switching to another agent.
+- This contract applies only where the named agent is available. Other runtimes
+  must report that the required executor is unsupported.
+{_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_END}"""
+_MATTPOCOCK_RESEARCH_DESCRIPTION_START = (
+    "# local-sync:research-description:start"
+)
+_MATTPOCOCK_RESEARCH_DESCRIPTION_END = "# local-sync:research-description:end"
+_MATTPOCOCK_RESEARCH_DESCRIPTION_CONTRACT_RE = re.compile(
+    r"(?ms)^[ \t]*"
+    + re.escape(_MATTPOCOCK_RESEARCH_DESCRIPTION_START)
+    + r".*?^[ \t]*"
+    + re.escape(_MATTPOCOCK_RESEARCH_DESCRIPTION_END)
+    + r"[ \t]*$"
+)
+_MATTPOCOCK_RESEARCH_DESCRIPTION_LINE_RE = re.compile(
+    r"(?m)^(?P<indent>[ \t]*)short_description:.*$"
+)
+_MATTPOCOCK_RESEARCH_DESCRIPTION = (
+    "Research from high-trust sources via Luna"
+)
 _MATTPOCOCK_HANDOFF_SKILL = "mattpocock-handoff"
 _MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_START = (
     "<!-- local-sync:handoff-workspace:start -->"
@@ -862,6 +910,34 @@ def _enforce_mattpocock_research_workspace_contract(content: str) -> str:
     )
 
 
+def _enforce_mattpocock_research_delegation_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_RE,
+        _MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT,
+    )
+
+
+def _enforce_mattpocock_research_description(content: str) -> str:
+    def replace_description(match: re.Match[str]) -> str:
+        indent = match.groupdict().get("indent") or "  "
+        return "\n".join(
+            (
+                f"{indent}{_MATTPOCOCK_RESEARCH_DESCRIPTION_START}",
+                f'{indent}short_description: "{_MATTPOCOCK_RESEARCH_DESCRIPTION}"',
+                f"{indent}{_MATTPOCOCK_RESEARCH_DESCRIPTION_END}",
+            )
+        )
+
+    if _MATTPOCOCK_RESEARCH_DESCRIPTION_CONTRACT_RE.search(content):
+        return _MATTPOCOCK_RESEARCH_DESCRIPTION_CONTRACT_RE.sub(
+            replace_description, content, count=1
+        )
+    return _MATTPOCOCK_RESEARCH_DESCRIPTION_LINE_RE.sub(
+        replace_description, content, count=1
+    )
+
+
 def _enforce_mattpocock_handoff_workspace_contract(content: str) -> str:
     return _enforce_marked_contract(
         content,
@@ -1005,6 +1081,13 @@ def normalize_candidate(
                 and file_path == asset_dir / "SKILL.md"
             ):
                 content = _enforce_mattpocock_research_workspace_contract(content)
+                content = _enforce_mattpocock_research_delegation_contract(content)
+            if (
+                asset.source == _MATTPOCOCK_SOURCE
+                and asset.canonical_name == _MATTPOCOCK_RESEARCH_SKILL
+                and file_path == asset_dir / "agents/openai.yaml"
+            ):
+                content = _enforce_mattpocock_research_description(content)
             if (
                 asset.source == _MATTPOCOCK_SOURCE
                 and asset.canonical_name == _MATTPOCOCK_HANDOFF_SKILL
