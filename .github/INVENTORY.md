@@ -107,7 +107,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-kubernetes/SKILL.md`
 - `.github/skills/internal-lesson-codification/SKILL.md`
-- `.github/skills/internal-low-cost-delegation/SKILL.md`
 - `.github/skills/internal-makefile/SKILL.md`
 - `.github/skills/internal-markdown/SKILL.md`
 - `.github/skills/internal-nodejs-project/SKILL.md`
@@ -195,7 +194,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Agents
 
-- `.github/agents/internal-low-cost-copilot.agent.md`
+- `.github/agents/internal-luna-executor.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
 - `.github/agents/local-sync-repos.agent.md`

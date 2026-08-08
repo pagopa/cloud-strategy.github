@@ -11,7 +11,6 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 - `/grill-me`: repeatable clarification sessions for material points the critic cannot resolve unanimously.
 - `/internal-gateway-writing-plans`: implementation-plan writing only after the current whole analysis receives explicit approval.
 - `/mattpocock-research`: on-demand owner for decision-relevant external research after local evidence is exhausted; this reference does not preload the skill.
-- `/internal-low-cost-delegation`: bounded evidence collection after the parent locks the question, inputs, and output shape.
 
 ## Local references
 
@@ -77,10 +76,10 @@ Before asking the first question block:
 - If platform semantics control feasibility or ownership, verify those semantics before converging.
 - Separate original user intent from emerged requirements. Do not rewrite later constraints as the original request.
 
-At the bounded evidence and external-research checkpoints, delegate only a
-declared evidence-collection slice after the parent locks the question,
-sources, output path, and validation. Keep Idea Gate 0, synthesis,
-alternatives, critical resolution, and approval with this skill's parent.
+At the bounded evidence and external-research checkpoints, the parent may
+invoke `internal-luna-executor` with the evidence question, relevant sources,
+expected output, and validation. Keep Idea Gate 0, synthesis, alternatives,
+critical resolution, and approval with this skill's parent.
 
 ## State machine
 

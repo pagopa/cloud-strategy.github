@@ -23,15 +23,14 @@ interface:
     tasks; require red-first evidence only for mandatory-test-first and retain
     focused and broad validation for feature-first completion. Do not impose a
     universal test language or layout.
-    an explicit - No Git mutation. bullet in ## Global Constraints and include
-    model-selection acceptance evidence in manual_obligations whenever
-    delegation is used. Do not predict runtime candidates or weaken a
-    requirement into a manual attestation. Run the executor-owned preflight as
-    the sole mechanical validator. After the control inventory, structure,
-    decisions, and acceptance are locked, use /internal-low-cost-delegation
-    only for bounded plan drafting with Luna/high; retain eligibility,
-    classification, review, and handoff here. Run the executor-owned
-    preflight and revise until it has zero blocking
+    Require an explicit - No Git mutation. bullet in ## Global Constraints.
+    Do not predict runtime candidates or weaken a requirement into a manual
+    attestation. Run the executor-owned preflight as the sole mechanical
+    validator. After the control inventory, structure, decisions, and
+    acceptance are locked, you may invoke internal-luna-executor with the
+    drafting objective, relevant evidence, required structure, and validation;
+    retain eligibility, classification, review, and handoff here. Run the
+    executor-owned preflight and revise until it has zero blocking
     findings; explicitly legacy/imported material requires reconstruction and
     refreshed approval/fingerprint. Perform human review, report the plan path,
     name /internal-gateway-execute-plans as the only next owner, and wait for

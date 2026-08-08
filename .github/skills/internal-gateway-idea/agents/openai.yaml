@@ -50,11 +50,11 @@ interface:
     may load /internal-gateway-writing-plans; do not infer it from a gate-local
     approval, stale state, or critic accepted. After the writing outcome, stop;
     do not implement, invoke execution owners, or modify downstream gateways.
-    Use /internal-low-cost-delegation only for a bounded evidence slice after
-    its question, inputs, output, write scope, validation, and stop conditions
-    are locked. Keep intent, synthesis, alternatives, critical resolution, and
-    approval with this gateway. Treat procedi, ok, and go as advancing only the
-    active visible gate; clarify ambiguous approval before loading another
+    The parent may invoke internal-luna-executor with the evidence question,
+    relevant sources, expected output, and validation. Keep intent, synthesis,
+    alternatives, critical resolution, and approval with this gateway. Treat
+    procedi, ok, and go as advancing only the active visible gate; clarify
+    ambiguous approval before loading another
     owner. If a mandatory gate was skipped, resume at the first skipped gate.
 
     The only transition notification is exactly:

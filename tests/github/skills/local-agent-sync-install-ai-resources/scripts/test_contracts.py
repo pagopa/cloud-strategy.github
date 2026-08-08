@@ -75,7 +75,7 @@ def test_live_catalog_discovers_legacy_agents_for_all_runtimes() -> None:
         path.relative_to(REPO_ROOT).as_posix()
         for path in (REPO_ROOT / ".github/agents").glob("*.agent.md")
         if not path.name.startswith("local-")
-        and path.name != "internal-low-cost-copilot.agent.md"
+        and path.name != "internal-luna-executor.agent.md"
     }
     agent_resources = {
         resource.source_path
@@ -96,7 +96,7 @@ def test_live_catalog_discovers_legacy_agents_for_all_runtimes() -> None:
     )
 
 
-def test_live_catalog_scopes_native_low_cost_agents_to_owning_runtimes() -> None:
+def test_live_catalog_scopes_native_luna_agents_to_owning_runtimes() -> None:
     resources = {
         resource.source_path: resource
         for resource in load_home_sync_catalog(REPO_ROOT)
@@ -104,9 +104,9 @@ def test_live_catalog_scopes_native_low_cost_agents_to_owning_runtimes() -> None
     }
 
     assert resources[
-        ".github/agents/internal-low-cost-copilot.agent.md"
+        ".github/agents/internal-luna-executor.agent.md"
     ].include_targets == ("copilot",)
-    assert resources[".codex/agents/internal-low-cost-codex.toml"].include_targets == (
+    assert resources[".codex/agents/internal-luna-executor.toml"].include_targets == (
         "codex",
     )
 

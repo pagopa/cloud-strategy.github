@@ -1,9 +1,0 @@
-interface:
-  display_name: "Internal Low-Cost Delegation"
-  short_description: "Delegate bounded token-intensive work"
-  default_prompt: >-
-    Use $internal-low-cost-delegation to determine whether this bounded task
-    is token-intensive but judgment-light, close all material decisions in the
-    parent, select internal-low-cost-copilot or internal-low-cost-codex, and
-    invoke the selected native route with a complete task packet or apply the
-    explicit parent fallback.

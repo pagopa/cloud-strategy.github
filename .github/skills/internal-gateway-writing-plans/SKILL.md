@@ -11,7 +11,6 @@ description: Use when repository-owned work needs an approved implementation pla
   owns eligibility, retained-plan requirements, review, and handoff.
 - `/internal-gateway-execute-plans`: required next owner after human review and
   explicit execution approval.
-- `/internal-low-cost-delegation`: locked plan-section drafting after control inventory and acceptance are complete.
 
 ## When to use
 
@@ -48,10 +47,8 @@ description: Use when repository-owned work needs an approved implementation pla
    preserved requirement, nearest owner, command or trigger, pass/fail signal,
    evidence, and safe fallback or authority boundary. Link local/runtime rows
    to `validations` and residual external/human rows to the existing contract
-   fields; the inventory is traceability, not a second parser contract. When
-   plan-writing or execution delegation is used, include the external
-   `model-selection` acceptance evidence in `manual_obligations`. Treat
-   `genuine-human-judgment` rows as explicit offline review follow-up; they are
+  fields; the inventory is traceability, not a second parser contract. Treat
+  `genuine-human-judgment` rows as explicit offline review follow-up; they are
    reported after a successful `DONE` closeout and do not block completion.
    Treat external evidence that was unavailable without an observed material
    failure as the same kind of non-blocking follow-up. Authority and approval
@@ -63,11 +60,10 @@ description: Use when repository-owned work needs an approved implementation pla
   evidence only for `mandatory-test-first`, while `feature-first` retains
   validation before production-ready completion.
   After the control inventory, plan structure, locked decisions, and
-  acceptance are complete, delegate only mechanical or token-intensive plan
-  drafting through `/internal-low-cost-delegation`; retain plan eligibility,
-  control classification, review, and handoff here. The delegated route must
-  use the Luna/high posture rather than the plan-writing probe's Luna/max
-  requirement.
+  acceptance are complete, the gateway may invoke `internal-luna-executor`
+  with the drafting objective, relevant evidence, required structure, and
+  validation. Retain plan eligibility, control classification, review, and
+  handoff here.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every
    `automatable-local` or `observable-runtime` row must map to a required

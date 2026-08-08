@@ -127,7 +127,7 @@ new independent full pass before approval.
 | State | Required behavior | Forbidden behavior |
 | --- | --- | --- |
 | `Specialization Checkpoint: gated` | Record when an incoming request is execution-shaped and name the later execution owner only as a future consequence. | Do not execute or present a post-critical recommendation from this checkpoint. |
-| `Bounded evidence delegation checkpoint` | After the question, inputs, output, write scope, validation, and stop conditions are locked, route only bounded evidence collection through `/internal-low-cost-delegation`. | Do not delegate intent, synthesis, alternatives, critical resolution, research ownership, or approval. |
+| `Bounded evidence delegation checkpoint` | The parent may invoke `internal-luna-executor` with the evidence question, relevant sources, expected output, and validation. | Do not delegate intent, synthesis, alternatives, critical resolution, research ownership, or approval. |
 | `Skipped-gate recovery` | Stop the current lane, mark downstream artifacts draft-only, and resume at the first skipped gate. | Do not continue from an invalid later state. |
 | `Idea Gate 0` | Render one numbered bulk block with `Question`, `Recommendation`, `Why`, and `Default if accepted`; capture intent, defaults, constraints, success criteria, validation, and anti-scope. | Do not treat evidence as approval or proceed before acceptance. |
 | `External Research Checkpoint` | Run only when one external primary-source fact could change feasibility, approach, constraints, or risk; use one bounded report under `tmp/.research/`. | Do not preload research or run a second pass automatically. |

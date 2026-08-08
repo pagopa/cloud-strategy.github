@@ -27,17 +27,17 @@ resources:
       - opencode
     target_support: See runtime support matrix
     notes: Explicitly sync-managed Terraform configuration skill bundle.
-  - resource_id: internal-low-cost-copilot
+  - resource_id: internal-luna-executor
     source_family: agents
-    source_path: .github/agents/internal-low-cost-copilot.agent.md
+    source_path: .github/agents/internal-luna-executor.agent.md
     include_targets:
       - copilot
     target_support: See runtime support matrix
-    notes: Native Copilot low-cost worker profile.
-  - resource_id: internal-low-cost-codex
+    notes: Installs the native Luna executor in ~/.copilot/agents/.
+  - resource_id: internal-luna-executor
     source_family: agents
-    source_path: .codex/agents/internal-low-cost-codex.toml
+    source_path: .codex/agents/internal-luna-executor.toml
     include_targets:
       - codex
     target_support: See runtime support matrix
-    notes: Native Codex low-cost worker profile.
+    notes: Installs the native Luna executor in ~/.codex/agents/.

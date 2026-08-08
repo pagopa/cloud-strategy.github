@@ -68,9 +68,9 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
   when path, runtime, symptom, or validation evidence proves they are needed.
 - Route executable or evaluable behavior changes through `/internal-tdd`
   before implementation; that skill owns test posture and sequencing.
-- For bounded, token-intensive, judgment-light work, evaluate
-  `/internal-low-cost-delegation`; keep material decisions and final acceptance
-  with the primary owner.
+- To run work with Luna, invoke `internal-luna-executor` with the objective,
+  relevant context, constraints, expected output, and validation. Keep material
+  decisions and final acceptance with the primary owner.
 - Use bounded evidence: inspect changed sections and failing-validator context
   first, then expand only when gaps remain.
 - Name the validation path early; if evidence changes it, update the working

@@ -11,7 +11,6 @@ This index lists every other skill that this file asks the agent to load, route 
 
 - `superpowers-test-driven-development`: core red-green-refactor loop after this wrapper selects a mandatory-test-first slice.
 - `superpowers-verification-before-completion`: evidence gate before completion, passing, or coverage claims.
-- `/internal-low-cost-delegation`: bounded RED artifacts, log analysis, or one mechanical GREEN slice after the parent locks the seam and acceptance.
 
 Use this skill as the repository-owned owner for coding changes with executable
 or evaluable behavior. It classifies the local seam, names the lightest useful
@@ -71,9 +70,8 @@ seam.
 4. For prompt, agent, or LLM-output drift, define concrete evaluation examples
    or failure cases before changing behavior.
 5. After the parent locks the posture, boundary, artifact shape, write scope,
-   and validation, `/internal-low-cost-delegation` may receive only an exactly
-   specified RED artifact, bounded log analysis, or one mechanical GREEN
-   slice. The parent retains boundary choice, red proof, refactor, and final
+   and validation, it may invoke `internal-luna-executor` for the specified
+   work. The parent retains boundary choice, red proof, refactor, and final
    verification.
 6. Run the focused check and closest broader validation, then load
    `/superpowers-verification-before-completion` before positive claims.
