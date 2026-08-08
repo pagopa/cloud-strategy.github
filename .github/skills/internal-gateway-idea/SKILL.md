@@ -109,7 +109,9 @@ The canonical flow is:
 one `CRITIQUE -> QUESTION -> ANALYZE` return; all other material changes restart
 the current revision's analysis and critique. The persisted header records the
 current status, revision, reviewed revision, approved revision, next actor, and
-next action. The template owns literal enums; `scripts/idea_state.py` owns
+next action. `review_sources` is required v1 provenance: `standard` is required
+for every reviewed, final-approval, or approved state, and high assurance also
+requires `independent`. The template owns literal enums; `scripts/idea_state.py` owns
 parser and transition invariants.
 
 The two lanes are `shape-idea` and `review-existing`. An execution-shaped

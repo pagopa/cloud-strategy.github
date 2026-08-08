@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -33,6 +34,39 @@ def _parse(module, text: str | None = None):
     return module.parse_design_document(text or _valid_text(), expected_slug="sample")
 
 
+def _draft_document(module, *, assurance: str = "standard"):
+    document = _parse(module)
+    return replace(
+        document,
+        header=replace(
+            document.header,
+            assurance=assurance,
+            assurance_reason="Explicit test assurance state.",
+            status="under-review",
+            reviewed_revision=None,
+            approved_revision=None,
+            review_sources=(),
+            next_actor="critic",
+            next_action="Run the required review for the current revision.",
+        ),
+    )
+
+
+def _high_text() -> str:
+    return (
+        _valid_text()
+        .replace("assurance: standard", "assurance: high")
+        .replace(
+            "assurance_reason: No high assurance trigger applies.",
+            "assurance_reason: Explicit high-assurance fixture.",
+        )
+        .replace(
+            "review_sources: [standard]",
+            "review_sources: [standard, independent]",
+        )
+    )
+
+
 def test_valid_document_covers_both_lane_shape_and_sections() -> None:
     module = _load_module()
 
@@ -59,6 +93,19 @@ def test_review_existing_requires_a_source_baseline() -> None:
     text = _valid_text().replace("lane: shape-idea", "lane: review-existing").replace(
         "source_baseline: Current idea gateway and critical-master contracts.",
         "source_baseline: null",
+    )
+
+    with pytest.raises(module.DesignValidationError):
+        _parse(module, text)
+
+
+@pytest.mark.parametrize("review_sources", ("[unknown]", "[standard, standard]"))
+def test_header_review_sources_reject_unknown_or_duplicate_values(
+    review_sources: str,
+) -> None:
+    module = _load_module()
+    text = _valid_text().replace(
+        "review_sources: [standard]", f"review_sources: {review_sources}"
     )
 
     with pytest.raises(module.DesignValidationError):
@@ -103,6 +150,58 @@ def test_material_change_increments_revision_and_clears_approval() -> None:
     assert changed.header.approved_revision is None
     assert changed.header.status == "analyzing"
     assert changed.header.next_actor == "agent"
+
+
+def test_persisted_standard_review_sources_survive_clean_chat_round_trip() -> None:
+    module = _load_module()
+    document = _parse(module)
+    resumed = module.parse_design_document(document.raw_text, expected_slug="sample")
+
+    assert resumed.header.review_sources == ("standard",)
+    assert module.can_complete_review(resumed)
+    assert module.can_finalize_approval(resumed)
+
+
+def test_persisted_high_review_sources_survive_clean_chat_round_trip() -> None:
+    module = _load_module()
+    document = module.parse_design_document(_high_text(), expected_slug="sample")
+    resumed = module.parse_design_document(document.raw_text, expected_slug="sample")
+
+    assert resumed.header.assurance == "high"
+    assert resumed.header.review_sources == ("standard", "independent")
+    assert module.can_finalize_approval(resumed)
+
+
+def test_missing_review_sources_deny_approval_and_handoff() -> None:
+    module = _load_module()
+    document = _parse(module)
+    missing = replace(document, header=replace(document.header, review_sources=()))
+    approved_missing = replace(
+        missing,
+        header=replace(
+            missing.header,
+            status="approved",
+            approved_revision=missing.header.revision,
+            next_actor="plan-writer",
+            next_action="Write the approved implementation plan.",
+        ),
+    )
+
+    assert not module.can_complete_review(missing)
+    assert not module.can_finalize_approval(missing)
+    assert not module.can_handoff(approved_missing)
+
+
+@pytest.mark.parametrize("central_change", (False, True))
+def test_material_change_clears_persisted_review_sources(central_change: bool) -> None:
+    module = _load_module()
+    changed = module.apply_material_change(
+        _parse(module), central_change=central_change
+    )
+
+    assert changed.header.revision == 3
+    assert changed.header.review_sources == ()
+    assert changed.header.approved_revision is None
 
 
 def test_open_findings_are_persistable_but_block_review_approval_and_handoff() -> None:

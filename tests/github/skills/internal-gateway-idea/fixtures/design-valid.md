@@ -11,6 +11,7 @@ assurance_reason: No high-assurance trigger applies.
 platform_semantics_controlling: false
 reviewed_revision: 2
 approved_revision: null
+review_sources: [standard]
 next_actor: user
 next_action: Approve the current design or request a revision.
 ---

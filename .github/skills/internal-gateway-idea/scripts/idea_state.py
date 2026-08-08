@@ -27,6 +27,7 @@ HEADER_KEYS = frozenset(
         "platform_semantics_controlling",
         "reviewed_revision",
         "approved_revision",
+        "review_sources",
         "next_actor",
         "next_action",
     }
@@ -134,6 +135,7 @@ class DesignHeader:
     platform_semantics_controlling: bool
     reviewed_revision: int | None
     approved_revision: int | None
+    review_sources: tuple[str, ...]
     next_actor: str
     next_action: str
 
@@ -183,7 +185,6 @@ class DesignDocument:
     coverage_rows: tuple[CoverageRow, ...]
     ledger: tuple[ReviewFinding, ...]
     raw_text: str
-    packet_sources: tuple[str, ...] = ()
 
     @property
     def open_findings(self) -> tuple[ReviewFinding, ...]:
@@ -476,6 +477,19 @@ def _validate_header(raw: object, expected_slug: str | None) -> DesignHeader:
         errors.append("reviewed_revision must be an integer or null")
     if not _optional_integer(raw["approved_revision"]):
         errors.append("approved_revision must be an integer or null")
+    review_sources = raw["review_sources"]
+    if not isinstance(review_sources, list):
+        errors.append("review_sources must be a list")
+    else:
+        invalid_sources = [
+            source
+            for source in review_sources
+            if not isinstance(source, str) or source not in PACKET_SOURCES
+        ]
+        if invalid_sources:
+            errors.append("review_sources contains an unknown value")
+        elif len(set(review_sources)) != len(review_sources):
+            errors.append("review_sources must contain unique values")
     if raw["source_baseline"] is not None and not _non_empty(raw["source_baseline"]):
         errors.append("source_baseline must be a non-empty string or null")
     if raw["lane"] == "review-existing" and not _non_empty(raw["source_baseline"]):
@@ -504,9 +518,23 @@ def _validate_header(raw: object, expected_slug: str | None) -> DesignHeader:
         platform_semantics_controlling=raw["platform_semantics_controlling"],
         reviewed_revision=raw["reviewed_revision"],
         approved_revision=raw["approved_revision"],
+        review_sources=tuple(review_sources),
         next_actor=raw["next_actor"],
         next_action=raw["next_action"],
     )
+
+
+def _review_sources_complete(
+    header: DesignHeader,
+    sources: Sequence[str] | None = None,
+    *,
+    required_independent: bool = False,
+) -> bool:
+    required = {"standard"}
+    if header.assurance == "high" or required_independent:
+        required.add("independent")
+    available = set(header.review_sources if sources is None else sources)
+    return required.issubset(available)
 
 
 def _validate_state_consistency(header: DesignHeader, ledger: Sequence[ReviewFinding]) -> None:
@@ -531,12 +559,16 @@ def _validate_state_consistency(header: DesignHeader, ledger: Sequence[ReviewFin
     if header.status == "awaiting-final-approval":
         if header.reviewed_revision != header.revision or header.approved_revision is not None:
             raise DesignValidationError("awaiting-final-approval requires current reviewed state")
+        if not _review_sources_complete(header):
+            raise DesignValidationError("awaiting-final-approval requires complete review sources")
     if header.status == "approved":
         if (
             header.reviewed_revision != header.revision
             or header.approved_revision != header.revision
         ):
             raise DesignValidationError("approved state requires current review and approval")
+        if not _review_sources_complete(header):
+            raise DesignValidationError("approved state requires complete review sources")
         if _has_open_blocker_or_conflict(ledger):
             raise DesignValidationError("approved state cannot contain open blockers or conflicts")
 
@@ -593,6 +625,7 @@ def _has_open_blocker_or_conflict(findings: Sequence[ReviewFinding]) -> bool:
 def can_complete_review(document: DesignDocument) -> bool:
     return (
         document.header.reviewed_revision == document.header.revision
+        and _review_sources_complete(document.header)
         and not _has_open_blocker_or_conflict(document.ledger)
     )
 
@@ -610,6 +643,7 @@ def can_handoff(document: DesignDocument) -> bool:
         document.header.status == "approved"
         and document.header.reviewed_revision == document.header.revision
         and document.header.approved_revision == document.header.revision
+        and _review_sources_complete(document.header)
         and not _has_open_blocker_or_conflict(document.ledger)
     )
 
@@ -620,6 +654,7 @@ def apply_material_change(document: DesignDocument, *, central_change: bool) -> 
         revision=document.header.revision + 1,
         reviewed_revision=None if central_change else document.header.reviewed_revision,
         approved_revision=None,
+        review_sources=(),
         status="analyzing",
         next_actor="agent",
         next_action="Recompose the current design and run the required review.",
@@ -803,7 +838,7 @@ def _routed_document(
     reviewed_revision: int | None = None,
     approved_revision: int | None = None,
     ledger: Sequence[ReviewFinding] | None = None,
-    packet_sources: Sequence[str] | None = None,
+    review_sources: Sequence[str] | None = None,
 ) -> DesignDocument:
     header = replace(
         document.header,
@@ -812,12 +847,14 @@ def _routed_document(
         next_action=next_action,
         reviewed_revision=reviewed_revision,
         approved_revision=approved_revision,
+        review_sources=tuple(
+            document.header.review_sources if review_sources is None else review_sources
+        ),
     )
     return replace(
         document,
         header=header,
         ledger=tuple(document.ledger if ledger is None else ledger),
-        packet_sources=tuple(document.packet_sources if packet_sources is None else packet_sources),
     )
 
 
@@ -829,7 +866,28 @@ def apply_review_precedence(
 ) -> DesignDocument:
     valid_packets: list[Mapping[str, Any]] = []
     incoming: list[NormalizedFinding] = []
+    seen_sources: set[str] = set()
     for packet in packet_results:
+        if not isinstance(packet, Mapping):
+            return _routed_document(
+                document,
+                status="analyzing",
+                next_actor="agent",
+                next_action="Discard the invalid packet and rerun analysis for the current revision.",
+            )
+        source = packet.get("source")
+        if (
+            not isinstance(source, str)
+            or source not in PACKET_SOURCES
+            or source in seen_sources
+        ):
+            return _routed_document(
+                document,
+                status="analyzing",
+                next_actor="agent",
+                next_action="Discard the invalid packet and rerun analysis for the current revision.",
+            )
+        seen_sources.add(source)
         validated, findings, error = _validated_packet(
             packet,
             expected_target_path=f"tmp/idea/{document.header.slug}/design.md",
@@ -846,15 +904,38 @@ def apply_review_precedence(
         incoming.extend(findings)
 
     ledger = consolidate_findings(document.ledger, incoming)
-    sources = tuple(dict.fromkeys((*document.packet_sources, *(packet["source"] for packet in valid_packets))))
-    if required_independent and not any(packet["source"] == "independent" for packet in valid_packets):
+    sources = _union(
+        document.header.review_sources,
+        tuple(packet["source"] for packet in valid_packets),
+    )
+    if not valid_packets:
+        return _routed_document(
+            document,
+            status="analyzing",
+            next_actor="agent",
+            next_action="Run the required review for the current revision.",
+            ledger=ledger,
+            review_sources=sources,
+        )
+    if not _review_sources_complete(
+        document.header, sources, required_independent=required_independent
+    ) and "standard" in sources:
         return _routed_document(
             document,
             status="awaiting-independent-review",
             next_actor="user",
             next_action="Obtain one isolated independent full-scope review for this revision.",
             ledger=ledger,
-            packet_sources=sources,
+            review_sources=sources,
+        )
+    if "standard" not in sources:
+        return _routed_document(
+            document,
+            status="analyzing",
+            next_actor="agent",
+            next_action="Obtain the required standard full-scope review for this revision.",
+            ledger=ledger,
+            review_sources=sources,
         )
     if any(
         packet["source"] == "independent" and packet["outcome"] == "request-separate-review"
@@ -866,7 +947,7 @@ def apply_review_precedence(
             next_actor="user",
             next_action="Provide an isolated independent reviewer before continuing.",
             ledger=ledger,
-            packet_sources=sources,
+            review_sources=sources,
         )
     if any(packet["outcome"] == "needs-clarification" for packet in valid_packets):
         return _routed_document(
@@ -875,7 +956,7 @@ def apply_review_precedence(
             next_actor="user",
             next_action="Answer the newly exposed user-owned decision in one bounded follow-up.",
             ledger=ledger,
-            packet_sources=sources,
+            review_sources=sources,
         )
     if any(packet["outcome"] == "reopen-analysis" for packet in valid_packets):
         return _routed_document(
@@ -884,7 +965,7 @@ def apply_review_precedence(
             next_actor="agent",
             next_action="Reopen the assumption or scope analysis for this revision.",
             ledger=ledger,
-            packet_sources=sources,
+            review_sources=sources,
         )
     if any(packet["outcome"] == "revise-design" for packet in valid_packets) or _has_open_blocker_or_conflict(ledger):
         return _routed_document(
@@ -893,7 +974,7 @@ def apply_review_precedence(
             next_actor="user",
             next_action="Choose a remedy or explicitly accept the residual risk.",
             ledger=ledger,
-            packet_sources=sources,
+            review_sources=sources,
         )
     return _routed_document(
         document,
@@ -902,7 +983,7 @@ def apply_review_precedence(
         next_action="Approve the current design or request a revision.",
         reviewed_revision=document.header.revision,
         ledger=ledger,
-        packet_sources=sources,
+        review_sources=sources,
     )
 
 

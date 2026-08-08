@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -28,6 +29,24 @@ def _load_module():
 def _document(module):
     return module.parse_design_document(
         FIXTURE.read_text(encoding="utf-8"), expected_slug="sample"
+    )
+
+
+def _draft_document(module, *, assurance: str = "standard"):
+    document = _document(module)
+    return replace(
+        document,
+        header=replace(
+            document.header,
+            assurance=assurance,
+            assurance_reason="Explicit test assurance state.",
+            status="under-review",
+            reviewed_revision=None,
+            approved_revision=None,
+            review_sources=(),
+            next_actor="critic",
+            next_action="Run the required review for the current revision.",
+        ),
     )
 
 
@@ -95,6 +114,7 @@ def test_standard_and_independent_packets_consolidate_to_one_canonical_finding()
     assert merged.blocking is True
     assert set(merged.sources) == {"standard", "independent"}
     assert set(merged.evidence) == {"design.md#L12", "design.md#L18"}
+    assert reviewed.header.review_sources == ("standard", "independent")
 
 
 def test_conflicting_recommendations_remain_separate_and_open() -> None:
@@ -169,6 +189,67 @@ def test_missing_independent_packet_fails_closed() -> None:
     assert routed.header.status == "awaiting-independent-review"
     assert routed.header.next_actor == "user"
     assert routed.header.reviewed_revision is None
+    assert routed.header.review_sources == ("standard",)
+
+
+def test_empty_packet_set_cannot_enter_final_approval() -> None:
+    module = _load_module()
+    routed = module.apply_review_precedence(
+        _draft_document(module), [], required_independent=False
+    )
+
+    assert routed.header.status == "analyzing"
+    assert routed.header.reviewed_revision is None
+    assert routed.header.review_sources == ()
+    assert not module.can_finalize_approval(routed)
+
+
+def test_independent_only_high_assurance_cannot_enter_final_approval() -> None:
+    module = _load_module()
+    routed = module.apply_review_precedence(
+        _draft_document(module, assurance="high"),
+        [_packet("independent")],
+        required_independent=False,
+    )
+
+    assert routed.header.status == "analyzing"
+    assert routed.header.reviewed_revision is None
+    assert routed.header.review_sources == ("independent",)
+    assert not module.can_complete_review(routed)
+    assert not module.can_finalize_approval(routed)
+
+
+def test_high_assurance_requires_standard_and_independent_packets() -> None:
+    module = _load_module()
+    routed = module.apply_review_precedence(
+        _draft_document(module, assurance="high"),
+        [_packet("standard")],
+        required_independent=False,
+    )
+
+    assert routed.header.status == "awaiting-independent-review"
+    assert routed.header.reviewed_revision is None
+    assert routed.header.review_sources == ("standard",)
+
+
+@pytest.mark.parametrize(
+    "packets",
+    (
+        [_packet("unknown")],
+        [_packet("standard"), _packet("standard")],
+    ),
+)
+def test_unknown_or_duplicate_packet_sources_fail_closed(
+    packets: list[dict[str, object]],
+) -> None:
+    module = _load_module()
+    routed = module.apply_review_precedence(
+        _draft_document(module), packets, required_independent=False
+    )
+
+    assert routed.header.status == "analyzing"
+    assert routed.header.reviewed_revision is None
+    assert not module.can_finalize_approval(routed)
 
 
 def test_public_critique_is_numbered_and_does_not_expose_packet_json() -> None:

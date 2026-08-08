@@ -11,6 +11,7 @@ assurance_reason: "<why standard or high assurance applies>"
 platform_semantics_controlling: false
 reviewed_revision: null
 approved_revision: null
+review_sources: []
 next_actor: agent
 next_action: "Identify the nearest owner, consumer, and validation path."
 ---
