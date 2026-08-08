@@ -148,6 +148,17 @@ def test_claim_requirements_return_documented_methods() -> None:
     } <= set(methods)
 
 
+def test_covered_claim_uses_selected_internal_tdd_posture() -> None:
+    requirement = next(
+        item
+        for item in resolve_simple_task.CLAIM_REQUIREMENTS["covered"]
+        if item["method"] == "internal-tdd"
+    )
+
+    assert "selected posture" in requirement["evidence"]
+    assert "failing-then-passing" not in requirement["evidence"]
+
+
 def test_suggest_cli_returns_runtime_support_without_worktree_mapping() -> None:
     result = subprocess.run(
         [

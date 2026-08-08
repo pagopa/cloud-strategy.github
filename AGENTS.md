@@ -66,6 +66,8 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
   unless new evidence invalidates the current state.
 - Keep one active primary owner per execution lane; load narrower owners only
   when path, runtime, symptom, or validation evidence proves they are needed.
+- Route executable or evaluable behavior changes through `/internal-tdd`
+  before implementation; that skill owns test posture and sequencing.
 - For bounded, token-intensive, judgment-light work, evaluate
   `/internal-low-cost-delegation`; keep material decisions and final acceptance
   with the primary owner.
@@ -86,24 +88,6 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
   and validation path visible before implementation or handoff.
 - When a contract or policy changes, align the owning tests, validators, or docs
   instead of letting stale checks restore the old behavior.
-
-## Code Changes
-
-- Executable or evaluable behavior changes must use a test-first
-  red-green-refactor loop: define the failing check, make the smallest
-  implementation edit, then rerun the focused check and closest validation.
-- Place tests under repository-root `tests/` using paths that make the owning
-  source or checked behavior obvious. Keep deeper layout conventions in the
-  nearest owner.
-- The failing check must exist before the first implementation edit unless a
-  pre-code testability exception names the gap and alternate validation path.
-- Tests added after implementation are regression coverage only; they must not
-  be represented as test-first work.
-- Exceptions are limited to prose-only docs, generated inventory, mechanical
-  formatting, behavior-neutral renames, read-only validation, or explicit
-  pre-code testability exceptions.
-- If this gate is skipped, agents must stop, disclose the violation, establish
-  the recovery path, and must not claim retroactive red-green-refactor work.
 
 ## Protected Skill Boundary
 

@@ -72,7 +72,7 @@ CLAIM_REQUIREMENTS = {
     "covered": [
         {
             "method": "internal-tdd",
-            "evidence": "Use internal-tdd to show the failing-then-passing seam, or state why it could not be run.",
+            "evidence": "Use internal-tdd, record its selected posture, and provide the focused evidence required by that posture.",
         },
         {
             "method": "scope-check",

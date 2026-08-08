@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Terraform Router"
   short_description: "Wrap Anton for non-language Terraform work"
-  default_prompt: "Use $internal-terraform as the stable Terraform/OpenTofu wrapper; delegate pure language directly to $internal-tf and use Anton for every other branch."
+  default_prompt: "Use $internal-terraform as the stable Terraform/OpenTofu wrapper; delegate pure language directly to $internal-tf and use Anton for every other branch. For each changed root, select the observable boundary, record the native command and CI discovery or manifest registration, and treat an unexecuted test file as an explicit validation gap."

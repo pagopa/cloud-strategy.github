@@ -9,17 +9,18 @@ description: Use when modifying code with executable or evaluable behavior, incl
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `superpowers-test-driven-development`: core red-green-refactor loop after this wrapper selects a mandatory test-first slice.
+- `superpowers-test-driven-development`: core red-green-refactor loop after this wrapper selects a mandatory-test-first slice.
 - `superpowers-verification-before-completion`: evidence gate before completion, passing, or coverage claims.
 - `/internal-low-cost-delegation`: bounded RED artifacts, log analysis, or one mechanical GREEN slice after the parent locks the seam and acceptance.
 
 Use this skill as the repository-owned owner for coding changes with executable
 or evaluable behavior. It classifies the local seam, names the lightest useful
-guardrail, and then delegates mandatory TDD execution to
+guardrail, and then delegates mandatory-test-first execution to
 `/superpowers-test-driven-development`.
 
-This wrapper does not redefine red, green, refactor, test quality, or recovery
-mechanics. Those belong to the core skill.
+This wrapper does not redefine test quality or recovery mechanics. Those belong
+to the core skill. It selects the risk- and stage-based posture that controls
+whether the core skill owns sequencing.
 
 ## When to use
 
@@ -29,8 +30,8 @@ mechanics. Those belong to the core skill.
   whose behavior can be checked through a stable boundary.
 - Prompt, agent, or LLM-output drift with concrete failure examples or an
   evaluable contract.
-- Coding work that needs a repository-local decision about whether TDD is
-  mandatory, recommended, or not useful.
+- Coding work that needs a repository-local decision about which test posture is
+  appropriate.
 
 ## When not to use
 
@@ -42,78 +43,50 @@ mechanics. Those belong to the core skill.
 - Mechanical realignment with no behavior change and no credible executable
   seam.
 
-## Applicability Levels
+## Test Postures
 
-| Level | Use when | Required posture |
+| Posture | Use when | Required posture |
 | --- | --- | --- |
-| Mandatory | The change adds or changes executable or evaluable behavior, including a public interface, refactor, structured output, or prompt contract, or the user explicitly asks for TDD. | Name the observable behavior or risk, choose the smallest useful stable check, then load `/superpowers-test-driven-development`. |
-| Recommended | Behavior-neutral work touches a public or stable boundary where an additional guardrail would reduce meaningful risk. | Prefer a public-boundary check and keep the slice small; this level never permits a behavior change without mandatory TDD. |
-| Not suitable | The change has no practical executable or evaluable contract. | Do not manufacture tests; name the seam gap and use the closest validator or review gate. |
+| `mandatory-test-first` | The work is a reproducible bug fix, regression, behavior-preserving refactor, established public contract, or involves security, authorization, secrets, persistent state, migration, destructive behavior, or another high-impact failure mode. | Choose the observable behavior, establish red evidence, then load `/superpowers-test-driven-development` for the implementation loop. |
+| `feature-first` | The work is a new, exploratory, reversible capability and changes no established contract. | Implementation may precede the durable regression check, but focused and broader validation must be reachable before `feature-first-validated` completion. |
+| `prototype-unverified` | The work is an explicit learning artifact with declared scope, risk, and missing validation. | Never present it as production-ready; report the missing evidence. |
+| `validation-only` | No useful executable or evaluable seam exists. | Name the seam gap and alternate validator before editing. |
 
-The levels are mutually exclusive. When more than one description appears to
-fit, `mandatory` takes precedence over `recommended`, and `recommended` takes
-precedence over `not suitable`.
+The postures are mutually exclusive. A new-feature label alone never grants
+`feature-first`; risk and delivery stage control the choice. Reading
+instructional source and asserting its wording does not create an evaluable
+seam.
 
-- Reading instructional source and asserting its wording does not create an
-  evaluable seam.
-- Skill-only changes without a parser, executable consumer, public protocol, or
-  concrete evaluation case are `not suitable`; use structural validation and
-  human review.
+## Execution Contract
 
-## Core Contract
+1. Identify the observable behavior, risk, or evaluable contract and select
+   exactly one posture before implementation.
+2. Choose the nearest owner, stable boundary, native test layout, established
+   runner, local command, and CI trigger. Use an external-language harness only
+   for a real cross-language boundary such as a CLI, plan JSON, filesystem,
+   protocol, or remote API; Python is not a universal harness.
+3. For `mandatory-test-first`, establish red evidence and delegate the
+   implementation loop to `/superpowers-test-driven-development` rather than
+   reproducing it locally.
+4. For prompt, agent, or LLM-output drift, define concrete evaluation examples
+   or failure cases before changing behavior.
+5. After the parent locks the posture, boundary, artifact shape, write scope,
+   and validation, `/internal-low-cost-delegation` may receive only an exactly
+   specified RED artifact, bounded log analysis, or one mechanical GREEN
+   slice. The parent retains boundary choice, red proof, refactor, and final
+   verification.
+6. Run the focused check and closest broader validation, then load
+   `/superpowers-verification-before-completion` before positive claims.
 
-- Delegate mandatory red-green-refactor work to
-  `/superpowers-test-driven-development`; do not run a local copy of its loop.
-- Before implementation, record one of three routing outcomes:
-  `mandatory`, `recommended`, or `not suitable`.
-- For `mandatory`, load the core skill before changing behavior.
-- For `recommended`, keep the check at the most meaningful public or stable
-  boundary and confirm the task is behavior-neutral.
-- When adding tests, keep them under repository-root `tests/` and choose paths
-  that make the covered owner or checked behavior obvious. Use the nearest
-  owner for deeper layout conventions.
-- For `not suitable`, name the seam gap and the alternate validation path before
-  implementation.
-- After the parent locks the seam, red proof, artifact shape, write scope, and
-  validation, delegate only an exactly specified RED artifact, bounded log
-  analysis, or one mechanical GREEN slice through
-  `/internal-low-cost-delegation`. Retain seam choice, red proof, refactor,
-  and final verification in the parent.
-- Tests or checks added after implementation are regression coverage only. Do
-  not describe them as test-first work. If implementation in the current task
-  preceded its failing check, the agent must stop, disclose the test-first
-  violation, and establish a recovery path before continuing.
+## Completion
 
-## Workflow
+| State | Required evidence |
+| --- | --- |
+| `test-first-validated` | The `mandatory-test-first` loop has observed red evidence plus fresh focused and broader passing validation. |
+| `feature-first-validated` | The `feature-first` work has fresh focused validation and reachable broader validation. |
+| `prototype-unverified` | Scope, risk, and missing validation remain explicit; the artifact is not production-ready. |
+| `validation-only` | The seam gap and alternate validation are recorded. |
 
-1. Identify the observable behavior, risk, or evaluable contract.
-2. Pick the closest public or stable boundary that can prove it.
-3. Choose `mandatory`, `recommended`, or `not suitable`.
-4. Load `/superpowers-test-driven-development` only for mandatory TDD execution.
-5. For prompt, agent, or LLM-output drift, define concrete eval examples or
-   failure cases before changing behavior.
-6. Finish with the focused check, the closest broader validation, and
-  `/superpowers-verification-before-completion` before positive claims.
-
-## Completion States
-
-- `red-green-refactor`: the core skill owned the loop and fresh evidence shows
-  the focused check plus broader validation passed.
-- `exception-based`: the seam gap was named before implementation and the
-  alternate validation ran or its gap was reported.
-- `regression-only` is not a completed state when implementation in the current
-  task preceded its check. The agent must stop, disclose the test-first violation,
-  establish a recovery path, and must not claim test-first work. Tests added for
-  behavior that predated the current task remain honest regression coverage.
-
-## Validation
-
-- The wrapper chose `mandatory`, `recommended`, or `not suitable` before
-  implementation.
-- Mandatory slices loaded `/superpowers-test-driven-development`.
-- Not-suitable slices named the seam gap and alternate validation path.
-- Focused checks and the closest broader validation ran, or the gap was
-  reported.
-- Completion declares whether the work was `red-green-refactor`,
-  `exception-based`, or `regression-only`.
-- Final claims passed through `/superpowers-verification-before-completion`.
+Tests or checks added after implementation are not TDD. Classify them honestly
+under the selected posture; do not reconstruct existing implementation solely
+to manufacture a test-first history.

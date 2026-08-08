@@ -37,6 +37,20 @@ Anton core through this wrapper, including:
 4. Load `references/review-anti-patterns.md` or `references/decision-guide.md` only when its local overlay is independently useful.
 5. Coordinate an Azure owner only when an Azure design or governance decision is independently requested.
 
+## Repository test reachability
+
+For every new or changed Terraform root, record the Terraform/OpenTofu root
+directory and version, the boundary selected by the Anton core, the local
+authoritative command, and the CI discovery mechanism. Prefer automatic
+changed-root discovery; use a validated repository-owned root manifest as the
+fallback.
+
+The Anton core owns test-boundary and framework selection. This wrapper only
+requires proof that the selected runner executes locally and is reachable from
+the matching CI trigger before production-ready completion. Otherwise record
+the reachability gap explicitly; a test file's presence is not passing
+evidence.
+
 ## Authority and overrides
 
 User instructions and root repository policy remain higher precedence. Wrapper
