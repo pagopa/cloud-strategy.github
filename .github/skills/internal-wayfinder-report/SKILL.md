@@ -10,6 +10,12 @@ single-page report. The report explains what the workspace says and surfaces
 coherence questions, while the map, analysis, and issue files remain
 authoritative.
 
+For eligible token-intensive work, use `/internal-low-cost-delegation` only in
+two stages: candidate evidence inventory after source paths and authority are
+locked, then locked report drafting after sections, evidence IDs, findings,
+diagram roles, and validation are fixed. Never delegate source authority,
+findings, or diagram relationships.
+
 ## When to use
 
 Use this skill after a local Wayfinder workspace has source analysis and needs a

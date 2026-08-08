@@ -28,6 +28,9 @@ interface:
     Gate 0. needs-clarification means load `/grill-me` for one or more numbered clarification sessions over the critic's newly surfaced elements. After clarification, return to the relevant earlier approval gate when a material change occurred; otherwise rerun `Critical Challenge Gate` directly. Repeat
     until the critic emits one conclusive routing outcome. For accepted, load
     /internal-gateway-writing-plans automatically without another approval.
+    After the evidence question and sources are locked, use
+    /internal-low-cost-delegation for bounded evidence collection only; keep
+    intent, synthesis, alternatives, critical resolution, and approval here.
     Treat procedi, ok, go, or similar approval as advancing only the active visible gate; clarify ambiguous approval before loading another owner. If a mandatory gate was skipped, stop and resume at the first skipped mandatory gate. Stop after the writing outcome; do not implement or invoke execution
     owners from this skill.
 

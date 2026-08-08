@@ -20,6 +20,10 @@ _PERMISSION_MAP_OPENCODE = {
     "web": ["webfetch", "websearch"],
 }
 
+_CODEX_TARGET_OVERRIDE_KEYS = frozenset(
+    {"model", "model_reasoning_effort", "sandbox_mode"}
+)
+
 _FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 
 
@@ -59,14 +63,19 @@ def translate_agent_for_target(
     content = source_path.read_text(encoding="utf-8")
     frontmatter, body = parse_frontmatter_and_body(content)
     config = load_agent_config(config_path)
-    frontmatter = merge_config(frontmatter, config, target)
 
     if target == "copilot":
+        frontmatter = merge_config(frontmatter, config, target)
         return _translate_for_copilot(frontmatter, body)
     elif target == "opencode":
+        frontmatter = merge_config(frontmatter, config, target)
         return _translate_for_opencode(frontmatter, body)
     elif target == "codex":
-        return _translate_for_codex(frontmatter, body)
+        return _translate_for_codex(
+            frontmatter,
+            body,
+            _validated_codex_target_overrides(config),
+        )
     raise ValueError(f"Unknown target: {target}")
 
 
@@ -148,7 +157,26 @@ def _build_opencode_permission(frontmatter: dict) -> dict[str, object]:
     return permission
 
 
-def _translate_for_codex(frontmatter: dict, body: str) -> str:
+def _validated_codex_target_overrides(config: dict) -> dict[str, object]:
+    target_overrides = config.get("codex", {})
+    if not isinstance(target_overrides, dict):
+        raise ValueError("Codex agent overrides must be a mapping")
+
+    unsupported = set(target_overrides) - _CODEX_TARGET_OVERRIDE_KEYS
+    if unsupported:
+        raise ValueError(
+            "unsupported Codex agent override(s): "
+            + ", ".join(sorted(unsupported))
+        )
+
+    return dict(target_overrides)
+
+
+def _translate_for_codex(
+    frontmatter: dict,
+    body: str,
+    target_overrides: dict[str, object],
+) -> str:
     try:
         import tomli_w
     except ImportError:
@@ -163,6 +191,7 @@ def _translate_for_codex(frontmatter: dict, body: str) -> str:
         toml_data["name"] = frontmatter["name"]
     if "description" in frontmatter:
         toml_data["description"] = frontmatter["description"]
+    toml_data.update(target_overrides)
 
     instructions = body.strip()
     handoffs_text = _render_handoffs_instructions(frontmatter)

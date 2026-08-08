@@ -10,6 +10,7 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 - `/grill-me`: compact Gate 1 interview after local preflight and Initial Idea Ordering.
 - `/internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
 - `/internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
+- `/internal-low-cost-delegation`: bounded token-intensive slices after the Readiness Brief and TDD classification lock the work.
 - `/superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
 - `/addyosmani-code-simplification`: on-demand method owner only for an explicit code-simplification request or an already-approved simplification remediation.
 
@@ -35,6 +36,11 @@ Ordinary `full-gate` work continues after the internal Readiness Brief without r
 Stop only when the work becomes materially complex, too costly for the current run, ambiguous, unsafe, multi-phase, approval-bound, or not locally verifiable. Stop output must explain the boundary break instead of delegating by name.
 
 Use local references and scripts only to keep the decision process compact and deterministic. Keep working state small, inspect bounded evidence first, and preserve direct completion ownership inside this bundle.
+
+After the Readiness Brief and TDD classification, require
+`/internal-low-cost-delegation` for an eligible bounded, token-intensive,
+judgment-light slice. Keep `trivial-skip` direct, and keep lane choice, scope,
+repairs, acceptance, and completion with this gateway.
 
 ## When to use
 

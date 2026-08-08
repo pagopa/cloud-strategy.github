@@ -54,12 +54,12 @@ rows:
     resource_family: agents
     support_level: Documented
     home_path: ~/.codex/agents/
-    direct_copy_possible: false
+    direct_copy_possible: true
     translation_required: true
     include_in_v1: true
     evidence:
       - https://developers.openai.com/codex/agents
-    notes: Requires MD to TOML translation.
+    notes: Native TOML agents copy directly; portable Markdown agents use TOML translation.
   - target: copilot
     resource_family: agents
     support_level: Documented

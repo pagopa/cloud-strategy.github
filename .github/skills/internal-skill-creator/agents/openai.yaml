@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Skill Creator"
   short_description: "Create and revise repository-owned skills"
-  default_prompt: "Use $internal-skill-creator to create, revise, replace, or retire a repository-owned skill. Apply /mattpocock-writing-great-skills as the core method, prefix cross-skill invocations with `/`, run proportional evaluation, then complete repository closure."
+  default_prompt: "Use $internal-skill-creator to create, revise, replace, or retire a repository-owned skill. Apply /mattpocock-writing-great-skills as the core method, prefix cross-skill invocations with `/`, and use /internal-low-cost-delegation only after inventory, consumer mapping, outline, metadata shape, or evaluation commands are locked for bounded execution. Retain trigger, boundary, policy, and subjective authoring judgment; run proportional evaluation and complete repository closure."

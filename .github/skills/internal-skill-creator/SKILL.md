@@ -23,6 +23,12 @@ distinction consistently to the six internal gateway skills covered by this
 convention. Keep the target skill model-invocable; a called skill must not set
 `disable-model-invocation: true`.
 
+Use `/internal-low-cost-delegation` after the parent locks the inventory,
+consumer map, outline, metadata shape, or evaluation command for bounded
+inventory, consumer mapping, locked-outline drafting, metadata, or evaluation
+execution. Retain trigger, boundary, policy, and subjective authoring
+judgment, and require human review for subjective instructional prose.
+
 ## When to use
 
 - The requested skill change affects repository-owned behavior or structure,

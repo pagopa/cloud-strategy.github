@@ -269,14 +269,20 @@ def build_home_sync_plan(
                 continue
 
             content_hash = source_hash
-            if resource.source_family == "agents" and target != "copilot":
+            if (
+                resource.source_family == "agents"
+                and target != "copilot"
+                and not is_native_agent_source(source_path)
+            ):
                 content_hash = _compute_agent_translation_hash(
                     source_root=source_root,
                     source_path=resource.source_path,
                     target=target,
                 )
             linked_resource = resource.source_family == "skills" or (
-                resource.source_family == "agents" and target == "copilot"
+                resource.source_family == "agents"
+                and target == "copilot"
+                and not is_native_agent_source(source_path)
             )
             managed_resource = ManagedResource(
                 target=target,
@@ -575,7 +581,11 @@ def apply_home_sync_plan(
         source_path = plan.source_root / managed_resource.source_path
         if managed_resource.resource_family == AGENTS_MD_FAMILY:
             _apply_portable_agents_md(source_path, target_path)
-        elif managed_resource.resource_family == "agents" and managed_resource.target != "copilot":
+        elif (
+            managed_resource.resource_family == "agents"
+            and managed_resource.target != "copilot"
+            and not is_native_agent_source(source_path)
+        ):
             _apply_translated_agent(source_path, target_path, managed_resource.target)
         else:
             copy_resource(source_path, target_path)
@@ -1443,7 +1453,7 @@ def is_valid_resource(path: Path, source_family: str) -> bool:
             return False
         return True
     if source_family == "agents":
-        return path.is_file() and path.suffix == ".md"
+        return path.is_file() and path.suffix in {".md", ".toml"}
     return is_valid_skill_bundle(path)
 
 
@@ -1460,7 +1470,7 @@ def resource_target_path(
         if not has_agent_root(target):
             raise ValueError(f"Target {target} does not support agents")
         agent_root = runtime_agent_root(home_root, target)
-        ext = target_extension(target)
+        ext = ".toml" if resource.source_path.endswith(".toml") else target_extension(target)
         return agent_root / f"{resource.resource_id}{ext}"
     return runtime_skill_root(home_root, target) / resource.resource_id
 
@@ -1471,6 +1481,10 @@ def resource_block_code(source_family: str) -> str:
     if source_family == "agents":
         return "source-invalid-agent"
     return "source-invalid-skill"
+
+
+def is_native_agent_source(path: Path) -> bool:
+    return path.suffix == ".toml"
 
 
 def hash_resource(path: Path) -> str:

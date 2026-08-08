@@ -66,6 +66,9 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
   unless new evidence invalidates the current state.
 - Keep one active primary owner per execution lane; load narrower owners only
   when path, runtime, symptom, or validation evidence proves they are needed.
+- For bounded, token-intensive, judgment-light work, evaluate
+  `/internal-low-cost-delegation`; keep material decisions and final acceptance
+  with the primary owner.
 - Use bounded evidence: inspect changed sections and failing-validator context
   first, then expand only when gaps remain.
 - Name the validation path early; if evidence changes it, update the working

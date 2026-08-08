@@ -11,6 +11,7 @@ This index lists every other skill that this file asks the agent to load, route 
 
 - `superpowers-test-driven-development`: core red-green-refactor loop after this wrapper selects a mandatory test-first slice.
 - `superpowers-verification-before-completion`: evidence gate before completion, passing, or coverage claims.
+- `/internal-low-cost-delegation`: bounded RED artifacts, log analysis, or one mechanical GREEN slice after the parent locks the seam and acceptance.
 
 Use this skill as the repository-owned owner for coding changes with executable
 or evaluable behavior. It classifies the local seam, names the lightest useful
@@ -73,6 +74,11 @@ precedence over `not suitable`.
   owner for deeper layout conventions.
 - For `not suitable`, name the seam gap and the alternate validation path before
   implementation.
+- After the parent locks the seam, red proof, artifact shape, write scope, and
+  validation, delegate only an exactly specified RED artifact, bounded log
+  analysis, or one mechanical GREEN slice through
+  `/internal-low-cost-delegation`. Retain seam choice, red proof, refactor,
+  and final verification in the parent.
 - Tests or checks added after implementation are regression coverage only. Do
   not describe them as test-first work. If implementation in the current task
   preceded its failing check, the agent must stop, disclose the test-first

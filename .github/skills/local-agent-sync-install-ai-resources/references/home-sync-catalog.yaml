@@ -27,3 +27,17 @@ resources:
       - opencode
     target_support: See runtime support matrix
     notes: Explicitly sync-managed Terraform configuration skill bundle.
+  - resource_id: internal-low-cost-copilot
+    source_family: agents
+    source_path: .github/agents/internal-low-cost-copilot.agent.md
+    include_targets:
+      - copilot
+    target_support: See runtime support matrix
+    notes: Native Copilot low-cost worker profile.
+  - resource_id: internal-low-cost-codex
+    source_family: agents
+    source_path: .codex/agents/internal-low-cost-codex.toml
+    include_targets:
+      - codex
+    target_support: See runtime support matrix
+    notes: Native Codex low-cost worker profile.

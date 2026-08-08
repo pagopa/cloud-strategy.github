@@ -41,6 +41,11 @@ Do not treat existing files under `report/` as source authority.
 
 ## 3. Build one bounded navigation index
 
+At this point, a parent may delegate the bounded evidence-candidate inventory
+through `/internal-low-cost-delegation` once source paths, authority order,
+output shape, and validation are locked. The parent retains source authority
+and findings.
+
 Run the read-only helper once after inventory and hashing:
 
 ```bash
@@ -66,6 +71,11 @@ Full source dumps, raw debug logs, repeated reads, and iterative warning cleanup
 are out of scope. Do not repair, rewrite, or normalize source files.
 
 ## 5. Draft the compact report shape
+
+After the parent fixes sections, evidence IDs, findings, diagram roles, and
+validation, a bounded drafting slice may be delegated through
+`/internal-low-cost-delegation`. Do not delegate source authority, findings, or
+diagram relationships.
 
 Choose the generic five-section skeleton, evidence IDs, findings, and two
 diagram roles before editing. Write one `report/report.json` with exactly five

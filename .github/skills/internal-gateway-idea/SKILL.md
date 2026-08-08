@@ -11,6 +11,7 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 - `/grill-me`: repeatable clarification sessions for material points the critic cannot resolve unanimously.
 - `/internal-gateway-writing-plans`: implementation-plan writing immediately after the critic emits `accepted`.
 - `/mattpocock-research`: on-demand owner for decision-relevant external research after local evidence is exhausted; this reference does not preload the skill.
+- `/internal-low-cost-delegation`: bounded evidence collection after the parent locks the question, inputs, and output shape.
 
 ## Local references
 
@@ -87,6 +88,11 @@ Before asking the first question block:
 - For large files, generated output, logs, or tabular artifacts, inspect aggregate facts first: path, size, headers, counts, anomalies, and targeted slices.
 - If platform semantics control feasibility or ownership, verify those semantics before converging.
 - Separate original user intent from emerged requirements. Do not rewrite later constraints as the original request.
+
+At the bounded evidence and external-research checkpoints, delegate only a
+declared evidence-collection slice after the parent locks the question,
+sources, output path, and validation. Keep Idea Gate 0, synthesis,
+alternatives, critical resolution, and approval with this skill's parent.
 
 ## State machine
 

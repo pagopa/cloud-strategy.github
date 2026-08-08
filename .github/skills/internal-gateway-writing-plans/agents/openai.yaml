@@ -22,7 +22,11 @@ interface:
     model-selection acceptance evidence in manual_obligations whenever
     delegation is used. Do not predict runtime candidates or weaken a
     requirement into a manual attestation. Run the executor-owned preflight as
-    the sole mechanical validator and revise until it has zero blocking
+    the sole mechanical validator. After the control inventory, structure,
+    decisions, and acceptance are locked, use /internal-low-cost-delegation
+    only for bounded plan drafting with Luna/high; retain eligibility,
+    classification, review, and handoff here. Run the executor-owned
+    preflight and revise until it has zero blocking
     findings; explicitly legacy/imported material requires reconstruction and
     refreshed approval/fingerprint. Perform human review, report the plan path,
     name /internal-gateway-execute-plans as the only next owner, and wait for

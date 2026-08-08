@@ -11,6 +11,7 @@ description: Use when repository-owned work needs an approved implementation pla
   owns eligibility, retained-plan requirements, review, and handoff.
 - `/internal-gateway-execute-plans`: required next owner after human review and
   explicit execution approval.
+- `/internal-low-cost-delegation`: locked plan-section drafting after control inventory and acceptance are complete.
 
 ## When to use
 
@@ -55,6 +56,12 @@ description: Use when repository-owned work needs an approved implementation pla
    Authority and approval rows remain pre-execution gates. Completion: one
    plan exists at the retained path and contains those artifact properties plus
    one versioned `## Execution Contract` fenced JSON object.
+  After the control inventory, plan structure, locked decisions, and
+  acceptance are complete, delegate only mechanical or token-intensive plan
+  drafting through `/internal-low-cost-delegation`; retain plan eligibility,
+  control classification, review, and handoff here. The delegated route must
+  use the Luna/high posture rather than the plan-writing probe's Luna/max
+  requirement.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every
    `automatable-local` or `observable-runtime` row must map to a required

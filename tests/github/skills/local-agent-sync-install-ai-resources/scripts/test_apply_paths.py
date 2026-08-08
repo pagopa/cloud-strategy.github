@@ -568,6 +568,75 @@ rows:
     )
 
 
+def test_codex_native_agent_is_copied_without_translation(
+    tmp_path: Path, capsys
+) -> None:
+    refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
+    refs.mkdir(parents=True)
+    (refs / "home-sync-catalog.yaml").write_text(
+        """version: 1
+defaults:
+  include_internal_skills: false
+  include_local_skills: false
+  include_unlisted_skills: false
+  unmanaged_existing_skills_policy: repo-wins
+  excluded_skills: []
+  skill_targets: []
+resources:
+  - resource_id: native-agent
+    source_family: agents
+    source_path: .codex/agents/native-agent.toml
+    include_targets: [codex]
+    target_support: documented
+    notes: native Codex agent
+""",
+        encoding="utf-8",
+    )
+    (refs / "runtime-support-matrix.yaml").write_text(
+        """version: 1
+rows:
+  - target: codex
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.codex/agents/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence: []
+    notes: native Codex agent
+""",
+        encoding="utf-8",
+    )
+    source = tmp_path / ".codex/agents/native-agent.toml"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        'name = "native-agent"\nmodel = "gpt-5.6-luna"\n', encoding="utf-8"
+    )
+
+    home = tmp_path / "home"
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "codex",
+                    "--create-missing-dirs",
+                ]
+            )
+        )
+        == 0
+    )
+    capsys.readouterr()
+
+    target = home / ".codex/agents/native-agent.toml"
+    assert target.read_bytes() == source.read_bytes()
+
+
 def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
     tmp_path: Path,
 ) -> None:
