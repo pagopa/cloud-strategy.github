@@ -95,6 +95,7 @@ description: Use when repository-owned work needs an approved implementation pla
   execution has not started without approval.
 
 ## Command Portability
+
 - Write every baseline, focused, and final validation command in directly
   executable native form. The command recorded in the plan is the
   authoritative command and evidence label.

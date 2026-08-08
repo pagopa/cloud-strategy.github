@@ -7,14 +7,13 @@ description: "Use when executing or resuming an approved repository-owned retain
 
 ## Bundle References
 
-- `references/execution-contract.md` — repository hooks around the delegated execution loop.
+- `references/execution-contract.md` — repository-local controls around the direct execution loop.
 - `references/recovery-contract.md` — continuation-first recovery and closeout decision ladder.
 - `references/status-contract.md` — status transition table, required headings, and exact sibling filenames.
 - `scripts/plan_execution.py` — read-only stdlib-only CLI for strict plan binding, structured recovery classification, status shape, resume safety, and completion readiness.
 
 ## Referenced skills
 
-- `/superpowers-executing-plans` supplies only critical plan review, todo tracking, and task-by-task mechanics.
 - `/internal-tdd` owns executable-behavior test-first guidance at the local task gate.
 - `/superpowers-verification-before-completion` owns final evidence before completion claims.
 - `/addyosmani-code-simplification` is conditional and may be loaded only when the approved task explicitly authorizes simplification.
@@ -22,13 +21,13 @@ description: "Use when executing or resuming an approved repository-owned retain
 ## When to use
 
 - Execute or resume an approved retained plan under `tmp/superpowers/plans/`.
-- Apply repository-local preflight, task hooks, status handling, and closeout around the delegated core loop.
+- Apply repository-local preflight, task hooks, status handling, and closeout around the direct task loop.
 
 ## When not to use
 
 - Writing, reformulating, reviewing, or challenging a plan.
 - Running same-chat work that is not driven by an approved retained plan.
-- Changing imported execution behavior or replacing the delegated core workflow.
+- Changing the retained-plan schema or replacing the local execution contract.
 
 ## Safety Boundary
 
@@ -42,12 +41,12 @@ approval and runtime safety remain gateway responsibilities.
 
 ## Control coverage
 
-Before the delegated loop, read the plan's `## Control Inventory` or
+Before execution, read the plan's `## Control Inventory` or
 reconstruct the same inventory from its tasks, acceptance criteria, and
 versioned `## Execution Contract`. Classify every obligation exactly once as
 `automatable-local`, `observable-runtime`, `external-capability`,
 `authority-or-scope`, or `genuine-human-judgment`. Do not confuse these control
-classes with the six executor-owned runtime discovery categories.
+classes with the six runtime discovery categories.
 
 - `automatable-local` and `observable-runtime` controls must use a required
   executable validation or capability probe with a clear pass/fail signal and
@@ -89,9 +88,9 @@ judgment as offline follow-up after a successful closeout.
 
 `/internal-gateway-execute-plans` is the authoritative local execution route. It
 controls routing, recovery, stopping, worktree and finishing decisions, status
-transitions, and closeout. The imported `/superpowers-executing-plans` bundle is
-delegated only critical review, todo tracking, and task-by-task mechanics; it
-does not regain any local gateway responsibility.
+transitions, closeout, critical review, todo tracking, and task-by-task
+mechanics. All plan work remains in the current session and under this
+gateway's responsibility.
 
 - bind the exact plan path and explicit approval state;
 - compute the SHA-256 fingerprint, run dirty-worktree preflight, and capture
@@ -114,7 +113,7 @@ does not regain any local gateway responsibility.
 1. **Bind** the approved retained plan, fingerprint, workspace overlap, control
    inventory, and native validation commands. Completion: preflight passes,
    every control has an owner, and the baseline is recorded.
-2. **Execute** the delegated plan task-by-task with the posture returned by
+2. **Execute** the approved plan task-by-task with the posture returned by
   `/internal-tdd`. Require red-first gates only for `mandatory-test-first`;
   `feature-first` requires focused validation before task transition and
   reachable evidence before production-ready completion. Completion: each
@@ -132,20 +131,20 @@ does not regain any local gateway responsibility.
    verification-before-completion gate. Completion: the status sibling and report
    contain the same fresh evidence.
 
-## Delegation checkpoints
+## Task checkpoints
 
-Before delegating task mechanics to `/superpowers-executing-plans`, bind the
-retained plan, record approval, fingerprint the plan, capture the workspace
-baseline, and run the plan's broad baseline validation. The binding gate must
-also confirm the current plan has `## Control Inventory` and an explicit no-Git
-constraint. A document identified as `legacy/imported` is non-actionable until
-the writing gateway reconstructs it and approval and fingerprint are refreshed.
+Before the task loop, bind the retained plan, record approval, fingerprint the
+plan, capture the workspace baseline, and run the plan's broad baseline
+validation. The binding gate must also confirm the current plan has `## Control
+Inventory` and an explicit no-Git constraint. A document identified as
+`legacy/imported` is non-actionable until the writing gateway reconstructs it
+and approval and fingerprint are refreshed.
 At each task boundary, load `/internal-tdd` when the task changes executable or
 evaluable behavior, record and apply its selected posture, and require
 red-first evidence before implementation only for `mandatory-test-first`.
 For `feature-first`, require focused validation before task transition and
 reachable evidence before production-ready completion.
-After each delegated task, run the plan's focused validation, retain fresh
+After each task, run the plan's focused validation, retain fresh
 evidence, classify failures, and try each distinct safe repair or recovery
 candidate while evidence improves. Do not repeat an unchanged attempt as
 recovery. Pre-existing or unrelated broad failures do not stop independent
@@ -167,16 +166,12 @@ to `references/status-contract.md`. Always provide a concise user-facing report
 with the outcome, changed work, validation, blocker or gap, recovery attempts,
 and exact next action.
 
-## Subagent model selection
+## Direct execution rule
 
-Before any plan-writing or plan-execution delegation, probe whether
-`gpt-5.6-luna` is available at `max` reasoning. If it is unavailable, select the
-least expensive available model that is suitable for the specific task. Record
-the timestamp and context, probe and availability result, selected model,
-reasoning level, suitability evidence, and cost/fallback rationale. The known
-drafting fallback is `gpt-5.6-terra` at `high` reasoning; it is not a guarantee
-or a substitute for the probe. Luna's absence alone is not a blocker when the
-fallback evidence is complete; lack of a suitable approved fallback is.
+Perform plan review, todo tracking, and task-by-task mechanics in the current
+session. Do not dispatch plan work, select another model, or invoke a separate
+execution skill. The gateway retains responsibility for plan binding, task
+order, validation, recovery, status, and closeout.
 
 ## No-Commit Rule
 
@@ -193,14 +188,14 @@ mutation steps, skip them and record the plan drift in the status sibling.
 - `python3 scripts/plan_execution.py resume-check <plan-file> <status-file> --format compact`
 - `python3 scripts/plan_execution.py closeout-check <plan-file> <evidence-file> --format compact`
 - `python3 scripts/plan_execution.py completion-check <plan-file> <status-file> --format compact`
-- Confirm no live repository references point to removed bundle files.
+- Confirm no live bundle instruction dispatches plan work outside the current session.
 
 The writer-owned versioned `## Execution Contract` is authoritative for
 validation IDs, native commands, required flags, equivalence policy, manual
 obligations, and authority boundaries. The control inventory is a traceability
-layer over that contract, not a competing schema. The executor owns all six
-discovery categories, recovery candidates, attempts, rejection evidence,
-authority state, and closeout routing. `DONE` requires fresh evidence for every
+layer over that contract, not a competing schema. The gateway owns all six
+runtime discovery categories, recovery candidates, attempts, rejection
+evidence, authority state, and closeout routing. `DONE` requires fresh evidence for every
 task and every automatable or observable control; `request-authority` keeps
 execution active and does not produce a status sibling. Unavailable external
 evidence without an observed material failure is reported as non-blocking

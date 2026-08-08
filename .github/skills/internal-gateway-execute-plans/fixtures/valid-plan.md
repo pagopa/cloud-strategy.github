@@ -22,7 +22,7 @@ Validate the plan execution CLI against a realistic plan shape.
 
 | ID | Requirement | Class | Owner | Command or trigger | Pass/fail | Evidence | Fallback/boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| CI-01 | Current retained plans expose the required structural controls. | automatable-local | executor preflight | `gateway-tests` | Pass: inventory and no-Git constraint are present; fail: either is missing. | Focused pytest output. | Legacy/imported plans remain non-actionable until reconstructed. |
+| CI-01 | Current retained plans expose the required structural controls. | automatable-local | gateway preflight | `gateway-tests` | Pass: inventory and no-Git constraint are present; fail: either is missing. | Focused pytest output. | Legacy/imported plans remain non-actionable until reconstructed. |
 
 ## Execution Contract
 

@@ -8,7 +8,6 @@ import sys
 from pathlib import Path
 from typing import Final
 
-
 CONTRACT_VERSION: Final = "internal-gateway-idea-eval-v1"
 REQUIRED_CASE_IDS: Final = (
     "COVERAGE_OMISSION_BLOCK",

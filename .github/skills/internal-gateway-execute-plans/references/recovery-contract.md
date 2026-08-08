@@ -2,10 +2,9 @@
 
 This is the authoritative recovery ladder for
 `/internal-gateway-execute-plans`. The gateway owns route selection, recovery,
-stopping, worktree/finishing decisions, and closeout; imported execution
-mechanics do not override it. Keep the native authoritative command as the
-evidence label even when a supported override or optional accelerator invokes
-it.
+stopping, worktree/finishing decisions, closeout, and direct task mechanics.
+Keep the native authoritative command as the evidence label even when a
+supported override or optional accelerator invokes it.
 
 Before recovery begins, the binding gate must have passed current-plan
 `## Control Inventory` and explicit no-Git checks. A plan identified as
@@ -93,7 +92,7 @@ evidence, or `NEEDS_REVIEW` with completed work, an observed material failure,
 exhausted recovery, and a structured review request. Pending human or external
 evidence without an observed material failure is recorded as non-blocking
 follow-up on a successful `DONE` closeout; it is not by itself a review route.
-The local gateway makes this decision; imported core mechanics cannot create a
+The local gateway makes this decision; no separate execution path can create a
 status sibling or change the route.
 
 ## Bounded graphify fallback

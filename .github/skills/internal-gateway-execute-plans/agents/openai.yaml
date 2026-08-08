@@ -11,7 +11,7 @@ interface:
     from a material failure; retry safe repairs while evidence improves; keep
     authority and human or external follow-up explicit without blocking DONE
     when no material failure was observed. Preserve
-    native validation commands, record all six executor-owned discovery
+    native validation commands, record all six runtime discovery
     categories and structured recovery evidence, and continue through safe
     recovery. Request authority while execution remains active. Use
     /internal-tdd to record and apply the selected posture at executable task
@@ -21,12 +21,7 @@ interface:
     closeout-check with both plan and evidence paths as the deterministic route
     owner. Write one matching status sibling only for DONE, PARTIAL, BLOCKED, or
     NEEDS_REVIEW, and never mutate Git. The local gateway owns routing,
-    recovery, stopping, worktree/finishing decisions, status, and closeout;
-    delegate only critical review, todo tracking, and task mechanics to
-    imported execution core. Before any plan-writing or execution delegation,
-    probe gpt-5.6-luna at max reasoning. If unavailable, select the least
-    expensive suitable available fallback and record timestamp/context,
-    availability, selected model, reasoning, suitability evidence, and
-    cost/fallback rationale. The known drafting fallback is gpt-5.6-terra/high,
-    not a guarantee; Luna absence alone is not a blocker when fallback evidence
-    is complete.
+    recovery, stopping, worktree/finishing decisions, status, closeout, critical
+    review, todo tracking, and task mechanics directly in the current session.
+    Keep all plan work within this gateway; do not dispatch it to another
+    execution owner or model.

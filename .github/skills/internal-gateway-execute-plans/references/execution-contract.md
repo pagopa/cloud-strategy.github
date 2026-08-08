@@ -1,17 +1,16 @@
 # Execution Contract
 
-This reference is authoritative for the repository-local execution gateway
-around delegated `/superpowers-executing-plans` mechanics. The gateway owns
-routing, recovery, stopping, worktree/finishing decisions, status, and
-closeout. The imported bundle contributes only critical review, todo tracking,
-and task-by-task mechanics.
+This reference is authoritative for the repository-local execution gateway and
+its direct plan-execution mechanics. The gateway owns routing, recovery,
+stopping, worktree/finishing decisions, status, closeout, critical review, todo
+tracking, and task-by-task mechanics.
 
-## Before the delegated loop
+## Before execution
 
 - Require the exact retained plan path under `tmp/superpowers/plans/`.
 - Treat the writer-owned versioned `## Execution Contract` as authoritative.
 - Require a current plan's `## Control Inventory` and explicit no-Git constraint
-  through executor preflight. An explicitly `legacy/imported` document remains
+  through gateway preflight. An explicitly `legacy/imported` document remains
   non-actionable until the writing gateway reconstructs it and approval and
   fingerprint are refreshed.
 - Accept `Preflight Gate` as the canonical plan heading and
@@ -27,17 +26,10 @@ and task-by-task mechanics.
   retain its command, exit status, and bounded failure summary.
 - Preserve the no-Git-mutation rule throughout execution.
 
-Before any plan-writing or plan-execution delegation, probe
-`gpt-5.6-luna` at `max` reasoning. If unavailable, select the least expensive
-available model suitable for the task and record timestamp/context, probe
-result, selected model, reasoning level, suitability evidence, and
-cost/fallback rationale. `gpt-5.6-terra/high` is the known drafting fallback,
-not a guaranteed selection.
-
 ## Control coverage
 
 Build a control inventory from the plan's `## Control Inventory`, tasks, and
-acceptance criteria before loading the delegated loop. Assign each obligation
+acceptance criteria before execution. Assign each obligation
 exactly one class: `automatable-local`, `observable-runtime`,
 `external-capability`, `authority-or-scope`, or `genuine-human-judgment`.
 
@@ -79,7 +71,7 @@ fingerprint, or completion checks fail. Required plan headings and execution
 fields are blocking. The validator does not interpret textual states such as
 `Draft-only`.
 
-## Before each delegated task
+## Before each task
 
 - State the task's observable outcome, dependency set, and focused validation.
 - For executable or evaluable behavior, load `/internal-tdd`, record and apply
@@ -87,13 +79,12 @@ fields are blocking. The validator does not interpret textual states such as
   implementation edit only for `mandatory-test-first`. For `feature-first`,
   require focused validation before task transition and reachable evidence
   before production-ready completion.
-- The local gateway retains routing, status, fixtures, approval, recovery,
-  stop, worktree/finishing, and closeout decisions; do not delegate those
-  decisions to imported core skills.
+- Apply routing, status, fixtures, approval, recovery, stop, worktree/finishing,
+  and closeout decisions in this gateway.
 - Keep repository-owned routing, status, fixtures, and approval gates in scope;
-  do not edit imported core skills.
+  do not edit unrelated skills.
 
-## After each delegated task
+## After each task
 
 - Run the plan-specified focused validation command.
 - Confirm every changed task and control has fresh evidence before transition;
@@ -126,7 +117,7 @@ fields are blocking. The validator does not interpret textual states such as
   coherent dependency set as one execution unit. Keep coupled edits, such as a
   signature, its callers, and its implementation, together; keep unrelated plan
   tasks separate. Use the task's focused validation as its transition gate.
-- **FFD (fail fast on fatal conditions):** Stop the delegated loop on plan
+- **FFD (fail fast on fatal conditions):** Stop execution on plan
   drift, owner conflict, missing required validation, unapproved scope
   expansion, unsafe continuation, unknown failure attribution, or an unresolved
   task-local regression after bounded recovery.
