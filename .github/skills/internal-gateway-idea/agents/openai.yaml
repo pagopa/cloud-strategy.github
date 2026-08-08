@@ -2,71 +2,26 @@ interface:
   display_name: "Idea Internal Gateway"
   short_description: "Idea shaping with outcome proofs and final approval"
   default_prompt: |-
-    Use /internal-gateway-idea when a repository-owned idea, proposed direction,
-    unclear goal, or option set needs brainstorming before planning. Load
-    /superpowers-brainstorming as the core workflow, then read
-    references/workflow.md for the canonical state machine. If the incoming
-    request is execution-shaped, record Specialization Checkpoint: gated
-    internally and project only its decision-relevant consequence. Run Idea Gate
-    0 as one numbered bulk question block with Question, Recommendation, Why,
-    and Default if accepted; evidence cannot replace Idea Gate 0. Follow this
-    order: Specialization Checkpoint: gated, Idea Gate 0, External Research
-    Checkpoint, Controlling platform evidence, Assumption Challenge Gate,
-    Alternative discovery, Coverage + minimality, Present design direction,
-    Full-analysis consolidation, Independent full-scope critical, Critical
-    resolution loop, Full-loop revision when material, Whole-analysis user
-    approval, Writing-plans, Stop before implementation execution.
+    Use /internal-gateway-idea for repository-owned idea shaping or review before
+    planning. Load /superpowers-brainstorming, persist only
+    tmp/idea/<slug>/design.md using references/design-template.md, and follow
+    the compact SCOPE -> DISCOVER -> QUESTION? -> ANALYZE -> CRITIQUE ->
+    USER_DECISION -> REVISE -> VERIFY -> FINAL_APPROVAL -> HANDOFF/STOP flow.
 
-    Keep exactly tmp/idea/<slug>/state.yaml and tmp/idea/<slug>/design.md as
-    lightweight, best-effort artifacts. State is not durable storage, a
-    security boundary, or planning authorization; do not append a transcript.
-    design.md is the single living spec and coverage artifact. Reconstruct a
-    draft and invalidate claimed approval or critique when state is stale,
-    missing, or corrupt, and never overwrite a slug with different intent.
+    Use the strict state helper and the critical-master full-analysis packet at
+    their documented boundaries. Reconstruct a draft and clear claimed review
+    or approval when state is stale, missing, or corrupt; never append a
+    transcript or create state.yaml.
 
-    Before design presentation and final approval, map every deliverable to
-    requirement ID, nearest owner/design element, consumer, validation, and
-    status or approved anti-scope. Add interface and independent-decision
-    columns when three or more owners or runtime surfaces are involved. Verify
-    controlling primary-source platform semantics before architecture defaults.
-    Compare no-new-artifact, existing-owner, and new-abstraction before
-    selecting a new abstraction; record its invariant, footprint/maintenance,
-    and exit criterion.
+    Keep coverage, minimality, controlling platform evidence, assurance, and
+    current-revision approval explicit. Add interface, independent-decision,
+    and consumer columns when ownership or runtime surfaces expand.
 
-    After design-direction approval, recompose the complete design.md before an
-    independent full-scope critical pass. Same-context self-review and
-    delta-only critique cannot authorize planning. If a fresh subagent or
-    isolated agent dispatch is unavailable, fail closed with
-    request-separate-review. A material change to requirements, scope,
-    ownership, platform assumptions, alternative, coverage, validation,
-    anti-scope, or material risk requires recomposition and another full pass.
-    The only critical outcomes are accepted, revise-design, reopen-analysis,
-    and needs-clarification; accepted requires every material objection to be
-    closed or explicitly routed.
-
-    After objections are closed, routed, or named as residual risks, present
-    the entire current analysis and independent outcome. Ask one explicit
-    current-conversation question authorizing plan writing. Only that approval
-    may load /internal-gateway-writing-plans; do not infer it from a gate-local
-    approval, stale state, or critic accepted. After the writing outcome, stop;
-    do not implement, invoke execution owners, or modify downstream gateways.
-    The parent may invoke internal-luna-executor with the evidence question,
-    relevant sources, expected output, and validation. Keep intent, synthesis,
-    alternatives, critical resolution, and approval with this gateway. Treat
-    procedi, ok, and go as advancing only the active visible gate; clarify
-    ambiguous approval before loading another
-    owner. If a mandatory gate was skipped, resume at the first skipped gate.
-
-    The only transition notification is exactly:
-    🚀 **Scrittura del piano avviata**
-    ✅ La critica si è conclusa senza obiezioni materiali aperte.
-    🛠️ `/internal-gateway-writing-plans` sta preparando il piano di implementazione.
-
-    Keep mandatory gates as internal workflow state. In chat, emit one compact
-    user-facing decision card with 🎯 🧭 🛠️ 🧪 ⚠️ ✅ 💡 ✈️ for status, approval,
-    routing, material risk, blocker, and requested user action. Content-bearing
-    output uses its owning schema and is outside the card limit. Guided
-    questions, alternatives, design sections, and critique packets are
-    content-bearing output. Do not announce skipped checkpoints or print
-    internal ledgers. Always show a material risk, blocker, validation gap, or
-    user decision.
+    Recompose the complete design before critique. A material change starts a
+    new revision and invalidates review and approval. Use one standard packet
+    and one independent packet when assurance is high; invalid or unavailable
+    required review fails closed. Only current approval may load
+    /internal-gateway-writing-plans, and neither design nor plan approval
+    authorizes implementation. Use one compact decision card for status, risk,
+    validation, and next action; content-bearing questions, designs, and
+    critique packets keep their schemas.

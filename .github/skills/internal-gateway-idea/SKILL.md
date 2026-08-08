@@ -14,8 +14,12 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 
 ## Local references
 
-- `references/workflow.md`: authoritative state machine, Mermaid workflow,
-  approval rules, and routing stability for this bundle.
+- `references/design-template.md`: the only living-spec template and exact YAML
+    header/section contract.
+- `scripts/idea_state.py`: strict state parser, transitions, packet consumer,
+    finding consolidation, and public projection.
+- `internal-gateway-critical-master`: owns the `full-analysis-v1` producer
+    packet and its contract; consume only validated packets at that boundary.
 - Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `tsv`/`csv` only for large flat tables; data on stdout, diagnostics on stderr; keep output bounded.
 
 Lightweight repository-owned wrapper for idea shaping. Use `/superpowers-brainstorming` as the core workflow and add the local gates below. Loading `/superpowers-brainstorming` is an intentional, globally-resolvable exception to the bundle self-containment rule. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.
@@ -28,33 +32,47 @@ Lightweight repository-owned wrapper for idea shaping. Use `/superpowers-brainst
 
 ## Core contract
 
-- Follow the mandatory gate sequence: `Specialization Checkpoint: gated`, `Idea Gate 0`, `External Research Checkpoint`, `Controlling platform evidence`, `Assumption Challenge Gate`, `Alternative discovery`, `Coverage + minimality`, `Present design direction`, `Full-analysis consolidation`, `Independent full-scope critical`, `Full-loop revision when material`, `Whole-analysis user approval`, `Writing-plans`, `Stop before implementation execution`.
 - Load `/superpowers-brainstorming` as the core workflow.
-- Read `references/workflow.md` before presenting the final design direction.
-- Keep the `/superpowers-brainstorming` hard gate: no implementation action before the user approves the design.
-- Treat approval as gate-local. `procedi`, `ok`, `go`, or similar approval advances only the active visible gate.
-- If approval wording is ambiguous, ask whether it means design approval, critical review, or implementation execution.
-- After the bounded evidence pass, run `Idea Gate 0` as one numbered bulk question block; evidence cannot replace Idea Gate 0.
-- Do not proceed to the next mandatory gate until `Idea Gate 0` is accepted or the user explicitly overrides its defaults.
-- Before design presentation and before final approval, build one coverage map for every explicit deliverable. Each row must contain `requirement ID | user deliverable | nearest owner/design element | consumer | validation | status or approved anti-scope`; add interface and independent-decision columns when three or more owners or runtime surfaces are involved. A missing deliverable or unexplained anti-scope blocks advancement.
-- If platform semantics control feasibility or ownership, obtain controlling primary-source evidence before architecture defaults; adapter-only evidence routes back to analysis.
-- Compare `no-new-artifact`, `existing-owner`, and `new-abstraction` before selecting a new abstraction. A selected new abstraction needs an invariant, footprint/maintenance rationale, and exit criterion.
-- Keep multi-turn continuity to exactly `tmp/idea/<slug>/state.yaml` and `tmp/idea/<slug>/design.md`. They are lightweight, best-effort artifacts, not durable storage, a security boundary, or planning authorization. `design.md` is the single living spec and coverage artifact; do not append a transcript or create a duplicate spec.
-- Before the critical pass, recompose the complete current `design.md`. Require at least one independent full-scope critique; same-context self-review, delta-only critique, or unavailable review without a fail-closed fallback cannot authorize planning.
-- A material revision to requirements, scope, ownership, platform assumptions, alternative, coverage, validation, anti-scope, or material risk invalidates the prior critique and requires recomposition plus a new full pass.
-- Run `Critical Challenge Gate` as its own visible gate after design presentation and full-analysis consolidation; an embedded critique does not satisfy it.
-- The only critical outcomes are `accepted`, `revise-design`, `reopen-analysis`, and `needs-clarification`.
-- `accepted` is legal only when every material objection raised during the current `Critical Challenge Gate` is closed or explicitly routed; continue to `Whole-analysis user approval`.
-- Every material objection raised during the current critical pass is closed or explicitly routed before `accepted`.
-- `revise-design` returns to design presentation and approval, then reruns full-analysis consolidation and the independent full-scope critical pass.
-- `reopen-analysis` returns to `Idea Gate 0` so the assumption, scope decision, or alternative can be reconsidered.
-- `needs-clarification` means load `/grill-me` for one or more numbered clarification sessions over the critic's newly surfaced elements.
-- After clarification, return to the relevant earlier approval gate when a material change occurred; otherwise rerun the independent full-scope critical pass directly. Repeat until the critic emits one conclusive routing outcome.
-- If any mandatory gate was skipped, stop, name the missed gate, mark any downstream artifact as draft-only, and resume at the first skipped mandatory gate.
-- Use this skill only to add repository-owned idea gates, not to fork the core brainstorming process.
-- Keep collaborative questioning inside the core brainstorming workflow.
-- After objections are closed, routed, or exposed as named residual risks, present the entire current analysis and independent outcome. Ask one explicit current-conversation question authorizing plan writing; a generic approval is sufficient only when no residual risk remains, otherwise name the risk being accepted. Only this approval may load `/internal-gateway-writing-plans`.
-- Stop after the delegated writing outcome. Do not implement, invoke execution owners, or run execution commands from this skill.
+- Persist exactly one artifact: `tmp/idea/<slug>/design.md`. Its YAML header
+    is the resumable state; it is not a transcript, authorization, or duplicate
+    specification. Read `references/design-template.md` before creating it.
+- Inspect the nearest owner, consumer, validation path, original intent, and
+    emerged requirements before asking questions. Run `Idea Gate 0` as one
+    numbered block with `Question`, `Recommendation`, `Why`, and `Default if
+    accepted`; evidence cannot replace it.
+- Obtain controlling primary-source platform evidence before architecture
+    defaults. Compare `no-new-artifact`, `existing-owner`, and
+    `new-abstraction`; a selected abstraction needs an invariant, maintenance
+    rationale, and exit criterion.
+- Map every deliverable before design presentation and final approval. Each row
+    has requirement ID, deliverable, owner/design element, conditional interface,
+    independent decision, consumer, validation, and status or anti-scope. Three
+    or more owners or runtime surfaces require separate interface,
+    independent-decision, and consumer columns.
+- Recompose the complete design before critique. Use one full-scope standard
+    packet and one independent packet when assurance is high. The critic owns
+    packet production and this gateway owns validation, consolidation, F IDs,
+    public rendering, and state transitions. Invalid or unavailable required
+    review fails closed.
+- A material change to requirements, scope, ownership, platform assumptions,
+    alternatives, coverage, validation, anti-scope, or material risk increments
+    the revision and invalidates review and approval. Open non-blocking findings
+    may persist; open blockers and conflicts prevent review completion.
+- High assurance applies to destructive or hard-to-reverse production changes;
+    security, authorization, permission, or sensitive-data impact; an unknown
+    controlling platform claim; three or more independent owners with material
+    interfaces; feasibility-critical unknowns after evidence; or an explicit
+    user request. Run one isolated full review, not a second workflow.
+- After the bounded critic pass, use one consolidated revision. `needs-clarification`
+    may load `/grill-me` with one block and one legal follow-up; the only automatic
+    return is `CRITIQUE -> QUESTION -> ANALYZE` for a newly exposed blocking
+    user-owned ambiguity. Silence never accepts that decision.
+- Final approval is current-revision only. `approvo` stops; `approvo e scrivi il
+    piano` or a later current `scrivi il piano` routes only to
+    `/internal-gateway-writing-plans`. Neither phrase authorizes implementation.
+- If a mandatory gate or current state is missing or stale, reconstruct the
+    draft, clear claimed review/approval, and resume at the first unresolved
+    state. Do not invoke the execution gateway from this skill.
 
 ## User-facing communication
 
@@ -83,31 +101,23 @@ critical resolution, and approval with this skill's parent.
 
 ## State machine
 
-Follow `references/workflow.md` in this order:
+The canonical flow is:
 
-1. `Bounded evidence pass`
-2. `Specialization Checkpoint: gated` when the incoming ask is execution-shaped.
-3. `Idea Gate 0`
-4. `External Research Checkpoint`
-5. `Controlling platform evidence`
-6. `Assumption Challenge Gate`
-7. `Alternative discovery`
-8. `Coverage + minimality`
-9. `Present design direction`
-10. `Full-analysis consolidation`
-11. `Independent full-scope critical`
-12. `Critical resolution loop`
-13. `Whole-analysis user approval`
-14. `Writing-plans`
-15. `Stop before implementation execution`
+`SCOPE -> DISCOVER -> QUESTION? -> ANALYZE/WRITE DRAFT -> PRE-CRITIQUE CHECK -> CRITIQUE -> USER_DECISION -> REVISE -> VERIFY -> FINAL_APPROVAL -> APPROVED -> HANDOFF/STOP`
 
-If a later step happened before an earlier mandatory gate, use `Skipped-gate
-recovery`: stop the current lane, identify the first skipped mandatory gate,
-and resume there before producing or revising a retained artifact.
+`QUESTION?` is optional. A new blocking user-owned ambiguity permits exactly
+one `CRITIQUE -> QUESTION -> ANALYZE` return; all other material changes restart
+the current revision's analysis and critique. The persisted header records the
+current status, revision, reviewed revision, approved revision, next actor, and
+next action. The template owns literal enums; `scripts/idea_state.py` owns
+parser and transition invariants.
 
-Do not skip from evidence or design approval to implementation. The only
-post-brainstorming owner this skill may load is
-`/internal-gateway-writing-plans`, and only after whole-analysis approval.
+The two lanes are `shape-idea` and `review-existing`. An execution-shaped
+request records a gated specialization consequence and remains in design until
+the final approval boundary. `accepted`, `revise-design`, `reopen-analysis`,
+`needs-clarification`, `invalid-target`, and `request-separate-review` are
+critic outcomes; only current, complete, non-blocked review can reach final
+approval.
 
 ## Idea Gate 0
 
@@ -222,22 +232,13 @@ implementation execution.
 
 ## Validation
 
-- The skill read `references/workflow.md` before finalizing the design direction.
-- The skill used `Specialization Checkpoint: gated` for execution-shaped requests.
-- The skill loaded `/superpowers-brainstorming` as core instead of copying its workflow.
-- The skill verified controlling platform semantics before architecture defaults when they governed feasibility or ownership.
-- The skill produced coverage and minimality evidence before design presentation and final approval.
-- The skill kept exactly `state.yaml` and `design.md` as lightweight, best-effort state and single living spec.
-- The skill challenged the user's initial assumption, not only corrected the proposed solution.
-- The skill presented 2-3 approaches and explained why the recommendation beat the strongest rejected option.
-- The skill recomposed the complete current analysis before an independent full-scope critical pass.
-- The skill used `Critical Challenge Gate` only after full-analysis consolidation and before plan writing.
-- Every material objection raised during the current critical pass was closed or explicitly routed before `accepted`.
-- A material revision invalidated the prior critical result and triggered a new full pass.
-- A `needs-clarification` result ran one or more `/grill-me` sessions over the critic's newly surfaced elements and returned to the relevant earlier approval gate after a material change or reran the critic otherwise.
-- An `accepted` result waited for one explicit current-conversation approval of the entire analysis before implementation-plan writing and emitted only the exact transition notification.
-- The skill treated ambiguous approval words as gate-local and clarified the active gate when needed.
-- The skill kept collaborative questioning inside the core brainstorming workflow.
-- The skill loaded `/internal-gateway-writing-plans` only for implementation-plan writing after `accepted`.
-- The skill stopped after `/internal-gateway-writing-plans` produced a writing outcome.
-- The Mermaid workflow and runtime prompt contain the same mandatory gate names.
+- Parse `design.md` with the strict YAML/state helper and reject duplicate or
+    unknown header keys, stale revisions, invalid actors, missing sections,
+    incomplete coverage, missing handoff controls, and unsafe ledger IDs.
+- Require the focused state/consumer tests, strict skill validation, routing
+    cases, token-risk checks, and the home-sync contract suite. Use human review
+    for subjective prose, proportionality, discovery retention, and semantic
+    regression; do not turn prose into a synthetic wording test.
+- Validate the critic packet through the critical-master producer contract,
+    persist the required packet sources, consolidate equivalent findings, keep
+    conflicts open, and render only localized public fields.
