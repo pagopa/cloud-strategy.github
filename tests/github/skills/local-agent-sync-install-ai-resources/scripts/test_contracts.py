@@ -109,6 +109,9 @@ def test_live_catalog_scopes_native_luna_agents_to_owning_runtimes() -> None:
     assert resources[".codex/agents/internal-luna-executor.toml"].include_targets == (
         "codex",
     )
+    assert resources[
+        ".codex/agents/internal-gateway-critical-master.toml"
+    ].include_targets == ("codex",)
 
 
 def test_agent_discovery_finds_native_codex_agents_only_for_codex(

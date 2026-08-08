@@ -41,3 +41,10 @@ resources:
       - codex
     target_support: See runtime support matrix
     notes: Installs the native Luna executor in ~/.codex/agents/.
+  - resource_id: internal-gateway-critical-master
+    source_family: agents
+    source_path: .codex/agents/internal-gateway-critical-master.toml
+    include_targets:
+      - codex
+    target_support: See runtime support matrix
+    notes: Installs the native critical-challenge agent in ~/.codex/agents/.

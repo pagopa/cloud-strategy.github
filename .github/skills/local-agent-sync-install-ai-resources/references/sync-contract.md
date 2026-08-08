@@ -12,8 +12,9 @@ Use this reference for the exact repository-to-home contract.
   not a second source.
 - Eligible skills are materialized as one absolute canonical symbolic link per
   skill. A write through that link changes the repository object directly.
-- Copilot agents are canonical links to `.github/agents/`; Codex and OpenCode
-  agents retain their translated copy behavior.
+- Copilot agents are canonical links to `.github/agents/`. Native Codex TOML
+  agents are copied unchanged to `~/.codex/agents/`; Markdown agents are
+  translated for Codex and OpenCode copy targets.
 - Never copy, merge, or reconcile home skill content into the repository.
 - Preserve all home-only skills, including `graphify`, every `local-*` bundle,
   invalid repository bundles, and every catalog-excluded ID.
@@ -81,7 +82,7 @@ without backup and create the absolute link. `unlink_managed_skill` unlinks
 the link itself, including a broken link, and never follows its target.
 
 Apply verifies every skill and Copilot agent by exact link identity, and every
-translated copied agent by its expected hash. It then writes manifest v2.
+copied Codex or OpenCode agent by its expected hash. It then writes manifest v2.
 The global `AGENTS.md` copy is verified against its rendered portable hash.
 Unsupported link capability is
 `symlink-unsupported`; do not fall back to copied skills.
@@ -103,7 +104,7 @@ Do not run against the real home during tests. Use a temporary home root.
 
 ## Reporting
 
-Compact and report payloads expose `linked`, `unlinked`, copied translated agents,
+Compact and report payloads expose `linked`, `unlinked`, copied agents,
 skipped resources, blockers, and a bounded path sample. Report counts for
 unchanged skills rather than enumerating them. Translate every blocker using
 `error-codes.md` and state the next action.
