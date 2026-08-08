@@ -7,7 +7,7 @@ description: Use when repository-owned work needs an approved implementation pla
 
 ## Referenced skills
 
-- `/superpowers-writing-plans`: imported drafting mechanics only; this gateway
+- `/superpowers-writing-plans`: imported plan-structure mechanics only; this gateway
   owns eligibility, retained-plan requirements, review, and handoff.
 - `/internal-gateway-execute-plans`: required next owner after human review and
   explicit execution approval.
@@ -25,9 +25,10 @@ description: Use when repository-owned work needs an approved implementation pla
 
 ## Contract
 
-0. Establish writing eligibility before any drafting. `Critical Challenge Gate:
-   accepted` authorizes plan writing only when it is supplied by
-   `/internal-gateway-idea`. A direct invocation of this gateway requires
+0. Establish writing eligibility before any implementation-plan writing.
+  `Critical Challenge Gate: accepted` authorizes implementation-plan writing
+  only when it is supplied by
+  `/internal-gateway-idea`. A direct invocation of this gateway requires
    explicit user approval in the current conversation. Neither path authorizes
    plan execution, status creation, or Git mutation.
 1. Capture the target, anti-scope, nearest owner, validation path, stop
@@ -39,11 +40,13 @@ description: Use when repository-owned work needs an approved implementation pla
    under `## Global Constraints` and a compact `## Control Inventory` in every
    current plan. Completion: all six facts, the no-mutation rule, and one owner
    for every obligation are recorded before delegation.
-2. Produce one reviewable retained plan under `tmp/superpowers/plans/` with
-   ordered actionable tasks, concrete file targets, focused validation, a
-   compact `## Control Inventory`, and an execution handoff. Imported
-   `/superpowers-writing-plans` mechanics may assist drafting but do not own
-   approval eligibility or handoff. Each inventory row records a stable ID,
+2. Lock exactly one parent-supplied retained plan path under
+    `tmp/superpowers/plans/` and its required structure before delegation:
+    ordered actionable tasks, concrete file targets, focused validation, a
+    compact `## Control Inventory`, an execution handoff, and one versioned
+    `## Execution Contract` fenced JSON object. Imported
+    `/superpowers-writing-plans` mechanics define plan structure only; they do
+    not own approval eligibility or handoff. Each inventory row records a stable ID,
    preserved requirement, nearest owner, command or trigger, pass/fail signal,
    evidence, and safe fallback or authority boundary. Link local/runtime rows
    to `validations` and residual external/human rows to the existing contract
@@ -59,11 +62,15 @@ description: Use when repository-owned work needs an approved implementation pla
   every posture to focused and broad validation; require observed red-first
   evidence only for `mandatory-test-first`, while `feature-first` retains
   validation before production-ready completion.
-  After the control inventory, plan structure, locked decisions, and
-  acceptance are complete, the gateway may invoke `internal-luna-executor`
-  with the drafting objective, relevant evidence, required structure, and
-  validation. Retain plan eligibility, control classification, review, and
-  handoff here.
+  After eligibility, the control inventory, plan structure, locked decisions,
+  and acceptance are complete, the gateway MUST delegate implementation-plan
+  writing (redazione del piano) to `internal-luna-executor` with the
+  parent-supplied path, implementation-plan writing objective, relevant
+  evidence, required structure, and validation. Luna MUST write exactly one reviewable retained plan to that
+  path, run the executor-owned `preflight`, fix every blocking finding, and
+  repeat until there are zero blocking findings. The parent gateway retains
+  eligibility, control classification, human review, final independent
+  `preflight`, handoff, and the no-Git-mutation boundary.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every
    `automatable-local` or `observable-runtime` row must map to a required
@@ -82,13 +89,12 @@ description: Use when repository-owned work needs an approved implementation pla
    results or recovery candidates. Completion: each review concern and control
    row is accepted or has a recorded revision.
 4. Report the retained plan path, name `/internal-gateway-execute-plans` as
-   the only next owner, and wait for explicit execution approval. Do not invoke
-   execution, create a status sibling, or offer an imported execution owner
-   before that approval. Completion: the path and next owner are reported and
-   execution has not started without approval.
+  the only next owner, and wait for explicit execution approval. Do not invoke
+  execution, create a status sibling, or offer an imported execution owner
+  before that approval. Completion: the path and next owner are reported and
+  execution has not started without approval.
 
 ## Command Portability
-
 - Write every baseline, focused, and final validation command in directly
   executable native form. The command recorded in the plan is the
   authoritative command and evidence label.
@@ -98,25 +104,16 @@ description: Use when repository-owned work needs an approved implementation pla
   the recorded authoritative command or its validation meaning.
 
 The executor owns the single mechanical plan validator. Do not add a
-writer-local validator, draft-only lifecycle, or duplicate parser contract.
-Before handoff, run the executor-owned `preflight` against the written current
-plan and revise it until there are zero blocking findings. Explicitly
+writer-local validator, a second implementation-plan writing lifecycle, or a
+duplicate parser contract.
+Before handoff, the parent gateway MUST run the executor-owned `preflight`
+independently against the written current plan and confirm zero blocking
+findings. Explicitly
 `legacy/imported` material is the only reconstruction path; it is not a current
 plan exemption and requires refreshed approval and fingerprint. Plans without
 the versioned contract are not actionable. Do not leave an automatable
 obligation as narrative-only evidence or downgrade it to a manual obligation
 to make preflight or closeout pass.
-
-## Subagent model selection
-
-Before any plan-writing or plan-execution delegation, probe whether
-`gpt-5.6-luna` is available at `max` reasoning. If unavailable, select the
-least expensive available model suitable for the specific task and record the
-timestamp and context, probe and availability result, selected model,
-reasoning level, suitability evidence, and cost/fallback rationale. The known
-drafting fallback is `gpt-5.6-terra` at `high` reasoning, not a guarantee. Luna's
-absence alone is not a blocker when fallback evidence is complete; lack of a
-suitable approved fallback is.
 
 ## No-Commit Rule
 

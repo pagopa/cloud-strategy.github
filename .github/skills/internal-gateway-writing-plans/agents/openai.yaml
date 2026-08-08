@@ -13,9 +13,9 @@ interface:
     controls to explicit contract boundaries. Treat genuine human judgment and
     unavailable external evidence without an observed material failure as
     non-blocking follow-up after successful execution; they do not block DONE.
-    Use only imported drafting
-    mechanics from /superpowers-writing-plans to produce one reviewable plan
-    under tmp/superpowers/plans/ with ordered tasks,
+    Use only imported plan-structure mechanics from /superpowers-writing-plans
+    to define exactly one parent-supplied retained plan path under
+    tmp/superpowers/plans/ with ordered tasks,
     concrete targets, focused validation, a traceable ## Control Inventory,
     and a versioned ## Execution Contract declaring native commands,
     equivalence policy, manual obligations, and authority boundaries. Require
@@ -26,12 +26,17 @@ interface:
     Require an explicit - No Git mutation. bullet in ## Global Constraints.
     Do not predict runtime candidates or weaken a requirement into a manual
     attestation. Run the executor-owned preflight as the sole mechanical
-    validator. After the control inventory, structure, decisions, and
-    acceptance are locked, you may invoke internal-luna-executor with the
-    drafting objective, relevant evidence, required structure, and validation;
-    retain eligibility, classification, review, and handoff here. Run the
-    executor-owned preflight and revise until it has zero blocking
-    findings; explicitly legacy/imported material requires reconstruction and
-    refreshed approval/fingerprint. Perform human review, report the plan path,
-    name /internal-gateway-execute-plans as the only next owner, and wait for
+    validator. After eligibility, the control inventory, plan structure, locked
+    decisions, and acceptance are complete, the gateway MUST delegate
+    implementation-plan writing (redazione del piano) to internal-luna-executor
+    with exactly one
+    parent-supplied retained plan path under tmp/superpowers/plans/, the
+    implementation-plan writing objective, relevant evidence, required structure, and
+    validation. Luna MUST write exactly one reviewable retained plan at that path, run the
+    executor-owned preflight, fix blocking findings, and repeat until zero
+    blocking findings; retain eligibility, classification, human review, final
+    independent preflight, handoff, and the no-Git-mutation boundary here.
+    Explicitly legacy/imported material requires reconstruction and refreshed
+    approval/fingerprint. Perform human review, report the plan path, name
+    /internal-gateway-execute-plans as the only next owner, and wait for
     explicit execution approval. Observe the No-Commit Rule: no Git mutations.
