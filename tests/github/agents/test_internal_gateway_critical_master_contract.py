@@ -9,6 +9,10 @@ REPO_ROOT = next(
 )
 CODEX_PATH = REPO_ROOT / ".codex/agents/internal-gateway-critical-master.toml"
 COPILOT_PATH = REPO_ROOT / ".github/agents/internal-gateway-critical-master.agent.md"
+OPENAI_PATH = (
+    REPO_ROOT
+    / ".github/skills/internal-gateway-critical-master/agents/openai.yaml"
+)
 
 
 def _assert_ordered(markers: list[str], text: str) -> None:
@@ -44,13 +48,17 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
         "estimate",
         "final consistency gate",
         "exactly one canonical internal routing outcome",
-        "references/output-contract.md",
+        "full-analysis-v1",
+        "full-analysis-contract.md",
+        "target_path",
+        "target_revision",
+        "every material finding",
+        "strict JSON packet",
     ):
         assert marker in instructions
     for defense in ("none", "resolves", "narrows", "accepts-risk", "unanswered"):
         assert defense in instructions
 
-    _assert_ordered(["🎯", "⚠️", "✅"], instructions)
     for marker in (
         "do not edit files",
         "do not run commands",
@@ -68,5 +76,11 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
         "/internal-review-code",
     ):
         assert marker in lowered
+
+    assert "output-contract.md" not in instructions
+    assert "emoji card" not in lowered
+    openai_prompt = OPENAI_PATH.read_text(encoding="utf-8")
+    assert "full-analysis-v1" in openai_prompt
+    assert "emoji card" not in openai_prompt.lower()
 
     assert not COPILOT_PATH.exists()
