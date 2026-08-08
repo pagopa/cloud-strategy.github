@@ -114,9 +114,11 @@ does not regain any local gateway responsibility.
 1. **Bind** the approved retained plan, fingerprint, workspace overlap, control
    inventory, and native validation commands. Completion: preflight passes,
    every control has an owner, and the baseline is recorded.
-2. **Execute** the delegated plan task-by-task with task-level red-first gates.
-   Completion: each task and control has fresh focused evidence or a recorded
-   safe pause.
+2. **Execute** the delegated plan task-by-task with the posture returned by
+  `/internal-tdd`. Require red-first gates only for `mandatory-test-first`;
+  `feature-first` requires focused validation before task transition and
+  reachable evidence before production-ready completion. Completion: each
+  task and control has fresh focused evidence or a recorded safe pause.
 3. **Recover** through `references/recovery-contract.md` whenever validation or
    execution is unresolved. Completion: each distinct safe candidate was tried,
    authority was requested when required, or exhaustion evidence is complete.
@@ -138,9 +140,11 @@ baseline, and run the plan's broad baseline validation. The binding gate must
 also confirm the current plan has `## Control Inventory` and an explicit no-Git
 constraint. A document identified as `legacy/imported` is non-actionable until
 the writing gateway reconstructs it and approval and fingerprint are refreshed.
-At each
-task boundary, load `/internal-tdd` when the task changes executable or
-evaluable behavior and require its red-first evidence before implementation.
+At each task boundary, load `/internal-tdd` when the task changes executable or
+evaluable behavior, record and apply its selected posture, and require
+red-first evidence before implementation only for `mandatory-test-first`.
+For `feature-first`, require focused validation before task transition and
+reachable evidence before production-ready completion.
 After each delegated task, run the plan's focused validation, retain fresh
 evidence, classify failures, and try each distinct safe repair or recovery
 candidate while evidence improves. Do not repeat an unchanged attempt as

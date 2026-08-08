@@ -14,6 +14,10 @@ interface:
     native validation commands, record all six executor-owned discovery
     categories and structured recovery evidence, and continue through safe
     recovery. Request authority while execution remains active. Use
+    /internal-tdd to record and apply the selected posture at executable task
+    boundaries; require red-first evidence only for mandatory-test-first, and
+    require reachable focused and broad validation before feature-first
+    production-ready completion. Use
     closeout-check with both plan and evidence paths as the deterministic route
     owner. Write one matching status sibling only for DONE, PARTIAL, BLOCKED, or
     NEEDS_REVIEW, and never mutate Git. The local gateway owns routing,

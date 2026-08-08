@@ -82,8 +82,11 @@ fields are blocking. The validator does not interpret textual states such as
 ## Before each delegated task
 
 - State the task's observable outcome, dependency set, and focused validation.
-- For executable or evaluable behavior, load `/internal-tdd` and establish
-  red-first evidence before the first implementation edit.
+- For executable or evaluable behavior, load `/internal-tdd`, record and apply
+  its selected posture, and establish red-first evidence before the first
+  implementation edit only for `mandatory-test-first`. For `feature-first`,
+  require focused validation before task transition and reachable evidence
+  before production-ready completion.
 - The local gateway retains routing, status, fixtures, approval, recovery,
   stop, worktree/finishing, and closeout decisions; do not delegate those
   decisions to imported core skills.

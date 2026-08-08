@@ -58,6 +58,10 @@ description: Use when repository-owned work needs an approved implementation pla
    rows remain pre-execution gates. Completion: one
    plan exists at the retained path and contains those artifact properties plus
    one versioned `## Execution Contract` fenced JSON object.
+  Classify each executable or evaluable task through `/internal-tdd`. Map
+  every posture to focused and broad validation; require observed red-first
+  evidence only for `mandatory-test-first`, while `feature-first` retains
+  validation before production-ready completion.
   After the control inventory, plan structure, locked decisions, and
   acceptance are complete, delegate only mechanical or token-intensive plan
   drafting through `/internal-low-cost-delegation`; retain plan eligibility,

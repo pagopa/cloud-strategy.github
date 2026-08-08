@@ -19,6 +19,10 @@ interface:
     concrete targets, focused validation, a traceable ## Control Inventory,
     and a versioned ## Execution Contract declaring native commands,
     equivalence policy, manual obligations, and authority boundaries. Require
+    posture classification through /internal-tdd for executable or evaluable
+    tasks; require red-first evidence only for mandatory-test-first and retain
+    focused and broad validation for feature-first completion. Do not impose a
+    universal test language or layout.
     an explicit - No Git mutation. bullet in ## Global Constraints and include
     model-selection acceptance evidence in manual_obligations whenever
     delegation is used. Do not predict runtime candidates or weaken a
