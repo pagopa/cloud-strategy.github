@@ -43,7 +43,7 @@ def test_internal_luna_executor_codex_contract() -> None:
 
     assert payload["name"] == "internal-luna-executor"
     assert payload["model"] == "gpt-5.6-luna"
-    assert "model_reasoning_effort" not in payload
+    assert payload["model_reasoning_effort"] == "high"
     assert payload["sandbox_mode"] == "workspace-write"
     assert "delegate" not in payload["developer_instructions"].lower()
     assert all(
