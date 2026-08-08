@@ -148,6 +148,17 @@ def _minimal_status(plan: Path, status: str = "PARTIAL") -> str:
         if status in {"BLOCKED", "NEEDS_REVIEW"}
         else "None; execution remains resumable."
     )
+    review = (
+        "## Review Required\n\n"
+        "- Event: A material validation failure was observed.\n"
+        "- Impact: The feature cannot be accepted without a decision.\n"
+        "- Recovery: Safe repair and validation candidates were exhausted.\n"
+        "- Evidence: The final validation still reports the failure.\n"
+        "- Decision: Decide whether to repair, narrow scope, or accept the gap.\n"
+        "- Next action: Review the evidence and authorize the selected route.\n\n"
+        if status == "NEEDS_REVIEW"
+        else ""
+    )
     return (
         f"## Status\n\n`{status}`\n\n"
         f"## Plan\n\n`{plan}`\n\n"
@@ -158,7 +169,8 @@ def _minimal_status(plan: Path, status: str = "PARTIAL") -> str:
         "## Next\n\nResume Task 2.\n\n"
         "## Closeout Decision\n\n- Route: " + reason + "\n\n"
         "## Recovery Attempts\n\n- None beyond recorded evidence.\n\n"
-        "## Recovery Exhaustion\n\n- " + exhaustion + "\n"
+        "## Recovery Exhaustion\n\n- " + exhaustion + "\n\n"
+        + review
     )
 
 
@@ -419,7 +431,7 @@ def test_closeout_completes_with_pending_offline_human_review(tmp_path: Path) ->
     assert "offline-human-review-pending" in decision.reasons
 
 
-def test_closeout_keeps_pending_external_obligation_in_review(tmp_path: Path) -> None:
+def test_closeout_completes_with_pending_external_follow_up(tmp_path: Path) -> None:
     plan = _stage_valid_plan(
         tmp_path,
         _fixture("valid-plan.md")
@@ -435,7 +447,9 @@ def test_closeout_keeps_pending_external_obligation_in_review(tmp_path: Path) ->
             {"id": "capability-check", "satisfied": False, "evidence": "Capability unavailable."}
         ],
     )
-    assert classify_closeout(_contract(plan), evidence).route == "NEEDS_REVIEW"
+    decision = classify_closeout(_contract(plan), evidence)
+    assert decision.route == "DONE"
+    assert "external-follow-up-pending" in decision.reasons
 
 
 @pytest.mark.parametrize(
@@ -456,11 +470,30 @@ def test_needs_review_requires_bound_reason(tmp_path: Path, valid_plan: Path) ->
     status.write_text(
         _minimal_status(valid_plan, "NEEDS_REVIEW").replace(
             "Recovery exhausted for an environmental validation.", "Pending work."
-        )
+        ).replace("A material validation failure was observed.", "A review is pending.")
     )
     assert "needs-review-without-bound-reason" in {
         item.code for item in validate_status(status)
     }
+
+
+def test_needs_review_requires_structured_review_request(
+    tmp_path: Path, valid_plan: Path
+) -> None:
+    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
+    text = _minimal_status(valid_plan, "NEEDS_REVIEW")
+    status.write_text(text[: text.index("## Review Required")])
+    assert "missing-review-request" in {
+        item.code for item in validate_status(status)
+    }
+
+
+def test_needs_review_accepts_structured_review_request(
+    tmp_path: Path, valid_plan: Path
+) -> None:
+    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
+    status.write_text(_minimal_status(valid_plan, "NEEDS_REVIEW"))
+    assert validate_status(status) == []
 
 
 def test_needs_review_rejects_offline_human_review_only(
@@ -471,7 +504,7 @@ def test_needs_review_rejects_offline_human_review_only(
         _minimal_status(valid_plan, "NEEDS_REVIEW").replace(
             "Recovery exhausted for an environmental validation.",
             "Pending human review.",
-        )
+        ).replace("A material validation failure was observed.", "A review is pending.")
     )
     assert "needs-review-without-bound-reason" in {
         item.code for item in validate_status(status)

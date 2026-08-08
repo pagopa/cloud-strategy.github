@@ -54,11 +54,13 @@ classes with the six executor-owned runtime discovery categories.
   reproducible evidence, and the check must fail when the requirement is
   violated. Establish red-first evidence before implementation when the control
   changes executable or evaluable behavior.
-- `external-capability` controls fail closed when the service, network,
-  credential, or tool is unavailable. Use a safe fallback only when the plan
-  permits it; otherwise keep the obligation unresolved and request authority
-  or route to the contract's review state. A warning or user certification is
-  not a technical pass.
+- `external-capability` controls fail closed for the capability decision. Probe
+  explicitly and use a safe fallback only when the plan permits it; do not
+  treat an unavailable capability as a technical pass. When no material
+  feature failure is observed, record the unavailable evidence as a
+  non-blocking follow-up rather than routing the completed feature to
+  `NEEDS_REVIEW`. If the probe observes a material contract failure, classify
+  it as unresolved or regression and enter recovery.
 - `authority-or-scope` controls use the plan's authority boundary. Do not
   expand scope or modify the approved plan without the required approval and a
   refreshed fingerprint.
@@ -100,8 +102,9 @@ does not regain any local gateway responsibility.
 - apply task-level `/internal-tdd` and evidence hooks;
 - decide routing, recovery candidates, stop conditions, and worktree/finishing
   behavior;
-- classify closeout evidence with `closeout-check`, continue while a safe route exists,
-  and preserve the baseline/final delta;
+- classify closeout evidence with `closeout-check`, continue while a safe route
+  exists, retry distinct safe repairs while evidence improves, and preserve
+  the baseline/final delta;
 - enforce the no-Git-mutation policy;
 - replace the exact `DONE`, `PARTIAL`, `BLOCKED`, or `NEEDS_REVIEW` sibling;
 - run resume and completion checks through `scripts/plan_execution.py`.
@@ -115,13 +118,14 @@ does not regain any local gateway responsibility.
    Completion: each task and control has fresh focused evidence or a recorded
    safe pause.
 3. **Recover** through `references/recovery-contract.md` whenever validation or
-   execution is unresolved. Completion: the next candidate was tried, authority
-   was requested when required, or exhaustion evidence is complete.
+   execution is unresolved. Completion: each distinct safe candidate was tried,
+   authority was requested when required, or exhaustion evidence is complete.
 4. **Decide** with `closeout-check`. Completion: continue immediately on a
   `continue-*` or `request-authority` route, or write one legal status sibling
-  for a terminal or explicit pause route. A pending human review is recorded
-  as offline follow-up evidence and does not change a successful closeout to
-  `NEEDS_REVIEW`.
+  for a terminal or explicit pause route. Pending human or external evidence
+  without an observed material failure is recorded as non-blocking follow-up
+  on `DONE`. `NEEDS_REVIEW` is reserved for a material failure, exhausted
+  recovery, and a concrete decision or authority request.
 5. **Close** with broader validation, `git diff --check`, status binding, and the
    verification-before-completion gate. Completion: the status sibling and report
    contain the same fresh evidence.
@@ -138,8 +142,9 @@ At each
 task boundary, load `/internal-tdd` when the task changes executable or
 evaluable behavior and require its red-first evidence before implementation.
 After each delegated task, run the plan's focused validation, retain fresh
-evidence, classify failures, and attempt bounded recovery while evidence
-improves. Pre-existing or unrelated broad failures do not stop independent
+evidence, classify failures, and try each distinct safe repair or recovery
+candidate while evidence improves. Do not repeat an unchanged attempt as
+recovery. Pre-existing or unrelated broad failures do not stop independent
 tasks. Load `/superpowers-verification-before-completion` before any positive
 completion claim; load `/addyosmani-code-simplification` only when explicitly
 authorized by the plan.
@@ -193,8 +198,10 @@ layer over that contract, not a competing schema. The executor owns all six
 discovery categories, recovery candidates, attempts, rejection evidence,
 authority state, and closeout routing. `DONE` requires fresh evidence for every
 task and every automatable or observable control; `request-authority` keeps
-execution active and does not produce a status sibling. Required unresolved
-external obligations still route to `NEEDS_REVIEW`; pending human judgment is
-reported as offline follow-up and is not a closeout blocker. The final report
-must also name control gates added or updated, their evidence, and any
+execution active and does not produce a status sibling. Unavailable external
+evidence without an observed material failure is reported as non-blocking
+follow-up and does not route to `NEEDS_REVIEW`. `NEEDS_REVIEW` requires a
+material failure observed after safe recovery is exhausted, and its status
+sibling must contain a structured `## Review Required` request. The final
+report must also name control gates added or updated, their evidence, and any
 residual gap.

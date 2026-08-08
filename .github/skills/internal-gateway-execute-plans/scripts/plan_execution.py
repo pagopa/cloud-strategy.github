@@ -72,6 +72,14 @@ REQUIRED_STATUS_HEADINGS = (
     "Validation",
     "Next",
 )
+REVIEW_REQUIRED_FIELDS = (
+    "Event",
+    "Impact",
+    "Recovery",
+    "Evidence",
+    "Decision",
+    "Next action",
+)
 
 
 class ExecutionContractError(ValueError):
@@ -575,7 +583,11 @@ def classify_closeout(contract: ExecutionContract, evidence: CloseoutEvidence | 
         if any(not candidate.attempted and candidate.result == "not-run" for candidate in validation.candidates):
             raise ValueError(f"structured recovery has an unclassified candidate for {validation.id}")
     if unresolved:
-        return _closeout_decision("NEEDS_REVIEW", ["recovery-exhausted"], "Resolve the environmental or external obligation, then rerun closeout-check.")
+        return _closeout_decision(
+            "NEEDS_REVIEW",
+            ["recovery-exhausted"],
+            "Review the material failure and decide whether to repair, narrow scope, or accept the gap.",
+        )
     declared_manual = {item.id: item for item in contract.manual_obligations}
     pending_external = [
         item.id
@@ -584,12 +596,6 @@ def classify_closeout(contract: ExecutionContract, evidence: CloseoutEvidence | 
         and declared_manual[item.id].required
         and declared_manual[item.id].kind == "external"
     ]
-    if pending_external:
-        return _closeout_decision(
-            "NEEDS_REVIEW",
-            ["external-obligation-pending", f"obligation:{pending_external[0]}"],
-            "Resolve the pending external obligation, then rerun closeout-check.",
-        )
     pending_human = [
         item.id
         for item in evidence.manual_obligations
@@ -597,11 +603,16 @@ def classify_closeout(contract: ExecutionContract, evidence: CloseoutEvidence | 
         and declared_manual[item.id].required
         and declared_manual[item.id].kind == "human"
     ]
+    follow_up_reasons: list[str] = []
+    if pending_external:
+        follow_up_reasons.append("external-follow-up-pending")
     if pending_human:
+        follow_up_reasons.append("offline-human-review-pending")
+    if follow_up_reasons:
         return _closeout_decision(
             "DONE",
-            ["all-required-validations-passed", "offline-human-review-pending"],
-            "No further execution is required; complete the pending human review offline.",
+            ["all-required-validations-passed", *follow_up_reasons],
+            "No further execution is required; record pending external or human evidence as offline follow-up.",
         )
     return _closeout_decision("DONE", ["all-required-validations-passed"], "No further execution is required.")
 
@@ -717,6 +728,7 @@ def _validate_status_evidence(text: str, status: str | None) -> list[Finding]:
     decision = _extract_section(text, "Closeout Decision")
     exhaustion = _extract_section(text, "Recovery Exhaustion")
     classification = _extract_section(text, "Failure Classification")
+    review = _extract_section(text, "Review Required")
     if baseline and final:
         baseline_commands = set(re.findall(r"`([^`\n]+)`", baseline))
         final_commands = set(re.findall(r"`([^`\n]+)`", final))
@@ -730,9 +742,39 @@ def _validate_status_evidence(text: str, status: str | None) -> list[Finding]:
     if status in {"BLOCKED", "NEEDS_REVIEW"} and not exhaustion:
         findings.append(Finding("missing-recovery-exhaustion", f"{status} requires ## Recovery Exhaustion"))
     if status == "NEEDS_REVIEW":
-        lowered = (decision + "\n" + classification + "\n" + exhaustion).lower()
-        if not any(marker in lowered for marker in ("external", "environmental", "recovery-exhausted", "authority-declined")):
-            findings.append(Finding("needs-review-without-bound-reason", "NEEDS_REVIEW requires a bound external, environmental, or authority-declined reason"))
+        if not review:
+            findings.append(Finding("missing-review-request", "NEEDS_REVIEW requires ## Review Required"))
+        else:
+            missing_fields = [
+                field
+                for field in REVIEW_REQUIRED_FIELDS
+                if not re.search(rf"(?im)^\s*[-*]\s+{re.escape(field)}\s*:", review)
+            ]
+            if missing_fields:
+                findings.append(
+                    Finding(
+                        "incomplete-review-request",
+                        "Review Required is missing: " + ", ".join(missing_fields),
+                    )
+                )
+        lowered = (decision + "\n" + classification + "\n" + exhaustion + "\n" + review).lower()
+        if not any(
+            marker in lowered
+            for marker in (
+                "material",
+                "task-local regression",
+                "recovery-exhausted",
+                "recovery exhausted",
+                "authority-declined",
+                "fatal",
+                "unsafe",
+                "failed",
+                "regression",
+                "plan drift",
+                "scope expansion",
+            )
+        ):
+            findings.append(Finding("needs-review-without-bound-reason", "NEEDS_REVIEW requires a material failure, exhausted recovery, or declined authority"))
     if status == "BLOCKED":
         lowered = (decision + "\n" + classification + "\n" + exhaustion).lower()
         if not any(marker in lowered for marker in ("fatal", "task-local regression", "unsafe")):

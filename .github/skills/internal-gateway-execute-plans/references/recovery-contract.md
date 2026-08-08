@@ -31,14 +31,18 @@ query as unavailable and use the bounded search ladder below.
 Completion: every safe in-scope candidate is listed with its compatibility
 evidence.
 
-## 3. Retry exact
+## 3. Retry and repair exact
 
 Rerun the authoritative command through a safe supported override when this
 preserves its semantics. A possibly mutating command must not use blind
 `accelerator || native` retry. If accelerator start state is unknown, inspect
-observable state first and retry only through an idempotent path.
+observable state first and retry only through an idempotent path. After a failed
+attempt, try each distinct safe repair or recovery candidate and rerun the exact
+validation. Do not repeat an unchanged attempt unless a recorded external state
+change makes it meaningful.
 
-Completion: the retry ran once and produced a distinct evidence delta.
+Completion: every attempted repair has a distinct evidence delta, or the next
+attempt would cross an authority, safety, scope, or ownership boundary.
 
 ## 4. Validate equivalent
 
@@ -85,11 +89,12 @@ python3 scripts/plan_execution.py closeout-check <plan-file> <evidence-file> --f
 Continue immediately for `continue-execution` or `continue-recovery`; do not
 write an intermediate status sibling. Write exactly one status sibling only
 for `DONE`, `PARTIAL` with an explicit pause, `BLOCKED` with exhausted fatal
-evidence, or `NEEDS_REVIEW` with completed work and exhausted required
-external or non-substitutable environmental evidence. Pending human review is
-recorded as offline follow-up on a successful `DONE` closeout. The local
-gateway makes this decision; imported core mechanics cannot create a status
-sibling or change the route.
+evidence, or `NEEDS_REVIEW` with completed work, an observed material failure,
+exhausted recovery, and a structured review request. Pending human or external
+evidence without an observed material failure is recorded as non-blocking
+follow-up on a successful `DONE` closeout; it is not by itself a review route.
+The local gateway makes this decision; imported core mechanics cannot create a
+status sibling or change the route.
 
 ## Bounded graphify fallback
 

@@ -45,9 +45,12 @@ exactly one class: `automatable-local`, `observable-runtime`,
   native command or capability probe, pass/fail condition, and reproducible
   evidence. The check must fail when the requirement is violated; a warning or
   printout is not a gate.
-- For external capabilities, probe explicitly and fail closed when unavailable.
-  Use only a plan-permitted safe fallback; otherwise preserve the unresolved
-  external obligation and follow the authority/review route.
+- For external capabilities, probe explicitly and fail closed for the
+  capability decision. Use only a plan-permitted safe fallback; do not treat an
+  unavailable capability as a technical pass. If no material feature failure
+  was observed, preserve the unavailable evidence as non-blocking follow-up.
+  If the probe observes a material contract failure, preserve it as an
+  unresolved or regression validation and follow the recovery route.
 - Map authority or scope controls to the plan's approval boundary and genuine
   human judgment to a declared human obligation. Human-judgment evidence is an
   offline post-closeout review and does not block `DONE`; do not claim it was
@@ -103,10 +106,11 @@ fields are blocking. The validator does not interpret textual states such as
   full search output into status files.
 - Classify each failure as `task-local regression`, `pre-existing`,
   `unrelated/external`, `environmental`, or `unknown`.
-- Attempt bounded recovery only when it is directly required by the current
-  task or its validation, stays inside approved scope, and evidence improves.
-  Record recovery as an auxiliary execution task without changing the approved
-  plan or fingerprint.
+- Attempt recovery whenever the current task or its validation exposes a
+  failure. Try each distinct safe repair or recovery candidate, rerun the
+  authoritative validation, and continue while evidence improves. Do not repeat
+  an unchanged attempt as recovery. Record recovery as an auxiliary execution
+  task without changing the approved plan or fingerprint.
 - Run `closeout-check <plan-file> <evidence-file>` after recovery evidence
   changes. Continue without writing an intermediate status while it returns
   `continue-execution`, `continue-recovery`, or `request-authority`.
@@ -156,14 +160,16 @@ fields are blocking. The validator does not interpret textual states such as
 - Run `git diff --check` and verify no Git mutation was performed.
 - Replace older status siblings for the same plan basename and write exactly
   one allowed status sibling.
-- Use `NEEDS_REVIEW`, not `BLOCKED`, when all in-scope tasks are complete and a
-  broad validation still has a proven pre-existing or unrelated failure.
+- Do not use `NEEDS_REVIEW` merely because a broad validation has a proven
+  pre-existing, unrelated, or unavailable external result. Preserve that gap on
+  `DONE` when no material in-scope failure was observed. Use `NEEDS_REVIEW` only
+  when a material failure remains after safe recovery is exhausted or authority
+  is declined, and include the structured review request.
 - Give the user a concise user-facing report containing outcome, changed work,
   control gates and evidence, validation, blocker or external gap, Recovery
   Attempts, and next action; do not require the user to open the status
   sibling.
 - Run `completion-check` only when every task and broader check has fresh
   passing evidence and every automatable or observable-runtime control is
-  covered. Pending required external obligations remain `NEEDS_REVIEW`;
-  pending human obligations are reported as offline follow-up and do not block
-  `DONE`.
+  covered. Pending human or external obligations without an observed material
+  failure are reported as non-blocking follow-up and do not block `DONE`.
