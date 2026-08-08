@@ -278,6 +278,15 @@ def test_valid_v2_manifest_rows_load_unchanged(tmp_path: Path) -> None:
             "target_path": (tmp_path / "home/.codex/agents/review.toml").as_posix(),
         },
         {
+            "target": "codex",
+            "resource_family": "agents",
+            "source_path": ".codex/agents/native.toml",
+            "materialization": "symlink",
+            "link_target": (tmp_path / ".codex/agents/native.toml").as_posix(),
+            "content_hash": None,
+            "target_path": (tmp_path / "home/.codex/agents/native.toml").as_posix(),
+        },
+        {
             "target": "copilot",
             "resource_family": "agents",
             "materialization": "symlink",
@@ -327,6 +336,18 @@ def test_manifest_serialization_emits_v2_link_and_copy_rows(tmp_path: Path) -> N
         content_hash="content-agent",
         last_action="copy",
     )
+    native_agent = ManagedResource(
+        target="codex",
+        resource_id="native",
+        resource_family="agents",
+        source_path=".codex/agents/native.toml",
+        target_path=str(tmp_path / "home/.codex/agents/native.toml"),
+        source_hash="source-native",
+        materialization="symlink",
+        link_target=str(tmp_path / ".codex/agents/native.toml"),
+        content_hash=None,
+        last_action="link",
+    )
     plan = HomeSyncPlan(
         source_root=tmp_path,
         home_root=tmp_path / "home",
@@ -335,9 +356,9 @@ def test_manifest_serialization_emits_v2_link_and_copy_rows(tmp_path: Path) -> N
         selected_targets=("skills", "codex"),
         retired_targets=(),
         source_revision=None,
-        source_resources_considered=2,
+        source_resources_considered=3,
         operations=(),
-        desired_resources=(skill, agent),
+        desired_resources=(skill, agent, native_agent),
         missing_dirs=(),
         unsupported_families_by_target={},
         residual_drift=(),
@@ -346,7 +367,11 @@ def test_manifest_serialization_emits_v2_link_and_copy_rows(tmp_path: Path) -> N
     payload = build_manifest_payload(plan)
 
     assert payload["schema_version"] == 2
-    assert payload["managed_resources"] == [skill.to_dict(), agent.to_dict()]
+    assert payload["managed_resources"] == [
+        skill.to_dict(),
+        agent.to_dict(),
+        native_agent.to_dict(),
+    ]
 
 
 def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -> None:

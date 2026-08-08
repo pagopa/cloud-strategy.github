@@ -568,7 +568,7 @@ rows:
     )
 
 
-def test_codex_native_agent_is_copied_without_translation(
+def test_codex_native_agent_is_symlinked_without_translation(
     tmp_path: Path, capsys
 ) -> None:
     refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
@@ -634,7 +634,13 @@ rows:
     capsys.readouterr()
 
     target = home / ".codex/agents/native-agent.toml"
-    assert target.read_bytes() == source.read_bytes()
+    assert target.is_symlink()
+    assert target.resolve() == source.resolve()
+    source.write_text(
+        'name = "native-agent"\nmodel = "gpt-5.6-luna-updated"\n',
+        encoding="utf-8",
+    )
+    assert target.read_text(encoding="utf-8") == source.read_text(encoding="utf-8")
 
 
 def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
@@ -659,6 +665,47 @@ def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
     add_materialization_operation(
         operations,
         target="copilot",
+        target_path=target,
+        source_path=source,
+        resource=resource,
+        source_hash="source-hash",
+        manifest_index={
+            target.as_posix(): {
+                "materialization": "copy",
+                "content_hash": hash_resource(target),
+            }
+        },
+        changed_only=False,
+        policy=_repo_wins_policy(),
+    )
+
+    assert [(operation.action, operation.code) for operation in operations] == [
+        ("link", None)
+    ]
+
+
+def test_manifest_managed_codex_copy_migrates_to_link_when_unchanged(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / ".codex/agents/native-agent.toml"
+    source.parent.mkdir(parents=True)
+    source.write_text('name = "native-agent"\n', encoding="utf-8")
+    target = tmp_path / "home/.codex/agents/native-agent.toml"
+    target.parent.mkdir(parents=True)
+    target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+    resource = CatalogResource(
+        resource_id="native-agent",
+        source_family="agents",
+        source_path=".codex/agents/native-agent.toml",
+        include_targets=("codex",),
+        target_support="documented",
+        notes="native Codex agent",
+    )
+    operations: list[HomeSyncOperation] = []
+
+    add_materialization_operation(
+        operations,
+        target="codex",
         target_path=target,
         source_path=source,
         resource=resource,

@@ -279,10 +279,8 @@ def build_home_sync_plan(
                     source_path=resource.source_path,
                     target=target,
                 )
-            linked_resource = resource.source_family == "skills" or (
-                resource.source_family == "agents"
-                and target == "copilot"
-                and not is_native_agent_source(source_path)
+            linked_resource = resource.source_family == "skills" or is_linkable_agent(
+                resource.source_family, source_path, target
             )
             managed_resource = ManagedResource(
                 target=target,
@@ -397,7 +395,7 @@ def _verify_link_target_path(
 ) -> str | None:
     target_root = (
         runtime_agent_root(home_root, target)
-        if resource_family == "agents" and target == "copilot"
+        if resource_family == "agents" and has_agent_root(target)
         else runtime_skill_root(home_root, target)
     )
     resolved_home = home_root.resolve()
@@ -533,8 +531,8 @@ def apply_home_sync_plan(
                 if managed_resource is not None
                 else (
                     "agents"
-                    if operation.target == "copilot"
-                    and target_path.parent == runtime_agent_root(plan.home_root, "copilot")
+                    if has_agent_root(operation.target)
+                    and target_path.parent == runtime_agent_root(plan.home_root, operation.target)
                     else "skills"
                 )
             )
@@ -551,7 +549,12 @@ def apply_home_sync_plan(
                 continue
 
             if managed_resource is None or managed_resource.materialization != "symlink":
-                invalid_code = "source-invalid-agent" if operation.target == "copilot" else "source-invalid-skill"
+                invalid_code = (
+                    "source-invalid-agent"
+                    if managed_resource is not None
+                    and managed_resource.resource_family == "agents"
+                    else "source-invalid-skill"
+                )
                 raise RuntimeError(f"{invalid_code}: {target_path}")
             source_path = (plan.source_root / managed_resource.source_path).resolve()
             link_state, link_code = assess_resource_link(target_path, source_path)
@@ -934,8 +937,8 @@ def add_materialization_operation(
     policy: HomeSyncPolicy,
 ) -> None:
     manifest_entry = manifest_index.get(target_path.as_posix())
-    copilot_agent_link = resource.source_family == "agents" and target == "copilot"
-    linked_resource = resource.source_family == "skills" or copilot_agent_link
+    linked_agent = is_linkable_agent(resource.source_family, source_path, target)
+    linked_resource = resource.source_family == "skills" or linked_agent
     if linked_resource:
         expected_target = source_path.resolve()
         link_state, link_code = assess_resource_link(target_path, expected_target)
@@ -961,14 +964,14 @@ def add_materialization_operation(
                 )
             )
             return
-        if copilot_agent_link and link_state == "replace-directory":
+        if linked_agent and link_state == "replace-directory":
             if manifest_entry is None:
                 add_blocked_operation(
                     operations,
                     target=target,
                     target_path=target_path,
                     code="target-exists-unmanaged",
-                    reason="Existing Copilot agent content is not manifest-managed, so replacing it with a repository link is unsafe.",
+                    reason="Existing agent content is not manifest-managed, so replacing it with a repository link is unsafe.",
                     resource=resource,
                 )
                 return
@@ -1153,10 +1156,7 @@ def add_stale_managed_operations(
         if not isinstance(target_path, str) or target_path in desired_paths:
             continue
 
-        if item.get("materialization") == "symlink" and (
-            item.get("resource_family") == "skills"
-            or (item.get("resource_family") == "agents" and item.get("target") == "copilot")
-        ):
+        if item.get("materialization") == "symlink" and is_linkable_manifest_row(item):
             stale_path = Path(target_path)
             link_path_code = _verify_link_target_path(
                 home_root=home_root,
@@ -1408,13 +1408,31 @@ def _is_valid_v2_manifest_row(item: dict[str, object]) -> bool:
         return False
     if not isinstance(target_path, str) or not Path(target_path).is_absolute():
         return False
-    if family == "skills" or (family == "agents" and item.get("target") == "copilot"):
+    if family == "skills" or (
+        family == "agents"
+        and item.get("target") == "copilot"
+    ):
         return (
             materialization == "symlink"
             and isinstance(link_target, str)
             and Path(link_target).is_absolute()
             and Path(link_target).resolve().as_posix() == link_target
             and content_hash is None
+        )
+    if family == "agents" and item.get("target") == "codex":
+        source_path = item.get("source_path")
+        return (
+            materialization == "symlink"
+            and isinstance(source_path, str)
+            and Path(source_path).suffix == ".toml"
+            and isinstance(link_target, str)
+            and Path(link_target).is_absolute()
+            and Path(link_target).resolve().as_posix() == link_target
+            and content_hash is None
+        ) or (
+            materialization == "copy"
+            and link_target is None
+            and isinstance(content_hash, str)
         )
     if family == AGENTS_MD_FAMILY:
         return materialization == "copy" and link_target is None and isinstance(content_hash, str)
@@ -1485,6 +1503,28 @@ def resource_block_code(source_family: str) -> str:
 
 def is_native_agent_source(path: Path) -> bool:
     return path.suffix == ".toml"
+
+
+def is_linkable_agent(resource_family: str, source_path: Path, target: str) -> bool:
+    return resource_family == "agents" and (
+        target == "copilot" or (target == "codex" and is_native_agent_source(source_path))
+    )
+
+
+def is_linkable_manifest_row(item: dict[str, object]) -> bool:
+    if item.get("resource_family") == "skills":
+        return True
+    return (
+        item.get("resource_family") == "agents"
+        and (
+            item.get("target") == "copilot"
+            or (
+                item.get("target") == "codex"
+                and isinstance(item.get("source_path"), str)
+                and Path(str(item["source_path"])).suffix == ".toml"
+            )
+        )
+    )
 
 
 def hash_resource(path: Path) -> str:

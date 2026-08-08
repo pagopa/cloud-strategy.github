@@ -24,8 +24,8 @@ bundle directly.
   automatically except files whose name starts with `local-`. Native Codex
   agents under `.codex/agents/*.toml` are discovered for Codex only.
 - Copilot agents are absolute links back to `.github/agents/`. Native Codex
-  TOML agents are copied unchanged to `~/.codex/agents/`; Markdown agents are
-  translated only for Codex and OpenCode copy targets.
+  TOML agents are absolute links back to `.codex/agents/`; Markdown agents
+  are translated only for Codex and OpenCode copy targets.
 - Home-only skills are unmanaged and preserved. This includes catalog-excluded
   `graphify` and every `local-*` bundle.
 - Reverse synchronization, reconciliation, and copied-skill fallback are
@@ -62,12 +62,14 @@ Accept `agents-md` as a CLI alias for the same target.
   unmanaged target file.
 - Keep `~/.copilot/agents/` a real directory. Never replace the root with a
   link.
+- Keep `~/.codex/agents/` a real directory. Never replace the root with a
+  link.
 - Create one canonical absolute link for every eligible repository skill.
 - Create one canonical absolute link for every eligible Copilot agent.
-- Copy every eligible native Codex TOML agent unchanged; translate Markdown
-  agents only for Codex and OpenCode copy targets.
-- Migrate a manifest-managed unchanged Copilot copy to its canonical link;
-  block unmanaged or locally modified copies.
+- Create one canonical absolute link for every eligible native Codex TOML
+  agent; translate Markdown agents only for Codex and OpenCode copy targets.
+- Migrate a manifest-managed unchanged agent copy to its canonical link; block
+  unmanaged or locally modified copies.
 - A colliding home directory with an eligible repository skill ID is removed
   without backup and replaced by that link.
 - A matching unmanaged link is adopted into the manifest without replacement.
