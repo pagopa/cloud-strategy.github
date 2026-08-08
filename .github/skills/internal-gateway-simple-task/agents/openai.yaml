@@ -1,4 +1,16 @@
 interface:
   display_name: "Simple Task Internal Gateway"
   short_description: "Fast path for concrete repository tasks"
-  default_prompt: "Use /internal-gateway-simple-task for a concrete coding or non-coding task that should finish end-to-end in one bounded run. Start with bounded evidence, local idea ordering, and one compact clarification only when necessary. If the task changes executable or evaluable behavior, load `/internal-tdd` before implementation. After the Readiness Brief and TDD classification, you may invoke internal-luna-executor with the objective, relevant context, constraints, expected output, and validation; retain lane choice, repairs, and completion here. Use `/grill-me` only when a missing bounded fact blocks the active lane. Treat ordinary full-gate readiness as internal; stop only when an approval boundary or another named stop condition is present. Keep gate requirements distinct from the actual internal Gate Evidence Ledger. Run `/internal-gateway-critical-master` before non-trivial action. Stop with reason when the work becomes too large, costly, ambiguous, unsafe, or not locally verifiable. Use `/superpowers-verification-before-completion` before positive claims. Emit no more than four content lines and surface risks, blockers, gaps, or user actions only when present. Use --format json for complete diagnostic evidence."
+  default_prompt: >-
+    Use /internal-gateway-simple-task for concrete repository-owned
+    low-to-medium-risk work that can finish in one bounded session. Inspect
+    local evidence first, use /grill-me only for one unrecoverable material
+    fact, and run /internal-gateway-critical-master before non-trivial action.
+    Allow one evidence-backed reformulation and re-critique when new evidence
+    changes a rejected plan. Classify prompt or skill-only edits as
+    validation-only under /internal-tdd. Load
+    /addyosmani-code-simplification only for explicit simplification work.
+    Delegate non-trivial work to internal-luna-executor unless the caller is
+    GPT-5.6 Luna; unknown identity defaults to delegation. Stop with the exact
+    violated condition, evidence, and required next decision. Use
+    /superpowers-verification-before-completion before positive claims.
