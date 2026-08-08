@@ -47,13 +47,13 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
         "inference",
         "estimate",
         "final consistency gate",
-        "exactly one canonical internal routing outcome",
+        "full-analysis packet outcome",
         "full-analysis-v1",
         "full-analysis-contract.md",
         "target_path",
         "target_revision",
         "every material finding",
-        "strict JSON packet",
+        "exactly one UTF-8 JSON object",
     ):
         assert marker in instructions
     for defense in ("none", "resolves", "narrows", "accepts-risk", "unanswered"):
@@ -66,8 +66,8 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
         "do not access external systems",
         "do not dispatch subagents",
         "do not expose the internal critical record",
-        "defense classification",
-        "canonical routing outcome",
+        "defense",
+        "full-analysis packet",
         "self-contained at runtime",
         "source skill is unavailable at runtime",
         "/internal-gateway-writing-plans",
@@ -78,7 +78,7 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
         assert marker in lowered
 
     assert "output-contract.md" not in instructions
-    assert "emoji card" not in lowered
+    assert "three-to-five-content-line" not in lowered
     openai_prompt = OPENAI_PATH.read_text(encoding="utf-8")
     assert "full-analysis-v1" in openai_prompt
     assert "emoji card" not in openai_prompt.lower()

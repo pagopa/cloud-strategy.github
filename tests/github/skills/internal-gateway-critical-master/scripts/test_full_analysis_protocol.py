@@ -71,10 +71,16 @@ def _parse(module, packet: dict[str, object]):
 def test_valid_packet_is_accepted() -> None:
     module = _load_module()
 
-    result = _parse(module, _packet(outcome="revise-design", findings=[_finding()]))
+    result = _parse(
+        module,
+        _packet(
+            outcome="revise-design",
+            findings=[_finding(), _finding(finding_id="C-002")],
+        ),
+    )
 
     assert result.outcome == "revise-design"
-    assert result.findings[0].id == "C-001"
+    assert tuple(finding.id for finding in result.findings) == ("C-001", "C-002")
 
 
 @pytest.mark.parametrize(
