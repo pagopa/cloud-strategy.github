@@ -21,6 +21,25 @@ instructions.
 - An explicit caller-owned output path may override this default.
 <!-- local-sync:research-workspace:end -->
 
+<!-- local-sync:research-delegation:start -->
+## Local research-delegation contract
+
+This repository-owned contract replaces the generic background-agent
+instruction for research execution.
+
+- Delegate every research run to the `internal-luna-executor` subagent.
+- Give Luna a self-contained brief with the question, context, primary-source
+  and citation requirements, output path, and validation expectations.
+- Luna must research the question and write the single Markdown report directly
+	to the requested path. The caller verifies the result and does not repeat the
+	research or write a second report.
+- Verify that the report exists, is non-empty, and includes source citations.
+- If `internal-luna-executor` is unavailable or cannot complete the brief,
+	report a blocker instead of switching to another agent.
+- This contract applies only where the named agent is available. Other runtimes
+	must report that the required executor is unsupported.
+<!-- local-sync:research-delegation:end -->
+
 <!-- local-sync:mattpocock-git-autonomy:start -->
 ## Local Git-autonomy contract
 
