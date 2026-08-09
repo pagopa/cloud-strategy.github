@@ -8,6 +8,49 @@ description: Use when a concrete repository-owned low-to-medium-risk task can fi
 Use this skill as the short, linear route for concrete repository work. It owns
 scope selection, bounded execution, repair, validation, and the final report.
 
+## Internal Execution Brief
+
+For every concrete non-trivial task, this gateway owns one canonical Internal
+Execution Brief. Capture the following task-instance fields before
+implementation:
+
+- **Request and observable outcome** — what was asked and what a reviewer can
+  observe when it is complete.
+- **Target scope, anti-scope, owner, and route** — the intended files or
+  boundaries, explicit exclusions, nearest owner, and selected gateway.
+- **Constraints, authority, assumptions, and open facts** — safety and
+  approval boundaries, known assumptions, and facts still to resolve.
+- **Local evidence, proposed direction, and rejected alternative** — the
+  evidence that selects the direction and the credible alternative that was
+  declined.
+- **Acceptance, native validation, and pass/fail signal** — observable
+  acceptance, the owning command or check, and what counts as pass or fail.
+- **Stop conditions, dependencies, and handoff** — conditions that halt work,
+  required local or external dependencies, and the next owner when work stops
+  or is promoted.
+- **State, evidence delta, and current decisions** — the current working state,
+  what new evidence changed, and the decisions that currently govern the task.
+
+The brief is task-instance working data. It is not a new skill format, design
+or state machine, second implementation plan, or separate approval gate. Use
+the self-contained `references/execution-brief-template.md` as a reusable
+shape without turning it into persisted state or a competing contract.
+
+Keep a same-session brief in working context. On pause or resume, materialize
+at most one uncommitted disposable `tmp/briefs/<slug>.md`. When promotion
+creates a retained implementation plan, authority transfers to
+`/internal-gateway-writing-plans` and the brief retires as authority.
+Supporting skills may contribute evidence, but may not create competing
+briefs. `/internal-gateway-idea` and `/internal-gateway-writing-plans` remain
+the heavier routes for design/state and retained-plan work.
+
+Before any live provider or external operation, require explicit authority.
+Use a safe local fallback when the brief permits one; otherwise stop
+fail-closed. Keep this boundary provider-neutral. Close out through one
+canonical evidence ledger with fresh focused and broader validation evidence;
+do not claim completion before those checks pass, and do not introduce numeric
+tool-call or read thresholds.
+
 ## Scope
 
 Use only when the target, intended outcome, anti-scope, and validation signal
@@ -84,10 +127,11 @@ Keep one coherent in-scope change per task. Do not add speculative machinery,
 hidden routing, duplicate validators, or other structure that does not serve
 the active outcome.
 
-After each task, run its exact focused validation and check that every changed
-requirement has fresh evidence. Classify failures as task-local, pre-existing,
-unrelated/external, environmental, or unknown. Repair once only when the repair
-is safe, in scope, and produces new evidence; rerun the authoritative command.
+After each task, run its exact focused validation and record the fresh result in
+the canonical evidence ledger. Check that every changed requirement has fresh
+evidence. Classify failures as task-local, pre-existing, unrelated/external,
+environmental, or unknown. Repair once only when the repair is safe, in scope,
+and produces new evidence; rerun the authoritative command.
 
 Before any completion, passing, fixed, or no-gap claim, load
 `/superpowers-verification-before-completion`, run the full required checks,
