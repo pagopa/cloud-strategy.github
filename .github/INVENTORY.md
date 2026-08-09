@@ -194,6 +194,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Agents
 
+- `.github/agents/internal-gateway-critical-master.agent.md`
 - `.github/agents/internal-luna-executor.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`

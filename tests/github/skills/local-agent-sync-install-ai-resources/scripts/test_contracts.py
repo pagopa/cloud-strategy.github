@@ -75,7 +75,11 @@ def test_live_catalog_discovers_legacy_agents_for_all_runtimes() -> None:
         path.relative_to(REPO_ROOT).as_posix()
         for path in (REPO_ROOT / ".github/agents").glob("*.agent.md")
         if not path.name.startswith("local-")
-        and path.name != "internal-luna-executor.agent.md"
+        and path.name
+        not in {
+            "internal-luna-executor.agent.md",
+            "internal-gateway-critical-master.agent.md",
+        }
     }
     agent_resources = {
         resource.source_path
@@ -96,7 +100,7 @@ def test_live_catalog_discovers_legacy_agents_for_all_runtimes() -> None:
     )
 
 
-def test_live_catalog_scopes_native_luna_agents_to_owning_runtimes() -> None:
+def test_live_catalog_scopes_native_paired_agents_to_owning_runtimes() -> None:
     resources = {
         resource.source_path: resource
         for resource in load_home_sync_catalog(REPO_ROOT)
@@ -112,6 +116,9 @@ def test_live_catalog_scopes_native_luna_agents_to_owning_runtimes() -> None:
     assert resources[
         ".codex/agents/internal-gateway-critical-master.toml"
     ].include_targets == ("codex",)
+    assert resources[
+        ".github/agents/internal-gateway-critical-master.agent.md"
+    ].include_targets == ("copilot",)
 
 
 def test_agent_discovery_finds_native_codex_agents_only_for_codex(
