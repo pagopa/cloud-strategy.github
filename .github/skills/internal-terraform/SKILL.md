@@ -34,6 +34,12 @@ evidence that the selected runner executes locally and is reachable from the
 matching CI trigger; when that proof cannot be demonstrated, record the
 reachability gap explicitly.
 
+Native Terraform/OpenTofu tests are authoritative for Terraform semantics when
+the native runner can observe the behavior. Python must not use regex or string
+matching as a substitute for native resource, module, provider, plan, or assert
+checks. A repository-specific static contract is a narrow exception only when
+no native equivalent exists and its cross-boundary purpose is documented.
+
 ### Handoff
 
 Before invoking the selected target, state Primary, Reason (deliverable and

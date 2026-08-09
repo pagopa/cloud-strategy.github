@@ -49,6 +49,7 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
   file-shape recipes, command playbooks, or tool-specific workflows here.
 - Short, globally safe best-practice defaults may live here when they improve
   baseline behavior without turning this file into a procedure manual.
+- Test placement follows the component and runner that own the behavior: keep native tests in the tool, framework, module, or infrastructure layout; place non-native or cross-boundary tests under repository-root `tests/` only when a real observable boundary exists.
 - `tmp/` is temporary support only. Treat its contents as disposable working
   artifacts and do not commit files from `tmp/`.
 

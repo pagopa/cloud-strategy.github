@@ -40,6 +40,11 @@ linter-owned diagnostics to the configured tooling.
 - Keep reusable logic explicit about its inputs. Put environment-specific and
   operator-tuned values at a configuration or composition boundary rather than
   scattering them through implementation code.
+- Place a Python test under repository-root `tests/` when it verifies Python
+  behavior or a real observable external contract such as CLI, subprocess,
+  filesystem, protocol, JSON, or wrapper behavior. Reading another
+  technology's source or configuration alone does not establish a Python test
+  boundary.
 - Use the repository-declared runtime and declared dependency manager. For
   pip-managed requirements, preserve exact pins and hashes in the owning lock
   artifact; use the other manager's canonical frozen or locked validation when

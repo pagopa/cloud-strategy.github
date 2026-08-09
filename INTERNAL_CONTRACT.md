@@ -222,6 +222,19 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
     evaluation cases remain valid evidence
   - repository automation rejects tests that assert raw skill wording
 
+#### `testing-test-placement-follows-behavior-owner`
+
+- Goal: keep test placement aligned with the behavior owner and authoritative runner.
+- Scope:
+  - repository-owned test paths, fixtures, runners, and CI references
+  - native, language-owned, and cross-boundary tests
+- Expected behavior:
+  - native tests remain in the layout owned by their tool, framework, module, or infrastructure root;
+  - repository-root `tests/` is used for Python behavior tests and real external-boundary tests, not as a universal native-test container;
+  - fixture, runner, and CI ownership follows the component that consumes them;
+  - functional keywords alone do not determine placement;
+  - duplicate, obsolete, or replacement decisions retain evidence of behavior and authoritative coverage.
+
 ### Naming And Operating Model
 
 #### `resource-governance-uses-supported-origin-naming`

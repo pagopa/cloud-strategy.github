@@ -63,7 +63,12 @@ seam.
 2. Choose the nearest owner, stable boundary, native test layout, established
    runner, local command, and CI trigger. Use an external-language harness only
    for a real cross-language boundary such as a CLI, plan JSON, filesystem,
-   protocol, or remote API; Python is not a universal harness.
+   protocol, or remote API; Python is not a universal harness. For test
+   topology changes that create, move, merge, delete, replace, or cross
+   language boundaries, record the behavior, owner, test level, native
+   location, relevant runner or trigger, duplication evidence, and decision.
+   This is an operational decision, not a second plan schema or a mandatory
+   field set for unrelated tasks.
 3. For `mandatory-test-first`, establish red evidence and delegate the
    implementation loop to `/superpowers-test-driven-development` rather than
    reproducing it locally.
