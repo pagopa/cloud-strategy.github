@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import subprocess
@@ -190,6 +191,56 @@ def test_advance_rejects_an_uninitialized_directory(tmp_path: Path) -> None:
     assert list(tmp_path.iterdir()) == []
 
 
+def test_advance_accepts_a_readable_critical_report_at_g3(tmp_path: Path, capsys) -> None:
+    module = _load_module()
+    design = module.render_bounded_design(_g0_payload())
+    (tmp_path / "design.md").write_text(design, encoding="utf-8")
+    state = _state(
+        module,
+        state="WAIT_G3",
+        digest=hashlib.sha256(design.encode("utf-8")).hexdigest(),
+    )
+    (tmp_path / "state.json").write_text(module.serialize_state(state), encoding="utf-8")
+    report = """# Critical Analysis
+
+## Scope
+Review the typed event boundary.
+
+## Assessment
+The boundary is sound.
+
+### Evidence 1 — Explicit state transition
+**Critique:** The transition must remain typed.
+**Evidence:** The gateway validates event names and payloads.
+**Suggestion:** Keep the typed event boundary.
+**Why:** It prevents free-form input from advancing state.
+**Impact:** An untyped transition could bypass governance.
+**Blocking:** false
+
+## Conclusion
+**Outcome:** accepted
+**Summary:** The current boundary can proceed.
+"""
+
+    result = module.main(
+        [
+            "advance",
+            "--root",
+            str(tmp_path),
+            "--slug",
+            "sample",
+            "--event",
+            "record-readable-review",
+            "--payload-json",
+            json.dumps({"source": "standard", "report": report}),
+            "--compact",
+        ]
+    )
+
+    assert result == 0
+    assert "state=WAIT_G4|" in capsys.readouterr().out
+
+
 def test_advisory_before_g0_returns_to_wait_g0_without_mandatory_review(tmp_path: Path) -> None:
     module = _load_module()
     started = module.start_advisory_before_g0(
@@ -266,10 +317,6 @@ def test_template_skill_and_metadata_share_structured_v2_contract() -> None:
         assert "internal-gateway-idea-state/v2" in document
         assert "state.json" in document
         assert "design.md" in document
-    assert "stateDiagram-v2" in skill
-    assert "WAIT_G0 --> WAIT_G1" in skill
-    assert "WAIT_G5 --> APPROVED" in skill
-    assert "/internal-gateway-writing-plans" in metadata
 
 
 def test_design_is_replaced_before_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

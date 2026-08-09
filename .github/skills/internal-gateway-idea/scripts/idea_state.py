@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -1265,8 +1266,8 @@ def _validate_packet(
         clarification = " ".join(f"{f.critique} {f.reason}" for f in blockers).casefold()
         if not blockers or not any(marker in clarification for marker in ("user decision", "unresolved", "clarif")):
             diagnostics.append("needs-clarification requires an unresolved user-decision blocker")
-    elif outcome == "invalid-target" and not packet_diagnostics:
-        diagnostics.append("invalid-target requires diagnostics")
+    elif outcome == "invalid-target":
+        diagnostics.append("invalid-target packets cannot be consumed")
     elif outcome == "request-separate-review":
         if source != "independent":
             diagnostics.append("request-separate-review requires independent source")
@@ -1409,6 +1410,50 @@ def record_review(
         allow_wait_g3=True,
     )
     return result.state
+
+
+def _load_critical_report_adapter() -> Any:
+    module_name = "critical_report_adapter"
+    module = sys.modules.get(module_name)
+    if module is None:
+        adapter_path = Path(__file__).with_name("critical_report_adapter.py")
+        spec = importlib.util.spec_from_file_location(module_name, adapter_path)
+        if spec is None or spec.loader is None:
+            raise DesignValidationError("critical report adapter cannot be loaded")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+    adapter = getattr(module, "adapt_critical_report", None)
+    if not callable(adapter):
+        raise DesignValidationError("critical report adapter has no adaptation function")
+    return adapter
+
+
+def record_readable_review(
+    state: StateV2,
+    report: str,
+    *,
+    source: str,
+    g3_approval_event: TypedEvent,
+    expected_target_path: str,
+    expected_revision: int,
+) -> StateV2:
+    """Adapt one readable critic report and record it at the current G3 boundary."""
+
+    adapt_critical_report = _load_critical_report_adapter()
+    packet = adapt_critical_report(
+        report,
+        source=source,
+        target_path=expected_target_path,
+        target_revision=expected_revision,
+    )
+    return record_review(
+        state,
+        packet,
+        g3_approval_event=g3_approval_event,
+        expected_target_path=expected_target_path,
+        expected_revision=expected_revision,
+    )
 
 
 def _has_open_blocker_or_conflict(findings: Sequence[ReviewFinding]) -> bool:
@@ -1824,17 +1869,32 @@ def _cli_advance(args: argparse.Namespace) -> int:
                 expected_target_path=f"tmp/idea/{args.slug}/design.md",
                 expected_revision=snapshot.state.revision,
             )
-            design = design_with_ledger(snapshot.design_text or "", next_state.ledger)
-            replace_design_then_state(root, design, next_state)
+        elif name == "record-readable-review":
+            report = payload.get("report")
+            if not isinstance(report, str):
+                raise DesignValidationError("record-readable-review needs a report string")
+            source = payload.get("source", "standard")
+            if not isinstance(source, str):
+                raise DesignValidationError("record-readable-review source must be a string")
+            next_state = record_readable_review(
+                snapshot.state,
+                report,
+                source=source,
+                g3_approval_event=TypedEvent("approve", {}),
+                expected_target_path=f"tmp/idea/{args.slug}/design.md",
+                expected_revision=snapshot.state.revision,
+            )
         else:
             event = validate_event({"event": name, "payload": payload}, current_state=snapshot.state)
             result = transition_gate(snapshot.state, event, gate=snapshot.state.state)
             if not result.accepted:
                 raise DesignValidationError(result.reason or "event did not advance")
-            if result.state.ledger != snapshot.state.ledger and snapshot.design_text is not None:
-                replace_design_then_state(root, design_with_ledger(snapshot.design_text, result.state.ledger), result.state)
+            next_state = result.state
+        if name in {"record-review", "record-readable-review"}:
+            if next_state.ledger != snapshot.state.ledger and snapshot.design_text is not None:
+                replace_design_then_state(root, design_with_ledger(snapshot.design_text, next_state.ledger), next_state)
             else:
-                _persist_state_only(root, result.state)
+                _persist_state_only(root, next_state)
     return _cli_inspect(root, args.slug, args.compact)
 
 
@@ -1873,7 +1933,16 @@ def _build_parser() -> argparse.ArgumentParser:
 
     advance = subparsers.add_parser("advance")
     add_runtime_options(advance)
-    advance.add_argument("--event", choices=("select-approach", "record-review", "resolve-review", "approve"))
+    advance.add_argument(
+        "--event",
+        choices=(
+            "select-approach",
+            "record-review",
+            "record-readable-review",
+            "resolve-review",
+            "approve",
+        ),
+    )
     advance.add_argument("--payload-json")
     advance.add_argument("--message")
     advance.set_defaults(handler=_cli_advance)

@@ -14,10 +14,20 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 MODULE_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/idea_state.py"
+ADAPTER_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/critical_report_adapter.py"
 
 
 def _load_module():
     spec = importlib.util.spec_from_file_location("idea_state_consumer_v2", MODULE_PATH)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_adapter():
+    spec = importlib.util.spec_from_file_location("critical_report_adapter", ADAPTER_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -137,6 +147,58 @@ def test_malformed_or_interrupted_critic_keeps_wait_g3_authoritative() -> None:
     assert state.state == "WAIT_G3"
     assert state.review_sources == ()
     assert state.reviewed_revision is None
+
+
+def test_invalid_target_packet_cannot_advance_review() -> None:
+    module = _load_module()
+    packet = _packet(outcome="invalid-target", diagnostics=["No analysable context."])
+
+    with pytest.raises(module.DesignValidationError):
+        module.record_review(
+            _state(module),
+            packet,
+            g3_approval_event=module.TypedEvent("approve", {}),
+            expected_target_path="tmp/idea/sample/design.md",
+            expected_revision=1,
+        )
+
+
+def test_readable_report_is_adapted_and_recorded_in_one_consumer_call() -> None:
+    module = _load_module()
+    _load_adapter()
+    report = """# Critical Analysis
+
+## Scope
+Review the typed event boundary.
+
+## Assessment
+The boundary is sound.
+
+### Evidence 1 — Explicit state transition
+**Critique:** The transition must remain typed.
+**Evidence:** The gateway validates event names and payloads.
+**Suggestion:** Keep the typed event boundary.
+**Why:** It prevents free-form input from advancing state.
+**Impact:** An untyped transition could bypass governance.
+**Blocking:** false
+
+## Conclusion
+**Outcome:** accepted
+**Summary:** The current boundary can proceed.
+"""
+
+    reviewed = module.record_readable_review(
+        _state(module),
+        report,
+        source="standard",
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+    )
+
+    assert reviewed.state == "WAIT_G4"
+    assert reviewed.review_sources == ("standard",)
+    assert reviewed.reviewed_revision == 1
 
 
 def test_high_assurance_requires_both_review_sources() -> None:

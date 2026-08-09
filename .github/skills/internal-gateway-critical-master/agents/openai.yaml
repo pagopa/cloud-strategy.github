@@ -1,4 +1,4 @@
 interface:
-  display_name: "Critical Master Internal Gateway"
-  short_description: "Critical challenge for plans and decisions"
-  default_prompt: "Use /internal-gateway-critical-master to run the full-scope challenge. Complete the three internal phases and emit exactly one validated internal-gateway-critical/full-analysis-v1 JSON packet with the current source, target path, target revision, every material finding, residual risks, and diagnostics. Do not emit a card, Markdown, prose, or any output outside the JSON packet."
+  display_name: "Critical Master"
+  short_description: "Adaptive critical analysis for any decision context"
+  default_prompt: "Use /internal-gateway-critical-master to analyze the available context. No structured input is required. Preserve the full critical challenge, adapt to partial context, and emit one readable Markdown report with consecutively numbered Evidence items; every item must include Critique, Evidence, Suggestion, Why, and explicit Blocking. Prefer read-only analysis, but honor an explicit user request for action when tools and authority allow it. Fail only when no analysable context exists."

@@ -38,7 +38,7 @@ def test_internal_gateway_critical_master_copilot_contract() -> None:
     assert set(frontmatter) == {"name", "description", "tools", "model", "agents"}
     assert frontmatter["name"] == "internal-gateway-critical-master"
     assert frontmatter["description"].startswith("Use this agent when")
-    assert frontmatter["tools"] == ["read", "search"]
+    assert frontmatter["tools"] == ["read", "search", "edit", "execute"]
     assert frontmatter["model"] == "GPT-5.6 Sol"
     assert frontmatter["model"] != "GPT-5.6 Luna"
     assert "effort" not in frontmatter
@@ -49,33 +49,34 @@ def test_internal_gateway_critical_master_copilot_contract() -> None:
     assert headings == [
         "Role",
         "Core Skill",
-        "Routing Rules/Boundaries",
-        "Required Input",
-        "Output Expectations",
+        "Context and Input",
+        "Operating Boundary",
+        "Output",
+        "No-context Failure",
     ]
     assert body.count("## Core Skill") == 1
     assert body.count("- `internal-gateway-critical-master`") == 1
     lowered = body.lower()
     for marker in (
         "load and follow `internal-gateway-critical-master`",
-        "references/full-analysis-contract.md",
-        "source",
-        "target_path",
-        "target_revision",
-        "do not edit files",
-        "do not run commands or execute",
-        "do not access external systems",
-        "do not author or modify plans",
-        "do not dispatch subagents",
-        "do not perform active routing",
-        "exactly one UTF-8 JSON object",
-        "internal-gateway-critical/full-analysis-v1",
-        "exact top-level keys",
-        "every material finding",
-        "no Markdown or prose outside JSON",
-        "full-analysis contract",
+        "no structured input is required",
+        "full challenge procedure",
+        "prefer read-only",
+        "explicitly requests",
+        "readable markdown report",
+        "number every evidence item consecutively",
+        "critique, evidence, suggestion, why, and explicit blocking",
+        "no-context failure",
     ):
         assert marker.lower() in lowered
+    for retired_marker in (
+        "full-analysis-v1",
+        "target_revision",
+        "target_path",
+        "references/full-analysis-contract.md",
+        "exactly one utf-8 json object",
+    ):
+        assert retired_marker not in lowered
 
 
 def test_internal_gateway_critical_master_codex_contract() -> None:
@@ -84,10 +85,23 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
 
     assert CODEX_PATH.stem == payload["name"] == "internal-gateway-critical-master"
     assert payload["description"]
-    assert "critical-challenge" in payload["description"]
+    assert "critical-analysis" in payload["description"]
     assert payload["model"] == "gpt-5.6-sol"
     assert payload["model_reasoning_effort"] == "medium"
-    assert payload["sandbox_mode"] == "read-only"
+    assert payload["sandbox_mode"] == "workspace-write"
 
     assert isinstance(instructions, str)
     assert instructions.strip()
+    lowered = " ".join(instructions.lower().split())
+    for marker in (
+        "structured input is optional",
+        "only analysis failure",
+        "prefer read-only",
+        "explicitly asks",
+        "readable markdown report",
+        "number evidence items consecutively",
+        "critique, evidence, suggestion, why, and explicit blocking",
+    ):
+        assert marker in lowered
+    assert "full-analysis-v1" not in lowered
+    assert "target_revision" not in lowered

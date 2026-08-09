@@ -12,9 +12,17 @@ description: Use when a repository-owned idea needs a mandatory fail-closed G0-G
 - `scripts/idea_state.py` owns `internal-gateway-idea-state/v2`, typed events,
   transitions, approvals, hashing, persistence, review binding, and CLI
   projections.
-- `internal-gateway-critical-master` produces the in-memory
-  `internal-gateway-critical/full-analysis-v1` packet. This gateway validates,
-  binds, consolidates, and stores only decision-relevant ledger rows.
+- `internal-gateway-critical-master` produces a generic readable critical
+  report. `scripts/critical_report_adapter.py` owns the consumer-side
+  conversion that binds that report to the current source, design path, and
+  revision before review ingestion.
+- `scripts/idea_state.py::record_readable_review` is the single consumer entry
+  point for adapting a readable report and recording it at G3. The packet API
+  remains only as an internal compatibility boundary.
+- `scripts/idea_state.py` validates the adapted
+  `internal-gateway-critical/full-analysis-v1` boundary, consolidates findings,
+  and stores only decision-relevant ledger rows. The critical skill does not
+  know this boundary.
 - `/internal-gateway-writing-plans` is the only owner after G5 approval.
   Design approval and plan-writing approval never authorize implementation.
 
@@ -56,14 +64,16 @@ legality but never semantically infers a typed decision from free-form prose.
 | G0 | `WAIT_G0` | `resolve-g0` with typed intent, decisions, constraints, success criteria, and anti-scope | `WAIT_G1` |
 | G1 | `WAIT_G1` | simple approval | `WAIT_G2` |
 | G2 | `WAIT_G2` | `select-approach` with typed approach data | `WAIT_G3` |
-| G3 | `WAIT_G3` | current-turn simple approval, then internal critic boundary | valid packet persists `WAIT_G4` |
+| G3 | `WAIT_G3` | current-turn simple approval, then `record-readable-review` | valid report persists `WAIT_G4` |
 | G4 | `WAIT_G4` | `resolve-review` with typed disposition, remedy, and risk decision | `WAIT_G5` only when blockers and conflicts close |
 | G5 | `WAIT_G5` | simple approval | `APPROVED`, then writing-plans stop |
 
 G3 approval is not banked by itself. When the critic is available in that same
-assistant turn, it must validate and persist the current-revision packet before
-the turn ends at `WAIT_G4`. If packet validation or persistence is interrupted,
-`WAIT_G3` remains authoritative and the critic is rerun after resumption.
+assistant turn, the gateway must call `record_readable_review`, which adapts the
+readable report, validates the bound current-revision packet, and persists it
+before the turn ends at `WAIT_G4`. If adaptation, validation, or persistence is
+interrupted, `WAIT_G3` remains authoritative and the critic is rerun after
+resumption.
 
 ```mermaid
 stateDiagram-v2
@@ -97,20 +107,28 @@ approval maps to the simple approval event for that gate.
 
 ## Critic and advisory boundaries
 
-`record-review` is an internal boundary, not a user shortcut. It validates the
-complete in-memory `full-analysis-v1` packet, including exact keys, source,
-target path, target revision, findings, evidence, diagnostics, and outcome
-invariants. A standard review is required; high assurance also requires an
-independent review. Sources cannot be duplicated or invented. Valid findings
-are consolidated deterministically into the design ledger, merging equivalent
-evidence and keeping recommendation conflicts open. Raw packet JSON is
-discarded.
+The readable critical report is an internal input to the consumer adapter, not
+a user shortcut. `record_readable_review` calls
+`critical_report_adapter.py`, which requires numbered evidence with critique,
+evidence, suggestion, why, and explicit blocking fields; it supplies the
+current source, design path, and revision and produces the bound in-memory
+`full-analysis-v1` packet. The existing packet validator then checks the exact
+keys, findings, evidence, diagnostics, and outcome invariants. Invalid-target
+packets and no-context reports cannot be ingested. A standard review is
+required; high assurance also requires an independent review. Sources cannot be
+duplicated or invented. Valid findings are consolidated deterministically into
+the design ledger, merging equivalent evidence and keeping recommendation
+conflicts open. Neither the raw report nor packet JSON is persisted.
+
+For the state CLI, use `advance --event record-readable-review` with a payload
+containing the readable `report` and optional `source`; the consumer derives the
+current design path and revision from the loaded state.
 
 `resolve-review` is a separate user disposition/remedy/risk event. It can reach
 G5 only after all open blockers and conflicts close. An unresolved disposition
-returns to the earliest affected gate and revision. Advisory packet ingestion
-is optional, remains non-mandatory, and cannot populate `review_sources`,
-`reviewed_revision`, or `approved_revision`.
+returns to the earliest affected gate and revision. Advisory report adaptation
+and packet ingestion are optional, remain non-mandatory, and cannot populate
+`review_sources`, `reviewed_revision`, or `approved_revision`.
 
 An on-demand advisory may create the bounded two-artifact pair before G0 at
 `ADVISORY_REVIEW`, with `advisory_return_state: WAIT_G0`. Finishing it returns
@@ -118,11 +136,12 @@ to exactly `WAIT_G0`; it never satisfies mandatory G4 review.
 
 ## Fail-closed recovery and handoff
 
-Missing, malformed, stale, v1, or hash-mismatched evidence clears later review
-and approval claims and returns to the earliest gate that can be proven. An
-orphaned bounded design is uninitialized and may be retried through `init`.
+Missing, malformed, stale, v1, or hash-mismatched adapted evidence clears later
+review and approval claims and returns to the earliest gate that can be proven.
+An orphaned bounded design is uninitialized and may be retried through `init`.
 Unexpected stable artifacts, future events, invalid short approvals, stale
-packets, unavailable mandatory critic evidence, and scope drift stop progress.
+reports or packets, unavailable mandatory critic evidence, and scope drift stop
+progress.
 
 G5 approval routes only to `/internal-gateway-writing-plans` and stops. The
 route has `authorizes_execution: false`; no design or plan approval can invoke

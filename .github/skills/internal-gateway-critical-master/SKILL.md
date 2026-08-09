@@ -1,175 +1,184 @@
 ---
 name: internal-gateway-critical-master
-description: Use when a repository-owned plan, proposal, decision, or assumption set needs a full-scope critical challenge, pre-mortem, hidden-assumption test, failure-mode analysis, or lateral reframe before action, with a validated full-analysis packet as the only output.
+description: Use when any plan, proposal, decision, design, workflow, requirement, or assumption set needs a thorough critical challenge before action.
 ---
 
-# Internal Gateway Critical Master
+# Critical Master
 
 ## Referenced skills
 
 - None.
 
-Use this skill as the portable core for full-scope critical challenge work. The
-calling gateway decides when to invoke it; this skill produces the validated
-full-analysis packet and does not execute, plan, or route work.
+This skill is self-contained. It does not require a caller protocol, fixed
+metadata, another skill, a repository workflow, or a machine-readable output
+contract.
 
 ## When to use
 
-- A repository-owned plan, proposal, decision, or assumption set needs pressure
-  before action and the result must be consumed as structured review evidence.
+Receive and analyze whatever relevant context is available, identify the most
+important weaknesses and risks, and return a useful critical assessment. The
+subject may be a plan, proposal, decision, design, workflow, requirement,
+document, architecture, or another action context.
 
-## When not to use
+## Context intake
 
-- The next step is retained planning, implementation, or evidence-first review.
-- The request is for a compact summary instead of a full-scope challenge.
+Input is optional. Build the analysis from the following sources, in order:
 
-## Boundaries
+1. The current user request and conversation.
+2. Content supplied or attached by the user.
+3. Files explicitly named by the user.
+4. Clearly relevant local files, when read or search tools are available.
 
-- Challenge only. Do not edit files, run commands, access external systems,
-  author retained plans, dispatch subagents, or perform active routing.
-- The output is always one `internal-gateway-critical/full-analysis-v1` JSON
-  packet. There is no card-only, prose-only, or early-stop output mode.
+Do not invent evidence. If the context is partial, continue with the strongest
+reasonable interpretation, label assumptions, and record the missing evidence.
+If several subjects are possible, use the latest user focus and state the
+chosen scope in the report.
 
-## Required input
+There is only one failure case: no analysable subject, request, decision, or
+evidence is available at all. In that case, emit the failure report described
+under `No-context failure` and stop. Do not fail merely because metadata,
+files, revision numbers, or a preferred artifact format are absent.
 
-The caller supplies `source`, `target_path`, and `target_revision` for the
-current living design. `source` is `standard` or `independent`; the path is
-repository-relative POSIX; the revision is a positive integer. Do not invent
-missing or stale target metadata. If the caller cannot supply it, stop for the
-metadata clarification needed to bind the packet safely.
+## Operating posture
 
-Read `references/full-analysis-contract.md` before producing output. It is the
-single packet-shape and outcome authority for this skill.
+- Challenge the subject before recommending action.
+- Preserve the original intent and distinguish it from constraints or
+  requirements discovered during the analysis.
+- Treat weak claims as hypotheses, not facts.
+- Keep material risks and decisive uncertainty visible.
+- Recommend the smallest change that preserves the intended value when the
+  current direction is overbuilt or unsafe.
+- Do not pad the report with trivial findings.
+- Analysis and recommendations are the default. If the user explicitly asks
+  for an action, adapt when the available tools, authority, and safety
+  conditions permit it; do not treat read-only behavior as an absolute ban.
 
 ## Critical procedure
 
-Run exactly three phases. Do not skip a phase and do not loop back unless new
-evidence appears.
+Run the following three phases once. The phases are an internal reasoning
+sequence, not a reason to ask the user for structured input.
 
 ### Phase 1: Discover
 
-- Read only the smallest evidence needed to understand the challenged proposal,
-  decision, or assumption set.
-- Identify the material claims, constraints, success criteria, anti-scope, and
-  evidence gaps.
-- Record internally what is being challenged and why it matters now.
+- Identify what is being challenged and why it matters now.
+- Extract the material goal, proposal, claims, constraints, success criteria,
+  anti-scope, stakeholders, dependencies, and available evidence.
+- Separate confirmed facts, inferences, estimates, and unknowns.
+- Record evidence gaps without treating them as automatic blockers.
 
-Completion criterion: the challenged target, caller metadata, material claims,
-constraints, success criteria, anti-scope, and evidence gaps are recorded.
+Completion criterion: the subject, intent, important constraints, success
+criteria, anti-scope, and evidence gaps are understood well enough to critique.
 
 ### Phase 2: Challenge
 
-- Select exactly three lenses from the table below based on the highest-risk
-  gaps in the Discover summary.
-- Lens three must be lateral: `analogy` or `reverse-assumption`.
-- Apply each selected lens once.
-- Apply one optional pre-mortem pass when failure modes are material and not
-  covered by the selected lenses.
-- Record every material finding from the full-scope challenge. Do not stop at
-  the first controlling objection and do not pad the packet with weak findings.
-- Ask at most one concise root question across all findings when its answer
-  could materially change the critique.
-- Treat mitigations as conditions to continue, not as implementation designs
-  that rescue the proposal.
-
-Completion criterion: exactly three lenses were applied, the third is lateral,
-every material finding is recorded with evidence, and any material failure mode
-has been represented as a finding or residual risk.
+Select exactly three lenses based on the highest-risk gaps. The third lens must
+be lateral: `analogy` or `reverse-assumption`. Apply each selected lens once.
 
 | Lens | Question | Use when |
 | --- | --- | --- |
-| First principles | Which claims are evidence-backed, and which are inherited assumptions? | The plan repeats local habits as if they were constraints. |
+| First principles | Which claims are evidence-backed, and which are inherited assumptions? | Local habits may be mistaken for real constraints. |
 | Constraint audit | Which limits are real, and which are defaults or untested policies? | The solution seems boxed in too early. |
 | Inversion | What would we do if the stated goal were reversed or forbidden? | The current path feels inevitable. |
-| Counterfactual | What would be true if the rejected option were actually better? | A tradeoff has been simplified too quickly. |
-| Role reversal | What would review, delivery, planning, or the user object to? | The plan optimizes one owner at another owner's cost. |
-| Time shift | What breaks after one month, one sync cycle, or one consumer rollout? | The immediate change looks correct but may age badly. |
-| Scope compression | What is the smallest version that preserves most value? | The plan may be overengineered. |
-| Opportunity cost | What useful path is the plan excluding? | The design is safe but may be too narrow. |
-| Analogy | Which solution in a different domain already solved a structurally similar problem? | The team is stuck in familiar patterns. |
-| Reverse assumption | What changes if the most obvious assumption here is false? | A key claim has not been tested recently. |
+| Counterfactual | What would be true if the rejected option were actually better? | A tradeoff may be oversimplified. |
+| Role reversal | What would delivery, review, operations, or the user object to? | One owner may be optimized at another owner's cost. |
+| Time shift | What breaks after one month, one cycle, or one rollout? | The immediate change may age badly. |
+| Scope compression | What is the smallest version that preserves most value? | The proposal may be overengineered. |
+| Opportunity cost | What useful path is the proposal excluding? | A safe path may still be too narrow. |
+| Analogy | Which different domain solved a structurally similar problem? | Familiar patterns may be limiting the design. |
+| Reverse assumption | What changes if the most obvious assumption is false? | A key assumption has not been tested. |
 
-Trigger a pre-mortem when at least one of these is true:
+Run a pre-mortem when failure modes are material and not already covered. This
+applies when the subject involves coordination across teams or systems, a
+missed assumption could cause an incident or governance breach, a new owner or
+handoff is introduced, or the change affects a hard-to-reverse production path.
 
-- The proposal depends on coordination across teams, systems, or sync cycles.
-- A missed assumption could cause rollback, incident, or governance breach.
-- The plan introduces a new operational owner, on-call rotation, or handoff.
-- The change affects a production path and cannot be rolled back in under one hour.
+Record every material finding from the full challenge. Lead with the strongest
+supported objection, but do not stop there if other material findings exist.
+Ask at most one root question internally when its answer could change the
+critique. Treat mitigations as conditions for continuing, not as implementation
+designs that silently rescue a weak proposal.
+
+Completion criterion: exactly three lenses were applied, the third is lateral,
+all material findings are represented, and material failure modes appear in a
+finding or residual risk.
 
 ### Phase 3: Synthesize
 
-- Run the final consistency gate: name the strongest supported objection,
-  downgrade weak claims to hypotheses, and surface unresolved uncertainty.
-- Classify each material claim as `confirmed`, `inference`, or `estimate` and
+- Run a final consistency check and name the strongest supported objection.
+- Classify material claims as `confirmed`, `inference`, or `estimate` and
   evidence quality as `strong`, `partial`, or `weak`.
-- Set internal Defense to exactly one of `none`, `resolves`, `narrows`,
-  `accepts-risk`, or `unanswered`; when it is not `none`, retain the strongest
-  defense and its remaining vulnerability in working state.
-- Select exactly one full-analysis outcome from the contract.
-- Set `accepted` only when no blocking finding and no diagnostics remain.
-- Set `revise-design` when at least one finding requires a design remedy.
-- Set `reopen-analysis` when a blocking finding reopens assumptions or scope.
-- Set `needs-clarification` only for a blocking finding tied to an unresolved
-  user decision.
-- Set `invalid-target` for invalid or unbound target metadata or packet input.
-- Set `request-separate-review` only for an independent review request with
-  `source: independent` and diagnostics.
+- Classify the internal defense as `none`, `resolves`, `narrows`,
+  `accepts-risk`, or `unanswered`; retain its remaining vulnerability when it
+  is not `none`.
+- Select one conclusion:
+  - `accepted`: no blocking finding remains;
+  - `revise-design`: a finding requires a design or proposal remedy;
+  - `reopen-analysis`: a blocking finding reopens assumptions or scope;
+  - `needs-clarification`: a blocking finding depends on an unresolved user
+    decision.
+- Use `failure-no-context` only when the sole failure condition applies.
 
-Completion criterion: one valid packet contains the exact target binding,
-source, outcome, every material finding, residual risks, and diagnostics. The
-packet passes the outcome invariants in `references/full-analysis-contract.md`.
+Do not conceal a material risk just to reach `accepted`. Do not use a numeric
+precision that the available evidence cannot support.
 
-## Internal critical record
+## Readable report
 
-Keep the following as internal working state and project it only through the
-packet:
+Return one concise Markdown report. The structure is a readability aid and is
+not a dependency for using this skill. Write prose in the user's language,
+while keeping the field labels below recognizable.
 
-- Challenged proposal, timing, source, target path, and target revision
-- Selected lenses (exactly three; third is lateral)
-- Material claims with claim class and evidence quality
-- Every material finding, its evidence, blocking status, recommendation, and ID
-- Strongest objection and any pre-mortem failure, causes, and conditions
-- Defense classification and remaining vulnerability
-- Unresolved user decisions and residual risks
-- Exactly one full-analysis outcome and packet diagnostics
+```markdown
+# Critical Analysis
 
-Preserve traceability between original intent and emerged requirements. Do not
-rewrite emerged constraints as original intent. Keep material risk and decisive
-uncertainty visible in the packet. The packet must contain no unsupported
-numeric precision.
+## Scope
+<what is being analyzed and why>
 
-## Output
+## Assessment
+<short overall assessment>
 
-Emit exactly one UTF-8 JSON object conforming to
-`references/full-analysis-contract.md`:
+### Evidence 1 — <short title>
+**Critique:** <what is wrong or uncertain>
+**Evidence:** <fact, passage, observation, or missing proof supporting the critique>
+**Suggestion:** <what should be changed, checked, or decided>
+**Why:** <why this suggestion improves the outcome or reduces the risk>
+**Impact:** <material consequence if the point is ignored>
+**Blocking:** <true or false>
 
-- no Markdown fences;
-- no headings, preamble, appendix, prose, or emoji card;
-- exactly the required top-level keys;
-- unique `C-000` finding IDs and non-empty unique evidence references;
-- every material finding from the challenge, not only the strongest one.
+### Evidence 2 — <short title>
+...
 
-The default public path is this full-analysis packet. The packet is an internal
-producer result; `/internal-gateway-idea` validates it, consolidates equivalent
-findings, renders localized fields, and owns state transitions.
+## Residual Risks
+- <risk that remains after the recommendations>
 
-## Tooling
+## Open Questions
+- <question only when its answer could change the conclusion>
 
-- `scripts/full_analysis.py` provides the pure packet parser, strict validator,
-  and bounded `text`, `json`, and `compact` CLI views.
-- The validator rejects malformed JSON, Markdown fences, unknown or missing
-  keys, invalid nested values, path or revision mismatches, and outcome-invariant
-  failures. An invalid packet is never a review pass.
-- Keep this bundle self-contained. Do not depend on card contracts, external
-  instructions, or repository-global Python modules.
+## Conclusion
+**Outcome:** <accepted | revise-design | reopen-analysis | needs-clarification>
+**Summary:** <strongest supported conclusion and next condition>
+```
 
-## Outcome meanings
+Evidence headings must be numbered consecutively. Every evidence must contain
+the four decision fields `Critique`, `Evidence`, `Suggestion`, and `Why`, plus
+an explicit `Blocking` classification. `Impact` should also be present whenever
+it is relevant; use `Blocking: false` when the finding is material but not a
+stop condition.
 
-| Outcome | Use when |
-| --- | --- |
-| `accepted` | The full analysis has no blocking finding and no diagnostics. |
-| `revise-design` | At least one material finding requires a design remedy. |
-| `reopen-analysis` | A blocking finding requires assumptions or scope to be reopened. |
-| `needs-clarification` | A blocking finding depends on an unresolved user decision. |
-| `invalid-target` | Target metadata, packet shape, or required binding is invalid. |
-| `request-separate-review` | An independent review is required and has diagnostics. |
+Include every material finding, not only the strongest one. Keep the report
+focused on decisions, risks, consequences, and actionable recommendations.
+Do not emit an unrelated card, a machine-only object, a preamble, or internal
+working notes outside the report.
+
+## No-context failure
+
+When no subject or evidence can be recovered, emit only:
+
+```markdown
+# Critical Analysis
+
+## Status
+Failure: no analysable context was available.
+
+## Required Context
+Provide a subject, decision, proposal, design, document, or evidence to critique.
+```
