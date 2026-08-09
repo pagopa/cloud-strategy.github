@@ -1,20 +1,11 @@
 ---
-schema: internal-gateway-idea/v1
+schema: internal-gateway-idea-state/v2
 slug: sample
-status: approved
-revision: true
-target: Invalid design.
-source_baseline: null
-lane: unknown
-assurance: standard
-assurance_reason: Missing.
-platform_semantics_controlling: false
-reviewed_revision: 1
-approved_revision: 1
-next_actor: none
-next_action: Stop.
+state: WAIT_G3
+design_sha256: not-a-hash
 ---
 
-## Context and Goal
+# Invalid Design
 
-This fixture intentionally violates the state contract.
+This fixture has front matter and duplicated persisted state, so it must fail
+the v2 Markdown boundary before any state transition is considered.

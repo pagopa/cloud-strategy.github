@@ -7,18 +7,17 @@ from pathlib import Path
 
 import pytest
 
+
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 MODULE_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/idea_state.py"
-FIXTURE = Path(__file__).parent / "fixtures/design-valid.md"
 
 
 def _load_module():
-    assert MODULE_PATH.exists(), f"missing state module: {MODULE_PATH}"
-    spec = importlib.util.spec_from_file_location("idea_state_consumer", MODULE_PATH)
+    spec = importlib.util.spec_from_file_location("idea_state_consumer_v2", MODULE_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -26,317 +25,278 @@ def _load_module():
     return module
 
 
-def _document(module):
-    return module.parse_design_document(
-        FIXTURE.read_text(encoding="utf-8"), expected_slug="sample"
-    )
-
-
-def _draft_document(module, *, assurance: str = "standard"):
-    document = _document(module)
-    return replace(
-        document,
-        header=replace(
-            document.header,
-            assurance=assurance,
-            assurance_reason="Explicit test assurance state.",
-            status="under-review",
-            reviewed_revision=None,
-            approved_revision=None,
-            review_sources=(),
-            next_actor="critic",
-            next_action="Run the required review for the current revision.",
-        ),
+def _state(module, *, state: str = "WAIT_G3", assurance: str = "standard", sources: tuple[str, ...] = ()):
+    return module.StateV2(
+        schema="internal-gateway-idea-state/v2",
+        slug="sample",
+        revision=1,
+        state=state,
+        design_sha256="a" * 64,
+        assurance=assurance,
+        review_sources=sources,
+        reviewed_revision=1 if state in {"WAIT_G4", "WAIT_G5", "APPROVED"} else None,
+        approved_revision=1 if state == "APPROVED" else None,
     )
 
 
 def _packet(
-    source: str,
+    source: str = "standard",
     *,
     outcome: str = "accepted",
-    findings: list[dict[str, object]] | None = None,
+    recommendation: str = "Keep the typed event boundary.",
+    blocking: bool = False,
     diagnostics: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "schema": "internal-gateway-critical/full-analysis-v1",
         "source": source,
         "target_path": "tmp/idea/sample/design.md",
-        "target_revision": 2,
+        "target_revision": 1,
         "outcome": outcome,
-        "findings": findings or [],
+        "findings": [
+            {
+                "id": "C-001",
+                "critique": "The current control needs explicit evidence.",
+                "recommendation": recommendation,
+                "reason": "The state must fail closed.",
+                "blocking": blocking,
+                "evidence": ["design.md#L1"],
+            }
+        ],
         "residual_risks": [],
         "diagnostics": diagnostics or [],
     }
 
 
-def _finding(
-    *,
-    recommendation: str = "Keep the compact contract.",
-    reason: str = "The design must retain a reviewable proof.",
-    blocking: bool = False,
-    evidence: list[str] | None = None,
-) -> dict[str, object]:
-    return {
-        "id": "C-001",
-        "critique": "The current control needs explicit evidence.",
-        "recommendation": recommendation,
-        "reason": reason,
-        "blocking": blocking,
-        "evidence": evidence or ["design.md#L12"],
-    }
-
-
-def test_standard_and_independent_packets_consolidate_to_one_canonical_finding() -> None:
+def test_packet_shape_and_target_binding_fail_closed() -> None:
     module = _load_module()
-    document = _document(module)
+    packet = _packet()
+    packet["unknown"] = True
+    with pytest.raises(module.DesignValidationError):
+        module.record_review(
+            _state(module),
+            packet,
+            g3_approval_event=module.TypedEvent("approve", {}),
+            expected_target_path="tmp/idea/sample/design.md",
+            expected_revision=1,
+        )
 
-    reviewed = module.apply_review_precedence(
-        document,
-        [
-            _packet(
-                "standard",
-                outcome="revise-design",
-                findings=[_finding(evidence=["design.md#L12"])],
-            ),
-            _packet(
-                "independent",
-                outcome="revise-design",
-                findings=[_finding(blocking=True, evidence=["design.md#L18"])],
-            ),
-        ],
-        required_independent=True,
+    wrong_target = _packet()
+    wrong_target["target_revision"] = 2
+    with pytest.raises(module.DesignValidationError):
+        module.record_review(
+            _state(module),
+            wrong_target,
+            g3_approval_event=module.TypedEvent("approve", {}),
+            expected_target_path="tmp/idea/sample/design.md",
+            expected_revision=1,
+        )
+
+
+def test_record_review_requires_current_turn_g3_approval_and_enters_wait_g4() -> None:
+    module = _load_module()
+    reviewed = module.record_review(
+        _state(module),
+        _packet(),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
     )
 
-    assert reviewed.header.reviewed_revision is None
-    assert reviewed.header.status == "awaiting-remedy-decision"
-    assert len(reviewed.ledger) == 2
-    merged = next(item for item in reviewed.ledger if item.id == "F-002")
-    assert merged.blocking is True
-    assert set(merged.sources) == {"standard", "independent"}
-    assert set(merged.evidence) == {"design.md#L12", "design.md#L18"}
-    assert reviewed.header.review_sources == ("standard", "independent")
+    assert reviewed.state == "WAIT_G4"
+    assert reviewed.reviewed_revision == reviewed.revision
+    assert reviewed.approved_revision is None
+    assert reviewed.review_sources == ("standard",)
 
 
-def test_conflicting_recommendations_remain_separate_and_open() -> None:
+def test_standalone_packet_cannot_advance_persisted_wait_g3() -> None:
     module = _load_module()
-    document = _document(module)
-    packets = [
-        _packet(
-            "standard", findings=[_finding(recommendation="Keep the compact contract.")]
-        ),
-        _packet(
-            "independent",
-            findings=[_finding(recommendation="Replace the contract entirely.")],
-        ),
-    ]
+    with pytest.raises(module.DesignValidationError):
+        module.consume_full_analysis_packet(
+            _state(module),
+            _packet(),
+            expected_target_path="tmp/idea/sample/design.md",
+            expected_revision=1,
+            mandatory=True,
+        )
 
-    reviewed = module.apply_review_precedence(
-        document, packets, required_independent=True
+
+def test_malformed_or_interrupted_critic_keeps_wait_g3_authoritative() -> None:
+    module = _load_module()
+    state = _state(module)
+    malformed = _packet()
+    malformed["findings"] = [{"id": "C-001", "blocking": "yes"}]
+    with pytest.raises(module.DesignValidationError):
+        module.record_review(
+            state,
+            malformed,
+            g3_approval_event=module.TypedEvent("approve", {}),
+            expected_target_path="tmp/idea/sample/design.md",
+            expected_revision=1,
+        )
+    assert state.state == "WAIT_G3"
+    assert state.review_sources == ()
+    assert state.reviewed_revision is None
+
+
+def test_high_assurance_requires_both_review_sources() -> None:
+    module = _load_module()
+    state = _state(module, assurance="high")
+    after_standard = module.record_review(
+        state,
+        _packet("standard"),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+    )
+    assert after_standard.state == "WAIT_G3"
+    assert after_standard.review_sources == ("standard",)
+    assert after_standard.reviewed_revision is None
+
+    after_independent = module.record_review(
+        after_standard,
+        _packet("independent"),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+    )
+    assert after_independent.state == "WAIT_G4"
+    assert after_independent.review_sources == ("standard", "independent")
+
+
+def test_duplicate_review_source_is_rejected() -> None:
+    module = _load_module()
+    reviewed = module.record_review(
+        _state(module, assurance="high"),
+        _packet(),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+    )
+    with pytest.raises(module.DesignValidationError):
+        module.record_review(
+            reviewed,
+            _packet(),
+            g3_approval_event=module.TypedEvent("approve", {}),
+            expected_target_path="tmp/idea/sample/design.md",
+            expected_revision=1,
+        )
+
+
+def test_equivalent_findings_merge_sources_and_evidence() -> None:
+    module = _load_module()
+    first = module.record_review(
+        _state(module, assurance="high"),
+        _packet("standard"),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+    )
+    second_packet = _packet("independent")
+    second_packet["findings"][0]["evidence"] = ["design.md#L2"]  # type: ignore[index]
+    second = module.record_review(
+        first,
+        second_packet,
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
     )
 
-    assert len(reviewed.ledger) == 3
-    assert sum(item.disposition == "open" for item in reviewed.ledger) >= 2
-    assert not module.can_complete_review(reviewed)
+    assert len(second.ledger) == 1
+    assert second.ledger[0].sources == ("standard", "independent")
+    assert set(second.ledger[0].evidence) == {"design.md#L1", "design.md#L2"}
 
 
-@pytest.mark.parametrize(
-    ("outcome", "expected_status", "expected_actor"),
-    (
-        ("needs-clarification", "awaiting-decisions", "user"),
-        ("reopen-analysis", "analyzing", "agent"),
-        ("revise-design", "awaiting-remedy-decision", "user"),
-    ),
-)
-def test_review_precedence_routes_outcomes_without_automatic_loops(
-    outcome: str, expected_status: str, expected_actor: str
-) -> None:
+def test_conflicting_recommendations_remain_open() -> None:
     module = _load_module()
-    document = _document(module)
-
-    routed = module.apply_review_precedence(
-        document,
-        [
-            _packet(
-                "standard",
-                outcome=outcome,
-                findings=[
-                    _finding(
-                        blocking=True,
-                        reason=(
-                            "The unresolved user decision needs one bounded answer."
-                            if outcome == "needs-clarification"
-                            else "The design must retain a reviewable proof."
-                        ),
-                    )
-                ],
-            )
-        ],
-        required_independent=False,
+    first = module.record_review(
+        _state(module, assurance="high"),
+        _packet("standard"),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
     )
-
-    assert routed.header.status == expected_status
-    assert routed.header.next_actor == expected_actor
-    assert routed.header.revision == 2
-
-
-def test_missing_independent_packet_fails_closed() -> None:
-    module = _load_module()
-
-    routed = module.apply_review_precedence(
-        _document(module), [_packet("standard")], required_independent=True
+    second = module.record_review(
+        first,
+        _packet("independent", recommendation="Replace the boundary."),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
     )
-
-    assert routed.header.status == "awaiting-independent-review"
-    assert routed.header.next_actor == "user"
-    assert routed.header.reviewed_revision is None
-    assert routed.header.review_sources == ("standard",)
-
-
-def test_empty_packet_set_cannot_enter_final_approval() -> None:
-    module = _load_module()
-    routed = module.apply_review_precedence(
-        _draft_document(module), [], required_independent=False
+    assert len(second.ledger) == 2
+    assert all(item.conflict for item in second.ledger)
+    unresolved = module.resolve_review(
+        second,
+        disposition="open",
+        remedy=None,
+        risk_decision=None,
     )
-
-    assert routed.header.status == "analyzing"
-    assert routed.header.reviewed_revision is None
-    assert routed.header.review_sources == ()
-    assert not module.can_finalize_approval(routed)
+    assert unresolved.state == "WAIT_G3"
+    assert unresolved.revision == second.revision + 1
 
 
-def test_independent_only_high_assurance_cannot_enter_final_approval() -> None:
+def test_advisory_packet_is_non_mandatory_and_cannot_set_review_claims() -> None:
     module = _load_module()
-    routed = module.apply_review_precedence(
-        _draft_document(module, assurance="high"),
-        [_packet("independent")],
-        required_independent=False,
+    advisory = module.start_advisory(
+        _state(module, state="WAIT_G0"),
+        prior_gate="WAIT_G0",
     )
-
-    assert routed.header.status == "analyzing"
-    assert routed.header.reviewed_revision is None
-    assert routed.header.review_sources == ("independent",)
-    assert not module.can_complete_review(routed)
-    assert not module.can_finalize_approval(routed)
-
-
-def test_high_assurance_requires_standard_and_independent_packets() -> None:
-    module = _load_module()
-    routed = module.apply_review_precedence(
-        _draft_document(module, assurance="high"),
-        [_packet("standard")],
-        required_independent=False,
+    result = module.consume_full_analysis_packet(
+        advisory,
+        _packet(),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+        mandatory=False,
     )
+    assert result.state.state == "ADVISORY_REVIEW"
+    assert result.state.review_sources == ()
+    assert result.state.reviewed_revision is None
+    assert result.state.approved_revision is None
 
-    assert routed.header.status == "awaiting-independent-review"
-    assert routed.header.reviewed_revision is None
-    assert routed.header.review_sources == ("standard",)
 
-
-@pytest.mark.parametrize(
-    "packets",
-    (
-        [_packet("unknown")],
-        [_packet("standard"), _packet("standard")],
-    ),
-)
-def test_unknown_or_duplicate_packet_sources_fail_closed(
-    packets: list[dict[str, object]],
-) -> None:
+def test_advisory_review_returns_to_exact_prior_gate() -> None:
     module = _load_module()
-    routed = module.apply_review_precedence(
-        _draft_document(module), packets, required_independent=False
+    reviewing = module.start_advisory(_state(module, state="WAIT_G1"), prior_gate="WAIT_G1")
+    resumed = module.finish_advisory(reviewing)
+    assert reviewing.state == "ADVISORY_REVIEW"
+    assert resumed.state == "WAIT_G1"
+    assert resumed.review_sources == ()
+    assert resumed.reviewed_revision is None
+
+
+def test_g4_resolution_is_separate_from_g3_packet_ingestion() -> None:
+    module = _load_module()
+    reviewed = module.record_review(
+        _state(module),
+        _packet(),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
     )
-
-    assert routed.header.status == "analyzing"
-    assert routed.header.reviewed_revision is None
-    assert not module.can_finalize_approval(routed)
-
-
-def test_public_critique_is_numbered_and_does_not_expose_packet_json() -> None:
-    module = _load_module()
-    findings = module.consolidate_findings(
-        [],
-        [
-            module.NormalizedFinding(
-                critique="A control is missing.",
-                recommendation="Add the control.",
-                reason="Evidence is incomplete.",
-                blocking=True,
-                source="standard",
-                evidence=("design.md#L12",),
-                equivalence_key="control-missing",
-            )
-        ],
+    resolved = module.resolve_review(
+        reviewed,
+        disposition="closed",
+        remedy={"action": "retain"},
+        risk_decision={"accepted": True},
     )
+    assert resolved.state == "WAIT_G5"
+    assert resolved.approved_revision is None
 
-    rendered = module.render_public_critique(findings)
-
-    assert "1." in rendered
-    assert "Critica:" in rendered
-    assert "Suggerimento:" in rendered
-    assert "Perché:" in rendered
-    assert "Bloccante: si" in rendered
-    assert '"schema"' not in rendered
-
-
-@pytest.mark.parametrize(
-    ("signals", "expected"),
-    (
-        ({"destructive": True}, "high"),
-        ({"security": True}, "high"),
-        ({"unknown_platform_claim": True}, "high"),
-        ({"independent_owners": 3}, "high"),
-        ({"feasibility_unknown": True}, "high"),
-        ({"explicit_user_request": True}, "high"),
-        ({"destructive": False, "security": False}, "standard"),
-    ),
-)
-def test_assurance_triggers_and_near_miss_are_explicit(
-    signals: dict[str, object], expected: str
-) -> None:
-    module = _load_module()
-
-    assert module.determine_assurance(signals) == expected
-
-
-def test_final_approval_separates_design_plan_and_execution() -> None:
-    module = _load_module()
-    document = _document(module)
-
-    approval = module.route_final_approval(document, "approvo")
-    plan_route = module.route_final_approval(document, "approvo e scrivi il piano")
-    later_plan_route = module.route_final_approval(document, "scrivi il piano")
-
-    assert approval.approved is True
-    assert approval.next_actor == "none"
-    assert plan_route.next_actor == "plan-writer"
-    assert later_plan_route.next_actor == "plan-writer"
-    assert approval.authorizes_execution is False
-    assert plan_route.authorizes_execution is False
-    assert later_plan_route.authorizes_execution is False
-
-
-@pytest.mark.parametrize(
-    ("prompt", "owner"),
-    (
-        ("shape this repository idea and compare alternatives", "internal-gateway-idea"),
-        ("review this completed architecture independently", "internal-review-high-level"),
-        ("challenge this design with a full critical analysis", "internal-gateway-critical-master"),
-        ("implement this small bounded repository task", "internal-gateway-simple-task"),
-    ),
-)
-def test_routing_cases_have_one_nearest_owner(prompt: str, owner: str) -> None:
-    module = _load_module()
-
-    route = module.resolve_route(prompt)
-
-    assert route.owner == owner
-    assert route.competing_owners == ()
-
-
-def test_clean_chat_route_has_no_automatic_implementation_transition() -> None:
-    module = _load_module()
-    route = module.route_final_approval(_document(module), "approvo e scrivi il piano")
-
+    approval = module.transition_gate(
+        resolved,
+        module.TypedEvent("approve", {"token": "ok"}),
+        gate="WAIT_G5",
+    )
+    assert approval.accepted is True
+    assert approval.state.state == "APPROVED"
+    route = module.derive_route(approval.state)
     assert route.next_actor == "plan-writer"
+    assert route.next_owner == "/internal-gateway-writing-plans"
     assert route.authorizes_execution is False
+
+
+def test_material_revision_cannot_enter_g5() -> None:
+    module = _load_module()
+    state = _state(module, state="WAIT_G4")
+    changed = replace(state, revision=2, reviewed_revision=1)
+    assert not module.can_enter_g5(changed, "a" * 64)

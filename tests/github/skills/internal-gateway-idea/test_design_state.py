@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import subprocess
 import sys
-from dataclasses import replace
 from pathlib import Path
 
 import pytest
+
 
 REPO_ROOT = next(
     parent
@@ -17,8 +19,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def _load_module():
-    assert MODULE_PATH.exists(), f"missing state module: {MODULE_PATH}"
-    spec = importlib.util.spec_from_file_location("idea_state", MODULE_PATH)
+    spec = importlib.util.spec_from_file_location("idea_state_v2", MODULE_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -26,201 +27,295 @@ def _load_module():
     return module
 
 
-def _valid_text() -> str:
-    return (FIXTURES / "design-valid.md").read_text(encoding="utf-8")
-
-
-def _parse(module, text: str | None = None):
-    return module.parse_design_document(text or _valid_text(), expected_slug="sample")
-
-
-def _draft_document(module, *, assurance: str = "standard"):
-    document = _parse(module)
-    return replace(
-        document,
-        header=replace(
-            document.header,
-            assurance=assurance,
-            assurance_reason="Explicit test assurance state.",
-            status="under-review",
-            reviewed_revision=None,
-            approved_revision=None,
-            review_sources=(),
-            next_actor="critic",
-            next_action="Run the required review for the current revision.",
-        ),
+def _state(module, *, state: str = "WAIT_G0", assurance: str = "standard", revision: int = 1, digest: str = "a" * 64, sources: tuple[str, ...] = ()):
+    reviewed = revision if state in {"WAIT_G4", "WAIT_G5", "APPROVED"} else None
+    approved = revision if state == "APPROVED" else None
+    return module.StateV2(
+        schema="internal-gateway-idea-state/v2",
+        slug="sample",
+        revision=revision,
+        state=state,
+        design_sha256=digest,
+        assurance=assurance,
+        review_sources=sources,
+        reviewed_revision=reviewed,
+        approved_revision=approved,
     )
 
 
-def _high_text() -> str:
-    return (
-        _valid_text()
-        .replace("assurance: standard", "assurance: high")
-        .replace(
-            "assurance_reason: No high assurance trigger applies.",
-            "assurance_reason: Explicit high-assurance fixture.",
-        )
-        .replace(
-            "review_sources: [standard]",
-            "review_sources: [standard, independent]",
-        )
-    )
-
-
-def test_valid_document_covers_both_lane_shape_and_sections() -> None:
-    module = _load_module()
-
-    document = _parse(module)
-
-    assert document.header.lane == "shape-idea"
-    assert document.header.status == "awaiting-final-approval"
-    assert document.header.revision == 2
-    assert set(document.sections) >= {
-        "Context and Goal",
-        "Decisions and Rationale",
-        "Scope and Coverage",
-        "Design",
-        "Validation and Handoff",
-        "Review Ledger",
-        "Risks and Open Questions",
-        "Continuation",
+def _g0_payload() -> dict[str, object]:
+    return {
+        "intent": "Make the idea gateway fail closed.",
+        "accepted_decisions": ["Use one mandatory current-gate workflow."],
+        "open_decisions": [],
+        "constraints": ["No Git mutation."],
+        "success_criteria": ["Every gate has executable evidence."],
+        "anti_scope": ["Do not change unrelated gateways."],
+        "evidence": ["focused tests"],
     }
-    assert document.coverage_rows[0].requirement_id == "D-001"
 
 
-def test_review_existing_requires_a_source_baseline() -> None:
+def test_v2_state_round_trip_is_strict_and_minimal() -> None:
     module = _load_module()
-    text = _valid_text().replace("lane: shape-idea", "lane: review-existing").replace(
-        "source_baseline: Current idea gateway and critical-master contracts.",
-        "source_baseline: null",
-    )
+    state = _state(module)
 
-    with pytest.raises(module.DesignValidationError):
-        _parse(module, text)
+    encoded = module.serialize_state(state)
+    parsed = module.parse_state(encoded, expected_slug="sample")
 
-
-@pytest.mark.parametrize("review_sources", ("[unknown]", "[standard, standard]"))
-def test_header_review_sources_reject_unknown_or_duplicate_values(
-    review_sources: str,
-) -> None:
-    module = _load_module()
-    text = _valid_text().replace(
-        "review_sources: [standard]", f"review_sources: {review_sources}"
-    )
-
-    with pytest.raises(module.DesignValidationError):
-        _parse(module, text)
+    assert parsed == state
+    assert set(json.loads(encoded)) == {
+        "schema",
+        "slug",
+        "revision",
+        "state",
+        "design_sha256",
+        "assurance",
+        "review_sources",
+        "reviewed_revision",
+        "approved_revision",
+    }
 
 
 @pytest.mark.parametrize(
-    "change",
+    "value",
     (
-        ("revision: 2", "revision: true"),
-        ("status: awaiting-final-approval", "status: invalid"),
-        ("next_actor: user", "next_actor: critic"),
-        ("reviewed_revision: 2", "reviewed_revision: 1"),
-        ("approved_revision: null", "approved_revision: 1"),
+        {"schema": "internal-gateway-idea/v1", "slug": "sample"},
+        {
+            "schema": "internal-gateway-idea-state/v2",
+            "slug": "sample",
+            "revision": 1,
+            "state": "WAIT_G0",
+            "design_sha256": "a" * 64,
+            "assurance": "standard",
+            "review_sources": ["standard", "standard"],
+            "reviewed_revision": None,
+            "approved_revision": None,
+        },
     ),
 )
-def test_invalid_header_values_and_stale_state_fail_closed(
-    change: tuple[str, str],
-) -> None:
+def test_v1_or_duplicate_review_state_fails_closed(value: dict[str, object]) -> None:
     module = _load_module()
-    text = _valid_text().replace(*change)
-
     with pytest.raises(module.DesignValidationError):
-        _parse(module, text)
+        module.validate_state(value, expected_slug="sample")
 
 
-def test_invalid_fixture_rejects_missing_sections_and_bad_revision() -> None:
+@pytest.mark.parametrize("message, expected", (("OK!", "ok"), ("continua.", "continua"), ("procedi?", "procedi"), (" VA BENE ", "va bene")))
+def test_short_approval_normalizes_only_terminal_punctuation(message: str, expected: str) -> None:
     module = _load_module()
+    assert module.normalize_short_approval(message) == expected
 
+
+@pytest.mark.parametrize(
+    "message",
+    (
+        "okay",
+        "not ok",
+        "ok, implementa",
+        "approvo e scrivi il piano",
+        "procedi domani",
+        "please continua",
+        "scrivi il piano",
+    ),
+)
+def test_compound_future_or_execution_intent_cannot_advance(message: str) -> None:
+    module = _load_module()
+    assert module.normalize_short_approval(message) is None
+
+
+def test_presented_default_produces_typed_current_gate_event() -> None:
+    module = _load_module()
+    state = _state(module)
+    presented = module.PresentedDecision("resolve-g0", _g0_payload(), "WAIT_G0")
+
+    event = module.adapt_presented_approval(
+        "OK!", current_state=state, presented=presented
+    )
+    result = module.transition_gate(state, event, gate="WAIT_G0")
+
+    assert event.name == "resolve-g0"
+    assert result.accepted is True
+    assert result.state.state == "WAIT_G1"
+    assert result.state.revision == state.revision
+
+
+def test_future_event_is_rejected_without_state_change() -> None:
+    module = _load_module()
+    state = _state(module, state="WAIT_G1")
     with pytest.raises(module.DesignValidationError):
-        _parse(module, (FIXTURES / "design-invalid.md").read_text(encoding="utf-8"))
+        module.validate_event(
+            {"event": "resolve-review", "payload": {"disposition": "closed"}},
+            current_state=state,
+        )
+
+    result = module.transition_gate(
+        state, module.TypedEvent("approve", {}), gate="WAIT_G1"
+    )
+    assert result.state.state == "WAIT_G2"
+    assert result.state.revision == state.revision
 
 
-def test_material_change_increments_revision_and_clears_approval() -> None:
+def test_normal_initialization_creates_only_bounded_two_artifact_pair(tmp_path: Path) -> None:
     module = _load_module()
-    document = _parse(module)
+    assert list(tmp_path.iterdir()) == []
 
-    changed = module.apply_material_change(document, central_change=True)
-
-    assert changed.header.revision == 3
-    assert changed.header.reviewed_revision is None
-    assert changed.header.approved_revision is None
-    assert changed.header.status == "analyzing"
-    assert changed.header.next_actor == "agent"
-
-
-def test_persisted_standard_review_sources_survive_clean_chat_round_trip() -> None:
-    module = _load_module()
-    document = _parse(module)
-    resumed = module.parse_design_document(document.raw_text, expected_slug="sample")
-
-    assert resumed.header.review_sources == ("standard",)
-    assert module.can_complete_review(resumed)
-    assert module.can_finalize_approval(resumed)
-
-
-def test_persisted_high_review_sources_survive_clean_chat_round_trip() -> None:
-    module = _load_module()
-    document = module.parse_design_document(_high_text(), expected_slug="sample")
-    resumed = module.parse_design_document(document.raw_text, expected_slug="sample")
-
-    assert resumed.header.assurance == "high"
-    assert resumed.header.review_sources == ("standard", "independent")
-    assert module.can_finalize_approval(resumed)
-
-
-def test_missing_review_sources_deny_approval_and_handoff() -> None:
-    module = _load_module()
-    document = _parse(module)
-    missing = replace(document, header=replace(document.header, review_sources=()))
-    approved_missing = replace(
-        missing,
-        header=replace(
-            missing.header,
-            status="approved",
-            approved_revision=missing.header.revision,
-            next_actor="plan-writer",
-            next_action="Write the approved implementation plan.",
-        ),
+    snapshot = module.initialize_after_g0(
+        tmp_path,
+        slug="sample",
+        decision_payload=_g0_payload(),
+        assurance="standard",
     )
 
-    assert not module.can_complete_review(missing)
-    assert not module.can_finalize_approval(missing)
-    assert not module.can_handoff(approved_missing)
+    assert snapshot.state.state == "WAIT_G1"
+    assert snapshot.state.revision == 1
+    assert module.validate_design_text(snapshot.design_text or "", pre_g3=True) <= 300
+    assert {path.name for path in tmp_path.iterdir()} == {"design.md", "state.json"}
 
 
-@pytest.mark.parametrize("central_change", (False, True))
-def test_material_change_clears_persisted_review_sources(central_change: bool) -> None:
+def test_advance_rejects_an_uninitialized_directory(tmp_path: Path) -> None:
     module = _load_module()
-    changed = module.apply_material_change(
-        _parse(module), central_change=central_change
+    result = module.main(
+        [
+            "advance",
+            "--root",
+            str(tmp_path),
+            "--slug",
+            "sample",
+            "--event",
+            "approve",
+            "--message",
+            "ok",
+        ]
+    )
+    assert result != 0
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_advisory_before_g0_returns_to_wait_g0_without_mandatory_review(tmp_path: Path) -> None:
+    module = _load_module()
+    started = module.start_advisory_before_g0(
+        tmp_path,
+        slug="sample",
+        bounded_design="## Intent\n\nA bounded advisory design.\n",
+        assurance="standard",
+    )
+    assert started.state.state == "ADVISORY_REVIEW"
+    assert started.state.advisory_return_state == "WAIT_G0"
+
+    resumed = module.finish_advisory(started.state)
+    assert resumed.state == "WAIT_G0"
+    assert resumed.review_sources == ()
+    assert resumed.reviewed_revision is None
+
+
+def test_design_hash_mismatch_reopens_earliest_safe_gate(tmp_path: Path) -> None:
+    module = _load_module()
+    design = module.render_bounded_design(_g0_payload())
+    (tmp_path / "design.md").write_text(design, encoding="utf-8")
+    state = _state(module, state="WAIT_G3", digest="0" * 64)
+    (tmp_path / "state.json").write_text(module.serialize_state(state), encoding="utf-8")
+
+    recovered = module.load_runtime(tmp_path, slug="sample")
+    assert recovered.state.state == "WAIT_G0"
+    assert recovered.state.reviewed_revision is None
+    assert recovered.state.approved_revision is None
+
+
+def test_pre_g3_design_cap_is_executable() -> None:
+    module = _load_module()
+    payload = _g0_payload()
+    payload["intent"] = "word " * 305
+    with pytest.raises(module.DesignValidationError):
+        module.render_bounded_design(payload)
+
+
+def test_design_fixtures_use_the_v2_markdown_boundary() -> None:
+    module = _load_module()
+    valid = (FIXTURES / "design-valid.md").read_text(encoding="utf-8")
+    invalid = (FIXTURES / "design-invalid.md").read_text(encoding="utf-8")
+    assert module.validate_design_text(valid, pre_g3=True) <= 300
+    with pytest.raises(module.DesignValidationError):
+        module.validate_design_text(invalid, pre_g3=True)
+
+
+def test_template_skill_and_metadata_share_structured_v2_contract() -> None:
+    template = (
+        REPO_ROOT / ".github/skills/internal-gateway-idea/references/design-template.md"
+    ).read_text(encoding="utf-8")
+    skill = (REPO_ROOT / ".github/skills/internal-gateway-idea/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    metadata = (
+        REPO_ROOT / ".github/skills/internal-gateway-idea/agents/openai.yaml"
+    ).read_text(encoding="utf-8")
+
+    json_block = template.split("```json", 1)[1].split("```", 1)[0]
+    documented_state = json.loads(json_block)
+    assert documented_state["schema"] == "internal-gateway-idea-state/v2"
+    assert set(documented_state) == {
+        "schema",
+        "slug",
+        "revision",
+        "state",
+        "design_sha256",
+        "assurance",
+        "review_sources",
+        "reviewed_revision",
+        "approved_revision",
+    }
+    for document in (template, skill, metadata):
+        assert "internal-gateway-idea-state/v2" in document
+        assert "state.json" in document
+        assert "design.md" in document
+    assert "stateDiagram-v2" in skill
+    assert "WAIT_G0 --> WAIT_G1" in skill
+    assert "WAIT_G5 --> APPROVED" in skill
+    assert "/internal-gateway-writing-plans" in metadata
+
+
+def test_design_is_replaced_before_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    module = _load_module()
+    events: list[str] = []
+    original = module.os.replace
+
+    def observe(source: object, target: object) -> None:
+        events.append(Path(target).name)
+        original(source, target)
+
+    monkeypatch.setattr(module.os, "replace", observe)
+    state = _state(module, state="WAIT_G1")
+    module.replace_design_then_state(
+        tmp_path,
+        module.render_bounded_design(_g0_payload()),
+        state,
     )
 
-    assert changed.header.revision == 3
-    assert changed.header.review_sources == ()
-    assert changed.header.approved_revision is None
+    assert events[:2] == ["design.md", "state.json"]
 
 
-def test_open_findings_are_persistable_but_block_review_approval_and_handoff() -> None:
+def test_compact_cli_show_emits_one_line(tmp_path: Path) -> None:
     module = _load_module()
-    text = _valid_text().replace("| false | design-valid.md#L50 | closed |", "| true | design-valid.md#L50 | open |")
-    document = _parse(module, text)
-
-    assert document.open_findings
-    assert not module.can_complete_review(document)
-    assert not module.can_finalize_approval(document)
-    assert not module.can_handoff(document)
-
-
-def test_clean_chat_resume_uses_only_current_document_state() -> None:
-    module = _load_module()
-    document = _parse(module)
-
-    route = module.resume_route(document)
-
-    assert route.next_actor == "user"
-    assert "Approve" in route.next_action
-    assert route.source == "design.md"
+    module.initialize_after_g0(
+        tmp_path,
+        slug="sample",
+        decision_payload=_g0_payload(),
+        assurance="standard",
+    )
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(MODULE_PATH),
+            "inspect",
+            "--root",
+            str(tmp_path),
+            "--slug",
+            "sample",
+            "--compact",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0
+    assert completed.stdout.count("\n") == 1
+    assert completed.stderr == ""
+    assert "WAIT_G1" in completed.stdout

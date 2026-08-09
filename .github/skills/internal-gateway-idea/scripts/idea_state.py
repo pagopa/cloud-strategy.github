@@ -1,67 +1,61 @@
-"""State and producer-consumer helpers for the idea gateway living spec."""
+#!/usr/bin/env python3
+"""Fail-closed state and persistence owner for the idea gateway v2 contract.
+
+The runtime contract has exactly two stable artifacts: ``design.md`` and
+``state.json``.  The JSON state is deliberately small; actor, legal events,
+and event payloads are derived or transient.  Design and state are replaced
+individually, in that order, so a crash between replacements is recovered as a
+hash mismatch rather than guessed into forward progress.
+"""
 
 from __future__ import annotations
 
+import argparse
+import hashlib
+import json
+import os
 import re
+import sys
+import tempfile
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, replace
-from pathlib import Path
+from dataclasses import dataclass, field, replace
+from pathlib import Path, PurePosixPath
 from typing import Any
 
-import yaml
-from yaml.nodes import MappingNode
 
-SCHEMA = "internal-gateway-idea/v1"
+SCHEMA_V2 = "internal-gateway-idea-state/v2"
+SCHEMA = SCHEMA_V2
 PACKET_SCHEMA = "internal-gateway-critical/full-analysis-v1"
-HEADER_KEYS = frozenset(
+
+STATES = frozenset(
     {
-        "schema",
-        "slug",
-        "status",
-        "revision",
-        "target",
-        "source_baseline",
-        "lane",
-        "assurance",
-        "assurance_reason",
-        "platform_semantics_controlling",
-        "reviewed_revision",
-        "approved_revision",
-        "review_sources",
-        "next_actor",
-        "next_action",
+        "WAIT_G0",
+        "WAIT_G1",
+        "WAIT_G2",
+        "WAIT_G3",
+        "WAIT_G4",
+        "WAIT_G5",
+        "APPROVED",
+        "ADVISORY_REVIEW",
     }
 )
-STATUSES = frozenset(
-    {
-        "discovering",
-        "awaiting-decisions",
-        "analyzing",
-        "under-review",
-        "awaiting-remedy-decision",
-        "verifying",
-        "awaiting-final-approval",
-        "awaiting-independent-review",
-        "approved",
-        "superseded",
-    }
-)
-LANES = frozenset({"shape-idea", "review-existing"})
+GATES = ("G0", "G1", "G2", "G3", "G4", "G5")
 ASSURANCES = frozenset({"standard", "high"})
-ACTORS = frozenset({"agent", "user", "critic", "plan-writer", "none"})
-DISPOSITIONS = frozenset({"open", "accepted-remedy", "accepted-risk", "closed"})
-REQUIRED_SECTIONS = (
-    "Context and Goal",
-    "Decisions and Rationale",
-    "Scope and Coverage",
-    "Design",
-    "Validation and Handoff",
-    "Review Ledger",
-    "Risks and Open Questions",
-    "Continuation",
+REVIEW_SOURCES = frozenset({"standard", "independent"})
+SHORT_APPROVALS = frozenset({"ok", "approvo", "continua", "va bene", "procedi"})
+DISPOSITIONS = frozenset(
+    {"open", "closed", "accepted-remedy", "accepted-risk", "reopen-analysis"}
 )
-FINDING_ID_PATTERN = re.compile(r"^F-([0-9]{3})$")
-PACKET_FINDING_ID_PATTERN = re.compile(r"^C-[0-9]{3}$")
+PACKET_OUTCOMES = frozenset(
+    {
+        "accepted",
+        "revise-design",
+        "reopen-analysis",
+        "needs-clarification",
+        "invalid-target",
+        "request-separate-review",
+    }
+)
 PACKET_KEYS = frozenset(
     {
         "schema",
@@ -74,86 +68,104 @@ PACKET_KEYS = frozenset(
         "diagnostics",
     }
 )
-PACKET_SOURCES = frozenset({"standard", "independent"})
-PACKET_OUTCOMES = frozenset(
+PACKET_FINDING_KEYS = frozenset(
+    {"id", "critique", "recommendation", "reason", "blocking", "evidence"}
+)
+PACKET_FINDING_ID = re.compile(r"^C-[0-9]{3}$")
+LEDGER_FINDING_ID = re.compile(r"^F-[0-9]{3}$")
+SHA256 = re.compile(r"^[0-9a-fA-F]{64}$")
+SLUG = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+PERSISTED_KEYS = frozenset(
     {
-        "accepted",
-        "revise-design",
-        "reopen-analysis",
-        "needs-clarification",
-        "invalid-target",
-        "request-separate-review",
+        "schema",
+        "slug",
+        "revision",
+        "state",
+        "design_sha256",
+        "assurance",
+        "review_sources",
+        "reviewed_revision",
+        "approved_revision",
+        "advisory_return_state",
     }
+)
+REQUIRED_PERSISTED_KEYS = PERSISTED_KEYS - {"advisory_return_state"}
+
+PRE_G3_SECTIONS = (
+    "Intent",
+    "Accepted Decisions",
+    "Open Decisions",
+    "Selected Approach",
+    "Essential Evidence",
 )
 
 
 class DesignValidationError(ValueError):
-    """Raised when a living design document cannot be resumed safely."""
+    """Raised when state, design, event, or packet evidence is unsafe."""
 
 
-class UniqueSafeLoader(yaml.SafeLoader):
-    pass
+class StateValidationError(DesignValidationError):
+    """More specific alias for strict persisted-state failures."""
 
 
-def _construct_unique_mapping(
-    loader: UniqueSafeLoader, node: MappingNode, deep: bool = False
-) -> dict[object, object]:
-    if not isinstance(node, MappingNode):
-        raise yaml.constructor.ConstructorError(
-            None, None, "expected a mapping", node.start_mark
-        )
-    mapping: dict[object, object] = {}
-    for key_node, value_node in node.value:
-        key = loader.construct_object(key_node, deep=deep)
-        if key in mapping:
-            raise yaml.constructor.ConstructorError(
-                "while constructing a mapping",
-                node.start_mark,
-                f"duplicate key: {key}",
-                key_node.start_mark,
-            )
-        mapping[key] = loader.construct_object(value_node, deep=deep)
-    return mapping
+def _is_non_empty_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
 
 
-UniqueSafeLoader.add_constructor(
-    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _construct_unique_mapping
-)
+def _is_positive_integer(value: object) -> bool:
+    return type(value) is int and value > 0
 
 
-@dataclass(frozen=True)
-class DesignHeader:
-    schema: str
-    slug: str
-    status: str
-    revision: int
-    target: str
-    source_baseline: str | None
-    lane: str
-    assurance: str
-    assurance_reason: str
-    platform_semantics_controlling: bool
-    reviewed_revision: int | None
-    approved_revision: int | None
-    review_sources: tuple[str, ...]
-    next_actor: str
-    next_action: str
+def _is_non_negative_integer(value: object) -> bool:
+    return type(value) is int and value >= 0
 
 
-@dataclass(frozen=True)
-class CoverageRow:
-    requirement_id: str
-    deliverable: str
-    owner_design_element: str
-    interface: str
-    independent_decision: str
-    consumer: str
-    validation: str
-    status: str
+def _string_array(value: object, name: str, *, allow_empty: bool = True) -> tuple[str, ...]:
+    if not isinstance(value, (list, tuple)):
+        raise DesignValidationError(f"{name} must be an array of strings")
+    values: list[str] = []
+    for item in value:
+        if not _is_non_empty_string(item):
+            raise DesignValidationError(f"{name} must contain non-empty strings")
+        assert isinstance(item, str)
+        values.append(item.strip())
+    if len(set(values)) != len(values):
+        raise DesignValidationError(f"{name} must not contain duplicates")
+    if not allow_empty and not values:
+        raise DesignValidationError(f"{name} must not be empty")
+    return tuple(values)
+
+
+def _mapping(value: object, name: str) -> Mapping[str, object]:
+    if not isinstance(value, Mapping):
+        raise DesignValidationError(f"{name} must be an object")
+    if any(not isinstance(key, str) for key in value):
+        raise DesignValidationError(f"{name} keys must be strings")
+    return value  # type: ignore[return-value]
+
+
+def _strict_json_loads(payload: str) -> object:
+    def reject_duplicates(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise StateValidationError(f"duplicate JSON key: {key}")
+            result[key] = value
+        return result
+
+    try:
+        return json.loads(payload, object_pairs_hook=reject_duplicates)
+    except StateValidationError:
+        raise
+    except json.JSONDecodeError as error:
+        raise StateValidationError(f"invalid JSON: {error.msg}") from error
 
 
 @dataclass(frozen=True)
 class ReviewFinding:
+    """A consolidated, packet-free row in the design ledger."""
+
     id: str
     source: str
     sources: tuple[str, ...]
@@ -162,926 +174,1761 @@ class ReviewFinding:
     reason: str
     blocking: bool
     evidence: tuple[str, ...]
-    disposition: str
-    equivalence_key: str = ""
+    disposition: str = "open"
     conflict: bool = False
+    equivalence_key: str = ""
 
 
 @dataclass(frozen=True)
-class NormalizedFinding:
-    critique: str
-    recommendation: str
-    reason: str
-    blocking: bool
-    source: str
-    evidence: tuple[str, ...]
-    equivalence_key: str
+class StateV2:
+    schema: str
+    slug: str
+    revision: int
+    state: str
+    design_sha256: str
+    assurance: str
+    review_sources: tuple[str, ...]
+    reviewed_revision: int | None
+    approved_revision: int | None
+    advisory_return_state: str | None = None
+    # These fields are transient and are intentionally omitted from state.json.
+    ledger: tuple[ReviewFinding, ...] = field(default_factory=tuple, compare=True)
+    design_text: str | None = field(default=None, compare=False, repr=False)
 
 
 @dataclass(frozen=True)
-class DesignDocument:
-    header: DesignHeader
-    sections: Mapping[str, str]
-    coverage_rows: tuple[CoverageRow, ...]
-    ledger: tuple[ReviewFinding, ...]
-    raw_text: str
+class TypedEvent:
+    name: str
+    payload: Mapping[str, object] = field(default_factory=dict)
 
     @property
-    def open_findings(self) -> tuple[ReviewFinding, ...]:
-        return tuple(item for item in self.ledger if item.disposition == "open")
+    def event_name(self) -> str:
+        return self.name
 
 
 @dataclass(frozen=True)
-class ResumeRoute:
-    next_actor: str
-    next_action: str
-    source: str = "design.md"
+class PresentedDecision:
+    event_name: str
+    default_payload: Mapping[str, object] | None
+    gate: str
 
 
 @dataclass(frozen=True)
-class ApprovalRoute:
-    approved: bool
+class Route:
+    state: str
     next_actor: str
+    next_owner: str
+    legal_events: tuple[str, ...]
     next_action: str
     authorizes_execution: bool = False
 
+    @property
+    def owner(self) -> str:
+        return self.next_owner
+
 
 @dataclass(frozen=True)
-class RouteDecision:
-    owner: str
-    competing_owners: tuple[str, ...] = ()
+class TransitionResult:
+    state: StateV2
+    accepted: bool
+    legal_events: tuple[str, ...]
+    reason: str | None = None
+
+    @property
+    def next_state(self) -> StateV2:
+        return self.state
 
 
-def _non_empty(value: object) -> bool:
-    return isinstance(value, str) and bool(value.strip())
+@dataclass(frozen=True)
+class RuntimeSnapshot:
+    state: StateV2
+    root: Path | None = None
+    design_text: str | None = None
+    recovery_reason: str | None = None
+    stable_artifacts: tuple[str, ...] = ()
 
 
-def _positive_integer(value: object) -> bool:
-    return type(value) is int and value > 0
+@dataclass(frozen=True)
+class PacketResult:
+    source: str
+    target_path: str
+    target_revision: int
+    outcome: str
+    findings: tuple[ReviewFinding, ...]
+    residual_risks: tuple[str, ...]
+    diagnostics: tuple[str, ...]
 
 
-def _optional_integer(value: object) -> bool:
-    return value is None or type(value) is int
+@dataclass(frozen=True)
+class ReviewResult:
+    state: StateV2
+    source: str | None
+    outcome: str | None
+    findings: tuple[ReviewFinding, ...]
+    residual_risks: tuple[str, ...] = ()
+    diagnostics: tuple[str, ...] = ()
 
 
-def _normalise_header_name(value: str) -> str:
-    return re.sub(r"\s+", " ", value.strip()).casefold()
+def _state_mapping(state: StateV2) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema": state.schema,
+        "slug": state.slug,
+        "revision": state.revision,
+        "state": state.state,
+        "design_sha256": state.design_sha256,
+        "assurance": state.assurance,
+        "review_sources": list(state.review_sources),
+        "reviewed_revision": state.reviewed_revision,
+        "approved_revision": state.approved_revision,
+    }
+    if state.advisory_return_state is not None:
+        payload["advisory_return_state"] = state.advisory_return_state
+    return payload
 
 
-def _split_table_row(line: str) -> list[str]:
-    content = line.strip()
-    if content.startswith("|"):
-        content = content[1:]
-    if content.endswith("|"):
-        content = content[:-1]
-    return [cell.strip() for cell in content.split("|")]
+def validate_state(value: Mapping[str, object], *, expected_slug: str) -> StateV2:
+    """Validate the exact minimal v2 state object; never migrate v1 fields."""
 
+    if not isinstance(value, Mapping):
+        raise StateValidationError("state must be a JSON object")
+    keys = set(value)
+    if not REQUIRED_PERSISTED_KEYS.issubset(keys):
+        missing = sorted(REQUIRED_PERSISTED_KEYS - keys)
+        raise StateValidationError(f"state missing keys: {missing}")
+    unknown = keys - PERSISTED_KEYS
+    if unknown:
+        raise StateValidationError(f"state has unknown keys: {sorted(unknown)}")
+    if value.get("schema") != SCHEMA_V2:
+        raise StateValidationError(f"schema must be {SCHEMA_V2}")
+    slug = value.get("slug")
+    if not isinstance(slug, str) or slug != expected_slug or not SLUG.fullmatch(slug):
+        raise StateValidationError("state slug does not match the expected slug")
 
-def _is_separator_row(cells: Sequence[str]) -> bool:
-    return bool(cells) and all(
-        bool(re.fullmatch(r":?-+:?", cell.replace(" ", ""))) for cell in cells
+    state_name = value.get("state")
+    if state_name not in STATES:
+        raise StateValidationError("state is not a supported v2 state")
+    revision = value.get("revision")
+    if not _is_non_negative_integer(revision):
+        raise StateValidationError("revision must be a non-negative integer")
+    if state_name != "WAIT_G0" and revision == 0:
+        raise StateValidationError("initialized state revision must be positive")
+
+    design_hash = value.get("design_sha256")
+    if not isinstance(design_hash, str) or (
+        not SHA256.fullmatch(design_hash) and not (state_name == "WAIT_G0" and design_hash == "")
+    ):
+        raise StateValidationError("design_sha256 must be a 64-character hexadecimal hash")
+
+    assurance = value.get("assurance")
+    if assurance not in ASSURANCES:
+        raise StateValidationError("assurance must be standard or high")
+
+    sources = _string_array(value.get("review_sources"), "review_sources")
+    if any(source not in REVIEW_SOURCES for source in sources):
+        raise StateValidationError("review_sources contains an unknown source")
+
+    reviewed = value.get("reviewed_revision")
+    approved = value.get("approved_revision")
+    if reviewed is not None and not _is_positive_integer(reviewed):
+        raise StateValidationError("reviewed_revision must be a positive integer or null")
+    if approved is not None and not _is_positive_integer(approved):
+        raise StateValidationError("approved_revision must be a positive integer or null")
+    if reviewed is not None and reviewed != revision:
+        raise StateValidationError("reviewed_revision is stale")
+    if approved is not None and approved != revision:
+        raise StateValidationError("approved_revision is stale")
+    if approved is not None and reviewed is None:
+        raise StateValidationError("approved_revision requires reviewed_revision")
+
+    advisory_return = value.get("advisory_return_state")
+    if advisory_return is not None and advisory_return not in {
+        "WAIT_G0",
+        "WAIT_G1",
+        "WAIT_G2",
+        "WAIT_G3",
+    }:
+        raise StateValidationError("advisory_return_state is not a safe gate")
+    if state_name == "ADVISORY_REVIEW":
+        if advisory_return is None:
+            raise StateValidationError("advisory review needs a return gate")
+        if sources or reviewed is not None or approved is not None:
+            raise StateValidationError("advisory review cannot claim mandatory review")
+    elif advisory_return is not None:
+        raise StateValidationError("advisory_return_state is only valid for advisory review")
+
+    if state_name in {"WAIT_G0", "WAIT_G1", "WAIT_G2", "WAIT_G3"}:
+        if sources or reviewed is not None or approved is not None:
+            raise StateValidationError("early gate cannot claim later review or approval")
+    if state_name in {"WAIT_G4", "WAIT_G5", "APPROVED"}:
+        if reviewed is None or not sources:
+            raise StateValidationError("review gate requires current mandatory review evidence")
+        if assurance == "high" and set(sources) != REVIEW_SOURCES:
+            raise StateValidationError("high assurance requires standard and independent review")
+    if state_name == "APPROVED" and approved is None:
+        raise StateValidationError("approved state requires current approval")
+    if state_name != "APPROVED" and approved is not None:
+        raise StateValidationError("approval can only be persisted in APPROVED")
+
+    return StateV2(
+        schema=SCHEMA_V2,
+        slug=slug,
+        revision=revision,
+        state=state_name,
+        design_sha256=design_hash,
+        assurance=assurance,
+        review_sources=sources,
+        reviewed_revision=reviewed,
+        approved_revision=approved,
+        advisory_return_state=advisory_return,
     )
 
 
-def _find_table(section: str, required_headers: set[str]) -> tuple[list[str], list[list[str]]] | None:
-    lines = section.splitlines()
-    for index, line in enumerate(lines):
-        if "|" not in line:
-            continue
-        headers = _split_table_row(line)
-        normalized = {_normalise_header_name(header) for header in headers}
-        if not required_headers.issubset(normalized):
-            continue
-        rows: list[list[str]] = []
-        for following in lines[index + 1 :]:
-            if "|" not in following:
-                if rows:
-                    break
-                continue
-            cells = _split_table_row(following)
-            if _is_separator_row(cells):
-                continue
-            rows.append(cells)
-        return headers, rows
+def serialize_state(state: StateV2) -> str:
+    """Serialize only the canonical persisted state fields."""
+
+    if state.schema != SCHEMA_V2:
+        raise StateValidationError("only internal-gateway-idea-state/v2 can be persisted")
+    return json.dumps(_state_mapping(state), sort_keys=True, separators=(",", ":")) + "\n"
+
+
+def parse_state(payload: str | Mapping[str, object], *, expected_slug: str) -> StateV2:
+    decoded = _strict_json_loads(payload) if isinstance(payload, str) else payload
+    return validate_state(_mapping(decoded, "state"), expected_slug=expected_slug)
+
+
+def _gate_for_state(state: str) -> str | None:
+    if state in {"WAIT_G0"}:
+        return "G0"
+    if state in {"WAIT_G1"}:
+        return "G1"
+    if state in {"WAIT_G2"}:
+        return "G2"
+    if state in {"WAIT_G3"}:
+        return "G3"
+    if state in {"WAIT_G4"}:
+        return "G4"
+    if state in {"WAIT_G5"}:
+        return "G5"
     return None
 
 
-def _front_matter(text: str) -> tuple[str, str]:
-    lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
-        raise DesignValidationError("design.md must start with YAML front matter")
-    try:
-        end = next(index for index in range(1, len(lines)) if lines[index].strip() == "---")
-    except StopIteration as error:
-        raise DesignValidationError("YAML front matter is not closed") from error
-    return "\n".join(lines[1:end]), "\n".join(lines[end + 1 :])
-
-
-def _parse_sections(body: str) -> dict[str, str]:
-    headings: list[tuple[int, str]] = []
-    for index, line in enumerate(body.splitlines()):
-        match = re.match(r"^##\s+(.+?)\s*$", line)
-        if match:
-            headings.append((index, match.group(1)))
-    sections: dict[str, str] = {}
-    lines = body.splitlines()
-    for position, (start, name) in enumerate(headings):
-        if name in sections:
-            raise DesignValidationError(f"duplicate section: {name}")
-        end = headings[position + 1][0] if position + 1 < len(headings) else len(lines)
-        sections[name] = "\n".join(lines[start + 1 : end]).strip()
-    missing = [name for name in REQUIRED_SECTIONS if name not in sections]
-    if missing:
-        raise DesignValidationError(f"missing required sections: {missing}")
-    return sections
-
-
-def _parse_coverage(section: str) -> tuple[CoverageRow, ...]:
-    table = _find_table(
-        section,
-        {"id", "deliverable", "owner/design element", "validation", "status"},
+def _route_fields(state: StateV2) -> tuple[str, str, tuple[str, ...], str]:
+    if state.state == "WAIT_G0":
+        return (
+            "user",
+            "/internal-gateway-idea",
+            ("resolve-g0", "approve"),
+            "Submit typed G0 decisions or accept the presented default.",
+        )
+    if state.state == "WAIT_G1":
+        return "user", "/internal-gateway-idea", ("approve",), "Approve G1 to continue."
+    if state.state == "WAIT_G2":
+        return (
+            "user",
+            "/internal-gateway-idea",
+            ("select-approach", "approve"),
+            "Submit the typed approach or accept the presented default.",
+        )
+    if state.state == "WAIT_G3":
+        return (
+            "user",
+            "/internal-gateway-idea",
+            ("approve",),
+            "Approve G3; the current-turn critic boundary must complete before G4.",
+        )
+    if state.state == "WAIT_G4":
+        return (
+            "user",
+            "/internal-gateway-idea",
+            ("resolve-review", "approve"),
+            "Submit the typed review resolution or accept the presented default.",
+        )
+    if state.state == "WAIT_G5":
+        return (
+            "user",
+            "/internal-gateway-idea",
+            ("approve",),
+            "Approve G5 to hand off to writing-plans, then stop.",
+        )
+    if state.state == "ADVISORY_REVIEW":
+        return (
+            "critic",
+            "/internal-gateway-idea",
+            ("finish-advisory",),
+            "Finish the optional advisory and return to its recorded gate.",
+        )
+    return (
+        "plan-writer",
+        "/internal-gateway-writing-plans",
+        (),
+        "Writing-plans is the next owner; execution is not authorized.",
     )
-    if table is None:
-        raise DesignValidationError("Scope and Coverage needs a coverage table")
-    headers, rows = table
-    positions = {_normalise_header_name(header): index for index, header in enumerate(headers)}
-    required = {
-        "id",
-        "deliverable",
-        "owner/design element",
+
+
+def derive_route(state: StateV2) -> Route:
+    actor, owner, events, action = _route_fields(state)
+    return Route(
+        state=state.state,
+        next_actor=actor,
+        next_owner=owner,
+        legal_events=events,
+        next_action=action,
+        authorizes_execution=False,
+    )
+
+
+def normalize_short_approval(message: str) -> str | None:
+    """Normalize only whole-message short approvals and terminal punctuation."""
+
+    if not isinstance(message, str):
+        return None
+    normalized = message.strip().casefold()
+    if not normalized:
+        return None
+    normalized = normalized.rstrip(".!?")
+    if normalized in SHORT_APPROVALS:
+        return normalized
+    return None
+
+
+def _payload_keys(payload: Mapping[str, object], allowed: set[str], name: str) -> None:
+    unknown = set(payload) - allowed
+    if unknown:
+        raise DesignValidationError(f"{name} has unknown keys: {sorted(unknown)}")
+
+
+def _require_text(payload: Mapping[str, object], key: str, name: str) -> str:
+    value = payload.get(key)
+    if not _is_non_empty_string(value):
+        raise DesignValidationError(f"{name}.{key} must be a non-empty string")
+    assert isinstance(value, str)
+    return value.strip()
+
+
+def _require_group(payload: Mapping[str, object], keys: tuple[str, ...], name: str) -> object:
+    for key in keys:
+        if key in payload:
+            value = payload[key]
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+            if isinstance(value, (list, tuple)):
+                _string_array(value, f"{name}.{key}")
+                return value
+            raise DesignValidationError(f"{name}.{key} has an invalid type")
+    raise DesignValidationError(f"{name} needs one of: {', '.join(keys)}")
+
+
+def _validate_g0_payload(payload: Mapping[str, object]) -> None:
+    allowed = {
+        "intent",
+        "goal",
+        "accepted_decisions",
+        "decisions",
+        "open_decisions",
+        "constraints",
+        "success_criteria",
+        "success",
         "validation",
-        "status",
+        "anti_scope",
+        "evidence",
+        "assurance",
+        "approach",
+        "selected_approach",
     }
-    errors: list[str] = []
-    missing = required - set(positions)
-    if missing:
-        errors.append(f"coverage table missing columns: {sorted(missing)}")
-    if errors:
-        raise DesignValidationError("; ".join(errors))
+    _payload_keys(payload, allowed, "resolve-g0 payload")
+    _require_group(payload, ("intent", "goal"), "resolve-g0 payload")
+    _require_group(payload, ("accepted_decisions", "decisions"), "resolve-g0 payload")
+    _require_group(payload, ("constraints",), "resolve-g0 payload")
+    _require_group(payload, ("success_criteria", "success", "validation"), "resolve-g0 payload")
+    _require_group(payload, ("anti_scope",), "resolve-g0 payload")
+    if "open_decisions" in payload:
+        _string_array(payload["open_decisions"], "resolve-g0 payload.open_decisions")
+    if "evidence" in payload:
+        _string_array(payload["evidence"], "resolve-g0 payload.evidence")
 
-    def value(cells: list[str], name: str) -> str:
-        index = positions.get(name)
-        return cells[index].strip() if index is not None and index < len(cells) else ""
 
-    parsed: list[CoverageRow] = []
-    for row_index, cells in enumerate(rows, start=1):
-        row = CoverageRow(
-            requirement_id=value(cells, "id"),
-            deliverable=value(cells, "deliverable"),
-            owner_design_element=value(cells, "owner/design element"),
-            interface=value(cells, "interface"),
-            independent_decision=value(cells, "independent decision"),
-            consumer=value(cells, "consumer"),
-            validation=value(cells, "validation"),
-            status=value(cells, "status"),
+def _validate_approach_payload(payload: Mapping[str, object]) -> None:
+    allowed = {
+        "approach",
+        "selected_approach",
+        "rationale",
+        "alternatives_considered",
+        "tradeoffs",
+        "evidence",
+    }
+    _payload_keys(payload, allowed, "select-approach payload")
+    _require_group(payload, ("approach", "selected_approach"), "select-approach payload")
+    if "rationale" in payload:
+        _require_text(payload, "rationale", "select-approach payload")
+    if "alternatives_considered" in payload:
+        _string_array(
+            payload["alternatives_considered"],
+            "select-approach payload.alternatives_considered",
         )
-        if not all(
-            _non_empty(item)
-            for item in (
-                row.requirement_id,
-                row.deliverable,
-                row.owner_design_element,
-                row.validation,
-                row.status,
-            )
-        ):
-            raise DesignValidationError(f"coverage row {row_index} has an empty required field")
-        parsed.append(row)
-
-    owner_count = len({row.owner_design_element for row in parsed})
-    consumer_count = len({row.consumer for row in parsed if row.consumer})
-    if owner_count >= 3 or consumer_count >= 3:
-        required_multi_owner = {"interface", "independent decision", "consumer"}
-        missing_multi_owner = required_multi_owner - set(positions)
-        if missing_multi_owner:
-            raise DesignValidationError(
-                "multi-owner coverage needs columns: "
-                + ", ".join(sorted(missing_multi_owner))
-            )
-        for row_index, row in enumerate(parsed, start=1):
-            if not all(
-                _non_empty(item)
-                for item in (row.interface, row.independent_decision, row.consumer)
-            ):
-                raise DesignValidationError(
-                    f"multi-owner coverage row {row_index} needs interface, independent decision, and consumer"
-                )
-    return tuple(parsed)
 
 
-def _issue_key(critique: str, reason: str) -> str:
-    return "|".join(
-        re.sub(r"\s+", " ", value.strip().casefold()) for value in (critique, reason)
-    )
+def _validate_resolution_payload(payload: Mapping[str, object]) -> None:
+    allowed = {
+        "disposition",
+        "remedy",
+        "risk_decision",
+        "blockers_closed",
+        "conflicts_closed",
+        "presented_default",
+    }
+    _payload_keys(payload, allowed, "resolve-review payload")
+    disposition = payload.get("disposition")
+    if disposition not in DISPOSITIONS:
+        raise DesignValidationError("resolve-review disposition is not supported")
+    if "remedy" in payload and payload["remedy"] is not None:
+        _mapping(payload["remedy"], "resolve-review remedy")
+    if "risk_decision" in payload and payload["risk_decision"] is not None:
+        _mapping(payload["risk_decision"], "resolve-review risk_decision")
+    for key in ("blockers_closed", "conflicts_closed", "presented_default"):
+        if key in payload and type(payload[key]) is not bool:
+            raise DesignValidationError(f"resolve-review {key} must be boolean")
 
 
-def _parse_ledger(section: str) -> tuple[ReviewFinding, ...]:
-    table = _find_table(
-        section,
-        {"id", "source", "critique", "recommendation", "reason", "blocking", "evidence", "disposition"},
-    )
-    if table is None:
-        return ()
-    headers, rows = table
-    positions = {_normalise_header_name(header): index for index, header in enumerate(headers)}
-
-    def value(cells: list[str], name: str) -> str:
-        index = positions[name]
-        return cells[index].strip() if index < len(cells) else ""
-
-    findings: list[ReviewFinding] = []
-    previous_number = 0
-    seen: set[str] = set()
-    for row_index, cells in enumerate(rows, start=1):
-        finding_id = value(cells, "id")
-        match = FINDING_ID_PATTERN.fullmatch(finding_id)
-        if not match or finding_id in seen:
-            raise DesignValidationError(f"invalid or duplicate finding ID at ledger row {row_index}")
-        number = int(match.group(1))
-        if number <= previous_number:
-            raise DesignValidationError("ledger finding IDs must be monotonic and non-reused")
-        previous_number = number
-        seen.add(finding_id)
-
-        blocking_text = value(cells, "blocking").casefold()
-        if blocking_text not in {"true", "false"}:
-            raise DesignValidationError(f"ledger row {row_index} has invalid blocking value")
-        evidence = tuple(
-            item.strip()
-            for item in value(cells, "evidence").split(";")
-            if item.strip()
-        )
-        disposition = value(cells, "disposition")
-        if disposition not in DISPOSITIONS:
-            raise DesignValidationError(f"ledger row {row_index} has invalid disposition")
-        source = value(cells, "source")
-        critique = value(cells, "critique")
-        recommendation = value(cells, "recommendation")
-        reason = value(cells, "reason")
-        if not source or not critique or not recommendation or not reason or not evidence:
-            raise DesignValidationError(f"ledger row {row_index} has an empty required field")
-        findings.append(
-            ReviewFinding(
-                id=finding_id,
-                source=source,
-                sources=(source,),
-                critique=critique,
-                recommendation=recommendation,
-                reason=reason,
-                blocking=blocking_text == "true",
-                evidence=evidence,
-                disposition=disposition,
-                equivalence_key=_issue_key(critique, reason),
-            )
-        )
-    return tuple(findings)
-
-
-def _validate_header(raw: object, expected_slug: str | None) -> DesignHeader:
-    if not isinstance(raw, dict):
-        raise DesignValidationError("front matter must be a mapping")
-    keys = set(raw)
-    missing = HEADER_KEYS - keys
-    unknown = keys - HEADER_KEYS
-    if missing or unknown:
-        raise DesignValidationError(
-            f"header keys mismatch; missing={sorted(missing)}, unknown={sorted(unknown)}"
-        )
-    errors: list[str] = []
-    string_keys = (
-        "schema",
-        "slug",
-        "status",
-        "target",
-        "assurance_reason",
-        "next_action",
-    )
-    for key in string_keys:
-        if not _non_empty(raw[key]):
-            errors.append(f"{key} must be a non-empty string")
-    if raw["schema"] != SCHEMA:
-        errors.append(f"schema must be {SCHEMA}")
-    if expected_slug is not None and raw["slug"] != expected_slug:
-        errors.append("slug does not match the expected slug")
-    if raw["status"] not in STATUSES:
-        errors.append("status is not supported")
-    if not _positive_integer(raw["revision"]):
-        errors.append("revision must be a positive integer")
-    if raw["lane"] not in LANES:
-        errors.append("lane is not supported")
-    if raw["assurance"] not in ASSURANCES:
-        errors.append("assurance is not supported")
-    if type(raw["platform_semantics_controlling"]) is not bool:
-        errors.append("platform_semantics_controlling must be a boolean")
-    if not _optional_integer(raw["reviewed_revision"]):
-        errors.append("reviewed_revision must be an integer or null")
-    if not _optional_integer(raw["approved_revision"]):
-        errors.append("approved_revision must be an integer or null")
-    review_sources = raw["review_sources"]
-    if not isinstance(review_sources, list):
-        errors.append("review_sources must be a list")
+def validate_event(event: Mapping[str, object], *, current_state: StateV2) -> TypedEvent:
+    if not isinstance(event, Mapping):
+        raise DesignValidationError("event must be an object")
+    keys = set(event)
+    if keys != {"event", "payload"}:
+        raise DesignValidationError("event must contain exactly event and payload")
+    name = event.get("event")
+    if not isinstance(name, str):
+        raise DesignValidationError("event name must be a string")
+    payload = _mapping(event.get("payload"), f"{name} payload")
+    gate = _gate_for_state(current_state.state)
+    if name == "resolve-g0":
+        if gate != "G0":
+            raise DesignValidationError("resolve-g0 is not legal at the current gate")
+        _validate_g0_payload(payload)
+    elif name == "select-approach":
+        if gate != "G2":
+            raise DesignValidationError("select-approach is not legal at the current gate")
+        _validate_approach_payload(payload)
+    elif name == "record-review":
+        if gate != "G3":
+            raise DesignValidationError("record-review is not legal at the current gate")
+        _payload_keys(payload, {"packet", "g3_approval"}, "record-review payload")
+        _mapping(payload.get("packet"), "record-review packet")
+        if payload.get("g3_approval") is not True:
+            raise DesignValidationError("record-review needs the current-turn G3 approval")
+    elif name == "resolve-review":
+        if gate != "G4":
+            raise DesignValidationError("resolve-review is not legal at the current gate")
+        _validate_resolution_payload(payload)
+    elif name == "approve":
+        if gate not in {"G1", "G3", "G5"}:
+            raise DesignValidationError("simple approval is not legal at this gate")
+        _payload_keys(payload, {"token"}, "approve payload")
+        if "token" in payload and not _is_non_empty_string(payload["token"]):
+            raise DesignValidationError("approve token must be non-empty")
     else:
-        invalid_sources = [
-            source
-            for source in review_sources
-            if not isinstance(source, str) or source not in PACKET_SOURCES
-        ]
-        if invalid_sources:
-            errors.append("review_sources contains an unknown value")
-        elif len(set(review_sources)) != len(review_sources):
-            errors.append("review_sources must contain unique values")
-    if raw["source_baseline"] is not None and not _non_empty(raw["source_baseline"]):
-        errors.append("source_baseline must be a non-empty string or null")
-    if raw["lane"] == "review-existing" and not _non_empty(raw["source_baseline"]):
-        errors.append("review-existing requires a non-empty source_baseline")
-    if raw["next_actor"] not in ACTORS:
-        errors.append("next_actor is not supported")
-    if _positive_integer(raw["revision"]):
-        revision = raw["revision"]
-        for key in ("reviewed_revision", "approved_revision"):
-            value = raw[key]
-            if value is not None and value != revision:
-                errors.append(f"{key} is stale for revision {revision}")
-
-    if errors:
-        raise DesignValidationError("; ".join(errors))
-    return DesignHeader(
-        schema=raw["schema"],
-        slug=raw["slug"],
-        status=raw["status"],
-        revision=raw["revision"],
-        target=raw["target"],
-        source_baseline=raw["source_baseline"],
-        lane=raw["lane"],
-        assurance=raw["assurance"],
-        assurance_reason=raw["assurance_reason"],
-        platform_semantics_controlling=raw["platform_semantics_controlling"],
-        reviewed_revision=raw["reviewed_revision"],
-        approved_revision=raw["approved_revision"],
-        review_sources=tuple(review_sources),
-        next_actor=raw["next_actor"],
-        next_action=raw["next_action"],
-    )
+        raise DesignValidationError(f"unknown or future event: {name}")
+    return TypedEvent(name=name, payload=dict(payload))
 
 
-def _review_sources_complete(
-    header: DesignHeader,
-    sources: Sequence[str] | None = None,
+def adapt_presented_approval(
+    message: str,
     *,
-    required_independent: bool = False,
-) -> bool:
-    required = {"standard"}
-    if header.assurance == "high" or required_independent:
-        required.add("independent")
-    available = set(header.review_sources if sources is None else sources)
-    return required.issubset(available)
+    current_state: StateV2,
+    presented: PresentedDecision,
+) -> TypedEvent:
+    token = normalize_short_approval(message)
+    if token is None:
+        raise DesignValidationError("message is not a legal whole-message short approval")
+    expected_gate = _gate_for_state(current_state.state)
+    if expected_gate is None or presented.gate not in {current_state.state, expected_gate}:
+        raise DesignValidationError("presented decision is not bound to the current gate")
+    if expected_gate in {"G0", "G2", "G4"}:
+        if presented.default_payload is None:
+            raise DesignValidationError("a typed presented default is required")
+        event = {
+            "event": presented.event_name,
+            "payload": dict(presented.default_payload),
+        }
+    elif expected_gate in {"G1", "G3", "G5"}:
+        event = {"event": "approve", "payload": {"token": token}}
+    else:
+        raise DesignValidationError("short approval is not legal in the current state")
+    return validate_event(event, current_state=current_state)
 
 
-def _validate_state_consistency(header: DesignHeader, ledger: Sequence[ReviewFinding]) -> None:
-    expected_actor = {
-        "discovering": "agent",
-        "awaiting-decisions": "user",
-        "analyzing": "agent",
-        "under-review": "critic",
-        "awaiting-remedy-decision": "user",
-        "verifying": "agent",
-        "awaiting-final-approval": "user",
-        "awaiting-independent-review": "user",
-        "approved": "plan-writer",
-        "superseded": "none",
-    }[header.status]
-    if header.next_actor != expected_actor:
-        raise DesignValidationError(
-            f"status {header.status} requires next_actor {expected_actor}"
-        )
-    if header.approved_revision is not None and header.status != "approved":
-        raise DesignValidationError("approved_revision requires approved status")
-    if header.status == "awaiting-final-approval":
-        if header.reviewed_revision != header.revision or header.approved_revision is not None:
-            raise DesignValidationError("awaiting-final-approval requires current reviewed state")
-        if not _review_sources_complete(header):
-            raise DesignValidationError("awaiting-final-approval requires complete review sources")
-    if header.status == "approved":
-        if (
-            header.reviewed_revision != header.revision
-            or header.approved_revision != header.revision
-        ):
-            raise DesignValidationError("approved state requires current review and approval")
-        if not _review_sources_complete(header):
-            raise DesignValidationError("approved state requires complete review sources")
-        if _has_open_blocker_or_conflict(ledger):
-            raise DesignValidationError("approved state cannot contain open blockers or conflicts")
-
-
-def _validate_handoff_section(section: str) -> None:
-    required_labels = (
-        "Target",
-        "Source baseline",
-        "Anti-scope",
-        "Nearest owner",
-        "Validation path",
-        "Stop conditions",
-        "Observable acceptance",
-        "Authority",
+def adapt_presented_answer(
+    payload: Mapping[str, object],
+    *,
+    current_state: StateV2,
+    presented: PresentedDecision,
+) -> TypedEvent:
+    if _gate_for_state(current_state.state) not in {presented.gate, current_state.state}:
+        raise DesignValidationError("presented answer is not bound to the current gate")
+    return validate_event(
+        {"event": presented.event_name, "payload": dict(payload)},
+        current_state=current_state,
     )
-    for label in required_labels:
-        if not re.search(rf"(?im)^\s*[-*]?\s*{re.escape(label)}\s*:", section):
-            raise DesignValidationError(f"Validation and Handoff is missing {label}")
 
 
-def parse_design_document(text: str, *, expected_slug: str | None = None) -> DesignDocument:
-    yaml_text, body = _front_matter(text)
+def _clear_review(state: StateV2, *, state_name: str | None = None, revision: int | None = None) -> StateV2:
+    return replace(
+        state,
+        state=state_name or state.state,
+        revision=state.revision if revision is None else revision,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        advisory_return_state=None,
+        ledger=(),
+    )
+
+
+def _high_assurance_review_complete(state: StateV2, sources: Sequence[str] | None = None) -> bool:
+    available = set(state.review_sources if sources is None else sources)
+    return set(available) == REVIEW_SOURCES if state.assurance == "high" else "standard" in available
+
+
+def transition_gate(state: StateV2, event: TypedEvent, *, gate: str) -> TransitionResult:
+    legal = derive_route(state).legal_events
+    expected_gate = _gate_for_state(state.state)
+    if gate not in {state.state, expected_gate}:
+        return TransitionResult(state, False, legal, "gate does not match current state")
     try:
-        raw_header = yaml.load(yaml_text, Loader=UniqueSafeLoader)
-    except yaml.YAMLError as error:
-        raise DesignValidationError(f"invalid YAML front matter: {error}") from error
-    header = _validate_header(raw_header, expected_slug)
-    sections = _parse_sections(body)
-    coverage_rows = _parse_coverage(sections["Scope and Coverage"])
-    ledger = _parse_ledger(sections["Review Ledger"])
-    _validate_handoff_section(sections["Validation and Handoff"])
-    word_count = len(re.findall(r"\S+", text))
-    if word_count > 1200 and not any(
-        phrase in text.casefold() for phrase in ("independent systems", "bounded exception")
-    ):
-        raise DesignValidationError("design.md exceeds the 1,200-word hard budget")
-    _validate_state_consistency(header, ledger)
-    return DesignDocument(
-        header=header,
-        sections=sections,
-        coverage_rows=coverage_rows,
-        ledger=ledger,
-        raw_text=text,
+        validated = validate_event(
+            {"event": event.name, "payload": dict(event.payload)},
+            current_state=state,
+        )
+    except DesignValidationError as error:
+        return TransitionResult(state, False, legal, str(error))
+
+    next_state = state
+    if validated.name == "resolve-g0":
+        next_state = replace(state, state="WAIT_G1", revision=max(1, state.revision))
+    elif validated.name == "approve" and state.state == "WAIT_G1":
+        next_state = replace(state, state="WAIT_G2")
+    elif validated.name == "select-approach":
+        next_state = replace(state, state="WAIT_G3")
+    elif validated.name == "approve" and state.state == "WAIT_G3":
+        if not _high_assurance_review_complete(state):
+            return TransitionResult(state, False, legal, "G3 approval needs mandatory review evidence")
+        next_state = replace(state, state="WAIT_G4")
+    elif validated.name == "resolve-review":
+        next_state = resolve_review(
+            state,
+            disposition=str(validated.payload["disposition"]),
+            remedy=validated.payload.get("remedy") if isinstance(validated.payload.get("remedy"), Mapping) else None,
+            risk_decision=(
+                validated.payload.get("risk_decision")
+                if isinstance(validated.payload.get("risk_decision"), Mapping)
+                else None
+            ),
+            presented_default=bool(validated.payload.get("presented_default", False)),
+        )
+    elif validated.name == "approve" and state.state == "WAIT_G5":
+        if (
+            state.reviewed_revision != state.revision
+            or not _high_assurance_review_complete(state)
+            or _has_open_blocker_or_conflict(state.ledger)
+        ):
+            return TransitionResult(state, False, legal, "G5 requires current resolved mandatory review")
+        next_state = replace(state, state="APPROVED", approved_revision=state.revision)
+    else:
+        return TransitionResult(state, False, legal, "event cannot advance the current gate")
+    return TransitionResult(next_state, True, derive_route(next_state).legal_events)
+
+
+def _design_value(payload: Mapping[str, object], *keys: str, default: object = "") -> object:
+    for key in keys:
+        if key in payload:
+            return payload[key]
+    return default
+
+
+def _render_value(value: object) -> str:
+    if isinstance(value, (list, tuple)):
+        if not value:
+            return "- None recorded."
+        return "\n".join(f"- {item}" for item in value)
+    if isinstance(value, Mapping):
+        return json.dumps(dict(value), sort_keys=True, separators=(",", ":"))
+    if value is None or value == "":
+        return "- None recorded."
+    return str(value).strip()
+
+
+def render_bounded_design(payload: Mapping[str, object]) -> str:
+    """Render only the five pre-G3 decision sections from typed G0 data."""
+
+    _validate_g0_payload(payload)
+    text = "\n\n".join(
+        (
+            "# Idea Design",
+            "## Intent\n" + _render_value(_design_value(payload, "intent", "goal")),
+            "## Accepted Decisions\n"
+            + _render_value(_design_value(payload, "accepted_decisions", "decisions")),
+            "## Open Decisions\n" + _render_value(payload.get("open_decisions", [])),
+            "## Selected Approach\n"
+            + _render_value(_design_value(payload, "selected_approach", "approach", default="To be selected at G2.")),
+            "## Essential Evidence\n"
+            + _render_value(_design_value(payload, "evidence", "success_criteria", "success", "validation")),
+        )
     )
+    validate_design_text(text, pre_g3=True)
+    return text + "\n"
+
+
+def _section_names(text: str) -> tuple[str, ...]:
+    return tuple(match.group(1).strip() for match in re.finditer(r"^##\s+(.+?)\s*$", text, re.MULTILINE))
+
+
+def validate_design_text(text: str, *, pre_g3: bool) -> int:
+    if not isinstance(text, str) or not text.strip():
+        raise DesignValidationError("design.md must be non-empty")
+    if text.lstrip().startswith("---"):
+        raise DesignValidationError("design.md must not contain YAML front matter")
+    if re.search(r"^\s*(schema|state|revision|design_sha256)\s*:", text, re.MULTILINE):
+        raise DesignValidationError("design.md must not duplicate persisted state")
+    sections = _section_names(text)
+    if len(set(sections)) != len(sections):
+        raise DesignValidationError("design.md contains duplicate sections")
+    missing = [section for section in PRE_G3_SECTIONS if section not in sections]
+    if pre_g3 and missing:
+        raise DesignValidationError(f"design.md missing pre-G3 sections: {missing}")
+    unexpected = sorted(set(sections) - set(PRE_G3_SECTIONS))
+    if pre_g3 and unexpected:
+        raise DesignValidationError(f"pre-G3 design.md has disallowed sections: {unexpected}")
+    words = len(re.findall(r"\S+", text))
+    if pre_g3 and words > 300:
+        raise DesignValidationError("pre-G3 design.md exceeds the 300-word bound")
+    return words
+
+
+def _validate_bounded_design(text: str) -> int:
+    """Validate advisory text without requiring the full typed G0 sections."""
+
+    words = validate_design_text(text, pre_g3=False)
+    if words > 300:
+        raise DesignValidationError("pre-G3 design.md exceeds the 300-word bound")
+    return words
+
+
+def _ledger_markdown(findings: Sequence[ReviewFinding]) -> str:
+    lines = [
+        "## Review Ledger",
+        "",
+        "| ID | Sources | Critique | Recommendation | Reason | Blocking | Evidence | Disposition |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    if not findings:
+        lines.append("| — | — | No findings recorded. | — | — | false | — | closed |")
+    else:
+        for finding in findings:
+            evidence = "; ".join(finding.evidence)
+            sources = ", ".join(finding.sources)
+            lines.append(
+                f"| {finding.id} | {sources} | {finding.critique} | "
+                f"{finding.recommendation} | {finding.reason} | "
+                f"{str(finding.blocking).lower()} | {evidence} | {finding.disposition} |"
+            )
+    return "\n".join(lines)
+
+
+def design_with_ledger(design_text: str, findings: Sequence[ReviewFinding]) -> str:
+    base = re.split(r"^##\s+Review Ledger\s*$", design_text, maxsplit=1, flags=re.MULTILINE)[0].rstrip()
+    rendered = base + "\n\n" + _ledger_markdown(findings) + "\n"
+    validate_design_text(rendered, pre_g3=False)
+    return rendered
+
+
+def _artifact_paths(root: Path) -> tuple[Path, Path]:
+    root.mkdir(parents=True, exist_ok=True)
+    return root / "design.md", root / "state.json"
+
+
+def _cleanup_temp_files(root: Path) -> None:
+    if not root.exists():
+        return
+    for path in root.iterdir():
+        if path.is_file() and (
+            path.name.startswith(".design.md.") or path.name.startswith(".state.json.")
+        ) and path.name.endswith(".tmp"):
+            try:
+                path.unlink()
+            except OSError:
+                pass
+
+
+def _atomic_replace_text(path: Path, text: str) -> None:
+    fd, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent)
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as stream:
+            stream.write(text)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary.exists():
+            try:
+                temporary.unlink()
+            except OSError:
+                pass
+
+
+def replace_design_then_state(root: Path, design_text: str, state: StateV2) -> None:
+    """Replace design first and state second; there is no cross-file transaction."""
+
+    root = Path(root)
+    design_path, state_path = _artifact_paths(root)
+    pre_g3 = state.state in {"WAIT_G0", "WAIT_G1", "WAIT_G2", "WAIT_G3"}
+    if state.state == "ADVISORY_REVIEW":
+        _validate_bounded_design(design_text)
+    else:
+        validate_design_text(design_text, pre_g3=pre_g3)
+    _cleanup_temp_files(root)
+
+    design_bytes = design_text.encode("utf-8")
+    design_hash = hashlib.sha256(design_bytes).hexdigest()
+    _atomic_replace_text(design_path, design_text)
+    persisted = replace(state, schema=SCHEMA_V2, design_sha256=design_hash, design_text=None)
+    # The state validator is deliberately applied after the design replacement;
+    # a failure leaves a conservative hash mismatch for the next load.
+    validate_state(_state_mapping(persisted), expected_slug=persisted.slug)
+    _atomic_replace_text(state_path, serialize_state(persisted))
+
+
+def _persist_state_only(root: Path, state: StateV2) -> None:
+    _, state_path = _artifact_paths(Path(root))
+    validate_state(_state_mapping(state), expected_slug=state.slug)
+    _atomic_replace_text(state_path, serialize_state(state))
+
+
+def _empty_runtime_state(slug: str, *, design_hash: str = "") -> StateV2:
+    return StateV2(
+        schema=SCHEMA_V2,
+        slug=slug,
+        revision=0,
+        state="WAIT_G0",
+        design_sha256=design_hash,
+        assurance="standard",
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+    )
+
+
+def recover_hash_mismatch(snapshot: RuntimeSnapshot) -> StateV2:
+    design_hash = ""
+    if snapshot.design_text is not None:
+        design_hash = hashlib.sha256(snapshot.design_text.encode("utf-8")).hexdigest()
+    return replace(
+        snapshot.state,
+        schema=SCHEMA_V2,
+        state="WAIT_G0",
+        design_sha256=design_hash,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        advisory_return_state=None,
+        ledger=(),
+    )
+
+
+def load_runtime(root: Path, *, slug: str = "sample") -> RuntimeSnapshot:
+    root = Path(root)
+    design_path, state_path = _artifact_paths(root)
+    _cleanup_temp_files(root)
+    if root.exists():
+        stable = tuple(
+            sorted(
+                path.name
+                for path in root.iterdir()
+                if path.is_file()
+                and not path.name.startswith(".")
+                and path.name not in {"design.md", "state.json"}
+            )
+        )
+        if stable:
+            raise DesignValidationError(f"unexpected stable runtime artifacts: {list(stable)}")
+    else:
+        stable = ()
+
+    has_design = design_path.exists()
+    has_state = state_path.exists()
+    if not has_design and not has_state:
+        return RuntimeSnapshot(_empty_runtime_state(slug), root=root, stable_artifacts=())
+
+    design_text: str | None = None
+    if has_design:
+        try:
+            design_text = design_path.read_text(encoding="utf-8")
+        except OSError as error:
+            return RuntimeSnapshot(
+                _empty_runtime_state(slug),
+                root=root,
+                recovery_reason=f"design read failed: {error}",
+                stable_artifacts=("design.md",),
+            )
+
+    if not has_state:
+        design_hash = hashlib.sha256((design_text or "").encode("utf-8")).hexdigest() if design_text is not None else ""
+        return RuntimeSnapshot(
+            _empty_runtime_state(slug, design_hash=design_hash),
+            root=root,
+            design_text=design_text,
+            recovery_reason="orphaned design is uninitialized",
+            stable_artifacts=("design.md",) if has_design else (),
+        )
+    if not has_design:
+        return RuntimeSnapshot(
+            _empty_runtime_state(slug),
+            root=root,
+            recovery_reason="state exists without design",
+            stable_artifacts=("state.json",),
+        )
+
+    try:
+        persisted = parse_state(state_path.read_text(encoding="utf-8"), expected_slug=slug)
+        if persisted.state == "ADVISORY_REVIEW":
+            _validate_bounded_design(design_text or "")
+        else:
+            validate_design_text(
+                design_text or "",
+                pre_g3=persisted.state in {"WAIT_G0", "WAIT_G1", "WAIT_G2", "WAIT_G3"},
+            )
+    except (OSError, DesignValidationError) as error:
+        current_hash = hashlib.sha256((design_text or "").encode("utf-8")).hexdigest()
+        return RuntimeSnapshot(
+            replace(_empty_runtime_state(slug, design_hash=current_hash), revision=1),
+            root=root,
+            design_text=design_text,
+            recovery_reason=f"invalid persisted evidence: {error}",
+            stable_artifacts=("design.md", "state.json"),
+        )
+
+    actual_hash = hashlib.sha256((design_text or "").encode("utf-8")).hexdigest()
+    if persisted.design_sha256 != actual_hash:
+        recovered = recover_hash_mismatch(
+            RuntimeSnapshot(persisted, root=root, design_text=design_text)
+        )
+        return RuntimeSnapshot(
+            recovered,
+            root=root,
+            design_text=design_text,
+            recovery_reason="design hash mismatch; later claims cleared",
+            stable_artifacts=("design.md", "state.json"),
+        )
+    return RuntimeSnapshot(
+        replace(persisted, design_text=design_text),
+        root=root,
+        design_text=design_text,
+        stable_artifacts=("design.md", "state.json"),
+    )
+
+
+def initialize_after_g0(
+    root: Path,
+    *,
+    slug: str,
+    decision_payload: Mapping[str, object],
+    assurance: str,
+) -> RuntimeSnapshot:
+    if assurance not in ASSURANCES:
+        raise DesignValidationError("assurance must be standard or high")
+    root = Path(root)
+    design_path, state_path = _artifact_paths(root)
+    existing = load_runtime(root, slug=slug)
+    if existing.state.state == "ADVISORY_REVIEW":
+        if existing.state.advisory_return_state != "WAIT_G0":
+            raise DesignValidationError("only an advisory returning to WAIT_G0 can be initialized")
+        revision = max(1, existing.state.revision + 1)
+    elif design_path.exists() or state_path.exists():
+        if existing.recovery_reason and existing.state.state == "WAIT_G0":
+            revision = max(1, existing.state.revision)
+        else:
+            raise DesignValidationError("normal G0 initialization requires an uninitialized directory")
+    else:
+        revision = 1
+    design_text = render_bounded_design(decision_payload)
+    state = StateV2(
+        schema=SCHEMA_V2,
+        slug=slug,
+        revision=revision,
+        state="WAIT_G1",
+        design_sha256="",
+        assurance=assurance,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+    )
+    replace_design_then_state(root, design_text, state)
+    return load_runtime(root, slug=slug)
+
+
+def start_advisory(
+    state: StateV2,
+    *,
+    prior_gate: str,
+) -> StateV2:
+    if prior_gate not in {"WAIT_G0", "WAIT_G1", "WAIT_G2", "WAIT_G3"}:
+        raise DesignValidationError("advisory may return only to an early gate")
+    return replace(
+        state,
+        state="ADVISORY_REVIEW",
+        advisory_return_state=prior_gate,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        ledger=(),
+    )
+
+
+def finish_advisory(state: StateV2) -> StateV2:
+    if state.state != "ADVISORY_REVIEW" or state.advisory_return_state is None:
+        raise DesignValidationError("state is not an active advisory review")
+    return replace(
+        state,
+        state=state.advisory_return_state,
+        advisory_return_state=None,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        ledger=(),
+    )
+
+
+def start_advisory_before_g0(
+    root: Path,
+    *,
+    slug: str,
+    bounded_design: str,
+    assurance: str,
+) -> RuntimeSnapshot:
+    if assurance not in ASSURANCES:
+        raise DesignValidationError("assurance must be standard or high")
+    root = Path(root)
+    existing = load_runtime(root, slug=slug)
+    if existing.stable_artifacts:
+        raise DesignValidationError("advisory-before-G0 requires no stable runtime artifacts")
+    _validate_bounded_design(bounded_design)
+    state = StateV2(
+        schema=SCHEMA_V2,
+        slug=slug,
+        revision=1,
+        state="ADVISORY_REVIEW",
+        design_sha256="",
+        assurance=assurance,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        advisory_return_state="WAIT_G0",
+    )
+    replace_design_then_state(root, bounded_design, state)
+    return load_runtime(root, slug=slug)
+
+
+def _valid_repository_path(value: object) -> bool:
+    if not isinstance(value, str) or not value or value.startswith("/") or "\\" in value:
+        return False
+    parts = PurePosixPath(value).parts
+    return bool(parts) and ".." not in parts
+
+
+def _packet_string_array(value: object, name: str, diagnostics: list[str]) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        diagnostics.append(f"{name} must be an array")
+        return ()
+    if any(not _is_non_empty_string(item) for item in value):
+        diagnostics.append(f"{name} must contain non-empty strings")
+    values = tuple(item.strip() for item in value if isinstance(item, str) and item.strip())
+    if len(set(values)) != len(values):
+        diagnostics.append(f"{name} must not contain duplicates")
+    return values
+
+
+def _packet_to_finding(item: object, source: str, index: int, diagnostics: list[str]) -> ReviewFinding | None:
+    prefix = f"findings[{index}]"
+    if not isinstance(item, Mapping):
+        diagnostics.append(f"{prefix} must be an object")
+        return None
+    keys = set(item)
+    missing = PACKET_FINDING_KEYS - keys
+    unknown = keys - PACKET_FINDING_KEYS
+    if missing:
+        diagnostics.append(f"{prefix} missing keys: {sorted(missing)}")
+    if unknown:
+        diagnostics.append(f"{prefix} has unknown keys: {sorted(unknown)}")
+    finding_id = item.get("id")
+    if not isinstance(finding_id, str) or not PACKET_FINDING_ID.fullmatch(finding_id):
+        diagnostics.append(f"{prefix}.id must match C-000 format")
+    text_values: dict[str, str] = {}
+    for key in ("critique", "recommendation", "reason"):
+        value = item.get(key)
+        if not _is_non_empty_string(value):
+            diagnostics.append(f"{prefix}.{key} must be a non-empty string")
+        else:
+            assert isinstance(value, str)
+            text_values[key] = value.strip()
+    blocking = item.get("blocking")
+    if type(blocking) is not bool:
+        diagnostics.append(f"{prefix}.blocking must be boolean")
+    evidence = _packet_string_array(item.get("evidence"), f"{prefix}.evidence", diagnostics)
+    if (
+        isinstance(finding_id, str)
+        and PACKET_FINDING_ID.fullmatch(finding_id)
+        and len(text_values) == 3
+        and type(blocking) is bool
+        and evidence
+    ):
+        key = "|".join(
+            (text_values["critique"].casefold(), text_values["reason"].casefold())
+        )
+        return ReviewFinding(
+            id="",
+            source=source,
+            sources=(source,),
+            critique=text_values["critique"],
+            recommendation=text_values["recommendation"],
+            reason=text_values["reason"],
+            blocking=blocking,
+            evidence=evidence,
+            equivalence_key=key,
+        )
+    return None
+
+
+def _validate_packet(
+    packet: Mapping[str, object],
+    *,
+    expected_target_path: str,
+    expected_revision: int,
+) -> PacketResult:
+    diagnostics: list[str] = []
+    keys = set(packet)
+    missing = PACKET_KEYS - keys
+    unknown = keys - PACKET_KEYS
+    if missing:
+        diagnostics.append(f"packet missing keys: {sorted(missing)}")
+    if unknown:
+        diagnostics.append(f"packet has unknown keys: {sorted(unknown)}")
+    if packet.get("schema") != PACKET_SCHEMA:
+        diagnostics.append(f"schema must be {PACKET_SCHEMA}")
+    source = packet.get("source")
+    if source not in REVIEW_SOURCES:
+        diagnostics.append("source must be standard or independent")
+        source = "standard"
+    target_path = packet.get("target_path")
+    if not _valid_repository_path(target_path):
+        diagnostics.append("target_path must be a repository-relative POSIX path")
+        target_path = expected_target_path
+    elif target_path != expected_target_path:
+        diagnostics.append("target_path does not match the expected target")
+    target_revision = packet.get("target_revision")
+    if not _is_positive_integer(target_revision):
+        diagnostics.append("target_revision must be a positive integer")
+        target_revision = expected_revision
+    elif target_revision != expected_revision:
+        diagnostics.append("target_revision does not match the expected revision")
+    outcome = packet.get("outcome")
+    if outcome not in PACKET_OUTCOMES:
+        diagnostics.append("outcome is not supported")
+        outcome = "invalid-target"
+    findings: list[ReviewFinding] = []
+    raw_findings = packet.get("findings")
+    if not isinstance(raw_findings, list):
+        diagnostics.append("findings must be an array")
+    else:
+        packet_ids: set[str] = set()
+        for index, item in enumerate(raw_findings):
+            if isinstance(item, Mapping) and item.get("id") in packet_ids:
+                diagnostics.append(f"duplicate finding id: {item.get('id')}")
+            if isinstance(item, Mapping) and isinstance(item.get("id"), str):
+                packet_ids.add(item["id"])
+            finding = _packet_to_finding(item, str(source), index, diagnostics)
+            if finding is not None:
+                findings.append(finding)
+    residual_risks = _packet_string_array(packet.get("residual_risks"), "residual_risks", diagnostics)
+    packet_diagnostics = _packet_string_array(packet.get("diagnostics"), "diagnostics", diagnostics)
+    blockers = tuple(finding for finding in findings if finding.blocking)
+    if outcome == "accepted":
+        if blockers:
+            diagnostics.append("accepted cannot contain a blocking finding")
+        if packet_diagnostics:
+            diagnostics.append("accepted must have empty diagnostics")
+    elif outcome == "revise-design" and not findings:
+        diagnostics.append("revise-design requires at least one finding")
+    elif outcome == "reopen-analysis" and not blockers:
+        diagnostics.append("reopen-analysis requires a blocking finding")
+    elif outcome == "needs-clarification":
+        clarification = " ".join(f"{f.critique} {f.reason}" for f in blockers).casefold()
+        if not blockers or not any(marker in clarification for marker in ("user decision", "unresolved", "clarif")):
+            diagnostics.append("needs-clarification requires an unresolved user-decision blocker")
+    elif outcome == "invalid-target" and not packet_diagnostics:
+        diagnostics.append("invalid-target requires diagnostics")
+    elif outcome == "request-separate-review":
+        if source != "independent":
+            diagnostics.append("request-separate-review requires independent source")
+        if not packet_diagnostics:
+            diagnostics.append("request-separate-review requires diagnostics")
+    if diagnostics:
+        raise DesignValidationError("invalid full-analysis packet: " + "; ".join(dict.fromkeys(diagnostics)))
+    return PacketResult(
+        source=str(source),
+        target_path=str(target_path),
+        target_revision=int(target_revision),
+        outcome=str(outcome),
+        findings=tuple(findings),
+        residual_risks=residual_risks,
+        diagnostics=packet_diagnostics,
+    )
+
+
+def _next_ledger_id(findings: Sequence[ReviewFinding]) -> str:
+    numbers = [int(item.id[2:]) for item in findings if LEDGER_FINDING_ID.fullmatch(item.id)]
+    return f"F-{(max(numbers) if numbers else 0) + 1:03d}"
+
+
+def _consolidate_ledger(
+    existing: Sequence[ReviewFinding], incoming: Sequence[ReviewFinding]
+) -> tuple[ReviewFinding, ...]:
+    result = list(existing)
+    for item in incoming:
+        same_key = [
+            index
+            for index, current in enumerate(result)
+            if current.equivalence_key == item.equivalence_key
+        ]
+        same_recommendation = next(
+            (index for index in same_key if result[index].recommendation.casefold() == item.recommendation.casefold()),
+            None,
+        )
+        if same_recommendation is not None:
+            current = result[same_recommendation]
+            result[same_recommendation] = replace(
+                current,
+                sources=tuple(dict.fromkeys((*current.sources, *item.sources))),
+                evidence=tuple(dict.fromkeys((*current.evidence, *item.evidence))),
+                blocking=current.blocking or item.blocking,
+                disposition="open" if current.disposition == "open" or item.disposition == "open" else current.disposition,
+            )
+            continue
+        conflict = bool(same_key)
+        result.append(
+            replace(
+                item,
+                id=_next_ledger_id(result),
+                conflict=conflict,
+            )
+        )
+        if conflict:
+            for index in same_key:
+                result[index] = replace(result[index], conflict=True)
+    return tuple(result)
+
+
+def _consume_packet(
+    state: StateV2,
+    packet: Mapping[str, object],
+    *,
+    expected_target_path: str,
+    expected_revision: int,
+    mandatory: bool,
+    allow_wait_g3: bool,
+) -> ReviewResult:
+    if mandatory and state.state == "WAIT_G3" and not allow_wait_g3:
+        raise DesignValidationError("standalone mandatory packet cannot advance WAIT_G3")
+    if mandatory and state.state not in {"WAIT_G3", "WAIT_G4"}:
+        raise DesignValidationError("mandatory review packet is not legal at the current state")
+    if not mandatory and state.state not in {"WAIT_G0", "ADVISORY_REVIEW"}:
+        raise DesignValidationError("advisory review packet is only legal before mandatory review")
+    parsed = _validate_packet(
+        _mapping(packet, "packet"),
+        expected_target_path=expected_target_path,
+        expected_revision=expected_revision,
+    )
+    if mandatory and parsed.source in state.review_sources:
+        raise DesignValidationError("duplicate mandatory review source")
+    ledger = _consolidate_ledger(state.ledger, parsed.findings)
+    if not mandatory:
+        next_state = replace(state, ledger=ledger)
+        return ReviewResult(next_state, parsed.source, parsed.outcome, ledger, parsed.residual_risks)
+
+    sources = tuple(
+        source for source in ("standard", "independent") if source in (*state.review_sources, parsed.source)
+    )
+    review_complete = "standard" in sources and (state.assurance != "high" or "independent" in sources)
+    next_state = replace(
+        state,
+        state="WAIT_G4" if review_complete else "WAIT_G3",
+        review_sources=sources,
+        reviewed_revision=state.revision if review_complete else None,
+        approved_revision=None,
+        ledger=ledger,
+    )
+    return ReviewResult(next_state, parsed.source, parsed.outcome, ledger, parsed.residual_risks)
+
+
+def consume_full_analysis_packet(
+    state: StateV2,
+    packet: Mapping[str, object],
+    *,
+    expected_target_path: str,
+    expected_revision: int,
+    mandatory: bool,
+) -> ReviewResult:
+    return _consume_packet(
+        state,
+        packet,
+        expected_target_path=expected_target_path,
+        expected_revision=expected_revision,
+        mandatory=mandatory,
+        allow_wait_g3=False,
+    )
+
+
+def record_review(
+    state: StateV2,
+    packet: Mapping[str, object],
+    *,
+    g3_approval_event: TypedEvent,
+    expected_target_path: str,
+    expected_revision: int,
+) -> StateV2:
+    if state.state != "WAIT_G3":
+        raise DesignValidationError("record-review requires persisted WAIT_G3")
+    if not isinstance(g3_approval_event, TypedEvent) or g3_approval_event.name != "approve":
+        raise DesignValidationError("record-review requires the transient G3 approve event")
+    result = _consume_packet(
+        state,
+        packet,
+        expected_target_path=expected_target_path,
+        expected_revision=expected_revision,
+        mandatory=True,
+        allow_wait_g3=True,
+    )
+    return result.state
 
 
 def _has_open_blocker_or_conflict(findings: Sequence[ReviewFinding]) -> bool:
     return any(
-        finding.disposition == "open" and (finding.blocking or finding.conflict)
-        for finding in findings
+        item.disposition != "closed" and (item.blocking or item.conflict) for item in findings
     )
 
 
-def can_complete_review(document: DesignDocument) -> bool:
-    return (
-        document.header.reviewed_revision == document.header.revision
-        and _review_sources_complete(document.header)
-        and not _has_open_blocker_or_conflict(document.ledger)
-    )
-
-
-def can_finalize_approval(document: DesignDocument) -> bool:
-    return (
-        document.header.status == "awaiting-final-approval"
-        and document.header.approved_revision is None
-        and can_complete_review(document)
-    )
-
-
-def can_handoff(document: DesignDocument) -> bool:
-    return (
-        document.header.status == "approved"
-        and document.header.reviewed_revision == document.header.revision
-        and document.header.approved_revision == document.header.revision
-        and _review_sources_complete(document.header)
-        and not _has_open_blocker_or_conflict(document.ledger)
-    )
-
-
-def apply_material_change(document: DesignDocument, *, central_change: bool) -> DesignDocument:
-    header = replace(
-        document.header,
-        revision=document.header.revision + 1,
-        reviewed_revision=None if central_change else document.header.reviewed_revision,
-        approved_revision=None,
-        review_sources=(),
-        status="analyzing",
-        next_actor="agent",
-        next_action="Recompose the current design and run the required review.",
-    )
-    return replace(document, header=header)
-
-
-def resume_route(document: DesignDocument) -> ResumeRoute:
-    return ResumeRoute(
-        next_actor=document.header.next_actor,
-        next_action=document.header.next_action,
-    )
-
-
-def _packet_finding(
-    item: object, source: str, index: int
-) -> tuple[NormalizedFinding | None, str | None]:
-    if not isinstance(item, Mapping):
-        return None, f"findings[{index}] must be an object"
-    required = {"id", "critique", "recommendation", "reason", "blocking", "evidence"}
-    if set(item) != required:
-        return None, f"findings[{index}] keys do not match the producer contract"
-    if not isinstance(item["id"], str) or not PACKET_FINDING_ID_PATTERN.fullmatch(item["id"]):
-        return None, f"findings[{index}].id is invalid"
-    if not all(_non_empty(item[key]) for key in ("critique", "recommendation", "reason")):
-        return None, f"findings[{index}] text fields must be non-empty"
-    if type(item["blocking"]) is not bool:
-        return None, f"findings[{index}].blocking is invalid"
-    evidence = item["evidence"]
-    if (
-        not isinstance(evidence, list)
-        or not evidence
-        or any(not _non_empty(value) for value in evidence)
-        or len(set(evidence)) != len(evidence)
-    ):
-        return None, f"findings[{index}].evidence is invalid"
-    return (
-        NormalizedFinding(
-            critique=item["critique"].strip(),
-            recommendation=item["recommendation"].strip(),
-            reason=item["reason"].strip(),
-            blocking=item["blocking"],
-            source=source,
-            evidence=tuple(evidence),
-            equivalence_key=_issue_key(item["critique"], item["reason"]),
-        ),
-        None,
-    )
-
-
-def _validated_packet(
-    packet: object, expected_target_path: str, expected_revision: int
-) -> tuple[Mapping[str, Any] | None, tuple[NormalizedFinding, ...], str | None]:
-    if not isinstance(packet, Mapping) or set(packet) != PACKET_KEYS:
-        return None, (), "packet keys do not match full-analysis-v1"
-    if packet["schema"] != PACKET_SCHEMA:
-        return None, (), "packet schema is invalid"
-    source = packet["source"]
-    if source not in PACKET_SOURCES:
-        return None, (), "packet source is invalid"
-    if packet["target_path"] != expected_target_path:
-        return None, (), "packet target_path is stale"
-    if type(packet["target_revision"]) is not int or packet["target_revision"] != expected_revision:
-        return None, (), "packet target_revision is stale"
-    outcome = packet["outcome"]
-    if outcome not in PACKET_OUTCOMES:
-        return None, (), "packet outcome is invalid"
-    if not all(isinstance(packet[key], list) for key in ("findings", "residual_risks", "diagnostics")):
-        return None, (), "packet arrays are invalid"
-    if any(not _non_empty(value) for value in packet["diagnostics"]):
-        return None, (), "packet diagnostics are invalid"
-    normalized: list[NormalizedFinding] = []
-    finding_ids: set[str] = set()
-    for index, item in enumerate(packet["findings"]):
-        finding, error = _packet_finding(item, source, index)
-        if error:
-            return None, (), error
-        assert finding is not None
-        item_id = item["id"]
-        if item_id in finding_ids:
-            return None, (), "packet finding IDs must be unique"
-        finding_ids.add(item_id)
-        normalized.append(finding)
-    blockers = tuple(item for item in normalized if item.blocking)
-    diagnostics = tuple(packet["diagnostics"])
-    if outcome == "accepted" and (blockers or diagnostics):
-        return None, (), "accepted packet violates outcome invariants"
-    if outcome == "revise-design" and not normalized:
-        return None, (), "revise-design packet needs a finding"
-    if outcome == "reopen-analysis" and not blockers:
-        return None, (), "reopen-analysis packet needs a blocker"
-    if outcome == "needs-clarification":
-        text = " ".join(item.critique + " " + item.reason for item in blockers).casefold()
-        if not blockers or not any(marker in text for marker in ("user decision", "unresolved", "clarif")):
-            return None, (), "clarification packet needs an unresolved user decision"
-    if outcome == "invalid-target" and not diagnostics:
-        return None, (), "invalid-target packet needs diagnostics"
-    if outcome == "request-separate-review" and (source != "independent" or not diagnostics):
-        return None, (), "separate-review packet needs independent diagnostics"
-    return packet, tuple(normalized), None
-
-
-def _next_finding_number(findings: Sequence[ReviewFinding]) -> int:
-    numbers = [
-        int(match.group(1))
-        for finding in findings
-        if (match := FINDING_ID_PATTERN.fullmatch(finding.id))
-    ]
-    return max(numbers, default=0) + 1
-
-
-def _union(left: Sequence[str], right: Sequence[str]) -> tuple[str, ...]:
-    return tuple(dict.fromkeys((*left, *right)))
-
-
-def consolidate_findings(
-    existing: Sequence[ReviewFinding], incoming: Sequence[NormalizedFinding]
-) -> tuple[ReviewFinding, ...]:
-    findings = list(existing)
-    next_number = _next_finding_number(findings)
-    for item in incoming:
-        exact_index = next(
-            (
-                index
-                for index, finding in enumerate(findings)
-                if finding.equivalence_key == item.equivalence_key
-                and finding.recommendation == item.recommendation
-            ),
-            None,
-        )
-        conflict_indices = [
-            index
-            for index, finding in enumerate(findings)
-            if finding.equivalence_key == item.equivalence_key
-            and finding.recommendation != item.recommendation
-        ]
-        if exact_index is not None:
-            current = findings[exact_index]
-            findings[exact_index] = replace(
-                current,
-                source=", ".join(_union(current.source.split(", "), (item.source,))),
-                sources=_union(current.sources or tuple(current.source.split(", ")), (item.source,)),
-                blocking=current.blocking or item.blocking,
-                evidence=_union(current.evidence, item.evidence),
-                disposition=(
-                    "open"
-                    if current.blocking or item.blocking or current.conflict
-                    else current.disposition
-                ),
-            )
-            continue
-        if conflict_indices:
-            for index in conflict_indices:
-                findings[index] = replace(findings[index], conflict=True, disposition="open")
-        finding_id = f"F-{next_number:03d}"
-        next_number += 1
-        findings.append(
-            ReviewFinding(
-                id=finding_id,
-                source=item.source,
-                sources=(item.source,),
-                critique=item.critique,
-                recommendation=item.recommendation,
-                reason=item.reason,
-                blocking=item.blocking,
-                evidence=item.evidence,
-                disposition="open",
-                equivalence_key=item.equivalence_key,
-                conflict=bool(conflict_indices),
-            )
-        )
-    return tuple(findings)
-
-
-def _routed_document(
-    document: DesignDocument,
+def resolve_review(
+    state: StateV2,
     *,
-    status: str,
-    next_actor: str,
-    next_action: str,
-    reviewed_revision: int | None = None,
-    approved_revision: int | None = None,
-    ledger: Sequence[ReviewFinding] | None = None,
-    review_sources: Sequence[str] | None = None,
-) -> DesignDocument:
-    header = replace(
-        document.header,
-        status=status,
-        next_actor=next_actor,
-        next_action=next_action,
-        reviewed_revision=reviewed_revision,
-        approved_revision=approved_revision,
-        review_sources=tuple(
-            document.header.review_sources if review_sources is None else review_sources
-        ),
-    )
+    disposition: str,
+    remedy: Mapping[str, object] | None,
+    risk_decision: Mapping[str, object] | None,
+    presented_default: bool = False,
+) -> StateV2:
+    payload: dict[str, object] = {"disposition": disposition, "presented_default": presented_default}
+    if remedy is not None:
+        payload["remedy"] = remedy
+    if risk_decision is not None:
+        payload["risk_decision"] = risk_decision
+    _validate_resolution_payload(payload)
+    if state.state != "WAIT_G4":
+        raise DesignValidationError("resolve-review requires WAIT_G4")
+    if disposition in {"closed", "accepted-remedy", "accepted-risk"}:
+        ledger = tuple(
+            replace(item, disposition="closed")
+            if item.disposition != "closed"
+            else item
+            for item in state.ledger
+        )
+        if _has_open_blocker_or_conflict(ledger):
+            raise DesignValidationError("review blockers or conflicts remain open")
+        return replace(state, state="WAIT_G5", ledger=ledger, approved_revision=None)
     return replace(
-        document,
-        header=header,
-        ledger=tuple(document.ledger if ledger is None else ledger),
+        state,
+        state="WAIT_G3",
+        revision=state.revision + 1,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        ledger=state.ledger,
     )
 
 
-def apply_review_precedence(
-    document: DesignDocument,
-    packet_results: Sequence[Mapping[str, Any]],
-    *,
-    required_independent: bool,
-) -> DesignDocument:
-    valid_packets: list[Mapping[str, Any]] = []
-    incoming: list[NormalizedFinding] = []
-    seen_sources: set[str] = set()
-    for packet in packet_results:
-        if not isinstance(packet, Mapping):
-            return _routed_document(
-                document,
-                status="analyzing",
-                next_actor="agent",
-                next_action="Discard the invalid packet and rerun analysis for the current revision.",
-            )
-        source = packet.get("source")
-        if (
-            not isinstance(source, str)
-            or source not in PACKET_SOURCES
-            or source in seen_sources
-        ):
-            return _routed_document(
-                document,
-                status="analyzing",
-                next_actor="agent",
-                next_action="Discard the invalid packet and rerun analysis for the current revision.",
-            )
-        seen_sources.add(source)
-        validated, findings, error = _validated_packet(
-            packet,
-            expected_target_path=f"tmp/idea/{document.header.slug}/design.md",
-            expected_revision=document.header.revision,
-        )
-        if error or validated is None:
-            return _routed_document(
-                document,
-                status="analyzing",
-                next_actor="agent",
-                next_action="Discard the invalid packet and rerun analysis for the current revision.",
-            )
-        valid_packets.append(validated)
-        incoming.extend(findings)
-
-    ledger = consolidate_findings(document.ledger, incoming)
-    sources = _union(
-        document.header.review_sources,
-        tuple(packet["source"] for packet in valid_packets),
-    )
-    if not valid_packets:
-        return _routed_document(
-            document,
-            status="analyzing",
-            next_actor="agent",
-            next_action="Run the required review for the current revision.",
-            ledger=ledger,
-            review_sources=sources,
-        )
-    if not _review_sources_complete(
-        document.header, sources, required_independent=required_independent
-    ) and "standard" in sources:
-        return _routed_document(
-            document,
-            status="awaiting-independent-review",
-            next_actor="user",
-            next_action="Obtain one isolated independent full-scope review for this revision.",
-            ledger=ledger,
-            review_sources=sources,
-        )
-    if "standard" not in sources:
-        return _routed_document(
-            document,
-            status="analyzing",
-            next_actor="agent",
-            next_action="Obtain the required standard full-scope review for this revision.",
-            ledger=ledger,
-            review_sources=sources,
-        )
-    if any(
-        packet["source"] == "independent" and packet["outcome"] == "request-separate-review"
-        for packet in valid_packets
-    ):
-        return _routed_document(
-            document,
-            status="awaiting-independent-review",
-            next_actor="user",
-            next_action="Provide an isolated independent reviewer before continuing.",
-            ledger=ledger,
-            review_sources=sources,
-        )
-    if any(packet["outcome"] == "needs-clarification" for packet in valid_packets):
-        return _routed_document(
-            document,
-            status="awaiting-decisions",
-            next_actor="user",
-            next_action="Answer the newly exposed user-owned decision in one bounded follow-up.",
-            ledger=ledger,
-            review_sources=sources,
-        )
-    if any(packet["outcome"] == "reopen-analysis" for packet in valid_packets):
-        return _routed_document(
-            document,
-            status="analyzing",
-            next_actor="agent",
-            next_action="Reopen the assumption or scope analysis for this revision.",
-            ledger=ledger,
-            review_sources=sources,
-        )
-    if any(packet["outcome"] == "revise-design" for packet in valid_packets) or _has_open_blocker_or_conflict(ledger):
-        return _routed_document(
-            document,
-            status="awaiting-remedy-decision",
-            next_actor="user",
-            next_action="Choose a remedy or explicitly accept the residual risk.",
-            ledger=ledger,
-            review_sources=sources,
-        )
-    return _routed_document(
-        document,
-        status="awaiting-final-approval",
-        next_actor="user",
-        next_action="Approve the current design or request a revision.",
-        reviewed_revision=document.header.revision,
-        ledger=ledger,
-        review_sources=sources,
+def can_enter_g5(state: StateV2, design_hash: str) -> bool:
+    return (
+        state.state == "WAIT_G4"
+        and state.design_sha256 == design_hash
+        and state.reviewed_revision == state.revision
+        and _high_assurance_review_complete(state)
+        and state.advisory_return_state is None
+        and not _has_open_blocker_or_conflict(state.ledger)
     )
 
 
 def render_public_critique(findings: Sequence[ReviewFinding]) -> str:
+    if not findings:
+        return "No consolidated findings."
     lines: list[str] = []
     for index, finding in enumerate(findings, start=1):
-        lines.extend(
-            (
-                f"{index}. Critica: {finding.critique}",
-                f"   Suggerimento: {finding.recommendation}",
-                f"   Perché: {finding.reason}",
-                f"   Bloccante: {'si' if finding.blocking else 'no'}",
-            )
-        )
+        lines.append(f"{index}. {finding.critique} — {finding.recommendation}")
     return "\n".join(lines)
 
 
-def determine_assurance(signals: Mapping[str, object]) -> str:
-    high_triggers = (
-        "destructive",
-        "security",
-        "unknown_platform_claim",
-        "feasibility_unknown",
-        "explicit_user_request",
+# Narrow compatibility projection for repository state probes. It uses the v2
+# schema but is not the runtime serializer: canonical state.json never contains
+# completed_gates or plan_handoff.
+PLAN_WRITING = "PLAN_WRITING"
+
+
+@dataclass(frozen=True)
+class WorkflowState:
+    schema: str
+    slug: str
+    revision: int
+    state: str
+    design_sha256: str
+    assurance: str
+    review_sources: tuple[str, ...]
+    reviewed_revision: int | None
+    approved_revision: int | None
+    advisory_return_state: str | None
+    completed_gates: tuple[str, ...]
+    plan_handoff: str | None
+
+
+WORKFLOW_KEYS = frozenset(
+    {
+        "schema",
+        "slug",
+        "revision",
+        "state",
+        "design_sha256",
+        "assurance",
+        "review_sources",
+        "reviewed_revision",
+        "approved_revision",
+        "advisory_return_state",
+        "completed_gates",
+        "plan_handoff",
+    }
+)
+
+
+def new_workflow_state(
+    slug: str,
+    design_sha256: str,
+    assurance: str,
+    g0_complete: bool = False,
+) -> WorkflowState:
+    return WorkflowState(
+        schema=SCHEMA_V2,
+        slug=slug,
+        revision=1,
+        state="WAIT_G1" if g0_complete else "WAIT_G0",
+        design_sha256=design_sha256,
+        assurance=assurance,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        advisory_return_state=None,
+        completed_gates=("G0",) if g0_complete else (),
+        plan_handoff=None,
     )
-    if any(bool(signals.get(trigger)) for trigger in high_triggers):
-        return "high"
-    if type(signals.get("independent_owners")) is int and signals["independent_owners"] >= 3:
-        return "high"
-    return "standard"
 
 
-def route_final_approval(document: DesignDocument, command: str) -> ApprovalRoute:
-    if not can_finalize_approval(document):
-        return ApprovalRoute(
-            approved=False,
-            next_actor="user",
-            next_action="The current revision is not eligible for final approval.",
+def _workflow_mapping(state: WorkflowState) -> dict[str, object]:
+    return {
+        "schema": state.schema,
+        "slug": state.slug,
+        "revision": state.revision,
+        "state": state.state,
+        "design_sha256": state.design_sha256,
+        "assurance": state.assurance,
+        "review_sources": list(state.review_sources),
+        "reviewed_revision": state.reviewed_revision,
+        "approved_revision": state.approved_revision,
+        "advisory_return_state": state.advisory_return_state,
+        "completed_gates": list(state.completed_gates),
+        "plan_handoff": state.plan_handoff,
+    }
+
+
+def serialize_workflow_state(state: WorkflowState) -> str:
+    return json.dumps(_workflow_mapping(state), sort_keys=True, separators=(",", ":")) + "\n"
+
+
+def parse_workflow_state(payload: str | Mapping[str, object]) -> WorkflowState:
+    decoded = _strict_json_loads(payload) if isinstance(payload, str) else payload
+    value = _mapping(decoded, "workflow state")
+    keys = set(value)
+    if keys != WORKFLOW_KEYS:
+        raise StateValidationError(
+            f"workflow state keys mismatch; missing={sorted(WORKFLOW_KEYS - keys)} unknown={sorted(keys - WORKFLOW_KEYS)}"
         )
-    normalized = command.strip().casefold()
-    if any(word in normalized for word in ("esegui", "implementa", "execute")):
-        return ApprovalRoute(
-            approved=False,
-            next_actor="user",
-            next_action="Execution approval is a separate gateway decision.",
-        )
-    if "scrivi il piano" in normalized or "write the plan" in normalized:
-        return ApprovalRoute(
-            approved=True,
-            next_actor="plan-writer",
-            next_action="Route the approved design to /internal-gateway-writing-plans.",
-        )
-    if normalized in {"approvo", "approve", "approved"}:
-        return ApprovalRoute(
-            approved=True,
-            next_actor="none",
-            next_action="Design approved; stop before plan writing unless separately requested.",
-        )
-    return ApprovalRoute(
-        approved=False,
-        next_actor="user",
-        next_action="Use an explicit current-revision approval phrase.",
+    if value.get("schema") != SCHEMA_V2:
+        raise StateValidationError("workflow state is not v2")
+    if not isinstance(value.get("slug"), str) or not SLUG.fullmatch(value["slug"]):
+        raise StateValidationError("workflow slug is invalid")
+    if not _is_positive_integer(value.get("revision")):
+        raise StateValidationError("workflow revision is invalid")
+    if value.get("state") not in STATES | {PLAN_WRITING}:
+        raise StateValidationError("workflow state is invalid")
+    if not isinstance(value.get("design_sha256"), str) or not SHA256.fullmatch(value["design_sha256"]):
+        raise StateValidationError("workflow design hash is invalid")
+    if value.get("assurance") not in ASSURANCES:
+        raise StateValidationError("workflow assurance is invalid")
+    sources = _string_array(value.get("review_sources"), "workflow review_sources")
+    if any(source not in REVIEW_SOURCES for source in sources):
+        raise StateValidationError("workflow review source is invalid")
+    completed = _string_array(value.get("completed_gates"), "completed_gates")
+    if any(gate not in GATES for gate in completed):
+        raise StateValidationError("completed_gates contains an invalid gate")
+    for key in ("reviewed_revision", "approved_revision"):
+        if value[key] is not None and not _is_positive_integer(value[key]):
+            raise StateValidationError(f"workflow {key} is invalid")
+    plan_handoff = value.get("plan_handoff")
+    if plan_handoff is not None and not isinstance(plan_handoff, str):
+        raise StateValidationError("plan_handoff must be a string or null")
+    advisory = value.get("advisory_return_state")
+    if advisory is not None and not isinstance(advisory, str):
+        raise StateValidationError("advisory_return_state must be a string or null")
+    return WorkflowState(
+        schema=SCHEMA_V2,
+        slug=value["slug"],
+        revision=value["revision"],
+        state=value["state"],
+        design_sha256=value["design_sha256"],
+        assurance=value["assurance"],
+        review_sources=sources,
+        reviewed_revision=value["reviewed_revision"],
+        approved_revision=value["approved_revision"],
+        advisory_return_state=advisory,
+        completed_gates=completed,
+        plan_handoff=plan_handoff,
     )
 
 
-def resolve_route(prompt: str) -> RouteDecision:
-    normalized = prompt.casefold()
-    if any(term in normalized for term in ("critical analysis", "pressure-test", "challenge")):
-        return RouteDecision("internal-gateway-critical-master")
-    if "independent" in normalized and "review" in normalized:
-        return RouteDecision("internal-review-high-level")
-    if any(term in normalized for term in ("implement", "fix", "bounded task")):
-        return RouteDecision("internal-gateway-simple-task")
-    if any(term in normalized for term in ("idea", "brainstorm", "shape")):
-        return RouteDecision("internal-gateway-idea")
-    return RouteDecision("internal-gateway-idea")
+def advance_waiting_gate(
+    state: WorkflowState,
+    message: str,
+    *,
+    design_sha256: str,
+    review_sources: Sequence[str] | None = None,
+) -> WorkflowState:
+    if state.design_sha256 != design_sha256:
+        raise DesignValidationError("design hash mismatch; approval cannot advance")
+    token = normalize_short_approval(message)
+    if token is None:
+        raise DesignValidationError("only a whole-message short approval can advance")
+    sources = tuple(state.review_sources if review_sources is None else review_sources)
+    if any(source not in REVIEW_SOURCES for source in sources) or len(set(sources)) != len(sources):
+        raise DesignValidationError("review sources are invalid")
+    if state.state == "WAIT_G1":
+        return replace(state, state="WAIT_G2", completed_gates=(*state.completed_gates, "G1"))
+    if state.state == "WAIT_G2":
+        return replace(state, state="WAIT_G3", completed_gates=(*state.completed_gates, "G2"))
+    if state.state == "WAIT_G3":
+        if not _high_assurance_review_complete(
+            StateV2(
+                SCHEMA_V2,
+                state.slug,
+                state.revision,
+                "WAIT_G3",
+                state.design_sha256,
+                state.assurance,
+                sources,
+                state.reviewed_revision,
+                state.approved_revision,
+            )
+        ):
+            raise DesignValidationError("G3 cannot advance without mandatory current review")
+        return replace(
+            state,
+            state="WAIT_G4",
+            review_sources=sources,
+            reviewed_revision=state.revision,
+            completed_gates=(*state.completed_gates, "G3"),
+        )
+    if state.state == "WAIT_G4":
+        if state.reviewed_revision != state.revision or not _high_assurance_review_complete(
+            StateV2(
+                SCHEMA_V2,
+                state.slug,
+                state.revision,
+                "WAIT_G4",
+                state.design_sha256,
+                state.assurance,
+                sources,
+                state.reviewed_revision,
+                state.approved_revision,
+            )
+        ):
+            raise DesignValidationError("G4 cannot advance without current review")
+        return replace(state, state="WAIT_G5", review_sources=sources, completed_gates=(*state.completed_gates, "G4"))
+    if state.state == "WAIT_G5":
+        if state.reviewed_revision != state.revision or "standard" not in sources:
+            raise DesignValidationError("G5 requires current mandatory review")
+        if state.assurance == "high" and "independent" not in sources:
+            raise DesignValidationError("high assurance requires independent review")
+        return replace(
+            state,
+            state=PLAN_WRITING,
+            review_sources=sources,
+            approved_revision=state.revision,
+            completed_gates=(*state.completed_gates, "G5"),
+            plan_handoff="requested",
+        )
+    raise DesignValidationError("short approval is not legal at the current workflow gate")
 
 
-__all__ = [
-    "ApprovalRoute",
-    "CoverageRow",
-    "DesignDocument",
-    "DesignHeader",
-    "DesignValidationError",
-    "NormalizedFinding",
-    "ResumeRoute",
-    "ReviewFinding",
-    "RouteDecision",
-    "apply_material_change",
-    "apply_review_precedence",
-    "can_complete_review",
-    "can_finalize_approval",
-    "can_handoff",
-    "consolidate_findings",
-    "determine_assurance",
-    "parse_design_document",
-    "render_public_critique",
-    "resolve_route",
-    "resume_route",
-    "route_final_approval",
-]
+def start_advisory_review(state: WorkflowState) -> WorkflowState:
+    if state.state == PLAN_WRITING or state.state == "APPROVED":
+        raise DesignValidationError("advisory review cannot reopen a completed handoff")
+    return replace(
+        state,
+        state="ADVISORY_REVIEW",
+        advisory_return_state=state.state,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        plan_handoff=None,
+    )
+
+
+def finish_advisory_review(state: WorkflowState, *, design_sha256: str) -> WorkflowState:
+    if state.state != "ADVISORY_REVIEW" or state.advisory_return_state is None:
+        raise DesignValidationError("workflow is not in advisory review")
+    if state.design_sha256 != design_sha256:
+        raise DesignValidationError("design hash mismatch; advisory cannot return")
+    return replace(
+        state,
+        state=state.advisory_return_state,
+        advisory_return_state=None,
+        review_sources=(),
+        reviewed_revision=None,
+        approved_revision=None,
+        plan_handoff=None,
+    )
+
+
+def _compact_for_workflow(state: WorkflowState) -> str:
+    actor_events = {
+        "WAIT_G0": ("user", "resolve-g0"),
+        "WAIT_G1": ("user", "approve"),
+        "WAIT_G2": ("user", "select-approach"),
+        "WAIT_G3": ("user", "approve"),
+        "WAIT_G4": ("user", "resolve-review"),
+        "WAIT_G5": ("user", "approve"),
+        "ADVISORY_REVIEW": ("critic", "finish-advisory"),
+        PLAN_WRITING: ("plan-writer", "stop"),
+    }
+    actor, event = actor_events[state.state]
+    return f"{state.state}|R{state.revision}|{actor}|{event}"
+
+
+def _compact_for_snapshot(snapshot: RuntimeSnapshot) -> str:
+    route = derive_route(snapshot.state)
+    events = ",".join(route.legal_events) or "none"
+    action = " ".join(route.next_action.split())
+    return f"state={snapshot.state.state}|revision={snapshot.state.revision}|actor={route.next_actor}|events={events}|action={action}"
+
+
+def _json_projection(snapshot: RuntimeSnapshot) -> dict[str, object]:
+    route = derive_route(snapshot.state)
+    result = _state_mapping(snapshot.state)
+    result.update(
+        {
+            "next_actor": route.next_actor,
+            "next_owner": route.next_owner,
+            "legal_events": list(route.legal_events),
+            "next_action": route.next_action,
+            "authorizes_execution": False,
+        }
+    )
+    return result
+
+
+def _cli_payload(raw: str | None, *, name: str) -> object:
+    if raw is None:
+        raise DesignValidationError(f"{name} needs --payload-json")
+    return _strict_json_loads(raw)
+
+
+def _cli_root(value: str) -> Path:
+    return Path(value).expanduser()
+
+
+def _cli_inspect(root: Path, slug: str, compact: bool) -> int:
+    snapshot = load_runtime(root, slug=slug)
+    if compact:
+        print(_compact_for_snapshot(snapshot))
+    else:
+        print(json.dumps(_json_projection(snapshot), sort_keys=True, separators=(",", ":")))
+    return 0
+
+
+def _cli_init(args: argparse.Namespace) -> int:
+    payload = _mapping(_cli_payload(args.payload_json, name="init"), "init payload")
+    initialize_after_g0(
+        _cli_root(args.root),
+        slug=args.slug,
+        decision_payload=payload,
+        assurance=args.assurance,
+    )
+    return _cli_inspect(_cli_root(args.root), args.slug, args.compact)
+
+
+def _cli_advisory_start(args: argparse.Namespace) -> int:
+    payload = _cli_payload(args.payload_json, name="advisory start")
+    if isinstance(payload, str):
+        design = payload
+    else:
+        value = _mapping(payload, "advisory payload")
+        design_value = value.get("design", value.get("bounded_design"))
+        if not isinstance(design_value, str):
+            raise DesignValidationError("advisory payload needs a bounded design string")
+        design = design_value
+    start_advisory_before_g0(
+        _cli_root(args.root),
+        slug=args.slug,
+        bounded_design=design,
+        assurance=args.assurance,
+    )
+    return _cli_inspect(_cli_root(args.root), args.slug, args.compact)
+
+
+def _cli_advance(args: argparse.Namespace) -> int:
+    root = _cli_root(args.root)
+    snapshot = load_runtime(root, slug=args.slug)
+    if not (root / "state.json").exists():
+        raise DesignValidationError("advance is not legal before init; use init --event resolve-g0")
+    if args.message is not None:
+        token = normalize_short_approval(args.message)
+        if token is None or snapshot.state.state not in {"WAIT_G1", "WAIT_G3", "WAIT_G5"}:
+            raise DesignValidationError("this short approval is not legal without a presented typed default")
+        event = TypedEvent("approve", {"token": token})
+        result = transition_gate(snapshot.state, event, gate=snapshot.state.state)
+        if not result.accepted:
+            raise DesignValidationError(result.reason or "approval did not advance")
+        _persist_state_only(root, result.state)
+    else:
+        payload = _mapping(_cli_payload(args.payload_json, name="advance"), "advance payload")
+        name = args.event
+        if name == "record-review":
+            packet = _mapping(payload.get("packet"), "record-review packet")
+            approval = TypedEvent("approve", {})
+            next_state = record_review(
+                snapshot.state,
+                packet,
+                g3_approval_event=approval,
+                expected_target_path=f"tmp/idea/{args.slug}/design.md",
+                expected_revision=snapshot.state.revision,
+            )
+            design = design_with_ledger(snapshot.design_text or "", next_state.ledger)
+            replace_design_then_state(root, design, next_state)
+        else:
+            event = validate_event({"event": name, "payload": payload}, current_state=snapshot.state)
+            result = transition_gate(snapshot.state, event, gate=snapshot.state.state)
+            if not result.accepted:
+                raise DesignValidationError(result.reason or "event did not advance")
+            if result.state.ledger != snapshot.state.ledger and snapshot.design_text is not None:
+                replace_design_then_state(root, design_with_ledger(snapshot.design_text, result.state.ledger), result.state)
+            else:
+                _persist_state_only(root, result.state)
+    return _cli_inspect(root, args.slug, args.compact)
+
+
+def _cli_recover(args: argparse.Namespace) -> int:
+    root = _cli_root(args.root)
+    snapshot = load_runtime(root, slug=args.slug)
+    recovered = recover_hash_mismatch(snapshot)
+    if (root / "design.md").exists():
+        _persist_state_only(root, recovered)
+    if args.compact:
+        print(_compact_for_snapshot(replace(snapshot, state=recovered)))
+    else:
+        print(json.dumps(_json_projection(replace(snapshot, state=recovered)), sort_keys=True, separators=(",", ":")))
+    return 0
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Manage internal-gateway-idea-state/v2.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    def add_runtime_options(command: argparse.ArgumentParser) -> None:
+        command.add_argument("--root", required=True)
+        command.add_argument("--slug", required=True)
+        command.add_argument("--compact", action="store_true")
+
+    inspect = subparsers.add_parser("inspect")
+    add_runtime_options(inspect)
+    inspect.set_defaults(handler=lambda args: _cli_inspect(_cli_root(args.root), args.slug, args.compact))
+
+    init = subparsers.add_parser("init")
+    add_runtime_options(init)
+    init.add_argument("--event", required=True, choices=("resolve-g0",))
+    init.add_argument("--payload-json", required=True)
+    init.add_argument("--assurance", choices=tuple(sorted(ASSURANCES)), default="standard")
+    init.set_defaults(handler=_cli_init)
+
+    advance = subparsers.add_parser("advance")
+    add_runtime_options(advance)
+    advance.add_argument("--event", choices=("select-approach", "record-review", "resolve-review", "approve"))
+    advance.add_argument("--payload-json")
+    advance.add_argument("--message")
+    advance.set_defaults(handler=_cli_advance)
+
+    recover = subparsers.add_parser("recover")
+    add_runtime_options(recover)
+    recover.set_defaults(handler=_cli_recover)
+
+    advisory = subparsers.add_parser("advisory")
+    advisory_sub = advisory.add_subparsers(dest="advisory_command", required=True)
+    start = advisory_sub.add_parser("start")
+    add_runtime_options(start)
+    start.add_argument("--payload-json", required=True)
+    start.add_argument("--assurance", choices=tuple(sorted(ASSURANCES)), default="standard")
+    start.set_defaults(handler=_cli_advisory_start)
+
+    show = subparsers.add_parser("show")
+    show.add_argument("state_path")
+    show.add_argument("--compact", action="store_true")
+    show.set_defaults(handler=_cli_show)
+    return parser
+
+
+def _cli_show(args: argparse.Namespace) -> int:
+    path = Path(args.state_path)
+    payload = path.read_text(encoding="utf-8")
+    try:
+        compatibility = parse_workflow_state(payload)
+    except DesignValidationError:
+        raw = _strict_json_loads(payload)
+        value = _mapping(raw, "state")
+        slug = value.get("slug")
+        if not isinstance(slug, str):
+            raise DesignValidationError("state.json needs a slug")
+        state = validate_state(value, expected_slug=slug)
+        snapshot = RuntimeSnapshot(state, root=path.parent)
+        print(_compact_for_snapshot(snapshot) if args.compact else json.dumps(_json_projection(snapshot), sort_keys=True, separators=(",", ":")))
+        return 0
+    print(_compact_for_workflow(compatibility) if args.compact else serialize_workflow_state(compatibility).rstrip("\n"))
+    return 0
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = _build_parser()
+    try:
+        args = parser.parse_args(argv)
+        if args.command == "advance" and args.event == "approve" and args.message is None:
+            raise DesignValidationError("advance --event approve needs --message")
+        if args.command == "advance" and args.event != "approve" and args.payload_json is None:
+            raise DesignValidationError("typed advance events need --payload-json")
+        return int(args.handler(args))
+    except (DesignValidationError, OSError, ValueError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

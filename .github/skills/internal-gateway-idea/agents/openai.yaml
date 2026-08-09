@@ -1,27 +1,24 @@
 interface:
   display_name: "Idea Internal Gateway"
-  short_description: "Idea shaping with outcome proofs and final approval"
+  short_description: "Fail-closed G0-G5 idea shaping before plan writing"
   default_prompt: |-
-    Use /internal-gateway-idea for repository-owned idea shaping or review before
-    planning. Load /superpowers-brainstorming, persist only
-    tmp/idea/<slug>/design.md using references/design-template.md, and follow
-    the compact SCOPE -> DISCOVER -> QUESTION? -> ANALYZE -> CRITIQUE ->
-    USER_DECISION -> REVISE -> VERIFY -> FINAL_APPROVAL -> HANDOFF/STOP flow.
+    Use /internal-gateway-idea for repository-owned idea shaping or review
+    before implementation planning. Use the
+    internal-gateway-idea-state/v2 contract and keep exactly two runtime
+    artifacts: state.json plus design.md under tmp/idea/<slug>/.
 
-    Use the strict state helper and the critical-master full-analysis packet at
-    their documented boundaries. Reconstruct a draft and clear claimed review
-    or approval when state is stale, missing, or corrupt; never append a
-    transcript or create state.yaml.
+    Start normal G0 with typed resolve-g0 data through the state CLI; do not
+    create artifacts before G0. An on-demand advisory is the only pre-G0
+    exception and must return to WAIT_G0 without satisfying mandatory review.
+    Advance one current gate per user message. At G0, G2, and G4, a short
+    approval selects only the presented typed default; at G1, G3, and G5 it
+    is a simple approval. Accept terminal punctuation on whole-message short
+    approvals and reject compounds, appended content, future approvals, and
+    execution intent. Use --compact for bounded clean-chat projections.
 
-    Keep coverage, minimality, controlling platform evidence, assurance, and
-    current-revision approval explicit. Add interface, independent-decision,
-    and consumer columns when ownership or runtime surfaces expand.
-
-    Recompose the complete design before critique. A material change starts a
-    new revision and invalidates review and approval. Use one standard packet
-    and one independent packet when assurance is high; invalid or unavailable
-    required review fails closed. Only current approval may load
-    /internal-gateway-writing-plans, and neither design nor plan approval
-    authorizes implementation. Use one compact decision card for status, risk,
-    validation, and next action; content-bearing questions, designs, and
-    critique packets keep their schemas.
+    Keep full critic packet ingestion separate from the typed G4 user
+    resolution. Bind review evidence to the current design hash and revision,
+    consolidate only validated findings into the design ledger, and fail closed
+    on missing, malformed, stale, v1, or mismatched evidence. G5 routes only to
+    /internal-gateway-writing-plans and stops; neither design nor plan approval
+    authorizes implementation execution.

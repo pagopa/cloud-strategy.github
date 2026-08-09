@@ -1,74 +1,83 @@
----
-schema: internal-gateway-idea/v1
-slug: "<slug>"
-status: discovering
-revision: 1
-target: "<one-sentence goal>"
-source_baseline: null
-lane: shape-idea
-assurance: standard
-assurance_reason: "<why standard or high assurance applies>"
-platform_semantics_controlling: false
-reviewed_revision: null
-approved_revision: null
-review_sources: []
-next_actor: agent
-next_action: "Identify the nearest owner, consumer, and validation path."
----
+# Internal Gateway Idea Design Template
 
-# Living Design Document
+`state.json` and `design.md` are separate runtime artifacts. The JSON state is
+the only persisted workflow state; the Markdown file is the bounded design and
+its post-G3 review ledger. There are no packet files, review files, transcripts,
+status siblings, `state.yaml`, or review-packet directories.
 
-## Context and Goal
+## `state.json`
 
-Record the original request, the intended outcome, and any execution-shaped
-request that is being held at the design boundary.
+The canonical state uses the exact `internal-gateway-idea-state/v2` fields below.
+`advisory_return_state` is optional at runtime and is present only during
+`ADVISORY_REVIEW`.
 
-## Decisions and Rationale
+```json
+{
+  "schema": "internal-gateway-idea-state/v2",
+  "slug": "example",
+  "revision": 1,
+  "state": "WAIT_G1",
+  "design_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "assurance": "standard",
+  "review_sources": [],
+  "reviewed_revision": null,
+  "approved_revision": null
+}
+```
 
-Record accepted defaults, unresolved user decisions, controlling evidence, and
-why the selected direction beats the strongest rejected alternative.
+The state parser rejects unknown keys, duplicate sources, stale revisions,
+v1 state, wrong types, and a design hash mismatch. Actor, legal events, and
+typed payloads are derived or transient and are never serialized.
 
-## Scope and Coverage
+## `design.md` before G3
 
-Use one row for every explicit deliverable. Add `Interface`, `Independent
-decision`, and `Consumer` when three or more owners or runtime surfaces are
-involved.
+Normal G0 starts with no runtime artifacts. A typed `resolve-g0` event passed to
+`init` writes this bounded Markdown file first and then creates `state.json` at
+`WAIT_G1`. Before G3, the file is at most 300 non-whitespace tokens and contains
+only these sections:
 
-| ID | Deliverable | Owner/design element | Interface | Independent decision | Consumer | Validation | Status |
+## Intent
+
+Record the accepted intent and target outcome.
+
+## Accepted Decisions
+
+Record typed decisions accepted at G0.
+
+## Open Decisions
+
+Record unresolved user-owned decisions. Do not infer a decision from silence.
+
+## Selected Approach
+
+Record the typed approach selected at G2, when one exists.
+
+## Essential Evidence
+
+Record only evidence needed to resume the current revision.
+
+## Review Ledger after G3
+
+After mandatory critic ingestion, append the consolidated ledger to the same
+`design.md`. Store finding IDs, review sources, decision-relevant text, blocking
+and conflict status, evidence references, and disposition. Raw packet JSON is
+never stored.
+
+| ID | Sources | Critique | Recommendation | Reason | Blocking | Evidence | Disposition |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| D-001 | TBD deliverable | TBD owner or design element | TBD interface or approved anti-scope | TBD independent decision | TBD consumer | TBD focused check | TBD covered or blocked |
+| F-001 | standard | Example finding | Example remedy | Example reason | false | design.md#L1 | closed |
 
-## Design
+## Persistence and continuation
 
-Describe the current design direction, alternatives, invariants, maintenance
-footprint, exit criterion, and any bounded exception.
+Replace `design.md` with a same-directory temporary file, flush it, and
+atomically replace it. Compute its SHA-256 from the exact UTF-8 bytes, then
+replace `state.json` with a separate same-directory temporary file. This is two
+individual replacements, not a cross-file transaction; a crash between them
+must reopen the earliest safe gate on hash mismatch.
 
-## Validation and Handoff
-
-- Target: TBD approved target path or scope.
-- Source baseline: TBD baseline or source document.
-- Anti-scope: TBD explicitly excluded work.
-- Nearest owner: TBD next owner.
-- Validation path: TBD commands or human review.
-- Stop conditions: TBD scope, state, evidence, or approval blockers.
-- Observable acceptance: TBD proof that the current revision is complete.
-- Authority: Design approval, plan writing, and implementation execution remain separate.
-
-## Review Ledger
-
-Persist only validated, decision-relevant findings. Keep IDs monotonic and
-never reuse an ID. Use semicolons to separate evidence references.
-
-| ID | Source | Critique | Recommendation | Reason | Blocking | Evidence | Disposition |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| F-001 | standard | TBD finding | TBD recommended remedy | TBD why it matters | false | TBD path#L1 | open |
-
-## Risks and Open Questions
-
-List named residual risks, unresolved user decisions, missing platform evidence,
-and approved anti-scope. Silence does not resolve a user-owned decision.
-
-## Continuation
-
-Load this document in a clean chat. Validate the header and required sections,
-then resume at `next_actor` and `next_action` for the current revision.
+Load only the two stable artifacts in a clean chat. Derive the current actor,
+legal events, revision, and next action from validated state. If evidence is
+missing, malformed, stale, or v1, fail closed and restart at the earliest gate
+that can be proven. An on-demand advisory is the only pre-G0 exception: it
+creates the bounded pair at `ADVISORY_REVIEW` and returns to `WAIT_G0` without
+satisfying mandatory G4 review.
