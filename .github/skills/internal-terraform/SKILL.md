@@ -14,18 +14,44 @@ Use this wrapper for non-language or mixed Terraform/OpenTofu requests that
 require repository-local routing or handoff. Delegate pure HCL or
 typed-configuration fixes directly to `/internal-tf`.
 
-### Routing
+## Intent classification and routing
 
-- Pure HCL and typed configuration: Primary = `/internal-tf` (no Anton preload).
-- All other Terraform/OpenTofu work (including native tests, modules, provider
-  operations, plans, and CI-integrated roots): Primary =
-  `/antonbabenko-terraform-skill` via this wrapper.
+Classify intent before collecting general context. Syntax ownership does not
+decide operational adoption semantics.
+
+- HCL expressions, types, variables, outputs, formatting, typed configuration,
+  or import-block syntax and shape only, with no operational state or live
+  action: `Primary = /internal-tf`; do not preload Anton or the adoption
+  reference.
+- Existing-infrastructure adoption, operational import, bulk import, state
+  reconstruction, or IaC migration: `Primary = /antonbabenko-terraform-skill`
+  through this wrapper; load
+  `.github/skills/internal-terraform/references/existing-infrastructure-adoption.md`
+  only for this adoption branch.
+- Other non-language Terraform/OpenTofu work, including native tests, modules,
+  provider operations, plans, CI-integrated roots, state, drift, upgrades,
+  recovery, or risk diagnosis: `Primary = /antonbabenko-terraform-skill` via
+  this wrapper; do not load the adoption reference unless the request also
+  expresses adoption intent.
+- HCL plus existing-infrastructure adoption: Anton remains primary through
+  this wrapper, and `/internal-tf` is limited to the separable language
+  portion. Do not split operational ownership away from the wrapper; load the
+  adoption reference.
+- Missing or conflicting identity, ownership, or mutation facts in an adoption
+  request: keep Anton primary, mark the fact unknown, load the adoption
+  reference, fail closed, and require its safety gates. Do not infer identity
+  or permission.
 
 ### Context collection
 
-Collect runtime/version, changed-root path, relevant files and providers,
-execution path, environment criticality, and immediate risk only when they
-affect the selected branch; mark missing facts explicitly.
+For an adoption branch, collect only facts that affect the selected route:
+runtime and version, changed root or path, desired/live/state evidence,
+canonical identity and ambiguity, ownership disposition, mutation authority,
+environment criticality and immediate risk, declarative or imperative evidence
+mode, and recovery status. Mark unknown facts explicitly and stop on ambiguity
+rather than guessing. For other branches, retain only the runtime/version,
+changed-root path, relevant files and providers, execution path, environment
+criticality, and immediate risk needed for the selected owner.
 
 ### Test reachability
 
@@ -39,6 +65,10 @@ the native runner can observe the behavior. Python must not use regex or string
 matching as a substitute for native resource, module, provider, plan, or assert
 checks. A repository-specific static contract is a narrow exception only when
 no native equivalent exists and its cross-boundary purpose is documented.
+
+This skill provides guidance and routing instructions only. It cannot enforce
+runtime identity, ownership, mutation, or recovery gates; the selected owner
+and native runtime remain authoritative for those behaviors.
 
 ### Handoff
 
