@@ -34,7 +34,7 @@ def _load_module():
 
 def _load_idea_state():
     spec = importlib.util.spec_from_file_location(
-        "idea_state_v2_adapter_test", IDEA_STATE_PATH
+        "idea_state_v3_adapter_test", IDEA_STATE_PATH
     )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -204,8 +204,8 @@ def test_non_blocking_findings_can_be_accepted_with_residual_risk() -> None:
 def test_adapted_report_enters_the_existing_review_boundary() -> None:
     adapter = _load_module()
     idea_state = _load_idea_state()
-    state = idea_state.StateV2(
-        schema="internal-gateway-idea-state/v2",
+    state = idea_state.StateV3(
+        schema="internal-gateway-idea-state/v3",
         slug="sample",
         revision=3,
         state="WAIT_G3",
@@ -214,6 +214,7 @@ def test_adapted_report_enters_the_existing_review_boundary() -> None:
         review_sources=(),
         reviewed_revision=None,
         approved_revision=None,
+        events=(),
     )
     packet = adapter.adapt_critical_report(
         REPORT,

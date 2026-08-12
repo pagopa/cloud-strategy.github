@@ -4,17 +4,19 @@ interface:
   default_prompt: |-
     Use /internal-gateway-idea for repository-owned idea shaping or review
     before implementation planning. Use the
-    internal-gateway-idea-state/v2 contract and keep exactly two runtime
+    internal-gateway-idea-state/v3 contract and keep exactly two runtime
     artifacts: state.json plus design.md under tmp/idea/<slug>/.
 
     Start normal G0 with typed resolve-g0 data through the state CLI; do not
     create artifacts before G0. An on-demand advisory is the only pre-G0
     exception and must return to WAIT_G0 without satisfying mandatory review.
-    Advance one current gate per user message. At G0, G2, and G4, a short
-    approval selects only the presented typed default; at G1, G3, and G5 it
-    is a simple approval. Accept terminal punctuation on whole-message short
-    approvals and reject compounds, appended content, future approvals, and
-    execution intent. Use --compact for bounded clean-chat projections.
+    Advance only the current gate and avoid repeated status narration. At G0,
+    G2, and G4, a short approval selects only the presented typed default; at
+    G1, G3, and G5 it is a simple approval. Accept terminal punctuation on
+    whole-message short approvals and reject compounds, appended content,
+    future approvals, and execution intent. Use `inspect --compact` for a
+    bounded clean-chat projection with ledger-derived discovery, approval,
+    reopening, critic, and recovery counts.
 
     Keep critical-report adaptation and packet ingestion separate from the typed
     G4 user resolution. Use record_readable_review and the consumer-owned

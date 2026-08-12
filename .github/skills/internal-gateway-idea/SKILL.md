@@ -9,7 +9,7 @@ description: Use when a repository-owned idea needs a mandatory fail-closed G0-G
 
 - `references/design-template.md` owns the Markdown design shape and the
   separate `state.json` example.
-- `scripts/idea_state.py` owns `internal-gateway-idea-state/v2`, typed events,
+- `scripts/idea_state.py` owns `internal-gateway-idea-state/v3`, typed events,
   transitions, approvals, hashing, persistence, review binding, and CLI
   projections.
 - `internal-gateway-critical-master` produces a generic readable critical
@@ -18,7 +18,7 @@ description: Use when a repository-owned idea needs a mandatory fail-closed G0-G
   revision before review ingestion.
 - `scripts/idea_state.py::record_readable_review` is the single consumer entry
   point for adapting a readable report and recording it at G3. The packet API
-  remains only as an internal compatibility boundary.
+  remains only as an internal input boundary.
 - `scripts/idea_state.py` validates the adapted
   `internal-gateway-critical/full-analysis-v1` boundary, consolidates findings,
   and stores only decision-relevant ledger rows. The critical skill does not
@@ -36,9 +36,24 @@ Use this gateway when a repository-owned request begins as an idea, option set,
 proposed direction, or unclear goal and must be shaped and critically resolved
 before a plan is written or a bounded direct-execution handoff is selected.
 
+## Discovery routing
+
+IDEA owns deterministic discovery selection from impact, confidence, and
+default safety. `pre-draft` routes consequential or unsafe uncertainty to a
+`decision-brief`, `targeted-refinement` routes material ambiguity to
+`refinement-questions`, and `direct-draft` routes a clear, falsifiable request
+to a `design-draft`. The selected mode, rationale, and next artifact are
+persisted as one typed decision event; discovery transcripts are never stored.
+
+When discovery is selected, `/grill-me` owns the bounded questioning or
+refinement interaction and IDEA owns the route decision and its persisted
+outcome. An accepted decision reopens only for incompatible evidence, scope or
+constraint change, relevant validation failure, or material dependency change;
+cosmetic edits do not reopen it.
+
 ## Runtime boundary
 
-The canonical state is `internal-gateway-idea-state/v2`. Runtime persistence
+The canonical state is `internal-gateway-idea-state/v3`. Runtime persistence
 has exactly two stable artifacts under `tmp/idea/<slug>/`: `design.md` and
 `state.json`. Before normal G0, neither artifact exists. `init --event
 resolve-g0` accepts the required typed G0 decisions, writes bounded `design.md`
@@ -140,8 +155,8 @@ current source, design path, and revision and produces the bound in-memory
 `full-analysis-v1` packet. The existing packet validator then checks the exact
 keys, findings, evidence, diagnostics, and outcome invariants. Invalid-target
 packets and no-context reports cannot be ingested. A standard review is
-required; high assurance also requires an independent review. Sources cannot be
-duplicated or invented. Valid findings are consolidated deterministically into
+required; intensive assurance also requires an independent review. Sources
+cannot be duplicated or invented. Valid findings are consolidated deterministically into
 the design ledger, merging equivalent evidence and keeping recommendation
 conflicts open. Neither the raw report nor packet JSON is persisted.
 

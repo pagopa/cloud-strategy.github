@@ -6,7 +6,7 @@ Keep the idea gateway fail closed across clean-chat resumption.
 
 ## Accepted Decisions
 
-- Persist the minimal v2 state separately from the Markdown design.
+- Persist the canonical v3 state and typed event ledger separately from the Markdown design.
 - Require a typed event at every content-bearing gate.
 
 ## Open Decisions

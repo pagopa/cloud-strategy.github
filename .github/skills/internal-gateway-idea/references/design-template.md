@@ -7,13 +7,14 @@ status siblings, `state.yaml`, or review-packet directories.
 
 ## `state.json`
 
-The canonical state uses the exact `internal-gateway-idea-state/v2` fields below.
+The canonical state uses the exact `internal-gateway-idea-state/v3` fields below.
 `advisory_return_state` is optional at runtime and is present only during
-`ADVISORY_REVIEW`.
+`ADVISORY_REVIEW`. `events` is the compact typed event ledger and is always
+present, including as an empty array for an uninitialized state.
 
 ```json
 {
-  "schema": "internal-gateway-idea-state/v2",
+  "schema": "internal-gateway-idea-state/v3",
   "slug": "example",
   "revision": 1,
   "state": "WAIT_G1",
@@ -21,13 +22,14 @@ The canonical state uses the exact `internal-gateway-idea-state/v2` fields below
   "assurance": "standard",
   "review_sources": [],
   "reviewed_revision": null,
-  "approved_revision": null
+  "approved_revision": null,
+  "events": []
 }
 ```
 
 The state parser rejects unknown keys, duplicate sources, stale revisions,
-v1 state, wrong types, and a design hash mismatch. Actor, legal events, and
-typed payloads are derived or transient and are never serialized.
+Unsupported state schemas, wrong types, and a design hash mismatch. Actor and legal events
+are derived; typed payloads are retained only in the event ledger.
 
 ## `design.md` before G3
 

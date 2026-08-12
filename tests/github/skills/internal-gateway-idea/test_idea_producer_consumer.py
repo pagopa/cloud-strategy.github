@@ -20,7 +20,7 @@ ADAPTER_PATH = (
 
 
 def _load_module():
-    spec = importlib.util.spec_from_file_location("idea_state_consumer_v2", MODULE_PATH)
+    spec = importlib.util.spec_from_file_location("idea_state_consumer_v3", MODULE_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -45,9 +45,10 @@ def _state(
     state: str = "WAIT_G3",
     assurance: str = "standard",
     sources: tuple[str, ...] = (),
+    ledger: tuple = (),
 ):
-    return module.StateV2(
-        schema="internal-gateway-idea-state/v2",
+    return module.StateV3(
+        schema="internal-gateway-idea-state/v3",
         slug="sample",
         revision=1,
         state=state,
@@ -56,6 +57,8 @@ def _state(
         review_sources=sources,
         reviewed_revision=1 if state in {"WAIT_G4", "WAIT_G5", "APPROVED"} else None,
         approved_revision=1 if state == "APPROVED" else None,
+        events=(),
+        ledger=ledger,
     )
 
 
@@ -213,7 +216,7 @@ The boundary is sound.
 
 def test_high_assurance_requires_both_review_sources() -> None:
     module = _load_module()
-    state = _state(module, assurance="high")
+    state = _state(module, assurance="intensive")
     after_standard = module.record_review(
         state,
         _packet("standard"),
@@ -239,7 +242,7 @@ def test_high_assurance_requires_both_review_sources() -> None:
 def test_duplicate_review_source_is_rejected() -> None:
     module = _load_module()
     reviewed = module.record_review(
-        _state(module, assurance="high"),
+        _state(module, assurance="intensive"),
         _packet(),
         g3_approval_event=module.TypedEvent("approve", {}),
         expected_target_path="tmp/idea/sample/design.md",
@@ -258,7 +261,7 @@ def test_duplicate_review_source_is_rejected() -> None:
 def test_equivalent_findings_merge_sources_and_evidence() -> None:
     module = _load_module()
     first = module.record_review(
-        _state(module, assurance="high"),
+        _state(module, assurance="intensive"),
         _packet("standard"),
         g3_approval_event=module.TypedEvent("approve", {}),
         expected_target_path="tmp/idea/sample/design.md",
@@ -282,7 +285,7 @@ def test_equivalent_findings_merge_sources_and_evidence() -> None:
 def test_conflicting_recommendations_remain_open() -> None:
     module = _load_module()
     first = module.record_review(
-        _state(module, assurance="high"),
+        _state(module, assurance="intensive"),
         _packet("standard"),
         g3_approval_event=module.TypedEvent("approve", {}),
         expected_target_path="tmp/idea/sample/design.md",
@@ -438,3 +441,147 @@ def test_material_revision_cannot_enter_g5() -> None:
     state = _state(module, state="WAIT_G4")
     changed = replace(state, revision=2, reviewed_revision=1)
     assert not module.can_enter_g5(changed, "a" * 64)
+
+
+def test_finding_proof_is_required_before_blocker_closure() -> None:
+    module = _load_module()
+    reviewed = module.record_review(
+        _state(module),
+        _packet(outcome="revise-design", blocking=True),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+    )
+
+    with pytest.raises(module.DesignValidationError, match="proof"):
+        module.resolve_review(
+            reviewed,
+            disposition="closed",
+            remedy={"action": "retain"},
+            risk_decision=None,
+            finding_resolutions=(),
+        )
+
+
+def test_explicit_finding_risk_acceptance_closes_and_is_recorded() -> None:
+    module = _load_module()
+    reviewed = module.record_review(
+        _state(module),
+        _packet(outcome="revise-design", blocking=True),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+    )
+
+    resolved = module.resolve_review(
+        reviewed,
+        disposition="accepted-risk",
+        remedy=None,
+        risk_decision={"accepted": True},
+        finding_resolutions=(
+            module.FindingResolutionEvidence(
+                finding_id="F-001",
+                risk_acceptance="Owner accepted the residual risk for this revision.",
+            ),
+        ),
+    )
+
+    assert resolved.state == "WAIT_G5"
+    assert resolved.ledger[0].disposition == "closed"
+    assert resolved.events[-1].payload["finding_resolutions"] == [
+        {
+            "finding_id": "F-001",
+            "risk_acceptance": "Owner accepted the residual risk for this revision.",
+        }
+    ]
+
+
+def test_finding_proof_ledger_survives_runtime_reload(tmp_path: Path) -> None:
+    module = _load_module()
+    reviewed = module.record_review(
+        _state(module),
+        _packet(outcome="revise-design", blocking=True),
+        g3_approval_event=module.TypedEvent("approve", {}),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+    )
+    module.replace_design_then_state(
+        tmp_path, module.render_design_projection(reviewed), reviewed
+    )
+
+    loaded = module.load_runtime(tmp_path, slug="sample")
+
+    assert loaded.state.ledger == reviewed.ledger
+
+
+def test_approval_note_is_preserved_separately_from_typed_token() -> None:
+    module = _load_module()
+    event = module.validate_event(
+        {
+            "event": "approve",
+            "payload": {"token": "ok", "note": "Reviewed the current evidence."},
+        },
+        current_state=_state(module, state="WAIT_G5"),
+    )
+
+    event_state = _state(module, state="WAIT_G5", sources=("standard",))
+    result = module.transition_gate(event_state, event, gate=event_state.state)
+
+    assert result.accepted is True
+    assert result.state.events[-1].payload == {
+        "token": "ok",
+        "note": "Reviewed the current evidence.",
+    }
+
+
+@pytest.mark.parametrize(
+    ("impact", "confidence", "default_safety", "expected"),
+    (
+        ("high", "high", True, "intensive"),
+        ("medium", "high", True, "standard"),
+        ("low", "high", True, "lightweight"),
+        ("low", "high", False, "standard"),
+    ),
+)
+def test_assurance_level_is_proportional_and_non_downgradable(
+    impact: str, confidence: str, default_safety: bool, expected: str
+) -> None:
+    module = _load_module()
+
+    assert module.minimum_assurance(impact, confidence, default_safety) == expected
+    requested = "lightweight" if expected != "lightweight" else "standard"
+    if expected == "lightweight":
+        assert (
+            module.enforce_assurance_minimum(
+                requested, impact, confidence, default_safety
+            )
+            == requested
+        )
+    else:
+        with pytest.raises(module.DesignValidationError, match="minimum"):
+            module.enforce_assurance_minimum(
+                requested, impact, confidence, default_safety
+            )
+
+
+def test_advisory_finding_stays_in_ledger_until_promoted() -> None:
+    module = _load_module()
+    advisory = module.start_advisory(_state(module, state="WAIT_G0"), prior_gate="WAIT_G0")
+    result = module.consume_full_analysis_packet(
+        advisory,
+        _packet(),
+        expected_target_path="tmp/idea/sample/design.md",
+        expected_revision=1,
+        mandatory=False,
+    )
+
+    assert result.state.ledger[0].blocking is False
+    promoted = module.promote_advisory_finding(
+        result.state,
+        "F-001",
+        classification="blocker",
+        detail="The advisory is now material to the decision.",
+    )
+
+    assert promoted.ledger[0].blocking is True
+    assert promoted.events[-1].event == "promote-advisory"
