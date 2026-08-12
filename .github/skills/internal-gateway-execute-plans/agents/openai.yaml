@@ -4,24 +4,15 @@ interface:
   default_prompt: >-
     Use /internal-gateway-execute-plans for approved retained-plan execution or
     resume under tmp/superpowers/plans/. Bind the writer-owned versioned
-    Execution Contract and verify a control inventory for every task,
-    acceptance criterion, and declared obligation. Execute local and runtime
-    gates with reproducible evidence; probe external capabilities explicitly and
-    fail closed for the capability decision; distinguish unavailable evidence
-    from a material failure; retry safe repairs while evidence improves; keep
-    authority and human or external follow-up explicit without blocking DONE
-    when no material failure was observed. Preserve
-    native validation commands, record all six runtime discovery
-    categories and structured recovery evidence, and continue through safe
-    recovery. Request authority while execution remains active. Use
-    /internal-tdd to record and apply the selected posture at executable task
-    boundaries; require red-first evidence only for mandatory-test-first, and
-    require reachable focused and broad validation before feature-first
-    production-ready completion. Use
-    closeout-check with both plan and evidence paths as the deterministic route
-    owner. Write one matching status sibling only for DONE, PARTIAL, BLOCKED, or
-    NEEDS_REVIEW, and never mutate Git. The local gateway owns routing,
-    recovery, stopping, worktree/finishing decisions, status, closeout, critical
-    review, todo tracking, and task mechanics directly in the current session.
-    Keep all plan work within this gateway; do not dispatch it to another
-    execution owner or model.
+    Execution Manifest v1, explicit approval, semantic fingerprint, content
+    hash, control inventory, and native validations. Execute every task directly
+    in the current session and use /internal-tdd at executable task boundaries.
+    Diagnose failures, repair only clearly implied omissions inside approved
+    targets, preserve independent work around pre-existing failures, and stop
+    for authority, scope, or safety gaps. Do not dispatch subagents, workers,
+    models, or delegated plan execution; internal-luna-executor is metadata
+    only. Use only DONE, PARTIAL, and BLOCKED. Persist one compact JSON resume
+    sibling bound to the plan hashes and validate it with state-check. Never
+    mutate Git. Before a completion claim, run the plan's final validations,
+    git diff --check, and /superpowers-verification-before-completion. Return
+    exactly four lines labeled Plan, Changed, Checks, and Next.

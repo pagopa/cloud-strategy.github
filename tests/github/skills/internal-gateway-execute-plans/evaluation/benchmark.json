@@ -1,0 +1,18 @@
+{
+  "contract_version": "internal-gateway-execute-plans-eval-v1",
+  "required_case_ids": [
+    "VALID_PLAN_DONE",
+    "IN_TARGET_OMISSION_DONE",
+    "DISTINCT_SAFE_REPAIR_DONE",
+    "PRE_EXISTING_FAILURE_RESIDUAL",
+    "AUTHORITY_GAP_BLOCKED"
+  ],
+  "allowed_statuses": ["DONE", "PARTIAL", "BLOCKED"],
+  "forbidden_dispatch_events": [
+    "subagent",
+    "worker",
+    "model-switch",
+    "delegated-plan"
+  ],
+  "report_labels": ["Plan", "Changed", "Checks", "Next"]
+}

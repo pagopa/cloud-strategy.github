@@ -19,15 +19,3 @@ def valid_plan(tmp_path: Path) -> Path:
     target = staged / "valid-plan.md"
     shutil.copy(FIXTURES / "valid-plan.md", target)
     return target
-
-
-@pytest.fixture()
-def valid_partial_status(tmp_path: Path) -> Path:
-    target = tmp_path / "valid-plan.PARTIAL.md"
-    shutil.copy(FIXTURES / "valid-plan.PARTIAL.md", target)
-    return target
-
-
-@pytest.fixture()
-def invalid_status() -> Path:
-    return FIXTURES / "invalid-status.md"

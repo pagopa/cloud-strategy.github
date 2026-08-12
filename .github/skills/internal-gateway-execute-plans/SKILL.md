@@ -5,207 +5,107 @@ description: "Use when executing or resuming an approved repository-owned retain
 
 # Internal Gateway Execute Plans
 
-## Bundle References
-
-- `references/execution-contract.md` — repository-local controls around the direct execution loop.
-- `references/recovery-contract.md` — continuation-first recovery and closeout decision ladder.
-- `references/status-contract.md` — status transition table, required headings, and exact sibling filenames.
-- `scripts/plan_execution.py` — read-only stdlib-only CLI for strict plan binding, structured recovery classification, status shape, resume safety, and completion readiness.
-
-## Referenced skills
-
-- `/internal-tdd` owns executable-behavior test-first guidance at the local task gate.
-- `/superpowers-verification-before-completion` owns final evidence before completion claims.
-- `/addyosmani-code-simplification` is conditional and may be loaded only when the approved task explicitly authorizes simplification.
+Execute one approved retained plan directly in the current session. This
+gateway owns the task loop, validation, bounded repair, stopping decision, and
+user report. It does not delegate plan work.
 
 ## When to use
 
-- Execute or resume an approved retained plan under `tmp/superpowers/plans/`.
-- Apply repository-local preflight, task hooks, status handling, and closeout around the direct task loop.
+- Execute or resume an approved repository-owned retained plan under
+   `tmp/superpowers/plans/`.
 
-## When not to use
+## Use And Boundaries
 
-- Writing, reformulating, reviewing, or challenging a plan.
-- Running same-chat work that is not driven by an approved retained plan.
-- Changing the retained-plan schema or replacing the local execution contract
-  outside an explicitly approved migration plan.
+- Use only for an approved plan under `tmp/superpowers/plans/`.
+- The writer-owned `## Execution Manifest` v1 is authoritative for targets,
+  tasks, controls, validations, approval, hashes, and authority boundaries.
+- Do not rewrite the Manifest or broaden the plan. A plan change requires the
+  writer route, refreshed approval, and refreshed hashes.
+- Do not dispatch a subagent, worker, model switch, or delegated execution
+  path. `internal-luna-executor` is metadata only and is never invoked here.
+- Do not run Git mutations. Leave the worktree uncommitted.
 
-## Safety Boundary
+## Bind Before Editing
 
-The bundled CLI proves only mechanical safety: the plan is in the canonical
-retained directory, readable, actionable, and contains exactly one normative
-Execution Manifest v1; status files are bound to its semantic fingerprint and
-exact-byte content hash; and
-completion state is consistent. Missing required headings, execution fields,
-or contract data are blocking findings. Status files require the minimal
-resumable core plus closeout evidence for serialized routes. Conversational
-approval and runtime safety remain gateway responsibilities.
+1. Confirm the exact retained-plan path and explicit approval.
+2. Run `python3 scripts/plan_execution.py preflight <plan> --format compact`.
+3. Record the semantic fingerprint, exact content hash, worktree baseline, and
+   the plan's required baseline validation.
+4. Read `## Control Inventory` and map each obligation to a validation,
+   external or human follow-up, or authority boundary.
+5. Stop when a required control is uncovered, the plan is stale, or approval is
+   absent. Ask one focused authority question only after local checks are
+   exhausted.
 
-## Control coverage
+## Direct Finish Loop
 
-Before execution, read the plan's `## Control Inventory` or
-reconstruct the same inventory from its manifest tasks, acceptance criteria,
-and controls. Classify every obligation exactly once as
-`automatable-local`, `observable-runtime`, `external-capability`,
-`authority-or-scope`, or `genuine-human-judgment`. Do not confuse these control
-classes with the six runtime discovery categories.
+For each Manifest task, in order:
 
-- `automatable-local` and `observable-runtime` controls must use a required
-  executable validation or capability probe with a clear pass/fail signal and
-  reproducible evidence, and the check must fail when the requirement is
-  violated. Establish red-first evidence before implementation when the control
-  changes executable or evaluable behavior.
-- `external-capability` controls fail closed for the capability decision. Probe
-  explicitly and use a safe fallback only when the plan permits it; do not
-  treat an unavailable capability as a technical pass. When no material
-  feature failure is observed, record the unavailable evidence as a
-  non-blocking follow-up rather than routing the completed feature to
-  `NEEDS_REVIEW`. If the probe observes a material contract failure, classify
-  it as unresolved or regression and enter recovery.
-- `authority-or-scope` controls use the plan's authority boundary. Do not
-  expand scope or modify the approved plan without the required approval and a
-  refreshed fingerprint.
-- `genuine-human-judgment` controls remain explicit human obligations with
-  acceptance evidence, but their verification is an offline follow-up and does
-  not block `DONE` after execution and required validations complete. Do not
-  disguise them as automated validation. Authority and approval gates needed
-  before execution remain gateway preconditions.
+1. Apply the task posture and load `/internal-tdd` when executable or
+   evaluable behavior changes. Establish red evidence only for
+   `mandatory-test-first` tasks.
+2. Execute the approved task in the current session. Preserve task IDs and
+   dependencies; do not invent a parallel execution API.
+3. Run the task's focused validation and record the command, result, and
+   evidence. Continue independent tasks when a failure is pre-existing or
+   unrelated.
+4. If validation fails, diagnose the controlling local cause. Try a distinct
+   safe repair only when it is directly implied by the task acceptance, inside
+   an approved target, and does not change scope or authority.
+5. Re-run the same validation after a repair. Do not repeat an unchanged
+   attempt. Preserve any residual failure and its effect on remaining tasks.
+6. Audit the approved targets for clearly implied omissions before marking the
+   task complete. An omission that is normative, unsafe, out of scope, or
+   authority-required stops execution.
 
-Every control row must map to a contract validation, manual obligation, or
-authority boundary and retain its requirement, owner, trigger, pass/fail
-signal, evidence, and fallback. An uncovered local/runtime control is a plan
-gap: stop before editing or request the plan-authorized correction; never mark
-it satisfied to reach `DONE`. If correcting or completing the plan is explicitly
-authorized, add the missing control or gate without weakening the requirement,
-rerun preflight, and obtain refreshed approval and fingerprint before execution.
-Otherwise, do not modify the approved plan.
+## Stop And State
 
-Ask the user only after local checks are exhausted and only for new authority,
-access, a product or scope choice, or an explicit requirement conflict. Report
-the checks already performed and ask one focused question; never ask the user
-to run a local check or certify technical output. Record pending human
-judgment as offline follow-up after a successful closeout.
+Use exactly one compact JSON sibling when execution must be resumed or its
+terminal evidence must be recorded: `<plan-basename>.status.json`. Do not
+create Markdown status siblings or separate protocol evidence files. The JSON
+object has exactly these fields:
 
-## Gateway boundary
+`schema_version`, `status`, `plan`, `plan_fingerprint`, `content_hash`,
+`completed_task_ids`, `remaining_task_ids`, `last_validation`, `next_action`.
 
-`/internal-gateway-execute-plans` is the authoritative local execution route. It
-controls routing, recovery, stopping, worktree and finishing decisions, status
-transitions, closeout, critical review, todo tracking, and task-by-task
-mechanics. All plan work remains in the current session and under this
-gateway's responsibility.
+`status` is exactly one of `DONE`, `PARTIAL`, or `BLOCKED`:
 
-- bind the exact plan path and explicit approval state;
-- compute the SHA-256 fingerprint, run dirty-worktree preflight, and capture
-  the plan-required validation baseline;
-- verify control coverage before execution and preserve the mapping from each
-  obligation to its executable validation, external/human obligation, or
-  authority boundary;
-- apply task-level `/internal-tdd` and evidence hooks;
-- decide routing, recovery candidates, stop conditions, and worktree/finishing
-  behavior;
-- classify closeout evidence with `closeout-check`, continue while a safe route
-  exists, retry distinct safe repairs while evidence improves, and preserve
-  the baseline/final delta;
-- enforce the no-Git-mutation policy;
-- replace the exact `DONE`, `PARTIAL`, `BLOCKED`, or `NEEDS_REVIEW` sibling;
-- run resume and completion checks through `scripts/plan_execution.py`.
+- `DONE`: every task is complete, every required local or observable check
+  passes, and no task remains.
+- `PARTIAL`: execution is paused but remains resumable; remaining task IDs and
+  one concrete next action are recorded.
+- `BLOCKED`: an authority, scope, safety, or unresolved task-local condition
+  prevents progress; record one focused next action and make no out-of-scope
+  edit.
 
-## Gateway phases
+Bind the sibling to the plan's semantic fingerprint and exact content hash.
+The state path is in the same directory as the plan, with `.md` replaced by
+`.status.json`. Validate it with:
 
-1. **Bind** the approved retained plan, fingerprint, workspace overlap, control
-   inventory, and native validation commands. Completion: preflight passes,
-   every control has an owner, and the baseline is recorded.
-2. **Execute** the approved plan task-by-task with the posture returned by
-  `/internal-tdd`. Require red-first gates only for `mandatory-test-first`;
-  `feature-first` requires focused validation before task transition and
-  reachable evidence before production-ready completion. Completion: each
-  task and control has fresh focused evidence or a recorded safe pause.
-3. **Recover** through `references/recovery-contract.md` whenever validation or
-   execution is unresolved. Completion: each distinct safe candidate was tried,
-   authority was requested when required, or exhaustion evidence is complete.
-4. **Decide** with `closeout-check`. Completion: continue immediately on a
-  `continue-*` or `request-authority` route, or write one legal status sibling
-  for a terminal or explicit pause route. Pending human or external evidence
-  without an observed material failure is recorded as non-blocking follow-up
-  on `DONE`. `NEEDS_REVIEW` is reserved for a material failure, exhausted
-  recovery, and a concrete decision or authority request.
-5. **Close** with broader validation, `git diff --check`, status binding, and the
-   verification-before-completion gate. Completion: the status sibling and report
-   contain the same fresh evidence.
+`python3 scripts/plan_execution.py state-check <plan> <plan-sibling>.status.json --format compact`
 
-## Task checkpoints
+The validator checks the Manifest, sibling location, hashes, plan binding, task
+IDs, and status/task consistency. It does not execute work or select repairs.
 
-Before the task loop, bind the retained plan, record approval, fingerprint the
-plan, capture the workspace baseline, and run the plan's broad baseline
-validation. The binding gate must also confirm the current plan has `## Control
-Inventory` and an explicit no-Git constraint. A document identified as
-`legacy/imported` is non-actionable until the writing gateway reconstructs it
-and approval and fingerprint are refreshed.
-At each task boundary, load `/internal-tdd` when the task changes executable or
-evaluable behavior, record and apply its selected posture, and require
-red-first evidence before implementation only for `mandatory-test-first`.
-For `feature-first`, require focused validation before task transition and
-reachable evidence before production-ready completion.
-After each task, run the plan's focused validation, retain fresh
-evidence, classify failures, and try each distinct safe repair or recovery
-candidate while evidence improves. Do not repeat an unchanged attempt as
-recovery. Pre-existing or unrelated broad failures do not stop independent
-tasks. Load `/superpowers-verification-before-completion` before any positive
-completion claim; load `/addyosmani-code-simplification` only when explicitly
-authorized by the plan.
+## Completion Evidence
 
-Before a task transition or closeout, apply
-`references/recovery-contract.md`. Preserve the native authoritative command,
-continue on a safe `continue-*` route, keep bounded search and retry evidence,
-and do not convert an uncovered or unresolved control into a user question
-when a local check or probe can still be performed.
+After the last task, run the plan's required final validations, preserve the
+baseline/final delta, run `git diff --check`, and load
+`/superpowers-verification-before-completion` before claiming success. Load
+`/addyosmani-code-simplification` only when the approved plan authorizes it.
 
-On pause or resume, preserve the plan fingerprint and use the status and resume
-checks from `scripts/plan_execution.py`. At closeout, run the required broader
-validation with the same commands used at baseline, record the baseline/final
-delta, verify `git diff --check`, and write exactly one status sibling according
-to `references/status-contract.md`. Always provide a concise user-facing report
-with the outcome, changed work, validation, blocker or gap, recovery attempts,
-and exact next action.
+Pending human judgment or unavailable external evidence is recorded as a
+follow-up when no material implementation failure remains. It does not replace
+technical validation or justify an out-of-scope change.
 
-## Direct execution rule
+## User Report
 
-Perform plan review, todo tracking, and task-by-task mechanics in the current
-session. Do not dispatch plan work, select another model, or invoke a separate
-execution skill. The gateway retains responsibility for plan binding, task
-order, validation, recovery, status, and closeout.
+Always return exactly four lines, in this order, with no extra status prose:
 
-## No-Commit Rule
+`Plan: <path and terminal status>`
 
-Do not run `git add`, `git commit`, `git push`, `git merge`, or another Git
-mutation while executing, pausing, or closing out a plan. Leave executed
-changes uncommitted for the user to review. If a retained plan contains Git
-mutation steps, skip them and record the plan drift in the status sibling.
+`Changed: <files or no changes>`
 
-## Validation
+`Checks: <validation evidence and residual gap>`
 
-- `git diff --check`
-- `python3 scripts/plan_execution.py preflight <plan-file> --format compact`
-- `python3 scripts/plan_execution.py status-check <status-file> --format compact`
-- `python3 scripts/plan_execution.py resume-check <plan-file> <status-file> --format compact`
-- `python3 scripts/plan_execution.py closeout-check <plan-file> <evidence-file> --format compact`
-- `python3 scripts/plan_execution.py completion-check <plan-file> <status-file> --format compact`
-- Confirm no live bundle instruction dispatches plan work outside the current session.
-
-The writer-owned versioned `## Execution Manifest` is authoritative for target
-and validation IDs, native commands, task bindings, retry posture, manual
-obligations, approval binding, bootstrap metadata, and authority boundaries.
-The control inventory and task headings are compatibility projections only
-during the explicit migration bootstrap; they are not a competing schema. A
-legacy `## Execution Contract` is accepted only when the manifest declares
-that exact bootstrap projection. The gateway owns all six
-runtime discovery categories, recovery candidates, attempts, rejection
-evidence, authority state, and closeout routing. `DONE` requires fresh evidence for every
-task and every automatable or observable control; `request-authority` keeps
-execution active and does not produce a status sibling. Unavailable external
-evidence without an observed material failure is reported as non-blocking
-follow-up and does not route to `NEEDS_REVIEW`. `NEEDS_REVIEW` requires a
-material failure observed after safe recovery is exhausted, and its status
-sibling must contain a structured `## Review Required` request. The final
-report must also name control gates added or updated, their evidence, and any
-residual gap.
+`Next: <one action or none>`

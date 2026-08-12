@@ -16,23 +16,16 @@ FIXTURES = BUNDLE / "fixtures"
 sys.path.insert(0, str(SCRIPTS))
 
 from plan_execution import (  # noqa: E402
-    DISCOVERY_CATEGORIES,
     ExecutionContractError,
     Finding,
     build_compact_payload,
     canonical_json,
-    classify_closeout,
     compute_content_sha256,
     compute_sha256,
     compute_semantic_fingerprint,
     parse_execution_manifest,
-    parse_plan_contract,
-    status_for_route,
-    validate_completion,
-    validate_manifest_projection,
     validate_plan,
-    validate_resume,
-    validate_status,
+    validate_manifest_projection,
 )
 
 
@@ -51,141 +44,8 @@ def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
     return plan
 
 
-def _contract(plan: Path):
-    return parse_plan_contract(plan.read_text())
-
-
-def _discovery() -> list[dict[str, object]]:
-    return [
-        {
-            "category": category,
-            "status": "not-found",
-            "candidates": [],
-            "evidence": f"No candidate found in {category}.",
-        }
-        for category in DISCOVERY_CATEGORIES
-    ]
-
-
-def _validation(
-    plan: Path,
-    validation_id: str,
-    *,
-    outcome: str = "exact-pass",
-    candidate: dict[str, object] | None = None,
-    authority_state: str = "not-required",
-    equivalent_evidence: dict[str, bool] | None = None,
-) -> dict[str, object]:
-    declared = {item.id: item for item in _contract(plan).validations}[validation_id]
-    value: dict[str, object] = {
-        "id": declared.id,
-        "command": declared.command,
-        "required": declared.required,
-        "outcome": outcome,
-        "phase": declared.phases[-1],
-        "equivalence": declared.equivalence,
-    }
-    if equivalent_evidence is not None:
-        value["outcome"] = "equivalent-pass"
-        value["equivalence_evidence"] = equivalent_evidence
-    if outcome in {"unresolved", "regression"} or equivalent_evidence is not None:
-        value.update(
-            {
-                "failure_phase": "validator-result",
-                "discovery_results": _discovery(),
-                "candidates": [candidate] if candidate else [],
-                "authority": {
-                    "state": authority_state,
-                    "action": "dependency-installation"
-                    if authority_state != "not-required"
-                    else "read-only-discovery",
-                },
-            }
-        )
-    return value
-
-
-def _closeout_evidence(
-    plan: Path,
-    *,
-    validations: list[dict[str, object]] | None = None,
-    outcome: str = "exact-pass",
-    candidate: dict[str, object] | None = None,
-    authority_state: str = "not-required",
-    tasks_complete: bool = True,
-    tasks_remaining: list[str] | None = None,
-    pause_requested: bool = False,
-    fatal_conditions: list[str] | None = None,
-    exhaustion_evidence: list[str] | None = None,
-    manual_obligations: list[dict[str, object]] | None = None,
-) -> dict[str, object]:
-    if validations is None:
-        declared = list(_contract(plan).validations)
-        validations = [
-            _validation(
-                plan,
-                item.id,
-                outcome=outcome,
-                candidate=candidate if index == 0 else None,
-                authority_state=authority_state,
-            )
-            for index, item in enumerate(declared)
-        ]
-    return {
-        "plan_fingerprint": compute_semantic_fingerprint(
-            parse_execution_manifest(plan.read_text())
-        ),
-        "content_hash": compute_content_sha256(plan),
-        "tasks_complete": tasks_complete,
-        "tasks_remaining": tasks_remaining or [],
-        "pause_requested": pause_requested,
-        "fatal_conditions": fatal_conditions or [],
-        "validations": validations,
-        "manual_obligations": manual_obligations or [],
-        "exhaustion_evidence": exhaustion_evidence or [],
-    }
-
-
-def _minimal_status(plan: Path, status: str = "PARTIAL") -> str:
-    reason = (
-        "Recovery exhausted for an environmental validation."
-        if status == "NEEDS_REVIEW"
-        else "Classifier route is paused by the caller."
-    )
-    exhaustion = (
-        "No safe candidate remains after complete discovery."
-        if status in {"BLOCKED", "NEEDS_REVIEW"}
-        else "None; execution remains resumable."
-    )
-    review = (
-        "## Review Required\n\n"
-        "- Event: A material validation failure was observed.\n"
-        "- Impact: The feature cannot be accepted without a decision.\n"
-        "- Recovery: Safe repair and validation candidates were exhausted.\n"
-        "- Evidence: The final validation still reports the failure.\n"
-        "- Decision: Decide whether to repair, narrow scope, or accept the gap.\n"
-        "- Next action: Review the evidence and authorize the selected route.\n\n"
-        if status == "NEEDS_REVIEW"
-        else ""
-    )
-    return (
-        f"## Status\n\n`{status}`\n\n"
-        f"## Plan\n\n`{plan}`\n\n"
-        f"## Plan Fingerprint\n\n`{compute_semantic_fingerprint(parse_execution_manifest(plan.read_text()))}`\n\n"
-        f"## Content Hash\n\n`{compute_content_sha256(plan)}`\n\n"
-        "## Completed\n\n- Task 1\n\n"
-        "## Remaining\n\n- Task 2\n\n"
-        "## Validation\n\n- `python3 -m pytest -q tests/fixture/` — passed.\n\n"
-        "## Next\n\nResume Task 2.\n\n"
-        "## Closeout Decision\n\n- Route: " + reason + "\n\n"
-        "## Recovery Attempts\n\n- None beyond recorded evidence.\n\n"
-        "## Recovery Exhaustion\n\n- " + exhaustion + "\n\n"
-        + review
-    )
-
-
 def test_valid_plan_parses_contract_and_has_no_findings(valid_plan: Path) -> None:
-    assert parse_plan_contract(valid_plan.read_text()).schema_version == 1
+    assert parse_execution_manifest(valid_plan.read_text())["schema_version"] == 1
     assert parse_execution_manifest(valid_plan.read_text())["manifest_version"] == "execution-manifest/v1"
     assert validate_plan(valid_plan, repo_root=valid_plan.parents[3]) == []
 
@@ -229,12 +89,12 @@ def test_current_plan_requires_explicit_no_git_constraint(tmp_path: Path) -> Non
 def test_explicit_legacy_or_imported_plan_remains_non_actionable(
     tmp_path: Path,
 ) -> None:
-    plan = _stage_valid_plan(tmp_path, _fixture("legacy-draft-plan.md").read_text())
+    plan = _stage_valid_plan(tmp_path, "# Legacy plan\n\n## Goal\n\nNo manifest.\n")
     assert any(item.severity == "blocking" for item in validate_plan(plan, tmp_path))
 
 
 def test_legacy_plan_is_rejected(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path, _fixture("legacy-draft-plan.md").read_text())
+    plan = _stage_valid_plan(tmp_path, "# Legacy plan\n\n## Goal\n\nNo manifest.\n")
     assert any(item.severity == "blocking" for item in validate_plan(plan, tmp_path))
 
 
@@ -299,261 +159,6 @@ def test_execution_manifest_rejects_malformed_json_and_duplicate_blocks(
     }
 
 
-def test_closeout_is_done_when_all_required_obligations_pass_exactly(
-    valid_plan: Path,
-) -> None:
-    decision = classify_closeout(_contract(valid_plan), _closeout_evidence(valid_plan))
-    assert decision.route == "DONE"
-
-
-def test_closeout_accepts_admissible_equivalent_validation(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(
-        valid_plan,
-        validations=[
-            _validation(
-                valid_plan,
-                "focused-tests",
-                equivalent_evidence={
-                    "target_did_not_start": True,
-                    "same_checks": True,
-                    "same_inputs": True,
-                    "runtime_not_material": True,
-                },
-            ),
-            _validation(valid_plan, "diff-check"),
-        ],
-    )
-    assert classify_closeout(_contract(valid_plan), evidence).route == "DONE"
-
-
-def test_closeout_rejects_omitted_required_plan_validation(valid_plan: Path) -> None:
-    with pytest.raises(ValueError, match="missing required validation"):
-        classify_closeout(
-            _contract(valid_plan), _closeout_evidence(valid_plan, validations=[])
-        )
-
-
-def test_closeout_rejects_changed_command_and_unknown_id(valid_plan: Path) -> None:
-    changed = _closeout_evidence(valid_plan)
-    changed["validations"][0]["command"] = "make unrelated"  # type: ignore[index]
-    with pytest.raises(ValueError, match="command mismatch"):
-        classify_closeout(_contract(valid_plan), changed)
-    unknown = _closeout_evidence(valid_plan)
-    unknown["validations"][0]["id"] = "unknown"  # type: ignore[index]
-    with pytest.raises(ValueError, match="unknown validation id"):
-        classify_closeout(_contract(valid_plan), unknown)
-
-
-def test_closeout_continues_on_safe_untried_candidate(valid_plan: Path) -> None:
-    candidate = {
-        "name": "retry with compatible runtime",
-        "source": "path-executable",
-        "safe": True,
-        "requires_authority": False,
-        "attempted": False,
-        "result": "not-run",
-        "evidence_delta": "candidate has not been tried",
-    }
-    assert (
-        classify_closeout(
-            _contract(valid_plan),
-            _closeout_evidence(valid_plan, outcome="unresolved", candidate=candidate),
-        ).route
-        == "continue-recovery"
-    )
-
-
-def test_closeout_requests_authority_before_terminal_status(valid_plan: Path) -> None:
-    candidate = {
-        "name": "install compatible runtime",
-        "source": "path-executable",
-        "safe": False,
-        "requires_authority": True,
-        "attempted": False,
-        "result": "not-run",
-        "evidence_delta": "compatible runtime is not installed",
-    }
-    assert (
-        classify_closeout(
-            _contract(valid_plan),
-            _closeout_evidence(
-                valid_plan,
-                outcome="unresolved",
-                candidate=candidate,
-                authority_state="required-unrequested",
-            ),
-        ).route
-        == "request-authority"
-    )
-
-
-def test_closeout_rejects_narrative_only_exhaustion(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(
-        valid_plan,
-        outcome="unresolved",
-        exhaustion_evidence=["no compatible interpreter is available"],
-    )
-    evidence["validations"][0].pop("discovery_results")  # type: ignore[index]
-    with pytest.raises(ValueError, match="structured recovery"):
-        classify_closeout(_contract(valid_plan), evidence)
-
-
-def test_closeout_blocks_fatal_task_local_regression(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(
-        valid_plan, fatal_conditions=["task-local regression exhausted"]
-    )
-    assert classify_closeout(_contract(valid_plan), evidence).route == "BLOCKED"
-
-
-def test_closeout_routes_incomplete_work_and_explicit_pause(valid_plan: Path) -> None:
-    active = _closeout_evidence(
-        valid_plan, tasks_complete=False, tasks_remaining=["Task 2"]
-    )
-    paused = _closeout_evidence(
-        valid_plan,
-        tasks_complete=False,
-        tasks_remaining=["Task 2"],
-        pause_requested=True,
-    )
-    assert (
-        classify_closeout(_contract(valid_plan), active).route == "continue-execution"
-    )
-    assert classify_closeout(_contract(valid_plan), paused).route == "PARTIAL"
-
-
-def test_closeout_completes_with_pending_offline_human_review(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(
-        tmp_path,
-        _fixture("valid-plan.md")
-        .read_text()
-        .replace(
-            '"manual_obligations": []',
-            '"manual_obligations": [{"id": "owner-check", "kind": "human", "required": true, "acceptance": "Owner confirms output."}]',
-        ),
-    )
-    evidence = _closeout_evidence(
-        plan,
-        manual_obligations=[
-            {"id": "owner-check", "satisfied": False, "evidence": "Awaiting owner."}
-        ],
-    )
-    decision = classify_closeout(_contract(plan), evidence)
-    assert decision.route == "DONE"
-    assert "offline-human-review-pending" in decision.reasons
-
-
-def test_closeout_completes_with_pending_external_follow_up(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(
-        tmp_path,
-        _fixture("valid-plan.md")
-        .read_text()
-        .replace(
-            '"manual_obligations": []',
-            '"manual_obligations": [{"id": "capability-check", "kind": "external", "required": true, "acceptance": "External capability is available."}]',
-        ),
-    )
-    evidence = _closeout_evidence(
-        plan,
-        manual_obligations=[
-            {"id": "capability-check", "satisfied": False, "evidence": "Capability unavailable."}
-        ],
-    )
-    decision = classify_closeout(_contract(plan), evidence)
-    assert decision.route == "DONE"
-    assert "external-follow-up-pending" in decision.reasons
-
-
-@pytest.mark.parametrize(
-    "route", ("continue-execution", "continue-recovery", "request-authority")
-)
-def test_active_route_cannot_be_serialized_as_terminal_status(route: str) -> None:
-    assert status_for_route(route) is None
-
-
-def test_minimal_status_is_valid(tmp_path: Path, valid_plan: Path) -> None:
-    status = tmp_path / "valid-plan.PARTIAL.md"
-    status.write_text(_minimal_status(valid_plan))
-    assert validate_status(status) == []
-
-
-def test_needs_review_requires_bound_reason(tmp_path: Path, valid_plan: Path) -> None:
-    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
-    status.write_text(
-        _minimal_status(valid_plan, "NEEDS_REVIEW").replace(
-            "Recovery exhausted for an environmental validation.", "Pending work."
-        ).replace("A material validation failure was observed.", "A review is pending.")
-    )
-    assert "needs-review-without-bound-reason" in {
-        item.code for item in validate_status(status)
-    }
-
-
-def test_needs_review_requires_structured_review_request(
-    tmp_path: Path, valid_plan: Path
-) -> None:
-    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
-    text = _minimal_status(valid_plan, "NEEDS_REVIEW")
-    status.write_text(text[: text.index("## Review Required")])
-    assert "missing-review-request" in {
-        item.code for item in validate_status(status)
-    }
-
-
-def test_needs_review_accepts_structured_review_request(
-    tmp_path: Path, valid_plan: Path
-) -> None:
-    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
-    status.write_text(_minimal_status(valid_plan, "NEEDS_REVIEW"))
-    assert validate_status(status) == []
-
-
-def test_needs_review_rejects_offline_human_review_only(
-    tmp_path: Path, valid_plan: Path
-) -> None:
-    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
-    status.write_text(
-        _minimal_status(valid_plan, "NEEDS_REVIEW").replace(
-            "Recovery exhausted for an environmental validation.",
-            "Pending human review.",
-        ).replace("A material validation failure was observed.", "A review is pending.")
-    )
-    assert "needs-review-without-bound-reason" in {
-        item.code for item in validate_status(status)
-    }
-
-
-def test_status_rejects_unknown_state_and_missing_headings(
-    invalid_status: Path,
-) -> None:
-    codes = {item.code for item in validate_status(invalid_status)}
-    assert "unknown-status" in codes
-    assert "missing-heading" in codes
-
-
-def test_resume_rejects_plan_fingerprint_drift(
-    valid_plan: Path, valid_partial_status: Path
-) -> None:
-    valid_plan.write_text(valid_plan.read_text() + "\nChanged after approval.\n")
-    assert "content-hash-drift" in {
-        item.code for item in validate_resume(valid_plan, valid_partial_status)
-    }
-
-
-def test_resume_accepts_matching_status_binding(
-    valid_plan: Path, valid_partial_status: Path
-) -> None:
-    assert validate_resume(valid_plan, valid_partial_status) == []
-
-
-def test_completion_requires_done_and_no_remaining(
-    valid_plan: Path, valid_partial_status: Path
-) -> None:
-    findings = validate_completion(valid_plan, valid_partial_status)
-    assert "not-done" in {
-        item.code for item in findings
-    } or "content-hash-drift" in {item.code for item in findings}
-
-
 def test_compact_output_is_bounded() -> None:
     assert (
         build_compact_payload([Finding("missing-heading", "detail", "blocking")])[
@@ -582,90 +187,6 @@ def test_preflight_cli_valid_fixture(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
 
 
-def test_closeout_cli_binds_plan_and_evidence(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path)
-    evidence = tmp_path / "closeout.json"
-    evidence.write_text(json.dumps(_closeout_evidence(plan)))
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPTS / "plan_execution.py"),
-            "closeout-check",
-            str(plan),
-            str(evidence),
-            "--format",
-            "compact",
-        ],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stderr
-    assert json.loads(result.stdout)["route"] == "DONE"
-
-
-def test_closeout_cli_rejects_fingerprint_mismatch(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path)
-    evidence = tmp_path / "closeout.json"
-    payload = _closeout_evidence(plan)
-    payload["plan_fingerprint"] = "sha256:wrong"
-    evidence.write_text(json.dumps(payload))
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPTS / "plan_execution.py"),
-            "closeout-check",
-            str(plan),
-            str(evidence),
-            "--format",
-            "compact",
-        ],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode != 0
-    assert "fingerprint" in result.stderr
-
-
-def test_status_check_cli_valid() -> None:
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPTS / "plan_execution.py"),
-            "status-check",
-            str(_fixture("valid-plan.PARTIAL.md")),
-            "--format",
-            "compact",
-        ],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stderr
-
-
-def test_resume_check_cli_detects_drift(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path)
-    status = tmp_path / "valid-plan.PARTIAL.md"
-    status.write_text(_fixture("valid-plan.PARTIAL.md").read_text())
-    plan.write_text(plan.read_text() + "\nDrifted.\n")
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPTS / "plan_execution.py"),
-            "resume-check",
-            str(plan),
-            str(status),
-            "--format",
-            "compact",
-        ],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode != 0
-    assert "content-hash-drift" in {
-        item["code"] for item in json.loads(result.stdout)["finding_sample"]
-    }
-
-
 def test_manifest_only_plan_rejects_legacy_execution_contract_projection(
     tmp_path: Path,
 ) -> None:
@@ -676,18 +197,6 @@ def test_manifest_only_plan_rejects_legacy_execution_contract_projection(
     )
     codes = {item.code for item in validate_plan(plan, tmp_path)}
     assert "obsolete-execution-contract" in codes
-
-
-def test_status_binds_semantic_approval_and_content_audit_separately(
-    tmp_path: Path,
-) -> None:
-    plan = _stage_valid_plan(tmp_path)
-    status = tmp_path / "valid-plan.PARTIAL.md"
-    status.write_text(_fixture("valid-plan.PARTIAL.md").read_text())
-    original = plan.read_text()
-    plan.write_text(original.replace('"path": "tests/fixture/"', '"path": "tests/other/"', 1))
-    codes = {item.code for item in validate_resume(plan, status)}
-    assert {"semantic-fingerprint-drift", "content-hash-drift"} <= codes
 
 
 def _current_bootstrap_plan() -> Path:
@@ -792,5 +301,108 @@ def test_bootstrap_projection_drift_fails_closed() -> None:
 
 def test_legacy_only_plan_has_no_manifest_fallback() -> None:
     with pytest.raises(ExecutionContractError) as exc:
-        parse_execution_manifest(_fixture("legacy-draft-plan.md").read_text())
+        parse_execution_manifest("# Legacy plan\n\n## Goal\n\nNo manifest.\n")
     assert exc.value.code == "missing-execution-manifest"
+
+
+def _write_resume_state(plan: Path, state: Path, status: str = "DONE") -> None:
+    manifest = parse_execution_manifest(plan.read_text())
+    tasks = sorted(manifest["tasks"], key=lambda item: item["order"])
+    task_ids = [item["id"] for item in tasks]
+    completed = task_ids if status == "DONE" else []
+    state.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "status": status,
+                "plan": str(plan.relative_to(plan.parents[3])),
+                "plan_fingerprint": compute_semantic_fingerprint(manifest),
+                "content_hash": compute_content_sha256(plan),
+                "completed_task_ids": completed,
+                "remaining_task_ids": [item for item in task_ids if item not in completed],
+                "last_validation": "focused-tests: passed",
+                "next_action": "No further execution is required.",
+            }
+        )
+    )
+
+
+def _run_state_check(plan: Path, state: Path, repo_root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "state-check",
+            str(plan),
+            str(state),
+            "--repo-root",
+            str(repo_root),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_state_check_accepts_hash_bound_done_state(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_suffix(".status.json")
+    _write_resume_state(plan, state)
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)["status"] == "passed"
+
+
+def test_state_check_rejects_content_hash_drift(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_suffix(".status.json")
+    _write_resume_state(plan, state)
+    plan.write_text(plan.read_text() + "\nEditorial drift.\n")
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode != 0
+    assert "content-hash-drift" in {
+        item["code"] for item in json.loads(result.stdout)["finding_sample"]
+    }
+
+
+@pytest.mark.parametrize("status", ("DONE", "PARTIAL", "BLOCKED"))
+def test_state_check_accepts_only_new_run_statuses(tmp_path: Path, status: str) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_suffix(".status.json")
+    _write_resume_state(plan, state, status)
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode == 0, result.stderr
+
+
+def test_state_check_rejects_retired_needs_review_status(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_suffix(".status.json")
+    _write_resume_state(plan, state, "NEEDS_REVIEW")
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode != 0
+    assert "unknown-status" in {
+        item["code"] for item in json.loads(result.stdout)["finding_sample"]
+    }
+
+
+@pytest.mark.parametrize(
+    "retired_command",
+    ("status-check", "resume-check", "closeout-check", "completion-check"),
+)
+def test_retired_status_protocol_commands_are_not_exposed(retired_command: str) -> None:
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS / "plan_execution.py"), retired_command, "--help"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0

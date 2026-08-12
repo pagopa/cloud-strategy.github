@@ -1,5 +1,7 @@
 import importlib.util
+import json
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -40,3 +42,30 @@ def test_writer_plan_is_actionable_for_executor(tmp_path: Path) -> None:
     findings = _executor_module().validate_plan(plan, repo_root=tmp_path)
 
     assert findings == []
+
+
+def test_writer_plan_remains_actionable_through_preflight_cli(tmp_path: Path) -> None:
+    retained = tmp_path / "tmp" / "superpowers" / "plans"
+    retained.mkdir(parents=True)
+    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
+    (tmp_path / ".github").mkdir()
+    plan = retained / WRITER_FIXTURE.name
+    shutil.copy(WRITER_FIXTURE, plan)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(EXECUTOR_SCRIPT),
+            "preflight",
+            str(plan),
+            "--repo-root",
+            str(tmp_path),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)["status"] == "passed"
