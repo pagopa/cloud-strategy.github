@@ -172,6 +172,38 @@ def test_normal_initialization_creates_only_bounded_two_artifact_pair(tmp_path: 
     assert {path.name for path in tmp_path.iterdir()} == {"design.md", "state.json"}
 
 
+def test_cli_persists_direct_execution_handoff_after_explicit_choice(tmp_path: Path, capsys) -> None:
+    module = _load_module()
+    design = module.render_bounded_design(_g0_payload())
+    approved = _state(
+        module,
+        state="APPROVED",
+        digest=hashlib.sha256(design.encode("utf-8")).hexdigest(),
+        sources=("standard",),
+    )
+    module.replace_design_then_state(tmp_path, design, approved)
+
+    result = module.main(
+        [
+            "advance",
+            "--root",
+            str(tmp_path),
+            "--slug",
+            "sample",
+            "--event",
+            "select-handoff",
+            "--payload-json",
+            json.dumps({"mode": "direct-execution"}),
+            "--compact",
+        ]
+    )
+
+    assert result == 0
+    assert "state=DIRECT_EXECUTION|" in capsys.readouterr().out
+    persisted = json.loads((tmp_path / "state.json").read_text(encoding="utf-8"))
+    assert persisted["state"] == "DIRECT_EXECUTION"
+
+
 def test_advance_rejects_an_uninitialized_directory(tmp_path: Path) -> None:
     module = _load_module()
     result = module.main(

@@ -1,6 +1,6 @@
 interface:
   display_name: "Idea Internal Gateway"
-  short_description: "Fail-closed G0-G5 idea shaping before plan writing"
+  short_description: "Fail-closed G0-G5 idea shaping before handoff"
   default_prompt: |-
     Use /internal-gateway-idea for repository-owned idea shaping or review
     before implementation planning. Use the
@@ -22,6 +22,11 @@ interface:
     current design hash and revision, require explicit Blocking on every
     evidence item, consolidate only validated findings into the design ledger,
     and fail closed on missing, malformed, stale, v1, or mismatched evidence.
-    G5 routes only to
-    /internal-gateway-writing-plans and stops; neither design nor plan approval
-    authorizes implementation execution.
+    After the G5 simple approval, remain in APPROVED and stop before creating a
+    plan or invoking another gateway. Ask one explicit handoff question:
+    choose direct-execution through /internal-gateway-simple-task or
+    implementation-plan through /internal-gateway-writing-plans. Convert the
+    answer to exactly one typed select-handoff payload and fail closed on
+    ambiguity. Persist PLAN_WRITING or DIRECT_EXECUTION only after that event;
+    direct execution still requires the simple-task gateway's bounded-scope and
+    authority checks, while plan writing never authorizes execution.

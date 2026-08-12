@@ -81,3 +81,15 @@ missing, malformed, stale, or v1, fail closed and restart at the earliest gate
 that can be proven. An on-demand advisory is the only pre-G0 exception: it
 creates the bounded pair at `ADVISORY_REVIEW` and returns to `WAIT_G0` without
 satisfying mandatory G4 review.
+
+After G5 approval, `APPROVED` is the persisted pause before handoff. Do not
+create a retained plan or invoke another gateway until a typed
+`select-handoff` event records one of these modes:
+
+- `implementation-plan` → persist `PLAN_WRITING` and hand off to
+  `/internal-gateway-writing-plans`.
+- `direct-execution` → persist `DIRECT_EXECUTION` and hand off to
+  `/internal-gateway-simple-task`.
+
+Neither mode is inferred from a short approval or an ambiguous answer. The
+selected downstream gateway retains its own authority and validation boundary.

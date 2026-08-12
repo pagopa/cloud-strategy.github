@@ -352,9 +352,67 @@ def test_g4_resolution_is_separate_from_g3_packet_ingestion() -> None:
     assert approval.accepted is True
     assert approval.state.state == "APPROVED"
     route = module.derive_route(approval.state)
-    assert route.next_actor == "plan-writer"
-    assert route.next_owner == "/internal-gateway-writing-plans"
+    assert route.next_actor == "user"
+    assert route.next_owner == "/internal-gateway-idea"
+    assert route.legal_events == ("select-handoff",)
     assert route.authorizes_execution is False
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected_state", "expected_actor", "expected_owner", "authorizes_execution"),
+    (
+        (
+            "implementation-plan",
+            "PLAN_WRITING",
+            "plan-writer",
+            "/internal-gateway-writing-plans",
+            False,
+        ),
+        (
+            "direct-execution",
+            "DIRECT_EXECUTION",
+            "task-executor",
+            "/internal-gateway-simple-task",
+            True,
+        ),
+    ),
+)
+def test_explicit_handoff_choice_selects_one_terminal_owner(
+    mode: str,
+    expected_state: str,
+    expected_actor: str,
+    expected_owner: str,
+    authorizes_execution: bool,
+) -> None:
+    module = _load_module()
+    approved = _state(module, state="APPROVED", sources=("standard",))
+
+    result = module.transition_gate(
+        approved,
+        module.TypedEvent("select-handoff", {"mode": mode}),
+        gate="APPROVED",
+    )
+
+    assert result.accepted is True
+    assert result.state.state == expected_state
+    route = module.derive_route(result.state)
+    assert route.next_actor == expected_actor
+    assert route.next_owner == expected_owner
+    assert route.authorizes_execution is authorizes_execution
+
+
+def test_invalid_handoff_choice_fails_closed_without_state_change() -> None:
+    module = _load_module()
+    approved = _state(module, state="APPROVED", sources=("standard",))
+
+    result = module.transition_gate(
+        approved,
+        module.TypedEvent("select-handoff", {"mode": "guess"}),
+        gate="APPROVED",
+    )
+
+    assert result.accepted is False
+    assert result.state == approved
 
 
 def test_material_revision_cannot_enter_g5() -> None:

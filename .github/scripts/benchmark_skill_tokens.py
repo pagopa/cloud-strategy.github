@@ -111,7 +111,7 @@ GATEWAY_SKILL = "internal-gateway-idea"
 REVIEW_COUNTERCHECK_SKILL = "internal-gateway-critical-master"
 
 GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
-    "Direct execute": [GATEWAY_SKILL],
+    "Direct execute": [GATEWAY_SKILL, "internal-gateway-simple-task"],
     "Define Gate 0": [GATEWAY_SKILL, "grill-me"],
     "Define idea and critical": [
         GATEWAY_SKILL, "grill-me", "internal-gateway-critical-master",

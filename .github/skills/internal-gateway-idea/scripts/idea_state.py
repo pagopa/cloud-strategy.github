@@ -27,6 +27,10 @@ from typing import Any
 SCHEMA_V2 = "internal-gateway-idea-state/v2"
 SCHEMA = SCHEMA_V2
 PACKET_SCHEMA = "internal-gateway-critical/full-analysis-v1"
+PLAN_WRITING = "PLAN_WRITING"
+DIRECT_EXECUTION = "DIRECT_EXECUTION"
+HANDOFF_MODES = frozenset({"implementation-plan", "direct-execution"})
+TERMINAL_STATES = frozenset({PLAN_WRITING, DIRECT_EXECUTION})
 
 STATES = frozenset(
     {
@@ -37,6 +41,8 @@ STATES = frozenset(
         "WAIT_G4",
         "WAIT_G5",
         "APPROVED",
+        PLAN_WRITING,
+        DIRECT_EXECUTION,
         "ADVISORY_REVIEW",
     }
 )
@@ -360,14 +366,14 @@ def validate_state(value: Mapping[str, object], *, expected_slug: str) -> StateV
     if state_name in {"WAIT_G0", "WAIT_G1", "WAIT_G2", "WAIT_G3"}:
         if sources or reviewed is not None or approved is not None:
             raise StateValidationError("early gate cannot claim later review or approval")
-    if state_name in {"WAIT_G4", "WAIT_G5", "APPROVED"}:
+    if state_name in {"WAIT_G4", "WAIT_G5", "APPROVED"} | TERMINAL_STATES:
         if reviewed is None or not sources:
             raise StateValidationError("review gate requires current mandatory review evidence")
         if assurance == "high" and set(sources) != REVIEW_SOURCES:
             raise StateValidationError("high assurance requires standard and independent review")
-    if state_name == "APPROVED" and approved is None:
+    if state_name in {"APPROVED"} | TERMINAL_STATES and approved is None:
         raise StateValidationError("approved state requires current approval")
-    if state_name != "APPROVED" and approved is not None:
+    if state_name not in {"APPROVED"} | TERMINAL_STATES and approved is not None:
         raise StateValidationError("approval can only be persisted in APPROVED")
 
     return StateV2(
@@ -451,6 +457,27 @@ def _route_fields(state: StateV2) -> tuple[str, str, tuple[str, ...], str]:
             ("approve",),
             "Approve G5 to hand off to writing-plans, then stop.",
         )
+    if state.state == "APPROVED":
+        return (
+            "user",
+            "/internal-gateway-idea",
+            ("select-handoff",),
+            "Choose direct execution through simple-task or implementation-plan writing.",
+        )
+    if state.state == PLAN_WRITING:
+        return (
+            "plan-writer",
+            "/internal-gateway-writing-plans",
+            (),
+            "Writing-plans is the selected next owner; execution is not authorized.",
+        )
+    if state.state == DIRECT_EXECUTION:
+        return (
+            "task-executor",
+            "/internal-gateway-simple-task",
+            (),
+            "Simple-task is the selected next owner; revalidate the bounded execution scope before acting.",
+        )
     if state.state == "ADVISORY_REVIEW":
         return (
             "critic",
@@ -474,7 +501,7 @@ def derive_route(state: StateV2) -> Route:
         next_owner=owner,
         legal_events=events,
         next_action=action,
-        authorizes_execution=False,
+        authorizes_execution=state.state == DIRECT_EXECUTION,
     )
 
 
@@ -620,6 +647,12 @@ def validate_event(event: Mapping[str, object], *, current_state: StateV2) -> Ty
         if gate != "G4":
             raise DesignValidationError("resolve-review is not legal at the current gate")
         _validate_resolution_payload(payload)
+    elif name == "select-handoff":
+        if current_state.state != "APPROVED":
+            raise DesignValidationError("select-handoff is not legal before G5 approval")
+        _payload_keys(payload, {"mode"}, "select-handoff payload")
+        if payload.get("mode") not in HANDOFF_MODES:
+            raise DesignValidationError("select-handoff mode must be implementation-plan or direct-execution")
     elif name == "approve":
         if gate not in {"G1", "G3", "G5"}:
             raise DesignValidationError("simple approval is not legal at this gate")
@@ -733,6 +766,12 @@ def transition_gate(state: StateV2, event: TypedEvent, *, gate: str) -> Transiti
         ):
             return TransitionResult(state, False, legal, "G5 requires current resolved mandatory review")
         next_state = replace(state, state="APPROVED", approved_revision=state.revision)
+    elif validated.name == "select-handoff" and state.state == "APPROVED":
+        mode = str(validated.payload["mode"])
+        next_state = replace(
+            state,
+            state=PLAN_WRITING if mode == "implementation-plan" else DIRECT_EXECUTION,
+        )
     else:
         return TransitionResult(state, False, legal, "event cannot advance the current gate")
     return TransitionResult(next_state, True, derive_route(next_state).legal_events)
@@ -1522,7 +1561,6 @@ def render_public_critique(findings: Sequence[ReviewFinding]) -> str:
 # Narrow compatibility projection for repository state probes. It uses the v2
 # schema but is not the runtime serializer: canonical state.json never contains
 # completed_gates or plan_handoff.
-PLAN_WRITING = "PLAN_WRITING"
 
 
 @dataclass(frozen=True)
@@ -1717,17 +1755,31 @@ def advance_waiting_gate(
             raise DesignValidationError("high assurance requires independent review")
         return replace(
             state,
-            state=PLAN_WRITING,
+            state="APPROVED",
             review_sources=sources,
             approved_revision=state.revision,
             completed_gates=(*state.completed_gates, "G5"),
-            plan_handoff="requested",
+            plan_handoff=None,
         )
+    if state.state == "APPROVED":
+        raise DesignValidationError("select-handoff is required before choosing a terminal owner")
     raise DesignValidationError("short approval is not legal at the current workflow gate")
 
 
+def advance_handoff(state: WorkflowState, *, mode: str) -> WorkflowState:
+    if state.state != "APPROVED":
+        raise DesignValidationError("select-handoff requires an approved workflow")
+    if mode not in HANDOFF_MODES:
+        raise DesignValidationError("select-handoff mode must be implementation-plan or direct-execution")
+    return replace(
+        state,
+        state=PLAN_WRITING if mode == "implementation-plan" else DIRECT_EXECUTION,
+        plan_handoff="requested" if mode == "implementation-plan" else "direct-execution",
+    )
+
+
 def start_advisory_review(state: WorkflowState) -> WorkflowState:
-    if state.state == PLAN_WRITING or state.state == "APPROVED":
+    if state.state in {PLAN_WRITING, DIRECT_EXECUTION, "APPROVED"}:
         raise DesignValidationError("advisory review cannot reopen a completed handoff")
     return replace(
         state,
@@ -1764,8 +1816,10 @@ def _compact_for_workflow(state: WorkflowState) -> str:
         "WAIT_G3": ("user", "approve"),
         "WAIT_G4": ("user", "resolve-review"),
         "WAIT_G5": ("user", "approve"),
+        "APPROVED": ("user", "select-handoff"),
         "ADVISORY_REVIEW": ("critic", "finish-advisory"),
         PLAN_WRITING: ("plan-writer", "stop"),
+        DIRECT_EXECUTION: ("task-executor", "stop"),
     }
     actor, event = actor_events[state.state]
     return f"{state.state}|R{state.revision}|{actor}|{event}"
@@ -1787,7 +1841,7 @@ def _json_projection(snapshot: RuntimeSnapshot) -> dict[str, object]:
             "next_owner": route.next_owner,
             "legal_events": list(route.legal_events),
             "next_action": route.next_action,
-            "authorizes_execution": False,
+            "authorizes_execution": route.authorizes_execution,
         }
     )
     return result
@@ -1895,6 +1949,8 @@ def _cli_advance(args: argparse.Namespace) -> int:
                 replace_design_then_state(root, design_with_ledger(snapshot.design_text, next_state.ledger), next_state)
             else:
                 _persist_state_only(root, next_state)
+        else:
+            _persist_state_only(root, next_state)
     return _cli_inspect(root, args.slug, args.compact)
 
 
@@ -1937,6 +1993,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--event",
         choices=(
             "select-approach",
+            "select-handoff",
             "record-review",
             "record-readable-review",
             "resolve-review",
