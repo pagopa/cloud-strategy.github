@@ -79,8 +79,9 @@ seam.
    `/internal-subagent-contract` with one `DelegationBrief` v1. The parent
    retains posture choice, boundary choice, routing, authority, lifecycle,
    retry choice, red proof, refactor, independent validation, and final
-   verification; it verifies the returned `WorkerResult` v1 and never branches
-   on caller or model identity.
+   verification; it verifies the adapter-composed `WorkerResult` v1 and
+   caller-owned `VerificationReceipt` v1, treats unobserved worker validation
+   as a claim, and never branches on caller or model identity.
 6. Run the focused check and closest broader validation, then load
    `/superpowers-verification-before-completion` before positive claims.
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Subagent Contract"
   short_description: "Validate bounded caller-owned subagent briefs and results"
-  default_prompt: "Use $internal-subagent-contract for one bounded, caller-owned brief/result handoff; validate value, scope, hashes, evidence, budgets, and progress without routing, retrying, or deciding acceptance."
+  default_prompt: "Use $internal-subagent-contract for one bounded, caller-owned brief/result pair; keep semantic worker fields separate from deterministic adapter data, validate the adapter-composed WorkerResult v1 and caller-owned VerificationReceipt v1, and never route, retry, or decide acceptance."

@@ -27,8 +27,9 @@ After inventory, consumer mapping, outline, metadata shape, or evaluation
 commands are locked, the parent may invoke `internal-luna-executor` through
 `/internal-subagent-contract` with one `DelegationBrief` v1. The brief declares
 the exact write scope, expected skill artifact, acceptance, and validation;
-the parent verifies one `WorkerResult` v1, artifact/hash/evidence binding, and
-budget use. Retain trigger, boundary, policy, subjective authoring judgment,
+the parent verifies the adapter-composed `WorkerResult` v1 and caller-owned
+`VerificationReceipt` v1. Treat unobserved validation and budget data as claims
+or unavailable evidence. Retain trigger, boundary, policy, subjective authoring judgment,
 scope, retry choice, and human review for subjective instructional prose.
 
 ## When to use

@@ -44,7 +44,7 @@
     "attempts": 2,
     "context_refills": 1
   },
-  "result_path": ".github/skills/internal-subagent-contract/fixtures/worker-result.json",
+  "result_path": "tmp/.handoff/internal-subagent-contract-worker.result.json",
   "cache": {
     "prefix_version": "internal-subagent-contract/v1",
     "key_class": "worker-role"

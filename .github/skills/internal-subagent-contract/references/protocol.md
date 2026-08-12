@@ -49,6 +49,15 @@ parent traversal. The producer may lower the attempt/refill budgets but may
 not raise the protocol bounds. Evidence and acceptance entries are bounded
 facts, not a pasted conversation.
 
+Evidence references use a deterministic v1 convention: `fact:<text>` is an
+inline fact, `path:<repository-relative-path>` is an explicit path, and a bare
+repository-relative path is retained as the compatibility form of a path
+reference. Callers materialize applicable policy and resolve only these
+references before worker execution. Globs, ambiguous duplicates, traversal,
+missing paths, and symlink targets outside the repository or declared scope
+are rejected. A directory reference may expand recursively only within its
+resolved root and caller limits.
+
 ## WorkerResult
 
 The worker returns one structured object. The result ID must equal the brief
@@ -80,7 +89,7 @@ ID, and `brief_sha256` must hash the exact brief bytes supplied to the worker.
     "reason": "why a retry is or is not appropriate",
     "required_new_input": null
   },
-  "budgets_used": {"wall_seconds": 0, "attempts": 1, "context_refills": 0}
+  "budgets_used": {"wall_seconds": null, "attempts": 1, "context_refills": 0}
 }
 ```
 
@@ -89,6 +98,52 @@ evidence inventory; callers use acceptance IDs when proving a value claim.
 The consumer verifies artifact bytes and does not trust a path or hash stated
 by the worker. A result with `value_delivered: true` must contain an artifact
 or an acceptance-bound pass evidence entry.
+
+The runtime adapter may compose deterministic v1 fields from the exact brief
+bytes, observed telemetry, and persisted artifact bytes, but it must not
+rewrite semantic worker fields. Adapter mismatches remain visible; they are
+never silently repaired.
+
+## VerificationReceipt v1
+
+`VerificationReceipt v1` is caller-owned and separate from `WorkerResult v1`.
+It binds one brief/result pair and stores the raw worker payload hash and an
+optional raw-payload reference. Its fixed top-level shape is:
+
+```json
+{
+  "schema_version": 1,
+  "delegation_id": "stable-id",
+  "brief_sha256": "sha256:<64-hex-digits>",
+  "result_path": "caller/result.result.json",
+  "raw_worker": {"sha256": "sha256:<64-hex-digits>", "ref": null},
+  "attestations": {
+    "brief_binding": {"state": "verified", "source": "adapter", "evidence_ref": "..."},
+    "artifact_integrity": {"state": "verified", "source": "adapter", "evidence_ref": "..."},
+    "declared_scope": {"state": "verified", "source": "adapter", "evidence_ref": "..."},
+    "execution_confinement": {"state": "unavailable", "source": "runtime", "evidence_ref": "..."},
+    "validation_execution": {"state": "worker_claim", "source": "worker", "evidence_ref": "..."},
+    "budget_accounting": {"state": "unavailable", "source": "runtime", "evidence_ref": "..."},
+    "result_persistence": {"state": "unavailable", "source": "adapter", "evidence_ref": "..."},
+    "caller_acceptance": {"state": "unavailable", "source": "caller", "evidence_ref": "..."}
+  },
+  "caller_decision": {"decision": "not_decided", "source": "caller", "evidence_ref": "..."},
+  "value_verified": false
+}
+```
+
+Each attestation state is exactly `verified`, `worker_claim`, `unavailable`,
+or `failed`. A worker-declared validation remains `worker_claim` until the
+runtime or caller observes its command, outcome, and evidence. Missing
+telemetry is `unavailable`; it is never invented. The caller decision is
+separate and is exactly `accepted`, `rejected`, or `not_decided`.
+
+The caller or adapter persists `result_path` outside worker `write_scope` and
+stores the receipt at its deterministic `.receipt.json` sibling. `value_verified`
+belongs only to the receipt and can be true only after caller acceptance and
+verified attestations. V1 validates one brief/result pair; `retry`, `attempts`,
+`context_refills`, and `progress_signature` remain compatibility fields, while
+retry eligibility is not a new lifecycle owner.
 
 ## Progress and retry eligibility
 
@@ -106,10 +161,10 @@ The validator hashes this material projection with compact, sorted-key JSON:
 
 Artifact and evidence lists, and remaining strings, are normalized for stable
 comparison. Reordering keys, whitespace, or prose-only/non-blocking findings
-does not constitute progress. A caller-requested corrective transition needs
-remaining attempt budget, changed brief input, and a changed progress
-projection. A repeated projection is `stalled`; the validator never performs
-the retry itself.
+does not constitute progress. The projection is correlation data for one pair;
+v1 neither defines attempt lineage nor performs retry. `retry_eligible()` is a
+deprecated caller-side compatibility utility and must receive no new
+dependencies. Lineage-aware lifecycle behavior requires a later version.
 
 ## Stable prompt order and telemetry
 
@@ -133,10 +188,9 @@ them. Do not put timestamps, raw user text, secrets, delegation IDs, or raw
 paths in stable cache content. Missing cache-write telemetry is an external
 capability gap, not a protocol pass.
 
-Caller-owned receipts may include the delegation ID, protocol version, worker
-identifier, status, value bit, progress signature, attempt/refill counts,
-latency, token fields when available, artifact count, and validation outcome.
-Redact brief content, secrets, and sensitive paths.
+Caller-owned receipts may include worker status, value bit, progress signature,
+attempt/refill counts, latency, token fields when available, artifact count,
+and validation outcome. Redact brief content, secrets, and sensitive paths.
 
 ## Migration notes
 

@@ -71,6 +71,10 @@ def test_luna_profiles_expose_the_same_parsed_worker_contract() -> None:
     assert "nested_agents: prohibited" in codex_body
     assert EXPECTED_PROTOCOL in copilot_body
     assert EXPECTED_PROTOCOL in codex_body
+    for body in (copilot_body, codex_body):
+        assert "VerificationReceipt" in body
+        assert "runtime adapter" in body
+        assert "semantic worker fields" in body
 
 
 def test_luna_profiles_have_no_positive_nested_dispatch_route() -> None:
@@ -80,3 +84,5 @@ def test_luna_profiles_have_no_positive_nested_dispatch_route() -> None:
     for body in (copilot_body, codex_body):
         assert "nested_agents: prohibited" in body
         assert not re.search(r"\b(delegate|spawn)\s+(?:to\s+)?another\s+agent", body, re.I)
+        assert "exact `brief_sha256`" not in body
+        assert "budget usage" not in body

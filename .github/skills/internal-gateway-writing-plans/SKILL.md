@@ -74,9 +74,10 @@ description: Use when repository-owned work needs an approved implementation pla
   `internal-luna-executor`. The brief declares the single retained-plan path
   as `write_scope` and `expected_output.path`, the plan objective and evidence,
   the required manifest and preflight acceptance, and exact focused validation.
-  Luna MUST return one `WorkerResult` v1 with matching delegation ID and brief
-  hash, artifact hash, acceptance evidence, progress signature, and budget use.
-  The writer independently verifies the result and the plan, then runs the
+  Luna MUST return the semantic fields for one `WorkerResult` v1. The runtime
+  adapter composes deterministic fields and a caller-owned `VerificationReceipt`
+  v1; unobserved validation and budget data remain claims or `unavailable`.
+  The writer independently verifies the result, receipt, and plan, then runs the
   executor-owned `preflight`; it may use only the one bounded refill and one
   corrective retry allowed by the brief. The parent gateway retains
   eligibility, control classification, routing, authority, lifecycle, retry

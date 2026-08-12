@@ -15,14 +15,22 @@ FIXTURES = BUNDLE / "fixtures"
 sys.path.insert(0, str(BUNDLE / "scripts"))
 
 from subagent_contract import (  # noqa: E402
+    ATTESTATION_NAMES,
+    ATTESTATION_STATES,
     BRIEF_FIELDS,
+    RECEIPT_FIELDS,
     RESULT_FIELDS,
     canonical_json,
     compare_progress,
     compute_progress_signature,
+    evidence_path_allowed,
+    resolve_evidence_refs,
+    sha256_bytes,
+    receipt_path_for,
     retry_eligible,
     validate_brief,
     validate_prompt_order,
+    validate_receipt,
     validate_result,
 )
 
@@ -39,9 +47,53 @@ def _valid_result() -> dict:
     return _load("valid-result.json")
 
 
+def _valid_receipt(brief: dict, raw_worker: bytes) -> dict:
+    return {
+        "schema_version": 1,
+        "delegation_id": brief["delegation_id"],
+        "brief_sha256": sha256_bytes((FIXTURES / "valid-brief.json").read_bytes()),
+        "result_path": brief["result_path"],
+        "raw_worker": {"sha256": sha256_bytes(raw_worker), "ref": None},
+        "attestations": {
+            name: {
+                "state": "verified",
+                "source": "adapter",
+                "evidence_ref": f"evidence:{name}",
+            }
+            for name in ATTESTATION_NAMES
+        },
+        "caller_decision": {
+            "decision": "accepted",
+            "source": "caller",
+            "evidence_ref": "evidence:caller-acceptance",
+        },
+        "value_verified": True,
+    }
+
+
 def test_valid_brief_fixture_has_exact_protocol_shape() -> None:
     brief = _valid_brief()
     assert set(brief) == BRIEF_FIELDS
+    assert validate_brief(brief, repo_root=REPO_ROOT) == []
+
+
+def test_brief_evidence_separates_inline_facts_from_resolved_paths() -> None:
+    brief = _valid_brief()
+    brief["evidence"] = [
+        {"ref": "fact:caller-approved-policy", "purpose": "Materialized policy fact."},
+        {"ref": "path:.github/skills/internal-subagent-contract/references/protocol.md", "purpose": "Protocol reference."},
+    ]
+
+    resolved = resolve_evidence_refs(brief, repo_root=REPO_ROOT)
+
+    assert resolved[0] == {
+        "kind": "fact",
+        "ref": "fact:caller-approved-policy",
+        "value": "caller-approved-policy",
+    }
+    assert resolved[1]["kind"] == "path"
+    assert evidence_path_allowed(BUNDLE / "references/protocol.md", resolved)
+    assert not evidence_path_allowed(BUNDLE / "SKILL.md", resolved)
     assert validate_brief(brief, repo_root=REPO_ROOT) == []
 
 
@@ -93,6 +145,69 @@ def test_valid_result_binds_delegation_brief_artifact_and_acceptance() -> None:
     )
 
     assert errors == []
+
+
+def test_verification_receipt_binds_exact_pair_and_keeps_decision_separate() -> None:
+    brief = copy.deepcopy(_valid_brief())
+    brief["result_path"] = "tmp/.handoff/receipt-test.result.json"
+    raw_worker = b'{"semantic":"worker output"}'
+    receipt = _valid_receipt(brief, raw_worker)
+
+    assert set(receipt) == RECEIPT_FIELDS
+    assert receipt_path_for(brief["result_path"]) == "tmp/.handoff/receipt-test.receipt.json"
+    assert "value_verified" not in _valid_result()
+    assert validate_receipt(
+        receipt,
+        brief,
+        _valid_result(),
+        repo_root=REPO_ROOT,
+        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+        raw_worker_bytes=raw_worker,
+        result_path=brief["result_path"],
+    ) == []
+
+
+@pytest.mark.parametrize("state", sorted(ATTESTATION_STATES))
+def test_receipt_accepts_only_declared_attestation_states(state: str) -> None:
+    brief = copy.deepcopy(_valid_brief())
+    brief["result_path"] = "tmp/.handoff/receipt-state.result.json"
+    raw_worker = b'{"semantic":"worker output"}'
+    receipt = _valid_receipt(brief, raw_worker)
+    for attestation in receipt["attestations"].values():
+        attestation["state"] = state
+    receipt["value_verified"] = state == "verified"
+    if state != "verified":
+        receipt["caller_decision"]["decision"] = "not_decided"
+
+    assert validate_receipt(
+        receipt,
+        brief,
+        _valid_result(),
+        repo_root=REPO_ROOT,
+        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+        raw_worker_bytes=raw_worker,
+        result_path=brief["result_path"],
+    ) == []
+
+
+def test_receipt_rejects_unknown_attestation_state() -> None:
+    brief = copy.deepcopy(_valid_brief())
+    brief["result_path"] = "tmp/.handoff/receipt-state.result.json"
+    raw_worker = b'{"semantic":"worker output"}'
+    receipt = _valid_receipt(brief, raw_worker)
+    receipt["attestations"]["validation_execution"]["state"] = "assumed"
+
+    errors = validate_receipt(
+        receipt,
+        brief,
+        _valid_result(),
+        repo_root=REPO_ROOT,
+        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+        raw_worker_bytes=raw_worker,
+        result_path=brief["result_path"],
+    )
+
+    assert any("state" in error for error in errors)
 
 
 def test_result_rejects_delegation_and_brief_hash_mismatch() -> None:

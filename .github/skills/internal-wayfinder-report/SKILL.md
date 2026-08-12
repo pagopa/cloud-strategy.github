@@ -14,8 +14,9 @@ The parent may invoke `internal-luna-executor` through
 `/internal-subagent-contract` for candidate evidence inventory or report
 drafting only after the relevant sources, authority, report structure,
 acceptance, and validation are fixed. Use one `DelegationBrief` v1 and verify
-one `WorkerResult` v1, including scope, hashes, evidence, progress, and budget
-use. Never delegate source authority, findings, diagram relationships,
+the adapter-composed `WorkerResult` v1 plus caller-owned `VerificationReceipt`
+v1. Treat unobserved validation and budget data as claims or unavailable
+evidence. Never delegate source authority, findings, diagram relationships,
 acceptance, or closeout.
 
 ## When to use

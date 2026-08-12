@@ -11,6 +11,11 @@ defines the brief/result shape and validates protocol invariants. The caller
 chooses whether delegation is worthwhile, owns scope and authority, selects
 the runtime, validates acceptance, and closes the work.
 
+V1 binds one brief/result pair. It is an integrity and handoff protocol, not a
+sandbox or proof that every execution fact was observed. A deterministic
+runtime adapter composes hashes, telemetry, persistence, and a separate
+caller-owned `VerificationReceipt` without changing semantic worker fields.
+
 ## When to use
 
 Use it at the producer/worker/consumer boundary when a bounded task needs a
@@ -22,10 +27,13 @@ owner.
 
 - The producer writes a complete `DelegationBrief` with a measurable objective,
   value gate, bounded evidence, write scope, acceptance, and budgets.
-- The worker reads only that brief, performs the bounded assignment, writes only
-  declared artifacts, and returns a `WorkerResult`.
-- The consumer independently checks hashes, scope, evidence, acceptance, and
-  the result status before deciding what happens next.
+- The worker reads caller-authorized policy and brief evidence, performs the
+  bounded assignment, writes only declared artifacts, and returns semantic
+  worker fields.
+- The runtime adapter composes the deterministic `WorkerResult` envelope,
+  persists it outside worker scope, and produces a `VerificationReceipt`.
+- The consumer checks result and receipt before deciding acceptance, retry,
+  promotion, or closeout.
 
 ## Value gate
 
@@ -41,22 +49,24 @@ evidence; a prose summary is not value.
 - `write` supplies a bounded implementation or artifact scope.
 - `plan` supplies bounded drafting scope and a caller-owned acceptance check.
 
-All branches use the same versioned fields. The protocol does not select a
+Evidence uses `fact:<inline-value>` or `path:<repository-relative-path>`;
+unprefixed repository paths remain the v1 compatibility form. Resolved paths
+form the worker read allowlist. All branches use the same versioned fields. The protocol does not select a
 provider, model, skill, route, reviewer, retry, or acceptance decision.
 
 ## Status and retry breaker
 
 Results use `completed`, `partial`, `blocked`, `stalled`, `invalid_input`, or
-`failed`. One initial attempt, at most one context refill, and at most one
-corrective retry are the default upper bounds; a caller may lower them.
-Repeated material progress is `stalled`. Missing authority, invalid input,
-and repeated progress stop the worker. Minor, cosmetic, punctuation, and
-prose-only findings never reopen a retry.
+`failed`. Attempt, refill, retry, and progress fields remain compatible claims
+for one pair; v1 does not own multi-attempt lineage. `retry_eligible()` is a
+deprecated caller-side compatibility utility. Missing authority and invalid
+input stop the worker. Minor or prose-only findings do not justify a retry.
 
 ## Completion criteria
 
-The consumer accepts a result only after it verifies the delegation ID, exact
-brief hash, artifact hashes and repository-relative scope, acceptance evidence,
-progress signature, and budget use. Use the executable validator in
+The consumer accepts a result only after it verifies the adapter-composed
+result and caller-owned receipt. Receipt attestations are `verified`,
+`worker_claim`, `unavailable`, or `failed`; caller acceptance stays separate.
+Use the executable validator in
 `scripts/subagent_contract.py`; load `references/protocol.md` for examples,
 canonical projections, cache fields, and migration details.

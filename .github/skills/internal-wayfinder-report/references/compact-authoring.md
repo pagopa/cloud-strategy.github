@@ -44,8 +44,9 @@ Do not treat existing files under `report/` as source authority.
 At this point, a parent may invoke `internal-luna-executor` through
 `/internal-subagent-contract` with a `DelegationBrief` v1 containing the source
 paths, authority order, expected output, write scope, acceptance, and
-validation. Verify the returned `WorkerResult` v1, brief/delegation/artifact
-hashes, acceptance evidence, progress signature, and budget use. The parent
+validation. Verify the adapter-composed `WorkerResult` v1 and caller-owned
+`VerificationReceipt` v1; treat unobserved validation and budget data as claims
+or unavailable evidence. The parent
 retains source authority, findings, diagram relationships, retry choice, and
 closeout.
 

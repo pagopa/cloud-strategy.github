@@ -112,7 +112,9 @@ validation, and final reporting.
 - Non-trivial work may use `internal-luna-executor` only after the caller's
   value gate, scope, authority, objective, expected output, acceptance, and
   validation are locked. Use `/internal-subagent-contract` for one
-  `DelegationBrief` v1 and verify the returned `WorkerResult` v1 here. The
+  `DelegationBrief` v1 and verify the adapter-composed `WorkerResult` v1 plus
+  caller-owned `VerificationReceipt` v1 here. Treat worker validation and
+  budget data as claims unless the receipt records runtime observation. The
   caller retains routing, scope, authority, lifecycle, retry choice,
   independent validation, acceptance, and closeout; do not branch on caller or
   model identity.

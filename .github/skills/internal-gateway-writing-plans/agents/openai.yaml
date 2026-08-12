@@ -36,8 +36,9 @@ interface:
     internal-luna-executor. Bind exactly one parent-supplied retained plan path
     under tmp/superpowers/plans/ as the write_scope and expected output, and
     include the objective, bounded evidence, required structure, acceptance,
-    and exact validation. Verify one WorkerResult v1 for matching IDs and
-    hashes, acceptance evidence, progress signature, and budget use; retain
+    and exact validation. Verify the adapter-composed WorkerResult v1 and
+    caller-owned VerificationReceipt v1; treat unobserved validation or budget
+    data as claims or unavailable evidence; retain
     routing, authority, lifecycle, retry choice, independent validation,
     human review, final preflight, handoff, and the no-Git-mutation boundary
     here. Do not branch on caller or model identity.

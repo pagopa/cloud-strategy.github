@@ -66,6 +66,18 @@ OUTPUT_KINDS = frozenset({"artifact", "analysis", "patch", "validation"})
 OUTPUT_FORMATS = frozenset({"json", "markdown", "patch", "text"})
 VALIDATION_OWNERS = frozenset({"worker", "caller"})
 EVIDENCE_OUTCOMES = frozenset({"pass", "fail", "not_run"})
+ATTESTATION_NAMES = (
+    "brief_binding",
+    "artifact_integrity",
+    "declared_scope",
+    "execution_confinement",
+    "validation_execution",
+    "budget_accounting",
+    "result_persistence",
+    "caller_acceptance",
+)
+ATTESTATION_STATES = frozenset({"verified", "worker_claim", "unavailable", "failed"})
+CALLER_DECISIONS = frozenset({"accepted", "rejected", "not_decided"})
 PROMPT_PREFIX_ORDER = (
     "role",
     "protocol",
@@ -75,6 +87,24 @@ PROMPT_PREFIX_ORDER = (
     "brief",
     "retry",
 )
+RECEIPT_FIELDS = frozenset(
+    {
+        "schema_version",
+        "delegation_id",
+        "brief_sha256",
+        "result_path",
+        "raw_worker",
+        "attestations",
+        "caller_decision",
+        "value_verified",
+    }
+)
+RAW_WORKER_FIELDS = frozenset({"sha256", "ref"})
+ATTESTATION_FIELDS = frozenset({"state", "source", "evidence_ref"})
+CALLER_DECISION_FIELDS = frozenset({"decision", "source", "evidence_ref"})
+INLINE_FACT_PREFIX = "fact:"
+PATH_REF_PREFIX = "path:"
+_GLOB_MAGIC = re.compile(r"[*?\[\]{},]")
 
 _DELEGATION_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 _SHA256 = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
@@ -114,6 +144,21 @@ def sha256_bytes(value: bytes | str) -> str:
 
 def sha256_path(path: Path) -> str:
     return sha256_bytes(path.read_bytes())
+
+
+def receipt_path_for(result_path: str | Path) -> str:
+    """Return the deterministic caller-owned receipt sibling for a result path."""
+
+    path = Path(result_path)
+    if not str(result_path).strip() or not path.name:
+        raise ValueError("result_path must name a result file")
+    suffix = ".result.json"
+    receipt_name = (
+        f"{path.name[:-len(suffix)]}.receipt.json"
+        if path.name.endswith(suffix)
+        else f"{path.name}.receipt.json"
+    )
+    return path.with_name(receipt_name).as_posix()
 
 
 def _normal_hash(value: object, label: str) -> str | None:
@@ -168,6 +213,69 @@ def _relative_path(value: object, label: str, repo_root: Path) -> list[str]:
     except ValueError:
         return [f"{label} must remain inside the repository"]
     return []
+
+
+def resolve_evidence_refs(
+    brief: Mapping[str, object], *, repo_root: Path | None = None
+) -> list[dict[str, str]]:
+    """Resolve caller-authorized evidence using the v1 explicit fact/path convention."""
+
+    root = (repo_root or Path.cwd()).resolve()
+    evidence = brief.get("evidence")
+    if not isinstance(evidence, list):
+        raise ContractError(("brief.evidence must be a list",))
+
+    resolved: list[dict[str, str]] = []
+    seen_paths: set[str] = set()
+    for index, item in enumerate(evidence):
+        if not isinstance(item, Mapping) or not isinstance(item.get("ref"), str):
+            raise ContractError((f"brief.evidence[{index}].ref must be a non-empty string",))
+        ref = item["ref"]
+        if not ref.strip():
+            raise ContractError((f"brief.evidence[{index}].ref must be a non-empty string",))
+        if ref.startswith(INLINE_FACT_PREFIX):
+            fact = ref[len(INLINE_FACT_PREFIX) :].strip()
+            if not fact:
+                raise ContractError((f"brief.evidence[{index}] inline fact must be non-empty",))
+            resolved.append({"kind": "fact", "ref": ref, "value": fact})
+            continue
+
+        path_ref = ref[len(PATH_REF_PREFIX) :] if ref.startswith(PATH_REF_PREFIX) else ref
+        if not path_ref.strip():
+            raise ContractError((f"brief.evidence[{index}] path must be non-empty",))
+        if _GLOB_MAGIC.search(path_ref):
+            raise ContractError((f"brief.evidence[{index}] must not contain an unresolved glob",))
+        path_errors = _relative_path(path_ref, f"brief.evidence[{index}].ref", root)
+        if path_errors:
+            raise ContractError(tuple(path_errors))
+        candidate = root / path_ref
+        if not candidate.exists():
+            raise ContractError((f"brief.evidence[{index}] path does not resolve: {path_ref}",))
+        resolved_path = candidate.resolve()
+        if resolved_path.as_posix() in seen_paths:
+            raise ContractError((f"brief.evidence contains ambiguous duplicate path: {path_ref}",))
+        seen_paths.add(resolved_path.as_posix())
+        resolved.append({"kind": "path", "ref": ref, "path": resolved_path.as_posix()})
+    return resolved
+
+
+def evidence_path_allowed(candidate: Path | str, resolved_evidence: Sequence[Mapping[str, str]]) -> bool:
+    """Return whether a candidate remains inside a caller-authorized evidence path."""
+
+    candidate_path = Path(candidate).resolve()
+    for item in resolved_evidence:
+        if item.get("kind") != "path" or not isinstance(item.get("path"), str):
+            continue
+        authorized = Path(item["path"]).resolve()
+        if candidate_path == authorized:
+            return True
+        if authorized.is_dir():
+            try:
+                candidate_path.relative_to(authorized)
+            except ValueError:
+                continue
+            return True
+    return False
 
 
 def _scope_allows(path: str, scopes: Sequence[str]) -> bool:
@@ -324,6 +432,11 @@ def validate_brief(brief: Mapping[str, object], *, repo_root: Path | None = None
             errors.append(f"brief.cache.prefix_version must be {CONTRACT_VERSION}")
         if not _non_empty(cache.get("key_class")):
             errors.append("brief.cache.key_class must be non-empty")
+    if isinstance(evidence, list) and evidence:
+        try:
+            resolve_evidence_refs(brief, repo_root=root)
+        except ContractError as exc:
+            errors.extend(exc.errors)
     return errors
 
 
@@ -515,10 +628,10 @@ def validate_result(
             errors.append("result.budgets_used.attempts exceeds brief budget")
         if not _is_int(refills) or not 0 <= refills <= min(max_refills, MAX_CONTEXT_REFILLS):
             errors.append("result.budgets_used.context_refills exceeds brief budget")
-        if "wall_seconds" in budgets_used and (
+        if budgets_used.get("wall_seconds") is not None and (
             not _is_int(budgets_used["wall_seconds"]) or budgets_used["wall_seconds"] < 0
         ):
-            errors.append("result.budgets_used.wall_seconds must be a non-negative integer")
+            errors.append("result.budgets_used.wall_seconds must be null or a non-negative integer")
 
     if result["value_delivered"] and not artifacts and not acceptance_pass:
         errors.append("result.value_delivered requires an artifact or acceptance-bound pass evidence")
@@ -529,6 +642,129 @@ def validate_result(
         errors.extend(_relative_path(str(supplied), "result_path", root))
         if str(supplied) != str(brief.get("result_path")):
             errors.append("result_path must match brief.result_path")
+    return errors
+
+
+def _receipt_attestation_errors(value: object, label: str) -> list[str]:
+    errors = _field_errors(value, ATTESTATION_FIELDS, label)
+    if errors:
+        return errors
+    assert isinstance(value, Mapping)
+    if value["state"] not in ATTESTATION_STATES:
+        errors.append(f"{label}.state is invalid")
+    if not _non_empty(value["source"]):
+        errors.append(f"{label}.source must be non-empty")
+    if not _non_empty(value["evidence_ref"]):
+        errors.append(f"{label}.evidence_ref must be non-empty")
+    return errors
+
+
+def validate_receipt(
+    receipt: Mapping[str, object],
+    brief: Mapping[str, object],
+    result: Mapping[str, object],
+    *,
+    repo_root: Path | None = None,
+    brief_bytes: bytes | None = None,
+    raw_worker_bytes: bytes | None = None,
+    result_path: Path | str | None = None,
+    receipt_path: Path | str | None = None,
+) -> list[str]:
+    """Return caller-owned VerificationReceipt v1 binding and attestation findings."""
+
+    root = (repo_root or Path.cwd()).resolve()
+    errors = _field_errors(receipt, RECEIPT_FIELDS, "receipt")
+    if errors:
+        return errors
+    errors.extend(validate_brief(brief, repo_root=root))
+
+    bound_result_path = result_path if result_path is not None else brief.get("result_path")
+    bound_result_path_text = (
+        bound_result_path.as_posix()
+        if isinstance(bound_result_path, Path)
+        else bound_result_path
+    )
+    errors.extend(
+        validate_result(
+            result,
+            brief,
+            repo_root=root,
+            brief_bytes=brief_bytes,
+            result_path=bound_result_path,
+        )
+    )
+
+    if receipt["schema_version"] != 1 or not _is_int(receipt["schema_version"]):
+        errors.append("receipt.schema_version must be integer 1")
+    if receipt["delegation_id"] != brief.get("delegation_id"):
+        errors.append("receipt.delegation_id must match brief.delegation_id")
+    if receipt["delegation_id"] != result.get("delegation_id"):
+        errors.append("receipt.delegation_id must match result.delegation_id")
+    expected_brief_hash = (
+        sha256_bytes(brief_bytes)
+        if brief_bytes is not None
+        else sha256_bytes(canonical_json(brief))
+    )
+    if not _hash_matches(receipt["brief_sha256"], expected_brief_hash):
+        errors.append("receipt.brief_sha256 does not match the exact brief bytes")
+
+    errors.extend(_relative_path(receipt["result_path"], "receipt.result_path", root))
+    if receipt["result_path"] != bound_result_path_text:
+        errors.append("receipt.result_path must match the bound result_path")
+    if receipt["result_path"] != brief.get("result_path"):
+        errors.append("receipt.result_path must match brief.result_path")
+    if isinstance(receipt["result_path"], str) and isinstance(brief.get("write_scope"), list):
+        if _scope_allows(receipt["result_path"], brief["write_scope"]):
+            errors.append("receipt.result_path must remain outside brief.write_scope")
+
+    if receipt_path is not None:
+        receipt_path_text = receipt_path.as_posix() if isinstance(receipt_path, Path) else receipt_path
+        errors.extend(_relative_path(receipt_path_text, "receipt_path", root))
+        if isinstance(receipt["result_path"], str) and receipt_path_text != receipt_path_for(receipt["result_path"]):
+            errors.append("receipt_path must be the deterministic result sibling")
+
+    raw_worker = receipt["raw_worker"]
+    errors.extend(_field_errors(raw_worker, RAW_WORKER_FIELDS, "receipt.raw_worker"))
+    if isinstance(raw_worker, Mapping) and not _field_errors(raw_worker, RAW_WORKER_FIELDS, "receipt.raw_worker"):
+        if not _hash_matches(
+            raw_worker["sha256"],
+            sha256_bytes(raw_worker_bytes) if raw_worker_bytes is not None else raw_worker["sha256"],
+        ):
+            errors.append("receipt.raw_worker.sha256 does not match raw worker bytes")
+        raw_ref = raw_worker["ref"]
+        if raw_ref is not None:
+            errors.extend(_relative_path(raw_ref, "receipt.raw_worker.ref", root))
+
+    attestations = receipt["attestations"]
+    errors.extend(_field_errors(attestations, set(ATTESTATION_NAMES), "receipt.attestations"))
+    if isinstance(attestations, Mapping):
+        for name in ATTESTATION_NAMES:
+            if name in attestations:
+                errors.extend(_receipt_attestation_errors(attestations[name], f"receipt.attestations.{name}"))
+
+    caller_decision = receipt["caller_decision"]
+    errors.extend(_field_errors(caller_decision, CALLER_DECISION_FIELDS, "receipt.caller_decision"))
+    if isinstance(caller_decision, Mapping) and not _field_errors(
+        caller_decision, CALLER_DECISION_FIELDS, "receipt.caller_decision"
+    ):
+        if caller_decision["decision"] not in CALLER_DECISIONS:
+            errors.append("receipt.caller_decision.decision is invalid")
+        if not _non_empty(caller_decision["source"]):
+            errors.append("receipt.caller_decision.source must be non-empty")
+        if not _non_empty(caller_decision["evidence_ref"]):
+            errors.append("receipt.caller_decision.evidence_ref must be non-empty")
+
+    if not _is_bool(receipt["value_verified"]):
+        errors.append("receipt.value_verified must be boolean")
+    elif receipt["value_verified"]:
+        if not isinstance(caller_decision, Mapping) or caller_decision.get("decision") != "accepted":
+            errors.append("receipt.value_verified requires caller_decision.accepted")
+        if not isinstance(attestations, Mapping) or any(
+            attestations.get(name, {}).get("state") != "verified"
+            for name in ATTESTATION_NAMES
+            if isinstance(attestations.get(name), Mapping)
+        ):
+            errors.append("receipt.value_verified requires every attestation to be verified")
     return errors
 
 
