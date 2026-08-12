@@ -41,12 +41,48 @@ DISCOVERY_CATEGORIES = (
 )
 
 CONTRACT_SCHEMA_VERSION = 1
+MANIFEST_SCHEMA_VERSION = 1
 CONTRACT_PHASES = frozenset({"baseline", "focused", "final"})
 CONTRACT_EQUIVALENCE = frozenset({"exact-only", "allowed-if-admissible"})
 CLOSEOUT_OUTCOMES = frozenset(
     {"exact-pass", "equivalent-pass", "warning", "unresolved", "regression"}
 )
 ALLOWED_STATUSES = frozenset({"DONE", "PARTIAL", "BLOCKED", "NEEDS_REVIEW"})
+MANIFEST_CONTROL_CLASSES = frozenset(
+    {
+        "automatable-local",
+        "observable-runtime",
+        "external-capability",
+        "authority-or-scope",
+        "genuine-human-judgment",
+    }
+)
+MANIFEST_POSTURES = frozenset(
+    {"mandatory-test-first", "feature-first", "prototype-unverified", "validation-only"}
+)
+MANIFEST_TARGET_STATES = frozenset({"create", "modify", "inspect"})
+MANIFEST_BOOTSTRAP_MODES = frozenset({"explicit-single-plan", "manifest-only"})
+MANIFEST_FIELDS = frozenset(
+    {
+        "schema_version",
+        "manifest_version",
+        "plan_id",
+        "repository_root",
+        "authority_boundaries",
+        "targets",
+        "controls",
+        "validations",
+        "manual_obligations",
+        "tasks",
+        "retry_policy",
+        "hashing",
+        "approval",
+        "bootstrap",
+        "rollout",
+        "handoff",
+    }
+)
+SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 
 STATUS_FILENAME_RE = re.compile(
     r"^(?P<basename>.+)\.(?P<status>DONE|PARTIAL|BLOCKED|NEEDS_REVIEW)\.md$"
@@ -88,6 +124,331 @@ class ExecutionContractError(ValueError):
     def __init__(self, code: str, message: str) -> None:
         super().__init__(message)
         self.code = code
+
+
+def canonical_json(value: object) -> bytes:
+    """Serialize manifest values using compact, sorted-key JSON for JCS inputs."""
+
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+
+
+def _reject_duplicate_json_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON field: {key}")
+        result[key] = value
+    return result
+
+
+def _contains_embedded_digest(value: object, path: str = "") -> bool:
+    if isinstance(value, Mapping):
+        for key, child in value.items():
+            child_path = f"{path}.{key}" if path else str(key)
+            if key in {"content_sha256", "semantic_fingerprint"} and isinstance(child, str):
+                if SHA256_RE.fullmatch(child):
+                    return True
+            if _contains_embedded_digest(child, child_path):
+                return True
+    elif isinstance(value, list):
+        return any(_contains_embedded_digest(item, path) for item in value)
+    return False
+
+
+def compute_semantic_fingerprint(manifest: Mapping[str, object]) -> str:
+    """Return the external SHA-256 of the canonical Execution Manifest JSON."""
+
+    if _contains_embedded_digest(manifest):
+        raise ExecutionContractError(
+            "manifest-hash-self-reference",
+            "Execution Manifest must not contain a content or semantic digest value",
+        )
+    return f"sha256:{hashlib.sha256(canonical_json(manifest)).hexdigest()}"
+
+
+def _manifest_exact_fields(
+    mapping: Mapping[str, object], expected: set[str] | frozenset[str], label: str
+) -> None:
+    unknown = set(mapping) - set(expected)
+    missing = set(expected) - set(mapping)
+    if unknown:
+        raise ExecutionContractError(
+            "unknown-manifest-field",
+            f"{label} has unknown fields: {sorted(unknown)}",
+        )
+    if missing:
+        raise ExecutionContractError(
+            "missing-manifest-field",
+            f"{label} is missing fields: {sorted(missing)}",
+        )
+
+
+def _manifest_object(value: object, label: str) -> Mapping[str, object]:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{label} must be a JSON object")
+    return value
+
+
+def _manifest_non_empty_strings(value: object, label: str) -> tuple[str, ...]:
+    return _strings(value, label, allow_empty=False)
+
+
+def _manifest_id_list(value: object, label: str) -> tuple[str, ...]:
+    values = _strings(value, label, allow_empty=True)
+    if len(set(values)) != len(values):
+        raise ValueError(f"{label} must not contain duplicate ids")
+    return values
+
+
+def _manifest_fenced_object(text: str, heading: str) -> Mapping[str, object]:
+    matches = list(re.finditer(rf"(?m)^## {re.escape(heading)}\s*$", text))
+    if not matches:
+        raise ExecutionContractError(
+            "missing-execution-manifest",
+            f"Plan must contain exactly one ## {heading}",
+        )
+    if len(matches) > 1:
+        raise ExecutionContractError(
+            "duplicate-execution-manifest",
+            f"Plan must contain only one ## {heading}",
+        )
+    start = matches[0].end()
+    next_heading = re.search(r"(?m)^#{2,6}\s+", text[start:])
+    body = text[start : start + next_heading.start()] if next_heading else text[start:]
+    fenced = re.fullmatch(r"\s*```json\s*\n(.*?)\n```\s*", body, re.DOTALL)
+    if not fenced:
+        raise ExecutionContractError(
+            "malformed-execution-manifest",
+            f"{heading} must contain exactly one immediately contained ```json fenced object",
+        )
+    try:
+        raw = json.loads(fenced.group(1), object_pairs_hook=_reject_duplicate_json_fields)
+    except ValueError as exc:
+        message = str(exc)
+        code = "duplicate-manifest-field" if message.startswith("duplicate JSON field") else "malformed-execution-manifest"
+        raise ExecutionContractError(code, f"{heading} JSON is malformed: {message}") from exc
+    return _manifest_object(raw, heading)
+
+
+def parse_execution_manifest(text: str) -> dict[str, object]:
+    """Parse and validate exactly one normative Execution Manifest object."""
+
+    root = _manifest_fenced_object(text, "Execution Manifest")
+    _manifest_exact_fields(root, MANIFEST_FIELDS, "Execution Manifest")
+    try:
+        if not _is_int(root["schema_version"]) or root["schema_version"] != MANIFEST_SCHEMA_VERSION:
+            raise ExecutionContractError(
+                "unsupported-manifest-schema",
+                f"Execution Manifest schema_version must be {MANIFEST_SCHEMA_VERSION}",
+            )
+        if not _non_empty_string(root["manifest_version"]) or root["manifest_version"] != "execution-manifest/v1":
+            raise ValueError("manifest_version must be execution-manifest/v1")
+        if not _non_empty_string(root["plan_id"]):
+            raise ValueError("plan_id must be non-empty")
+        if root["repository_root"] != ".":
+            raise ValueError("repository_root must be .")
+
+        authority = _manifest_object(root["authority_boundaries"], "authority_boundaries")
+        _manifest_exact_fields(
+            authority,
+            {"normative_owner", "execution_owner", "worker", "caller_owns", "protected_paths", "no_git_mutation"},
+            "authority_boundaries",
+        )
+        if not _non_empty_string(authority["normative_owner"]) or not _non_empty_string(authority["execution_owner"]):
+            raise ValueError("authority owners must be non-empty")
+        if not _non_empty_string(authority["worker"]):
+            raise ValueError("authority_boundaries.worker must be non-empty")
+        _manifest_non_empty_strings(authority["caller_owns"], "authority_boundaries.caller_owns")
+        _manifest_non_empty_strings(authority["protected_paths"], "authority_boundaries.protected_paths")
+        if not _bool(authority["no_git_mutation"], "authority_boundaries.no_git_mutation"):
+            raise ValueError("authority_boundaries.no_git_mutation must be true")
+
+        targets = root["targets"]
+        if not isinstance(targets, list) or not targets:
+            raise ValueError("targets must be a non-empty list")
+        target_ids: set[str] = set()
+        for index, raw_target in enumerate(targets):
+            label = f"targets[{index}]"
+            target = _manifest_object(raw_target, label)
+            keys = {"id", "path", "state", "condition"} if "condition" in target else {"id", "path", "state"}
+            _manifest_exact_fields(target, keys, label)
+            target_id = _string(target["id"], f"{label}.id")
+            if target_id in target_ids:
+                raise ValueError(f"duplicate target id: {target_id}")
+            target_ids.add(target_id)
+            _string(target["path"], f"{label}.path")
+            if target["state"] not in MANIFEST_TARGET_STATES:
+                raise ValueError(f"{label}.state is invalid")
+            if "condition" in target:
+                _string(target["condition"], f"{label}.condition")
+
+        controls = _manifest_object(root["controls"], "controls")
+        if not controls:
+            raise ValueError("controls must not be empty")
+        for control_id, raw_control in controls.items():
+            label = f"controls.{control_id}"
+            control = _manifest_object(raw_control, label)
+            _manifest_exact_fields(control, {"class", "owner", "binding"}, label)
+            if control["class"] not in MANIFEST_CONTROL_CLASSES:
+                raise ValueError(f"{label}.class is invalid")
+            _string(control["owner"], f"{label}.owner")
+            _manifest_non_empty_strings(control["binding"], f"{label}.binding")
+
+        validations = root["validations"]
+        if not isinstance(validations, list) or not validations:
+            raise ValueError("validations must be a non-empty list")
+        validation_ids: set[str] = set()
+        for index, raw_validation in enumerate(validations):
+            label = f"validations[{index}]"
+            validation = _manifest_object(raw_validation, label)
+            validation_fields = {"id", "command", "owner", "pass_signal", "phases"}
+            if "equivalence" in validation:
+                validation_fields.add("equivalence")
+            _manifest_exact_fields(validation, validation_fields, label)
+            validation_id = _string(validation["id"], f"{label}.id")
+            if validation_id in validation_ids:
+                raise ExecutionContractError(
+                    "duplicate-validation-id",
+                    f"Duplicate validation id: {validation_id}",
+                )
+            validation_ids.add(validation_id)
+            _string(validation["command"], f"{label}.command")
+            _string(validation["owner"], f"{label}.owner")
+            _string(validation["pass_signal"], f"{label}.pass_signal")
+            phases = _manifest_non_empty_strings(validation["phases"], f"{label}.phases")
+            if any(phase not in CONTRACT_PHASES for phase in phases):
+                raise ValueError(f"{label}.phases contains an unsupported phase")
+            if "equivalence" in validation and validation["equivalence"] not in CONTRACT_EQUIVALENCE:
+                raise ValueError(f"{label}.equivalence is invalid")
+
+        manual = root["manual_obligations"]
+        if not isinstance(manual, list):
+            raise ValueError("manual_obligations must be a list")
+        manual_ids: set[str] = set()
+        for index, raw_obligation in enumerate(manual):
+            label = f"manual_obligations[{index}]"
+            obligation = _manifest_object(raw_obligation, label)
+            _manifest_exact_fields(obligation, {"id", "kind", "required", "acceptance"}, label)
+            obligation_id = _string(obligation["id"], f"{label}.id")
+            if obligation_id in manual_ids:
+                raise ValueError(f"duplicate manual obligation id: {obligation_id}")
+            manual_ids.add(obligation_id)
+            if obligation["kind"] not in {"human", "external"}:
+                raise ValueError(f"{label}.kind is invalid")
+            _bool(obligation["required"], f"{label}.required")
+            _string(obligation["acceptance"], f"{label}.acceptance")
+
+        tasks = root["tasks"]
+        if not isinstance(tasks, list) or not tasks:
+            raise ValueError("tasks must be a non-empty list")
+        task_ids: set[str] = set()
+        orders: set[int] = set()
+        for index, raw_task in enumerate(tasks):
+            label = f"tasks[{index}]"
+            task = _manifest_object(raw_task, label)
+            _manifest_exact_fields(
+                task,
+                {"id", "order", "posture", "objective", "depends_on", "target_ids", "validation_ids", "manual_obligation_ids", "acceptance", "stop_conditions"},
+                label,
+            )
+            task_id = _string(task["id"], f"{label}.id")
+            if task_id in task_ids:
+                raise ValueError(f"duplicate task id: {task_id}")
+            task_ids.add(task_id)
+            if not _is_int(task["order"]) or task["order"] < 1 or task["order"] in orders:
+                raise ValueError(f"{label}.order must be a unique positive integer")
+            orders.add(task["order"])
+            if task["posture"] not in MANIFEST_POSTURES:
+                raise ValueError(f"{label}.posture is invalid")
+            _string(task["objective"], f"{label}.objective")
+            _manifest_id_list(task["depends_on"], f"{label}.depends_on")
+            _manifest_id_list(task["target_ids"], f"{label}.target_ids")
+            _manifest_id_list(task["validation_ids"], f"{label}.validation_ids")
+            _manifest_id_list(task["manual_obligation_ids"], f"{label}.manual_obligation_ids")
+            _manifest_non_empty_strings(task["acceptance"], f"{label}.acceptance")
+            _manifest_non_empty_strings(task["stop_conditions"], f"{label}.stop_conditions")
+
+        retry = _manifest_object(root["retry_policy"], "retry_policy")
+        _manifest_exact_fields(retry, {"initial_attempts", "max_context_refills", "max_corrective_retries", "caller_may_lower", "repeat_progress_status", "minor_or_cosmetic_reopens"}, "retry_policy")
+        for field in ("initial_attempts", "max_context_refills", "max_corrective_retries"):
+            if not _is_int(retry[field]) or retry[field] < 0:
+                raise ValueError(f"retry_policy.{field} must be a non-negative integer")
+        if retry["initial_attempts"] != 1 or retry["max_context_refills"] != 1 or retry["max_corrective_retries"] != 1:
+            raise ValueError("retry_policy must retain one initial attempt, one refill, and one corrective retry")
+        _bool(retry["caller_may_lower"], "retry_policy.caller_may_lower")
+        if retry["repeat_progress_status"] != "stalled":
+            raise ValueError("retry_policy.repeat_progress_status must be stalled")
+        if retry["minor_or_cosmetic_reopens"] is not False:
+            raise ValueError("retry_policy.minor_or_cosmetic_reopens must be false")
+
+        hashing = _manifest_object(root["hashing"], "hashing")
+        _manifest_exact_fields(hashing, {"content_sha256", "semantic_fingerprint", "self_reference"}, "hashing")
+        content_hash = _manifest_object(hashing["content_sha256"], "hashing.content_sha256")
+        semantic_hash = _manifest_object(hashing["semantic_fingerprint"], "hashing.semantic_fingerprint")
+        _manifest_exact_fields(content_hash, {"algorithm", "input", "binding"}, "hashing.content_sha256")
+        _manifest_exact_fields(semantic_hash, {"algorithm", "input", "version", "binding"}, "hashing.semantic_fingerprint")
+        if content_hash["algorithm"] != "SHA-256" or semantic_hash["algorithm"] != "SHA-256":
+            raise ValueError("hashing algorithms must be SHA-256")
+        _string(content_hash["input"], "hashing.content_sha256.input")
+        _string(semantic_hash["input"], "hashing.semantic_fingerprint.input")
+        if content_hash["binding"] != "external" or semantic_hash["binding"] != "external":
+            raise ValueError("hashing bindings must be external")
+        _string(semantic_hash["version"], "hashing.semantic_fingerprint.version")
+        if hashing["self_reference"] is not False:
+            raise ValueError("hashing.self_reference must be false")
+        compute_semantic_fingerprint(root)
+
+        approval = _manifest_object(root["approval"], "approval")
+        _manifest_exact_fields(approval, {"binds", "editorial_content_change", "normative_manifest_change"}, "approval")
+        if approval["binds"] != "semantic_fingerprint":
+            raise ValueError("approval.binds must be semantic_fingerprint")
+        _string(approval["editorial_content_change"], "approval.editorial_content_change")
+        _string(approval["normative_manifest_change"], "approval.normative_manifest_change")
+
+        bootstrap = _manifest_object(root["bootstrap"], "bootstrap")
+        _manifest_exact_fields(bootstrap, {"mode", "compatibility_projection", "projection_binding", "legacy_only", "retirement_evidence"}, "bootstrap")
+        mode = _string(bootstrap["mode"], "bootstrap.mode")
+        if mode not in MANIFEST_BOOTSTRAP_MODES:
+            raise ValueError("bootstrap.mode is invalid")
+        projection = _strings(bootstrap["compatibility_projection"], "bootstrap.compatibility_projection")
+        if mode == "explicit-single-plan" and projection != (
+            "Control Inventory",
+            "Task headings",
+            "Execution Contract",
+        ):
+            raise ValueError("bootstrap.compatibility_projection is not the supported projection")
+        if mode == "manifest-only" and projection:
+            raise ValueError("manifest-only plans must not emit a compatibility projection")
+        binding = _manifest_object(bootstrap["projection_binding"], "bootstrap.projection_binding")
+        _manifest_exact_fields(binding, {"controls", "tasks", "validations", "authority"}, "bootstrap.projection_binding")
+        if dict(binding) != {"controls": "manifest.controls", "tasks": "manifest.tasks", "validations": "manifest.validations", "authority": "manifest.authority_boundaries"}:
+            raise ValueError("bootstrap.projection_binding is conflicting")
+        if bootstrap["legacy_only"] != "reject":
+            raise ValueError("bootstrap.legacy_only must be reject")
+        _string(bootstrap["retirement_evidence"], "bootstrap.retirement_evidence")
+
+        _manifest_non_empty_strings(root["rollout"], "rollout")
+        handoff = _manifest_object(root["handoff"], "handoff")
+        _manifest_exact_fields(handoff, {"next_owner", "requires", "status_sibling", "git_mutation"}, "handoff")
+        if handoff["next_owner"] != "/internal-gateway-execute-plans":
+            raise ValueError("handoff.next_owner must be /internal-gateway-execute-plans")
+        requires = _manifest_non_empty_strings(handoff["requires"], "handoff.requires")
+        for required in ("human approval", "exact semantic_fingerprint review", "zero blocking preflight findings"):
+            if required not in requires:
+                raise ValueError(f"handoff.requires is missing {required}")
+        if handoff["status_sibling"] != "none" or handoff["git_mutation"] != "prohibited":
+            raise ValueError("handoff must prohibit status sibling and Git mutation")
+    except ExecutionContractError:
+        raise
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError("malformed-execution-manifest", str(exc)) from exc
+    return dict(root)
 
 
 @dataclass(frozen=True)
@@ -196,6 +557,7 @@ class ManualResult:
 @dataclass(frozen=True)
 class CloseoutEvidence:
     plan_fingerprint: str
+    content_hash: str
     tasks_complete: bool
     tasks_remaining: tuple[str, ...]
     fatal_conditions: tuple[str, ...]
@@ -229,6 +591,14 @@ def _bool(value: object, label: str) -> bool:
     if not isinstance(value, bool):
         raise ValueError(f"{label} must be a boolean")
     return value
+
+
+def _is_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _non_empty_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
 
 
 def _string(value: object, label: str) -> str:
@@ -367,6 +737,97 @@ def parse_execution_contract(text: str) -> ExecutionContract:
         raise ExecutionContractError("malformed-execution-contract", str(exc)) from exc
 
 
+def _execution_contract_from_manifest(manifest: Mapping[str, object]) -> ExecutionContract:
+    """Build the closeout view from the authoritative manifest validations."""
+
+    validations = manifest["validations"]
+    if not isinstance(validations, list):
+        raise ExecutionContractError(
+            "malformed-execution-manifest", "Manifest validations must be a list"
+        )
+    parsed_validations: list[ValidationContract] = []
+    for item in validations:
+        if not isinstance(item, Mapping):
+            raise ExecutionContractError(
+                "malformed-execution-manifest",
+                "Manifest validation entries must be objects",
+            )
+        equivalence = item.get("equivalence", "exact-only")
+        if equivalence not in CONTRACT_EQUIVALENCE:
+            raise ExecutionContractError(
+                "malformed-execution-manifest",
+                "Manifest validation equivalence is invalid",
+            )
+        parsed_validations.append(
+            ValidationContract(
+                _string(item["id"], "manifest validation id"),
+                _string(item["command"], "manifest validation command"),
+                tuple(_strings(item["phases"], "manifest validation phases", allow_empty=False)),
+                True,
+                "exit-code-0",
+                equivalence,  # type: ignore[arg-type]
+            )
+        )
+    manual_values = manifest["manual_obligations"]
+    if not isinstance(manual_values, list):
+        raise ExecutionContractError(
+            "malformed-execution-manifest", "Manifest manual_obligations must be a list"
+        )
+    parsed_manual = tuple(
+        ManualObligation(
+            _string(item["id"], "manifest manual obligation id"),
+            _string(item["kind"], "manifest manual obligation kind"),  # type: ignore[arg-type]
+            _bool(item["required"], "manifest manual obligation required"),
+            _string(item["acceptance"], "manifest manual obligation acceptance"),
+        )
+        for item in manual_values
+        if isinstance(item, Mapping)
+    )
+    return ExecutionContract(
+        1,
+        tuple(parsed_validations),
+        parsed_manual,
+        AuthorityContract(
+            ("read-only-inspection", "local-validation"),
+            (
+                "read-only-discovery",
+                "scope-expansion",
+                "plan-modification",
+                "status-sibling",
+                "git-mutation",
+                "dependency-installation",
+            ),
+        ),
+    )
+
+
+def parse_plan_contract(text: str) -> ExecutionContract:
+    """Return the closeout contract, with the manifest as the sole authority."""
+
+    manifest = parse_execution_manifest(text)
+    bootstrap = manifest["bootstrap"]
+    if not isinstance(bootstrap, Mapping):
+        raise ExecutionContractError(
+            "malformed-execution-manifest", "Manifest bootstrap metadata is missing"
+        )
+    if bootstrap["mode"] == "explicit-single-plan":
+        projection_findings = validate_manifest_projection(text, manifest)
+        if projection_findings:
+            raise ExecutionContractError(
+                "bootstrap-projection-drift", "; ".join(projection_findings)
+            )
+        # The old object is a compatibility projection only. It supplies the
+        # legacy closeout equivalence policy while the manifest owns identity,
+        # commands, phases, authority, and task bindings.
+        return parse_execution_contract(text)
+    if re.search(r"(?m)^## Execution Contract\s*$", text):
+        raise ExecutionContractError(
+            "obsolete-execution-contract",
+            "manifest-only plans must not contain an Execution Contract projection",
+        )
+    return _execution_contract_from_manifest(manifest)
+
+
 def _parse_equivalence(value: object, label: str) -> ValidationEquivalence:
     mapping = _mapping(value, label)
     expected = {"target_did_not_start", "same_checks", "same_inputs", "runtime_not_material"}
@@ -425,9 +886,15 @@ def _parse_authority(value: object, label: str) -> AuthorityState:
 
 def parse_closeout_evidence(payload: Mapping[str, object]) -> CloseoutEvidence:
     mapping = _mapping(payload, "closeout evidence")
-    allowed = {"plan_fingerprint", "tasks_complete", "tasks_remaining", "pause_requested", "fatal_conditions", "validations", "manual_obligations", "exhaustion_evidence"}
+    allowed = {"plan_fingerprint", "content_hash", "tasks_complete", "tasks_remaining", "pause_requested", "fatal_conditions", "validations", "manual_obligations", "exhaustion_evidence"}
     unknown = set(mapping) - allowed
-    missing = {"plan_fingerprint", "tasks_complete", "tasks_remaining", "validations"} - set(mapping)
+    missing = {
+        "plan_fingerprint",
+        "content_hash",
+        "tasks_complete",
+        "tasks_remaining",
+        "validations",
+    } - set(mapping)
     if unknown or missing:
         details = []
         if unknown:
@@ -489,6 +956,7 @@ def parse_closeout_evidence(payload: Mapping[str, object]) -> CloseoutEvidence:
         manuals.append(ManualResult(manual_id, _bool(item["satisfied"], f"{label}.satisfied"), _string(item["evidence"], f"{label}.evidence")))
     return CloseoutEvidence(
         _string(mapping["plan_fingerprint"], "plan_fingerprint"),
+        _string(mapping["content_hash"], "content_hash"),
         _bool(mapping["tasks_complete"], "tasks_complete"),
         _strings(mapping["tasks_remaining"], "tasks_remaining"),
         _strings(mapping.get("fatal_conditions", []), "fatal_conditions"),
@@ -624,6 +1092,12 @@ def status_for_route(route: CloseoutRoute) -> str | None:
 
 
 def compute_sha256(path: Path) -> str:
+    return compute_content_sha256(path)
+
+
+def compute_content_sha256(path: Path) -> str:
+    """Hash the exact retained-plan bytes for external audit binding."""
+
     return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
 
 
@@ -652,6 +1126,126 @@ def _extract_plan_reference(text: str) -> str | None:
         if value:
             return value
     return None
+
+
+def _sha256_in_section(text: str, heading: str) -> str | None:
+    for line in _extract_section(text, heading).splitlines():
+        value = line.strip().strip("`").strip()
+        if SHA256_RE.fullmatch(value):
+            return value if value.startswith("sha256:") else f"sha256:{value}"
+    return None
+
+
+def _plan_hash_bindings(plan_path: Path) -> tuple[str, str]:
+    manifest = parse_execution_manifest(plan_path.read_text())
+    return compute_semantic_fingerprint(manifest), compute_content_sha256(plan_path)
+
+
+def validate_manifest_projection(
+    text: str, manifest: Mapping[str, object]
+) -> list[str]:
+    """Check the one-plan bootstrap projection without reconstructing legacy plans."""
+
+    findings: list[str] = []
+    controls = manifest.get("controls")
+    if not isinstance(controls, Mapping):
+        findings.append("Control Inventory projection does not bind manifest.controls")
+    else:
+        inventory_ids: list[str] = []
+        for line in _extract_section(text, "Control Inventory").splitlines():
+            if not line.strip().startswith("|"):
+                continue
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if (
+                cells
+                and cells[0] not in {"ID", "---"}
+                and re.fullmatch(r"[A-Z][A-Z0-9-]+", cells[0])
+            ):
+                inventory_ids.append(cells[0])
+        if set(inventory_ids) != set(controls):
+            findings.append(
+                "Control Inventory projection drift: IDs do not equal manifest.controls"
+            )
+
+    tasks = manifest.get("tasks")
+    task_ids = [
+        f"T{match.group(1)}"
+        for match in re.finditer(r"(?im)^#{2,6}\s+Task\s+(\d+)\s*:", text)
+    ]
+    manifest_task_ids = [
+        item["id"]
+        for item in sorted(tasks or [], key=lambda item: item.get("order", 0))
+        if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+    ]
+    if task_ids != manifest_task_ids:
+        findings.append(
+            "Task heading projection drift: ordered headings do not equal manifest.tasks"
+        )
+
+    bootstrap = manifest.get("bootstrap")
+    bootstrap_mode = bootstrap.get("mode") if isinstance(bootstrap, Mapping) else None
+    if bootstrap_mode == "explicit-single-plan":
+        try:
+            contract = parse_execution_contract(text)
+        except ExecutionContractError as exc:
+            findings.append(f"Execution Contract projection is invalid: {exc}")
+        else:
+            manifest_validations = manifest.get("validations")
+            manifest_by_id = {
+                item["id"]: item
+                for item in manifest_validations or []
+                if isinstance(item, Mapping)
+            }
+            contract_by_id = {item.id: item for item in contract.validations}
+            if set(manifest_by_id) != set(contract_by_id):
+                findings.append(
+                    "Execution Contract projection drift: validation IDs do not equal manifest.validations"
+                )
+            else:
+                for validation_id, manifest_item in manifest_by_id.items():
+                    contract_item = contract_by_id[validation_id]
+                    if (
+                        manifest_item["command"] != contract_item.command
+                        or tuple(manifest_item["phases"]) != contract_item.phases
+                    ):
+                        findings.append(
+                            f"Execution Contract projection drift for validation {validation_id}"
+                        )
+            manifest_manual = {
+                item["id"]: item
+                for item in manifest.get("manual_obligations", [])
+                if isinstance(item, Mapping)
+            }
+            contract_manual = {item.id: item for item in contract.manual_obligations}
+            if set(manifest_manual) != set(contract_manual):
+                findings.append(
+                    "Execution Contract projection drift: manual obligation IDs do not equal manifest.manual_obligations"
+                )
+    elif bootstrap_mode == "manifest-only":
+        if re.search(r"(?m)^## Execution Contract\s*$", text):
+            findings.append(
+                "manifest-only plans must not contain an Execution Contract projection"
+            )
+    else:
+        findings.append("Bootstrap projection mode is invalid or missing")
+
+    authority = manifest.get("authority_boundaries")
+    if not isinstance(authority, Mapping) or authority.get("no_git_mutation") is not True:
+        findings.append("Authority projection drift: no_git_mutation is not true")
+    if isinstance(bootstrap, Mapping):
+        expected_binding = {
+            "controls": "manifest.controls",
+            "tasks": "manifest.tasks",
+            "validations": "manifest.validations",
+            "authority": "manifest.authority_boundaries",
+        }
+        if bootstrap.get("projection_binding") != expected_binding:
+            findings.append("Bootstrap projection binding is conflicting")
+        if bootstrap.get("legacy_only") != "reject":
+            findings.append("Bootstrap must reject legacy-only plans")
+    else:
+        findings.append("Bootstrap projection metadata is missing")
+    return findings
 
 
 def _plan_reference_matches(plan_path: Path, status_path: Path, reference: str, repo_root: Path) -> bool:
@@ -700,10 +1294,26 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
         )
     if not (TASK_HEADING_RE.search(text) or UNCHECKED_TASK_RE.search(text)):
         findings.append(Finding("missing-task", "Plan must contain at least one task heading"))
-    try:
-        parse_execution_contract(text)
-    except ExecutionContractError as exc:
-        findings.append(Finding(exc.code, str(exc)))
+    if not re.search(r"(?m)^## Execution Manifest\s*$", text):
+        findings.append(
+            Finding(
+                "missing-execution-manifest",
+                "Current plans must contain exactly one ## Execution Manifest",
+            )
+        )
+    else:
+        try:
+            manifest = parse_execution_manifest(text)
+        except ExecutionContractError as exc:
+            findings.append(Finding(exc.code, str(exc)))
+        else:
+            for message in validate_manifest_projection(text, manifest):
+                code = (
+                    "obsolete-execution-contract"
+                    if message.startswith("manifest-only plans must not")
+                    else "bootstrap-projection-drift"
+                )
+                findings.append(Finding(code, message))
     return findings
 
 
@@ -814,11 +1424,41 @@ def validate_resume(plan_path: Path, status_path: Path, repo_root: Path | None =
         findings.append(Finding("missing-plan-binding", "Status must declare the plan path"))
     elif not _plan_reference_matches(plan_path, status_path, declared, effective_root):
         findings.append(Finding("plan-binding-mismatch", f"Status plan reference does not match the validated plan: {declared}"))
-    recorded = next((line.strip().strip("`") for line in text.splitlines() if line.strip().strip("`").startswith("sha256:")), None)
-    if recorded is None:
-        findings.append(Finding("missing-fingerprint", "Status must contain a sha256: Plan Fingerprint"))
-    elif recorded != compute_sha256(plan_path):
-        findings.append(Finding("plan-fingerprint-drift", f"Plan changed after approval: recorded {recorded} != computed {compute_sha256(plan_path)}"))
+    try:
+        semantic_fingerprint, content_hash = _plan_hash_bindings(plan_path)
+    except ExecutionContractError as exc:
+        findings.append(Finding(exc.code, str(exc)))
+        return findings
+    recorded_semantic = _sha256_in_section(text, "Plan Fingerprint")
+    if recorded_semantic is None:
+        findings.append(
+            Finding(
+                "missing-fingerprint",
+                "Status must contain a sha256: semantic Plan Fingerprint",
+            )
+        )
+    elif recorded_semantic != semantic_fingerprint:
+        findings.append(
+            Finding(
+                "semantic-fingerprint-drift",
+                f"Manifest changed after approval: recorded {recorded_semantic} != computed {semantic_fingerprint}",
+            )
+        )
+    recorded_content = _sha256_in_section(text, "Content Hash")
+    if recorded_content is None:
+        findings.append(
+            Finding(
+                "missing-content-hash",
+                "Manifest-bound status must contain a sha256: Content Hash audit binding",
+            )
+        )
+    elif recorded_content != content_hash:
+        findings.append(
+            Finding(
+                "content-hash-drift",
+                f"Plan bytes changed after approval: recorded {recorded_content} != computed {content_hash}",
+            )
+        )
     return findings
 
 
@@ -882,10 +1522,13 @@ def main(argv: list[str] | None = None) -> int:
             plan_findings = validate_plan(args.plan, repo_root)
             if any(item.severity == "blocking" for item in plan_findings):
                 raise ValueError("plan preflight failed")
-            contract = parse_execution_contract(args.plan.read_text())
+            contract = parse_plan_contract(args.plan.read_text())
             evidence = parse_closeout_evidence(json.loads(args.evidence.read_text()))
-            if evidence.plan_fingerprint != compute_sha256(args.plan):
-                raise ValueError("plan fingerprint mismatch")
+            semantic_fingerprint, content_hash = _plan_hash_bindings(args.plan)
+            if evidence.plan_fingerprint != semantic_fingerprint:
+                raise ValueError("semantic plan fingerprint mismatch")
+            if evidence.content_hash != content_hash:
+                raise ValueError("content hash mismatch")
             decision = classify_closeout(contract, evidence)
         except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
             sys.stderr.write(f"Invalid closeout evidence: {exc}\n")

@@ -1,4 +1,4 @@
-# Execution Contract
+# Execution Manifest and Compatibility Contract
 
 This reference is authoritative for the repository-local execution gateway and
 its direct plan-execution mechanics. The gateway owns routing, recovery,
@@ -8,7 +8,13 @@ tracking, and task-by-task mechanics.
 ## Before execution
 
 - Require the exact retained plan path under `tmp/superpowers/plans/`.
-- Treat the writer-owned versioned `## Execution Contract` as authoritative.
+- Treat the writer-owned versioned `## Execution Manifest` v1 as authoritative.
+- Require exactly one manifest object. New plans use `bootstrap.mode:
+  manifest-only` and must not emit a legacy `## Execution Contract`.
+- The current migration plan may use `bootstrap.mode:
+  explicit-single-plan` once, but only when its control inventory, task
+  headings, validation commands/phases, manual obligations, and authority
+  boundary project exactly from the manifest. Legacy-only plans are rejected.
 - Require a current plan's `## Control Inventory` and explicit no-Git constraint
   through gateway preflight. An explicitly `legacy/imported` document remains
   non-actionable until the writing gateway reconstructs it and approval and
@@ -16,7 +22,8 @@ tracking, and task-by-task mechanics.
 - Accept `Preflight Gate` as the canonical plan heading and
   `Repository Preflight` or `Preflight` as compatibility aliases.
 - Confirm explicit user approval is present in the current conversation.
-- Compute and record the SHA-256 plan fingerprint with `scripts/plan_execution.py`.
+- Compute and record the external semantic manifest fingerprint and exact-byte
+  content hash with `scripts/plan_execution.py`.
 - Record branch, dirty files, and in-scope overlap before editing.
 - Name the local task dependency set and focused validation command.
 - Record the native authoritative command for baseline and focused validation;
@@ -49,11 +56,11 @@ exactly one class: `automatable-local`, `observable-runtime`,
   satisfied before it occurs. Do not use a user assertion, warning, or
   narrative-only note as a technical pass. Approval and authority gates needed
   before execution remain gateway preconditions.
-- Keep stable IDs and traceability to the existing `Execution Contract`; do not
-  introduce a competing schema. If a local/runtime obligation has no gate,
+- Keep stable IDs and traceability to the Execution Manifest; do not introduce
+  a competing schema. If a local/runtime obligation has no gate,
   stop before editing or obtain the plan-authorized correction. An authorized
   correction must preserve the requirement, pass preflight, and refresh
-  approval and fingerprint before execution; otherwise the approved plan is
+  approval and semantic fingerprint before execution; otherwise the approved plan is
   immutable.
 
 Ask the user only after local checks are exhausted and only for new authority,
@@ -66,8 +73,8 @@ judgment as offline follow-up after a successful closeout.
 
 The bundled validator blocks when it cannot safely identify or inspect the
 retained plan, when the plan has no actionable task, when the strict versioned
-execution contract is missing or malformed, or when status binding,
-fingerprint, or completion checks fail. Required plan headings and execution
+Execution Manifest is missing or malformed, or when status semantic/content
+bindings or completion checks fail. Required plan headings and execution
 fields are blocking. The validator does not interpret textual states such as
 `Draft-only`.
 

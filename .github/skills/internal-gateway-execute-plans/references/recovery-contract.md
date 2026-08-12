@@ -9,7 +9,8 @@ supported override or optional accelerator invokes it.
 Before recovery begins, the binding gate must have passed current-plan
 `## Control Inventory` and explicit no-Git checks. A plan identified as
 `legacy/imported` must be reconstructed through the writing gateway with
-refreshed approval and fingerprint before execution or recovery can proceed.
+refreshed semantic approval and exact-byte content audit binding before
+execution or recovery can proceed.
 
 ## 1. Attribute
 
