@@ -1,94 +1,62 @@
 # AGENTS.md - Repository Operating Core
 
-`AGENTS.md` is the primary always-on repository policy entrypoint for coding
-agents in this repository. Keep it compact: it should route agents to the
-nearest owner, avoid duplicated guidance, and require explicit validation.
+`AGENTS.md` is the always-on policy entrypoint for coding agents in this
+repository. Keep it a compact map of stable rules; place specialized guidance
+with the nearest owner.
 
-## First Move
-
-- Identify the requested target and nearest owner before broad reading.
-- Read only the evidence needed to choose the smallest valid change and check.
-- Prefer the closest executable validation; report any validation gap explicitly.
-
-## Precedence
+## Precedence And Scope
 
 - Direct user instructions win for the current task unless they require unsafe,
   destructive, or impossible behavior.
-- Resolve conflicts with the smallest valid owner. Treat broader files as
-  fallback policy, not permission to override narrower contracts.
-- Do not infer active policy from removed files, generated output, historical
-  aliases, or past automation unless it exists on disk and is deliberately
-  reintroduced.
+- Apply the smallest relevant owner. Narrower, target-specific rules override
+  broader defaults when they conflict.
+- Use only policy that exists on disk. Removed files, generated output,
+  historical aliases, and past automation are not active policy.
+- `AGENTS.md` owns repository-wide precedence, boundaries, and tactical defaults.
+  `.github/INVENTORY.md` owns the exact live GitHub Copilot catalog.
+- `.github/instructions/**` contains platform-native Copilot projections.
+  Portable agents must not load those files manually as portable policy.
 
-## User Alignment
+## Working Agreement
 
-- For small, deterministic, low-risk tasks, proceed after identifying the
-  target, nearest owner, and validation path.
-- For non-trivial, ambiguous, architectural, policy, contract, or multi-step
-  work, align with the user before implementation.
-
-## Operating Principles
-
-- Think before acting. Confirm target, nearest owner, bounded evidence, and
-  validation path before broad commands.
-- Make surgical changes. Preserve user work, avoid unrelated refactors, and tie
-  each edit to the requested outcome.
-- Fix the controlling issue where practical instead of layering workarounds.
-- Work toward verified outcomes. Run the closest available validation and report
-  explicit gaps.
-
-## Scope And Placement
-
-- `AGENTS.md` owns stable repository-wide policy, precedence, tactical defaults,
-  ownership boundaries, and routing anchors.
-- `.github/INVENTORY.md` is the exact live inventory of the GitHub Copilot catalog.
-- `.github/instructions/**` contains platform-native Copilot projections. Portable
-  agents must not discover or load these files manually or treat them as portable
-  policy; native platform application remains authoritative.
-- Do not put long operational procedures, detailed checklists, detailed
-  file-shape recipes, command playbooks, or tool-specific workflows here.
-- Short, globally safe best-practice defaults may live here when they improve
-  baseline behavior without turning this file into a procedure manual.
-- Test placement follows the component and runner that own the behavior: keep native tests in the tool, framework, module, or infrastructure layout; place non-native or cross-boundary tests under repository-root `tests/` only when a real observable boundary exists.
-- `tmp/` is temporary support only. Treat its contents as disposable working
-  artifacts and do not commit files from `tmp/`.
-
-## Authoring Defaults
-
-- Use Plain Technical English for repository-owned prose unless a narrower owner
-  explicitly overrides it.
-- Prefer short sentences, stable terms, active voice, and explicit `must`,
-  `should`, and `may` wording.
-- Keep required technical names unchanged.
-
-## Tactical Defaults
-
-- Preserve compact working state across turns; avoid rebuilding full context
-  unless new evidence invalidates the current state.
-- Keep one active primary owner per execution lane; load narrower owners only
-  when path, runtime, symptom, or validation evidence proves they are needed.
-- Route executable or evaluable behavior changes through `/internal-tdd`
-  before implementation; that skill owns test posture and sequencing.
-- To run work with Luna, invoke `internal-luna-executor` with the objective,
-  relevant context, constraints, expected output, and validation. Keep material
-  decisions and final acceptance with the primary owner.
-- Use bounded evidence: inspect changed sections and failing-validator context
-  first, then expand only when gaps remain.
-- Name the validation path early; if evidence changes it, update the working
-  assumption before editing.
-
-## Delivery And Validation
-
-- Be extremely concise in user-facing reporting without sacrificing clarity,
-  correctness, safety, required evidence, or actionable next steps. Lead with
-  the outcome, omit repetition and incidental process detail, and expand only
-  when requested or necessary.
+- Identify the target, nearest owner, bounded evidence, and validation path
+  before broad reading or commands.
+- Proceed directly for deterministic, low-risk work. Align with the user before
+  non-trivial, ambiguous, architectural, policy, contract, or multi-step changes.
+- Make the smallest change that fixes the controlling issue. Preserve user work
+  and avoid unrelated refactors.
+- Keep one active primary owner per execution lane. That owner retains material
+  decisions and final acceptance; load narrower owners only when evidence shows
+  they are needed.
+- For non-trivial work, state the target state, anti-scope, assumptions,
+  tradeoffs, and validation path before implementation or handoff.
 - Reason from repository evidence. Do not invent runtimes, validators, sync
-  flows, or tests.
-- For non-trivial work, make target state, anti-scope, assumptions, tradeoffs,
-  and validation path visible before implementation or handoff.
-- When a contract or policy changes, align the owning tests, validators, or docs
-  instead of letting stale checks restore the old behavior.
+  flows, tests, or policy.
+
+## Placement And Authoring
+
+- Keep detailed procedures, checklists, file-shape recipes, command playbooks,
+  and tool-specific workflows in their owning skills or files.
+- Use Plain Technical English for repository-owned prose unless a narrower owner
+  explicitly overrides it. Prefer short sentences, stable terms, active voice,
+  and explicit `must`, `should`, and `may` wording.
+- Keep required technical names unchanged.
+- Place native tests with the component and runner that own the behavior. Use
+  repository-root `tests/` only for real non-native or cross-boundary behavior.
+- Treat `tmp/` as disposable support. Do not commit its contents.
+
+## Validation And Delivery
+
+- Route executable or evaluable behavior changes through `/internal-tdd` before
+  implementation; that skill owns test posture and sequencing.
+- Name the closest executable validation early. Run it after the change and
+  report unavailable checks or evidence gaps explicitly.
+- When policy or a contract changes, align its owning tests, validators, and
+  documentation so stale checks cannot restore the old behavior.
+- Treat prose as guidance, not enforcement. Put hard guarantees in permissions,
+  validators, hooks, or CI.
+- Report the outcome first. Include changed files, validation evidence, and
+  remaining risks without repeating incidental process detail.
 
 ## Protected Skill Boundary
 
