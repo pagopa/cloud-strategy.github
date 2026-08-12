@@ -18,9 +18,13 @@ The benchmark contains exactly five branches:
 
 Every observation records the plan/state hash pair, plan binding, task sets,
 dispatch events, edits, validation and repair events, residuals, status, and
-four report lines. The scorer checks only `DONE`, `PARTIAL`, and `BLOCKED`,
+four report lines. It also records a finite `bootstrap` array whose entries have
+only `check`, `status`, and `next_action`, plus five independent
+`delivery_verdicts` entries with category, outcome, coverage, and limit. The
+scorer checks only `DONE`, `PARTIAL`, and `BLOCKED`,
 complete task accounting, no forbidden dispatch event, matching SHA-256
-bindings, and the exact `Plan`, `Changed`, `Checks`, `Next` line labels.
+bindings, separate bootstrap and delivery records, and the exact `Plan`,
+`Changed`, `Checks`, `Next` line labels.
 
 Run the scorer with:
 

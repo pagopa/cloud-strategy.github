@@ -16,3 +16,9 @@ interface:
     mutate Git. Before a completion claim, run the plan's final validations,
     git diff --check, and /superpowers-verification-before-completion. Return
     exactly four lines labeled Plan, Changed, Checks, and Next.
+    Resolve the executor from the loaded physical bundle and use only its
+    hash-locked scripts/requirements.txt through scripts/run.sh; never fall
+    back to consumer-relative or home-directory runtime dependencies.
+    Bootstrap observations use only check/status/next_action with PASS or
+    BLOCKED; delivery observations retain all five qualified verdict categories
+    and never collapse readiness into a validated field.

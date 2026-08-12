@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Read-only validator for retained plans and JSON resume state."""
+"""Validator for retained plans and hash-bound execution status."""
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -12,6 +13,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Sequence
+
+import yaml
 
 
 @dataclass(frozen=True)
@@ -255,6 +258,118 @@ class ExecutionContractError(ValueError):
     def __init__(self, code: str, message: str) -> None:
         super().__init__(message)
         self.code = code
+
+
+BootstrapStatus = Literal["PASS", "BLOCKED"]
+
+
+@dataclass(frozen=True)
+class BootstrapCheck:
+    check: str
+    status: BootstrapStatus
+    next_action: str
+    external: bool = False
+
+
+def build_bootstrap_payload(
+    check: str, status: BootstrapStatus, next_action: str
+) -> dict[str, str]:
+    """Build the compact three-field local bootstrap projection."""
+
+    if not isinstance(check, str) or not check.strip():
+        raise ExecutionContractError(
+            "bootstrap-check-required", "Bootstrap check must be non-empty"
+        )
+    if status not in {"PASS", "BLOCKED"}:
+        raise ExecutionContractError(
+            "bootstrap-status-invalid", "Bootstrap status must be PASS or BLOCKED"
+        )
+    if not isinstance(next_action, str) or not next_action.strip():
+        raise ExecutionContractError(
+            "bootstrap-next-action-required",
+            "Bootstrap next_action must be concrete and non-empty",
+        )
+    if status == "BLOCKED" and next_action.strip().lower() in {"none", "no action", "n/a"}:
+        raise ExecutionContractError(
+            "bootstrap-next-action-required",
+            "A blocked bootstrap check must name one concrete next action",
+        )
+    return {
+        "check": check.strip(),
+        "status": status,
+        "next_action": next_action.strip(),
+    }
+
+
+def run_local_bootstrap(
+    checks: Sequence[BootstrapCheck],
+) -> tuple[dict[str, str], ...]:
+    """Collect finite local checks and stop before external work after a block."""
+
+    results: list[dict[str, str]] = []
+    for check in checks:
+        if check.external:
+            break
+        results.append(build_bootstrap_payload(check.check, check.status, check.next_action))
+        if check.status == "BLOCKED":
+            break
+    return tuple(results)
+
+
+def resolve_loaded_bundle(entrypoint: Path) -> Path:
+    """Resolve the physical executor bundle owning a loaded entrypoint."""
+
+    if entrypoint.is_symlink() and not entrypoint.exists():
+        raise ExecutionContractError(
+            "loaded-bundle-stale",
+            f"Loaded executor entrypoint is a stale symlink: {entrypoint}; "
+            "next action: repair the loaded bundle link before execution.",
+        )
+    try:
+        physical_entrypoint = entrypoint.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise ExecutionContractError(
+            "loaded-bundle-missing",
+            f"Loaded executor entrypoint is unavailable: {entrypoint}; "
+            "next action: load the executor bundle before execution.",
+        ) from exc
+    if not physical_entrypoint.is_file():
+        raise ExecutionContractError(
+            "loaded-bundle-invalid",
+            f"Loaded executor entrypoint is not a file: {physical_entrypoint}; "
+            "next action: repair the loaded executor bundle.",
+        )
+    scripts_dir = physical_entrypoint.parent
+    bundle_root = scripts_dir.parent
+    if (
+        physical_entrypoint.name != "plan_execution.py"
+        or scripts_dir.name != "scripts"
+        or not (bundle_root / "SKILL.md").is_file()
+    ):
+        raise ExecutionContractError(
+            "loaded-bundle-invalid",
+            f"Loaded entrypoint does not belong to an executor bundle: {physical_entrypoint}; "
+            "next action: use the physical internal-gateway-execute-plans bundle.",
+        )
+    return bundle_root
+
+def bundle_runner_command(
+    bundle_entrypoint: Path, argv: Sequence[str], cwd: Path
+) -> list[str]:
+    """Build the runner command from a loaded entrypoint, independent of cwd."""
+
+    entrypoint = bundle_entrypoint
+    if not entrypoint.is_absolute():
+        entrypoint = cwd / entrypoint
+    bundle_root = resolve_loaded_bundle(entrypoint)
+    runner = bundle_root / "scripts" / "run.sh"
+    if not runner.is_file():
+        raise ExecutionContractError(
+            "bundle-runner-missing",
+            f"Executor bundle runner is missing: {runner}; "
+            "next action: restore scripts/run.sh in the loaded bundle.",
+        )
+    return ["bash", str(runner), *(str(argument) for argument in argv)]
 
 
 def canonical_json(value: object) -> bytes:
@@ -702,6 +817,14 @@ class ResumeState:
 
 
 @dataclass(frozen=True)
+class StatusDiscovery:
+    path: Path | None
+    state: ResumeState | None
+    legacy_path: Path | None
+    findings: tuple[Finding, ...]
+
+
+@dataclass(frozen=True)
 class Baseline:
     head: str
     paths: Mapping[str, str]
@@ -1001,6 +1124,319 @@ def write_resume_state(path: Path, payload: Mapping[str, object]) -> None:
     )
 
 
+STATUS_FILENAME_RE = re.compile(r"^(?P<base>.+)\.(?P<status>[^.]+)\.yaml$")
+
+
+class _UniqueKeyLoader(yaml.SafeLoader):
+    pass
+
+
+def _construct_unique_mapping(
+    loader: yaml.SafeLoader, node: yaml.MappingNode, deep: bool = False
+) -> dict[object, object]:
+    mapping: dict[object, object] = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise ExecutionContractError(
+                "duplicate-status-field", f"Duplicate YAML field: {key}"
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+_UniqueKeyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _construct_unique_mapping
+)
+
+
+def _load_status_yaml(text: str) -> Mapping[str, object]:
+    try:
+        payload = yaml.load(text, Loader=_UniqueKeyLoader)
+    except yaml.YAMLError as exc:
+        raise ExecutionContractError(
+            "malformed-status-yaml", f"Status YAML is malformed: {exc}"
+        ) from exc
+    return _mapping(payload, "status YAML")
+
+
+def status_sibling_paths(plan_path: Path) -> tuple[Path, ...]:
+    """Return the three canonical YAML status siblings for a retained plan."""
+
+    return tuple(
+        plan_path.with_name(f"{plan_path.stem}.{status}.yaml")
+        for status in ("DONE", "PARTIAL", "BLOCKED")
+    )
+
+
+def _status_filename(path: Path, plan_path: Path) -> str | None:
+    match = STATUS_FILENAME_RE.fullmatch(path.name)
+    if not match or match.group("base") != plan_path.stem:
+        return None
+    return match.group("status")
+
+
+def parse_status_yaml(payload: Mapping[str, object], source_path: Path) -> ResumeState:
+    """Parse YAML state and bind its status to the uppercase filename."""
+
+    match = STATUS_FILENAME_RE.fullmatch(source_path.name)
+    status_from_filename = match.group("status") if match else None
+    if status_from_filename not in STATE_STATUSES:
+        raise ExecutionContractError(
+            "invalid-status-filename",
+            f"Status YAML filename must end in .DONE.yaml, .PARTIAL.yaml, or .BLOCKED.yaml: {source_path.name}",
+        )
+    state = parse_resume_state(_mapping(payload, "status YAML"))
+    if state.status != status_from_filename:
+        raise ExecutionContractError(
+            "status-filename-mismatch",
+            f"Status filename {source_path.name} disagrees with YAML status {state.status}",
+        )
+    return state
+
+
+def build_status_yaml(
+    plan_path: Path,
+    status: str,
+    completed_task_ids: Sequence[str],
+    remaining_task_ids: Sequence[str],
+    last_validation: str,
+    next_action: str,
+    repo_root: Path | None = None,
+) -> dict[str, object]:
+    """Build a hash-bound YAML status payload without choosing execution work."""
+
+    payload = build_resume_state(
+        plan_path,
+        status,
+        tuple(completed_task_ids),
+        tuple(remaining_task_ids),
+        last_validation,
+        next_action,
+        repo_root,
+    )
+    if status not in STATE_STATUSES:
+        raise ExecutionContractError(
+            "unknown-status", f"status must be one of {sorted(STATE_STATUSES)}"
+        )
+    return payload
+
+
+def write_status_yaml(path: Path, payload: Mapping[str, object]) -> None:
+    """Write one validated YAML status sibling through an atomic transition."""
+
+    state = parse_status_yaml(payload, path)
+    serialized = yaml.safe_dump(
+        {
+            "schema_version": state.schema_version,
+            "status": state.status,
+            "plan": state.plan,
+            "plan_fingerprint": state.plan_fingerprint,
+            "content_hash": state.content_hash,
+            "completed_task_ids": list(state.completed_task_ids),
+            "remaining_task_ids": list(state.remaining_task_ids),
+            "last_validation": state.last_validation,
+            "next_action": state.next_action,
+        },
+        sort_keys=False,
+    )
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(serialized, encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def _parse_legacy_status(path: Path) -> ResumeState:
+    try:
+        payload = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_reject_duplicate_json_fields,
+        )
+    except json.JSONDecodeError as exc:
+        raise ExecutionContractError(
+            "malformed-legacy-status", f"Legacy JSON status is malformed: {exc}"
+        ) from exc
+    except (OSError, UnicodeError) as exc:
+        raise ExecutionContractError("legacy-status-unreadable", str(exc)) from exc
+    return parse_resume_state(_mapping(payload, "legacy status"))
+
+
+def _status_binding_findings(
+    plan_path: Path,
+    state_path: Path,
+    state: ResumeState,
+    repo_root: Path,
+) -> list[Finding]:
+    findings: list[Finding] = []
+    if not _plan_reference_matches(plan_path, state_path, state.plan, repo_root):
+        findings.append(
+            Finding("plan-binding-mismatch", f"Status plan does not match: {state.plan}")
+        )
+    try:
+        manifest = parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
+        semantic_fingerprint = compute_semantic_fingerprint(manifest)
+        content_hash = compute_content_sha256(plan_path)
+        expected_task_ids = set(_manifest_task_ids(manifest))
+    except (OSError, UnicodeError, ExecutionContractError) as exc:
+        return findings + [Finding("plan-unreadable", str(exc))]
+    if state.plan_fingerprint != semantic_fingerprint:
+        findings.append(
+            Finding(
+                "semantic-fingerprint-drift",
+                f"Manifest changed after approval: recorded {state.plan_fingerprint} != computed {semantic_fingerprint}",
+            )
+        )
+    if state.content_hash != content_hash:
+        findings.append(
+            Finding(
+                "content-hash-drift",
+                f"Plan bytes changed after approval: recorded {state.content_hash} != computed {content_hash}",
+            )
+        )
+    completed = set(state.completed_task_ids)
+    remaining = set(state.remaining_task_ids)
+    unknown = (completed | remaining) - expected_task_ids
+    if unknown:
+        findings.append(Finding("unknown-task-id", f"Status contains unknown task IDs: {sorted(unknown)}"))
+    if completed & remaining:
+        findings.append(Finding("task-progress-overlap", "Status completed and remaining tasks overlap"))
+    if completed | remaining != expected_task_ids:
+        findings.append(Finding("incomplete-task-progress", "Status must account for every manifest task exactly once"))
+    if state.status == "DONE" and remaining:
+        findings.append(Finding("done-with-remaining-tasks", "DONE status must not contain remaining tasks"))
+    if state.status != "DONE" and not remaining:
+        findings.append(Finding("status-progress-mismatch", "A complete task set must use DONE status"))
+    return findings
+
+
+def discover_status(plan_path: Path) -> StatusDiscovery:
+    """Discover exactly one unambiguous YAML status or a migration candidate."""
+
+    findings: list[Finding] = []
+    yaml_candidates: list[tuple[Path, str]] = []
+    legacy_candidates: list[Path] = []
+    prefix = f"{plan_path.stem}."
+    try:
+        entries = sorted(plan_path.parent.iterdir(), key=lambda item: item.name)
+    except OSError as exc:
+        return StatusDiscovery(None, None, None, (Finding("status-directory-unreadable", str(exc)),))
+
+    for entry in entries:
+        if entry.resolve() == plan_path.resolve():
+            continue
+        if not entry.name.startswith(prefix):
+            continue
+        if entry.is_symlink() and not entry.exists():
+            findings.append(Finding("stale-status-sibling", f"Status sibling is a stale symlink: {entry}"))
+            continue
+        if entry.name == plan_path.with_suffix(".status.json").name:
+            legacy_candidates.append(entry)
+            continue
+        if entry.name.endswith(".tmp"):
+            findings.append(Finding("interrupted-status-transition", f"Temporary status transition remains: {entry}"))
+            continue
+        status = _status_filename(entry, plan_path)
+        if status is not None:
+            if status not in STATE_STATUSES:
+                findings.append(Finding("unknown-status", f"Unknown status filename: {entry.name}"))
+            else:
+                yaml_candidates.append((entry, status))
+            continue
+        findings.append(Finding("unknown-status-sibling", f"Unrecognized status sibling: {entry.name}"))
+
+    if len(legacy_candidates) > 1:
+        findings.append(Finding("duplicate-legacy-status", "More than one legacy status sibling was found"))
+    legacy_path = legacy_candidates[0] if legacy_candidates else None
+    if len(yaml_candidates) > 1:
+        findings.append(Finding("ambiguous-status-siblings", "More than one YAML status sibling was found"))
+    if legacy_path is not None and yaml_candidates:
+        findings.append(Finding("legacy-status-conflict", "Legacy JSON and YAML status siblings cannot coexist"))
+
+    state: ResumeState | None = None
+    selected_path: Path | None = None
+    if len(yaml_candidates) == 1:
+        selected_path = yaml_candidates[0][0]
+        try:
+            state = parse_status_yaml(
+                _load_status_yaml(selected_path.read_text(encoding="utf-8")),
+                selected_path,
+            )
+        except (OSError, UnicodeError, ExecutionContractError, TypeError, ValueError) as exc:
+            findings.append(Finding(getattr(exc, "code", "malformed-status"), str(exc)))
+    if legacy_path is not None and not yaml_candidates:
+        try:
+            _parse_legacy_status(legacy_path)
+        except (ExecutionContractError, TypeError, ValueError) as exc:
+            findings.append(Finding(getattr(exc, "code", "malformed-legacy-status"), str(exc)))
+    return StatusDiscovery(selected_path, state, legacy_path, tuple(findings))
+
+
+def migrate_legacy_status(
+    plan_path: Path, legacy_path: Path, repo_root: Path | None = None
+) -> Path:
+    """Migrate one valid legacy JSON sibling through a verified YAML transition."""
+
+    expected_legacy = plan_path.with_suffix(".status.json")
+    if legacy_path.resolve() != expected_legacy.resolve():
+        raise ExecutionContractError(
+            "legacy-path-mismatch", f"Legacy status must be {expected_legacy}"
+        )
+    if not legacy_path.is_file():
+        raise ExecutionContractError("legacy-status-not-found", f"Legacy status not found: {legacy_path}")
+    discovery = discover_status(plan_path)
+    if discovery.findings:
+        first = discovery.findings[0]
+        raise ExecutionContractError(first.code, first.message)
+    if discovery.legacy_path != legacy_path:
+        raise ExecutionContractError("legacy-status-not-found", "Exactly one legacy status sibling is required")
+    state = _parse_legacy_status(legacy_path)
+    root = repo_root or _find_repo_root(plan_path)
+    binding_findings = _status_binding_findings(plan_path, legacy_path, state, root)
+    if binding_findings:
+        first = binding_findings[0]
+        raise ExecutionContractError(first.code, first.message)
+    target = plan_path.with_name(f"{plan_path.stem}.{state.status}.yaml")
+    if target.exists() or target.is_symlink():
+        raise ExecutionContractError("legacy-status-conflict", f"YAML status already exists: {target}")
+    temporary = target.with_name(target.name + ".tmp")
+    if temporary.exists() or temporary.is_symlink():
+        raise ExecutionContractError("interrupted-status-transition", f"Temporary status transition remains: {temporary}")
+    serialized = yaml.safe_dump(
+        {
+            "schema_version": state.schema_version,
+            "status": state.status,
+            "plan": state.plan,
+            "plan_fingerprint": state.plan_fingerprint,
+            "content_hash": state.content_hash,
+            "completed_task_ids": list(state.completed_task_ids),
+            "remaining_task_ids": list(state.remaining_task_ids),
+            "last_validation": state.last_validation,
+            "next_action": state.next_action,
+        },
+        sort_keys=False,
+    )
+    temporary.write_text(serialized, encoding="utf-8")
+    try:
+        migrated_state = parse_status_yaml(
+            _load_status_yaml(temporary.read_text(encoding="utf-8")), target
+        )
+        binding_findings = _status_binding_findings(plan_path, target, migrated_state, root)
+        if binding_findings:
+            first = binding_findings[0]
+            raise ExecutionContractError(first.code, first.message)
+        os.replace(temporary, target)
+        final_state = parse_status_yaml(
+            _load_status_yaml(target.read_text(encoding="utf-8")), target
+        )
+        binding_findings = _status_binding_findings(plan_path, target, final_state, root)
+        if binding_findings:
+            first = binding_findings[0]
+            raise ExecutionContractError(first.code, first.message)
+        legacy_path.unlink()
+    except (OSError, UnicodeError, ExecutionContractError, TypeError, ValueError):
+        raise
+    return target
+
+
 def _extract_headings(text: str) -> list[str]:
     return [line.lstrip("#").strip() for line in text.splitlines() if line.startswith("#")]
 
@@ -1199,66 +1635,46 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
 def validate_state(
     plan_path: Path, state_path: Path, repo_root: Path | None = None
 ) -> list[Finding]:
-    """Validate state location, plan binding, hashes, and task progress."""
+    """Validate a YAML status sibling or an explicitly supplied legacy JSON state."""
 
     effective_root = repo_root or _find_repo_root(plan_path)
     findings = validate_plan(plan_path, effective_root)
-    if state_path.resolve() != state_path_for(plan_path).resolve():
+    is_yaml = state_path.suffix.lower() == ".yaml"
+    expected_paths = {path.resolve() for path in status_sibling_paths(plan_path)}
+    if is_yaml and state_path.resolve() not in expected_paths:
         findings.append(
             Finding(
                 "state-path-mismatch",
-                f"Resume state must be the plan sibling {state_path_for(plan_path)}",
+                f"YAML status must be one of {sorted(str(path) for path in expected_paths)}",
+            )
+        )
+    elif not is_yaml and state_path.resolve() != state_path_for(plan_path).resolve():
+        findings.append(
+            Finding(
+                "state-path-mismatch",
+                f"Legacy JSON state must be the plan sibling {state_path_for(plan_path)}",
             )
         )
     if not state_path.is_file():
         return findings + [Finding("state-not-found", f"Resume state not found: {state_path}")]
     try:
-        payload = json.loads(
-            state_path.read_text(), object_pairs_hook=_reject_duplicate_json_fields
-        )
-        state = parse_resume_state(_mapping(payload, "resume state"))
+        if is_yaml:
+            state = parse_status_yaml(
+                _load_status_yaml(state_path.read_text(encoding="utf-8")), state_path
+            )
+        else:
+            payload = json.loads(
+                state_path.read_text(encoding="utf-8"),
+                object_pairs_hook=_reject_duplicate_json_fields,
+            )
+            state = parse_resume_state(_mapping(payload, "resume state"))
     except json.JSONDecodeError as exc:
         return findings + [Finding("malformed-state", f"Resume state JSON is malformed: {exc}")]
     except ExecutionContractError as exc:
         return findings + [Finding(exc.code, str(exc))]
     except (OSError, UnicodeError, TypeError, ValueError) as exc:
         return findings + [Finding("malformed-state", str(exc))]
-
-    if not _plan_reference_matches(plan_path, state_path, state.plan, effective_root):
-        findings.append(Finding("plan-binding-mismatch", f"Resume state plan does not match: {state.plan}"))
-    try:
-        manifest = parse_execution_manifest(plan_path.read_text())
-        semantic_fingerprint = compute_semantic_fingerprint(manifest)
-        content_hash = compute_content_sha256(plan_path)
-        expected_task_ids = set(_manifest_task_ids(manifest))
-    except (OSError, UnicodeError, ExecutionContractError) as exc:
-        return findings + [Finding("plan-unreadable", str(exc))]
-    if state.plan_fingerprint != semantic_fingerprint:
-        findings.append(
-            Finding(
-                "semantic-fingerprint-drift",
-                f"Manifest changed after approval: recorded {state.plan_fingerprint} != computed {semantic_fingerprint}",
-            )
-        )
-    if state.content_hash != content_hash:
-        findings.append(
-            Finding(
-                "content-hash-drift",
-                f"Plan bytes changed after approval: recorded {state.content_hash} != computed {content_hash}",
-            )
-        )
-    completed = set(state.completed_task_ids)
-    remaining = set(state.remaining_task_ids)
-    unknown = (completed | remaining) - expected_task_ids
-    if unknown:
-        findings.append(Finding("unknown-task-id", f"Resume state contains unknown task IDs: {sorted(unknown)}"))
-    if completed | remaining != expected_task_ids:
-        findings.append(Finding("incomplete-task-progress", "Resume state must account for every manifest task exactly once"))
-    if state.status == "DONE" and remaining:
-        findings.append(Finding("done-with-remaining-tasks", "DONE state must not contain remaining tasks"))
-    if state.status != "DONE" and not remaining:
-        findings.append(Finding("status-progress-mismatch", "A complete task set must use DONE status"))
-    return findings
+    return findings + _status_binding_findings(plan_path, state_path, state, effective_root)
 
 
 def validate_serial_predecessor(
@@ -1334,7 +1750,7 @@ def main(argv: list[str] | None = None) -> int:
     preflight.add_argument("path", type=Path)
     preflight.add_argument("--repo-root", type=Path, default=None)
     preflight.add_argument("--format", choices=("text", "json", "compact"), default="text")
-    state_check = subparsers.add_parser("state-check", help="Validate a JSON resume sibling")
+    state_check = subparsers.add_parser("state-check", help="Validate a YAML status sibling or explicit legacy JSON state")
     state_check.add_argument("plan", type=Path)
     state_check.add_argument("state", type=Path)
     state_check.add_argument("--repo-root", type=Path, default=None)

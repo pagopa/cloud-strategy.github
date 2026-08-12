@@ -20,6 +20,12 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
 - No Git mutation.
 - Preserve fixture integrity.
 
+## Status Contract
+
+- Runtime status uses one uppercase YAML sibling: `<plan-basename>.DONE.yaml`, `<plan-basename>.PARTIAL.yaml`, or `<plan-basename>.BLOCKED.yaml`.
+- The filename status and YAML `status` value must agree.
+- One legacy `<plan-basename>.status.json` may migrate only after YAML validation.
+
 ## Control Inventory
 
 | ID | Requirement | Class | Owner | Command or trigger | Pass/fail | Evidence | Fallback/boundary |

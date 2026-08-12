@@ -142,6 +142,15 @@ without the versioned manifest are not actionable. Do not leave an automatable
 obligation as narrative-only evidence or downgrade it to a manual obligation
 to make preflight or closeout pass.
 
+### Producer readiness boundary
+
+The writer owns producer-side readiness: it may prove the control inventory,
+ordered task projection, manifest-only shape, and handoff ownership from the
+plan it emits. These checks use parsed structure and do not import
+`internal-gateway-execute-plans` or any executor-private module. The executor
+bundle remains the only owner of retained-plan mechanical preflight, loaded
+bundle resolution, state, and execution validation.
+
 ## No-Commit Rule
 
 - Never run `git add`, `git commit`, `git push`, or another Git mutation while

@@ -1,4 +1,6 @@
 import json
+import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -357,6 +359,303 @@ def test_bootstrap_projection_drift_fails_closed() -> None:
     findings = validate_manifest_projection(text, changed)
 
     assert any("projection" in finding.lower() for finding in findings)
+
+
+def _stage_exec01_predecessor(tmp_path: Path) -> Path:
+    retained = tmp_path / "tmp" / "superpowers" / "plans"
+    retained.mkdir(parents=True)
+    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
+    (tmp_path / ".github").mkdir()
+    source = REPO_ROOT / "tmp/superpowers/plans/2026-08-12-igi-02-plan-delivery-integrity-and-end-to-end-assurance.md"
+    plan = retained / source.name
+    shutil.copy(source, plan)
+    return plan
+
+
+def test_exec01_predecessor_gate_requires_exact_igi02_done_state(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    cases = ("missing", "partial", "path-drift", "hash-drift", "complete")
+
+    for case in cases:
+        case_root = tmp_path / case
+        plan = _stage_exec01_predecessor(case_root)
+        state = plan.with_suffix(".status.json")
+
+        if case != "missing":
+            _write_resume_state(plan, state, "PARTIAL" if case == "partial" else "DONE")
+            payload = json.loads(state.read_text())
+            payload["last_validation"] = (
+                "final: native validations passed; "
+                "counts=discovery:1,approvals:1,reopenings:1,critic:1,recovery:1"
+            )
+            state.write_text(json.dumps(payload))
+        if case == "path-drift":
+            payload = json.loads(state.read_text())
+            payload["plan"] = "tmp/superpowers/plans/not-the-predecessor.md"
+            state.write_text(json.dumps(payload))
+        elif case == "hash-drift":
+            plan.write_text(plan.read_text().replace("## Goal\n", "## Goal\nEditorial drift.\n", 1))
+
+        findings = module.validate_serial_predecessor(plan, state, repo_root=case_root)
+        codes = {finding.code for finding in findings}
+
+        if case == "missing":
+            assert "state-not-found" in codes
+        elif case == "partial":
+            assert "predecessor-not-done" in codes
+        elif case == "path-drift":
+            assert "plan-binding-mismatch" in codes
+        elif case == "hash-drift":
+            assert "content-hash-drift" in codes
+        else:
+            assert findings == []
+
+
+def _stage_bundle(tmp_path: Path) -> tuple[Path, Path]:
+    bundle = tmp_path / "canonical" / "internal-gateway-execute-plans"
+    scripts = bundle / "scripts"
+    scripts.mkdir(parents=True)
+    (bundle / "SKILL.md").write_text("# Executor bundle\n")
+    entrypoint = scripts / "plan_execution.py"
+    entrypoint.write_text("#!/usr/bin/env python3\n")
+    runner = scripts / "run.sh"
+    runner.write_text("#!/usr/bin/env bash\n")
+    runner.chmod(0o755)
+    return bundle, entrypoint
+
+
+def test_resolve_loaded_bundle_from_external_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    module = sys.modules["plan_execution"]
+    bundle, entrypoint = _stage_bundle(tmp_path)
+    external = tmp_path / "external"
+    external.mkdir()
+    monkeypatch.chdir(external)
+
+    assert module.resolve_loaded_bundle(entrypoint) == bundle.resolve()
+
+
+def test_resolve_loaded_bundle_accepts_canonical_symlink(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    bundle, entrypoint = _stage_bundle(tmp_path)
+    loaded = tmp_path / "loaded" / "plan_execution.py"
+    loaded.parent.mkdir()
+    loaded.symlink_to(entrypoint)
+
+    assert module.resolve_loaded_bundle(loaded) == bundle.resolve()
+
+
+def test_resolve_loaded_bundle_rejects_stale_symlink(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    loaded = tmp_path / "loaded" / "plan_execution.py"
+    loaded.parent.mkdir()
+    loaded.symlink_to(tmp_path / "missing" / "plan_execution.py")
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.resolve_loaded_bundle(loaded)
+
+    assert exc.value.code == "loaded-bundle-stale"
+    assert "next action" in str(exc.value).lower()
+
+
+def test_bundle_runner_uses_loaded_bundle_from_external_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = sys.modules["plan_execution"]
+    bundle, entrypoint = _stage_bundle(tmp_path)
+    loaded = tmp_path / "loaded" / "plan_execution.py"
+    loaded.parent.mkdir()
+    loaded.symlink_to(entrypoint)
+    external = tmp_path / "external"
+    external.mkdir()
+    monkeypatch.chdir(external)
+
+    command = module.bundle_runner_command(
+        loaded, ("preflight", "tmp/superpowers/plans/plan.md"), external
+    )
+
+    assert command == [
+        "bash",
+        str(bundle / "scripts" / "run.sh"),
+        "preflight",
+        "tmp/superpowers/plans/plan.md",
+    ]
+
+
+def test_bundle_runner_rejects_stale_loaded_symlink(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    loaded = tmp_path / "loaded" / "plan_execution.py"
+    loaded.parent.mkdir()
+    loaded.symlink_to(tmp_path / "missing" / "plan_execution.py")
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.bundle_runner_command(loaded, (), tmp_path)
+
+    assert exc.value.code == "loaded-bundle-stale"
+    assert "next action" in str(exc.value).lower()
+
+
+def test_dependency_lock_contains_hash_locked_pyyaml() -> None:
+    requirements_in = SCRIPTS / "requirements.in"
+    requirements_lock = SCRIPTS / "requirements.txt"
+
+    assert "PyYAML" in requirements_in.read_text(encoding="utf-8")
+    lock_text = requirements_lock.read_text(encoding="utf-8")
+    assert re.search(r"(?im)^pyyaml==[0-9][^\\s]*", lock_text)
+    assert re.search(r"(?im)^\s+--hash=sha256:[0-9a-f]{64}", lock_text)
+
+
+def _status_payload(
+    module,
+    plan: Path,
+    status: str = "DONE",
+    completed: tuple[str, ...] | None = None,
+) -> dict[str, object]:
+    manifest = module.parse_execution_manifest(plan.read_text())
+    task_ids = tuple(module._manifest_task_ids(manifest))
+    completed_task_ids = (
+        completed
+        if completed is not None
+        else (task_ids if status == "DONE" else task_ids[:1])
+    )
+    remaining_task_ids = tuple(
+        task_id for task_id in task_ids if task_id not in completed_task_ids
+    )
+    return module.build_status_yaml(
+        plan,
+        status,
+        completed_task_ids,
+        remaining_task_ids,
+        "focused: native tests passed",
+        "No further execution is required." if status == "DONE" else "Continue the approved task loop.",
+        repo_root=plan.parents[3],
+    )
+
+
+def test_yaml_status_filename_and_content_status_must_match(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    done_path = plan.with_name(f"{plan.stem}.DONE.yaml")
+    payload = _status_payload(module, plan)
+
+    assert module.parse_status_yaml(payload, done_path).status == "DONE"
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.PARTIAL.yaml"))
+
+    assert exc.value.code == "status-filename-mismatch"
+
+
+def test_status_discovery_rejects_duplicate_or_ambiguous_siblings(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    module.write_status_yaml(
+        plan.with_name(f"{plan.stem}.DONE.yaml"), _status_payload(module, plan, "DONE")
+    )
+    module.write_status_yaml(
+        plan.with_name(f"{plan.stem}.PARTIAL.yaml"),
+        _status_payload(module, plan, "PARTIAL"),
+    )
+
+    discovery = module.discover_status(plan)
+    assert "ambiguous-status-siblings" in {finding.code for finding in discovery.findings}
+
+
+def test_status_discovery_rejects_interrupted_transition(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    transition = plan.with_name(f"{plan.stem}.DONE.yaml.tmp")
+    transition.write_text("incomplete transition\n")
+
+    discovery = module.discover_status(plan)
+    assert "interrupted-status-transition" in {
+        finding.code for finding in discovery.findings
+    }
+
+
+def test_migrate_exactly_one_legacy_json_sibling(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    legacy = plan.with_suffix(".status.json")
+    legacy.write_text(json.dumps(_status_payload(module, plan)))
+
+    migrated = module.migrate_legacy_status(plan, legacy, repo_root=tmp_path)
+
+    assert migrated == plan.with_name(f"{plan.stem}.DONE.yaml")
+    assert migrated.is_file()
+    assert not legacy.exists()
+    assert module.parse_status_yaml(
+        module.yaml.safe_load(migrated.read_text()), migrated
+    ).status == "DONE"
+
+
+def test_migration_rejects_legacy_conflict_and_duplicate_state(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    conflict_root = tmp_path / "conflict"
+    plan = _stage_valid_plan(conflict_root)
+    legacy = plan.with_suffix(".status.json")
+    legacy.write_text(json.dumps(_status_payload(module, plan)))
+    module.write_status_yaml(
+        plan.with_name(f"{plan.stem}.DONE.yaml"), _status_payload(module, plan)
+    )
+
+    with pytest.raises(module.ExecutionContractError) as conflict:
+        module.migrate_legacy_status(plan, legacy, repo_root=conflict_root)
+    assert conflict.value.code == "legacy-status-conflict"
+
+    duplicate_root = tmp_path / "duplicate"
+    duplicate_plan = _stage_valid_plan(duplicate_root)
+    duplicate_legacy = duplicate_plan.with_suffix(".status.json")
+    duplicate_legacy.write_text(json.dumps(_status_payload(module, duplicate_plan)))
+    module.write_status_yaml(
+        duplicate_plan.with_name(f"{duplicate_plan.stem}.DONE.yaml"),
+        _status_payload(module, duplicate_plan),
+    )
+    module.write_status_yaml(
+        duplicate_plan.with_name(f"{duplicate_plan.stem}.BLOCKED.yaml"),
+        _status_payload(module, duplicate_plan, "BLOCKED"),
+    )
+
+    with pytest.raises(module.ExecutionContractError) as duplicate:
+        module.migrate_legacy_status(
+            duplicate_plan, duplicate_legacy, repo_root=duplicate_root
+        )
+    assert duplicate.value.code == "ambiguous-status-siblings"
+
+
+def test_migration_preserves_hash_binding_and_task_progress(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    legacy = plan.with_suffix(".status.json")
+    manifest = module.parse_execution_manifest(plan.read_text())
+    task_ids = tuple(module._manifest_task_ids(manifest))
+    legacy_payload = _status_payload(module, plan, "PARTIAL", ())
+    legacy.write_text(json.dumps(legacy_payload))
+
+    migrated = module.migrate_legacy_status(plan, legacy, repo_root=tmp_path)
+    migrated_state = module.parse_status_yaml(
+        module.yaml.safe_load(migrated.read_text()), migrated
+    )
+
+    assert migrated_state.plan == legacy_payload["plan"]
+    assert migrated_state.plan_fingerprint == legacy_payload["plan_fingerprint"]
+    assert migrated_state.content_hash == legacy_payload["content_hash"]
+    assert migrated_state.completed_task_ids == ()
+    assert migrated_state.remaining_task_ids == task_ids
+
+
+def test_yaml_state_check_rejects_plan_or_hash_drift(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    module.write_status_yaml(state, _status_payload(module, plan))
+    plan.write_text(plan.read_text().replace("## Goal\n", "## Goal\nEditorial drift.\n", 1))
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode != 0
+    assert "content-hash-drift" in {
+        item["code"] for item in json.loads(result.stdout)["finding_sample"]
+    }
 
 
 def test_legacy_only_plan_has_no_manifest_fallback() -> None:

@@ -46,3 +46,6 @@ interface:
     approval/semantic-fingerprint and content-hash bindings. Perform human review, report the plan path, name
     /internal-gateway-execute-plans as the only next owner, and wait for
     explicit execution approval. Observe the No-Commit Rule: no Git mutations.
+    Producer readiness remains writer-owned and structural; writer compatibility
+    checks must not import executor-private code, while retained-plan mechanical
+    preflight remains executor-owned.

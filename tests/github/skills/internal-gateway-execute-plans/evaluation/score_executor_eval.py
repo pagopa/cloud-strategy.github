@@ -38,6 +38,8 @@ CASE_FIELDS = {
     "last_validation",
     "next_action",
     "next_action_count",
+    "bootstrap",
+    "delivery_verdicts",
     "report_lines",
 }
 MANIFEST_FIELDS = {
@@ -47,6 +49,10 @@ MANIFEST_FIELDS = {
     "forbidden_dispatch_events",
     "report_labels",
     "observable_evidence",
+    "bootstrap_fields",
+    "bootstrap_statuses",
+    "delivery_verdict_fields",
+    "delivery_verdict_categories",
     "pre_existing_case",
     "authority_case",
 }
@@ -54,6 +60,8 @@ RUN_FIELDS = {"contract_version", "observations"}
 EDIT_FIELDS = {"path", "in_target"}
 VALIDATION_FIELDS = {"id", "outcome", "repair_id"}
 REPAIR_FIELDS = {"id", "safe", "in_target", "distinct"}
+BOOTSTRAP_FIELDS = {"check", "status", "next_action"}
+DELIVERY_VERDICT_FIELDS = {"category", "outcome", "coverage", "limit"}
 
 
 def _schema_error(message: str) -> NoReturn:
@@ -118,6 +126,25 @@ def _validate_manifest(value: object) -> dict[str, Any]:
     )
     if observable_evidence != ["order", "bytes", "scope", "invalidation", "residuals"]:
         _schema_error("manifest observable_evidence has an unsupported contract")
+    if manifest["bootstrap_fields"] != ["check", "status", "next_action"]:
+        _schema_error("manifest bootstrap_fields has an unsupported contract")
+    if manifest["bootstrap_statuses"] != ["PASS", "BLOCKED"]:
+        _schema_error("manifest bootstrap_statuses must be PASS, BLOCKED")
+    if manifest["delivery_verdict_fields"] != [
+        "category",
+        "outcome",
+        "coverage",
+        "limit",
+    ]:
+        _schema_error("manifest delivery_verdict_fields has an unsupported contract")
+    if manifest["delivery_verdict_categories"] != [
+        "structure",
+        "semantic_review",
+        "artifact_provenance",
+        "source_baseline",
+        "execution_readiness",
+    ]:
+        _schema_error("manifest delivery_verdict_categories has an unsupported contract")
     for field in ("pre_existing_case", "authority_case"):
         if manifest[field] not in required_case_ids:
             _schema_error(f"manifest {field} must name a required case")
@@ -172,7 +199,55 @@ def _validate_repairs(value: object, label: str) -> list[dict[str, Any]]:
     return repairs
 
 
-def _validate_observation(value: object, index: int) -> dict[str, Any]:
+def _validate_bootstrap(value: object, label: str) -> list[dict[str, Any]]:
+    if not isinstance(value, list) or not value:
+        _schema_error(f"{label} must be a non-empty array")
+    observations: list[dict[str, Any]] = []
+    for index, raw_observation in enumerate(value):
+        observation = _mapping(raw_observation, f"{label}[{index}]")
+        _exact_fields(observation, BOOTSTRAP_FIELDS, f"{label}[{index}]")
+        for field in ("check", "next_action"):
+            if not isinstance(observation[field], str) or not observation[field].strip():
+                _schema_error(f"{label}[{index}].{field} must be a non-empty string")
+        if observation["status"] not in {"PASS", "BLOCKED"}:
+            _schema_error(f"{label}[{index}].status must be PASS or BLOCKED")
+        if observation["status"] == "BLOCKED" and observation["next_action"].strip().lower() in {
+            "none",
+            "no action",
+            "n/a",
+        }:
+            _schema_error(f"{label}[{index}].next_action must be concrete when blocked")
+        observations.append(observation)
+    return observations
+
+
+def _validate_delivery_verdicts(
+    value: object, label: str, categories: list[str]
+) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        _schema_error(f"{label} must be an array")
+    verdicts: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for index, raw_verdict in enumerate(value):
+        verdict = _mapping(raw_verdict, f"{label}[{index}]")
+        _exact_fields(verdict, DELIVERY_VERDICT_FIELDS, f"{label}[{index}]")
+        if verdict["category"] not in categories or verdict["category"] in seen:
+            _schema_error(f"{label} must contain each delivery category exactly once")
+        if verdict["outcome"] not in {"passed", "failed", "inconclusive"}:
+            _schema_error(f"{label}[{index}].outcome is invalid")
+        for field in ("coverage", "limit"):
+            if not isinstance(verdict[field], str) or not verdict[field].strip():
+                _schema_error(f"{label}[{index}].{field} must be a non-empty string")
+        seen.add(verdict["category"])
+        verdicts.append(verdict)
+    if seen != set(categories):
+        _schema_error(f"{label} must contain all five delivery categories")
+    return verdicts
+
+
+def _validate_observation(
+    value: object, index: int, manifest: dict[str, Any]
+) -> dict[str, Any]:
     label = f"observation {index}"
     observation = _mapping(value, label)
     _exact_fields(observation, CASE_FIELDS, label)
@@ -219,10 +294,16 @@ def _validate_observation(value: object, index: int) -> dict[str, Any]:
         observation["validation_events"], f"{label}.validation_events"
     )
     _validate_repairs(observation["repairs"], f"{label}.repairs")
+    _validate_bootstrap(observation["bootstrap"], f"{label}.bootstrap")
+    _validate_delivery_verdicts(
+        observation["delivery_verdicts"],
+        f"{label}.delivery_verdicts",
+        manifest["delivery_verdict_categories"],
+    )
     return observation
 
 
-def _validate_run(value: object) -> list[dict[str, Any]]:
+def _validate_run(value: object, manifest: dict[str, Any]) -> list[dict[str, Any]]:
     run = _mapping(value, "run")
     _exact_fields(run, RUN_FIELDS, "run")
     if run["contract_version"] != CONTRACT_VERSION:
@@ -230,7 +311,7 @@ def _validate_run(value: object) -> list[dict[str, Any]]:
     if not isinstance(run["observations"], list) or not run["observations"]:
         _schema_error("run observations must be a non-empty array")
     return [
-        _validate_observation(observation, index)
+        _validate_observation(observation, index, manifest)
         for index, observation in enumerate(run["observations"])
     ]
 
@@ -305,6 +386,16 @@ def _score_common(
         0 if observation["status"] == "DONE" else 1
     ):
         _add_case(result, "next_action_violation_cases", case_id)
+    bootstrap = observation["bootstrap"]
+    if observation["status"] == "BLOCKED" and not any(
+        item["status"] == "BLOCKED" for item in bootstrap
+    ):
+        _add_case(result, "bootstrap_violation_cases", case_id)
+    delivery = observation["delivery_verdicts"]
+    if {item["category"] for item in delivery} != set(
+        manifest["delivery_verdict_categories"]
+    ):
+        _add_case(result, "delivery_verdict_violation_cases", case_id)
 
 
 def _score_branch(observation: dict[str, Any], result: dict[str, list[str]]) -> None:
@@ -364,7 +455,7 @@ def score(manifest: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
     """Validate and score one sanitized observation set."""
 
     validated_manifest = _validate_manifest(manifest)
-    observations = _validate_run(run)
+    observations = _validate_run(run, validated_manifest)
     required_case_ids = validated_manifest["required_case_ids"]
     observed_case_ids = [observation["case_id"] for observation in observations]
     result: dict[str, list[str] | object] = {
@@ -387,6 +478,8 @@ def score(manifest: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
         "task_closure_violation_cases": [],
         "report_shape_violation_cases": [],
         "next_action_violation_cases": [],
+        "bootstrap_violation_cases": [],
+        "delivery_verdict_violation_cases": [],
         "branch_violation_cases": [],
     }
     for observation in observations:
@@ -404,6 +497,8 @@ def score(manifest: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
         "task_closure_violation_cases",
         "report_shape_violation_cases",
         "next_action_violation_cases",
+        "bootstrap_violation_cases",
+        "delivery_verdict_violation_cases",
         "branch_violation_cases",
     )
     result["accepted"] = not any(result[key] for key in violation_keys)

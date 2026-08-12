@@ -25,6 +25,27 @@ user report. It does not delegate plan work.
   path. `internal-luna-executor` is metadata only and is never invoked here.
 - Do not run Git mutations. Leave the worktree uncommitted.
 
+Before any task edit, verify the exact IGI-02 predecessor state with the
+caller-owned plan and status paths. The state must be hash-bound, `DONE`,
+complete for every predecessor task, and include final validation plus observed
+workflow-count evidence. Resolve the executor from its physically loaded
+bundle entrypoint; a consumer working directory or a home-directory fallback
+is never an executor owner.
+
+The executor bundle owns its runtime dependencies. Declare direct dependencies
+in `scripts/requirements.in`, generate the hash-locked
+`scripts/requirements.txt` with the repository lock generator, and invoke the
+bundle through `scripts/run.sh`. The runner must derive its physical bundle
+from its loaded entrypoint and must not use repository-global requirements.
+
+Bootstrap output is a separate compact projection with exactly `check`,
+`status`, and `next_action`; status is only `PASS` or `BLOCKED`. A bounded local
+bootstrap collects its finite local checks and stops before external or live
+work after a blocker. Delivery readiness remains five independent verdicts:
+`structure`, `semantic_review`, `artifact_provenance`, `source_baseline`, and
+`execution_readiness`, each with outcome, coverage, and limit. Do not replace
+those records with a standalone `validated` field.
+
 ## Bind Before Editing
 
 1. Confirm the exact retained-plan path and explicit approval.
@@ -76,10 +97,10 @@ authorship or proof of a historical execution run.
 
 ## Stop And State
 
-Use exactly one compact JSON sibling when execution must be resumed or its
-terminal evidence must be recorded: `<plan-basename>.status.json`. Do not
-create Markdown status siblings or separate protocol evidence files. The JSON
-object has exactly these fields:
+Runtime execution state uses exactly one readable YAML sibling named
+`<plan-basename>.<STATUS>.yaml`. Do not create Markdown status siblings or
+dual-write JSON and YAML runtime state. The YAML object has exactly these
+fields:
 
 `schema_version`, `status`, `plan`, `plan_fingerprint`, `content_hash`,
 `completed_task_ids`, `remaining_task_ids`, `last_validation`, `next_action`.
@@ -95,13 +116,15 @@ object has exactly these fields:
   edit.
 
 Bind the sibling to the plan's semantic fingerprint and exact content hash.
-The state path is in the same directory as the plan, with `.md` replaced by
-`.status.json`. Validate it with:
+The uppercase filename status and YAML `status` must agree. Validate it with:
 
-`python3 scripts/plan_execution.py state-check <plan> <plan-sibling>.status.json --format compact`
+`python3 scripts/plan_execution.py state-check <plan> <plan-basename>.DONE.yaml --format compact`
 
 The validator checks the Manifest, sibling location, hashes, plan binding, task
-IDs, and status/task consistency. It does not execute work or select repairs.
+IDs, and status/task consistency. A single legacy `<plan-basename>.status.json`
+may be migrated only through a validated YAML transition; malformed, stale,
+duplicate, conflicting, or interrupted state remains blocked. The validator
+does not execute work or select repairs.
 
 ## Completion Evidence
 

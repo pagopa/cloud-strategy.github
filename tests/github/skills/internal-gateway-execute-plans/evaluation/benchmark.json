@@ -16,6 +16,10 @@
   ],
   "report_labels": ["Plan", "Changed", "Checks", "Next"],
   "observable_evidence": ["order", "bytes", "scope", "invalidation", "residuals"],
+  "bootstrap_fields": ["check", "status", "next_action"],
+  "bootstrap_statuses": ["PASS", "BLOCKED"],
+  "delivery_verdict_fields": ["category", "outcome", "coverage", "limit"],
+  "delivery_verdict_categories": ["structure", "semantic_review", "artifact_provenance", "source_baseline", "execution_readiness"],
   "pre_existing_case": "PRE_EXISTING_FAILURE_RESIDUAL",
   "authority_case": "AUTHORITY_GAP_BLOCKED"
 }

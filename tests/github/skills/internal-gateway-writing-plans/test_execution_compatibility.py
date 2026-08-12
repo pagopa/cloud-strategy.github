@@ -1,11 +1,12 @@
-import importlib.util
+import ast
 import json
+import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-import pytest
+import yaml
 
 REPO_ROOT = next(
     parent
@@ -18,32 +19,100 @@ EXECUTOR_SCRIPT = (
     REPO_ROOT
     / ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
 )
+EXECUTOR_BUNDLE = REPO_ROOT / ".github/skills/internal-gateway-execute-plans"
+INVENTORY = REPO_ROOT / ".github/INVENTORY.md"
 
 
-def _executor_module():
-    spec = importlib.util.spec_from_file_location("plan_execution", EXECUTOR_SCRIPT)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+def extract_manifest_projection(text: str) -> tuple[set[str], tuple[str, ...]]:
+    """Extract the writer-owned control table and task IDs from the manifest."""
+
+    lines = text.splitlines()
+    collecting = False
+    control_ids: set[str] = set()
+    for line in lines:
+        if line == "## Control Inventory":
+            collecting = True
+            continue
+        if collecting and line.startswith("## "):
+            break
+        if collecting and line.strip().startswith("|"):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if cells and cells[0] not in {"ID", "---"} and cells[0]:
+                control_ids.add(cells[0])
+
+    match = re.search(
+        r"(?ms)^## Execution Manifest\s*\n\s*```json\s*\n(.*?)\n```\s*$",
+        text,
+    )
+    assert match
+    manifest = json.loads(match.group(1))
+    tasks = sorted(manifest["tasks"], key=lambda item: item["order"])
+    task_ids = tuple(task["id"] for task in tasks)
+    return control_ids, task_ids
 
 
-def test_writer_plan_is_actionable_for_executor(tmp_path: Path) -> None:
-    retained = tmp_path / "tmp" / "superpowers" / "plans"
-    retained.mkdir(parents=True)
-    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
-    (tmp_path / ".github").mkdir()
-    plan = retained / WRITER_FIXTURE.name
-    shutil.copy(WRITER_FIXTURE, plan)
+def test_writer_producer_projection_has_exact_controls_and_tasks() -> None:
+    text = WRITER_FIXTURE.read_text()
+    controls, task_ids = extract_manifest_projection(text)
+    task_headings = [
+        line.strip()
+        for line in WRITER_FIXTURE.read_text().splitlines()
+        if re.match(r"^#{2,6}\s+Task\s+\d+\b", line)
+    ]
 
-    writer_text = WRITER_FIXTURE.read_text()
-    assert "## Control Inventory" in writer_text
-    assert "- No Git mutation." in writer_text
+    assert controls == {"CI-01"}
+    assert task_ids == ("T1", "T2")
+    assert len(task_headings) == len(task_ids)
+    assert "## Producer Readiness" in text
 
-    findings = _executor_module().validate_plan(plan, repo_root=tmp_path)
 
-    assert findings == []
+def test_writer_producer_does_not_import_executor_private_code() -> None:
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    imported_modules = {
+        node.module
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.module
+    }
+    imported_names = {
+        alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    }
+
+    assert not any("internal-gateway-execute-plans" in module for module in imported_modules)
+    assert "plan_execution" not in imported_names
+
+
+def test_writer_fixture_emits_manifest_only() -> None:
+    text = WRITER_FIXTURE.read_text(encoding="utf-8")
+    assert text.count("## Execution Manifest") == 1
+    assert "## Execution Contract" not in text
+    _, task_ids = extract_manifest_projection(text)
+    assert task_ids == ("T1", "T2")
+
+
+def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> None:
+    writer_metadata = yaml.safe_load(
+        (BUNDLE / "agents/openai.yaml").read_text(encoding="utf-8")
+    )
+    executor_metadata = yaml.safe_load(
+        (EXECUTOR_BUNDLE / "agents/openai.yaml").read_text(encoding="utf-8")
+    )
+    executor_fixture = (EXECUTOR_BUNDLE / "fixtures/valid-plan.md").read_text(
+        encoding="utf-8"
+    )
+    inventory = INVENTORY.read_text(encoding="utf-8")
+
+    assert isinstance(writer_metadata, dict) and "interface" in writer_metadata
+    assert isinstance(executor_metadata, dict) and "interface" in executor_metadata
+    assert (EXECUTOR_BUNDLE / "scripts/run.sh").is_file()
+    assert (EXECUTOR_BUNDLE / "scripts/requirements.in").is_file()
+    assert (EXECUTOR_BUNDLE / "scripts/requirements.txt").is_file()
+    assert "## Status Contract" in executor_fixture
+    assert "status" in executor_fixture.lower()
+    assert ".github/skills/internal-gateway-writing-plans/SKILL.md" in inventory
+    assert ".github/skills/internal-gateway-execute-plans/SKILL.md" in inventory
 
 
 def test_writer_plan_remains_actionable_through_preflight_cli(tmp_path: Path) -> None:
@@ -71,88 +140,3 @@ def test_writer_plan_remains_actionable_through_preflight_cli(tmp_path: Path) ->
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["status"] == "passed"
-
-
-def _stage_valid_plan(tmp_path: Path) -> Path:
-    retained = tmp_path / "tmp" / "superpowers" / "plans"
-    retained.mkdir(parents=True)
-    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
-    (tmp_path / ".github").mkdir()
-    plan = retained / WRITER_FIXTURE.name
-    shutil.copy(WRITER_FIXTURE, plan)
-    return plan
-
-
-def _write_predecessor_state(module, plan: Path, status: str) -> Path:
-    manifest = module.parse_execution_manifest(plan.read_text())
-    task_ids = [
-        task["id"] for task in sorted(manifest["tasks"], key=lambda item: item["order"])
-    ]
-    completed = task_ids if status == "DONE" else []
-    state = plan.with_suffix(".status.json")
-    payload = module.build_resume_state(
-        plan,
-        status,
-        completed,
-        [task_id for task_id in task_ids if task_id not in completed],
-        "final: pytest=79; workflow-counts=counts=discovery:1,approvals:1,reopenings:1,critic:1,recovery:1",
-        "No further execution is required.",
-        repo_root=plan.parents[3],
-    )
-    module.write_resume_state(state, payload)
-    return state
-
-
-@pytest.mark.parametrize("failure", ("missing", "partial", "hash-drift"))
-def test_serial_predecessor_gate_rejects_unverified_igi01_state(
-    tmp_path: Path, failure: str
-) -> None:
-    module = _executor_module()
-    plan = _stage_valid_plan(tmp_path)
-    state = _write_predecessor_state(module, plan, "PARTIAL" if failure == "partial" else "DONE")
-
-    if failure == "missing":
-        state.unlink()
-    elif failure == "hash-drift":
-        plan.write_text(plan.read_text() + "\nEditorial drift.\n")
-
-    findings = module.validate_serial_predecessor(plan, state, repo_root=tmp_path)
-    codes = {finding.code for finding in findings}
-
-    assert codes
-    if failure == "missing":
-        assert "state-not-found" in codes
-    elif failure == "partial":
-        assert "predecessor-not-done" in codes
-    else:
-        assert "content-hash-drift" in codes
-
-
-def test_serial_predecessor_gate_accepts_done_state_with_final_count_evidence(
-    tmp_path: Path,
-) -> None:
-    module = _executor_module()
-    plan = _stage_valid_plan(tmp_path)
-    state = _write_predecessor_state(module, plan, "DONE")
-
-    assert module.validate_serial_predecessor(plan, state, repo_root=tmp_path) == []
-
-
-def test_serial_predecessor_gate_accepts_explicit_observed_count_evidence(
-    tmp_path: Path,
-) -> None:
-    module = _executor_module()
-    plan = _stage_valid_plan(tmp_path)
-    state = _write_predecessor_state(module, plan, "DONE")
-    payload = json.loads(state.read_text())
-    payload["last_validation"] = "final: native validations passed"
-    state.write_text(json.dumps(payload))
-
-    assert module.validate_serial_predecessor(
-        plan,
-        state,
-        repo_root=tmp_path,
-        workflow_count_evidence=(
-            "counts=discovery:1,approvals:1,reopenings:1,critic:1,recovery:1"
-        ),
-    ) == []

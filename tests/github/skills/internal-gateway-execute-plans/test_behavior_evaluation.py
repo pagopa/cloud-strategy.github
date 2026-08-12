@@ -60,6 +60,36 @@ def _observation(case_id: str, status: str) -> dict[str, object]:
     completed = TASKS if status == "DONE" else ["T1"]
     remaining = [] if status == "DONE" else ["T2", "T3"]
     next_action = "none" if status == "DONE" else "Continue the approved task loop."
+    bootstrap = [
+        {
+            "check": "local-preflight",
+            "status": "BLOCKED" if status == "BLOCKED" else "PASS",
+            "next_action": (
+                "Request explicit scope approval."
+                if status == "BLOCKED"
+                else "none"
+            ),
+        }
+    ]
+    delivery_verdicts = [
+        {
+            "category": category,
+            "outcome": (
+                "inconclusive"
+                if status == "BLOCKED" and category == "execution_readiness"
+                else "passed"
+            ),
+            "coverage": "observed",
+            "limit": "authority required" if status == "BLOCKED" else "none",
+        }
+        for category in (
+            "structure",
+            "semantic_review",
+            "artifact_provenance",
+            "source_baseline",
+            "execution_readiness",
+        )
+    ]
     return {
         "case_id": case_id,
         "status": status,
@@ -86,6 +116,8 @@ def _observation(case_id: str, status: str) -> dict[str, object]:
         "last_validation": "focused validation passed",
         "next_action": next_action,
         "next_action_count": 0 if status == "DONE" else 1,
+        "bootstrap": bootstrap,
+        "delivery_verdicts": delivery_verdicts,
         "report_lines": [
             "Plan: tmp/superpowers/plans/example.md",
             "Changed: approved executor targets",
@@ -167,6 +199,36 @@ def test_benchmark_declares_observable_guardrail_contract() -> None:
     ]
     assert benchmark["pre_existing_case"] == "PRE_EXISTING_FAILURE_RESIDUAL"
     assert benchmark["authority_case"] == "AUTHORITY_GAP_BLOCKED"
+
+
+def test_benchmark_declares_separate_bootstrap_and_delivery_records() -> None:
+    benchmark = _load(BENCHMARK)
+
+    assert benchmark["bootstrap_fields"] == ["check", "status", "next_action"]
+    assert benchmark["bootstrap_statuses"] == ["PASS", "BLOCKED"]
+    assert benchmark["delivery_verdict_fields"] == [
+        "category",
+        "outcome",
+        "coverage",
+        "limit",
+    ]
+    assert benchmark["delivery_verdict_categories"] == [
+        "structure",
+        "semantic_review",
+        "artifact_provenance",
+        "source_baseline",
+        "execution_readiness",
+    ]
+
+
+def test_scorer_accepts_separate_bootstrap_and_delivery_verdict_records() -> None:
+    scorer = _load_scorer()
+
+    result = scorer.score(_load(BENCHMARK), _passing_run())
+
+    assert result["accepted"] is True
+    assert result["bootstrap_violation_cases"] == []
+    assert result["delivery_verdict_violation_cases"] == []
 
 
 def test_five_observed_branches_are_accepted() -> None:
@@ -293,6 +355,92 @@ def test_verdict_payload_keeps_five_categories_and_qualified_aggregate() -> None
         for item in payload["verdicts"].values()
     )
     assert "validated" not in json.dumps(payload).lower()
+
+
+def test_bootstrap_payload_has_only_check_status_next_action() -> None:
+    executor = _load_executor()
+
+    payload = executor.build_bootstrap_payload("bundle-resolution", "PASS", "none")
+
+    assert payload == {
+        "check": "bundle-resolution",
+        "status": "PASS",
+        "next_action": "none",
+    }
+
+
+def test_bootstrap_collects_local_checks_then_stops_before_external_work() -> None:
+    executor = _load_executor()
+    checks = (
+        executor.BootstrapCheck("bundle-resolution", "PASS", "none"),
+        executor.BootstrapCheck(
+            "predecessor", "BLOCKED", "Request verified predecessor evidence."
+        ),
+        executor.BootstrapCheck(
+            "live-operation", "PASS", "must not run", external=True
+        ),
+    )
+
+    result = executor.run_local_bootstrap(checks)
+
+    assert [item["check"] for item in result] == ["bundle-resolution", "predecessor"]
+    assert result[-1]["status"] == "BLOCKED"
+
+
+def test_bootstrap_blocked_result_has_one_concrete_next_action() -> None:
+    executor = _load_executor()
+
+    with pytest.raises(executor.ExecutionContractError) as exc:
+        executor.build_bootstrap_payload("predecessor", "BLOCKED", "none")
+
+    assert exc.value.code == "bootstrap-next-action-required"
+
+
+def test_bootstrap_does_not_replace_five_delivery_verdicts() -> None:
+    executor = _load_executor()
+    verdicts = _passing_verdicts(executor)
+
+    bootstrap = executor.build_bootstrap_payload(
+        "predecessor", "BLOCKED", "Request verified predecessor evidence."
+    )
+    delivery = executor.build_verdict_payload(executor.VERDICT_CATEGORIES, verdicts)
+
+    assert set(bootstrap) == {"check", "status", "next_action"}
+    assert set(delivery["verdicts"]) == set(executor.VERDICT_CATEGORIES)
+    assert "validated" not in json.dumps(delivery).lower()
+
+
+def test_yaml_status_cases_preserve_five_verdict_categories() -> None:
+    executor = _load_executor()
+    plan = (
+        REPO_ROOT
+        / ".github/skills/internal-gateway-execute-plans/fixtures/valid-plan.md"
+    )
+    manifest = executor.parse_execution_manifest(plan.read_text())
+    task_ids = tuple(executor._manifest_task_ids(manifest))
+    verdicts = _passing_verdicts(executor)
+
+    for status in ("DONE", "PARTIAL", "BLOCKED"):
+        completed = task_ids if status == "DONE" else ()
+        remaining = () if status == "DONE" else task_ids
+        payload = executor.build_status_yaml(
+            plan,
+            status,
+            completed,
+            remaining,
+            "focused validation passed",
+            "none" if status == "DONE" else "Continue the approved task loop.",
+        )
+        parsed = executor.parse_status_yaml(
+            payload, plan.with_name(f"{plan.stem}.{status}.yaml")
+        )
+        delivery = executor.build_verdict_payload(
+            executor.VERDICT_CATEGORIES, verdicts
+        )
+
+        assert parsed.status == status
+        assert set(delivery["verdicts"]) == set(executor.VERDICT_CATEGORIES)
+        assert "validated" not in json.dumps(delivery).lower()
 
 
 def test_aggregate_verdict_stays_inconclusive_for_missing_or_unresolved_categories() -> None:
