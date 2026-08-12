@@ -22,7 +22,6 @@ from plan_execution import (  # noqa: E402
     canonical_json,
     compute_content_sha256,
     compute_semantic_fingerprint,
-    compute_sha256,
     parse_execution_manifest,
     validate_manifest_projection,
     validate_plan,

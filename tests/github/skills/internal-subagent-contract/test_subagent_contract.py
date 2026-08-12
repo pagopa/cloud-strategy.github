@@ -19,7 +19,6 @@ from subagent_contract import (  # noqa: E402
     ATTESTATION_STATES,
     BRIEF_FIELDS,
     RECEIPT_FIELDS,
-    RESULT_FIELDS,
     canonical_json,
     compare_progress,
     compute_progress_signature,
