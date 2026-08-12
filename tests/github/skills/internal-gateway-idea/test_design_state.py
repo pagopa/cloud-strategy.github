@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -28,7 +27,15 @@ def _load_module():
     return module
 
 
-def _state(module, *, state: str = "WAIT_G0", assurance: str = "standard", revision: int = 1, digest: str = "a" * 64, sources: tuple[str, ...] = ()):
+def _state(
+    module,
+    *,
+    state: str = "WAIT_G0",
+    assurance: str = "standard",
+    revision: int = 1,
+    digest: str = "a" * 64,
+    sources: tuple[str, ...] = (),
+):
     reviewed = revision if state in {"WAIT_G4", "WAIT_G5", "APPROVED"} else None
     approved = revision if state == "APPROVED" else None
     return module.StateV2(
@@ -100,8 +107,18 @@ def test_v1_or_duplicate_review_state_fails_closed(value: dict[str, object]) -> 
         module.validate_state(value, expected_slug="sample")
 
 
-@pytest.mark.parametrize("message, expected", (("OK!", "ok"), ("continua.", "continua"), ("procedi?", "procedi"), (" VA BENE ", "va bene")))
-def test_short_approval_normalizes_only_terminal_punctuation(message: str, expected: str) -> None:
+@pytest.mark.parametrize(
+    "message, expected",
+    (
+        ("OK!", "ok"),
+        ("continua.", "continua"),
+        ("procedi?", "procedi"),
+        (" VA BENE ", "va bene"),
+    ),
+)
+def test_short_approval_normalizes_only_terminal_punctuation(
+    message: str, expected: str
+) -> None:
     module = _load_module()
     assert module.normalize_short_approval(message) == expected
 
@@ -155,7 +172,9 @@ def test_future_event_is_rejected_without_state_change() -> None:
     assert result.state.revision == state.revision
 
 
-def test_normal_initialization_creates_only_bounded_two_artifact_pair(tmp_path: Path) -> None:
+def test_normal_initialization_creates_only_bounded_two_artifact_pair(
+    tmp_path: Path,
+) -> None:
     module = _load_module()
     assert list(tmp_path.iterdir()) == []
 
@@ -172,7 +191,9 @@ def test_normal_initialization_creates_only_bounded_two_artifact_pair(tmp_path: 
     assert {path.name for path in tmp_path.iterdir()} == {"design.md", "state.json"}
 
 
-def test_cli_persists_direct_execution_handoff_after_explicit_choice(tmp_path: Path, capsys) -> None:
+def test_cli_persists_direct_execution_handoff_after_explicit_choice(
+    tmp_path: Path, capsys
+) -> None:
     module = _load_module()
     design = module.render_bounded_design(_g0_payload())
     approved = _state(
@@ -223,7 +244,9 @@ def test_advance_rejects_an_uninitialized_directory(tmp_path: Path) -> None:
     assert list(tmp_path.iterdir()) == []
 
 
-def test_advance_accepts_a_readable_critical_report_at_g3(tmp_path: Path, capsys) -> None:
+def test_advance_accepts_a_readable_critical_report_at_g3(
+    tmp_path: Path, capsys
+) -> None:
     module = _load_module()
     design = module.render_bounded_design(_g0_payload())
     (tmp_path / "design.md").write_text(design, encoding="utf-8")
@@ -232,7 +255,9 @@ def test_advance_accepts_a_readable_critical_report_at_g3(tmp_path: Path, capsys
         state="WAIT_G3",
         digest=hashlib.sha256(design.encode("utf-8")).hexdigest(),
     )
-    (tmp_path / "state.json").write_text(module.serialize_state(state), encoding="utf-8")
+    (tmp_path / "state.json").write_text(
+        module.serialize_state(state), encoding="utf-8"
+    )
     report = """# Critical Analysis
 
 ## Scope
@@ -273,7 +298,9 @@ The boundary is sound.
     assert "state=WAIT_G4|" in capsys.readouterr().out
 
 
-def test_advisory_before_g0_returns_to_wait_g0_without_mandatory_review(tmp_path: Path) -> None:
+def test_advisory_before_g0_returns_to_wait_g0_without_mandatory_review(
+    tmp_path: Path,
+) -> None:
     module = _load_module()
     started = module.start_advisory_before_g0(
         tmp_path,
@@ -295,7 +322,9 @@ def test_design_hash_mismatch_reopens_earliest_safe_gate(tmp_path: Path) -> None
     design = module.render_bounded_design(_g0_payload())
     (tmp_path / "design.md").write_text(design, encoding="utf-8")
     state = _state(module, state="WAIT_G3", digest="0" * 64)
-    (tmp_path / "state.json").write_text(module.serialize_state(state), encoding="utf-8")
+    (tmp_path / "state.json").write_text(
+        module.serialize_state(state), encoding="utf-8"
+    )
 
     recovered = module.load_runtime(tmp_path, slug="sample")
     assert recovered.state.state == "WAIT_G0"
@@ -351,7 +380,9 @@ def test_template_skill_and_metadata_share_structured_v2_contract() -> None:
         assert "design.md" in document
 
 
-def test_design_is_replaced_before_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_design_is_replaced_before_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     module = _load_module()
     events: list[str] = []
     original = module.os.replace

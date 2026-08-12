@@ -149,7 +149,9 @@ def test_duplicate_evidence_registry_entries_are_rejected(tmp_path: Path) -> Non
         render_report(workspace, report_path(workspace))
 
 
-def test_evidence_sources_are_read_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_evidence_sources_are_read_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     workspace = copy_workspace(tmp_path, "dense")
     read_paths: list[Path] = []
     original_read_text = Path.read_text
@@ -346,12 +348,8 @@ def test_findings_are_ranked_by_impact_certainty_propagation_then_id(
     workspace = copy_workspace(tmp_path, "dense")
     markup = render_report(workspace, report_path(workspace)).read_text()
 
-    assert markup.index('data-finding-id="F02"') < markup.index(
-        'data-finding-id="F03"'
-    )
-    assert markup.index('data-finding-id="F03"') < markup.index(
-        'data-finding-id="F01"'
-    )
+    assert markup.index('data-finding-id="F02"') < markup.index('data-finding-id="F03"')
+    assert markup.index('data-finding-id="F03"') < markup.index('data-finding-id="F01"')
 
 
 def test_duplicate_finding_ids_are_rejected(tmp_path: Path) -> None:
@@ -406,7 +404,9 @@ def test_sections_render_once_in_canonical_order(tmp_path: Path) -> None:
     assert all(markup.count(f'id="{section_id}"') == 1 for section_id in SECTION_IDS)
 
 
-def test_executive_status_and_priorities_precede_detailed_sections(tmp_path: Path) -> None:
+def test_executive_status_and_priorities_precede_detailed_sections(
+    tmp_path: Path,
+) -> None:
     workspace = copy_workspace(tmp_path, "dense")
     markup = render_report(workspace, report_path(workspace)).read_text()
 
@@ -542,7 +542,11 @@ def test_bundle_has_one_runtime_script_and_no_legacy_contract() -> None:
     assert "--preview" not in result.stdout
 
     collector_result = subprocess.run(
-        [sys.executable, str(BUNDLE_ROOT / "scripts/collect_source_notes.py"), "--help"],
+        [
+            sys.executable,
+            str(BUNDLE_ROOT / "scripts/collect_source_notes.py"),
+            "--help",
+        ],
         check=False,
         capture_output=True,
         text=True,

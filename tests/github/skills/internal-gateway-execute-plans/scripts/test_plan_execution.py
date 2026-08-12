@@ -21,11 +21,11 @@ from plan_execution import (  # noqa: E402
     build_compact_payload,
     canonical_json,
     compute_content_sha256,
-    compute_sha256,
     compute_semantic_fingerprint,
+    compute_sha256,
     parse_execution_manifest,
-    validate_plan,
     validate_manifest_projection,
+    validate_plan,
 )
 
 
@@ -46,7 +46,10 @@ def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
 
 def test_valid_plan_parses_contract_and_has_no_findings(valid_plan: Path) -> None:
     assert parse_execution_manifest(valid_plan.read_text())["schema_version"] == 1
-    assert parse_execution_manifest(valid_plan.read_text())["manifest_version"] == "execution-manifest/v1"
+    assert (
+        parse_execution_manifest(valid_plan.read_text())["manifest_version"]
+        == "execution-manifest/v1"
+    )
     assert validate_plan(valid_plan, repo_root=valid_plan.parents[3]) == []
 
 
@@ -77,9 +80,7 @@ def test_current_plan_requires_control_inventory(tmp_path: Path) -> None:
 
 
 def test_current_plan_requires_explicit_no_git_constraint(tmp_path: Path) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        "- No Git mutation.\n", "", 1
-    )
+    text = _fixture("valid-plan.md").read_text().replace("- No Git mutation.\n", "", 1)
     plan = _stage_valid_plan(tmp_path, text)
     assert "missing-no-git-constraint" in {
         item.code for item in validate_plan(plan, tmp_path)
@@ -193,14 +194,16 @@ def test_manifest_only_plan_rejects_legacy_execution_contract_projection(
     text = _fixture("valid-plan.md").read_text()
     plan = _stage_valid_plan(
         tmp_path,
-        text + '\n## Execution Contract\n\n```json\n{}\n```\n',
+        text + "\n## Execution Contract\n\n```json\n{}\n```\n",
     )
     codes = {item.code for item in validate_plan(plan, tmp_path)}
     assert "obsolete-execution-contract" in codes
 
 
 def _current_bootstrap_plan() -> Path:
-    return REPO_ROOT / "tmp/superpowers/plans/2026-08-11-skills-orchestration-alignment.md"
+    return (
+        REPO_ROOT / "tmp/superpowers/plans/2026-08-11-skills-orchestration-alignment.md"
+    )
 
 
 def _manifest_text(plan: Path) -> str:
@@ -228,14 +231,20 @@ def test_execution_manifest_rejects_duplicate_fenced_blocks(tmp_path: Path) -> N
 def test_execution_manifest_rejects_unknown_fields(tmp_path: Path) -> None:
     plan = _current_bootstrap_plan()
     text = _manifest_text(plan)
-    text = text.replace('"manifest_version": "execution-manifest/v1"', '"unknown": true,\n  "manifest_version": "execution-manifest/v1"', 1)
+    text = text.replace(
+        '"manifest_version": "execution-manifest/v1"',
+        '"unknown": true,\n  "manifest_version": "execution-manifest/v1"',
+        1,
+    )
 
     with pytest.raises(ExecutionContractError) as exc:
         parse_execution_manifest(text)
     assert exc.value.code == "unknown-manifest-field"
 
 
-def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(tmp_path: Path) -> None:
+def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(
+    tmp_path: Path,
+) -> None:
     plan = _current_bootstrap_plan()
     original = _manifest_text(plan)
     editorial = original + "\nEditorial note that does not change the manifest.\n"
@@ -247,9 +256,9 @@ def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(tmp_path
     assert compute_content_sha256(tmp_path / "original.md") != compute_content_sha256(
         tmp_path / "editorial.md"
     )
-    assert compute_semantic_fingerprint(original_manifest) == compute_semantic_fingerprint(
-        editorial_manifest
-    )
+    assert compute_semantic_fingerprint(
+        original_manifest
+    ) == compute_semantic_fingerprint(editorial_manifest)
 
 
 @pytest.mark.parametrize(
@@ -269,7 +278,9 @@ def test_every_normative_manifest_class_changes_semantic_fingerprint(mutator) ->
     changed = json.loads(json.dumps(manifest))
     mutator(changed)
 
-    assert compute_semantic_fingerprint(manifest) != compute_semantic_fingerprint(changed)
+    assert compute_semantic_fingerprint(manifest) != compute_semantic_fingerprint(
+        changed
+    )
 
 
 def test_manifest_hashes_are_external_and_self_reference_is_rejected() -> None:
@@ -319,7 +330,9 @@ def _write_resume_state(plan: Path, state: Path, status: str = "DONE") -> None:
                 "plan_fingerprint": compute_semantic_fingerprint(manifest),
                 "content_hash": compute_content_sha256(plan),
                 "completed_task_ids": completed,
-                "remaining_task_ids": [item for item in task_ids if item not in completed],
+                "remaining_task_ids": [
+                    item for item in task_ids if item not in completed
+                ],
                 "last_validation": "focused-tests: passed",
                 "next_action": "No further execution is required.",
             }
@@ -327,7 +340,9 @@ def _write_resume_state(plan: Path, state: Path, status: str = "DONE") -> None:
     )
 
 
-def _run_state_check(plan: Path, state: Path, repo_root: Path) -> subprocess.CompletedProcess[str]:
+def _run_state_check(
+    plan: Path, state: Path, repo_root: Path
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [
             sys.executable,

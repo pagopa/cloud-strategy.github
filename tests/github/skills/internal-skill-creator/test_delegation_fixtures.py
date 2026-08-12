@@ -12,9 +12,7 @@ REPO_ROOT = next(
 )
 BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-skill-creator"
 FIXTURES = BUNDLE_ROOT / "fixtures"
-sys.path.insert(
-    0, str(REPO_ROOT / ".github/skills/internal-subagent-contract/scripts")
-)
+sys.path.insert(0, str(REPO_ROOT / ".github/skills/internal-subagent-contract/scripts"))
 
 from subagent_contract import (  # noqa: E402
     compute_progress_signature,
@@ -64,12 +62,15 @@ def test_valid_creator_result_binds_artifact_acceptance_and_progress() -> None:
     result = _load("valid-plan-result.json")
 
     assert result["progress_signature"] == compute_progress_signature(result)
-    assert validate_result(
-        result,
-        brief,
-        repo_root=REPO_ROOT,
-        brief_bytes=brief_path.read_bytes(),
-    ) == []
+    assert (
+        validate_result(
+            result,
+            brief,
+            repo_root=REPO_ROOT,
+            brief_bytes=brief_path.read_bytes(),
+        )
+        == []
+    )
     assert result["value_delivered"] is True
     assert any(
         evidence["acceptance_id"] == "A1" and evidence["outcome"] == "pass"
@@ -88,7 +89,9 @@ def test_creator_result_rejects_tampered_binding(tamper: str) -> None:
     elif tamper == "artifact_hash":
         result["artifacts"][0]["sha256"] = "sha256:" + "0" * 64
     else:
-        result["artifacts"][0]["path"] = ".github/skills/internal-skill-creator/SKILL.md"
+        result["artifacts"][0]["path"] = (
+            ".github/skills/internal-skill-creator/SKILL.md"
+        )
 
     errors = validate_result(
         result,

@@ -30,16 +30,34 @@ def _brief(root: Path, mode: str = "write") -> dict:
         "delegation_id": f"flow-{mode}",
         "mode": mode,
         "objective": "Produce one bounded observable result.",
-        "value_gate": {"autonomous": True, "verifiable": True, "leverage": "Multiple bounded checks."},
+        "value_gate": {
+            "autonomous": True,
+            "verifiable": True,
+            "leverage": "Multiple bounded checks.",
+        },
         "evidence": [{"ref": "path:inputs", "purpose": "Authorized input root"}],
         "constraints": ["Use only authorized evidence."],
         "write_scope": [] if mode == "read" else ["out"],
-        "expected_output": {"kind": "analysis" if mode == "read" else "artifact", "path": output, "format": "markdown"},
+        "expected_output": {
+            "kind": "analysis" if mode == "read" else "artifact",
+            "path": output,
+            "format": "markdown",
+        },
         "acceptance": [{"id": "A1", "observable": "Caller can verify the result."}],
-        "validation": [{"id": "V1", "owner": "worker", "command": "true", "pass_signal": "exit-code-0"}],
+        "validation": [
+            {
+                "id": "V1",
+                "owner": "worker",
+                "command": "true",
+                "pass_signal": "exit-code-0",
+            }
+        ],
         "budgets": {"attempts": 2, "context_refills": 1},
         "result_path": f"handoff/{mode}.result.json",
-        "cache": {"prefix_version": "internal-subagent-contract/v1", "key_class": "worker-role"},
+        "cache": {
+            "prefix_version": "internal-subagent-contract/v1",
+            "key_class": "worker-role",
+        },
     }
 
 
@@ -57,7 +75,11 @@ def _raw_worker(brief: dict) -> dict:
         "evidence": [{"acceptance_id": "A1", "ref": "V1", "outcome": "pass"}],
         "non_blocking_findings": [],
         "remaining": [],
-        "retry": {"recommended": False, "reason": "No retry needed.", "required_new_input": None},
+        "retry": {
+            "recommended": False,
+            "reason": "No retry needed.",
+            "required_new_input": None,
+        },
     }
 
 
@@ -68,12 +90,16 @@ def _setup(tmp_path: Path, mode: str = "write") -> tuple[dict, dict, bytes]:
     raw = _raw_worker(brief)
     if mode != "read":
         (tmp_path / "out").mkdir()
-        (tmp_path / brief["expected_output"]["path"]).write_text("artifact", encoding="utf-8")
+        (tmp_path / brief["expected_output"]["path"]).write_text(
+            "artifact", encoding="utf-8"
+        )
     return brief, raw, json.dumps(raw, sort_keys=True).encode()
 
 
 @pytest.mark.parametrize("mode", ["read", "write", "plan"])
-def test_compose_handoff_preserves_worker_semantics_for_all_modes(tmp_path: Path, mode: str) -> None:
+def test_compose_handoff_preserves_worker_semantics_for_all_modes(
+    tmp_path: Path, mode: str
+) -> None:
     brief, raw, raw_bytes = _setup(tmp_path, mode)
     result, receipt = compose_handoff(
         raw,
@@ -93,7 +119,11 @@ def test_compose_handoff_preserves_worker_semantics_for_all_modes(tmp_path: Path
     )
 
     assert result["summary"] == raw["summary"]
-    assert result["budgets_used"] == {"attempts": 1, "context_refills": 0, "wall_seconds": 2}
+    assert result["budgets_used"] == {
+        "attempts": 1,
+        "context_refills": 0,
+        "wall_seconds": 2,
+    }
     assert receipt["attestations"]["validation_execution"]["state"] == "verified"
     assert receipt["caller_decision"]["decision"] == "not_decided"
     assert receipt["value_verified"] is False
@@ -141,22 +171,42 @@ def test_evidence_allowlist_rejects_unlisted_or_escaping_inputs(tmp_path: Path) 
         resolve_evidence_allowlist(brief, repo_root=tmp_path)
 
 
-def test_compose_handoff_rejects_artifact_hash_scope_and_semantic_mismatches(tmp_path: Path) -> None:
+def test_compose_handoff_rejects_artifact_hash_scope_and_semantic_mismatches(
+    tmp_path: Path,
+) -> None:
     brief, raw, raw_bytes = _setup(tmp_path)
     out_of_scope = copy.deepcopy(raw)
     out_of_scope["artifacts"] = [{"path": "inputs/source.md", "kind": "markdown"}]
     with pytest.raises(AdapterError, match="scope"):
-        compose_handoff(out_of_scope, brief, repo_root=tmp_path, brief_bytes=b"brief", raw_worker_bytes=raw_bytes)
+        compose_handoff(
+            out_of_scope,
+            brief,
+            repo_root=tmp_path,
+            brief_bytes=b"brief",
+            raw_worker_bytes=raw_bytes,
+        )
 
     bad_hash = copy.deepcopy(raw)
     bad_hash["artifacts"][0]["sha256"] = "sha256:" + "0" * 64
     with pytest.raises(AdapterError, match="hash"):
-        compose_handoff(bad_hash, brief, repo_root=tmp_path, brief_bytes=b"brief", raw_worker_bytes=raw_bytes)
+        compose_handoff(
+            bad_hash,
+            brief,
+            repo_root=tmp_path,
+            brief_bytes=b"brief",
+            raw_worker_bytes=raw_bytes,
+        )
 
     semantic_mutation = copy.deepcopy(raw)
     semantic_mutation["brief_sha256"] = "sha256:" + "0" * 64
     with pytest.raises(AdapterError, match="deterministic"):
-        compose_handoff(semantic_mutation, brief, repo_root=tmp_path, brief_bytes=b"brief", raw_worker_bytes=raw_bytes)
+        compose_handoff(
+            semantic_mutation,
+            brief,
+            repo_root=tmp_path,
+            brief_bytes=b"brief",
+            raw_worker_bytes=raw_bytes,
+        )
 
 
 def test_compose_handoff_rejects_raw_worker_semantic_mutation(tmp_path: Path) -> None:
@@ -174,16 +224,22 @@ def test_compose_handoff_rejects_raw_worker_semantic_mutation(tmp_path: Path) ->
         )
 
 
-def test_unobserved_validation_and_telemetry_are_not_presented_as_verified(tmp_path: Path) -> None:
+def test_unobserved_validation_and_telemetry_are_not_presented_as_verified(
+    tmp_path: Path,
+) -> None:
     brief, raw, raw_bytes = _setup(tmp_path, "read")
-    result, receipt = compose_handoff(raw, brief, repo_root=tmp_path, brief_bytes=b"brief", raw_worker_bytes=raw_bytes)
+    result, receipt = compose_handoff(
+        raw, brief, repo_root=tmp_path, brief_bytes=b"brief", raw_worker_bytes=raw_bytes
+    )
 
     assert result["budgets_used"]["wall_seconds"] is None
     assert receipt["attestations"]["validation_execution"]["state"] == "worker_claim"
     assert receipt["attestations"]["budget_accounting"]["state"] == "unavailable"
 
 
-def test_runtime_evaluator_distinguishes_claims_observations_and_missing_telemetry() -> None:
+def test_runtime_evaluator_distinguishes_claims_observations_and_missing_telemetry() -> (
+    None
+):
     claim = evaluate_runtime_evidence(RuntimeObservation())
     observed = evaluate_runtime_evidence(
         RuntimeObservation(
@@ -219,7 +275,9 @@ def test_runtime_evaluator_distinguishes_claims_observations_and_missing_telemet
 
 def test_persistence_rejects_result_path_mismatch(tmp_path: Path) -> None:
     brief, raw, raw_bytes = _setup(tmp_path, "read")
-    result, receipt = compose_handoff(raw, brief, repo_root=tmp_path, brief_bytes=b"brief", raw_worker_bytes=raw_bytes)
+    result, receipt = compose_handoff(
+        raw, brief, repo_root=tmp_path, brief_bytes=b"brief", raw_worker_bytes=raw_bytes
+    )
     receipt["result_path"] = "handoff/other.result.json"
 
     with pytest.raises(AdapterError, match="result_path"):
@@ -236,10 +294,14 @@ def test_persist_handoff_writes_caller_owned_result_and_receipt(tmp_path: Path) 
         raw_worker_bytes=raw_bytes,
     )
 
-    result_path, receipt_path = persist_handoff(result, receipt, brief, repo_root=tmp_path)
+    result_path, receipt_path = persist_handoff(
+        result, receipt, brief, repo_root=tmp_path
+    )
 
     assert result_path == tmp_path / "handoff/write.result.json"
     assert receipt_path == tmp_path / "handoff/write.receipt.json"
     assert json.loads(result_path.read_text()) == result
     persisted_receipt = json.loads(receipt_path.read_text())
-    assert persisted_receipt["attestations"]["result_persistence"]["state"] == "verified"
+    assert (
+        persisted_receipt["attestations"]["result_persistence"]["state"] == "verified"
+    )

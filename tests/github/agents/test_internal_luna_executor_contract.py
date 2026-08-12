@@ -79,10 +79,14 @@ def test_luna_profiles_expose_the_same_parsed_worker_contract() -> None:
 
 def test_luna_profiles_have_no_positive_nested_dispatch_route() -> None:
     _, copilot_body = _parse_copilot(COPILOT_PATH)
-    codex_body = tomllib.loads(CODEX_PATH.read_text(encoding="utf-8"))["developer_instructions"]
+    codex_body = tomllib.loads(CODEX_PATH.read_text(encoding="utf-8"))[
+        "developer_instructions"
+    ]
 
     for body in (copilot_body, codex_body):
         assert "nested_agents: prohibited" in body
-        assert not re.search(r"\b(delegate|spawn)\s+(?:to\s+)?another\s+agent", body, re.I)
+        assert not re.search(
+            r"\b(delegate|spawn)\s+(?:to\s+)?another\s+agent", body, re.I
+        )
         assert "exact `brief_sha256`" not in body
         assert "budget usage" not in body

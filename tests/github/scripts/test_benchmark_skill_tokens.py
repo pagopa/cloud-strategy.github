@@ -12,7 +12,9 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").is_file() and (parent / ".github").is_dir()
 )
 SCRIPT_PATH = REPO_ROOT / ".github/scripts/benchmark_skill_tokens.py"
-FIXTURE_PATH = REPO_ROOT / "tests/github/skills/internal-terraform/fixtures/routing-cases.json"
+FIXTURE_PATH = (
+    REPO_ROOT / "tests/github/skills/internal-terraform/fixtures/routing-cases.json"
+)
 
 
 def _load_benchmark_module() -> Any:
@@ -49,7 +51,10 @@ def test_terraform_benchmark_covers_the_routing_fixture() -> None:
         assert report["primary_owner"] == expected["primary_owner"]
         assert report["delegated_owner"] == expected["delegated_owner"]
         assert report["loaded_local_references"] == expected["loaded_local_references"]
-        assert report["forbidden_local_references"] == expected["forbidden_local_references"]
+        assert (
+            report["forbidden_local_references"]
+            == expected["forbidden_local_references"]
+        )
 
 
 def test_terraform_benchmark_keeps_language_and_operational_owners_distinct() -> None:

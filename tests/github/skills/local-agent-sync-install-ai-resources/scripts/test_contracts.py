@@ -91,8 +91,7 @@ def test_live_catalog_discovers_legacy_agents_for_all_runtimes() -> None:
     assert all(
         resource.include_targets == ("codex", "copilot", "opencode")
         for resource in resources
-        if resource.source_family == "agents"
-        and resource.source_path in expected_paths
+        if resource.source_family == "agents" and resource.source_path in expected_paths
     )
     assert not any(
         resource.source_path.endswith("local-sync-external-resources.agent.md")
@@ -131,15 +130,12 @@ def test_agent_discovery_finds_native_codex_agents_only_for_codex(
     )
     codex_root = tmp_path / ".codex/agents"
     codex_root.mkdir(parents=True)
-    (codex_root / "native.toml").write_text(
-        'name = "native"\n', encoding="utf-8"
-    )
+    (codex_root / "native.toml").write_text('name = "native"\n', encoding="utf-8")
 
     resources = discover_agent_resources(tmp_path)
 
     assert {
-        resource["source_path"]: resource["include_targets"]
-        for resource in resources
+        resource["source_path"]: resource["include_targets"] for resource in resources
     } == {
         ".github/agents/review.agent.md": ["codex", "copilot", "opencode"],
         ".codex/agents/native.toml": ["codex"],
@@ -450,7 +446,9 @@ def test_translate_agent_for_codex_projects_sidecar_overrides(
     assert payload["model"] == "gpt-5.6-luna"
     assert payload["model_reasoning_effort"] == "high"
     assert payload["sandbox_mode"] == "workspace-write"
-    assert payload["developer_instructions"] == "Follow the complete parent task packet."
+    assert (
+        payload["developer_instructions"] == "Follow the complete parent task packet."
+    )
     assert "GPT-5.6 Luna" not in translated
 
 

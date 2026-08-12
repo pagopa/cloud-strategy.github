@@ -33,7 +33,9 @@ def snapshot_source_bytes(workspace: Path) -> dict[Path, bytes]:
     }
 
 
-def run_collector(workspace: Path, max_preview_lines: int = 2) -> subprocess.CompletedProcess[str]:
+def run_collector(
+    workspace: Path, max_preview_lines: int = 2
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [
             sys.executable,
@@ -91,7 +93,9 @@ def test_dense_inventory_is_sorted_structural_and_bounded(tmp_path: Path) -> Non
         assert item["windows"][0]["lines"][0] == f"# {expected_headings[item['path']]}"
 
 
-@pytest.mark.parametrize("missing", ["map.md", "analysis.md", "issues", "report/report.json"])
+@pytest.mark.parametrize(
+    "missing", ["map.md", "analysis.md", "issues", "report/report.json"]
+)
 def test_missing_required_paths_fail_with_bounded_error(
     tmp_path: Path, missing: str
 ) -> None:

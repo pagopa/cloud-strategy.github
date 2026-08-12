@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -16,12 +15,16 @@ MODULE_PATH = (
     REPO_ROOT
     / ".github/skills/internal-gateway-idea/scripts/critical_report_adapter.py"
 )
-IDEA_STATE_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/idea_state.py"
+IDEA_STATE_PATH = (
+    REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/idea_state.py"
+)
 TARGET = "tmp/idea/sample/design.md"
 
 
 def _load_module():
-    spec = importlib.util.spec_from_file_location("critical_report_adapter", MODULE_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "critical_report_adapter", MODULE_PATH
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -30,7 +33,9 @@ def _load_module():
 
 
 def _load_idea_state():
-    spec = importlib.util.spec_from_file_location("idea_state_v2_adapter_test", IDEA_STATE_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "idea_state_v2_adapter_test", IDEA_STATE_PATH
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -116,9 +121,7 @@ def test_readable_report_becomes_a_bound_consumer_packet() -> None:
             "recommendation": "Keep a central validation step until an equivalent proof exists.",
             "reason": "A shared control prevents unobserved bypasses.",
             "blocking": True,
-            "evidence": [
-                "The proposal names local commands but no central result."
-            ],
+            "evidence": ["The proposal names local commands but no central result."],
         },
         {
             "id": "C-002",
@@ -233,7 +236,9 @@ def test_adapted_report_enters_the_existing_review_boundary() -> None:
     assert reviewed.ledger[0].recommendation.startswith("Keep a central")
 
 
-def test_cli_compact_view_keeps_the_legacy_operator_entrypoint(tmp_path, capsys) -> None:
+def test_cli_compact_view_keeps_the_legacy_operator_entrypoint(
+    tmp_path, capsys
+) -> None:
     module = _load_module()
     report_path = tmp_path / "critical-report.md"
     report_path.write_text(REPORT, encoding="utf-8")

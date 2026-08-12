@@ -169,7 +169,9 @@ def test_normalization_enforces_mattpocock_git_autonomy_source_wide(
             canonical_name="mattpocock-second",
         ),
     )
-    for asset, body in zip(assets, ("First upstream body.\n", "Second upstream body.\n")):
+    for asset, body in zip(
+        assets, ("First upstream body.\n", "Second upstream body.\n")
+    ):
         skill = candidate / asset.local / "SKILL.md"
         skill.parent.mkdir(parents=True)
         skill.write_text(
@@ -344,7 +346,9 @@ def test_normalization_updates_wayfinder_contracts_without_changing_lifecycle(
     assert wayfinder_content.startswith(upstream_lifecycle)
     assert "local-sync:wayfinder-workspace:start" in wayfinder_content
     assert "local-sync:wayfinder-workspace:end" in wayfinder_content
-    assert wayfinder_content.count("local-sync:wayfinder-critical-validation:start") == 1
+    assert (
+        wayfinder_content.count("local-sync:wayfinder-critical-validation:start") == 1
+    )
     assert wayfinder_content.count("local-sync:wayfinder-critical-validation:end") == 1
     assert "`/internal-gateway-critical-master`" in wayfinder_content
     assert "Counter-validate every material critique" in wayfinder_content
@@ -372,7 +376,9 @@ def test_normalization_enforces_mattpocock_research_workspace_contract(
     local = ".github/skills/mattpocock-research"
     skill = candidate / local / "SKILL.md"
     skill.parent.mkdir(parents=True)
-    skill.write_text("Investigate the question and report the findings.\n", encoding="utf-8")
+    skill.write_text(
+        "Investigate the question and report the findings.\n", encoding="utf-8"
+    )
     asset = ManagedAsset(
         source="mattpocock-skills",
         upstream="skills/engineering/research",
@@ -413,7 +419,9 @@ def test_normalization_enforces_mattpocock_research_luna_delegation_contract(
     metadata = candidate / local / "agents/openai.yaml"
     skill.parent.mkdir(parents=True)
     metadata.parent.mkdir(parents=True)
-    skill.write_text("Investigate the question and report the findings.\n", encoding="utf-8")
+    skill.write_text(
+        "Investigate the question and report the findings.\n", encoding="utf-8"
+    )
     metadata.write_text(
         'interface:\n  display_name: "Research"\n'
         '  short_description: "Research from high-trust sources"\n',
@@ -453,7 +461,10 @@ def test_normalization_enforces_mattpocock_research_luna_delegation_contract(
     assert "self-contained brief" in research_content
     assert "report a blocker instead of switching to another agent" in research_content
     assert "local-sync:research-description:start" in metadata_content
-    assert 'short_description: "Research from high-trust sources via Luna"' in metadata_content
+    assert (
+        'short_description: "Research from high-trust sources via Luna"'
+        in metadata_content
+    )
     assert yaml.safe_load(metadata_content)["interface"]["short_description"] == (
         "Research from high-trust sources via Luna"
     )
@@ -500,7 +511,10 @@ def test_normalization_enforces_mattpocock_handoff_workspace_contract(
     assert "local-sync:handoff-workspace:start" in handoff_content
     assert "local-sync:handoff-workspace:end" in handoff_content
     assert "`tmp/.handoff/`" in handoff_content
-    assert "Do not duplicate content already captured in other artifacts (PRDs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead." in handoff_content
+    assert (
+        "Do not duplicate content already captured in other artifacts (PRDs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead."
+        in handoff_content
+    )
 
 
 def test_workspace_inside_repository_is_rejected(tmp_path: Path) -> None:

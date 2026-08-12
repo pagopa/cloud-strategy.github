@@ -67,8 +67,7 @@ def _exact_fields(value: dict[str, Any], expected: set[str], label: str) -> None
     actual = set(value)
     if actual != expected:
         _schema_error(
-            f"{label} fields must be exactly {sorted(expected)}; "
-            f"got {sorted(actual)}"
+            f"{label} fields must be exactly {sorted(expected)}; got {sorted(actual)}"
         )
 
 
@@ -239,17 +238,25 @@ def _score_common(
         _add_case(result, "status_violation_cases", case_id)
     if not observation["plan_reference_matches"]:
         _add_case(result, "hash_binding_violation_cases", case_id)
-    for field in ("plan_fingerprint", "state_plan_fingerprint", "content_hash", "state_content_hash"):
+    for field in (
+        "plan_fingerprint",
+        "state_plan_fingerprint",
+        "content_hash",
+        "state_content_hash",
+    ):
         if not SHA256_RE.fullmatch(observation[field]):
             _add_case(result, "hash_binding_violation_cases", case_id)
     if observation["plan_fingerprint"] != observation["state_plan_fingerprint"]:
         _add_case(result, "hash_binding_violation_cases", case_id)
     if observation["content_hash"] != observation["state_content_hash"]:
         _add_case(result, "hash_binding_violation_cases", case_id)
-    if any(
-        event in manifest["forbidden_dispatch_events"]
-        for event in observation["dispatch_events"]
-    ) or observation["dispatch_events"]:
+    if (
+        any(
+            event in manifest["forbidden_dispatch_events"]
+            for event in observation["dispatch_events"]
+        )
+        or observation["dispatch_events"]
+    ):
         _add_case(result, "dispatch_violation_cases", case_id)
     edits = _validate_edits(observation["edits"], f"{case_id}.edits")
     if any(not edit["in_target"] for edit in edits):
@@ -289,9 +296,7 @@ def _score_common(
         _add_case(result, "next_action_violation_cases", case_id)
 
 
-def _score_branch(
-    observation: dict[str, Any], result: dict[str, list[str]]
-) -> None:
+def _score_branch(observation: dict[str, Any], result: dict[str, list[str]]) -> None:
     case_id = observation["case_id"]
     status = observation["status"]
     if case_id == "VALID_PLAN_DONE":
@@ -405,7 +410,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--run", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
-        result = score(_load_json(args.manifest, "manifest"), _load_json(args.run, "run"))
+        result = score(
+            _load_json(args.manifest, "manifest"), _load_json(args.run, "run")
+        )
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

@@ -30,7 +30,9 @@ def _load_skill_contract(skill_name: str) -> tuple[dict[str, Any], dict[str, Any
     frontmatter_match = re.match(r"\A---\n(.*?)\n---\n", skill_text, re.DOTALL)
     assert frontmatter_match, f"{skill_name} must have YAML frontmatter"
     frontmatter = yaml.safe_load(frontmatter_match.group(1))
-    metadata = yaml.safe_load((skill_path / "agents/openai.yaml").read_text(encoding="utf-8"))
+    metadata = yaml.safe_load(
+        (skill_path / "agents/openai.yaml").read_text(encoding="utf-8")
+    )
     return frontmatter, metadata["interface"], skill_text
 
 
@@ -70,7 +72,9 @@ def test_routing_fixture_covers_the_required_scenario_matrix() -> None:
 def test_public_metadata_preserves_the_two_owner_boundary() -> None:
     fixture = _load_fixture()
     language_frontmatter, language_interface, _ = _load_skill_contract("internal-tf")
-    wrapper_frontmatter, wrapper_interface, _ = _load_skill_contract("internal-terraform")
+    wrapper_frontmatter, wrapper_interface, _ = _load_skill_contract(
+        "internal-terraform"
+    )
 
     language_public_text = " ".join(
         [
@@ -89,7 +93,9 @@ def test_public_metadata_preserves_the_two_owner_boundary() -> None:
 
     for term in fixture["metadata_contract"]["internal-tf"]["required_terms"]:
         assert term.casefold() in language_public_text
-    for marker in fixture["metadata_contract"]["internal-tf"]["forbidden_primary_markers"]:
+    for marker in fixture["metadata_contract"]["internal-tf"][
+        "forbidden_primary_markers"
+    ]:
         assert marker.casefold() not in language_interface["default_prompt"].casefold()
 
     for term in fixture["metadata_contract"]["internal-terraform"]["required_terms"]:
@@ -100,9 +106,7 @@ def test_public_metadata_preserves_the_two_owner_boundary() -> None:
 
 def test_mixed_and_ambiguous_scenarios_keep_one_fail_safe_primary_owner() -> None:
     fixture = _load_fixture()
-    scenarios = {
-        scenario["id"]: scenario for scenario in fixture["scenarios"]
-    }
+    scenarios = {scenario["id"]: scenario for scenario in fixture["scenarios"]}
 
     for scenario_id in (
         "mixed-adoption",
@@ -122,9 +126,11 @@ def test_mixed_and_ambiguous_scenarios_keep_one_fail_safe_primary_owner() -> Non
 
 def test_language_structure_reference_excludes_operational_ownership() -> None:
     fixture = _load_fixture()
-    reference_path = REPO_ROOT / ".github/skills/internal-tf" / fixture[
-        "language_boundary"
-    ]["reference"]
+    reference_path = (
+        REPO_ROOT
+        / ".github/skills/internal-tf"
+        / fixture["language_boundary"]["reference"]
+    )
     reference_text = reference_path.read_text(encoding="utf-8").casefold()
 
     for forbidden_term in fixture["language_boundary"]["forbidden_terms"]:
@@ -138,9 +144,7 @@ def test_language_structure_reference_excludes_operational_ownership() -> None:
 def test_language_only_scenarios_have_no_delegated_owner(
     scenario_id: str,
 ) -> None:
-    scenarios = {
-        scenario["id"]: scenario for scenario in _load_fixture()["scenarios"]
-    }
+    scenarios = {scenario["id"]: scenario for scenario in _load_fixture()["scenarios"]}
 
     assert scenarios[scenario_id]["primary_owner"] == "internal-tf"
     assert scenarios[scenario_id]["delegated_owner"] is None

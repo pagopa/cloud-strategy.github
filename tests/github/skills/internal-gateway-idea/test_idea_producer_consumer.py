@@ -7,14 +7,16 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 MODULE_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/idea_state.py"
-ADAPTER_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/critical_report_adapter.py"
+ADAPTER_PATH = (
+    REPO_ROOT
+    / ".github/skills/internal-gateway-idea/scripts/critical_report_adapter.py"
+)
 
 
 def _load_module():
@@ -27,7 +29,9 @@ def _load_module():
 
 
 def _load_adapter():
-    spec = importlib.util.spec_from_file_location("critical_report_adapter", ADAPTER_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "critical_report_adapter", ADAPTER_PATH
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -35,7 +39,13 @@ def _load_adapter():
     return module
 
 
-def _state(module, *, state: str = "WAIT_G3", assurance: str = "standard", sources: tuple[str, ...] = ()):
+def _state(
+    module,
+    *,
+    state: str = "WAIT_G3",
+    assurance: str = "standard",
+    sources: tuple[str, ...] = (),
+):
     return module.StateV2(
         schema="internal-gateway-idea-state/v2",
         slug="sample",
@@ -318,7 +328,9 @@ def test_advisory_packet_is_non_mandatory_and_cannot_set_review_claims() -> None
 
 def test_advisory_review_returns_to_exact_prior_gate() -> None:
     module = _load_module()
-    reviewing = module.start_advisory(_state(module, state="WAIT_G1"), prior_gate="WAIT_G1")
+    reviewing = module.start_advisory(
+        _state(module, state="WAIT_G1"), prior_gate="WAIT_G1"
+    )
     resumed = module.finish_advisory(reviewing)
     assert reviewing.state == "ADVISORY_REVIEW"
     assert resumed.state == "WAIT_G1"
@@ -359,7 +371,13 @@ def test_g4_resolution_is_separate_from_g3_packet_ingestion() -> None:
 
 
 @pytest.mark.parametrize(
-    ("mode", "expected_state", "expected_actor", "expected_owner", "authorizes_execution"),
+    (
+        "mode",
+        "expected_state",
+        "expected_actor",
+        "expected_owner",
+        "authorizes_execution",
+    ),
     (
         (
             "implementation-plan",

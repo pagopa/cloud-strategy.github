@@ -24,10 +24,10 @@ from subagent_contract import (  # noqa: E402
     compare_progress,
     compute_progress_signature,
     evidence_path_allowed,
-    resolve_evidence_refs,
-    sha256_bytes,
     receipt_path_for,
+    resolve_evidence_refs,
     retry_eligible,
+    sha256_bytes,
     validate_brief,
     validate_prompt_order,
     validate_receipt,
@@ -81,7 +81,10 @@ def test_brief_evidence_separates_inline_facts_from_resolved_paths() -> None:
     brief = _valid_brief()
     brief["evidence"] = [
         {"ref": "fact:caller-approved-policy", "purpose": "Materialized policy fact."},
-        {"ref": "path:.github/skills/internal-subagent-contract/references/protocol.md", "purpose": "Protocol reference."},
+        {
+            "ref": "path:.github/skills/internal-subagent-contract/references/protocol.md",
+            "purpose": "Protocol reference.",
+        },
     ]
 
     resolved = resolve_evidence_refs(brief, repo_root=REPO_ROOT)
@@ -113,14 +116,18 @@ def test_brief_rejects_unknown_and_missing_fields() -> None:
     assert any("objective" in error for error in errors)
 
 
-@pytest.mark.parametrize("bad_scope", ["/tmp/out.md", "../outside.md", "tmp/../outside.md"])
+@pytest.mark.parametrize(
+    "bad_scope", ["/tmp/out.md", "../outside.md", "tmp/../outside.md"]
+)
 def test_brief_write_scope_is_repository_relative(bad_scope: str) -> None:
     brief = _valid_brief()
     brief["write_scope"] = [bad_scope]
 
     errors = validate_brief(brief, repo_root=REPO_ROOT)
 
-    assert any("write_scope" in error or "repository-relative" in error for error in errors)
+    assert any(
+        "write_scope" in error or "repository-relative" in error for error in errors
+    )
 
 
 @pytest.mark.parametrize("mode", ["read", "write", "plan"])
@@ -154,17 +161,23 @@ def test_verification_receipt_binds_exact_pair_and_keeps_decision_separate() -> 
     receipt = _valid_receipt(brief, raw_worker)
 
     assert set(receipt) == RECEIPT_FIELDS
-    assert receipt_path_for(brief["result_path"]) == "tmp/.handoff/receipt-test.receipt.json"
+    assert (
+        receipt_path_for(brief["result_path"])
+        == "tmp/.handoff/receipt-test.receipt.json"
+    )
     assert "value_verified" not in _valid_result()
-    assert validate_receipt(
-        receipt,
-        brief,
-        _valid_result(),
-        repo_root=REPO_ROOT,
-        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
-        raw_worker_bytes=raw_worker,
-        result_path=brief["result_path"],
-    ) == []
+    assert (
+        validate_receipt(
+            receipt,
+            brief,
+            _valid_result(),
+            repo_root=REPO_ROOT,
+            brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+            raw_worker_bytes=raw_worker,
+            result_path=brief["result_path"],
+        )
+        == []
+    )
 
 
 @pytest.mark.parametrize("state", sorted(ATTESTATION_STATES))
@@ -179,15 +192,18 @@ def test_receipt_accepts_only_declared_attestation_states(state: str) -> None:
     if state != "verified":
         receipt["caller_decision"]["decision"] = "not_decided"
 
-    assert validate_receipt(
-        receipt,
-        brief,
-        _valid_result(),
-        repo_root=REPO_ROOT,
-        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
-        raw_worker_bytes=raw_worker,
-        result_path=brief["result_path"],
-    ) == []
+    assert (
+        validate_receipt(
+            receipt,
+            brief,
+            _valid_result(),
+            repo_root=REPO_ROOT,
+            brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+            raw_worker_bytes=raw_worker,
+            result_path=brief["result_path"],
+        )
+        == []
+    )
 
 
 def test_receipt_rejects_unknown_attestation_state() -> None:
@@ -230,7 +246,9 @@ def test_result_requires_artifact_or_acceptance_bound_evidence_for_value() -> No
     result = _valid_result()
     result["value_delivered"] = True
     result["artifacts"] = []
-    result["evidence"] = [{"ref": "summary only", "outcome": "not_run", "acceptance_id": "A1"}]
+    result["evidence"] = [
+        {"ref": "summary only", "outcome": "not_run", "acceptance_id": "A1"}
+    ]
 
     errors = validate_result(
         result,
@@ -300,12 +318,15 @@ def test_one_context_refill_and_one_corrective_retry_are_upper_bounds() -> None:
     brief = _valid_brief()
     result = _valid_result()
     result["budgets_used"]["context_refills"] = 1
-    assert validate_result(
-        result,
-        brief,
-        repo_root=REPO_ROOT,
-        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
-    ) == []
+    assert (
+        validate_result(
+            result,
+            brief,
+            repo_root=REPO_ROOT,
+            brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+        )
+        == []
+    )
 
     overrun = copy.deepcopy(result)
     overrun["budgets_used"]["context_refills"] = 2
@@ -321,7 +342,9 @@ def test_one_context_refill_and_one_corrective_retry_are_upper_bounds() -> None:
 def test_retry_requires_new_brief_input_and_changed_progress() -> None:
     previous_brief = _valid_brief()
     next_brief = copy.deepcopy(previous_brief)
-    next_brief["evidence"].append({"ref": "new-validator-output", "purpose": "corrective evidence"})
+    next_brief["evidence"].append(
+        {"ref": "new-validator-output", "purpose": "corrective evidence"}
+    )
     previous_result = _valid_result()
     previous_result["status"] = "partial"
     previous_result["value_delivered"] = False
@@ -358,9 +381,12 @@ def test_blocked_authority_result_is_terminal_for_retry() -> None:
 
 
 def test_prompt_prefix_order_is_stable_and_dynamic_sections_are_last() -> None:
-    assert validate_prompt_order(
-        ["role", "protocol", "schemas", "mode", "breakpoint", "brief", "retry"]
-    ) == []
+    assert (
+        validate_prompt_order(
+            ["role", "protocol", "schemas", "mode", "breakpoint", "brief", "retry"]
+        )
+        == []
+    )
     errors = validate_prompt_order(["role", "brief", "protocol", "retry"])
     assert errors
 
@@ -368,9 +394,12 @@ def test_prompt_prefix_order_is_stable_and_dynamic_sections_are_last() -> None:
 def test_cache_prefix_keeps_stable_protocol_before_dynamic_brief_and_retry() -> None:
     brief = _valid_brief()
     assert brief["cache"]["prefix_version"] == "internal-subagent-contract/v1"
-    assert validate_prompt_order(
-        ["role", "protocol", "schemas", "mode", "breakpoint", "brief", "retry"]
-    ) == []
+    assert (
+        validate_prompt_order(
+            ["role", "protocol", "schemas", "mode", "breakpoint", "brief", "retry"]
+        )
+        == []
+    )
 
 
 def test_protected_compatibility_is_caller_scope_not_provider_identity() -> None:
@@ -379,7 +408,10 @@ def test_protected_compatibility_is_caller_scope_not_provider_identity() -> None
     brief["write_scope"] = []
     brief["expected_output"] = {"kind": "analysis", "path": None, "format": "text"}
     brief["evidence"] = [
-        {"ref": ".github/skills/mattpocock-research/SKILL.md", "purpose": "compatibility input"}
+        {
+            "ref": ".github/skills/mattpocock-research/SKILL.md",
+            "purpose": "compatibility input",
+        }
     ]
 
     assert validate_brief(brief, repo_root=REPO_ROOT) == []
