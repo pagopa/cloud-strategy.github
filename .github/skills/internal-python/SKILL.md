@@ -61,5 +61,10 @@ linter-owned diagnostics to the configured tooling.
 
 - Use the repository wrapper or declared runtime before ambient `python3`.
 - Run the nearest focused `pytest` command for behavior changes.
+- Keep imports minimal and backed by actual usage while writing Python. Before
+  handoff, run the repository's declared static-analysis or lint check against
+  every changed `.py` file. Resolve unused or otherwise dead-import diagnostics
+  by removing the imports; do not suppress them with `noqa` or broaden
+  exclusions.
 - Keep compile and test scope narrow; exclude virtual environments, caches,
   exports, generated outputs, and dependency trees from broad sweeps.
