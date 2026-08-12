@@ -21,6 +21,15 @@ with the nearest owner.
 
 - Identify the target, nearest owner, bounded evidence, and validation path
   before broad reading or commands.
+- Match tool depth to task scope. A local naming or configuration question must
+  not trigger repository-wide analysis.
+- For a question limited to known files, paths, components, or file types, inspect
+  the smallest relevant set directly with targeted commands such as `rg --files`
+  and `sed`. Honor explicit scope limits and do not invoke graphify.
+- Use graphify when the answer requires broad architecture discovery, relationships
+  across repository areas, dependency or data-flow tracing, or finding an unknown
+  component or call path. The local-scope fast path takes precedence over broader
+  tool triggers.
 - Proceed directly for deterministic, low-risk work. Align with the user before
   non-trivial, ambiguous, architectural, policy, contract, or multi-step changes.
 - Make the smallest change that fixes the controlling issue. Preserve user work
