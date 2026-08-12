@@ -1,17 +1,19 @@
+# Manifest-only plan fixture
+
 ## Goal
 
-Validate the plan execution CLI against a realistic plan shape.
+Validate the manifest-authoritative execution CLI against a realistic writer output.
 
 ## Repository Preflight
 
-- **Target:** test fixture validation.
+- **Target:** manifest fixture validation.
 - **Anti-scope:** no runtime changes.
-- **Validation Path:** `pytest -q tests/fixture/`
+- **Validation Path:** `python3 -m pytest -q tests/fixture/`
 - **Stop Conditions:** fixture is incomplete.
-- **Baseline Validation:** run `pytest -q tests/fixture/` before edits.
+- **Baseline Validation:** run `python3 -m pytest -q tests/fixture/` before edits.
 - **Recovery Policy:** repair only task-local validation failures in scope.
-- **Escalation Conditions:** continue proven pre-existing or unrelated failures; stop on unsafe continuation or unresolved task-local regression.
-- **User-Facing Report:** summarize outcome, changes, validation, recovery, gaps, and next action.
+- **Escalation Conditions:** request authority for scope expansion.
+- **User-Facing Report:** summarize outcome, changes, validation, gaps, and next action.
 
 ## Global Constraints
 
@@ -22,36 +24,44 @@ Validate the plan execution CLI against a realistic plan shape.
 
 | ID | Requirement | Class | Owner | Command or trigger | Pass/fail | Evidence | Fallback/boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| CI-01 | Current retained plans expose the required structural controls. | automatable-local | gateway preflight | `gateway-tests` | Pass: inventory and no-Git constraint are present; fail: either is missing. | Focused pytest output. | Legacy/imported plans remain non-actionable until reconstructed. |
+| CI-01 | Current retained plans expose the required structural controls. | automatable-local | gateway preflight | `gateway-tests` | Pass: manifest, inventory, and no-Git constraint are present; fail: any is missing. | Focused pytest output. | Legacy/imported plans remain non-actionable until reconstructed. |
 
-## Execution Contract
+## Execution Manifest
 
 ```json
 {
   "schema_version": 1,
+  "manifest_version": "execution-manifest/v1",
+  "plan_id": "valid-plan",
+  "repository_root": ".",
+  "authority_boundaries": {
+    "normative_owner": "/internal-gateway-writing-plans",
+    "execution_owner": "/internal-gateway-execute-plans",
+    "worker": "internal-luna-executor",
+    "caller_owns": ["routing", "scope", "authority", "lifecycle", "retry", "independent_validation", "acceptance", "closeout"],
+    "protected_paths": [".github/skills/mattpocock-research/**", ".github/skills/superpowers-*/**"],
+    "no_git_mutation": true
+  },
+  "targets": [
+    {"id": "TGT-FIXTURE", "path": "tests/fixture/", "state": "inspect"}
+  ],
+  "controls": {
+    "CI-01": {"class": "automatable-local", "owner": "gateway", "binding": ["T1", "focused-tests", "diff-check"]}
+  },
   "validations": [
-    {
-      "id": "focused-tests",
-      "command": "python3 -m pytest -q tests/fixture/",
-      "phases": ["baseline", "focused", "final"],
-      "required": true,
-      "success": "exit-code-0",
-      "equivalence": "allowed-if-admissible"
-    },
-    {
-      "id": "diff-check",
-      "command": "git diff --check",
-      "phases": ["final"],
-      "required": true,
-      "success": "exit-code-0",
-      "equivalence": "exact-only"
-    }
+    {"id": "focused-tests", "command": "python3 -m pytest -q tests/fixture/", "owner": "fixture tests", "pass_signal": "exit-code-0", "phases": ["baseline", "focused", "final"], "equivalence": "allowed-if-admissible"},
+    {"id": "diff-check", "command": "git diff --check", "owner": "gateway", "pass_signal": "exit-code-0", "phases": ["final"]}
   ],
   "manual_obligations": [],
-  "authority": {
-    "autonomous": ["read-only-discovery", "supported-runtime-override", "idempotent-retry"],
-    "requires_approval": ["dependency-installation", "network-access", "destructive-change", "scope-expansion", "plan-modification"]
-  }
+  "tasks": [
+    {"id": "T1", "order": 1, "posture": "validation-only", "objective": "Validate the manifest-authoritative CLI fixture.", "depends_on": [], "target_ids": ["TGT-FIXTURE"], "validation_ids": ["focused-tests", "diff-check"], "manual_obligation_ids": [], "acceptance": ["Manifest parses and binds its projection."], "stop_conditions": ["Fixture is incomplete."]}
+  ],
+  "retry_policy": {"initial_attempts": 1, "max_context_refills": 1, "max_corrective_retries": 1, "caller_may_lower": true, "repeat_progress_status": "stalled", "minor_or_cosmetic_reopens": false},
+  "hashing": {"content_sha256": {"algorithm": "SHA-256", "input": "exact retained-plan bytes", "binding": "external"}, "semantic_fingerprint": {"algorithm": "SHA-256", "input": "RFC 8785 canonical Execution Manifest JSON", "version": "semantic-fingerprint/v1", "binding": "external"}, "self_reference": false},
+  "approval": {"binds": "semantic_fingerprint", "editorial_content_change": "retain approval and update content_sha256 audit", "normative_manifest_change": "require renewed approval and preflight"},
+  "bootstrap": {"mode": "manifest-only", "compatibility_projection": [], "projection_binding": {"controls": "manifest.controls", "tasks": "manifest.tasks", "validations": "manifest.validations", "authority": "manifest.authority_boundaries"}, "legacy_only": "reject", "retirement_evidence": "The writer emits this manifest without a legacy Execution Contract projection."},
+  "rollout": ["baseline", "final"],
+  "handoff": {"next_owner": "/internal-gateway-execute-plans", "requires": ["human approval", "exact semantic_fingerprint review", "zero blocking preflight findings"], "status_sibling": "none", "git_mutation": "prohibited"}
 }
 ```
 
@@ -60,5 +70,5 @@ Validate the plan execution CLI against a realistic plan shape.
 **Files:**
 - `scripts/plan_execution.py`
 
-- [ ] Run `python3 scripts/plan_execution.py preflight valid-plan.md`
+- [ ] Run `python3 -m pytest -q tests/fixture/`
 - [ ] Confirm exit 0.

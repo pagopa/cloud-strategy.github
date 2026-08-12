@@ -41,9 +41,13 @@ Do not treat existing files under `report/` as source authority.
 
 ## 3. Build one bounded navigation index
 
-At this point, a parent may invoke `internal-luna-executor` with the source
-paths, authority order, expected output, and validation. The parent retains
-source authority and findings.
+At this point, a parent may invoke `internal-luna-executor` through
+`/internal-subagent-contract` with a `DelegationBrief` v1 containing the source
+paths, authority order, expected output, write scope, acceptance, and
+validation. Verify the returned `WorkerResult` v1, brief/delegation/artifact
+hashes, acceptance evidence, progress signature, and budget use. The parent
+retains source authority, findings, diagram relationships, retry choice, and
+closeout.
 
 Run the read-only helper once after inventory and hashing:
 
@@ -71,9 +75,11 @@ are out of scope. Do not repair, rewrite, or normalize source files.
 
 ## 5. Draft the compact report shape
 
-After the parent fixes sections, evidence IDs, findings, diagram roles, and
-validation, it may invoke `internal-luna-executor` for drafting. Do not
-delegate source authority, findings, or diagram relationships.
+After the parent fixes sections, evidence IDs, findings, diagram roles,
+acceptance, and validation, it may invoke `internal-luna-executor` through
+`/internal-subagent-contract` for drafting. Do not delegate source authority,
+findings, diagram relationships, acceptance, or closeout; use the common brief
+and result protocol and the caller-owned retry budget.
 
 Choose the generic five-section skeleton, evidence IDs, findings, and two
 diagram roles before editing. Write one `report/report.json` with exactly five

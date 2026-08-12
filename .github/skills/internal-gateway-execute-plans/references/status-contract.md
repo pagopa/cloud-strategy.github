@@ -49,6 +49,7 @@ Every status file must contain this minimal resumable core in order:
 ## Status
 ## Plan
 ## Plan Fingerprint
+## Content Hash
 ## Completed
 ## Remaining
 ## Validation
@@ -64,6 +65,7 @@ contents when present:
 ## Baseline Validation
 ## Files Changed
 ## Recovery Attempts
+## Content Hash
 ## Failure Classification
 ## Closeout Decision
 ## Recovery Exhaustion
@@ -78,7 +80,12 @@ context. Its absence is not a parser failure.
 
 - **Status** — one of `DONE`, `PARTIAL`, `BLOCKED`, or `NEEDS_REVIEW`.
 - **Plan** — the exact plan file path.
-- **Plan Fingerprint** — the SHA-256 hash of the approved plan, prefixed with `sha256:`.
+- **Plan Fingerprint** — the external SHA-256 semantic fingerprint of the
+  canonical `## Execution Manifest` JSON, prefixed with `sha256:`. Editorial
+  Markdown changes do not alter this binding; normative manifest changes do.
+- **Content Hash** — the external SHA-256 hash of the exact retained-plan
+  bytes, prefixed with `sha256:`. Manifest-bound statuses must retain this
+  audit binding and update it for approved editorial changes.
 - **Completed** — list of tasks that passed their transition gate, with task-level evidence.
 - **Remaining** — list of tasks not yet complete, with the exact work remaining.
 - **Validation** — list of validation commands run and their results.
@@ -132,9 +139,13 @@ Before final response or pause:
 When resuming from a `PARTIAL` or `BLOCKED` status:
 
 1. Verify the status file exists and contains all required headings.
-2. Compute the current plan fingerprint and compare it to the recorded `## Plan Fingerprint`.
-3. If the fingerprints differ, the plan changed after approval; stop and record the drift.
-4. If the fingerprints match, resume from the first task listed in `## Remaining`.
+2. Compute the current semantic manifest fingerprint and exact content hash;
+   compare them to `## Plan Fingerprint` and `## Content Hash`.
+3. If the semantic fingerprint differs, the approved plan changed; stop and
+   record semantic drift. If only the content hash differs, record the
+   editorial audit drift and refresh the external content binding through the
+   approval route.
+4. If both bindings match, resume from the first task listed in `## Remaining`.
 5. Do not resume from `DONE` unless fresh evidence invalidates the previous closeout.
 
 When resuming from `NEEDS_REVIEW`:

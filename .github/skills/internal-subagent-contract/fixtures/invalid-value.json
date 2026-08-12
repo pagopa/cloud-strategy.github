@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "delegation_id": "delegation-invalid-value",
+  "mode": "read",
+  "objective": "Answer one obvious local question.",
+  "value_gate": {
+    "autonomous": true,
+    "verifiable": false,
+    "leverage": ""
+  },
+  "evidence": [
+    {
+      "ref": "README.md",
+      "purpose": "A single obvious input."
+    }
+  ],
+  "constraints": ["Return a short answer."],
+  "write_scope": [],
+  "expected_output": {
+    "kind": "analysis",
+    "path": null,
+    "format": "text"
+  },
+  "acceptance": [
+    {
+      "id": "A1",
+      "observable": "The answer is present."
+    }
+  ],
+  "validation": [
+    {
+      "id": "V1",
+      "owner": "caller",
+      "command": "true",
+      "pass_signal": "exit-code-0"
+    }
+  ],
+  "budgets": {
+    "attempts": 1,
+    "context_refills": 0
+  },
+  "result_path": "tmp/.handoff/delegation-invalid-value.result.json",
+  "cache": {
+    "prefix_version": "internal-subagent-contract/v1",
+    "key_class": "worker-role"
+  }
+}

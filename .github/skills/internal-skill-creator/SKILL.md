@@ -23,10 +23,13 @@ distinction consistently to the six internal gateway skills covered by this
 convention. Keep the target skill model-invocable; a called skill must not set
 `disable-model-invocation: true`.
 
-The parent may invoke `internal-luna-executor` with a locked inventory,
-consumer map, outline, metadata shape, or evaluation command. Retain trigger,
-boundary, policy, subjective authoring judgment, and human review for
-subjective instructional prose.
+After inventory, consumer mapping, outline, metadata shape, or evaluation
+commands are locked, the parent may invoke `internal-luna-executor` through
+`/internal-subagent-contract` with one `DelegationBrief` v1. The brief declares
+the exact write scope, expected skill artifact, acceptance, and validation;
+the parent verifies one `WorkerResult` v1, artifact/hash/evidence binding, and
+budget use. Retain trigger, boundary, policy, subjective authoring judgment,
+scope, retry choice, and human review for subjective instructional prose.
 
 ## When to use
 

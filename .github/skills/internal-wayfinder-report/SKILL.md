@@ -10,10 +10,13 @@ single-page report. The report explains what the workspace says and surfaces
 coherence questions, while the map, analysis, and issue files remain
 authoritative.
 
-The parent may invoke `internal-luna-executor` for candidate evidence inventory
-or report drafting after the relevant sources, authority, report structure,
-and validation are fixed. Never delegate source authority, findings, or diagram
-relationships.
+The parent may invoke `internal-luna-executor` through
+`/internal-subagent-contract` for candidate evidence inventory or report
+drafting only after the relevant sources, authority, report structure,
+acceptance, and validation are fixed. Use one `DelegationBrief` v1 and verify
+one `WorkerResult` v1, including scope, hashes, evidence, progress, and budget
+use. Never delegate source authority, findings, diagram relationships,
+acceptance, or closeout.
 
 ## When to use
 

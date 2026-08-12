@@ -17,8 +17,12 @@ interface:
     to define exactly one parent-supplied retained plan path under
     tmp/superpowers/plans/ with ordered tasks,
     concrete targets, focused validation, a traceable ## Control Inventory,
-    and a versioned ## Execution Contract declaring native commands,
-    equivalence policy, manual obligations, and authority boundaries. Require
+    and a normative ## Execution Manifest v1 declaring targets, controls,
+    native commands, manual obligations, authority boundaries, retry posture,
+    approval binding, bootstrap metadata, and handoff. New writer output uses
+    bootstrap.mode: manifest-only and emits no legacy ## Execution Contract;
+    the current migration plan is the sole exact compatibility projection.
+    Require
     posture classification through /internal-tdd for executable or evaluable
     tasks; require red-first evidence only for mandatory-test-first and retain
     focused and broad validation for feature-first completion. Do not impose a
@@ -27,16 +31,17 @@ interface:
     Do not predict runtime candidates or weaken a requirement into a manual
     attestation. Run the executor-owned preflight as the sole mechanical
     validator. After eligibility, the control inventory, plan structure, locked
-    decisions, and acceptance are complete, the gateway MUST delegate
-    implementation-plan writing (redazione del piano) to internal-luna-executor
-    with exactly one
-    parent-supplied retained plan path under tmp/superpowers/plans/, the
-    implementation-plan writing objective, relevant evidence, required structure, and
-    validation. Luna MUST write exactly one reviewable retained plan at that path, run the
-    executor-owned preflight, fix blocking findings, and repeat until zero
-    blocking findings; retain eligibility, classification, human review, final
-    independent preflight, handoff, and the no-Git-mutation boundary here.
+    decisions, and acceptance are complete, write one DelegationBrief v1 in
+    mode: plan through /internal-subagent-contract before invoking
+    internal-luna-executor. Bind exactly one parent-supplied retained plan path
+    under tmp/superpowers/plans/ as the write_scope and expected output, and
+    include the objective, bounded evidence, required structure, acceptance,
+    and exact validation. Verify one WorkerResult v1 for matching IDs and
+    hashes, acceptance evidence, progress signature, and budget use; retain
+    routing, authority, lifecycle, retry choice, independent validation,
+    human review, final preflight, handoff, and the no-Git-mutation boundary
+    here. Do not branch on caller or model identity.
     Explicitly legacy/imported material requires reconstruction and refreshed
-    approval/fingerprint. Perform human review, report the plan path, name
+    approval/semantic-fingerprint and content-hash bindings. Perform human review, report the plan path, name
     /internal-gateway-execute-plans as the only next owner, and wait for
     explicit execution approval. Observe the No-Commit Rule: no Git mutations.

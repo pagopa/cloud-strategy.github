@@ -27,13 +27,15 @@ description: "Use when executing or resuming an approved repository-owned retain
 
 - Writing, reformulating, reviewing, or challenging a plan.
 - Running same-chat work that is not driven by an approved retained plan.
-- Changing the retained-plan schema or replacing the local execution contract.
+- Changing the retained-plan schema or replacing the local execution contract
+  outside an explicitly approved migration plan.
 
 ## Safety Boundary
 
 The bundled CLI proves only mechanical safety: the plan is in the canonical
-retained directory, readable, actionable, and contains exactly one supported
-execution contract; status files are bound to the plan and fingerprint; and
+retained directory, readable, actionable, and contains exactly one normative
+Execution Manifest v1; status files are bound to its semantic fingerprint and
+exact-byte content hash; and
 completion state is consistent. Missing required headings, execution fields,
 or contract data are blocking findings. Status files require the minimal
 resumable core plus closeout evidence for serialized routes. Conversational
@@ -42,8 +44,8 @@ approval and runtime safety remain gateway responsibilities.
 ## Control coverage
 
 Before execution, read the plan's `## Control Inventory` or
-reconstruct the same inventory from its tasks, acceptance criteria, and
-versioned `## Execution Contract`. Classify every obligation exactly once as
+reconstruct the same inventory from its manifest tasks, acceptance criteria,
+and controls. Classify every obligation exactly once as
 `automatable-local`, `observable-runtime`, `external-capability`,
 `authority-or-scope`, or `genuine-human-judgment`. Do not confuse these control
 classes with the six runtime discovery categories.
@@ -190,10 +192,13 @@ mutation steps, skip them and record the plan drift in the status sibling.
 - `python3 scripts/plan_execution.py completion-check <plan-file> <status-file> --format compact`
 - Confirm no live bundle instruction dispatches plan work outside the current session.
 
-The writer-owned versioned `## Execution Contract` is authoritative for
-validation IDs, native commands, required flags, equivalence policy, manual
-obligations, and authority boundaries. The control inventory is a traceability
-layer over that contract, not a competing schema. The gateway owns all six
+The writer-owned versioned `## Execution Manifest` is authoritative for target
+and validation IDs, native commands, task bindings, retry posture, manual
+obligations, approval binding, bootstrap metadata, and authority boundaries.
+The control inventory and task headings are compatibility projections only
+during the explicit migration bootstrap; they are not a competing schema. A
+legacy `## Execution Contract` is accepted only when the manifest declares
+that exact bootstrap projection. The gateway owns all six
 runtime discovery categories, recovery candidates, attempts, rejection
 evidence, authority state, and closeout routing. `DONE` requires fresh evidence for every
 task and every automatable or observable control; `request-authority` keeps
