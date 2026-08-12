@@ -46,6 +46,9 @@ MANIFEST_FIELDS = {
     "allowed_statuses",
     "forbidden_dispatch_events",
     "report_labels",
+    "observable_evidence",
+    "pre_existing_case",
+    "authority_case",
 }
 RUN_FIELDS = {"contract_version", "observations"}
 EDIT_FIELDS = {"path", "in_target"}
@@ -110,6 +113,14 @@ def _validate_manifest(value: object) -> dict[str, Any]:
     report_labels = _unique_strings(manifest["report_labels"], "manifest report_labels")
     if report_labels != ["Plan", "Changed", "Checks", "Next"]:
         _schema_error("manifest report_labels must be Plan, Changed, Checks, Next")
+    observable_evidence = _unique_strings(
+        manifest["observable_evidence"], "manifest observable_evidence"
+    )
+    if observable_evidence != ["order", "bytes", "scope", "invalidation", "residuals"]:
+        _schema_error("manifest observable_evidence has an unsupported contract")
+    for field in ("pre_existing_case", "authority_case"):
+        if manifest[field] not in required_case_ids:
+            _schema_error(f"manifest {field} must name a required case")
     return manifest
 
 
@@ -358,6 +369,9 @@ def score(manifest: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
     observed_case_ids = [observation["case_id"] for observation in observations]
     result: dict[str, list[str] | object] = {
         "contract_version": CONTRACT_VERSION,
+        "observable_evidence": validated_manifest["observable_evidence"],
+        "pre_existing_case": validated_manifest["pre_existing_case"],
+        "authority_case": validated_manifest["authority_case"],
         "observed_case_ids": observed_case_ids,
         "missing_case_ids": sorted(set(required_case_ids) - set(observed_case_ids)),
         "unexpected_case_ids": sorted(set(observed_case_ids) - set(required_case_ids)),

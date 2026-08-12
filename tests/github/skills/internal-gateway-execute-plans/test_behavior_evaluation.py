@@ -12,6 +12,15 @@ HERE = Path(__file__).parent
 EVALUATION = HERE / "evaluation"
 BENCHMARK = EVALUATION / "benchmark.json"
 SCORER = EVALUATION / "score_executor_eval.py"
+REPO_ROOT = next(
+    parent
+    for parent in HERE.parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
+EXECUTOR_SCRIPT = (
+    REPO_ROOT
+    / ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
+)
 EXPECTED_CASES = {
     "VALID_PLAN_DONE",
     "IN_TARGET_OMISSION_DONE",
@@ -34,6 +43,15 @@ def _load_scorer():
     spec = importlib.util.spec_from_file_location("score_executor_eval", SCORER)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_executor():
+    spec = importlib.util.spec_from_file_location("plan_execution_eval", EXECUTOR_SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -137,6 +155,20 @@ def test_benchmark_declares_exactly_five_branches() -> None:
     assert len(benchmark["required_case_ids"]) == 5
 
 
+def test_benchmark_declares_observable_guardrail_contract() -> None:
+    benchmark = _load(BENCHMARK)
+
+    assert benchmark["observable_evidence"] == [
+        "order",
+        "bytes",
+        "scope",
+        "invalidation",
+        "residuals",
+    ]
+    assert benchmark["pre_existing_case"] == "PRE_EXISTING_FAILURE_RESIDUAL"
+    assert benchmark["authority_case"] == "AUTHORITY_GAP_BLOCKED"
+
+
 def test_five_observed_branches_are_accepted() -> None:
     scorer = _load_scorer()
     result = scorer.score(_load(BENCHMARK), _passing_run())
@@ -235,3 +267,132 @@ def test_cli_reports_structured_acceptance(tmp_path: Path, accepted: bool) -> No
     assert completed.returncode == (0 if accepted else 1)
     assert json.loads(completed.stdout)["accepted"] is accepted
     assert completed.stderr == ""
+
+
+def test_verdict_payload_keeps_five_categories_and_qualified_aggregate() -> None:
+    executor = _load_executor()
+    verdicts = {
+        category: executor.Verdict(
+            category=category,
+            outcome="passed",
+            coverage=f"{category} checks",
+            limit="none",
+        )
+        for category in executor.VERDICT_CATEGORIES
+    }
+
+    payload = executor.build_verdict_payload(
+        executor.VERDICT_CATEGORIES,
+        verdicts,
+    )
+
+    assert set(payload["verdicts"]) == set(executor.VERDICT_CATEGORIES)
+    assert payload["aggregate"]["outcome"] == "passed"
+    assert all(
+        set(item) == {"category", "outcome", "coverage", "limit"}
+        for item in payload["verdicts"].values()
+    )
+    assert "validated" not in json.dumps(payload).lower()
+
+
+def test_aggregate_verdict_stays_inconclusive_for_missing_or_unresolved_categories() -> None:
+    executor = _load_executor()
+    verdicts = {
+        "structure": executor.Verdict(
+            "structure", "passed", "manifest parsed", "none"
+        ),
+        "semantic_review": executor.Verdict(
+            "semantic_review", "inconclusive", "no review receipt", "review missing"
+        ),
+    }
+
+    aggregate = executor.aggregate_verdict(
+        executor.VERDICT_CATEGORIES,
+        verdicts,
+    )
+
+    assert aggregate.outcome == "inconclusive"
+    assert "missing" in aggregate.limit
+    assert "semantic_review" in aggregate.limit
+
+
+def test_structured_branches_preserve_residual_and_authority_limits() -> None:
+    observations = {
+        item["case_id"]: item for item in _passing_run()["observations"]
+    }
+
+    residual = observations["PRE_EXISTING_FAILURE_RESIDUAL"]
+    blocked = observations["AUTHORITY_GAP_BLOCKED"]
+
+    assert residual["pre_existing_failures"]
+    assert set(residual["pre_existing_failures"]).issubset(
+        set(residual["residual_failures"])
+    )
+    assert blocked["authority_required"] is True
+    assert blocked["next_action_count"] == 1
+
+
+def _passing_verdicts(executor):
+    return {
+        category: executor.Verdict(category, "passed", "observed", "none")
+        for category in executor.VERDICT_CATEGORIES
+    }
+
+
+def test_workflow_count_comparison_returns_observed_delta() -> None:
+    executor = _load_executor()
+    before = {
+        "discovery": 1,
+        "approvals": 1,
+        "reopenings": 1,
+        "critic": 1,
+        "recovery": 1,
+    }
+    after = {key: value + 1 for key, value in before.items()}
+
+    delta = executor.compare_workflow_counts(before, after)
+
+    assert delta.observed is True
+    assert delta.delta == {key: 1 for key in before}
+
+
+def test_delivery_readiness_requires_all_verdicts_and_count_evidence() -> None:
+    executor = _load_executor()
+    counts = (
+        {key: 1 for key in ("discovery", "approvals", "reopenings", "critic", "recovery")},
+        {key: 2 for key in ("discovery", "approvals", "reopenings", "critic", "recovery")},
+    )
+
+    readiness = executor.evaluate_delivery(
+        _passing_verdicts(executor),
+        predecessor={"verified": True, "limit": "none"},
+        provenance={"verified": True, "limit": "none"},
+        baseline={"verified": True, "limit": "none"},
+        counts=counts,
+    )
+
+    assert readiness.aggregate.outcome == "passed"
+    assert readiness.count_delta.observed is True
+    assert set(readiness.verdicts) == set(executor.VERDICT_CATEGORIES)
+
+
+def test_delivery_readiness_stays_non_green_for_missing_category_or_stale_artifact() -> None:
+    executor = _load_executor()
+    verdicts = _passing_verdicts(executor)
+    verdicts.pop("source_baseline")
+    counts = (
+        {key: 1 for key in ("discovery", "approvals", "reopenings", "critic", "recovery")},
+        {key: 2 for key in ("discovery", "approvals", "reopenings", "critic", "recovery")},
+    )
+
+    readiness = executor.evaluate_delivery(
+        verdicts,
+        predecessor={"verified": True, "limit": "none"},
+        provenance={"verified": False, "limit": "stale final artifact"},
+        baseline={"verified": True, "limit": "none"},
+        counts=counts,
+    )
+
+    assert readiness.aggregate.outcome != "passed"
+    assert "source_baseline" in readiness.aggregate.limit
+    assert "stale final artifact" in readiness.verdicts["artifact_provenance"].limit

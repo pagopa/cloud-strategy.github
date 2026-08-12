@@ -6,11 +6,12 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Sequence
 
 
 @dataclass(frozen=True)
@@ -18,6 +19,166 @@ class Finding:
     code: str
     message: str
     severity: Literal["blocking", "notice"] = "blocking"
+
+
+VerdictOutcome = Literal["passed", "failed", "inconclusive"]
+VERDICT_CATEGORIES = (
+    "structure",
+    "semantic_review",
+    "artifact_provenance",
+    "source_baseline",
+    "execution_readiness",
+)
+VERDICT_OUTCOMES = frozenset({"passed", "failed", "inconclusive"})
+WORKFLOW_COUNT_KEYS = ("discovery", "approvals", "reopenings", "critic", "recovery")
+WORKFLOW_COUNTS_RE = re.compile(
+    r"counts=discovery:\d+,approvals:\d+,reopenings:\d+,critic:\d+,recovery:\d+"
+)
+
+
+@dataclass(frozen=True)
+class Verdict:
+    category: str
+    outcome: VerdictOutcome
+    coverage: str
+    limit: str
+
+    def __post_init__(self) -> None:
+        if self.category not in VERDICT_CATEGORIES and self.category != "aggregate":
+            raise ValueError(f"unsupported verdict category: {self.category}")
+        if self.outcome not in VERDICT_OUTCOMES:
+            raise ValueError(f"unsupported verdict outcome: {self.outcome}")
+        if not self.coverage.strip() or not self.limit.strip():
+            raise ValueError("verdict coverage and limit must be non-empty")
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "category": self.category,
+            "outcome": self.outcome,
+            "coverage": self.coverage,
+            "limit": self.limit,
+        }
+
+
+@dataclass(frozen=True)
+class CountDelta:
+    before: Mapping[str, int]
+    after: Mapping[str, int]
+    delta: Mapping[str, int]
+    observed: bool = True
+
+
+@dataclass(frozen=True)
+class DeliveryReadiness:
+    verdicts: Mapping[str, Verdict]
+    aggregate: Verdict
+    count_delta: CountDelta | None
+
+
+def _validated_workflow_counts(counts: Mapping[str, int], label: str) -> dict[str, int]:
+    if set(counts) != set(WORKFLOW_COUNT_KEYS):
+        raise ValueError(f"{label} must contain exactly {list(WORKFLOW_COUNT_KEYS)}")
+    normalized: dict[str, int] = {}
+    for key in WORKFLOW_COUNT_KEYS:
+        value = counts[key]
+        if not _is_int(value) or value < 0:
+            raise ValueError(f"{label}.{key} must be a non-negative integer")
+        normalized[key] = value
+    return normalized
+
+
+def compare_workflow_counts(
+    igi01_counts: Mapping[str, int], downstream_counts: Mapping[str, int]
+) -> CountDelta:
+    """Compare observed IDEA and downstream workflow counts without inference."""
+
+    before = _validated_workflow_counts(igi01_counts, "igi01_counts")
+    after = _validated_workflow_counts(downstream_counts, "downstream_counts")
+    return CountDelta(
+        before=before,
+        after=after,
+        delta={key: after[key] - before[key] for key in WORKFLOW_COUNT_KEYS},
+    )
+
+
+def _gate_verdict(
+    category: str,
+    existing: Verdict | None,
+    gate: Mapping[str, object] | None,
+) -> Verdict:
+    if existing is None:
+        existing = Verdict(
+            category,
+            "inconclusive",
+            "No category verdict was supplied",
+            f"missing={category}",
+        )
+    if gate is None:
+        return Verdict(
+            category,
+            "inconclusive",
+            f"{category} gate evidence",
+            f"missing={category} gate",
+        )
+    verified = gate.get("verified")
+    if verified is True:
+        return existing
+    limit = gate.get("limit")
+    return Verdict(
+        category,
+        "inconclusive",
+        f"{category} gate evidence",
+        str(limit) if isinstance(limit, str) and limit.strip() else f"unverified={category}",
+    )
+
+
+def evaluate_delivery(
+    verdicts: Mapping[str, Verdict],
+    predecessor: Mapping[str, object] | None,
+    provenance: Mapping[str, object] | None,
+    baseline: Mapping[str, object] | None,
+    counts: tuple[Mapping[str, int], Mapping[str, int]] | CountDelta | None,
+) -> DeliveryReadiness:
+    """Compose end-to-end readiness while preserving every category and limit."""
+
+    category_verdicts: dict[str, Verdict] = {}
+    for category in VERDICT_CATEGORIES:
+        candidate = verdicts.get(category)
+        if candidate is not None and candidate.category != category:
+            raise ValueError(f"verdict category mismatch: {category}")
+        category_verdicts[category] = candidate or Verdict(
+            category,
+            "inconclusive",
+            "No category verdict was supplied",
+            f"missing={category}",
+        )
+    category_verdicts["artifact_provenance"] = _gate_verdict(
+        "artifact_provenance", category_verdicts["artifact_provenance"], provenance
+    )
+    category_verdicts["source_baseline"] = _gate_verdict(
+        "source_baseline", category_verdicts["source_baseline"], baseline
+    )
+
+    count_delta: CountDelta | None
+    if isinstance(counts, CountDelta):
+        count_delta = counts
+    elif isinstance(counts, tuple) and len(counts) == 2:
+        count_delta = compare_workflow_counts(counts[0], counts[1])
+    else:
+        count_delta = None
+
+    category_verdicts["execution_readiness"] = _gate_verdict(
+        "execution_readiness", category_verdicts["execution_readiness"], predecessor
+    )
+    if count_delta is None or not count_delta.observed:
+        category_verdicts["execution_readiness"] = Verdict(
+            "execution_readiness",
+            "inconclusive",
+            "serial predecessor, provenance, and baseline gates",
+            "workflow count comparison unavailable",
+        )
+    aggregate = aggregate_verdict(VERDICT_CATEGORIES, category_verdicts)
+    return DeliveryReadiness(category_verdicts, aggregate, count_delta)
 
 
 MANIFEST_SCHEMA_VERSION = 1
@@ -540,6 +701,192 @@ class ResumeState:
     next_action: str
 
 
+@dataclass(frozen=True)
+class Baseline:
+    head: str
+    paths: Mapping[str, str]
+
+
+def _git_head(repo_root: Path) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ExecutionContractError(
+            "baseline-head-unavailable",
+            f"Unable to resolve repository HEAD: {exc}",
+        ) from exc
+    head = completed.stdout.strip()
+    if not head:
+        raise ExecutionContractError("baseline-head-unavailable", "Repository HEAD is empty")
+    return head
+
+
+def _relevant_files(repo_root: Path, declared_paths: Sequence[str]) -> dict[str, str]:
+    hashes: dict[str, str] = {}
+    root = repo_root.resolve()
+    for declared in declared_paths:
+        candidate = Path(declared)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            raise ExecutionContractError(
+                "invalid-baseline-path",
+                f"Relevant baseline path must remain repository-relative: {declared}",
+            )
+        target = (root / candidate).resolve()
+        try:
+            target.relative_to(root)
+        except ValueError as exc:
+            raise ExecutionContractError(
+                "invalid-baseline-path",
+                f"Relevant baseline path escapes repository: {declared}",
+            ) from exc
+        if target.is_file():
+            hashes[candidate.as_posix()] = compute_content_sha256(target)
+        elif target.is_dir():
+            for entry in sorted(target.rglob("*")):
+                if not entry.is_file():
+                    continue
+                relative = entry.resolve().relative_to(root).as_posix()
+                hashes[relative] = compute_content_sha256(entry)
+        else:
+            hashes[candidate.as_posix()] = "<missing>"
+    return hashes
+
+
+def compute_relevant_baseline(repo_root: Path, paths: Sequence[str]) -> Baseline:
+    """Capture HEAD and exact dirty bytes for explicitly relevant paths."""
+
+    return Baseline(_git_head(repo_root.resolve()), _relevant_files(repo_root, paths))
+
+
+def validate_relevant_baseline(
+    baseline: Baseline, current: Baseline
+) -> list[Finding]:
+    """Fail closed on HEAD, declared-path, or undeclared dependency drift."""
+
+    findings: list[Finding] = []
+    if baseline.head != current.head:
+        findings.append(
+            Finding(
+                "baseline-head-drift",
+                f"Repository HEAD changed: {baseline.head} != {current.head}",
+            )
+        )
+    baseline_paths = dict(baseline.paths)
+    current_paths = dict(current.paths)
+    for path, expected in baseline_paths.items():
+        actual = current_paths.get(path, "<missing>")
+        if actual != expected:
+            findings.append(
+                Finding(
+                    "relevant-path-drift",
+                    f"Relevant path changed: {path}",
+                )
+            )
+    for path in sorted(set(current_paths) - set(baseline_paths)):
+        findings.append(
+            Finding(
+                "undeclared-dependency-drift",
+                f"Current baseline contains undeclared path: {path}",
+            )
+        )
+    return findings
+
+
+def validate_ignored_artifact(path: Path, expected_hash: str) -> Finding | None:
+    """Validate an ignored retained artifact by reading its exact bytes."""
+
+    if not path.is_file():
+        return Finding("ignored-artifact-missing", f"Ignored artifact is missing: {path}")
+    actual_hash = compute_content_sha256(path)
+    if actual_hash != expected_hash:
+        return Finding(
+            "ignored-artifact-hash-drift",
+            f"Ignored artifact bytes changed: {path}",
+        )
+    return None
+
+
+def git_diff_check_coverage(outcome: str) -> dict[str, str]:
+    """Describe the narrow coverage of `git diff --check` without overclaiming."""
+
+    if not outcome.strip():
+        raise ValueError("git diff --check outcome must be non-empty")
+    return {
+        "command": "git diff --check",
+        "outcome": outcome,
+        "coverage": "Git-visible paths only",
+        "limit": "Ignored paths are not covered and require direct byte validation",
+    }
+
+
+def aggregate_verdict(
+    required: Sequence[str], verdicts: Mapping[str, Verdict]
+) -> Verdict:
+    """Combine independent verdicts without hiding missing or inconclusive work."""
+
+    required_categories = tuple(required)
+    if not required_categories or len(set(required_categories)) != len(required_categories):
+        raise ValueError("required verdict categories must be unique and non-empty")
+    unsupported = set(required_categories) - set(VERDICT_CATEGORIES)
+    if unsupported:
+        raise ValueError(f"unsupported required verdict categories: {sorted(unsupported)}")
+
+    missing = [category for category in required_categories if category not in verdicts]
+    inconclusive = [
+        category
+        for category in required_categories
+        if category in verdicts and verdicts[category].outcome == "inconclusive"
+    ]
+    failed = [
+        category
+        for category in required_categories
+        if category in verdicts and verdicts[category].outcome == "failed"
+    ]
+    if missing or inconclusive:
+        outcome: VerdictOutcome = "inconclusive"
+        limits: list[str] = []
+        if missing:
+            limits.append(f"missing={','.join(missing)}")
+        if inconclusive:
+            limits.append(f"inconclusive={','.join(inconclusive)}")
+        limit = "; ".join(limits)
+    elif failed:
+        outcome = "failed"
+        limit = f"failed={','.join(failed)}"
+    else:
+        outcome = "passed"
+        limit = "none"
+    coverage = f"required categories={','.join(required_categories)}"
+    return Verdict("aggregate", outcome, coverage, limit)
+
+
+def build_verdict_payload(
+    required: Sequence[str], verdicts: Mapping[str, Verdict]
+) -> dict[str, object]:
+    """Build category-qualified output and preserve gaps as explicit verdicts."""
+
+    aggregate = aggregate_verdict(required, verdicts)
+    rendered: dict[str, dict[str, str]] = {}
+    for category in required:
+        verdict = verdicts.get(category)
+        if verdict is None:
+            verdict = Verdict(
+                category,
+                "inconclusive",
+                "No category result was supplied",
+                "Missing required verdict",
+            )
+        elif verdict.category != category:
+            raise ValueError(f"verdict key does not match category: {category}")
+        rendered[category] = verdict.as_dict()
+    return {"verdicts": rendered, "aggregate": aggregate.as_dict()}
+
+
 def state_path_for(plan_path: Path) -> Path:
     """Return the one JSON resume sibling for a retained plan."""
 
@@ -911,6 +1258,51 @@ def validate_state(
         findings.append(Finding("done-with-remaining-tasks", "DONE state must not contain remaining tasks"))
     if state.status != "DONE" and not remaining:
         findings.append(Finding("status-progress-mismatch", "A complete task set must use DONE status"))
+    return findings
+
+
+def validate_serial_predecessor(
+    plan_path: Path,
+    state_path: Path,
+    repo_root: Path | None = None,
+    workflow_count_evidence: str | None = None,
+) -> list[Finding]:
+    """Require a hash-bound, completed predecessor with final count evidence."""
+
+    effective_root = repo_root or _find_repo_root(plan_path)
+    findings = validate_state(plan_path, state_path, effective_root)
+    if findings or not state_path.is_file():
+        return findings
+    try:
+        payload = json.loads(
+            state_path.read_text(), object_pairs_hook=_reject_duplicate_json_fields
+        )
+        state = parse_resume_state(_mapping(payload, "resume state"))
+    except (OSError, UnicodeError, json.JSONDecodeError, ExecutionContractError, TypeError, ValueError) as exc:
+        return findings + [Finding("malformed-state", str(exc))]
+
+    if state.status != "DONE":
+        findings.append(
+            Finding(
+                "predecessor-not-done",
+                "Serial predecessor must have a DONE execution state",
+            )
+        )
+    if not re.search(r"(?i)\bfinal\b", state.last_validation):
+        findings.append(
+            Finding(
+                "predecessor-final-validation-missing",
+                "Serial predecessor state lacks final validation evidence",
+            )
+        )
+    count_evidence = f"{state.last_validation} {workflow_count_evidence or ''}"
+    if not WORKFLOW_COUNTS_RE.search(count_evidence):
+        findings.append(
+            Finding(
+                "predecessor-workflow-counts-missing",
+                "Serial predecessor state lacks observed IDEA workflow-count evidence",
+            )
+        )
     return findings
 
 

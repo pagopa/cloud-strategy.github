@@ -14,5 +14,8 @@
     "model-switch",
     "delegated-plan"
   ],
-  "report_labels": ["Plan", "Changed", "Checks", "Next"]
+  "report_labels": ["Plan", "Changed", "Checks", "Next"],
+  "observable_evidence": ["order", "bytes", "scope", "invalidation", "residuals"],
+  "pre_existing_case": "PRE_EXISTING_FAILURE_RESIDUAL",
+  "authority_case": "AUTHORITY_GAP_BLOCKED"
 }

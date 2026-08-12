@@ -16,10 +16,22 @@ sys.path.insert(0, str(BUNDLE / "scripts"))
 from runtime_evidence import (  # noqa: E402
     AdapterError,
     RuntimeObservation,
+    bounded_diagnostics,
     compose_handoff,
     evaluate_runtime_evidence,
+    isolated_diagnostics,
     persist_handoff,
     resolve_evidence_allowlist,
+    validate_path_identity,
+)
+from subagent_contract import (  # noqa: E402
+    bind_final_artifact,
+    compute_semantic_fingerprint,
+    invalidate_attestation,
+    primary_owner_decision,
+    sha256_path,
+    validate_payload_schema,
+    validate_receipt,
 )
 
 
@@ -305,3 +317,123 @@ def test_persist_handoff_writes_caller_owned_result_and_receipt(tmp_path: Path) 
     assert (
         persisted_receipt["attestations"]["result_persistence"]["state"] == "verified"
     )
+
+
+def test_bind_final_artifact_binds_final_bytes_and_semantic_fingerprint(
+    tmp_path: Path,
+) -> None:
+    brief, raw, raw_bytes = _setup(tmp_path)
+    result, receipt = compose_handoff(
+        raw,
+        brief,
+        repo_root=tmp_path,
+        brief_bytes=json.dumps(brief).encode(),
+        raw_worker_bytes=raw_bytes,
+    )
+    manifest = {"plan_id": "T2", "targets": ["out/result.md"]}
+
+    binding = bind_final_artifact(
+        result,
+        receipt,
+        brief["expected_output"]["path"],
+        manifest,
+        repo_root=tmp_path,
+    )
+
+    assert binding.receipt["final_artifact"]["path"] == "out/result.md"
+    assert binding.receipt["final_artifact"]["sha256"] == sha256_path(
+        tmp_path / "out/result.md"
+    )
+    assert (
+        binding.receipt["final_artifact"]["semantic_fingerprint"]
+        == compute_semantic_fingerprint(manifest)
+    )
+
+
+def test_stale_receipt_rejects_material_artifact_edit(tmp_path: Path) -> None:
+    brief, raw, raw_bytes = _setup(tmp_path)
+    result, receipt = compose_handoff(
+        raw,
+        brief,
+        repo_root=tmp_path,
+        brief_bytes=json.dumps(brief).encode(),
+        raw_worker_bytes=raw_bytes,
+    )
+    binding = bind_final_artifact(
+        result,
+        receipt,
+        brief["expected_output"]["path"],
+        {"plan_id": "T2"},
+        repo_root=tmp_path,
+    )
+    (tmp_path / "out/result.md").write_text("material edit", encoding="utf-8")
+
+    errors = validate_receipt(
+        binding.receipt,
+        brief,
+        binding.result,
+        repo_root=tmp_path,
+        brief_bytes=json.dumps(brief).encode(),
+        raw_worker_bytes=raw_bytes,
+        result_path=brief["result_path"],
+        manifest={"plan_id": "T2"},
+    )
+
+    assert any("final artifact" in error for error in errors)
+
+
+def test_material_edit_invalidation_marks_attestation_failed() -> None:
+    receipt = {"attestations": {"artifact_integrity": {"state": "verified"}}, "value_verified": True}
+
+    invalidated = invalidate_attestation(receipt, "material edit")
+
+    assert invalidated["attestations"]["artifact_integrity"]["state"] == "failed"
+    assert invalidated["value_verified"] is False
+
+
+def test_primary_owner_path_emits_no_worker_chain() -> None:
+    decision = primary_owner_decision(False)
+
+    assert decision["owner"] == "primary"
+    assert decision["delegated"] is False
+    assert decision["worker_chain"] is None
+
+
+def test_path_identity_checks_type_and_expected_symlink_target(tmp_path: Path) -> None:
+    target = tmp_path / "target.md"
+    target.write_text("target", encoding="utf-8")
+    link = tmp_path / "link.md"
+    link.symlink_to(target)
+
+    assert validate_path_identity(target, "file") == []
+    assert validate_path_identity(link, "symlink", target) == []
+    assert validate_path_identity(link, "file")
+    assert validate_path_identity(link, "symlink", tmp_path / "other.md")
+
+
+def test_isolated_diagnostics_select_only_requested_source() -> None:
+    diagnostics = {
+        "executor": ["executor failure"],
+        "provider": ["provider failure"],
+    }
+
+    assert isolated_diagnostics(diagnostics, "executor") == ["executor failure"]
+    assert "provider failure" not in isolated_diagnostics(diagnostics, "executor")
+
+
+def test_bounded_diagnostics_marks_omitted_output() -> None:
+    bounded = bounded_diagnostics(["one", "two", "three"], 2)
+
+    assert len(bounded) == 2
+    assert bounded[0:1] == ["one"]
+    assert "omitted" in bounded[-1]
+
+
+def test_payload_schema_rejects_unknown_and_malformed_payloads() -> None:
+    errors = validate_payload_schema(
+        {"id": "brief", "extra": True},
+        {"id": str, "items": list},
+    )
+
+    assert any("missing" in error for error in errors)
+    assert any("unknown" in error for error in errors)

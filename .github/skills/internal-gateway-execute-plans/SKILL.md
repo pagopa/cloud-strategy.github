@@ -58,6 +58,22 @@ For each Manifest task, in order:
    task complete. An omission that is normative, unsafe, out of scope, or
    authority-required stops execution.
 
+## Delivery Verdicts
+
+Readiness evidence uses five independent categories: `structure`,
+`semantic_review`, `artifact_provenance`, `source_baseline`, and
+`execution_readiness`. Each category reports an outcome, its coverage, and its
+limit. An aggregate result may be green only when every required category is
+concluded and passed; missing or inconclusive categories keep the aggregate
+inconclusive. Do not use a standalone `validated` signal as user-facing
+readiness evidence.
+
+The serial predecessor gate must verify the IGI-01 state sibling, its exact
+plan and manifest hashes, `DONE` task closure, final validation evidence, and
+an observed IDEA workflow-count record before T1 begins. A native seam test
+that demonstrates count derivation is evidence of coverage, not retrospective
+authorship or proof of a historical execution run.
+
 ## Stop And State
 
 Use exactly one compact JSON sibling when execution must be resumed or its

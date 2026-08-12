@@ -9,10 +9,12 @@ retry.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import re
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -97,8 +99,10 @@ RECEIPT_FIELDS = frozenset(
         "attestations",
         "caller_decision",
         "value_verified",
+        "final_artifact",
     }
 )
+FINAL_ARTIFACT_FIELDS = frozenset({"path", "sha256", "semantic_fingerprint"})
 RAW_WORKER_FIELDS = frozenset({"sha256", "ref"})
 ATTESTATION_FIELDS = frozenset({"state", "source", "evidence_ref"})
 CALLER_DECISION_FIELDS = frozenset({"decision", "source", "evidence_ref"})
@@ -116,6 +120,15 @@ class ContractError(ValueError):
     def __init__(self, errors: Sequence[str]):
         self.errors = tuple(errors)
         super().__init__("; ".join(self.errors))
+
+
+@dataclass(frozen=True)
+class BindingResult:
+    result: dict[str, object]
+    receipt: dict[str, object]
+    artifact_path: str
+    artifact_sha256: str
+    semantic_fingerprint: str
 
 
 def canonical_json(value: Any) -> bytes:
@@ -144,6 +157,14 @@ def sha256_bytes(value: bytes | str) -> str:
 
 def sha256_path(path: Path) -> str:
     return sha256_bytes(path.read_bytes())
+
+
+def compute_semantic_fingerprint(manifest: Mapping[str, object]) -> str:
+    """Hash the canonical manifest bytes used for caller acceptance binding."""
+
+    if not isinstance(manifest, Mapping):
+        raise ContractError(("manifest must be an object",))
+    return sha256_bytes(canonical_json(manifest))
 
 
 def receipt_path_for(result_path: str | Path) -> str:
@@ -194,6 +215,40 @@ def _field_errors(value: object, expected: set[str] | frozenset[str], label: str
         errors.append(f"{label} missing required field: {field}")
     for field in sorted(present - set(expected)):
         errors.append(f"{label} has unknown field: {field}")
+    return errors
+
+
+def validate_payload_schema(
+    payload: object, schema: Mapping[str, object], label: str = "payload"
+) -> list[str]:
+    """Validate exact payload keys and recursively declared Python types."""
+
+    if not isinstance(payload, Mapping):
+        return [f"{label} must be an object"]
+    if not isinstance(schema, Mapping):
+        return ["schema must be an object"]
+    errors: list[str] = []
+    for field in sorted(set(schema) - set(payload)):
+        errors.append(f"{label} missing required field: {field}")
+    for field in sorted(set(payload) - set(schema)):
+        errors.append(f"{label} has unknown field: {field}")
+
+    def matches(value: object, expected: object, field_label: str) -> bool:
+        if isinstance(expected, Mapping):
+            nested = validate_payload_schema(value, expected, field_label)
+            errors.extend(nested)
+            return not nested
+        if isinstance(expected, tuple):
+            return isinstance(value, expected)
+        if isinstance(expected, type):
+            return isinstance(value, expected)
+        if expected is None:
+            return value is None
+        raise ValueError(f"unsupported schema declaration for {field_label}")
+
+    for field, expected in schema.items():
+        if field in payload and not matches(payload[field], expected, f"{label}.{field}"):
+            errors.append(f"{label}.{field} has an invalid type")
     return errors
 
 
@@ -669,6 +724,7 @@ def validate_receipt(
     raw_worker_bytes: bytes | None = None,
     result_path: Path | str | None = None,
     receipt_path: Path | str | None = None,
+    manifest: Mapping[str, object] | None = None,
 ) -> list[str]:
     """Return caller-owned VerificationReceipt v1 binding and attestation findings."""
 
@@ -716,6 +772,56 @@ def validate_receipt(
     if isinstance(receipt["result_path"], str) and isinstance(brief.get("write_scope"), list):
         if _scope_allows(receipt["result_path"], brief["write_scope"]):
             errors.append("receipt.result_path must remain outside brief.write_scope")
+
+    final_artifact = receipt["final_artifact"]
+    artifact_attestation = (
+        receipt.get("attestations", {}).get("artifact_integrity")
+        if isinstance(receipt.get("attestations"), Mapping)
+        else None
+    )
+    invalidated = (
+        isinstance(artifact_attestation, Mapping)
+        and artifact_attestation.get("state") == "failed"
+        and str(artifact_attestation.get("evidence_ref", "")).startswith("invalidation:")
+    )
+    if final_artifact is None:
+        if receipt["value_verified"] and result.get("artifacts"):
+            errors.append("receipt.final_artifact is required for verified artifact acceptance")
+    else:
+        errors.extend(_field_errors(final_artifact, FINAL_ARTIFACT_FIELDS, "receipt.final_artifact"))
+        if isinstance(final_artifact, Mapping) and not _field_errors(
+            final_artifact, FINAL_ARTIFACT_FIELDS, "receipt.final_artifact"
+        ):
+            final_path = final_artifact["path"]
+            errors.extend(_relative_path(final_path, "receipt.final_artifact.path", root))
+            if isinstance(final_path, str):
+                artifact_path = root / final_path
+                if not artifact_path.is_file():
+                    errors.append(f"receipt.final_artifact is missing: {final_path}")
+                elif not invalidated and not _hash_matches(
+                    final_artifact["sha256"], sha256_path(artifact_path)
+                ):
+                    errors.append("receipt final artifact hash does not match current bytes")
+                result_artifacts = result.get("artifacts", [])
+                if isinstance(result_artifacts, list):
+                    matching = [
+                        item
+                        for item in result_artifacts
+                        if isinstance(item, Mapping) and item.get("path") == final_path
+                    ]
+                    if not matching:
+                        errors.append("receipt.final_artifact.path is not bound by result.artifacts")
+                    elif not _hash_matches(matching[0].get("sha256"), final_artifact["sha256"]):
+                        errors.append("receipt.final_artifact hash does not match result artifact")
+            if not _hash_matches(
+                final_artifact["semantic_fingerprint"],
+                final_artifact["semantic_fingerprint"],
+            ):
+                errors.append("receipt.final_artifact.semantic_fingerprint must be a SHA-256 value")
+            if manifest is not None and not _hash_matches(
+                final_artifact["semantic_fingerprint"], compute_semantic_fingerprint(manifest)
+            ):
+                errors.append("receipt.final_artifact semantic fingerprint does not match manifest")
 
     if receipt_path is not None:
         receipt_path_text = receipt_path.as_posix() if isinstance(receipt_path, Path) else receipt_path
@@ -766,6 +872,99 @@ def validate_receipt(
         ):
             errors.append("receipt.value_verified requires every attestation to be verified")
     return errors
+
+
+def bind_final_artifact(
+    result: Mapping[str, object],
+    receipt: Mapping[str, object],
+    artifact_path: Path | str,
+    manifest: Mapping[str, object],
+    *,
+    repo_root: Path | None = None,
+) -> BindingResult:
+    """Bind caller verification to the current final artifact bytes and manifest."""
+
+    root = (repo_root or Path.cwd()).resolve()
+    candidate = Path(artifact_path)
+    resolved = (candidate if candidate.is_absolute() else root / candidate).resolve()
+    try:
+        relative = resolved.relative_to(root).as_posix()
+    except ValueError as exc:
+        raise ContractError(("final artifact must remain inside repo_root",)) from exc
+    if not resolved.is_file():
+        raise ContractError((f"final artifact is missing: {relative}",))
+
+    artifacts = result.get("artifacts")
+    if not isinstance(artifacts, list):
+        raise ContractError(("result.artifacts must be a list",))
+    matching = []
+    for item in artifacts:
+        if not isinstance(item, Mapping) or not isinstance(item.get("path"), str):
+            continue
+        item_path = (root / item["path"]).resolve()
+        if item_path == resolved:
+            matching.append(item)
+    if len(matching) != 1:
+        raise ContractError(("final artifact must match exactly one result artifact",))
+    digest = sha256_path(resolved)
+    if not _hash_matches(matching[0].get("sha256"), digest):
+        raise ContractError(("final artifact bytes do not match result artifact hash",))
+
+    fingerprint = compute_semantic_fingerprint(manifest)
+    bound_receipt = copy.deepcopy(dict(receipt))
+    bound_receipt["final_artifact"] = {
+        "path": relative,
+        "sha256": digest,
+        "semantic_fingerprint": fingerprint,
+    }
+    return BindingResult(
+        result=copy.deepcopy(dict(result)),
+        receipt=bound_receipt,
+        artifact_path=relative,
+        artifact_sha256=digest,
+        semantic_fingerprint=fingerprint,
+    )
+
+
+def invalidate_attestation(receipt: Mapping[str, object], reason: str) -> dict[str, object]:
+    """Mark a prior artifact attestation unusable after a material edit."""
+
+    if not _non_empty(reason):
+        raise ValueError("invalidation reason must be non-empty")
+    invalidated = copy.deepcopy(dict(receipt))
+    attestations = invalidated.setdefault("attestations", {})
+    if not isinstance(attestations, dict):
+        raise ValueError("receipt.attestations must be an object")
+    attestations["artifact_integrity"] = {
+        "state": "failed",
+        "source": "caller",
+        "evidence_ref": f"invalidation:{reason.strip()}",
+    }
+    invalidated["value_verified"] = False
+    decision = invalidated.get("caller_decision")
+    if isinstance(decision, dict):
+        decision["decision"] = "rejected"
+        decision["source"] = "caller"
+        decision["evidence_ref"] = f"invalidation:{reason.strip()}"
+    return invalidated
+
+
+def primary_owner_decision(provenance_adds_value: bool) -> dict[str, object]:
+    """Choose the primary-owner path when delegation would add no provenance."""
+
+    if provenance_adds_value:
+        return {
+            "owner": "caller",
+            "delegated": True,
+            "worker_chain": "caller-selected",
+            "reason": "Delegation adds provenance value",
+        }
+    return {
+        "owner": "primary",
+        "delegated": False,
+        "worker_chain": None,
+        "reason": "Primary owner retains the work because delegation adds no provenance value",
+    }
 
 
 def retry_eligible(

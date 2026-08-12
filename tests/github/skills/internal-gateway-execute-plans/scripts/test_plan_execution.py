@@ -18,13 +18,17 @@ sys.path.insert(0, str(SCRIPTS))
 from plan_execution import (  # noqa: E402
     ExecutionContractError,
     Finding,
+    Baseline,
     build_compact_payload,
     canonical_json,
     compute_content_sha256,
     compute_semantic_fingerprint,
     parse_execution_manifest,
+    git_diff_check_coverage,
+    validate_ignored_artifact,
     validate_manifest_projection,
     validate_plan,
+    validate_relevant_baseline,
 )
 
 
@@ -199,10 +203,56 @@ def test_manifest_only_plan_rejects_legacy_execution_contract_projection(
     assert "obsolete-execution-contract" in codes
 
 
-def _current_bootstrap_plan() -> Path:
-    return (
-        REPO_ROOT / "tmp/superpowers/plans/2026-08-11-skills-orchestration-alignment.md"
+def test_relevant_baseline_detects_path_and_undeclared_dependency_drift() -> None:
+    baseline = Baseline(
+        head="sha256:head",
+        paths={"declared/source.py": "sha256:source", "declared/config.json": "sha256:config"},
     )
+    current = Baseline(
+        head="sha256:head",
+        paths={
+            "declared/source.py": "sha256:changed",
+            "declared/config.json": "sha256:config",
+            "undeclared/dependency.py": "sha256:new",
+        },
+    )
+
+    findings = validate_relevant_baseline(baseline, current)
+    codes = {finding.code for finding in findings}
+
+    assert "relevant-path-drift" in codes
+    assert "undeclared-dependency-drift" in codes
+
+
+def test_relevant_baseline_accepts_clean_declared_paths() -> None:
+    baseline = Baseline(
+        head="sha256:head",
+        paths={"declared/source.py": "sha256:source"},
+    )
+
+    assert validate_relevant_baseline(baseline, baseline) == []
+
+
+def test_ignored_artifact_validates_direct_bytes(tmp_path: Path) -> None:
+    artifact = tmp_path / "ignored-plan.md"
+    artifact.write_text("retained bytes", encoding="utf-8")
+    expected = compute_content_sha256(artifact)
+
+    assert validate_ignored_artifact(artifact, expected) is None
+    assert validate_ignored_artifact(artifact, "sha256:" + "0" * 64).code == "ignored-artifact-hash-drift"
+    assert validate_ignored_artifact(tmp_path / "missing.md", expected).code == "ignored-artifact-missing"
+
+
+def test_git_diff_check_coverage_names_git_visible_limit() -> None:
+    coverage = git_diff_check_coverage("passed")
+
+    assert coverage["outcome"] == "passed"
+    assert coverage["coverage"] == "Git-visible paths only"
+    assert "ignored" in coverage["limit"].lower()
+
+
+def _current_bootstrap_plan() -> Path:
+    return FIXTURES / "valid-plan.md"
 
 
 def _manifest_text(plan: Path) -> str:
@@ -265,7 +315,7 @@ def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(
     [
         lambda m: m["authority_boundaries"].update({"no_git_mutation": False}),
         lambda m: m["targets"][0].update({"path": "changed/path"}),
-        lambda m: m["controls"]["SUBAGENT-VALUE"]["binding"].append("T8"),
+            lambda m: m["controls"]["CI-01"]["binding"].append("T8"),
         lambda m: m["validations"][0].update({"command": "make changed"}),
         lambda m: m["tasks"][0].update({"depends_on": ["T8"]}),
         lambda m: m["bootstrap"].update({"mode": "generic"}),
@@ -302,7 +352,7 @@ def test_bootstrap_projection_drift_fails_closed() -> None:
     text = _manifest_text(_current_bootstrap_plan())
     manifest = parse_execution_manifest(text)
     changed = json.loads(json.dumps(manifest))
-    changed["controls"].pop("SUBAGENT-VALUE")
+    changed["controls"].pop("CI-01")
 
     findings = validate_manifest_projection(text, changed)
 

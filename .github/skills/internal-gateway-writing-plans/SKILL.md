@@ -77,6 +77,11 @@ description: Use when repository-owned work needs an approved implementation pla
   Luna MUST return the semantic fields for one `WorkerResult` v1. The runtime
   adapter composes deterministic fields and a caller-owned `VerificationReceipt`
   v1; unobserved validation and budget data remain claims or `unavailable`.
+  When delegation adds provenance value, caller acceptance must bind the exact
+  final artifact bytes and the manifest semantic fingerprint. A material edit
+  invalidates the prior result and receipt. When delegation adds no provenance
+  value, the primary owner performs the work without manufacturing a worker
+  chain or retrospective authorship claim.
   The writer independently verifies the result, receipt, and plan, then runs the
   executor-owned `preflight`; it may use only the one bounded refill and one
   corrective retry allowed by the brief. The parent gateway retains
@@ -100,6 +105,12 @@ description: Use when repository-owned work needs an approved implementation pla
    a warning or printout is not a gate. It must not predict runtime discovery
    results or recovery candidates. Completion: each review concern and control
    row is accepted or has a recorded revision.
+  Delivery communication must keep `structure`, `semantic_review`,
+  `artifact_provenance`, `source_baseline`, and `execution_readiness` as
+  distinct verdict categories. Each category names its outcome, coverage, and
+  limit; an aggregate green result requires every required category to be
+  concluded and passed. A standalone `validated` flag is not a readiness
+  claim.
 4. Report the retained plan path, name `/internal-gateway-execute-plans` as
   the only next owner, and wait for explicit execution approval. Do not invoke
   execution, create a status sibling, or offer an imported execution owner

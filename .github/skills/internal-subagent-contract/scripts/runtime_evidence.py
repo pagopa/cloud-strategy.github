@@ -6,7 +6,7 @@ import copy
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping
+from typing import Mapping, Sequence
 
 from subagent_contract import (
     ATTESTATION_NAMES,
@@ -54,6 +54,66 @@ class RuntimeObservation:
     command: str | None = None
     outcome: str | None = None
     evidence_ref: str | None = None
+
+
+def validate_path_identity(
+    path: Path,
+    expected_type: str,
+    expected_symlink_target: Path | str | None = None,
+) -> list[str]:
+    """Check path type and symlink identity before interpreting its contents."""
+
+    errors: list[str] = []
+    if expected_type not in {"file", "directory", "symlink"}:
+        return [f"unsupported expected path type: {expected_type}"]
+    if expected_symlink_target is not None and expected_type != "symlink":
+        errors.append("expected_symlink_target requires expected_type=symlink")
+    if expected_type == "symlink":
+        if not path.is_symlink():
+            errors.append(f"path is not a symlink: {path}")
+        elif expected_symlink_target is not None:
+            actual_target = path.resolve()
+            expected_target = Path(expected_symlink_target).expanduser().resolve()
+            if actual_target != expected_target:
+                errors.append(
+                    f"symlink target mismatch: {actual_target} != {expected_target}"
+                )
+        return errors
+
+    if path.is_symlink():
+        errors.append(f"path must not be a symlink: {path}")
+    elif expected_type == "file" and not path.is_file():
+        errors.append(f"path is not a file: {path}")
+    elif expected_type == "directory" and not path.is_dir():
+        errors.append(f"path is not a directory: {path}")
+    return errors
+
+
+def bounded_diagnostics(lines: Sequence[str], limit: int) -> list[str]:
+    """Return bounded diagnostics with an explicit omission marker."""
+
+    if limit < 1:
+        raise ValueError("diagnostic limit must be positive")
+    values = list(lines)
+    if not all(isinstance(line, str) for line in values):
+        raise ValueError("diagnostics must be strings")
+    if len(values) <= limit:
+        return values
+    omitted = len(values) - (limit - 1)
+    return values[: limit - 1] + [f"[truncated: {omitted} diagnostics omitted]"]
+
+
+def isolated_diagnostics(
+    diagnostics: Mapping[str, Sequence[str]], source: str, limit: int = 64
+) -> list[str]:
+    """Read only the selected diagnostic source; no unrelated backend is queried."""
+
+    if not isinstance(diagnostics, Mapping):
+        raise ValueError("diagnostics must be an object keyed by source")
+    selected = diagnostics.get(source, ())
+    if not isinstance(selected, Sequence) or isinstance(selected, (str, bytes)):
+        raise ValueError("selected diagnostics must be a sequence of strings")
+    return bounded_diagnostics(selected, limit)
 
 
 def evaluate_runtime_evidence(
@@ -286,6 +346,7 @@ def compose_handoff(
             "evidence_ref": "caller:pending",
         },
         "value_verified": False,
+        "final_artifact": None,
     }
     receipt_errors = validate_receipt(
         receipt,

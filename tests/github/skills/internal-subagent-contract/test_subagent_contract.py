@@ -67,6 +67,13 @@ def _valid_receipt(brief: dict, raw_worker: bytes) -> dict:
             "evidence_ref": "evidence:caller-acceptance",
         },
         "value_verified": True,
+        "final_artifact": {
+            "path": ".github/skills/internal-subagent-contract/fixtures/valid-brief.json",
+            "sha256": sha256_bytes(
+                (FIXTURES / "valid-brief.json").read_bytes()
+            ),
+            "semantic_fingerprint": sha256_bytes(b"manifest"),
+        },
     }
 
 
