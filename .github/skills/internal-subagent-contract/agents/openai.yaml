@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Subagent Contract"
+  short_description: "Validate bounded caller-owned subagent briefs and results"
+  default_prompt: "Use $internal-subagent-contract for one bounded, caller-owned brief/result handoff; validate value, scope, hashes, evidence, budgets, and progress without routing, retrying, or deciding acceptance."

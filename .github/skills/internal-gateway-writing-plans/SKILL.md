@@ -43,8 +43,10 @@ description: Use when repository-owned work needs an approved implementation pla
 2. Lock exactly one parent-supplied retained plan path under
     `tmp/superpowers/plans/` and its required structure before delegation:
     ordered actionable tasks, concrete file targets, focused validation, a
-    compact `## Control Inventory`, an execution handoff, and one versioned
-    `## Execution Contract` fenced JSON object. Imported
+    compact `## Control Inventory`, an execution handoff, and one normative
+    `## Execution Manifest` v1 fenced JSON object. The manifest owns targets,
+    controls, validations, tasks, authority boundaries, retry posture, approval
+    binding, bootstrap metadata, and handoff. Imported
     `/superpowers-writing-plans` mechanics define plan structure only; they do
     not own approval eligibility or handoff. Each inventory row records a stable ID,
    preserved requirement, nearest owner, command or trigger, pass/fail signal,
@@ -57,20 +59,29 @@ description: Use when repository-owned work needs an approved implementation pla
    failure as the same kind of non-blocking follow-up. Authority and approval
    rows remain pre-execution gates. Completion: one
    plan exists at the retained path and contains those artifact properties plus
-   one versioned `## Execution Contract` fenced JSON object.
+   one `## Execution Manifest` v1 fenced JSON object. New writer output uses
+   `bootstrap.mode: manifest-only` and emits no legacy `## Execution Contract`.
+   The current migration plan is the sole explicit compatibility projection;
+   it is accepted only when its manifest metadata and Markdown projection bind
+   exactly, and it retires at closeout.
   Classify each executable or evaluable task through `/internal-tdd`. Map
   every posture to focused and broad validation; require observed red-first
   evidence only for `mandatory-test-first`, while `feature-first` retains
   validation before production-ready completion.
   After eligibility, the control inventory, plan structure, locked decisions,
-  and acceptance are complete, the gateway MUST delegate implementation-plan
-  writing (redazione del piano) to `internal-luna-executor` with the
-  parent-supplied path, implementation-plan writing objective, relevant
-  evidence, required structure, and validation. Luna MUST write exactly one reviewable retained plan to that
-  path, run the executor-owned `preflight`, fix every blocking finding, and
-  repeat until there are zero blocking findings. The parent gateway retains
-  eligibility, control classification, human review, final independent
-  `preflight`, handoff, and the no-Git-mutation boundary.
+  and acceptance are complete, the gateway MUST write one `DelegationBrief` v1
+  in `mode: plan` through `/internal-subagent-contract` before invoking
+  `internal-luna-executor`. The brief declares the single retained-plan path
+  as `write_scope` and `expected_output.path`, the plan objective and evidence,
+  the required manifest and preflight acceptance, and exact focused validation.
+  Luna MUST return one `WorkerResult` v1 with matching delegation ID and brief
+  hash, artifact hash, acceptance evidence, progress signature, and budget use.
+  The writer independently verifies the result and the plan, then runs the
+  executor-owned `preflight`; it may use only the one bounded refill and one
+  corrective retry allowed by the brief. The parent gateway retains
+  eligibility, control classification, routing, authority, lifecycle, retry
+  choice, human review, final independent `preflight`, handoff, and the
+  no-Git-mutation boundary. No caller-identity branch changes this contract.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every
    `automatable-local` or `observable-runtime` row must map to a required
@@ -106,13 +117,16 @@ description: Use when repository-owned work needs an approved implementation pla
 
 The executor owns the single mechanical plan validator. Do not add a
 writer-local validator, a second implementation-plan writing lifecycle, or a
-duplicate parser contract.
+duplicate parser contract. The executor validates one normative Execution
+Manifest v1; a legacy `## Execution Contract` is accepted only as the exact
+compatibility projection declared by the migration manifest, never as a
+standalone plan schema.
 Before handoff, the parent gateway MUST run the executor-owned `preflight`
 independently against the written current plan and confirm zero blocking
 findings. Explicitly
 `legacy/imported` material is the only reconstruction path; it is not a current
-plan exemption and requires refreshed approval and fingerprint. Plans without
-the versioned contract are not actionable. Do not leave an automatable
+plan exemption and requires refreshed approval and semantic fingerprint. Plans
+without the versioned manifest are not actionable. Do not leave an automatable
 obligation as narrative-only evidence or downgrade it to a manual obligation
 to make preflight or closeout pass.
 

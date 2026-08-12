@@ -24,7 +24,13 @@ interface:
     evidence changes a rejected plan. Classify prompt or skill-only edits as
     validation-only under /internal-tdd. Load
     /addyosmani-code-simplification only for explicit simplification work.
-    Delegate non-trivial work to internal-luna-executor unless the caller is
-    GPT-5.6 Luna; unknown identity defaults to delegation. Stop with the exact
+    After the caller locks value, scope, authority, objective, expected output,
+    acceptance, and validation, it may invoke internal-luna-executor through
+    /internal-subagent-contract with one DelegationBrief v1 and verify one
+    WorkerResult v1. Keep routing, lifecycle, retry choice, independent
+    validation, acceptance, and closeout here; do not branch on caller or model
+    identity. Use one initial attempt, at most one context refill, and at most
+    one corrective retry; repeated progress is stalled and Minor/cosmetic
+    findings never reopen retry. Stop with the exact
     violated condition, evidence, and required next decision. Use
     /superpowers-verification-before-completion before positive claims.

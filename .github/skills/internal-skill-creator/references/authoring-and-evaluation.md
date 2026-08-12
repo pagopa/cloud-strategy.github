@@ -19,9 +19,12 @@ cross-skill calls, validators, tests, inventory, or sync. Keep generic
 analysis-only review outside this creator.
 
 After the parent locks the required inventory, consumer map, outline, metadata
-shape, or evaluation command, it may invoke `internal-luna-executor` for the
-work. Trigger, boundary, policy, and subjective authoring decisions remain with
-the parent.
+shape, or evaluation command, it may invoke `internal-luna-executor` through
+`/internal-subagent-contract` with one `DelegationBrief` v1. The caller verifies
+the matching `WorkerResult` v1, brief/delegation/artifact hashes, acceptance
+evidence, progress signature, and budget use. Trigger, boundary, policy,
+scope, retry choice, and subjective authoring decisions remain with the
+parent.
 
 ## Lifecycle and retirement
 

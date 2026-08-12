@@ -17,13 +17,19 @@ sys.path.insert(0, str(SCRIPTS))
 
 from plan_execution import (  # noqa: E402
     DISCOVERY_CATEGORIES,
+    ExecutionContractError,
     Finding,
     build_compact_payload,
+    canonical_json,
     classify_closeout,
+    compute_content_sha256,
     compute_sha256,
-    parse_execution_contract,
+    compute_semantic_fingerprint,
+    parse_execution_manifest,
+    parse_plan_contract,
     status_for_route,
     validate_completion,
+    validate_manifest_projection,
     validate_plan,
     validate_resume,
     validate_status,
@@ -46,7 +52,7 @@ def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
 
 
 def _contract(plan: Path):
-    return parse_execution_contract(plan.read_text())
+    return parse_plan_contract(plan.read_text())
 
 
 def _discovery() -> list[dict[str, object]]:
@@ -126,7 +132,10 @@ def _closeout_evidence(
             for index, item in enumerate(declared)
         ]
     return {
-        "plan_fingerprint": compute_sha256(plan),
+        "plan_fingerprint": compute_semantic_fingerprint(
+            parse_execution_manifest(plan.read_text())
+        ),
+        "content_hash": compute_content_sha256(plan),
         "tasks_complete": tasks_complete,
         "tasks_remaining": tasks_remaining or [],
         "pause_requested": pause_requested,
@@ -162,7 +171,8 @@ def _minimal_status(plan: Path, status: str = "PARTIAL") -> str:
     return (
         f"## Status\n\n`{status}`\n\n"
         f"## Plan\n\n`{plan}`\n\n"
-        f"## Plan Fingerprint\n\n`{compute_sha256(plan)}`\n\n"
+        f"## Plan Fingerprint\n\n`{compute_semantic_fingerprint(parse_execution_manifest(plan.read_text()))}`\n\n"
+        f"## Content Hash\n\n`{compute_content_sha256(plan)}`\n\n"
         "## Completed\n\n- Task 1\n\n"
         "## Remaining\n\n- Task 2\n\n"
         "## Validation\n\n- `python3 -m pytest -q tests/fixture/` — passed.\n\n"
@@ -175,11 +185,12 @@ def _minimal_status(plan: Path, status: str = "PARTIAL") -> str:
 
 
 def test_valid_plan_parses_contract_and_has_no_findings(valid_plan: Path) -> None:
-    assert parse_execution_contract(valid_plan.read_text()).schema_version == 1
+    assert parse_plan_contract(valid_plan.read_text()).schema_version == 1
+    assert parse_execution_manifest(valid_plan.read_text())["manifest_version"] == "execution-manifest/v1"
     assert validate_plan(valid_plan, repo_root=valid_plan.parents[3]) == []
 
 
-def test_plan_without_execution_contract_is_blocking(tmp_path: Path) -> None:
+def test_plan_without_execution_manifest_is_blocking(tmp_path: Path) -> None:
     plan = _stage_valid_plan(
         tmp_path,
         "# Plan\n\n## Goal\n\nStrict plan.\n\n"
@@ -191,7 +202,7 @@ def test_plan_without_execution_contract_is_blocking(tmp_path: Path) -> None:
         "## Task 1: Validate\n\n- [ ] Run validation.\n",
     )
     findings = validate_plan(plan, repo_root=tmp_path)
-    assert "missing-execution-contract" in {item.code for item in findings}
+    assert "missing-execution-manifest" in {item.code for item in findings}
     assert any(item.severity == "blocking" for item in findings)
 
 
@@ -231,7 +242,7 @@ def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
     text = (
         _fixture("valid-plan.md")
         .read_text()
-        .replace('"id": "diff-check"', '"id": "focused-tests"')
+        .replace('"id": "diff-check", "command"', '"id": "focused-tests", "command"')
     )
     plan = _stage_valid_plan(tmp_path, text)
     assert "duplicate-validation-id" in {
@@ -244,8 +255,8 @@ def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
     (
         ('"schema_version": 1', '"schema_version": 2', "schema_version"),
         (
-            '"id": "focused-tests"',
-            '"id": "focused-tests", "unknown": true',
+            '"id": "focused-tests", "command"',
+            '"id": "focused-tests", "unknown": true, "command"',
             "unknown fields",
         ),
         (
@@ -254,10 +265,10 @@ def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
             "command",
         ),
         ('"phases": ["final"]', '"phases": ["other"]', "phases"),
-        ('"equivalence": "exact-only"', '"equivalence": "never"', "equivalence"),
+        ('"mode": "manifest-only"', '"mode": "unsupported"', "bootstrap.mode"),
     ),
 )
-def test_execution_contract_rejects_invalid_fields(
+def test_execution_manifest_rejects_invalid_fields(
     tmp_path: Path, needle: str, replacement: str, message: str
 ) -> None:
     plan = _stage_valid_plan(
@@ -266,7 +277,7 @@ def test_execution_contract_rejects_invalid_fields(
     assert any(message in item.message for item in validate_plan(plan, tmp_path))
 
 
-def test_execution_contract_rejects_malformed_json_and_duplicate_blocks(
+def test_execution_manifest_rejects_malformed_json_and_duplicate_blocks(
     tmp_path: Path,
 ) -> None:
     malformed = _stage_valid_plan(
@@ -275,15 +286,15 @@ def test_execution_contract_rejects_malformed_json_and_duplicate_blocks(
         .read_text()
         .replace('"schema_version": 1', '"schema_version":', 1),
     )
-    assert "malformed-execution-contract" in {
+    assert "malformed-execution-manifest" in {
         item.code for item in validate_plan(malformed, tmp_path)
     }
     duplicate = _stage_valid_plan(
         tmp_path / "duplicate",
         _fixture("valid-plan.md").read_text()
-        + "\n## Execution Contract\n\n```json\n{}\n```\n",
+        + "\n## Execution Manifest\n\n```json\n{}\n```\n",
     )
-    assert "duplicate-execution-contract" in {
+    assert "duplicate-execution-manifest" in {
         item.code for item in validate_plan(duplicate, duplicate.parents[3])
     }
 
@@ -523,7 +534,7 @@ def test_resume_rejects_plan_fingerprint_drift(
     valid_plan: Path, valid_partial_status: Path
 ) -> None:
     valid_plan.write_text(valid_plan.read_text() + "\nChanged after approval.\n")
-    assert "plan-fingerprint-drift" in {
+    assert "content-hash-drift" in {
         item.code for item in validate_resume(valid_plan, valid_partial_status)
     }
 
@@ -540,7 +551,7 @@ def test_completion_requires_done_and_no_remaining(
     findings = validate_completion(valid_plan, valid_partial_status)
     assert "not-done" in {
         item.code for item in findings
-    } or "plan-fingerprint-drift" in {item.code for item in findings}
+    } or "content-hash-drift" in {item.code for item in findings}
 
 
 def test_compact_output_is_bounded() -> None:
@@ -650,6 +661,136 @@ def test_resume_check_cli_detects_drift(tmp_path: Path) -> None:
         text=True,
     )
     assert result.returncode != 0
-    assert "plan-fingerprint-drift" in {
+    assert "content-hash-drift" in {
         item["code"] for item in json.loads(result.stdout)["finding_sample"]
     }
+
+
+def test_manifest_only_plan_rejects_legacy_execution_contract_projection(
+    tmp_path: Path,
+) -> None:
+    text = _fixture("valid-plan.md").read_text()
+    plan = _stage_valid_plan(
+        tmp_path,
+        text + '\n## Execution Contract\n\n```json\n{}\n```\n',
+    )
+    codes = {item.code for item in validate_plan(plan, tmp_path)}
+    assert "obsolete-execution-contract" in codes
+
+
+def test_status_binds_semantic_approval_and_content_audit_separately(
+    tmp_path: Path,
+) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    status = tmp_path / "valid-plan.PARTIAL.md"
+    status.write_text(_fixture("valid-plan.PARTIAL.md").read_text())
+    original = plan.read_text()
+    plan.write_text(original.replace('"path": "tests/fixture/"', '"path": "tests/other/"', 1))
+    codes = {item.code for item in validate_resume(plan, status)}
+    assert {"semantic-fingerprint-drift", "content-hash-drift"} <= codes
+
+
+def _current_bootstrap_plan() -> Path:
+    return REPO_ROOT / "tmp/superpowers/plans/2026-08-11-skills-orchestration-alignment.md"
+
+
+def _manifest_text(plan: Path) -> str:
+    return plan.read_text(encoding="utf-8")
+
+
+def test_execution_manifest_parses_and_binds_current_bootstrap_projection() -> None:
+    plan = _current_bootstrap_plan()
+    text = _manifest_text(plan)
+    manifest = parse_execution_manifest(text)
+
+    assert manifest["manifest_version"] == "execution-manifest/v1"
+    assert validate_manifest_projection(text, manifest) == []
+
+
+def test_execution_manifest_rejects_duplicate_fenced_blocks(tmp_path: Path) -> None:
+    plan = _current_bootstrap_plan()
+    text = _manifest_text(plan) + "\n## Execution Manifest\n\n```json\n{}\n```\n"
+
+    with pytest.raises(ExecutionContractError) as exc:
+        parse_execution_manifest(text)
+    assert exc.value.code == "duplicate-execution-manifest"
+
+
+def test_execution_manifest_rejects_unknown_fields(tmp_path: Path) -> None:
+    plan = _current_bootstrap_plan()
+    text = _manifest_text(plan)
+    text = text.replace('"manifest_version": "execution-manifest/v1"', '"unknown": true,\n  "manifest_version": "execution-manifest/v1"', 1)
+
+    with pytest.raises(ExecutionContractError) as exc:
+        parse_execution_manifest(text)
+    assert exc.value.code == "unknown-manifest-field"
+
+
+def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(tmp_path: Path) -> None:
+    plan = _current_bootstrap_plan()
+    original = _manifest_text(plan)
+    editorial = original + "\nEditorial note that does not change the manifest.\n"
+    original_manifest = parse_execution_manifest(original)
+    editorial_manifest = parse_execution_manifest(editorial)
+
+    (tmp_path / "original.md").write_text(original, encoding="utf-8")
+    (tmp_path / "editorial.md").write_text(editorial, encoding="utf-8")
+    assert compute_content_sha256(tmp_path / "original.md") != compute_content_sha256(
+        tmp_path / "editorial.md"
+    )
+    assert compute_semantic_fingerprint(original_manifest) == compute_semantic_fingerprint(
+        editorial_manifest
+    )
+
+
+@pytest.mark.parametrize(
+    "mutator",
+    [
+        lambda m: m["authority_boundaries"].update({"no_git_mutation": False}),
+        lambda m: m["targets"][0].update({"path": "changed/path"}),
+        lambda m: m["controls"]["SUBAGENT-VALUE"]["binding"].append("T8"),
+        lambda m: m["validations"][0].update({"command": "make changed"}),
+        lambda m: m["tasks"][0].update({"depends_on": ["T8"]}),
+        lambda m: m["bootstrap"].update({"mode": "generic"}),
+        lambda m: m["handoff"].update({"next_owner": "/other-owner"}),
+    ],
+)
+def test_every_normative_manifest_class_changes_semantic_fingerprint(mutator) -> None:
+    manifest = parse_execution_manifest(_manifest_text(_current_bootstrap_plan()))
+    changed = json.loads(json.dumps(manifest))
+    mutator(changed)
+
+    assert compute_semantic_fingerprint(manifest) != compute_semantic_fingerprint(changed)
+
+
+def test_manifest_hashes_are_external_and_self_reference_is_rejected() -> None:
+    manifest = parse_execution_manifest(_manifest_text(_current_bootstrap_plan()))
+    content_hash = compute_content_sha256(_current_bootstrap_plan())
+    semantic_hash = compute_semantic_fingerprint(manifest)
+    encoded = canonical_json(manifest)
+
+    assert content_hash.encode() not in encoded
+    assert semantic_hash.encode() not in encoded
+
+    polluted = json.loads(encoded)
+    polluted["semantic_fingerprint"] = semantic_hash
+    with pytest.raises(ExecutionContractError) as exc:
+        compute_semantic_fingerprint(polluted)
+    assert exc.value.code == "manifest-hash-self-reference"
+
+
+def test_bootstrap_projection_drift_fails_closed() -> None:
+    text = _manifest_text(_current_bootstrap_plan())
+    manifest = parse_execution_manifest(text)
+    changed = json.loads(json.dumps(manifest))
+    changed["controls"].pop("SUBAGENT-VALUE")
+
+    findings = validate_manifest_projection(text, changed)
+
+    assert any("projection" in finding.lower() for finding in findings)
+
+
+def test_legacy_only_plan_has_no_manifest_fallback() -> None:
+    with pytest.raises(ExecutionContractError) as exc:
+        parse_execution_manifest(_fixture("legacy-draft-plan.md").read_text())
+    assert exc.value.code == "missing-execution-manifest"

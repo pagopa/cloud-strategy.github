@@ -109,9 +109,18 @@ validation, and final reporting.
 ## Execution posture
 
 - Trivial work executes directly after local evidence is sufficient.
-- Non-trivial work delegates the complete approved action plan to
-  `internal-luna-executor` when the caller is not GPT-5.6 Luna. GPT-5.6 Luna
-  executes directly. Unknown model identity defaults to delegation.
+- Non-trivial work may use `internal-luna-executor` only after the caller's
+  value gate, scope, authority, objective, expected output, acceptance, and
+  validation are locked. Use `/internal-subagent-contract` for one
+  `DelegationBrief` v1 and verify the returned `WorkerResult` v1 here. The
+  caller retains routing, scope, authority, lifecycle, retry choice,
+  independent validation, acceptance, and closeout; do not branch on caller or
+  model identity.
+- Use one initial worker attempt, at most one context refill, and at most one
+  corrective retry. A repeated progress signature is `stalled`; Minor,
+  cosmetic, punctuation, and prose-only findings do not reopen a retry. If the
+  worker is unavailable, perform the work locally only when the locked brief
+  permits that fallback.
 - For executable or evaluable behavior, load `/internal-tdd` before editing and
   record exactly one selected posture. This prompt/skill-only refactor is
   `validation-only`: it has no useful executable seam, so use the strict skill

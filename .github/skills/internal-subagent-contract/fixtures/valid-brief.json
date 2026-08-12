@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "delegation_id": "delegation-valid-brief",
+  "mode": "write",
+  "objective": "Create a bounded protocol artifact from the supplied repository evidence.",
+  "value_gate": {
+    "autonomous": true,
+    "verifiable": true,
+    "leverage": "The worker can inspect several related files and produce one reviewable artifact more efficiently than a local serial pass."
+  },
+  "evidence": [
+    {
+      "ref": ".github/skills/internal-subagent-contract/fixtures/valid-brief.json",
+      "purpose": "Bounded repository input for the protocol fixture."
+    }
+  ],
+  "constraints": [
+    "Write only under the declared repository-relative scope.",
+    "Do not invoke another agent or infer missing authority."
+  ],
+  "write_scope": [
+    ".github/skills/internal-subagent-contract/fixtures/"
+  ],
+  "expected_output": {
+    "kind": "artifact",
+    "path": ".github/skills/internal-subagent-contract/fixtures/worker-output.md",
+    "format": "markdown"
+  },
+  "acceptance": [
+    {
+      "id": "A1",
+      "observable": "The output is a reviewable artifact within the declared scope."
+    }
+  ],
+  "validation": [
+    {
+      "id": "V1",
+      "owner": "worker",
+      "command": "python3 -m pytest -q tests/github/skills/internal-subagent-contract",
+      "pass_signal": "exit-code-0"
+    }
+  ],
+  "budgets": {
+    "attempts": 2,
+    "context_refills": 1
+  },
+  "result_path": ".github/skills/internal-subagent-contract/fixtures/worker-result.json",
+  "cache": {
+    "prefix_version": "internal-subagent-contract/v1",
+    "key_class": "worker-role"
+  }
+}
