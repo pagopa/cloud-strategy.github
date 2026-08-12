@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "delegation_id": "creator-plan-draft",
+  "mode": "plan",
+  "objective": "Draft the bounded creator artifact at the exact declared path from the locked outline and acceptance checks.",
+  "value_gate": {
+    "autonomous": true,
+    "verifiable": true,
+    "leverage": "The worker can turn a fixed outline into one reviewable draft while the parent retains semantic acceptance."
+  },
+  "evidence": [
+    {
+      "ref": ".github/skills/internal-skill-creator/references/authoring-and-evaluation.md",
+      "purpose": "Locked creator evaluation requirements."
+    },
+    {
+      "ref": ".github/skills/internal-skill-creator/SKILL.md",
+      "purpose": "Parent-owned creator boundary and acceptance context."
+    }
+  ],
+  "constraints": [
+    "Write only the one exact artifact declared in write_scope.",
+    "Do not change the creator contract, metadata, inventory, or protected bundles.",
+    "Do not decide unresolved policy, authority, scope, or acceptance questions."
+  ],
+  "write_scope": [
+    ".github/skills/internal-skill-creator/fixtures/worker-output.md"
+  ],
+  "expected_output": {
+    "kind": "artifact",
+    "path": ".github/skills/internal-skill-creator/fixtures/worker-output.md",
+    "format": "markdown"
+  },
+  "acceptance": [
+    {
+      "id": "A1",
+      "observable": "The draft is present at the exact declared path and is ready for parent semantic review."
+    }
+  ],
+  "validation": [
+    {
+      "id": "V1",
+      "owner": "caller",
+      "command": "python3 -m pytest -q tests/github/skills/internal-skill-creator",
+      "pass_signal": "exit-code-0"
+    }
+  ],
+  "budgets": {
+    "attempts": 1,
+    "context_refills": 0
+  },
+  "result_path": "tmp/.handoff/internal-skill-creator-plan.result.json",
+  "cache": {
+    "prefix_version": "internal-subagent-contract/v1",
+    "key_class": "worker-role"
+  }
+}

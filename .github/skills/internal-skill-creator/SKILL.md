@@ -23,14 +23,31 @@ distinction consistently to the six internal gateway skills covered by this
 convention. Keep the target skill model-invocable; a called skill must not set
 `disable-model-invocation: true`.
 
-After inventory, consumer mapping, outline, metadata shape, or evaluation
-commands are locked, the parent may invoke `internal-luna-executor` through
-`/internal-subagent-contract` with one `DelegationBrief` v1. The brief declares
-the exact write scope, expected skill artifact, acceptance, and validation;
-the parent verifies the adapter-composed `WorkerResult` v1 and caller-owned
-`VerificationReceipt` v1. Treat unobserved validation and budget data as claims
-or unavailable evidence. Retain trigger, boundary, policy, subjective authoring judgment,
-scope, retry choice, and human review for subjective instructional prose.
+## Delegation admission
+
+Before any delegation, the creator parent must fix the task-specific objective,
+value gate, bounded evidence, constraints, write scope, expected output,
+acceptance, validation, and budget. The work must be autonomous, verifiable,
+and materially more useful to delegate than a trivial local operation. The
+allowed creator classes and their `read`, `plan`, or `write` mapping are in
+[`references/authoring-and-evaluation.md`](references/authoring-and-evaluation.md).
+
+After that gate is complete, the parent may invoke `internal-luna-executor`
+through `/internal-subagent-contract` with one `DelegationBrief` v1. The parent
+retains trigger, boundary, policy, scope, retry choice, independent validation,
+acceptance, semantic review, and closeout; it verifies one bound `WorkerResult`
+v1 and caller-owned `VerificationReceipt` v1. Treat unobserved validation and
+budget data as claims or unavailable evidence.
+
+Keep a single command, one obvious edit, an unresolved policy, boundary,
+authority, or acceptance decision, incomplete acceptance, and unverifiable
+prose local or blocked. Default to one attempt. A corrective retry requires new
+evidence and a concrete correction target; cosmetic, punctuation, prose-only,
+and semantic disagreement do not reopen the worker.
+
+Direct worker writes are limited to one exact declared artifact. The parent
+reviews and accepts it. The worker does not edit the creator contract,
+inventory, approval records, protected bundles, or broad directories.
 
 ## When to use
 

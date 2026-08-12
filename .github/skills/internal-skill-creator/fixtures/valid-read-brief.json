@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "delegation_id": "creator-read-inventory",
+  "mode": "read",
+  "objective": "Map the named creator files and their consumers into one bounded evidence inventory.",
+  "value_gate": {
+    "autonomous": true,
+    "verifiable": true,
+    "leverage": "The worker can inspect several related files and return a bounded inventory more efficiently than a local serial pass."
+  },
+  "evidence": [
+    {
+      "ref": ".github/skills/internal-skill-creator/SKILL.md",
+      "purpose": "Creator contract surface to map."
+    },
+    {
+      "ref": ".github/skills/internal-skill-creator/references/authoring-and-evaluation.md",
+      "purpose": "Creator evaluation surface to map."
+    },
+    {
+      "ref": ".github/skills/internal-skill-creator/agents/openai.yaml",
+      "purpose": "Creator interface metadata to map."
+    }
+  ],
+  "constraints": [
+    "Return evidence only for the named files and their observable consumers.",
+    "Do not infer unresolved policy, authority, or acceptance decisions."
+  ],
+  "write_scope": [],
+  "expected_output": {
+    "kind": "analysis",
+    "path": null,
+    "format": "text"
+  },
+  "acceptance": [
+    {
+      "id": "A1",
+      "observable": "Every named file and consumer class is covered by a bounded evidence reference."
+    }
+  ],
+  "validation": [
+    {
+      "id": "V1",
+      "owner": "caller",
+      "command": "python3 -m pytest -q tests/github/skills/internal-skill-creator",
+      "pass_signal": "exit-code-0"
+    }
+  ],
+  "budgets": {
+    "attempts": 1,
+    "context_refills": 0
+  },
+  "result_path": "tmp/.handoff/internal-skill-creator-read.result.json",
+  "cache": {
+    "prefix_version": "internal-subagent-contract/v1",
+    "key_class": "worker-role"
+  }
+}

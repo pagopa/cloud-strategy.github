@@ -6,6 +6,32 @@ Recover known answers from the request and repository evidence. Capture the
 capability, invocation conditions, expected output, constraints, dependencies,
 success criteria, validation path, and anti-scope.
 
+## Creator delegation matrix
+
+Delegate only after the parent fixes the complete task-specific objective,
+value gate, bounded evidence, constraints, write scope, expected output,
+acceptance, validation, and budget.
+
+| Creator task | Mode | Expected output | Write scope | Parent acceptance |
+| --- | --- | --- | --- | --- |
+| Multi-file inventory or consumer mapping | `read` | bounded analysis/evidence | empty | Every named path and consumer class is covered; no unresolved decision is silently inferred. |
+| Evidence inventory across known sources | `read` | bounded analysis/evidence | empty | Evidence refs resolve and authority remains with the parent. |
+| Draft after outline, metadata, acceptance, and validation are fixed | `plan` | one artifact at one exact path | one exact draft path | Parent reviews semantic content and applies or accepts it. |
+| One bounded implementation artifact | `write` | one artifact | one exact file or artifact path | Parent runs independent validation and accepts the result. |
+| Bounded validation set with multiple observable checks | `read` | validation evidence | empty | All declared checks and pass signals are present. |
+
+A single command, one obvious edit, unresolved policy, boundary, authority, or
+acceptance, incomplete acceptance, and unverifiable prose stay local or blocked.
+A competing-owner request stays with its owner; a Copilot agent under
+`.github/agents/` routes to `/internal-agent-creator`.
+
+Use one worker, one brief, and one result. Default to one attempt. A corrective
+retry requires new evidence or a concrete correction target. Cosmetic,
+punctuation, prose-only, and semantic disagreement do not reopen the worker.
+Direct worker writes are limited to one exact declared artifact; the parent
+reviews and accepts it. The worker never edits the creator contract, inventory,
+approval records, protected bundles, or broad directories.
+
 ## Bundle evidence
 
 For a bundle change, inspect every existing sibling under `references/`,
