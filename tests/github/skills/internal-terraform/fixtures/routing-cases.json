@@ -1,0 +1,110 @@
+{
+  "scenarios": [
+    {
+      "id": "hcl-only",
+      "primary_owner": "internal-tf",
+      "delegated_owner": null,
+      "loaded_local_references": ["references/common-mistakes.md"],
+      "forbidden_local_references": [
+        "references/existing-infrastructure-adoption.md",
+        "references/operational-validation.md"
+      ],
+      "fail_closed_on_unknown": false
+    },
+    {
+      "id": "tfvars-json-only",
+      "primary_owner": "internal-tf",
+      "delegated_owner": null,
+      "loaded_local_references": ["references/structure-standard.md"],
+      "forbidden_local_references": [
+        "references/existing-infrastructure-adoption.md",
+        "references/operational-validation.md"
+      ],
+      "fail_closed_on_unknown": false
+    },
+    {
+      "id": "mixed-adoption",
+      "primary_owner": "internal-terraform",
+      "delegated_owner": "internal-tf",
+      "loaded_local_references": [
+        "references/existing-infrastructure-adoption.md",
+        "references/structure-standard.md"
+      ],
+      "forbidden_local_references": ["references/operational-validation.md"],
+      "fail_closed_on_unknown": true
+    },
+    {
+      "id": "native-test",
+      "primary_owner": "internal-terraform",
+      "delegated_owner": null,
+      "loaded_local_references": ["references/operational-validation.md"],
+      "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+      "fail_closed_on_unknown": true
+    },
+    {
+      "id": "state-or-drift",
+      "primary_owner": "internal-terraform",
+      "delegated_owner": null,
+      "loaded_local_references": ["references/operational-validation.md"],
+      "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+      "fail_closed_on_unknown": true
+    },
+    {
+      "id": "module-architecture",
+      "primary_owner": "internal-terraform",
+      "delegated_owner": null,
+      "loaded_local_references": [],
+      "forbidden_local_references": [
+        "references/existing-infrastructure-adoption.md",
+        "references/operational-validation.md"
+      ],
+      "fail_closed_on_unknown": true
+    },
+    {
+      "id": "ci-or-provider-operation",
+      "primary_owner": "internal-terraform",
+      "delegated_owner": null,
+      "loaded_local_references": ["references/operational-validation.md"],
+      "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+      "fail_closed_on_unknown": true
+    },
+    {
+      "id": "ambiguous-adoption-identity",
+      "primary_owner": "internal-terraform",
+      "delegated_owner": null,
+      "loaded_local_references": ["references/existing-infrastructure-adoption.md"],
+      "forbidden_local_references": [],
+      "fail_closed_on_unknown": true
+    }
+  ],
+  "metadata_contract": {
+    "internal-tf": {
+      "required_terms": ["language-only", ".tfvars.json", "$internal-tf"],
+      "forbidden_primary_markers": ["$internal-terraform"]
+    },
+    "internal-terraform": {
+      "required_terms": [
+        "$internal-terraform",
+        "operational",
+        "mixed",
+        "adoption",
+        "state",
+        "native test",
+        "CI",
+        "provider",
+        "recovery",
+        "infrastructure-diagnosis"
+      ],
+      "forbidden_primary_markers": []
+    }
+  },
+  "language_boundary": {
+    "reference": "references/structure-standard.md",
+    "forbidden_terms": [
+      "backend configuration",
+      "state migration",
+      "provider-lock remediation",
+      "live import guard"
+    ]
+  }
+}

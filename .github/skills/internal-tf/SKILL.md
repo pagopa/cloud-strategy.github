@@ -1,6 +1,6 @@
 ---
 name: internal-tf
-description: Use when Terraform/OpenTofu language or HCL is the immediate concern.
+description: Use when Terraform/OpenTofu language-only HCL is the immediate concern.
 ---
 
 # Terraform/OpenTofu Language
@@ -13,7 +13,8 @@ description: Use when Terraform/OpenTofu language or HCL is the immediate concer
 
 ## When to use
 
-Use this skill when the immediate deliverable is Terraform/OpenTofu language or HCL:
+Use this skill when the immediate deliverable is language-only Terraform/OpenTofu
+HCL:
 
 - Edit or review `.tf`, `.tfvars`, or `.tfvars.json` files.
 - Fix HCL syntax, expressions, references, blocks, attributes, or collection types.
@@ -24,9 +25,9 @@ Use this skill when the immediate deliverable is Terraform/OpenTofu language or 
 
 ## Scope
 
-This is the lightweight language owner for Terraform/OpenTofu. It owns HCL
-shape, typed configuration, and readability, not the operational meaning of the
-infrastructure.
+This is the lightweight language-only owner for Terraform/OpenTofu. It owns
+HCL shape, typed configuration, and readability, not the operational meaning
+of the infrastructure.
 
 ### Language and syntax
 
@@ -53,13 +54,13 @@ terraform fmt -check -recursive
 terraform validate
 ```
 
-Use `tofu fmt` and `tofu validate` when the repository standardizes on OpenTofu. If validation requires provider installation, backend access, state inspection, a plan, an apply, credentials, or test execution, hand the operational part to `/antonbabenko-terraform-skill` through `/internal-terraform`.
+Use `tofu fmt` and `tofu validate` when the repository standardizes on OpenTofu. If validation requires provider installation, backend access, state inspection, a plan, an apply, credentials, native test execution, CI behavior, or cloud operation, hand the operational part to `/internal-terraform`.
 
 ## Routing boundaries
 
 | Immediate request | Owner |
 | --- | --- |
-| HCL syntax, expressions, types, variables, outputs, `.tfvars`, or formatting | `/internal-tf` |
+| HCL syntax, expressions, types, variables, outputs, `.tfvars`, `.tfvars.json`, or formatting | `/internal-tf` |
 | Native `.tftest.hcl` or `.tftest.json`, `run`, `assert`, mock providers, or `terraform test`/`tofu test` | `/internal-terraform` |
 | Module architecture, state, drift, plan/apply, provider operation, cloud topology, CI, scans, upgrades, recovery, or risk diagnosis | `/internal-terraform` |
 
@@ -72,7 +73,7 @@ migrating consumers, or protecting resource identity belongs to Anton through
 - State the Terraform/OpenTofu runtime and version when a language feature has a version floor.
 - Name the files and configuration constructs in scope.
 - Do not invent provider schemas or cloud behavior from HCL syntax alone.
-- Do not preload test, state, CI, security, or cloud-operation guidance for a language-only task.
+- Do not preload state, provider-operation, plan/apply, native-test, CI, or cloud-operation guidance for a language-only task.
 - When the request crosses a boundary, return the language finding and identify `/internal-terraform` as the owner of the remaining work.
 
 ## Output contract

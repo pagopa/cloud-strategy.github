@@ -47,7 +47,7 @@
 ## Reserved files
 
 - `98-locals.tf`: derived values only. Do not turn this file into a dump for static configuration that belongs directly in resources or `.tfvars`.
-- `99-providers.tf`: `terraform` block, `required_providers`, provider configuration, and any root-level backend declarations that the runner expects.
+- `99-providers.tf`: `terraform` block, `required_providers`, and provider configuration.
 - `99-variables.tf`: root input interface. Keep variable declarations here instead of scattering them across numbered domain files.
 - `99-outputs.tf`: root outputs for downstream consumers, cross-stack references, or operator visibility.
 - In new roots, keep these reserved filenames stable even when the numbered domain files change around them.
@@ -59,23 +59,21 @@
 - Keep tightly coupled resources together in the same numbered file or the same numeric band when they sit at the same dependency layer.
 - Split files to preserve readability and logical ownership, not just to maximize the number of files.
 
-## Environment model
+## Environment-specific values
 
 ```text
 env/
   <account | subscription | project>/
-    backend.ini
     terraform.tfvars
 ```
 
-- The `env/<account|subscription|project>/` directory is the default environment selector for repository-owned roots that use `terraform.sh`.
-- `backend.ini` contains the backend configuration consumed by `terraform.sh`, typically passed to `terraform init -backend-config=...`.
-- `terraform.tfvars` contains the environment-specific input values for that target environment.
+- The `env/<account|subscription|project>/` directory is the default environment selector for repository-owned roots.
+- Keep environment-specific input values in `terraform.tfvars`.
 - Keep secrets out of committed `terraform.tfvars` files unless the repository already has an approved secret-management pattern for that surface.
 
-## Existing layouts and migration
+## Existing layouts and change boundaries
 
 - Do not force this structure onto an existing root that already has a stable, business-meaningful layout.
 - When an existing root only partially matches the default, adapt this standard to the local shape instead of damaging the business logic to satisfy naming purity.
-- Use this structure as the target shape for migration only when migration is explicitly requested.
-- During migration, preserve resource addresses and state intent; if a structural refactor changes addresses, hand off the state migration to `antonbabenko-terraform-skill`.
+- Use this structure as the target shape for a layout change only when that change is explicitly requested.
+- This reference does not own provider, state, migration, import, or live-resource decisions; hand those concerns to `/internal-terraform`.

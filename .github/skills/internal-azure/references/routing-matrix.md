@@ -26,10 +26,11 @@
 | Restore exercise evidence | `/internal-azure-operations` |
 | Pipeline YAML review | `/internal-azure-devops` |
 | Choosing between landing-zone alternatives | `/internal-azure-strategic` |
-| Concrete Terraform edit | `/internal-terraform` |
-| Terraform HCL or `.tfvars` language edit | `/internal-tf` |
+| Terraform operational, mixed, adoption, state, provider, plan/apply, or module decision | `/internal-terraform` |
+| Terraform language-only HCL, `.tf`, `.tfvars`, or `.tfvars.json` edit | `/internal-tf` |
 | Native `.tftest.hcl` or `.tftest.json` test | `/internal-terraform` → `/antonbabenko-terraform-skill` |
 | Terraform module, state, or drift decision | `/internal-terraform` → `/antonbabenko-terraform-skill` |
+| Terraform adoption with missing or ambiguous identity | `/internal-terraform` → `/antonbabenko-terraform-skill` (fail closed) |
 | Concrete Azure Policy definition | `/internal-cloud-policy` |
 | Current SKU price | `/awesome-copilot-azure-pricing` |
 | Generic application code hosted on Azure | No forced Azure specialist; use the application's owner. |

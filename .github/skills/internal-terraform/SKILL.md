@@ -1,70 +1,62 @@
 ---
 name: internal-terraform
-description: Use when a Terraform/OpenTofu request needs the stable wrapper for non-language work or direct language delegation.
+description: Use when Terraform/OpenTofu work is operational, mixed, adoption, state, testing, CI, provider, recovery, or infrastructure diagnosis.
 ---
 
 # Terraform/OpenTofu Wrapper
 
 This stable wrapper routes Terraform/OpenTofu requests and collects only the
-bounded context necessary to select the appropriate owner.
+bounded context needed to select the appropriate owner.
 
 ## When to use
 
-Use this wrapper for non-language or mixed Terraform/OpenTofu requests that
-require repository-local routing or handoff. Delegate pure HCL or
-typed-configuration fixes directly to `/internal-tf`.
+Use this wrapper for operational or mixed Terraform/OpenTofu requests that
+require repository-local routing or handoff. Delegate positive language-only
+HCL or typed-configuration fixes directly to `/internal-tf`.
 
 ## Intent classification and routing
 
 Classify intent before collecting general context. Syntax ownership does not
-decide operational adoption semantics.
+decide operational, state, or adoption semantics.
 
-- HCL expressions, types, variables, outputs, formatting, typed configuration,
-  or import-block syntax and shape only, with no operational state or live
-  action: `Primary = /internal-tf`; do not preload Anton or the adoption
-  reference.
+- Positive language-only signal: HCL expressions, types, variables, outputs,
+  formatting, typed configuration, `.tf`, `.tfvars`, `.tfvars.json`, or
+  import-block syntax and shape only, with no state, provider operation,
+  plan/apply, native test, CI, or cloud behavior. Set `Primary = /internal-tf`
+  and do not preload this wrapper's operational references.
 - Existing-infrastructure adoption, operational import, bulk import, state
-  reconstruction, or IaC migration: `Primary = /antonbabenko-terraform-skill`
-  through this wrapper; load
-  `.github/skills/internal-terraform/references/existing-infrastructure-adoption.md`
-  only for this adoption branch.
-- Other non-language Terraform/OpenTofu work, including native tests, modules,
-  provider operations, plans, CI-integrated roots, state, drift, upgrades,
-  recovery, or risk diagnosis: `Primary = /antonbabenko-terraform-skill` via
-  this wrapper; do not load the adoption reference unless the request also
-  expresses adoption intent.
-- HCL plus existing-infrastructure adoption: Anton remains primary through
-  this wrapper, and `/internal-tf` is limited to the separable language
-  portion. Do not split operational ownership away from the wrapper; load the
-  adoption reference.
-- Missing or conflicting identity, ownership, or mutation facts in an adoption
-  request: keep Anton primary, mark the fact unknown, load the adoption
-  reference, fail closed, and require its safety gates. Do not infer identity
-  or permission.
+  reconstruction, IaC migration, native tests, module architecture, provider
+  operations, plans, CI-integrated roots, drift, upgrades, recovery, and risk
+  diagnosis remain `Primary = /antonbabenko-terraform-skill` through this
+  wrapper.
+- HCL plus an operational or adoption concern keeps Anton primary through this
+  wrapper. `/internal-tf` may contribute only a separable language finding;
+  operational ownership is not split away from the wrapper.
+- Missing or conflicting identity, ownership, mutation, or recovery facts keep
+  the wrapper primary. Mark the fact unknown, fail closed, and require the
+  applicable safety gates. Do not infer identity or permission.
 
 ### Context collection
 
-For an adoption branch, collect only facts that affect the selected route:
-runtime and version, changed root or path, desired/live/state evidence,
-canonical identity and ambiguity, ownership disposition, mutation authority,
-environment criticality and immediate risk, declarative or imperative evidence
-mode, and recovery status. Mark unknown facts explicitly and stop on ambiguity
-rather than guessing. For other branches, retain only the runtime/version,
-changed-root path, relevant files and providers, execution path, environment
-criticality, and immediate risk needed for the selected owner.
+For adoption, collect only facts that affect the selected route: runtime and
+version, changed root or path, desired/live/state evidence, canonical identity
+and ambiguity, ownership disposition, mutation authority, environment
+criticality, immediate risk, evidence mode, and recovery status. Mark unknown
+facts explicitly and stop on ambiguity rather than guessing.
 
-### Test reachability
+For other non-language branches, retain only the runtime/version, changed-root
+path, relevant files and providers, execution path, environment criticality,
+and immediate risk needed for the selected owner.
 
-For any new or changed Terraform root, production-ready completion requires
-evidence that the selected runner executes locally and is reachable from the
-matching CI trigger; when that proof cannot be demonstrated, record the
-reachability gap explicitly.
+## Conditional local references
 
-Native Terraform/OpenTofu tests are authoritative for Terraform semantics when
-the native runner can observe the behavior. Python must not use regex or string
-matching as a substitute for native resource, module, provider, plan, or assert
-checks. A repository-specific static contract is a narrow exception only when
-no native equivalent exists and its cross-boundary purpose is documented.
+- Adoption or existing-resource reconstruction: load
+  `references/existing-infrastructure-adoption.md`.
+- Operational validation, native tests, CI reachability, provider lockfile
+  evidence, state or drift, recovery, or infrastructure diagnosis: load
+  `references/operational-validation.md`.
+- Language-only work loads no wrapper-owned operational reference. Both local
+  references are resolved relative to this skill bundle.
 
 This skill provides guidance and routing instructions only. It cannot enforce
 runtime identity, ownership, mutation, or recovery gates; the selected owner

@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Terraform Router"
-  short_description: "Route HCL and adoption work to the right owner"
-  default_prompt: "Use $internal-terraform as the stable Terraform/OpenTofu wrapper: send pure HCL and import-block syntax to $internal-tf; route operational import, state reconstruction, IaC migration, and existing-resource adoption through the wrapper to Anton with the local adoption reference loaded conditionally. Keep Anton primary for mixed HCL plus adoption. This is guidance, not runtime enforcement."
+  short_description: "Route operational and mixed Terraform/OpenTofu work safely"
+  default_prompt: "Use $internal-terraform as the stable Terraform/OpenTofu wrapper for operational, mixed, adoption, state, native test, CI, provider, recovery, and infrastructure-diagnosis requests. Route only positive language-only HCL or .tfvars.json work to $internal-tf; keep the wrapper primary for mixed or ambiguous requests and load bundle-relative adoption or operational references conditionally. This is guidance, not runtime enforcement."
