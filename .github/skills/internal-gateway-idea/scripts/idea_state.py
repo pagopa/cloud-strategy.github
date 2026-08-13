@@ -710,6 +710,12 @@ def parse_state(payload: str | Mapping[str, object], *, expected_slug: str) -> S
     return replace(state, ledger=_ledger_from_events(state.events))
 
 
+def _requires_pre_review_design(state: StateV3) -> bool:
+    return state.state in {"WAIT_G0", "WAIT_G1", "WAIT_G2"} or (
+        state.state == "WAIT_G3" and not state.review_sources
+    )
+
+
 def render_design_projection(state: StateV3) -> str:
     """Render a deterministic readable projection without becoming state authority."""
 
@@ -730,7 +736,7 @@ def render_design_projection(state: StateV3) -> str:
     )
     if state.ledger:
         text = text + "\n\n" + _ledger_markdown(state.ledger)
-    validate_design_text(text, pre_g3=state.state in {"WAIT_G0", "WAIT_G1", "WAIT_G2", "WAIT_G3"})
+    validate_design_text(text, pre_g3=_requires_pre_review_design(state))
     return text + "\n"
 
 
@@ -947,7 +953,7 @@ def reopen_for_material_change(
         reviewed_revision=None,
         approved_revision=None,
         advisory_return_state=None,
-        ledger=state.ledger,
+        ledger=(),
     )
     return append_typed_event(
         reopened,
@@ -958,6 +964,7 @@ def reopen_for_material_change(
                 "detail": detail.strip(),
                 "next_state": target_state,
                 "next_revision": reopened.revision,
+                "findings": [],
             },
         ),
     )
@@ -1390,11 +1397,10 @@ def replace_design_then_state(root: Path, design_text: str, state: StateV3) -> N
 
     root = Path(root)
     design_path, state_path = _artifact_paths(root)
-    pre_g3 = state.state in {"WAIT_G0", "WAIT_G1", "WAIT_G2", "WAIT_G3"}
     if state.state == "ADVISORY_REVIEW":
         _validate_bounded_design(design_text)
     else:
-        validate_design_text(design_text, pre_g3=pre_g3)
+        validate_design_text(design_text, pre_g3=_requires_pre_review_design(state))
     _cleanup_temp_files(root)
 
     design_bytes = design_text.encode("utf-8")
@@ -1536,7 +1542,7 @@ def load_runtime(
         else:
             validate_design_text(
                 design_text or "",
-                pre_g3=persisted.state in {"WAIT_G0", "WAIT_G1", "WAIT_G2", "WAIT_G3"},
+                pre_g3=_requires_pre_review_design(persisted),
             )
     except (OSError, DesignValidationError) as error:
         current_hash = hashlib.sha256((design_text or "").encode("utf-8")).hexdigest()
@@ -2160,7 +2166,7 @@ def resolve_review(
         review_sources=(),
         reviewed_revision=None,
         approved_revision=None,
-        ledger=state.ledger,
+        ledger=(),
         )
     event_payload = dict(payload)
     event_payload.update(
@@ -2461,10 +2467,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     try:
         args = parser.parse_args(argv)
-        if args.command == "advance" and args.event == "approve" and args.message is None:
-            raise DesignValidationError("advance --event approve needs --message")
-        if args.command == "advance" and args.event != "approve" and args.payload_json is None:
-            raise DesignValidationError("typed advance events need --payload-json")
+        if args.command == "advance":
+            if args.message is not None:
+                if args.event not in {None, "approve"}:
+                    raise DesignValidationError(
+                        "short approval cannot be combined with a typed event"
+                    )
+            elif args.event == "approve":
+                raise DesignValidationError("advance --event approve needs --message")
+            elif args.payload_json is None:
+                raise DesignValidationError("typed advance events need --payload-json")
         return int(args.handler(args))
     except (DesignValidationError, OSError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)

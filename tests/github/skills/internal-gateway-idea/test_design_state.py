@@ -165,7 +165,7 @@ def test_coordinated_persistence_transition_appends_event() -> None:
     assert result.state.events[-1].payload == _g0_payload()
 
 
-def test_earliest_safe_gate_reopen_appends_revision_event() -> None:
+def test_earliest_safe_gate_reopen_appends_revision_event(tmp_path: Path) -> None:
     module = _load_module()
     finding = module.ReviewFinding(
         id="F-001",
@@ -196,6 +196,16 @@ def test_earliest_safe_gate_reopen_appends_revision_event() -> None:
     assert reopened.revision == 2
     assert reopened.events[-1].event == "resolve-review"
     assert reopened.events[-1].revision == 2
+    assert reopened.ledger == ()
+    assert reopened.events[-1].payload["findings"] == []
+
+    design = module.render_design_projection(reopened)
+    module.replace_design_then_state(tmp_path, design, reopened)
+    loaded = module.load_runtime(tmp_path, slug="sample")
+
+    assert loaded.state.state == "WAIT_G3"
+    assert loaded.state.ledger == ()
+    assert "## Review Ledger" not in (loaded.design_text or "")
 
 
 def test_coordinated_persistence_review_appends_event() -> None:
@@ -272,6 +282,56 @@ def test_material_reopen_rules_preserve_scope_and_reject_cosmetic_changes() -> N
     assert reopened.state == "WAIT_G3"
     assert reopened.revision == state.revision + 1
     assert reopened.events[-1].event == "reopen-review"
+
+
+def test_material_reopen_clears_review_ledger_and_persists(tmp_path: Path) -> None:
+    module = _load_module()
+    finding = module.ReviewFinding(
+        id="F-001",
+        source="standard",
+        sources=("standard",),
+        critique="The approved design has incompatible evidence.",
+        recommendation="Reopen the design review.",
+        reason="Later approval cannot remain authoritative.",
+        blocking=True,
+        evidence=("counter-validation",),
+        disposition="closed",
+        equivalence_key="incompatible-evidence",
+    )
+    reviewed = module.StateV3(
+        **{
+            **_state(
+                module,
+                state="WAIT_G5",
+                sources=("standard",),
+            ).__dict__,
+            "ledger": (finding,),
+            "events": (
+                module.EventLedgerEntry(
+                    1,
+                    "resolve-review",
+                    1,
+                    {"findings": [module._review_finding_mapping(finding)]},
+                ),
+            ),
+        }
+    )
+
+    reopened = module.reopen_for_material_change(
+        reviewed,
+        trigger="incompatible-evidence",
+        detail="Final counter-validation requires design revision.",
+    )
+    design = module.render_design_projection(reopened)
+    module.replace_design_then_state(tmp_path, design, reopened)
+    loaded = module.load_runtime(tmp_path, slug="sample")
+
+    assert reopened.state == "WAIT_G3"
+    assert reopened.ledger == ()
+    assert reopened.events[-1].payload["findings"] == []
+    assert loaded.state.ledger == ()
+    assert loaded.state.events[0].payload["findings"]
+    assert "## Review Ledger" not in (loaded.design_text or "")
 
 
 def test_root_path_rejects_registry_root_and_accepts_slug_directory(tmp_path: Path) -> None:
@@ -538,6 +598,33 @@ def test_advance_rejects_an_uninitialized_directory(tmp_path: Path) -> None:
     assert list(tmp_path.iterdir()) == []
 
 
+def test_advance_accepts_message_only_short_approval(tmp_path: Path, capsys) -> None:
+    module = _load_module()
+    runtime_root = tmp_path / "sample"
+    module.initialize_after_g0(
+        runtime_root,
+        slug="sample",
+        decision_payload=_g0_payload(),
+        assurance="standard",
+    )
+
+    result = module.main(
+        [
+            "advance",
+            "--root",
+            str(runtime_root),
+            "--slug",
+            "sample",
+            "--message",
+            "approvo",
+            "--compact",
+        ]
+    )
+
+    assert result == 0
+    assert "state=WAIT_G2|" in capsys.readouterr().out
+
+
 def test_advance_accepts_a_readable_critical_report_at_g3(
     tmp_path: Path, capsys
 ) -> None:
@@ -591,6 +678,85 @@ The boundary is sound.
     )
 
     assert result == 0
+    assert "state=WAIT_G4|" in capsys.readouterr().out
+
+
+def test_intensive_review_persists_each_readable_source(
+    tmp_path: Path, capsys
+) -> None:
+    module = _load_module()
+    runtime_root = tmp_path / "sample"
+    design = module.render_bounded_design(_g0_payload())
+    runtime_root.mkdir()
+    (runtime_root / "design.md").write_text(design, encoding="utf-8")
+    state = _state(
+        module,
+        state="WAIT_G3",
+        assurance="intensive",
+        digest=hashlib.sha256(design.encode("utf-8")).hexdigest(),
+    )
+    (runtime_root / "state.json").write_text(
+        module.serialize_state(state), encoding="utf-8"
+    )
+    report = """# Critical Analysis
+
+## Scope
+Review intensive assurance persistence.
+
+## Assessment
+The review source is usable.
+
+### Evidence 1 — Persisted source
+**Critique:** Each required source must persist independently.
+**Evidence:** Intensive assurance requires standard and independent sources.
+**Suggestion:** Retain the intermediate ledger until both sources complete.
+**Why:** An interrupted second review must not erase the first source.
+**Impact:** Missing persistence would force repeated review work.
+**Blocking:** false
+
+## Conclusion
+**Outcome:** accepted
+**Summary:** This source can be recorded.
+"""
+
+    first = module.main(
+        [
+            "advance",
+            "--root",
+            str(runtime_root),
+            "--slug",
+            "sample",
+            "--event",
+            "record-readable-review",
+            "--payload-json",
+            json.dumps({"source": "standard", "report": report}),
+            "--compact",
+        ]
+    )
+
+    assert first == 0
+    assert "state=WAIT_G3|" in capsys.readouterr().out
+    intermediate = module.load_runtime(runtime_root, slug="sample")
+    assert intermediate.recovery_reason is None
+    assert intermediate.state.review_sources == ("standard",)
+    assert "## Review Ledger" in (intermediate.design_text or "")
+
+    second = module.main(
+        [
+            "advance",
+            "--root",
+            str(runtime_root),
+            "--slug",
+            "sample",
+            "--event",
+            "record-readable-review",
+            "--payload-json",
+            json.dumps({"source": "independent", "report": report}),
+            "--compact",
+        ]
+    )
+
+    assert second == 0
     assert "state=WAIT_G4|" in capsys.readouterr().out
 
 
