@@ -1,9 +1,9 @@
 ---
-name: internal-gateway-idea-v2
+name: internal-gateway-idea
 description: Use when the user explicitly selects a conversation-first workflow to turn an early or unclear idea into a decision-ready analysis before any plan is requested.
 ---
 
-# Internal Gateway Idea V2
+# Internal Gateway Idea
 
 ## When to use
 
@@ -11,12 +11,12 @@ Use this skill only when the user explicitly selects it. It turns an early,
 unclear, or anchored idea into a decision-ready analysis while keeping the
 working discussion in the conversation by default.
 
-The existing `internal-gateway-idea` owns its governed G0-G5 stateful workflow.
-This skill complements that owner and does not claim or route its behavior.
+This is the canonical repository-owned idea-analysis gateway. It does not
+create an implementation plan or execution handoff.
 `grill-me` owns interview decisions and the resolved decision summary.
 `internal-gateway-critical-master` is an optional critical-strategy owner that
 the user must select explicitly. Planning is a separate user-requested action
-after analysis is accepted; this skill never creates a plan or execution handoff.
+after the analysis is accepted.
 
 ## Invocation and posture
 

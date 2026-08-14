@@ -1,8 +1,8 @@
 interface:
-  display_name: "Idea Analysis V2"
+  display_name: "Idea Analysis"
   short_description: "Conversation-first analysis for unclear ideas"
   default_prompt: >-
-    Use $internal-gateway-idea-v2 only when explicitly selected to turn an
+    Use $internal-gateway-idea only when explicitly selected to turn an
     early or unclear idea into a decision-ready Candidate Analysis Spec.
     Keep the analysis in conversation by default, distinguish Facts, Reports,
     Assumptions, Unknowns, and Constraints, and work through orienting,
