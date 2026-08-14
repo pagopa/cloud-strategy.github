@@ -343,17 +343,18 @@ def _reject_duplicate_json_fields(pairs: list[tuple[str, object]]) -> dict[str, 
     return result
 
 
-def _contains_embedded_digest(value: object, path: str = "") -> bool:
+def _contains_embedded_digest(value: object) -> bool:
     if isinstance(value, Mapping):
         for key, child in value.items():
-            child_path = f"{path}.{key}" if path else str(key)
-            if key in {"content_sha256", "semantic_fingerprint"} and isinstance(child, str):
+            if key in {"content_sha256", "semantic_fingerprint"} and isinstance(
+                child, str
+            ):
                 if SHA256_RE.fullmatch(child):
                     return True
-            if _contains_embedded_digest(child, child_path):
+            if _contains_embedded_digest(child):
                 return True
     elif isinstance(value, list):
-        return any(_contains_embedded_digest(item, path) for item in value)
+        return any(_contains_embedded_digest(item) for item in value)
     return False
 
 
@@ -554,6 +555,379 @@ def _manifest_fenced_object(text: str, heading: str) -> Mapping[str, object]:
     return _manifest_object(raw, heading)
 
 
+def _validate_manifest_identity(root: Mapping[str, object]) -> None:
+    if (
+        not _is_int(root["schema_version"])
+        or root["schema_version"] != MANIFEST_SCHEMA_VERSION
+    ):
+        raise ExecutionContractError(
+            "unsupported-manifest-schema",
+            f"Execution Manifest schema_version must be {MANIFEST_SCHEMA_VERSION}",
+        )
+    if (
+        not _non_empty_string(root["manifest_version"])
+        or root["manifest_version"] != "execution-manifest/v1"
+    ):
+        raise ValueError("manifest_version must be execution-manifest/v1")
+    if not _non_empty_string(root["plan_id"]):
+        raise ValueError("plan_id must be non-empty")
+    if root["repository_root"] != ".":
+        raise ValueError("repository_root must be .")
+
+
+def _validate_authority_boundaries(
+    root: Mapping[str, object]
+) -> Mapping[str, object]:
+    authority = _manifest_object(root["authority_boundaries"], "authority_boundaries")
+    _manifest_exact_fields(
+        authority,
+        {
+            "normative_owner",
+            "execution_owner",
+            "worker",
+            "caller_owns",
+            "protected_paths",
+            "no_git_mutation",
+        },
+        "authority_boundaries",
+    )
+    if not _non_empty_string(authority["normative_owner"]) or not _non_empty_string(
+        authority["execution_owner"]
+    ):
+        raise ValueError("authority owners must be non-empty")
+    if not _non_empty_string(authority["worker"]):
+        raise ValueError("authority_boundaries.worker must be non-empty")
+    _manifest_non_empty_strings(
+        authority["caller_owns"], "authority_boundaries.caller_owns"
+    )
+    _manifest_non_empty_strings(
+        authority["protected_paths"], "authority_boundaries.protected_paths"
+    )
+    if not _bool(authority["no_git_mutation"], "authority_boundaries.no_git_mutation"):
+        raise ValueError("authority_boundaries.no_git_mutation must be true")
+    return authority
+
+
+def _validate_targets(value: object) -> None:
+    targets = value
+    if not isinstance(targets, list) or not targets:
+        raise ValueError("targets must be a non-empty list")
+    target_ids: set[str] = set()
+    for index, raw_target in enumerate(targets):
+        label = f"targets[{index}]"
+        target = _manifest_object(raw_target, label)
+        keys = (
+            {"id", "path", "state", "condition"}
+            if "condition" in target
+            else {"id", "path", "state"}
+        )
+        _manifest_exact_fields(target, keys, label)
+        target_id = _string(target["id"], f"{label}.id")
+        if target_id in target_ids:
+            raise ValueError(f"duplicate target id: {target_id}")
+        target_ids.add(target_id)
+        target_path = _string(target["path"], f"{label}.path")
+        if _is_git_directory_path(target_path):
+            raise ExecutionContractError(
+                "git-target-prohibited",
+                f"{label}.path must not target the .git directory",
+            )
+        if target["state"] not in MANIFEST_TARGET_STATES:
+            raise ValueError(f"{label}.state is invalid")
+        if "condition" in target:
+            _string(target["condition"], f"{label}.condition")
+
+
+def _validate_controls(value: object) -> None:
+    controls = _manifest_object(value, "controls")
+    if not controls:
+        raise ValueError("controls must not be empty")
+    for control_id, raw_control in controls.items():
+        label = f"controls.{control_id}"
+        control = _manifest_object(raw_control, label)
+        _manifest_exact_fields(control, {"class", "owner", "binding"}, label)
+        if control["class"] not in MANIFEST_CONTROL_CLASSES:
+            raise ValueError(f"{label}.class is invalid")
+        _string(control["owner"], f"{label}.owner")
+        _manifest_non_empty_strings(control["binding"], f"{label}.binding")
+
+
+def _validate_validations(value: object) -> None:
+    validations = value
+    if not isinstance(validations, list) or not validations:
+        raise ValueError("validations must be a non-empty list")
+    validation_ids: set[str] = set()
+    for index, raw_validation in enumerate(validations):
+        label = f"validations[{index}]"
+        validation = _manifest_object(raw_validation, label)
+        validation_fields = {"id", "command", "owner", "pass_signal", "phases"}
+        if "equivalence" in validation:
+            validation_fields.add("equivalence")
+        _manifest_exact_fields(validation, validation_fields, label)
+        validation_id = _string(validation["id"], f"{label}.id")
+        if validation_id in validation_ids:
+            raise ExecutionContractError(
+                "duplicate-validation-id",
+                f"Duplicate validation id: {validation_id}",
+            )
+        validation_ids.add(validation_id)
+        validation_command = _string(validation["command"], f"{label}.command")
+        _reject_git_mutation(validation_command, f"{label}.command")
+        _string(validation["owner"], f"{label}.owner")
+        _string(validation["pass_signal"], f"{label}.pass_signal")
+        phases = _manifest_non_empty_strings(validation["phases"], f"{label}.phases")
+        if any(phase not in MANIFEST_PHASES for phase in phases):
+            raise ValueError(f"{label}.phases contains an unsupported phase")
+        if (
+            "equivalence" in validation
+            and validation["equivalence"] not in MANIFEST_EQUIVALENCE
+        ):
+            raise ValueError(f"{label}.equivalence is invalid")
+
+
+def _validate_manual_obligations(value: object) -> None:
+    manual = value
+    if not isinstance(manual, list):
+        raise ValueError("manual_obligations must be a list")
+    manual_ids: set[str] = set()
+    for index, raw_obligation in enumerate(manual):
+        label = f"manual_obligations[{index}]"
+        obligation = _manifest_object(raw_obligation, label)
+        _manifest_exact_fields(
+            obligation, {"id", "kind", "required", "acceptance"}, label
+        )
+        obligation_id = _string(obligation["id"], f"{label}.id")
+        if obligation_id in manual_ids:
+            raise ValueError(f"duplicate manual obligation id: {obligation_id}")
+        manual_ids.add(obligation_id)
+        if obligation["kind"] not in {"human", "external"}:
+            raise ValueError(f"{label}.kind is invalid")
+        _bool(obligation["required"], f"{label}.required")
+        obligation_acceptance = _string(
+            obligation["acceptance"], f"{label}.acceptance"
+        )
+        _reject_git_mutation(obligation_acceptance, f"{label}.acceptance")
+
+
+def _validate_tasks(value: object) -> None:
+    tasks = value
+    if not isinstance(tasks, list) or not tasks:
+        raise ValueError("tasks must be a non-empty list")
+    task_ids: set[str] = set()
+    orders: set[int] = set()
+    for index, raw_task in enumerate(tasks):
+        label = f"tasks[{index}]"
+        task = _manifest_object(raw_task, label)
+        _manifest_exact_fields(
+            task,
+            {
+                "id",
+                "order",
+                "posture",
+                "objective",
+                "depends_on",
+                "target_ids",
+                "validation_ids",
+                "manual_obligation_ids",
+                "acceptance",
+                "stop_conditions",
+            },
+            label,
+        )
+        task_id = _string(task["id"], f"{label}.id")
+        if task_id in task_ids:
+            raise ValueError(f"duplicate task id: {task_id}")
+        task_ids.add(task_id)
+        if (
+            not _is_int(task["order"])
+            or task["order"] < 1
+            or task["order"] in orders
+        ):
+            raise ValueError(f"{label}.order must be a unique positive integer")
+        orders.add(task["order"])
+        if task["posture"] not in MANIFEST_POSTURES:
+            raise ValueError(f"{label}.posture is invalid")
+        task_objective = _string(task["objective"], f"{label}.objective")
+        _reject_git_mutation(task_objective, f"{label}.objective")
+        _manifest_id_list(task["depends_on"], f"{label}.depends_on")
+        _manifest_id_list(task["target_ids"], f"{label}.target_ids")
+        _manifest_id_list(task["validation_ids"], f"{label}.validation_ids")
+        task_acceptance = _manifest_non_empty_strings(
+            task["acceptance"], f"{label}.acceptance"
+        )
+        task_stop_conditions = _manifest_non_empty_strings(
+            task["stop_conditions"], f"{label}.stop_conditions"
+        )
+        for item in (*task_acceptance, *task_stop_conditions):
+            _reject_git_mutation(item, label)
+
+
+def _validate_retry_policy(value: object) -> None:
+    retry = _manifest_object(value, "retry_policy")
+    _manifest_exact_fields(
+        retry,
+        {
+            "initial_attempts",
+            "max_context_refills",
+            "max_corrective_retries",
+            "caller_may_lower",
+            "repeat_progress_status",
+            "minor_or_cosmetic_reopens",
+        },
+        "retry_policy",
+    )
+    for field in (
+        "initial_attempts",
+        "max_context_refills",
+        "max_corrective_retries",
+    ):
+        if not _is_int(retry[field]) or retry[field] < 0:
+            raise ValueError(f"retry_policy.{field} must be a non-negative integer")
+    if (
+        retry["initial_attempts"] != 1
+        or retry["max_context_refills"] != 1
+        or retry["max_corrective_retries"] != 1
+    ):
+        raise ValueError(
+            "retry_policy must retain one initial attempt, one refill, and one corrective retry"
+        )
+    _bool(retry["caller_may_lower"], "retry_policy.caller_may_lower")
+    if retry["repeat_progress_status"] != "stalled":
+        raise ValueError("retry_policy.repeat_progress_status must be stalled")
+    if retry["minor_or_cosmetic_reopens"] is not False:
+        raise ValueError("retry_policy.minor_or_cosmetic_reopens must be false")
+
+
+def _validate_hashing(value: object) -> None:
+    hashing = _manifest_object(value, "hashing")
+    _manifest_exact_fields(
+        hashing,
+        {"content_sha256", "semantic_fingerprint", "self_reference"},
+        "hashing",
+    )
+    content_hash = _manifest_object(
+        hashing["content_sha256"], "hashing.content_sha256"
+    )
+    semantic_hash = _manifest_object(
+        hashing["semantic_fingerprint"], "hashing.semantic_fingerprint"
+    )
+    _manifest_exact_fields(
+        content_hash,
+        {"algorithm", "input", "binding"},
+        "hashing.content_sha256",
+    )
+    _manifest_exact_fields(
+        semantic_hash,
+        {"algorithm", "input", "version", "binding"},
+        "hashing.semantic_fingerprint",
+    )
+    if (
+        content_hash["algorithm"] != "SHA-256"
+        or semantic_hash["algorithm"] != "SHA-256"
+    ):
+        raise ValueError("hashing algorithms must be SHA-256")
+    _string(content_hash["input"], "hashing.content_sha256.input")
+    _string(semantic_hash["input"], "hashing.semantic_fingerprint.input")
+    if (
+        content_hash["binding"] != "external"
+        or semantic_hash["binding"] != "external"
+    ):
+        raise ValueError("hashing bindings must be external")
+    _string(semantic_hash["version"], "hashing.semantic_fingerprint.version")
+    if hashing["self_reference"] is not False:
+        raise ValueError("hashing.self_reference must be false")
+
+
+def _validate_approval(value: object) -> None:
+    approval = _manifest_object(value, "approval")
+    _manifest_exact_fields(
+        approval,
+        {"binds", "editorial_content_change", "normative_manifest_change"},
+        "approval",
+    )
+    if approval["binds"] != "semantic_fingerprint":
+        raise ValueError("approval.binds must be semantic_fingerprint")
+    _string(
+        approval["editorial_content_change"], "approval.editorial_content_change"
+    )
+    _string(
+        approval["normative_manifest_change"], "approval.normative_manifest_change"
+    )
+
+
+def _validate_bootstrap(value: object) -> None:
+    bootstrap = _manifest_object(value, "bootstrap")
+    _manifest_exact_fields(
+        bootstrap,
+        {
+            "mode",
+            "compatibility_projection",
+            "projection_binding",
+            "legacy_only",
+            "retirement_evidence",
+        },
+        "bootstrap",
+    )
+    mode = _string(bootstrap["mode"], "bootstrap.mode")
+    if mode not in MANIFEST_BOOTSTRAP_MODES:
+        raise ValueError("bootstrap.mode is invalid")
+    projection = _strings(
+        bootstrap["compatibility_projection"], "bootstrap.compatibility_projection"
+    )
+    if mode == "explicit-single-plan" and projection != (
+        "Control Inventory",
+        "Task headings",
+        "Execution Contract",
+    ):
+        raise ValueError(
+            "bootstrap.compatibility_projection is not the supported projection"
+        )
+    if mode == "manifest-only" and projection:
+        raise ValueError("manifest-only plans must not emit a compatibility projection")
+    binding = _manifest_object(
+        bootstrap["projection_binding"], "bootstrap.projection_binding"
+    )
+    _manifest_exact_fields(
+        binding,
+        {"controls", "tasks", "validations", "authority"},
+        "bootstrap.projection_binding",
+    )
+    if dict(binding) != {
+        "controls": "manifest.controls",
+        "tasks": "manifest.tasks",
+        "validations": "manifest.validations",
+        "authority": "manifest.authority_boundaries",
+    }:
+        raise ValueError("bootstrap.projection_binding is conflicting")
+    if bootstrap["legacy_only"] != "reject":
+        raise ValueError("bootstrap.legacy_only must be reject")
+    _string(bootstrap["retirement_evidence"], "bootstrap.retirement_evidence")
+
+
+def _validate_rollout_and_handoff(root: Mapping[str, object]) -> None:
+    _manifest_non_empty_strings(root["rollout"], "rollout")
+    handoff = _manifest_object(root["handoff"], "handoff")
+    _manifest_exact_fields(
+        handoff,
+        {"next_owner", "requires", "status_sibling", "git_mutation"},
+        "handoff",
+    )
+    if handoff["next_owner"] != "/internal-gateway-execute-plans":
+        raise ValueError("handoff.next_owner must be /internal-gateway-execute-plans")
+    requires = _manifest_non_empty_strings(
+        handoff["requires"], "handoff.requires"
+    )
+    for required in (
+        "human approval",
+        "exact semantic_fingerprint review",
+        "zero blocking preflight findings",
+    ):
+        if required not in requires:
+            raise ValueError(f"handoff.requires is missing {required}")
+    if handoff["status_sibling"] != "none" or handoff["git_mutation"] != "prohibited":
+        raise ValueError("handoff must prohibit status sibling and Git mutation")
+
+
 def parse_execution_manifest(text: str) -> dict[str, object]:
     """Parse and validate exactly one normative Execution Manifest object."""
 
@@ -565,225 +939,21 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
     )
     _manifest_exact_fields(root, manifest_fields, "Execution Manifest")
     try:
-        if not _is_int(root["schema_version"]) or root["schema_version"] != MANIFEST_SCHEMA_VERSION:
-            raise ExecutionContractError(
-                "unsupported-manifest-schema",
-                f"Execution Manifest schema_version must be {MANIFEST_SCHEMA_VERSION}",
-            )
-        if not _non_empty_string(root["manifest_version"]) or root["manifest_version"] != "execution-manifest/v1":
-            raise ValueError("manifest_version must be execution-manifest/v1")
-        if not _non_empty_string(root["plan_id"]):
-            raise ValueError("plan_id must be non-empty")
-        if root["repository_root"] != ".":
-            raise ValueError("repository_root must be .")
-
-        authority = _manifest_object(root["authority_boundaries"], "authority_boundaries")
-        _manifest_exact_fields(
-            authority,
-            {"normative_owner", "execution_owner", "worker", "caller_owns", "protected_paths", "no_git_mutation"},
-            "authority_boundaries",
-        )
-        if not _non_empty_string(authority["normative_owner"]) or not _non_empty_string(authority["execution_owner"]):
-            raise ValueError("authority owners must be non-empty")
-        if not _non_empty_string(authority["worker"]):
-            raise ValueError("authority_boundaries.worker must be non-empty")
-        _manifest_non_empty_strings(authority["caller_owns"], "authority_boundaries.caller_owns")
-        _manifest_non_empty_strings(authority["protected_paths"], "authority_boundaries.protected_paths")
-        if not _bool(authority["no_git_mutation"], "authority_boundaries.no_git_mutation"):
-            raise ValueError("authority_boundaries.no_git_mutation must be true")
+        _validate_manifest_identity(root)
+        authority = _validate_authority_boundaries(root)
         _validate_delegation_provenance(root, authority)
 
-        targets = root["targets"]
-        if not isinstance(targets, list) or not targets:
-            raise ValueError("targets must be a non-empty list")
-        target_ids: set[str] = set()
-        for index, raw_target in enumerate(targets):
-            label = f"targets[{index}]"
-            target = _manifest_object(raw_target, label)
-            keys = {"id", "path", "state", "condition"} if "condition" in target else {"id", "path", "state"}
-            _manifest_exact_fields(target, keys, label)
-            target_id = _string(target["id"], f"{label}.id")
-            if target_id in target_ids:
-                raise ValueError(f"duplicate target id: {target_id}")
-            target_ids.add(target_id)
-            target_path = _string(target["path"], f"{label}.path")
-            if _is_git_directory_path(target_path):
-                raise ExecutionContractError(
-                    "git-target-prohibited",
-                    f"{label}.path must not target the .git directory",
-                )
-            if target["state"] not in MANIFEST_TARGET_STATES:
-                raise ValueError(f"{label}.state is invalid")
-            if "condition" in target:
-                _string(target["condition"], f"{label}.condition")
-
-        controls = _manifest_object(root["controls"], "controls")
-        if not controls:
-            raise ValueError("controls must not be empty")
-        for control_id, raw_control in controls.items():
-            label = f"controls.{control_id}"
-            control = _manifest_object(raw_control, label)
-            _manifest_exact_fields(control, {"class", "owner", "binding"}, label)
-            if control["class"] not in MANIFEST_CONTROL_CLASSES:
-                raise ValueError(f"{label}.class is invalid")
-            _string(control["owner"], f"{label}.owner")
-            _manifest_non_empty_strings(control["binding"], f"{label}.binding")
-
-        validations = root["validations"]
-        if not isinstance(validations, list) or not validations:
-            raise ValueError("validations must be a non-empty list")
-        validation_ids: set[str] = set()
-        for index, raw_validation in enumerate(validations):
-            label = f"validations[{index}]"
-            validation = _manifest_object(raw_validation, label)
-            validation_fields = {"id", "command", "owner", "pass_signal", "phases"}
-            if "equivalence" in validation:
-                validation_fields.add("equivalence")
-            _manifest_exact_fields(validation, validation_fields, label)
-            validation_id = _string(validation["id"], f"{label}.id")
-            if validation_id in validation_ids:
-                raise ExecutionContractError(
-                    "duplicate-validation-id",
-                    f"Duplicate validation id: {validation_id}",
-                )
-            validation_ids.add(validation_id)
-            validation_command = _string(validation["command"], f"{label}.command")
-            _reject_git_mutation(validation_command, f"{label}.command")
-            _string(validation["owner"], f"{label}.owner")
-            _string(validation["pass_signal"], f"{label}.pass_signal")
-            phases = _manifest_non_empty_strings(validation["phases"], f"{label}.phases")
-            if any(phase not in MANIFEST_PHASES for phase in phases):
-                raise ValueError(f"{label}.phases contains an unsupported phase")
-            if "equivalence" in validation and validation["equivalence"] not in MANIFEST_EQUIVALENCE:
-                raise ValueError(f"{label}.equivalence is invalid")
-
-        manual = root["manual_obligations"]
-        if not isinstance(manual, list):
-            raise ValueError("manual_obligations must be a list")
-        manual_ids: set[str] = set()
-        for index, raw_obligation in enumerate(manual):
-            label = f"manual_obligations[{index}]"
-            obligation = _manifest_object(raw_obligation, label)
-            _manifest_exact_fields(obligation, {"id", "kind", "required", "acceptance"}, label)
-            obligation_id = _string(obligation["id"], f"{label}.id")
-            if obligation_id in manual_ids:
-                raise ValueError(f"duplicate manual obligation id: {obligation_id}")
-            manual_ids.add(obligation_id)
-            if obligation["kind"] not in {"human", "external"}:
-                raise ValueError(f"{label}.kind is invalid")
-            _bool(obligation["required"], f"{label}.required")
-            obligation_acceptance = _string(
-                obligation["acceptance"], f"{label}.acceptance"
-            )
-            _reject_git_mutation(obligation_acceptance, f"{label}.acceptance")
-
-        tasks = root["tasks"]
-        if not isinstance(tasks, list) or not tasks:
-            raise ValueError("tasks must be a non-empty list")
-        task_ids: set[str] = set()
-        orders: set[int] = set()
-        for index, raw_task in enumerate(tasks):
-            label = f"tasks[{index}]"
-            task = _manifest_object(raw_task, label)
-            _manifest_exact_fields(
-                task,
-                {"id", "order", "posture", "objective", "depends_on", "target_ids", "validation_ids", "manual_obligation_ids", "acceptance", "stop_conditions"},
-                label,
-            )
-            task_id = _string(task["id"], f"{label}.id")
-            if task_id in task_ids:
-                raise ValueError(f"duplicate task id: {task_id}")
-            task_ids.add(task_id)
-            if not _is_int(task["order"]) or task["order"] < 1 or task["order"] in orders:
-                raise ValueError(f"{label}.order must be a unique positive integer")
-            orders.add(task["order"])
-            if task["posture"] not in MANIFEST_POSTURES:
-                raise ValueError(f"{label}.posture is invalid")
-            task_objective = _string(task["objective"], f"{label}.objective")
-            _reject_git_mutation(task_objective, f"{label}.objective")
-            _manifest_id_list(task["depends_on"], f"{label}.depends_on")
-            _manifest_id_list(task["target_ids"], f"{label}.target_ids")
-            _manifest_id_list(task["validation_ids"], f"{label}.validation_ids")
-            _manifest_id_list(task["manual_obligation_ids"], f"{label}.manual_obligation_ids")
-            task_acceptance = _manifest_non_empty_strings(
-                task["acceptance"], f"{label}.acceptance"
-            )
-            task_stop_conditions = _manifest_non_empty_strings(
-                task["stop_conditions"], f"{label}.stop_conditions"
-            )
-            for value in (*task_acceptance, *task_stop_conditions):
-                _reject_git_mutation(value, label)
-
-        retry = _manifest_object(root["retry_policy"], "retry_policy")
-        _manifest_exact_fields(retry, {"initial_attempts", "max_context_refills", "max_corrective_retries", "caller_may_lower", "repeat_progress_status", "minor_or_cosmetic_reopens"}, "retry_policy")
-        for field in ("initial_attempts", "max_context_refills", "max_corrective_retries"):
-            if not _is_int(retry[field]) or retry[field] < 0:
-                raise ValueError(f"retry_policy.{field} must be a non-negative integer")
-        if retry["initial_attempts"] != 1 or retry["max_context_refills"] != 1 or retry["max_corrective_retries"] != 1:
-            raise ValueError("retry_policy must retain one initial attempt, one refill, and one corrective retry")
-        _bool(retry["caller_may_lower"], "retry_policy.caller_may_lower")
-        if retry["repeat_progress_status"] != "stalled":
-            raise ValueError("retry_policy.repeat_progress_status must be stalled")
-        if retry["minor_or_cosmetic_reopens"] is not False:
-            raise ValueError("retry_policy.minor_or_cosmetic_reopens must be false")
-
-        hashing = _manifest_object(root["hashing"], "hashing")
-        _manifest_exact_fields(hashing, {"content_sha256", "semantic_fingerprint", "self_reference"}, "hashing")
-        content_hash = _manifest_object(hashing["content_sha256"], "hashing.content_sha256")
-        semantic_hash = _manifest_object(hashing["semantic_fingerprint"], "hashing.semantic_fingerprint")
-        _manifest_exact_fields(content_hash, {"algorithm", "input", "binding"}, "hashing.content_sha256")
-        _manifest_exact_fields(semantic_hash, {"algorithm", "input", "version", "binding"}, "hashing.semantic_fingerprint")
-        if content_hash["algorithm"] != "SHA-256" or semantic_hash["algorithm"] != "SHA-256":
-            raise ValueError("hashing algorithms must be SHA-256")
-        _string(content_hash["input"], "hashing.content_sha256.input")
-        _string(semantic_hash["input"], "hashing.semantic_fingerprint.input")
-        if content_hash["binding"] != "external" or semantic_hash["binding"] != "external":
-            raise ValueError("hashing bindings must be external")
-        _string(semantic_hash["version"], "hashing.semantic_fingerprint.version")
-        if hashing["self_reference"] is not False:
-            raise ValueError("hashing.self_reference must be false")
+        _validate_targets(root["targets"])
+        _validate_controls(root["controls"])
+        _validate_validations(root["validations"])
+        _validate_manual_obligations(root["manual_obligations"])
+        _validate_tasks(root["tasks"])
+        _validate_retry_policy(root["retry_policy"])
+        _validate_hashing(root["hashing"])
         compute_semantic_fingerprint(root)
-
-        approval = _manifest_object(root["approval"], "approval")
-        _manifest_exact_fields(approval, {"binds", "editorial_content_change", "normative_manifest_change"}, "approval")
-        if approval["binds"] != "semantic_fingerprint":
-            raise ValueError("approval.binds must be semantic_fingerprint")
-        _string(approval["editorial_content_change"], "approval.editorial_content_change")
-        _string(approval["normative_manifest_change"], "approval.normative_manifest_change")
-
-        bootstrap = _manifest_object(root["bootstrap"], "bootstrap")
-        _manifest_exact_fields(bootstrap, {"mode", "compatibility_projection", "projection_binding", "legacy_only", "retirement_evidence"}, "bootstrap")
-        mode = _string(bootstrap["mode"], "bootstrap.mode")
-        if mode not in MANIFEST_BOOTSTRAP_MODES:
-            raise ValueError("bootstrap.mode is invalid")
-        projection = _strings(bootstrap["compatibility_projection"], "bootstrap.compatibility_projection")
-        if mode == "explicit-single-plan" and projection != (
-            "Control Inventory",
-            "Task headings",
-            "Execution Contract",
-        ):
-            raise ValueError("bootstrap.compatibility_projection is not the supported projection")
-        if mode == "manifest-only" and projection:
-            raise ValueError("manifest-only plans must not emit a compatibility projection")
-        binding = _manifest_object(bootstrap["projection_binding"], "bootstrap.projection_binding")
-        _manifest_exact_fields(binding, {"controls", "tasks", "validations", "authority"}, "bootstrap.projection_binding")
-        if dict(binding) != {"controls": "manifest.controls", "tasks": "manifest.tasks", "validations": "manifest.validations", "authority": "manifest.authority_boundaries"}:
-            raise ValueError("bootstrap.projection_binding is conflicting")
-        if bootstrap["legacy_only"] != "reject":
-            raise ValueError("bootstrap.legacy_only must be reject")
-        _string(bootstrap["retirement_evidence"], "bootstrap.retirement_evidence")
-
-        _manifest_non_empty_strings(root["rollout"], "rollout")
-        handoff = _manifest_object(root["handoff"], "handoff")
-        _manifest_exact_fields(handoff, {"next_owner", "requires", "status_sibling", "git_mutation"}, "handoff")
-        if handoff["next_owner"] != "/internal-gateway-execute-plans":
-            raise ValueError("handoff.next_owner must be /internal-gateway-execute-plans")
-        requires = _manifest_non_empty_strings(handoff["requires"], "handoff.requires")
-        for required in ("human approval", "exact semantic_fingerprint review", "zero blocking preflight findings"):
-            if required not in requires:
-                raise ValueError(f"handoff.requires is missing {required}")
-        if handoff["status_sibling"] != "none" or handoff["git_mutation"] != "prohibited":
-            raise ValueError("handoff must prohibit status sibling and Git mutation")
+        _validate_approval(root["approval"])
+        _validate_bootstrap(root["bootstrap"])
+        _validate_rollout_and_handoff(root)
     except ExecutionContractError:
         raise
     except (TypeError, ValueError) as exc:
@@ -875,7 +1045,9 @@ def _strings(value: object, label: str, *, allow_empty: bool = True) -> tuple[st
     return tuple(item.strip() for item in value)
 
 
-def _exact_fields(mapping: Mapping[str, object], expected: set[str], label: str) -> None:
+def _exact_fields(
+    mapping: Mapping[str, object], expected: set[str] | frozenset[str], label: str
+) -> None:
     unknown = set(mapping) - expected
     missing = expected - set(mapping)
     if unknown or missing:
@@ -928,7 +1100,7 @@ def _parse_approval_evidence(
 ) -> ApprovalEvidence:
     try:
         mapping = _mapping(value, "approval_evidence")
-        _exact_fields(mapping, set(APPROVAL_EVIDENCE_FIELDS), "approval_evidence")
+        _exact_fields(mapping, APPROVAL_EVIDENCE_FIELDS, "approval_evidence")
         source = _string(mapping["source"], "approval_evidence.source")
         statement = _string(mapping["statement"], "approval_evidence.statement")
         recorded_plan_fingerprint = _string(
@@ -1233,7 +1405,7 @@ def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
     """Parse the strict, hash-bound state persisted by the execution gateway."""
 
     mapping = _mapping(payload, "resume state")
-    _exact_fields(mapping, set(STATE_FIELDS), "resume state")
+    _exact_fields(mapping, STATE_FIELDS, "resume state")
     if not _is_int(mapping["schema_version"]) or mapping["schema_version"] != STATE_SCHEMA_VERSION:
         raise ExecutionContractError(
             "unsupported-state-schema",
@@ -1694,7 +1866,14 @@ def validate_manifest_projection(
 
 def _plan_reference_matches(plan_path: Path, status_path: Path, reference: str, repo_root: Path) -> bool:
     declared = Path(reference)
-    candidates = {declared.resolve()} if declared.is_absolute() else {(status_path.parent / declared).resolve(), (plan_path.parent / declared).resolve(), (repo_root / declared).resolve()}
+    if declared.is_absolute():
+        candidates = {declared.resolve()}
+    else:
+        candidates = {
+            (status_path.parent / declared).resolve(),
+            (plan_path.parent / declared).resolve(),
+            (repo_root / declared).resolve(),
+        }
     return plan_path.resolve() in candidates
 
 
@@ -1799,7 +1978,23 @@ def validate_state(
 def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
     blocking = [item for item in findings if item.severity == "blocking"]
     notices = [item for item in findings if item.severity == "notice"]
-    return {"status": "passed" if not blocking else "failed", "finding_counts": {"total": len(findings), "blocking": len(blocking), "notice": len(notices)}, "finding_sample": [{"code": item.code, "severity": item.severity} for item in findings[:10]], "next_action": "All checks passed." if not blocking else "Resolve blocking plan execution findings."}
+    return {
+        "status": "passed" if not blocking else "failed",
+        "finding_counts": {
+            "total": len(findings),
+            "blocking": len(blocking),
+            "notice": len(notices),
+        },
+        "finding_sample": [
+            {"code": item.code, "severity": item.severity}
+            for item in findings[:10]
+        ],
+        "next_action": (
+            "All checks passed."
+            if not blocking
+            else "Resolve blocking plan execution findings."
+        ),
+    }
 
 
 def _find_repo_root(start: Path) -> Path:
@@ -1813,8 +2008,17 @@ def _format_findings(findings: list[Finding], fmt: str) -> str:
     if fmt == "compact":
         return json.dumps(build_compact_payload(findings))
     if fmt == "json":
-        return json.dumps({"status": "failed" if any(item.severity == "blocking" for item in findings) else "passed", "findings": [item.__dict__ for item in findings]}, indent=2)
-    return "OK: all checks passed." if not findings else "\n".join(f"[{item.severity.upper()}] {item.code}: {item.message}" for item in findings)
+        status = "failed" if any(item.severity == "blocking" for item in findings) else "passed"
+        return json.dumps(
+            {"status": status, "findings": [item.__dict__ for item in findings]},
+            indent=2,
+        )
+    if not findings:
+        return "OK: all checks passed."
+    return "\n".join(
+        f"[{item.severity.upper()}] {item.code}: {item.message}"
+        for item in findings
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
