@@ -41,6 +41,18 @@ with the nearest owner.
   tradeoffs, and validation path before implementation or handoff.
 - Reason from repository evidence. Do not invent runtimes, validators, sync
   flows, tests, or policy.
+- Downshift for policy-only work. When the target state is a small declared
+  policy change in known files, use only the nearest owner, the mandatory TDD
+  guardrail, the scope validator, and adjacent tests. Load graphify, critical
+  review, brainstorming, or external research only on concrete ambiguity or
+  contradiction.
+- On a dirty working tree, snapshot the initial state, declare the task file
+  allowlist, and run targeted checks before global ones. Classify global
+  failures outside the allowlist as pre-existing; do not reopen
+  implementation for them.
+- Before the final answer, re-read the changed files from the working tree
+  and compare them with the claims made in the answer. Do not report checks,
+  content, or behavior that the final state does not contain.
 
 ## Placement And Authoring
 
