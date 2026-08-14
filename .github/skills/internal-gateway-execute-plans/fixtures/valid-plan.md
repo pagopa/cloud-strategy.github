@@ -22,9 +22,9 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
 
 ## Status Contract
 
-- Runtime status uses one uppercase YAML sibling: `<plan-basename>.DONE.yaml`, `<plan-basename>.PARTIAL.yaml`, or `<plan-basename>.BLOCKED.yaml`.
+- YAML is the current runtime status and uses one uppercase sibling: `<plan-basename>.DONE.yaml`, `<plan-basename>.PARTIAL.yaml`, or `<plan-basename>.BLOCKED.yaml`.
 - The filename status and YAML `status` value must agree.
-- One legacy `<plan-basename>.status.json` may migrate only after YAML validation.
+- No alternate runtime status format is accepted.
 
 ## Control Inventory
 

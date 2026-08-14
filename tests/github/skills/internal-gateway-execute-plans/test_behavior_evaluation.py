@@ -374,7 +374,7 @@ def test_bootstrap_collects_local_checks_then_stops_before_external_work() -> No
     checks = (
         executor.BootstrapCheck("bundle-resolution", "PASS", "none"),
         executor.BootstrapCheck(
-            "predecessor", "BLOCKED", "Request verified predecessor evidence."
+            "manifest-binding", "BLOCKED", "Request manifest binding evidence."
         ),
         executor.BootstrapCheck(
             "live-operation", "PASS", "must not run", external=True
@@ -383,7 +383,7 @@ def test_bootstrap_collects_local_checks_then_stops_before_external_work() -> No
 
     result = executor.run_local_bootstrap(checks)
 
-    assert [item["check"] for item in result] == ["bundle-resolution", "predecessor"]
+    assert [item["check"] for item in result] == ["bundle-resolution", "manifest-binding"]
     assert result[-1]["status"] == "BLOCKED"
 
 
@@ -391,7 +391,7 @@ def test_bootstrap_blocked_result_has_one_concrete_next_action() -> None:
     executor = _load_executor()
 
     with pytest.raises(executor.ExecutionContractError) as exc:
-        executor.build_bootstrap_payload("predecessor", "BLOCKED", "none")
+        executor.build_bootstrap_payload("manifest-binding", "BLOCKED", "none")
 
     assert exc.value.code == "bootstrap-next-action-required"
 
@@ -401,7 +401,7 @@ def test_bootstrap_does_not_replace_five_delivery_verdicts() -> None:
     verdicts = _passing_verdicts(executor)
 
     bootstrap = executor.build_bootstrap_payload(
-        "predecessor", "BLOCKED", "Request verified predecessor evidence."
+        "manifest-binding", "BLOCKED", "Request manifest binding evidence."
     )
     delivery = executor.build_verdict_payload(executor.VERDICT_CATEGORIES, verdicts)
 
@@ -487,60 +487,14 @@ def _passing_verdicts(executor):
     }
 
 
-def test_workflow_count_comparison_returns_observed_delta() -> None:
+def test_executor_surface_contains_no_cross_plan_gate_helpers() -> None:
     executor = _load_executor()
-    before = {
-        "discovery": 1,
-        "approvals": 1,
-        "reopenings": 1,
-        "critic": 1,
-        "recovery": 1,
+    retired_surface = {
+        name
+        for name in vars(executor)
+        if name.endswith(("Delta", "Readiness"))
+        or name.startswith(("compare_", "evaluate_"))
+        or "serial" in name
     }
-    after = {key: value + 1 for key, value in before.items()}
 
-    delta = executor.compare_workflow_counts(before, after)
-
-    assert delta.observed is True
-    assert delta.delta == {key: 1 for key in before}
-
-
-def test_delivery_readiness_requires_all_verdicts_and_count_evidence() -> None:
-    executor = _load_executor()
-    counts = (
-        {key: 1 for key in ("discovery", "approvals", "reopenings", "critic", "recovery")},
-        {key: 2 for key in ("discovery", "approvals", "reopenings", "critic", "recovery")},
-    )
-
-    readiness = executor.evaluate_delivery(
-        _passing_verdicts(executor),
-        predecessor={"verified": True, "limit": "none"},
-        provenance={"verified": True, "limit": "none"},
-        baseline={"verified": True, "limit": "none"},
-        counts=counts,
-    )
-
-    assert readiness.aggregate.outcome == "passed"
-    assert readiness.count_delta.observed is True
-    assert set(readiness.verdicts) == set(executor.VERDICT_CATEGORIES)
-
-
-def test_delivery_readiness_stays_non_green_for_missing_category_or_stale_artifact() -> None:
-    executor = _load_executor()
-    verdicts = _passing_verdicts(executor)
-    verdicts.pop("source_baseline")
-    counts = (
-        {key: 1 for key in ("discovery", "approvals", "reopenings", "critic", "recovery")},
-        {key: 2 for key in ("discovery", "approvals", "reopenings", "critic", "recovery")},
-    )
-
-    readiness = executor.evaluate_delivery(
-        verdicts,
-        predecessor={"verified": True, "limit": "none"},
-        provenance={"verified": False, "limit": "stale final artifact"},
-        baseline={"verified": True, "limit": "none"},
-        counts=counts,
-    )
-
-    assert readiness.aggregate.outcome != "passed"
-    assert "source_baseline" in readiness.aggregate.limit
-    assert "stale final artifact" in readiness.verdicts["artifact_provenance"].limit
+    assert retired_surface == set()

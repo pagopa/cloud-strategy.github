@@ -25,12 +25,9 @@ user report. It does not delegate plan work.
   path. `internal-luna-executor` is metadata only and is never invoked here.
 - Do not run Git mutations. Leave the worktree uncommitted.
 
-Before any task edit, verify the exact IGI-02 predecessor state with the
-caller-owned plan and status paths. The state must be hash-bound, `DONE`,
-complete for every predecessor task, and include final validation plus observed
-workflow-count evidence. Resolve the executor from its physically loaded
-bundle entrypoint; a consumer working directory or a home-directory fallback
-is never an executor owner.
+Before any task edit, resolve the executor from its physically loaded bundle
+entrypoint; a consumer working directory or a home-directory fallback is never
+an executor owner.
 
 The executor bundle owns its runtime dependencies. Declare direct dependencies
 in `scripts/requirements.in`, generate the hash-locked
@@ -89,21 +86,17 @@ concluded and passed; missing or inconclusive categories keep the aggregate
 inconclusive. Do not use a standalone `validated` signal as user-facing
 readiness evidence.
 
-The serial predecessor gate must verify the IGI-01 state sibling, its exact
-plan and manifest hashes, `DONE` task closure, final validation evidence, and
-an observed IDEA workflow-count record before T1 begins. A native seam test
-that demonstrates count derivation is evidence of coverage, not retrospective
-authorship or proof of a historical execution run.
-
 ## Stop And State
 
 Runtime execution state uses exactly one readable YAML sibling named
 `<plan-basename>.<STATUS>.yaml`. Do not create Markdown status siblings or
-dual-write JSON and YAML runtime state. The YAML object has exactly these
+write more than one runtime status sibling. The YAML object has exactly these
 fields:
 
 `schema_version`, `status`, `plan`, `plan_fingerprint`, `content_hash`,
 `completed_task_ids`, `remaining_task_ids`, `last_validation`, `next_action`.
+
+YAML is the only runtime status representation.
 
 `status` is exactly one of `DONE`, `PARTIAL`, or `BLOCKED`:
 
@@ -121,10 +114,9 @@ The uppercase filename status and YAML `status` must agree. Validate it with:
 `python3 scripts/plan_execution.py state-check <plan> <plan-basename>.DONE.yaml --format compact`
 
 The validator checks the Manifest, sibling location, hashes, plan binding, task
-IDs, and status/task consistency. A single legacy `<plan-basename>.status.json`
-may be migrated only through a validated YAML transition; malformed, stale,
-duplicate, conflicting, or interrupted state remains blocked. The validator
-does not execute work or select repairs.
+IDs, and status/task consistency. Malformed, stale, duplicate, conflicting, or
+interrupted state remains blocked. The validator does not execute work or
+select repairs.
 
 ## Completion Evidence
 

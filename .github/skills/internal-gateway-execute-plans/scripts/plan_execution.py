@@ -33,10 +33,6 @@ VERDICT_CATEGORIES = (
     "execution_readiness",
 )
 VERDICT_OUTCOMES = frozenset({"passed", "failed", "inconclusive"})
-WORKFLOW_COUNT_KEYS = ("discovery", "approvals", "reopenings", "critic", "recovery")
-WORKFLOW_COUNTS_RE = re.compile(
-    r"counts=discovery:\d+,approvals:\d+,reopenings:\d+,critic:\d+,recovery:\d+"
-)
 
 
 @dataclass(frozen=True)
@@ -61,127 +57,6 @@ class Verdict:
             "coverage": self.coverage,
             "limit": self.limit,
         }
-
-
-@dataclass(frozen=True)
-class CountDelta:
-    before: Mapping[str, int]
-    after: Mapping[str, int]
-    delta: Mapping[str, int]
-    observed: bool = True
-
-
-@dataclass(frozen=True)
-class DeliveryReadiness:
-    verdicts: Mapping[str, Verdict]
-    aggregate: Verdict
-    count_delta: CountDelta | None
-
-
-def _validated_workflow_counts(counts: Mapping[str, int], label: str) -> dict[str, int]:
-    if set(counts) != set(WORKFLOW_COUNT_KEYS):
-        raise ValueError(f"{label} must contain exactly {list(WORKFLOW_COUNT_KEYS)}")
-    normalized: dict[str, int] = {}
-    for key in WORKFLOW_COUNT_KEYS:
-        value = counts[key]
-        if not _is_int(value) or value < 0:
-            raise ValueError(f"{label}.{key} must be a non-negative integer")
-        normalized[key] = value
-    return normalized
-
-
-def compare_workflow_counts(
-    igi01_counts: Mapping[str, int], downstream_counts: Mapping[str, int]
-) -> CountDelta:
-    """Compare observed IDEA and downstream workflow counts without inference."""
-
-    before = _validated_workflow_counts(igi01_counts, "igi01_counts")
-    after = _validated_workflow_counts(downstream_counts, "downstream_counts")
-    return CountDelta(
-        before=before,
-        after=after,
-        delta={key: after[key] - before[key] for key in WORKFLOW_COUNT_KEYS},
-    )
-
-
-def _gate_verdict(
-    category: str,
-    existing: Verdict | None,
-    gate: Mapping[str, object] | None,
-) -> Verdict:
-    if existing is None:
-        existing = Verdict(
-            category,
-            "inconclusive",
-            "No category verdict was supplied",
-            f"missing={category}",
-        )
-    if gate is None:
-        return Verdict(
-            category,
-            "inconclusive",
-            f"{category} gate evidence",
-            f"missing={category} gate",
-        )
-    verified = gate.get("verified")
-    if verified is True:
-        return existing
-    limit = gate.get("limit")
-    return Verdict(
-        category,
-        "inconclusive",
-        f"{category} gate evidence",
-        str(limit) if isinstance(limit, str) and limit.strip() else f"unverified={category}",
-    )
-
-
-def evaluate_delivery(
-    verdicts: Mapping[str, Verdict],
-    predecessor: Mapping[str, object] | None,
-    provenance: Mapping[str, object] | None,
-    baseline: Mapping[str, object] | None,
-    counts: tuple[Mapping[str, int], Mapping[str, int]] | CountDelta | None,
-) -> DeliveryReadiness:
-    """Compose end-to-end readiness while preserving every category and limit."""
-
-    category_verdicts: dict[str, Verdict] = {}
-    for category in VERDICT_CATEGORIES:
-        candidate = verdicts.get(category)
-        if candidate is not None and candidate.category != category:
-            raise ValueError(f"verdict category mismatch: {category}")
-        category_verdicts[category] = candidate or Verdict(
-            category,
-            "inconclusive",
-            "No category verdict was supplied",
-            f"missing={category}",
-        )
-    category_verdicts["artifact_provenance"] = _gate_verdict(
-        "artifact_provenance", category_verdicts["artifact_provenance"], provenance
-    )
-    category_verdicts["source_baseline"] = _gate_verdict(
-        "source_baseline", category_verdicts["source_baseline"], baseline
-    )
-
-    count_delta: CountDelta | None
-    if isinstance(counts, CountDelta):
-        count_delta = counts
-    elif isinstance(counts, tuple) and len(counts) == 2:
-        count_delta = compare_workflow_counts(counts[0], counts[1])
-    else:
-        count_delta = None
-
-    category_verdicts["execution_readiness"] = _gate_verdict(
-        "execution_readiness", category_verdicts["execution_readiness"], predecessor
-    )
-    if count_delta is None or not count_delta.observed:
-        category_verdicts["execution_readiness"] = Verdict(
-            "execution_readiness",
-            "inconclusive",
-            "serial predecessor, provenance, and baseline gates",
-            "workflow count comparison unavailable",
-        )
-    aggregate = aggregate_verdict(VERDICT_CATEGORIES, category_verdicts)
-    return DeliveryReadiness(category_verdicts, aggregate, count_delta)
 
 
 MANIFEST_SCHEMA_VERSION = 1
@@ -820,7 +695,6 @@ class ResumeState:
 class StatusDiscovery:
     path: Path | None
     state: ResumeState | None
-    legacy_path: Path | None
     findings: tuple[Finding, ...]
 
 
@@ -1010,12 +884,6 @@ def build_verdict_payload(
     return {"verdicts": rendered, "aggregate": aggregate.as_dict()}
 
 
-def state_path_for(plan_path: Path) -> Path:
-    """Return the one JSON resume sibling for a retained plan."""
-
-    return plan_path.with_suffix(".status.json")
-
-
 def _manifest_task_ids(manifest: Mapping[str, object]) -> tuple[str, ...]:
     tasks = manifest["tasks"]
     if not isinstance(tasks, list):
@@ -1068,7 +936,7 @@ def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
     )
 
 
-def build_resume_state(
+def _build_status_payload(
     plan_path: Path,
     status: str,
     completed_task_ids: list[str] | tuple[str, ...],
@@ -1077,7 +945,7 @@ def build_resume_state(
     next_action: str,
     repo_root: Path | None = None,
 ) -> dict[str, object]:
-    """Build a bound state payload without executing or choosing plan work."""
+    """Build a bound status payload without choosing execution work."""
 
     manifest = parse_execution_manifest(plan_path.read_text())
     root = repo_root or _find_repo_root(plan_path)
@@ -1098,30 +966,6 @@ def build_resume_state(
     }
     parse_resume_state(payload)
     return payload
-
-
-def write_resume_state(path: Path, payload: Mapping[str, object]) -> None:
-    """Serialize validated state; approval and execution remain gateway-owned."""
-
-    state = parse_resume_state(payload)
-    path.write_text(
-        json.dumps(
-            {
-                "schema_version": state.schema_version,
-                "status": state.status,
-                "plan": state.plan,
-                "plan_fingerprint": state.plan_fingerprint,
-                "content_hash": state.content_hash,
-                "completed_task_ids": list(state.completed_task_ids),
-                "remaining_task_ids": list(state.remaining_task_ids),
-                "last_validation": state.last_validation,
-                "next_action": state.next_action,
-            },
-            separators=(",", ":"),
-            sort_keys=True,
-        )
-        + "\n"
-    )
 
 
 STATUS_FILENAME_RE = re.compile(r"^(?P<base>.+)\.(?P<status>[^.]+)\.yaml$")
@@ -1206,7 +1050,7 @@ def build_status_yaml(
 ) -> dict[str, object]:
     """Build a hash-bound YAML status payload without choosing execution work."""
 
-    payload = build_resume_state(
+    payload = _build_status_payload(
         plan_path,
         status,
         tuple(completed_task_ids),
@@ -1243,21 +1087,6 @@ def write_status_yaml(path: Path, payload: Mapping[str, object]) -> None:
     temporary = path.with_name(path.name + ".tmp")
     temporary.write_text(serialized, encoding="utf-8")
     os.replace(temporary, path)
-
-
-def _parse_legacy_status(path: Path) -> ResumeState:
-    try:
-        payload = json.loads(
-            path.read_text(encoding="utf-8"),
-            object_pairs_hook=_reject_duplicate_json_fields,
-        )
-    except json.JSONDecodeError as exc:
-        raise ExecutionContractError(
-            "malformed-legacy-status", f"Legacy JSON status is malformed: {exc}"
-        ) from exc
-    except (OSError, UnicodeError) as exc:
-        raise ExecutionContractError("legacy-status-unreadable", str(exc)) from exc
-    return parse_resume_state(_mapping(payload, "legacy status"))
 
 
 def _status_binding_findings(
@@ -1309,16 +1138,15 @@ def _status_binding_findings(
 
 
 def discover_status(plan_path: Path) -> StatusDiscovery:
-    """Discover exactly one unambiguous YAML status or a migration candidate."""
+    """Discover exactly one unambiguous YAML status sibling."""
 
     findings: list[Finding] = []
     yaml_candidates: list[tuple[Path, str]] = []
-    legacy_candidates: list[Path] = []
     prefix = f"{plan_path.stem}."
     try:
         entries = sorted(plan_path.parent.iterdir(), key=lambda item: item.name)
     except OSError as exc:
-        return StatusDiscovery(None, None, None, (Finding("status-directory-unreadable", str(exc)),))
+        return StatusDiscovery(None, None, (Finding("status-directory-unreadable", str(exc)),))
 
     for entry in entries:
         if entry.resolve() == plan_path.resolve():
@@ -1327,9 +1155,6 @@ def discover_status(plan_path: Path) -> StatusDiscovery:
             continue
         if entry.is_symlink() and not entry.exists():
             findings.append(Finding("stale-status-sibling", f"Status sibling is a stale symlink: {entry}"))
-            continue
-        if entry.name == plan_path.with_suffix(".status.json").name:
-            legacy_candidates.append(entry)
             continue
         if entry.name.endswith(".tmp"):
             findings.append(Finding("interrupted-status-transition", f"Temporary status transition remains: {entry}"))
@@ -1343,13 +1168,8 @@ def discover_status(plan_path: Path) -> StatusDiscovery:
             continue
         findings.append(Finding("unknown-status-sibling", f"Unrecognized status sibling: {entry.name}"))
 
-    if len(legacy_candidates) > 1:
-        findings.append(Finding("duplicate-legacy-status", "More than one legacy status sibling was found"))
-    legacy_path = legacy_candidates[0] if legacy_candidates else None
     if len(yaml_candidates) > 1:
         findings.append(Finding("ambiguous-status-siblings", "More than one YAML status sibling was found"))
-    if legacy_path is not None and yaml_candidates:
-        findings.append(Finding("legacy-status-conflict", "Legacy JSON and YAML status siblings cannot coexist"))
 
     state: ResumeState | None = None
     selected_path: Path | None = None
@@ -1362,79 +1182,7 @@ def discover_status(plan_path: Path) -> StatusDiscovery:
             )
         except (OSError, UnicodeError, ExecutionContractError, TypeError, ValueError) as exc:
             findings.append(Finding(getattr(exc, "code", "malformed-status"), str(exc)))
-    if legacy_path is not None and not yaml_candidates:
-        try:
-            _parse_legacy_status(legacy_path)
-        except (ExecutionContractError, TypeError, ValueError) as exc:
-            findings.append(Finding(getattr(exc, "code", "malformed-legacy-status"), str(exc)))
-    return StatusDiscovery(selected_path, state, legacy_path, tuple(findings))
-
-
-def migrate_legacy_status(
-    plan_path: Path, legacy_path: Path, repo_root: Path | None = None
-) -> Path:
-    """Migrate one valid legacy JSON sibling through a verified YAML transition."""
-
-    expected_legacy = plan_path.with_suffix(".status.json")
-    if legacy_path.resolve() != expected_legacy.resolve():
-        raise ExecutionContractError(
-            "legacy-path-mismatch", f"Legacy status must be {expected_legacy}"
-        )
-    if not legacy_path.is_file():
-        raise ExecutionContractError("legacy-status-not-found", f"Legacy status not found: {legacy_path}")
-    discovery = discover_status(plan_path)
-    if discovery.findings:
-        first = discovery.findings[0]
-        raise ExecutionContractError(first.code, first.message)
-    if discovery.legacy_path != legacy_path:
-        raise ExecutionContractError("legacy-status-not-found", "Exactly one legacy status sibling is required")
-    state = _parse_legacy_status(legacy_path)
-    root = repo_root or _find_repo_root(plan_path)
-    binding_findings = _status_binding_findings(plan_path, legacy_path, state, root)
-    if binding_findings:
-        first = binding_findings[0]
-        raise ExecutionContractError(first.code, first.message)
-    target = plan_path.with_name(f"{plan_path.stem}.{state.status}.yaml")
-    if target.exists() or target.is_symlink():
-        raise ExecutionContractError("legacy-status-conflict", f"YAML status already exists: {target}")
-    temporary = target.with_name(target.name + ".tmp")
-    if temporary.exists() or temporary.is_symlink():
-        raise ExecutionContractError("interrupted-status-transition", f"Temporary status transition remains: {temporary}")
-    serialized = yaml.safe_dump(
-        {
-            "schema_version": state.schema_version,
-            "status": state.status,
-            "plan": state.plan,
-            "plan_fingerprint": state.plan_fingerprint,
-            "content_hash": state.content_hash,
-            "completed_task_ids": list(state.completed_task_ids),
-            "remaining_task_ids": list(state.remaining_task_ids),
-            "last_validation": state.last_validation,
-            "next_action": state.next_action,
-        },
-        sort_keys=False,
-    )
-    temporary.write_text(serialized, encoding="utf-8")
-    try:
-        migrated_state = parse_status_yaml(
-            _load_status_yaml(temporary.read_text(encoding="utf-8")), target
-        )
-        binding_findings = _status_binding_findings(plan_path, target, migrated_state, root)
-        if binding_findings:
-            first = binding_findings[0]
-            raise ExecutionContractError(first.code, first.message)
-        os.replace(temporary, target)
-        final_state = parse_status_yaml(
-            _load_status_yaml(target.read_text(encoding="utf-8")), target
-        )
-        binding_findings = _status_binding_findings(plan_path, target, final_state, root)
-        if binding_findings:
-            first = binding_findings[0]
-            raise ExecutionContractError(first.code, first.message)
-        legacy_path.unlink()
-    except (OSError, UnicodeError, ExecutionContractError, TypeError, ValueError):
-        raise
-    return target
+    return StatusDiscovery(selected_path, state, tuple(findings))
 
 
 def _extract_headings(text: str) -> list[str]:
@@ -1635,91 +1383,36 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
 def validate_state(
     plan_path: Path, state_path: Path, repo_root: Path | None = None
 ) -> list[Finding]:
-    """Validate a YAML status sibling or an explicitly supplied legacy JSON state."""
+    """Validate one YAML status sibling bound to the retained plan."""
 
     effective_root = repo_root or _find_repo_root(plan_path)
     findings = validate_plan(plan_path, effective_root)
-    is_yaml = state_path.suffix.lower() == ".yaml"
+    if state_path.suffix.lower() != ".yaml":
+        return findings + [
+            Finding(
+                "status-format-required",
+                "Runtime status must use one of the canonical YAML siblings",
+            )
+        ]
     expected_paths = {path.resolve() for path in status_sibling_paths(plan_path)}
-    if is_yaml and state_path.resolve() not in expected_paths:
+    if state_path.resolve() not in expected_paths:
         findings.append(
             Finding(
                 "state-path-mismatch",
                 f"YAML status must be one of {sorted(str(path) for path in expected_paths)}",
             )
         )
-    elif not is_yaml and state_path.resolve() != state_path_for(plan_path).resolve():
-        findings.append(
-            Finding(
-                "state-path-mismatch",
-                f"Legacy JSON state must be the plan sibling {state_path_for(plan_path)}",
-            )
-        )
     if not state_path.is_file():
         return findings + [Finding("state-not-found", f"Resume state not found: {state_path}")]
     try:
-        if is_yaml:
-            state = parse_status_yaml(
-                _load_status_yaml(state_path.read_text(encoding="utf-8")), state_path
-            )
-        else:
-            payload = json.loads(
-                state_path.read_text(encoding="utf-8"),
-                object_pairs_hook=_reject_duplicate_json_fields,
-            )
-            state = parse_resume_state(_mapping(payload, "resume state"))
-    except json.JSONDecodeError as exc:
-        return findings + [Finding("malformed-state", f"Resume state JSON is malformed: {exc}")]
+        state = parse_status_yaml(
+            _load_status_yaml(state_path.read_text(encoding="utf-8")), state_path
+        )
     except ExecutionContractError as exc:
         return findings + [Finding(exc.code, str(exc))]
     except (OSError, UnicodeError, TypeError, ValueError) as exc:
         return findings + [Finding("malformed-state", str(exc))]
     return findings + _status_binding_findings(plan_path, state_path, state, effective_root)
-
-
-def validate_serial_predecessor(
-    plan_path: Path,
-    state_path: Path,
-    repo_root: Path | None = None,
-    workflow_count_evidence: str | None = None,
-) -> list[Finding]:
-    """Require a hash-bound, completed predecessor with final count evidence."""
-
-    effective_root = repo_root or _find_repo_root(plan_path)
-    findings = validate_state(plan_path, state_path, effective_root)
-    if findings or not state_path.is_file():
-        return findings
-    try:
-        payload = json.loads(
-            state_path.read_text(), object_pairs_hook=_reject_duplicate_json_fields
-        )
-        state = parse_resume_state(_mapping(payload, "resume state"))
-    except (OSError, UnicodeError, json.JSONDecodeError, ExecutionContractError, TypeError, ValueError) as exc:
-        return findings + [Finding("malformed-state", str(exc))]
-
-    if state.status != "DONE":
-        findings.append(
-            Finding(
-                "predecessor-not-done",
-                "Serial predecessor must have a DONE execution state",
-            )
-        )
-    if not re.search(r"(?i)\bfinal\b", state.last_validation):
-        findings.append(
-            Finding(
-                "predecessor-final-validation-missing",
-                "Serial predecessor state lacks final validation evidence",
-            )
-        )
-    count_evidence = f"{state.last_validation} {workflow_count_evidence or ''}"
-    if not WORKFLOW_COUNTS_RE.search(count_evidence):
-        findings.append(
-            Finding(
-                "predecessor-workflow-counts-missing",
-                "Serial predecessor state lacks observed IDEA workflow-count evidence",
-            )
-        )
-    return findings
 
 
 def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
@@ -1750,7 +1443,7 @@ def main(argv: list[str] | None = None) -> int:
     preflight.add_argument("path", type=Path)
     preflight.add_argument("--repo-root", type=Path, default=None)
     preflight.add_argument("--format", choices=("text", "json", "compact"), default="text")
-    state_check = subparsers.add_parser("state-check", help="Validate a YAML status sibling or explicit legacy JSON state")
+    state_check = subparsers.add_parser("state-check", help="Validate a YAML status sibling")
     state_check.add_argument("plan", type=Path)
     state_check.add_argument("state", type=Path)
     state_check.add_argument("--repo-root", type=Path, default=None)

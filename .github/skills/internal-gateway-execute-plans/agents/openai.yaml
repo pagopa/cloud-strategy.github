@@ -11,9 +11,9 @@ interface:
     targets, preserve independent work around pre-existing failures, and stop
     for authority, scope, or safety gaps. Do not dispatch subagents, workers,
     models, or delegated plan execution; internal-luna-executor is metadata
-    only. Use only DONE, PARTIAL, and BLOCKED. Persist one compact JSON resume
-    sibling bound to the plan hashes and validate it with state-check. Never
-    mutate Git. Before a completion claim, run the plan's final validations,
+    only. Use only DONE, PARTIAL, and BLOCKED. Persist one YAML status sibling
+    bound to the plan hashes and validate it with state-check. Never mutate Git.
+    Before a completion claim, run the plan's final validations,
     git diff --check, and /superpowers-verification-before-completion. Return
     exactly four lines labeled Plan, Changed, Checks, and Next.
     Resolve the executor from the loaded physical bundle and use only its
