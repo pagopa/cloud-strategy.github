@@ -37,7 +37,10 @@ evidence or a user decision.
 2. **Map the fog.** Separate the five evidence labels. Identify the unknowns
    that could change the recommendation, the evidence that would resolve them,
    and the constraints that must remain true. Do not promote a report or
-   assumption to a fact.
+   assumption to a fact. The analyst MUST NOT promote the report's own
+   recommendation into a decided direction before the user resolves the
+   corresponding interview question. Recommendations stay labeled as options
+   until a resolved decision records them.
 3. **Reframe.** For an anchored proposal, offer at least one materially
    different framing by changing the actor, mechanism, constraint, or causal
    assumption before polishing the initial proposal.
@@ -47,7 +50,12 @@ evidence or a user decision.
 5. **Interview.** When a user decision remains, use `/grill-me` with the
    current map and the active branch. Let it own recommendations, accepted
    defaults, question batching, dependent follow-ups, and the resolved decision
-   summary. Do not ask the user to resolve facts recoverable from evidence.
+   summary. Every question block routed to `/grill-me` MUST use the numbered
+   `Question / Recommendation / Why / Default if accepted` format. Send one
+   bulk numbered block structured by decision branch and dependency order.
+   One-question-at-a-time is allowed ONLY for unresolved follow-ups after the
+   bulk response. A numbered list without these four fields is a contract
+   violation. Do not ask the user to resolve facts recoverable from evidence.
 6. **Converge.** Compare options against the desired outcome, success criteria,
    evidence quality, constraints, and anti-scope. Select a recommendation,
    record resolved decisions, and explain rejected alternatives with the reason
@@ -112,8 +120,18 @@ evidence, constraints, success criteria, and anti-scope.
 Do not rerun unchanged analysis or critical review. Present the
 `Consolidated Analysis Spec` only after every material finding is resolved,
 rejected with evidence, accepted as residual risk, or routed to the branch
-that can resolve it. The consolidated spec updates the same canonical document;
-it is not a second report.
+that can resolve it. After a completed critical review, offer exactly these
+choices:
+
+- continue analysis on a specific point;
+- update the analysis by incorporating the critical review's evidence (the
+   default consolidation path);
+- run a further critical review only when a material finding remains unresolved
+   or new evidence arrived;
+- save the analysis to a user-supplied path, or close without a file or plan.
+
+Do not consolidate automatically. The consolidated spec updates the same
+canonical document; it is not a second report.
 
 ## Pause, continuation, and persistence
 
@@ -121,6 +139,12 @@ Conversation-only analysis is the default. If the user pauses, provide a
 `Resume from here` section containing the active question, key unknown, next
 branch, and decisions that remain closed. A later turn continues from that
 context without restarting settled work.
+
+The analyst MUST NOT create a file artifact during orient, map, reframe,
+diverge, interview, converge, stress-test, or normalize, or during the optional
+critical review. File creation is a user-gated action, not a workflow side
+effect. Files exist ONLY on an explicit request to save or to continue in
+another conversation.
 
 On an explicit request to continue in another conversation or to save the
 analysis, create at most one Markdown analysis artifact at the supplied path.
