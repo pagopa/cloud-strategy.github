@@ -40,9 +40,23 @@ grep -Eq -- '--hash=sha256:[0-9a-f]{64}' "$LOCK_FILE" || fail "Dependency lock i
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 command -v "$PYTHON_BIN" >/dev/null 2>&1 || fail "Missing Python runtime: $PYTHON_BIN; next action: install Python 3."
 RUNTIME_DIR="${EXECUTOR_BUNDLE_RUNTIME_DIR:-$BUNDLE_ROOT/.runtime}"
-if [[ ! -x "$RUNTIME_DIR/bin/python" ]]; then
-    "$PYTHON_BIN" -m venv "$RUNTIME_DIR"
-fi
 RUNTIME_PYTHON="$RUNTIME_DIR/bin/python"
-"$RUNTIME_PYTHON" -m pip install --disable-pip-version-check --require-hashes --no-deps -r "$LOCK_FILE"
+
+bootstrap_runtime() {
+    if [[ ! -x "$RUNTIME_PYTHON" ]]; then
+        "$PYTHON_BIN" -m venv "$RUNTIME_DIR" || fail "Unable to create the executor runtime: $RUNTIME_DIR"
+    fi
+    "$RUNTIME_PYTHON" -m pip install --disable-pip-version-check --require-hashes --no-deps -r "$LOCK_FILE" || \
+        fail "Unable to provision the executor runtime; next action: inspect the locked dependency installation."
+}
+
+if [[ "${1:-}" == "--bootstrap" ]]; then
+    shift
+    bootstrap_runtime
+    [[ "$#" -gt 0 ]] || exit 0
+fi
+
+[[ -x "$RUNTIME_PYTHON" ]] || fail "Executor runtime is not provisioned: $RUNTIME_DIR; next action: run $SCRIPT_PATH --bootstrap."
+"$RUNTIME_PYTHON" -c 'import yaml' >/dev/null 2>&1 || \
+    fail "Executor runtime is missing its locked dependencies; next action: run $SCRIPT_PATH --bootstrap."
 exec "$RUNTIME_PYTHON" "$ENTRYPOINT" "$@"

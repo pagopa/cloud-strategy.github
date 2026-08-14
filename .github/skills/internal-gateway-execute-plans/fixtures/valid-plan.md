@@ -23,7 +23,10 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
 ## Status Contract
 
 - YAML is the current runtime status and uses one uppercase sibling: `<plan-basename>.DONE.yaml`, `<plan-basename>.PARTIAL.yaml`, or `<plan-basename>.BLOCKED.yaml`.
+- Runtime status uses schema version `2`; the Execution Manifest uses schema version `1`.
 - The filename status and YAML `status` value must agree.
+- `approval_evidence` records explicit execution approval and binds the current semantic fingerprint and content hash.
+- `delivery_verdicts` records `structure`, `semantic_review`, `artifact_provenance`, `source_baseline`, and `execution_readiness`; `DONE` requires all five to pass.
 - No alternate runtime status format is accepted.
 
 ## Control Inventory

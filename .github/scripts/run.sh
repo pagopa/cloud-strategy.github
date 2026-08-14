@@ -39,8 +39,6 @@ Tools:
     audit_copilot_catalog
     detect_token_risks
     sync_home_ai_resources
-    adapt_critical_report
-    validate_full_analysis  (compatibility alias)
     validate_internal_skills
     validate_skill_change_scope
 EOF
@@ -139,9 +137,6 @@ resolve_script() {
             ;;
         sync_home_ai_resources|sync_home_ai_resources.py)
             printf '%s\n' "$REPO_ROOT/.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
-            ;;
-        adapt_critical_report|validate_full_analysis)
-            printf '%s\n' "$REPO_ROOT/.github/skills/internal-gateway-idea/scripts/critical_report_adapter.py"
             ;;
         validate_internal_skills|validate_internal_skills.py)
             printf '%s\n' "$SCRIPT_DIR/validate_internal_skills.py"

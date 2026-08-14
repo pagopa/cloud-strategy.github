@@ -430,6 +430,8 @@ def test_yaml_status_cases_preserve_five_verdict_categories() -> None:
             remaining,
             "focused validation passed",
             "none" if status == "DONE" else "Continue the approved task loop.",
+            approval_source="current-conversation",
+            delivery_verdicts=verdicts,
         )
         parsed = executor.parse_status_yaml(
             payload, plan.with_name(f"{plan.stem}.{status}.yaml")

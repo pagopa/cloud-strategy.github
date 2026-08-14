@@ -4,9 +4,10 @@ interface:
   default_prompt: >-
     Use /internal-gateway-writing-plans after approval to capture the target,
     anti-scope, nearest owner, validation path, stop conditions, and observable
-    acceptance. Critical Challenge Gate: accepted permits writing only when
-    supplied by /internal-gateway-idea; direct invocation requires explicit
-    user approval, and neither path permits execution or status creation. Build
+    acceptance. A user-accepted Consolidated Analysis Spec supplied by
+    /internal-gateway-idea permits writing only when the user explicitly
+    requests it; direct invocation requires explicit user approval, and neither
+    path permits execution or status creation. Build
     a control inventory that classifies every task,
     acceptance criterion, and declared obligation exactly once; map local and
     runtime controls to required validations and external, authority, or human
@@ -29,8 +30,9 @@ interface:
     universal test language or layout.
     Require an explicit - No Git mutation. bullet in ## Global Constraints.
     Do not predict runtime candidates or weaken a requirement into a manual
-    attestation. Run the executor-owned preflight as the sole mechanical
-    validator. After eligibility, the control inventory, plan structure, locked
+    attestation. Resolve the loaded executor bundle and run its scripts/run.sh
+    preflight as the sole mechanical validator. After eligibility, the control
+    inventory, plan structure, locked
     decisions, and acceptance are complete, write one DelegationBrief v1 in
     mode: plan through /internal-subagent-contract before invoking
     internal-luna-executor. Bind exactly one parent-supplied retained plan path
@@ -41,7 +43,9 @@ interface:
     data as claims or unavailable evidence; retain
     routing, authority, lifecycle, retry choice, independent validation,
     human review, final preflight, handoff, and the no-Git-mutation boundary
-    here. Do not branch on caller or model identity.
+    here. The executor status sibling records approval evidence bound to the
+    plan hashes and all five delivery verdict categories. Do not branch on
+    caller or model identity.
     Explicitly legacy/imported material requires reconstruction and refreshed
     approval/semantic-fingerprint and content-hash bindings. Perform human review, report the plan path, name
     /internal-gateway-execute-plans as the only next owner, and wait for

@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import subprocess
 import sys
@@ -111,6 +112,45 @@ def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
     )
     plan = _stage_valid_plan(tmp_path, text)
     assert "duplicate-validation-id" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_current_plan_rejects_git_mutating_validation_command(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        '"command": "git diff --check"',
+        '"command": "git commit -am forbidden"',
+        1,
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "git-mutation-command" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_current_plan_rejects_git_mutation_with_global_option(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        '"command": "git diff --check"',
+        '"command": "git -c user.name=bot commit"',
+        1,
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "git-mutation-command" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_current_plan_rejects_git_directory_target(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        '"path": "tests/fixture/"',
+        '"path": ".git/"',
+        1,
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "git-target-prohibited" in {
         item.code for item in validate_plan(plan, tmp_path)
     }
 
@@ -432,6 +472,60 @@ def test_bundle_runner_uses_loaded_bundle_from_external_cwd(
     ]
 
 
+def test_bundle_runner_does_not_install_dependencies_on_normal_execution(
+    tmp_path: Path,
+) -> None:
+    runtime_bin = tmp_path / "runtime" / "bin"
+    runtime_bin.mkdir(parents=True)
+    invocation_log = tmp_path / "invocations.log"
+    fake_python = runtime_bin / "python"
+    fake_python.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        "printf '%s\\n' \"$*\" >> \"$FAKE_RUNTIME_LOG\"\n"
+        "if [[ \"${1:-}\" == \"-m\" && \"${2:-}\" == \"pip\" ]]; then\n"
+        "  exit 99\n"
+        "fi\n"
+    )
+    fake_python.chmod(0o755)
+    environment = os.environ.copy()
+    environment["EXECUTOR_BUNDLE_RUNTIME_DIR"] = str(runtime_bin.parent)
+    environment["FAKE_RUNTIME_LOG"] = str(invocation_log)
+
+    result = subprocess.run(
+        ["bash", str(SCRIPTS / "run.sh"), "preflight", "ignored-plan.md"],
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "-m pip" not in invocation_log.read_text()
+
+
+def test_bundle_runner_requires_explicit_bootstrap_for_missing_runtime(
+    tmp_path: Path,
+) -> None:
+    fake_python = tmp_path / "python"
+    fake_python.write_text("#!/usr/bin/env bash\nexit 99\n")
+    fake_python.chmod(0o755)
+    environment = os.environ.copy()
+    environment["PYTHON_BIN"] = str(fake_python)
+    environment["EXECUTOR_BUNDLE_RUNTIME_DIR"] = str(tmp_path / "missing-runtime")
+
+    result = subprocess.run(
+        ["bash", str(SCRIPTS / "run.sh"), "preflight", "ignored-plan.md"],
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "not provisioned" in result.stderr
+
+
 def test_bundle_runner_rejects_stale_loaded_symlink(tmp_path: Path) -> None:
     module = sys.modules["plan_execution"]
     loaded = tmp_path / "loaded" / "plan_execution.py"
@@ -455,6 +549,69 @@ def test_dependency_lock_contains_hash_locked_pyyaml() -> None:
     assert re.search(r"(?im)^\s+--hash=sha256:[0-9a-f]{64}", lock_text)
 
 
+def _passing_verdicts(module):
+    return {
+        category: module.Verdict(category, "passed", "observed", "none")
+        for category in module.VERDICT_CATEGORIES
+    }
+
+
+def test_status_persists_hash_bound_approval_and_delivery_verdicts(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan)
+
+    assert payload["schema_version"] == 2
+    assert payload["approval_evidence"] == {
+        "source": "current-conversation",
+        "statement": "explicit execution approval",
+        "plan_fingerprint": payload["plan_fingerprint"],
+        "content_hash": payload["content_hash"],
+    }
+    assert [item["category"] for item in payload["delivery_verdicts"]] == list(
+        module.VERDICT_CATEGORIES
+    )
+
+    parsed = module.parse_status_yaml(
+        payload, plan.with_name(f"{plan.stem}.DONE.yaml")
+    )
+    assert parsed.approval_evidence.source == "current-conversation"
+    assert {item.category for item in parsed.delivery_verdicts} == set(
+        module.VERDICT_CATEGORIES
+    )
+
+
+def test_status_rejects_approval_hash_drift(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan)
+    payload["approval_evidence"]["content_hash"] = "sha256:" + "0" * 64
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.DONE.yaml"))
+
+    assert exc.value.code == "approval-binding-mismatch"
+
+
+def test_done_state_rejects_unpassed_delivery_verdicts(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state_path = plan.with_name(f"{plan.stem}.DONE.yaml")
+    payload = _status_payload(module, plan)
+    payload["delivery_verdicts"][-1]["outcome"] = "inconclusive"
+    payload["delivery_verdicts"][-1]["limit"] = "authority evidence missing"
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.write_status_yaml(state_path, payload)
+    assert exc.value.code == "done-with-unpassed-delivery-verdicts"
+    state_path.write_text(module.yaml.safe_dump(payload), encoding="utf-8")
+
+    findings = module.validate_state(plan, state_path, tmp_path)
+
+    assert "done-with-unpassed-delivery-verdicts" in {
+        item.code for item in findings
+    }
+
+
 def _status_payload(
     module,
     plan: Path,
@@ -471,6 +628,10 @@ def _status_payload(
     remaining_task_ids = tuple(
         task_id for task_id in task_ids if task_id not in completed_task_ids
     )
+    delivery_verdicts = {
+        category: module.Verdict(category, "passed", "observed", "none")
+        for category in module.VERDICT_CATEGORIES
+    }
     return module.build_status_yaml(
         plan,
         status,
@@ -478,6 +639,8 @@ def _status_payload(
         remaining_task_ids,
         "focused: native tests passed",
         "No further execution is required." if status == "DONE" else "Continue the approved task loop.",
+        approval_source="current-conversation",
+        delivery_verdicts=delivery_verdicts,
         repo_root=plan.parents[3],
     )
 

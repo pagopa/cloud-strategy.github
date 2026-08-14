@@ -18,24 +18,31 @@ def run_shell(command: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_resolve_script_handles_critical_report_adapter_and_debug_log_tools() -> None:
+def test_resolve_script_handles_current_catalog_and_debug_log_tools() -> None:
     result = run_shell(
         "source ./.github/scripts/run.sh; "
-        "printf '%s\\n' \"$(resolve_script adapt_critical_report)\"; "
-        "printf '%s\\n' \"$(resolve_script validate_full_analysis)\"; "
+        "printf '%s\\n' \"$(resolve_script build_inventory)\"; "
         "printf '%s\\n' \"$(resolve_script analyze_copilot_debug_log)\"; "
         "printf '%s\\n' \"$(resolve_script sync_home_ai_resources)\""
     )
     assert result.returncode == 0
     lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     assert lines[0].endswith(
-        ".github/skills/internal-gateway-idea/scripts/critical_report_adapter.py"
+        ".github/scripts/build_inventory.py"
     )
-    assert lines[1] == lines[0]
-    assert lines[2].endswith("tools/analyze_copilot_debug_log/run.sh")
-    assert lines[3].endswith(
+    assert lines[1].endswith("tools/analyze_copilot_debug_log/run.sh")
+    assert lines[2].endswith(
         ".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
     )
+
+
+def test_resolve_script_rejects_removed_idea_tools() -> None:
+    result = run_shell(
+        "source ./.github/scripts/run.sh; "
+        "if resolve_script adapt_critical_report >/dev/null; then exit 1; fi; "
+        "if resolve_script validate_full_analysis >/dev/null; then exit 1; fi"
+    )
+    assert result.returncode == 0
 
 
 def test_resolve_script_handles_protected_skill_scope_validator() -> None:

@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 from collections.abc import Mapping
@@ -59,9 +60,71 @@ class Verdict:
         }
 
 
+@dataclass(frozen=True)
+class ApprovalEvidence:
+    source: str
+    statement: str
+    plan_fingerprint: str
+    content_hash: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "source": self.source,
+            "statement": self.statement,
+            "plan_fingerprint": self.plan_fingerprint,
+            "content_hash": self.content_hash,
+        }
+
+
 MANIFEST_SCHEMA_VERSION = 1
-STATE_SCHEMA_VERSION = 1
+STATE_SCHEMA_VERSION = 2
 STATE_STATUSES = frozenset({"DONE", "PARTIAL", "BLOCKED"})
+APPROVAL_SOURCES = frozenset({"current-conversation", "external-authority-record"})
+APPROVAL_STATEMENT = "explicit execution approval"
+APPROVAL_EVIDENCE_FIELDS = frozenset(
+    {"source", "statement", "plan_fingerprint", "content_hash"}
+)
+GIT_MUTATING_SUBCOMMANDS = frozenset(
+    {
+        "add",
+        "am",
+        "apply",
+        "branch",
+        "checkout",
+        "clean",
+        "clone",
+        "commit",
+        "config",
+        "fetch",
+        "gc",
+        "init",
+        "merge",
+        "mv",
+        "pull",
+        "push",
+        "rebase",
+        "reflog",
+        "reset",
+        "restore",
+        "rm",
+        "stash",
+        "switch",
+        "tag",
+        "update-ref",
+        "worktree",
+    }
+)
+GIT_OPTIONS_WITH_VALUE = frozenset(
+    {
+        "-C",
+        "-c",
+        "--config-env",
+        "--exec-path",
+        "--git-dir",
+        "--namespace",
+        "--work-tree",
+    }
+)
 MANIFEST_CONTROL_CLASSES = frozenset(
     {
         "automatable-local",
@@ -119,6 +182,8 @@ STATE_FIELDS = frozenset(
         "plan",
         "plan_fingerprint",
         "content_hash",
+        "approval_evidence",
+        "delivery_verdicts",
         "completed_task_ids",
         "remaining_task_ids",
         "last_validation",
@@ -403,7 +468,12 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
             if target_id in target_ids:
                 raise ValueError(f"duplicate target id: {target_id}")
             target_ids.add(target_id)
-            _string(target["path"], f"{label}.path")
+            target_path = _string(target["path"], f"{label}.path")
+            if _is_git_directory_path(target_path):
+                raise ExecutionContractError(
+                    "git-target-prohibited",
+                    f"{label}.path must not target the .git directory",
+                )
             if target["state"] not in MANIFEST_TARGET_STATES:
                 raise ValueError(f"{label}.state is invalid")
             if "condition" in target:
@@ -439,7 +509,8 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
                     f"Duplicate validation id: {validation_id}",
                 )
             validation_ids.add(validation_id)
-            _string(validation["command"], f"{label}.command")
+            validation_command = _string(validation["command"], f"{label}.command")
+            _reject_git_mutation(validation_command, f"{label}.command")
             _string(validation["owner"], f"{label}.owner")
             _string(validation["pass_signal"], f"{label}.pass_signal")
             phases = _manifest_non_empty_strings(validation["phases"], f"{label}.phases")
@@ -463,7 +534,10 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
             if obligation["kind"] not in {"human", "external"}:
                 raise ValueError(f"{label}.kind is invalid")
             _bool(obligation["required"], f"{label}.required")
-            _string(obligation["acceptance"], f"{label}.acceptance")
+            obligation_acceptance = _string(
+                obligation["acceptance"], f"{label}.acceptance"
+            )
+            _reject_git_mutation(obligation_acceptance, f"{label}.acceptance")
 
         tasks = root["tasks"]
         if not isinstance(tasks, list) or not tasks:
@@ -487,13 +561,20 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
             orders.add(task["order"])
             if task["posture"] not in MANIFEST_POSTURES:
                 raise ValueError(f"{label}.posture is invalid")
-            _string(task["objective"], f"{label}.objective")
+            task_objective = _string(task["objective"], f"{label}.objective")
+            _reject_git_mutation(task_objective, f"{label}.objective")
             _manifest_id_list(task["depends_on"], f"{label}.depends_on")
             _manifest_id_list(task["target_ids"], f"{label}.target_ids")
             _manifest_id_list(task["validation_ids"], f"{label}.validation_ids")
             _manifest_id_list(task["manual_obligation_ids"], f"{label}.manual_obligation_ids")
-            _manifest_non_empty_strings(task["acceptance"], f"{label}.acceptance")
-            _manifest_non_empty_strings(task["stop_conditions"], f"{label}.stop_conditions")
+            task_acceptance = _manifest_non_empty_strings(
+                task["acceptance"], f"{label}.acceptance"
+            )
+            task_stop_conditions = _manifest_non_empty_strings(
+                task["stop_conditions"], f"{label}.stop_conditions"
+            )
+            for value in (*task_acceptance, *task_stop_conditions):
+                _reject_git_mutation(value, label)
 
         retry = _manifest_object(root["retry_policy"], "retry_policy")
         _manifest_exact_fields(retry, {"initial_attempts", "max_context_refills", "max_corrective_retries", "caller_may_lower", "repeat_progress_status", "minor_or_cosmetic_reopens"}, "retry_policy")
@@ -668,6 +749,119 @@ def _exact_fields(mapping: Mapping[str, object], expected: set[str], label: str)
         raise ValueError(f"{label} is malformed ({'; '.join(details)})")
 
 
+def _git_mutating_subcommands(value: str) -> tuple[str, ...]:
+    """Return explicitly mutating Git subcommands found in a command-like value."""
+
+    try:
+        tokens = shlex.split(value)
+    except ValueError:
+        return ()
+
+    found: list[str] = []
+    for index, token in enumerate(tokens):
+        if Path(token).name != "git":
+            continue
+        cursor = index + 1
+        while cursor < len(tokens) and tokens[cursor].startswith("-"):
+            option = tokens[cursor]
+            cursor += 1
+            if option in GIT_OPTIONS_WITH_VALUE and cursor < len(tokens):
+                cursor += 1
+        if cursor < len(tokens) and tokens[cursor] in GIT_MUTATING_SUBCOMMANDS:
+            found.append(tokens[cursor])
+    return tuple(dict.fromkeys(found))
+
+
+def _reject_git_mutation(value: str, label: str) -> None:
+    mutations = _git_mutating_subcommands(value)
+    if mutations:
+        raise ExecutionContractError(
+            "git-mutation-command",
+            f"{label} contains prohibited Git mutation: {', '.join(mutations)}",
+        )
+
+
+def _is_git_directory_path(value: str) -> bool:
+    return ".git" in Path(value).parts
+
+
+def _parse_approval_evidence(
+    value: object, plan_fingerprint: str, content_hash: str
+) -> ApprovalEvidence:
+    try:
+        mapping = _mapping(value, "approval_evidence")
+        _exact_fields(mapping, set(APPROVAL_EVIDENCE_FIELDS), "approval_evidence")
+        source = _string(mapping["source"], "approval_evidence.source")
+        statement = _string(mapping["statement"], "approval_evidence.statement")
+        recorded_plan_fingerprint = _string(
+            mapping["plan_fingerprint"], "approval_evidence.plan_fingerprint"
+        )
+        recorded_content_hash = _string(
+            mapping["content_hash"], "approval_evidence.content_hash"
+        )
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError(
+            "malformed-approval-evidence", str(exc)
+        ) from exc
+
+    if source not in APPROVAL_SOURCES:
+        raise ExecutionContractError(
+            "invalid-approval-source",
+            f"approval_evidence.source must be one of {sorted(APPROVAL_SOURCES)}",
+        )
+    if statement != APPROVAL_STATEMENT:
+        raise ExecutionContractError(
+            "approval-statement-required",
+            f"approval_evidence.statement must be {APPROVAL_STATEMENT!r}",
+        )
+    if recorded_plan_fingerprint != plan_fingerprint or recorded_content_hash != content_hash:
+        raise ExecutionContractError(
+            "approval-binding-mismatch",
+            "approval evidence must bind the current plan fingerprint and content hash",
+        )
+    return ApprovalEvidence(
+        source,
+        statement,
+        recorded_plan_fingerprint,
+        recorded_content_hash,
+    )
+
+
+def _parse_delivery_verdicts(value: object) -> tuple[Verdict, ...]:
+    if not isinstance(value, list):
+        raise ExecutionContractError(
+            "malformed-delivery-verdicts",
+            "delivery_verdicts must be a list",
+        )
+
+    verdicts: list[Verdict] = []
+    for index, raw_verdict in enumerate(value):
+        label = f"delivery_verdicts[{index}]"
+        try:
+            mapping = _mapping(raw_verdict, label)
+            _exact_fields(mapping, {"category", "outcome", "coverage", "limit"}, label)
+            verdicts.append(
+                Verdict(
+                    _string(mapping["category"], f"{label}.category"),
+                    _string(mapping["outcome"], f"{label}.outcome"),
+                    _string(mapping["coverage"], f"{label}.coverage"),
+                    _string(mapping["limit"], f"{label}.limit"),
+                )
+            )
+        except (TypeError, ValueError) as exc:
+            raise ExecutionContractError(
+                "malformed-delivery-verdicts", str(exc)
+            ) from exc
+
+    categories = tuple(verdict.category for verdict in verdicts)
+    if categories != VERDICT_CATEGORIES:
+        raise ExecutionContractError(
+            "delivery-verdict-categories",
+            "delivery_verdicts must contain the five categories in canonical order",
+        )
+    return tuple(verdicts)
+
+
 def compute_sha256(path: Path) -> str:
     return compute_content_sha256(path)
 
@@ -680,11 +874,13 @@ def compute_content_sha256(path: Path) -> str:
 
 @dataclass(frozen=True)
 class ResumeState:
-    schema_version: Literal[1]
+    schema_version: Literal[2]
     status: Literal["DONE", "PARTIAL", "BLOCKED"]
     plan: str
     plan_fingerprint: str
     content_hash: str
+    approval_evidence: ApprovalEvidence
+    delivery_verdicts: tuple[Verdict, ...]
     completed_task_ids: tuple[str, ...]
     remaining_task_ids: tuple[str, ...]
     last_validation: str
@@ -917,6 +1113,20 @@ def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
         raise ExecutionContractError("invalid-plan-fingerprint", "resume state.plan_fingerprint must be a SHA-256 digest")
     if not SHA256_RE.fullmatch(content_hash):
         raise ExecutionContractError("invalid-content-hash", "resume state.content_hash must be a SHA-256 digest")
+    approval_evidence = _parse_approval_evidence(
+        mapping["approval_evidence"], plan_fingerprint, content_hash
+    )
+    delivery_verdicts = _parse_delivery_verdicts(mapping["delivery_verdicts"])
+    if status == "DONE":
+        aggregate = aggregate_verdict(
+            VERDICT_CATEGORIES,
+            {verdict.category: verdict for verdict in delivery_verdicts},
+        )
+        if aggregate.outcome != "passed":
+            raise ExecutionContractError(
+                "done-with-unpassed-delivery-verdicts",
+                "DONE status requires all five delivery verdicts to be passed",
+            )
     completed = _strings(mapping["completed_task_ids"], "resume state.completed_task_ids")
     remaining = _strings(mapping["remaining_task_ids"], "resume state.remaining_task_ids")
     if len(set(completed)) != len(completed) or len(set(remaining)) != len(remaining):
@@ -929,6 +1139,8 @@ def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
         _string(mapping["plan"], "resume state.plan"),
         plan_fingerprint,
         content_hash,
+        approval_evidence,
+        delivery_verdicts,
         completed,
         remaining,
         _string(mapping["last_validation"], "resume state.last_validation"),
@@ -943,6 +1155,8 @@ def _build_status_payload(
     remaining_task_ids: list[str] | tuple[str, ...],
     last_validation: str,
     next_action: str,
+    approval_source: str,
+    delivery_verdicts: Mapping[str, Verdict],
     repo_root: Path | None = None,
 ) -> dict[str, object]:
     """Build a bound status payload without choosing execution work."""
@@ -953,12 +1167,32 @@ def _build_status_payload(
         plan_reference = plan_path.resolve().relative_to(root.resolve()).as_posix()
     except ValueError as exc:
         raise ValueError("plan must be inside the repository root") from exc
+    if approval_source not in APPROVAL_SOURCES:
+        raise ExecutionContractError(
+            "invalid-approval-source",
+            f"approval_source must be one of {sorted(APPROVAL_SOURCES)}",
+        )
+    if set(delivery_verdicts) != set(VERDICT_CATEGORIES):
+        raise ExecutionContractError(
+            "delivery-verdict-categories",
+            "delivery_verdicts must provide exactly the five required categories",
+        )
+    delivery_payload = build_verdict_payload(VERDICT_CATEGORIES, delivery_verdicts)
+    plan_fingerprint = compute_semantic_fingerprint(manifest)
+    content_hash = compute_content_sha256(plan_path)
     payload: dict[str, object] = {
         "schema_version": STATE_SCHEMA_VERSION,
         "status": status,
         "plan": plan_reference,
-        "plan_fingerprint": compute_semantic_fingerprint(manifest),
-        "content_hash": compute_content_sha256(plan_path),
+        "plan_fingerprint": plan_fingerprint,
+        "content_hash": content_hash,
+        "approval_evidence": {
+            "source": approval_source,
+            "statement": APPROVAL_STATEMENT,
+            "plan_fingerprint": plan_fingerprint,
+            "content_hash": content_hash,
+        },
+        "delivery_verdicts": list(delivery_payload["verdicts"].values()),
         "completed_task_ids": list(completed_task_ids),
         "remaining_task_ids": list(remaining_task_ids),
         "last_validation": last_validation,
@@ -1046,6 +1280,9 @@ def build_status_yaml(
     remaining_task_ids: Sequence[str],
     last_validation: str,
     next_action: str,
+    *,
+    approval_source: str,
+    delivery_verdicts: Mapping[str, Verdict],
     repo_root: Path | None = None,
 ) -> dict[str, object]:
     """Build a hash-bound YAML status payload without choosing execution work."""
@@ -1057,6 +1294,8 @@ def build_status_yaml(
         tuple(remaining_task_ids),
         last_validation,
         next_action,
+        approval_source,
+        delivery_verdicts,
         repo_root,
     )
     if status not in STATE_STATUSES:
@@ -1077,6 +1316,10 @@ def write_status_yaml(path: Path, payload: Mapping[str, object]) -> None:
             "plan": state.plan,
             "plan_fingerprint": state.plan_fingerprint,
             "content_hash": state.content_hash,
+            "approval_evidence": state.approval_evidence.as_dict(),
+            "delivery_verdicts": [
+                verdict.as_dict() for verdict in state.delivery_verdicts
+            ],
             "completed_task_ids": list(state.completed_task_ids),
             "remaining_task_ids": list(state.remaining_task_ids),
             "last_validation": state.last_validation,

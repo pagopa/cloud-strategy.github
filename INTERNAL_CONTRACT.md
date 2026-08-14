@@ -299,7 +299,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea`
   - unclear target state and multiple credible paths are explicit planning triggers
   - `internal-gateway-codebase-improvement` is a manual-only specialist gateway outside the canonical gateway core; it must not become an implicit fallback, peer-dispatch target, or replacement for an existing gateway owner
-  - critical challenge can return reformulation, simple, execute, review, continue-critical, or accept-with-risk outcomes
+  - critical challenge keeps its owner-defined outcomes explicit: accepted, revise-design, reopen-analysis, or needs-clarification
   - core-skill and support-selection contracts remain explicit where the skill behavior depends on them
 
 ### Repository Workflow

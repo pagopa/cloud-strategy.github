@@ -12,13 +12,21 @@ interface:
     for authority, scope, or safety gaps. Do not dispatch subagents, workers,
     models, or delegated plan execution; internal-luna-executor is metadata
     only. Use only DONE, PARTIAL, and BLOCKED. Persist one YAML status sibling
-    bound to the plan hashes and validate it with state-check. Never mutate Git.
+    with schema version 2, approval_evidence bound to the plan hashes, and all
+    five delivery verdicts; DONE requires every verdict to pass. Older status
+    siblings must be regenerated. Validate it with the loaded bundle's
+    scripts/run.sh state-check. Never mutate Git.
     Before a completion claim, run the plan's final validations,
     git diff --check, and /superpowers-verification-before-completion. Return
     exactly four lines labeled Plan, Changed, Checks, and Next.
-    Resolve the executor from the loaded physical bundle and use only its
-    hash-locked scripts/requirements.txt through scripts/run.sh; never fall
-    back to consumer-relative or home-directory runtime dependencies.
+    Resolve the executor from the loaded physical bundle and use its
+    hash-locked scripts/requirements.txt through scripts/run.sh for both
+    preflight and state-check; never fall back to consumer-relative or
+    home-directory runtime dependencies. Provision a missing runtime only with
+    the explicit scripts/run.sh --bootstrap command; ordinary calls must fail
+    closed instead of installing dependencies. Mechanical preflight rejects .git
+    targets and explicit mutating Git subcommands in manifest commands and
+    obligations; preserve the external permission boundary for other commands.
     Bootstrap observations use only check/status/next_action with PASS or
     BLOCKED; delivery observations retain all five qualified verdict categories
     and never collapse readiness into a validated field.

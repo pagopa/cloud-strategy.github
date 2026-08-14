@@ -26,11 +26,11 @@ description: Use when repository-owned work needs an approved implementation pla
 ## Contract
 
 0. Establish writing eligibility before any implementation-plan writing.
-  `Critical Challenge Gate: accepted` authorizes implementation-plan writing
-  only when it is supplied by
-  `/internal-gateway-idea`. A direct invocation of this gateway requires
-   explicit user approval in the current conversation. Neither path authorizes
-   plan execution, status creation, or Git mutation.
+  A user-accepted `Consolidated Analysis Spec` supplied by
+  `/internal-gateway-idea` authorizes implementation-plan writing only when
+  the user explicitly requests it. A direct invocation of this gateway
+  requires explicit user approval in the current conversation. Neither path
+  authorizes plan execution, status creation, or Git mutation.
 1. Capture the target, anti-scope, nearest owner, validation path, stop
    conditions, and observable acceptance. Build a control inventory before
    delegation: classify every task, acceptance criterion, and declared
@@ -109,8 +109,9 @@ description: Use when repository-owned work needs an approved implementation pla
   `artifact_provenance`, `source_baseline`, and `execution_readiness` as
   distinct verdict categories. Each category names its outcome, coverage, and
   limit; an aggregate green result requires every required category to be
-  concluded and passed. A standalone `validated` flag is not a readiness
-  claim.
+  concluded and passed. The executor persists those categories in the YAML
+  status sibling together with approval evidence bound to the plan hashes. A
+  standalone `validated` flag is not a readiness claim.
 4. Report the retained plan path, name `/internal-gateway-execute-plans` as
   the only next owner, and wait for explicit execution approval. Do not invoke
   execution, create a status sibling, or offer an imported execution owner
@@ -133,9 +134,11 @@ duplicate parser contract. The executor validates one normative Execution
 Manifest v1; a legacy `## Execution Contract` is accepted only as the exact
 compatibility projection declared by the migration manifest, never as a
 standalone plan schema.
-Before handoff, the parent gateway MUST run the executor-owned `preflight`
-independently against the written current plan and confirm zero blocking
-findings. Explicitly
+Before handoff, the parent gateway MUST resolve the executor's loaded physical
+bundle and run its `scripts/run.sh preflight` independently against the written
+current plan, then confirm zero blocking findings. The command is:
+`bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`.
+Explicitly
 `legacy/imported` material is the only reconstruction path; it is not a current
 plan exemption and requires refreshed approval and semantic fingerprint. Plans
 without the versioned manifest are not actionable. Do not leave an automatable
@@ -165,4 +168,6 @@ bundle resolution, state, and execution validation.
   validation, clear scope and safety boundaries, and no duplicate owner.
 - Confirm the handoff names `/internal-gateway-execute-plans` and waits for
   explicit approval.
+- Confirm the executor will record approval evidence and the five delivery
+  verdicts in its YAML status sibling before terminal closeout.
 - Run `git diff --check` and confirm no Git mutation occurred.

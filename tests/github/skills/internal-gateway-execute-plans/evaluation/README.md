@@ -26,6 +26,11 @@ complete task accounting, no forbidden dispatch event, matching SHA-256
 bindings, separate bootstrap and delivery records, and the exact `Plan`,
 `Changed`, `Checks`, `Next` line labels.
 
+The authoritative runtime YAML status also persists `approval_evidence`, bound
+to the current plan fingerprint and content hash, and the same five
+`delivery_verdicts`. This harness remains a sanitized observation format; it
+does not replace `state-check` or manufacture approval evidence.
+
 Run the scorer with:
 
 ```sh

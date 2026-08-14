@@ -572,12 +572,54 @@ def test_normalization_updates_name_and_declared_text_only(
 
     changed = normalize_candidate(_superpowers_resources(), candidate)
 
-    assert changed == (".github/skills/superpowers-brainstorming/SKILL.md",)
+    assert changed == tuple(
+        sorted(
+            (
+                ".github/skills/superpowers-brainstorming/SKILL.md",
+                ".github/skills/superpowers-brainstorming/agents/openai.yaml",
+            )
+        )
+    )
     content = skill.read_text(encoding="utf-8")
     assert "name: superpowers-brainstorming" in content
     assert "tmp/superpowers" in content
     assert "`superpowers-test-driven-development`" in content
     assert "superpowers-verification-before-completion" in content
+
+
+def test_normalization_creates_human_only_brainstorming_metadata_idempotently(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    skill = candidate / ".github/skills/superpowers-brainstorming/SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: brainstorming\n---\nAsk questions.\n",
+        encoding="utf-8",
+    )
+
+    first_changed = normalize_candidate(_superpowers_resources(), candidate)
+    second_changed = normalize_candidate(_superpowers_resources(), candidate)
+
+    metadata = yaml.safe_load(
+        (
+            candidate
+            / ".github/skills/superpowers-brainstorming/agents/openai.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    assert first_changed == tuple(
+        sorted(
+            (
+                ".github/skills/superpowers-brainstorming/SKILL.md",
+                ".github/skills/superpowers-brainstorming/agents/openai.yaml",
+            )
+        )
+    )
+    assert second_changed == ()
+    assert metadata["interface"]["display_name"] == "Brainstorming"
+    assert metadata["policy"]["allow_implicit_invocation"] is False
+    frontmatter = yaml.safe_load(skill.read_text(encoding="utf-8").split("---", 2)[1])
+    assert frontmatter["disable-model-invocation"] is True
 
 
 @pytest.mark.parametrize(
@@ -620,7 +662,10 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     second_changed = normalize_candidate(resources, candidate)
 
     content = skill.read_text(encoding="utf-8")
-    assert first_changed == (f"{local}/SKILL.md",)
+    expected_changed = [f"{local}/SKILL.md"]
+    if canonical_name == "superpowers-brainstorming":
+        expected_changed.append(f"{local}/agents/openai.yaml")
+    assert first_changed == tuple(sorted(expected_changed))
     assert second_changed == ()
     assert content.count("Local guided-question contract") == 1
     assert "numbered bulk question blocks" in content

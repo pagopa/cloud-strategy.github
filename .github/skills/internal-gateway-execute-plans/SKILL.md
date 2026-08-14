@@ -34,24 +34,32 @@ in `scripts/requirements.in`, generate the hash-locked
 `scripts/requirements.txt` with the repository lock generator, and invoke the
 bundle through `scripts/run.sh`. The runner must derive its physical bundle
 from its loaded entrypoint and must not use repository-global requirements.
+Provision the local runtime only with the explicit
+`bash <physical-executor-bundle>/scripts/run.sh --bootstrap` command; ordinary
+preflight and state-check calls reuse the provisioned runtime and fail closed
+when it is unavailable.
 
 Bootstrap output is a separate compact projection with exactly `check`,
 `status`, and `next_action`; status is only `PASS` or `BLOCKED`. A bounded local
 bootstrap collects its finite local checks and stops before external or live
 work after a blocker. Delivery readiness remains five independent verdicts:
 `structure`, `semantic_review`, `artifact_provenance`, `source_baseline`, and
-`execution_readiness`, each with outcome, coverage, and limit. Do not replace
-those records with a standalone `validated` field.
+`execution_readiness`, each with outcome, coverage, and limit. Persist those
+five records in runtime state; a `DONE` state requires all five to be passed.
+Do not replace those records with a standalone `validated` field.
 
 ## Bind Before Editing
 
 1. Confirm the exact retained-plan path and explicit approval.
-2. Run `python3 scripts/plan_execution.py preflight <plan> --format compact`.
-3. Record the semantic fingerprint, exact content hash, worktree baseline, and
-   the plan's required baseline validation.
-4. Read `## Control Inventory` and map each obligation to a validation,
+2. Resolve the loaded physical bundle and run its runner:
+   `bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`.
+3. Record explicit approval evidence bound to the semantic fingerprint and
+   exact content hash, then create the one `PARTIAL` status sibling with zero
+   completed tasks before the first task edit.
+4. Record the worktree baseline and the plan's required baseline validation.
+5. Read `## Control Inventory` and map each obligation to a validation,
    external or human follow-up, or authority boundary.
-5. Stop when a required control is uncovered, the plan is stale, or approval is
+6. Stop when a required control is uncovered, the plan is stale, or approval is
    absent. Ask one focused authority question only after local checks are
    exhausted.
 
@@ -83,8 +91,8 @@ Readiness evidence uses five independent categories: `structure`,
 `execution_readiness`. Each category reports an outcome, its coverage, and its
 limit. An aggregate result may be green only when every required category is
 concluded and passed; missing or inconclusive categories keep the aggregate
-inconclusive. Do not use a standalone `validated` signal as user-facing
-readiness evidence.
+inconclusive. Persist the category records in the status sibling and do not
+use a standalone `validated` signal as user-facing readiness evidence.
 
 ## Stop And State
 
@@ -94,8 +102,11 @@ write more than one runtime status sibling. The YAML object has exactly these
 fields:
 
 `schema_version`, `status`, `plan`, `plan_fingerprint`, `content_hash`,
-`completed_task_ids`, `remaining_task_ids`, `last_validation`, `next_action`.
+`approval_evidence`, `delivery_verdicts`, `completed_task_ids`,
+`remaining_task_ids`, `last_validation`, `next_action`.
 
+Runtime status uses schema version `2`; the Execution Manifest remains schema
+version `1`. Older status siblings must be regenerated before resuming.
 YAML is the only runtime status representation.
 
 `status` is exactly one of `DONE`, `PARTIAL`, or `BLOCKED`:
@@ -108,10 +119,17 @@ YAML is the only runtime status representation.
   prevents progress; record one focused next action and make no out-of-scope
   edit.
 
-Bind the sibling to the plan's semantic fingerprint and exact content hash.
-The uppercase filename status and YAML `status` must agree. Validate it with:
+`approval_evidence` records the source and statement of explicit execution
+approval and repeats the exact `plan_fingerprint` and `content_hash` it
+authorizes. The supported sources are `current-conversation` and
+`external-authority-record`; the statement is exactly `explicit execution
+approval`. `delivery_verdicts` contains the five canonical category records.
 
-`python3 scripts/plan_execution.py state-check <plan> <plan-basename>.DONE.yaml --format compact`
+Bind the sibling to the plan's semantic fingerprint and exact content hash.
+The uppercase filename status and YAML `status` must agree. Validate it with
+the loaded bundle runner:
+
+`bash <physical-executor-bundle>/scripts/run.sh state-check <plan> <plan-basename>.<STATUS>.yaml --format compact`
 
 The validator checks the Manifest, sibling location, hashes, plan binding, task
 IDs, and status/task consistency. Malformed, stale, duplicate, conflicting, or
@@ -120,10 +138,15 @@ select repairs.
 
 ## Completion Evidence
 
-After the last task, run the plan's required final validations, preserve the
-baseline/final delta, run `git diff --check`, and load
+Before recording a terminal state, run the plan's required final validations,
+preserve the baseline/final delta, run `git diff --check`, and load
 `/superpowers-verification-before-completion` before claiming success. Load
 `/addyosmani-code-simplification` only when the approved plan authorizes it.
+
+Mechanical preflight rejects `.git` targets and explicit mutating Git
+subcommands in manifest commands or task obligations. Execution still requires
+the repository's permission boundary for commands assembled outside the
+manifest; this gateway must never run Git mutations.
 
 Pending human judgment or unavailable external evidence is recorded as a
 follow-up when no material implementation failure remains. It does not replace
