@@ -123,6 +123,13 @@ def test_writer_plan_remains_actionable_through_preflight_cli(tmp_path: Path) ->
     plan = retained / WRITER_FIXTURE.name
     shutil.copy(WRITER_FIXTURE, plan)
 
+    manifest_match = re.search(
+        r"(?ms)^## Execution Manifest\s*\n\s*```json\s*\n(.*?)\n```\s*$",
+        plan.read_text(encoding="utf-8"),
+    )
+    assert manifest_match
+    assert "delegation" not in json.loads(manifest_match.group(1))
+
     result = subprocess.run(
         [
             sys.executable,

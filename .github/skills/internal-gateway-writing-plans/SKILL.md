@@ -69,8 +69,18 @@ description: Use when repository-owned work needs an approved implementation pla
   evidence only for `mandatory-test-first`, while `feature-first` retains
   validation before production-ready completion.
   After eligibility, the control inventory, plan structure, locked decisions,
-  and acceptance are complete, the gateway MUST write one `DelegationBrief` v1
-  in `mode: plan` through `/internal-subagent-contract` before invoking
+  and acceptance are complete, choose exactly one route:
+  - Local authoring is the default: record `delegation.mode: none` and
+    `worker: primary-owner`. The parent writes, verifies, and owns the
+    canonical retained plan. Do not manufacture a brief, worker result,
+    receipt, or retrospective worker-authorship claim.
+  - Delegation is a caller-owned exception. Use it only when a value gate
+    proves that one autonomous, bounded, verifiable evidence package is
+    materially useful and remains off the critical path. Record the gate
+    decision before any brief is written. Never delegate final synthesis when
+    the parent already holds the decisions and acceptance.
+  For the delegated branch only, write one `DelegationBrief` v1 in `mode: plan`
+  through `/internal-subagent-contract` before invoking
   `internal-luna-executor`. The brief declares the single retained-plan path
   as `write_scope` and `expected_output.path`, the plan objective and evidence,
   the required manifest and preflight acceptance, and exact focused validation.
@@ -79,15 +89,16 @@ description: Use when repository-owned work needs an approved implementation pla
   v1; unobserved validation and budget data remain claims or `unavailable`.
   When delegation adds provenance value, caller acceptance must bind the exact
   final artifact bytes and the manifest semantic fingerprint. A material edit
-  invalidates the prior result and receipt. When delegation adds no provenance
-  value, the primary owner performs the work without manufacturing a worker
-  chain or retrospective authorship claim.
-  The writer independently verifies the result, receipt, and plan, then runs the
-  executor-owned `preflight`; it may use only the one bounded refill and one
-  corrective retry allowed by the brief. The parent gateway retains
-  eligibility, control classification, routing, authority, lifecycle, retry
-  choice, human review, final independent `preflight`, handoff, and the
-  no-Git-mutation boundary. No caller-identity branch changes this contract.
+  invalidates the prior result and receipt. The parent independently verifies
+  any result, receipt, and plan, then runs the executor-owned `preflight`.
+  The parent retains eligibility, control classification, routing, authority,
+  lifecycle, retry choice, human review, final synthesis, independent
+  `preflight`, handoff, and the no-Git-mutation boundary. Model, provider, and
+  route selection remain caller-owned; same-model identity is diagnostic
+  evidence only and never a routing criterion. Before critic output can expand
+  scope, classify every finding exactly once as `blocking-now`,
+  `acceptance-required`, `follow-up`, `separate-design`, or
+  `rejected-with-reason`; untraceable findings are `separate-design`.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every
    `automatable-local` or `observable-runtime` row must map to a required
@@ -149,10 +160,11 @@ to make preflight or closeout pass.
 
 The writer owns producer-side readiness: it may prove the control inventory,
 ordered task projection, manifest-only shape, and handoff ownership from the
-plan it emits. These checks use parsed structure and do not import
-`internal-gateway-execute-plans` or any executor-private module. The executor
-bundle remains the only owner of retained-plan mechanical preflight, loaded
-bundle resolution, state, and execution validation.
+  plan it emits. These checks use parsed structure and do not import
+  `internal-gateway-execute-plans` or any executor-private module. Producer
+  readiness is writer-owned and structural. The executor bundle remains the
+  only owner of retained-plan mechanical preflight, loaded bundle resolution,
+  state, and execution validation.
 
 ## No-Commit Rule
 

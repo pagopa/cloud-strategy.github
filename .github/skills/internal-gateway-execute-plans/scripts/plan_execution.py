@@ -148,6 +148,7 @@ MANIFEST_FIELDS = frozenset(
         "plan_id",
         "repository_root",
         "authority_boundaries",
+        "delegation",
         "targets",
         "controls",
         "validations",
@@ -162,6 +163,15 @@ MANIFEST_FIELDS = frozenset(
     }
 )
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
+DELEGATION_FIELDS = frozenset(
+    {"schema_version", "mode", "worker", "result", "receipt", "acceptance"}
+)
+DELEGATION_RECORD_FIELDS = frozenset(
+    {"status", "content_hash", "plan_fingerprint"}
+)
+DELEGATION_MODES = frozenset({"none", "delegated"})
+LEGACY_DELEGATION_COMPATIBILITY = "manifest-v1-without-delegation"
+CURRENT_DELEGATION_COMPATIBILITY = "manifest-v1-with-delegation-v1"
 
 TASK_HEADING_RE = re.compile(r"(?im)^#{2,6}\s+Task(?:\s+\d+)?(?:\s*:|\b)")
 UNCHECKED_TASK_RE = re.compile(r"(?m)^\s*[-*]\s+\[\s\]\s+\S")
@@ -381,6 +391,128 @@ def _manifest_object(value: object, label: str) -> Mapping[str, object]:
     return value
 
 
+def delegation_compatibility_mode(manifest: Mapping[str, object]) -> str:
+    """Name the explicit compatibility path for Manifest v1 provenance."""
+
+    if "delegation" not in manifest:
+        return LEGACY_DELEGATION_COMPATIBILITY
+    return CURRENT_DELEGATION_COMPATIBILITY
+
+
+def _delegation_record(value: object, label: str) -> dict[str, str]:
+    if value is None:
+        code = (
+            "worker-result-not-accepted"
+            if label == "delegation.result"
+            else "delegation-acceptance-required"
+        )
+        raise ExecutionContractError(
+            code, f"{label} must be an accepted provenance record"
+        )
+    try:
+        record = _manifest_object(value, label)
+        _manifest_exact_fields(record, DELEGATION_RECORD_FIELDS, label)
+        status = _string(record["status"], f"{label}.status")
+        content_hash = _string(record["content_hash"], f"{label}.content_hash")
+        plan_fingerprint = _string(
+            record["plan_fingerprint"], f"{label}.plan_fingerprint"
+        )
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError(
+            "malformed-delegation-record", str(exc)
+        ) from exc
+
+    if status != "accepted":
+        code = (
+            "worker-result-not-accepted"
+            if label == "delegation.result"
+            else "delegation-acceptance-required"
+        )
+        raise ExecutionContractError(code, f"{label}.status must be accepted")
+    if not SHA256_RE.fullmatch(content_hash):
+        raise ExecutionContractError(
+            "invalid-delegation-hash",
+            f"{label}.content_hash must be a SHA-256 digest",
+        )
+    if not SHA256_RE.fullmatch(plan_fingerprint):
+        raise ExecutionContractError(
+            "invalid-delegation-hash",
+            f"{label}.plan_fingerprint must be a SHA-256 digest",
+        )
+    return {
+        "status": status,
+        "content_hash": content_hash,
+        "plan_fingerprint": plan_fingerprint,
+    }
+
+
+def _validate_delegation_provenance(
+    root: Mapping[str, object], authority: Mapping[str, object]
+) -> None:
+    if "delegation" not in root:
+        return
+
+    try:
+        delegation = _manifest_object(root["delegation"], "delegation")
+        _manifest_exact_fields(delegation, DELEGATION_FIELDS, "delegation")
+        schema_version = delegation["schema_version"]
+        mode = _string(delegation["mode"], "delegation.mode")
+        worker = _string(delegation["worker"], "delegation.worker")
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError(
+            "malformed-delegation-extension", str(exc)
+        ) from exc
+
+    if not _is_int(schema_version) or schema_version != 1:
+        raise ExecutionContractError(
+            "unsupported-delegation-schema",
+            "delegation.schema_version must be 1",
+        )
+    if mode not in DELEGATION_MODES:
+        raise ExecutionContractError(
+            "invalid-delegation-mode",
+            "delegation.mode must be none or delegated",
+        )
+
+    if mode == "none":
+        if worker != "primary-owner":
+            raise ExecutionContractError(
+                "local-worker-authorship",
+                "mode none must use worker primary-owner",
+            )
+        if delegation["receipt"] is not None:
+            raise ExecutionContractError(
+                "delegation-receipt-without-worker",
+                "mode none cannot claim a delegation receipt",
+            )
+        if delegation["result"] is not None or delegation["acceptance"] is not None:
+            raise ExecutionContractError(
+                "local-worker-authorship",
+                "mode none cannot claim worker result or acceptance",
+            )
+        return
+
+    if worker != authority["worker"]:
+        raise ExecutionContractError(
+            "delegation-worker-mismatch",
+            "delegated worker must match authority_boundaries.worker",
+        )
+    result = _delegation_record(delegation["result"], "delegation.result")
+    receipt = _delegation_record(delegation["receipt"], "delegation.receipt")
+    acceptance = _delegation_record(
+        delegation["acceptance"], "delegation.acceptance"
+    )
+    for record_name, record in (("receipt", receipt), ("acceptance", acceptance)):
+        if record["content_hash"] != result["content_hash"] or record[
+            "plan_fingerprint"
+        ] != result["plan_fingerprint"]:
+            raise ExecutionContractError(
+                "stale-delegation-binding",
+                f"delegation.{record_name} must bind the accepted result hashes; "
+                "material edits require new content and semantic hashes plus acceptance",
+            )
+
+
 def _manifest_non_empty_strings(value: object, label: str) -> tuple[str, ...]:
     return _strings(value, label, allow_empty=False)
 
@@ -426,7 +558,12 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
     """Parse and validate exactly one normative Execution Manifest object."""
 
     root = _manifest_fenced_object(text, "Execution Manifest")
-    _manifest_exact_fields(root, MANIFEST_FIELDS, "Execution Manifest")
+    manifest_fields = (
+        MANIFEST_FIELDS
+        if "delegation" in root
+        else MANIFEST_FIELDS - {"delegation"}
+    )
+    _manifest_exact_fields(root, manifest_fields, "Execution Manifest")
     try:
         if not _is_int(root["schema_version"]) or root["schema_version"] != MANIFEST_SCHEMA_VERSION:
             raise ExecutionContractError(
@@ -454,6 +591,7 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
         _manifest_non_empty_strings(authority["protected_paths"], "authority_boundaries.protected_paths")
         if not _bool(authority["no_git_mutation"], "authority_boundaries.no_git_mutation"):
             raise ValueError("authority_boundaries.no_git_mutation must be true")
+        _validate_delegation_provenance(root, authority)
 
         targets = root["targets"]
         if not isinstance(targets, list) or not targets:

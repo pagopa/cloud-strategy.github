@@ -38,6 +38,24 @@ def _fixture(name: str) -> Path:
     return FIXTURES / name
 
 
+def _manifest_text_with_delegation(delegation: dict[str, object]) -> str:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["delegation"] = delegation
+    return text[:start] + json.dumps(manifest, indent=2) + text[end:]
+
+
+def _accepted_provenance(seed: str = "3") -> dict[str, str]:
+    next_seed = format((int(seed, 16) + 1) % 16, "x")
+    return {
+        "status": "accepted",
+        "content_hash": "sha256:" + seed * 64,
+        "plan_fingerprint": "sha256:" + next_seed * 64,
+    }
+
+
 def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
     tmp_path.mkdir(parents=True, exist_ok=True)
     (tmp_path / "AGENTS.md").write_text("# agents\n")
@@ -56,6 +74,103 @@ def test_valid_plan_parses_contract_and_has_no_findings(valid_plan: Path) -> Non
         == "execution-manifest/v1"
     )
     assert validate_plan(valid_plan, repo_root=valid_plan.parents[3]) == []
+
+
+def test_manifest_accepts_delegated_provenance_with_accepted_result(
+    tmp_path: Path,
+) -> None:
+    provenance = _accepted_provenance()
+    text = _manifest_text_with_delegation(
+        {
+            "schema_version": 1,
+            "mode": "delegated",
+            "worker": "internal-luna-executor",
+            "result": provenance,
+            "receipt": dict(provenance),
+            "acceptance": dict(provenance),
+        }
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert validate_plan(plan, tmp_path) == []
+
+
+@pytest.mark.parametrize(
+    ("delegation", "finding_code"),
+    (
+        (
+            {
+                "schema_version": 1,
+                "mode": "delegated",
+                "worker": "internal-luna-executor",
+                "result": {
+                    **_accepted_provenance(),
+                    "status": "pending",
+                },
+                "receipt": _accepted_provenance(),
+                "acceptance": _accepted_provenance(),
+            },
+            "worker-result-not-accepted",
+        ),
+        (
+            {
+                "schema_version": 1,
+                "mode": "none",
+                "worker": "primary-owner",
+                "result": None,
+                "receipt": _accepted_provenance(),
+                "acceptance": None,
+            },
+            "delegation-receipt-without-worker",
+        ),
+        (
+            {
+                "schema_version": 1,
+                "mode": "none",
+                "worker": "internal-luna-executor",
+                "result": None,
+                "receipt": None,
+                "acceptance": None,
+            },
+            "local-worker-authorship",
+        ),
+        (
+            {
+                "schema_version": 1,
+                "mode": "delegated",
+                "worker": "internal-luna-executor",
+                "result": _accepted_provenance(),
+                "receipt": _accepted_provenance(),
+                "acceptance": _accepted_provenance("9"),
+            },
+            "stale-delegation-binding",
+        ),
+    ),
+)
+def test_manifest_rejects_contradictory_delegation_provenance(
+    tmp_path: Path, delegation: dict[str, object], finding_code: str
+) -> None:
+    plan = _stage_valid_plan(tmp_path, _manifest_text_with_delegation(delegation))
+
+    assert finding_code in {item.code for item in validate_plan(plan, tmp_path)}
+
+
+def test_manifest_without_delegation_uses_named_legacy_compatibility_path(
+    tmp_path: Path,
+) -> None:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest.pop("delegation")
+    legacy_text = text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    plan = _stage_valid_plan(tmp_path, legacy_text)
+
+    parsed = parse_execution_manifest(plan.read_text(encoding="utf-8"))
+
+    assert getattr(sys.modules["plan_execution"], "delegation_compatibility_mode")(
+        parsed
+    ) == "manifest-v1-without-delegation"
 
 
 def test_plan_without_execution_manifest_is_blocking(tmp_path: Path) -> None:

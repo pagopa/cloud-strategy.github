@@ -51,6 +51,14 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
     "protected_paths": [".github/skills/mattpocock-research/**", ".github/skills/superpowers-*/**"],
     "no_git_mutation": true
   },
+  "delegation": {
+    "schema_version": 1,
+    "mode": "none",
+    "worker": "primary-owner",
+    "result": null,
+    "receipt": null,
+    "acceptance": null
+  },
   "targets": [
     {"id": "TGT-FIXTURE", "path": "tests/fixture/", "state": "inspect"}
   ],

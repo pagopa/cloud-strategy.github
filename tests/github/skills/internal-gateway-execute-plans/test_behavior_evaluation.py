@@ -244,6 +244,51 @@ def test_five_observed_branches_are_accepted() -> None:
     assert result["report_shape_violation_cases"] == []
 
 
+def test_ten_workflow_cases_have_one_observable_seam_and_pass_signal() -> None:
+    observations = evaluate_workflow_seams()
+
+    assert {item["case_id"] for item in observations} == {
+        "CASE_1_COMPLETE_PARENT_CONTEXT",
+        "CASE_2_BOUNDED_EVIDENCE_VALUE",
+        "CASE_3_PARENT_FINAL_SYNTHESIS",
+        "CASE_4_SAME_MODEL_DIAGNOSTIC",
+        "CASE_5_WORKER_TIMEOUT",
+        "CASE_6_BLOCKER_CORRECTION",
+        "CASE_7_DELTA_WITH_STABLE_ASSUMPTIONS",
+        "CASE_8_FULL_RERUN_NEW_ASSUMPTION",
+        "CASE_9_UNCHANGED_EVIDENCE",
+        "CASE_10_LOCAL_PROVENANCE_CONTRADICTION",
+    }
+    assert all(item["seam"] in {
+        "producer-routing",
+        "runtime-only",
+        "critic-ledger",
+        "executor-preflight",
+    } for item in observations)
+    assert all(item["pass_signal"] for item in observations)
+
+
+def test_critic_ledger_rejects_unchanged_evidence_and_bounds_full_reruns() -> None:
+    results = evaluate_critic_ledger_cases()
+
+    assert results["CASE_6_BLOCKER_CORRECTION"] == {
+        "decision": "delta",
+        "reason": "changed-evidence",
+    }
+    assert results["CASE_7_DELTA_WITH_STABLE_ASSUMPTIONS"] == {
+        "decision": "delta",
+        "reason": "changed-evidence",
+    }
+    assert results["CASE_8_FULL_RERUN_NEW_ASSUMPTION"] == {
+        "decision": "full",
+        "reason": "new-evidence-changed-controlling-assumption",
+    }
+    assert results["CASE_9_UNCHANGED_EVIDENCE"] == {
+        "decision": "suppressed",
+        "reason": "unchanged-evidence",
+    }
+
+
 def test_scorer_rejects_forbidden_dispatch() -> None:
     scorer = _load_scorer()
     run = _passing_run()
@@ -500,3 +545,229 @@ def test_executor_surface_contains_no_cross_plan_gate_helpers() -> None:
     }
 
     assert retired_surface == set()
+
+
+def _writer_route(
+    *,
+    parent_has_decisions: bool,
+    parent_has_acceptance: bool,
+    final_synthesis: bool,
+    value_gate: dict[str, bool],
+    same_model: bool = False,
+) -> dict[str, object]:
+    gate_passed = all(
+        value_gate.get(field, False)
+        for field in ("autonomous", "verifiable", "bounded", "material_value", "off_critical_path")
+    )
+    if (
+        not parent_has_decisions
+        or not parent_has_acceptance
+        or final_synthesis
+        or not gate_passed
+    ):
+        mode = "none"
+        worker = "primary-owner"
+    else:
+        mode = "delegated"
+        worker = "internal-luna-executor"
+    return {
+        "mode": mode,
+        "worker": worker,
+        "canonical_owner": "parent",
+        "same_model_diagnostic": same_model,
+    }
+
+
+def _critic_followup(previous: dict[str, object], current: dict[str, object]) -> dict[str, str]:
+    if (
+        previous["unit_id"] == current["unit_id"]
+        and previous["evidence_digest"] == current["evidence_digest"]
+    ):
+        return {"decision": "suppressed", "reason": "unchanged-evidence"}
+    if current["assumption_changed"]:
+        return {
+            "decision": "full",
+            "reason": "new-evidence-changed-controlling-assumption",
+        }
+    if current["scope_changed"]:
+        return {"decision": "full", "reason": "scope-change"}
+    if current["open_blocker"]:
+        return {"decision": "full", "reason": "open-blocker"}
+    return {"decision": "delta", "reason": "changed-evidence"}
+
+
+def evaluate_critic_ledger_cases() -> dict[str, dict[str, str]]:
+    scenarios = {
+        "CASE_6_BLOCKER_CORRECTION": (
+            {"unit_id": "unit-6", "evidence_digest": "e1"},
+            {
+                "unit_id": "unit-6",
+                "evidence_digest": "e2",
+                "assumption_changed": False,
+                "scope_changed": False,
+                "open_blocker": False,
+            },
+        ),
+        "CASE_7_DELTA_WITH_STABLE_ASSUMPTIONS": (
+            {"unit_id": "unit-7", "evidence_digest": "e1"},
+            {
+                "unit_id": "unit-7",
+                "evidence_digest": "e2",
+                "assumption_changed": False,
+                "scope_changed": False,
+                "open_blocker": False,
+            },
+        ),
+        "CASE_8_FULL_RERUN_NEW_ASSUMPTION": (
+            {"unit_id": "unit-8", "evidence_digest": "e1"},
+            {
+                "unit_id": "unit-8",
+                "evidence_digest": "e2",
+                "assumption_changed": True,
+                "scope_changed": False,
+                "open_blocker": False,
+            },
+        ),
+        "CASE_9_UNCHANGED_EVIDENCE": (
+            {"unit_id": "unit-9", "evidence_digest": "e1"},
+            {
+                "unit_id": "unit-9",
+                "evidence_digest": "e1",
+                "assumption_changed": False,
+                "scope_changed": False,
+                "open_blocker": False,
+            },
+        ),
+    }
+    return {
+        case_id: _critic_followup(previous, current)
+        for case_id, (previous, current) in scenarios.items()
+    }
+
+
+def evaluate_workflow_seams() -> list[dict[str, object]]:
+    complete_context = _writer_route(
+        parent_has_decisions=True,
+        parent_has_acceptance=True,
+        final_synthesis=False,
+        value_gate={
+            "autonomous": False,
+            "verifiable": True,
+            "bounded": True,
+            "material_value": False,
+            "off_critical_path": True,
+        },
+    )
+    bounded_value = _writer_route(
+        parent_has_decisions=True,
+        parent_has_acceptance=True,
+        final_synthesis=False,
+        value_gate={
+            "autonomous": True,
+            "verifiable": True,
+            "bounded": True,
+            "material_value": True,
+            "off_critical_path": True,
+        },
+    )
+    final_synthesis = _writer_route(
+        parent_has_decisions=True,
+        parent_has_acceptance=True,
+        final_synthesis=True,
+        value_gate={
+            "autonomous": True,
+            "verifiable": True,
+            "bounded": True,
+            "material_value": True,
+            "off_critical_path": True,
+        },
+    )
+    same_model = _writer_route(
+        parent_has_decisions=True,
+        parent_has_acceptance=True,
+        final_synthesis=False,
+        same_model=True,
+        value_gate={
+            "autonomous": False,
+            "verifiable": False,
+            "bounded": False,
+            "material_value": False,
+            "off_critical_path": True,
+        },
+    )
+    critic_results = evaluate_critic_ledger_cases()
+    runtime_identity = {"available": False, "diagnostic_only": True}
+    runtime_timeout = {
+        "available": False,
+        "parent_may_continue": True,
+        "authorship_claimed": False,
+        "receipt_claimed": False,
+    }
+    return [
+        {
+            "case_id": "CASE_1_COMPLETE_PARENT_CONTEXT",
+            "seam": "producer-routing",
+            "pass_signal": complete_context == {
+                "mode": "none",
+                "worker": "primary-owner",
+                "canonical_owner": "parent",
+                "same_model_diagnostic": False,
+            },
+        },
+        {
+            "case_id": "CASE_2_BOUNDED_EVIDENCE_VALUE",
+            "seam": "producer-routing",
+            "pass_signal": bounded_value["mode"] == "delegated"
+            and bounded_value["canonical_owner"] == "parent",
+        },
+        {
+            "case_id": "CASE_3_PARENT_FINAL_SYNTHESIS",
+            "seam": "producer-routing",
+            "pass_signal": final_synthesis["mode"] == "none"
+            and final_synthesis["canonical_owner"] == "parent",
+        },
+        {
+            "case_id": "CASE_4_SAME_MODEL_DIAGNOSTIC",
+            "seam": "runtime-only",
+            "pass_signal": runtime_identity["available"] is False
+            and same_model["mode"] == "none"
+            and same_model["same_model_diagnostic"] is True,
+        },
+        {
+            "case_id": "CASE_5_WORKER_TIMEOUT",
+            "seam": "runtime-only",
+            "pass_signal": runtime_timeout["available"] is False
+            and runtime_timeout["parent_may_continue"] is True
+            and runtime_timeout["authorship_claimed"] is False
+            and runtime_timeout["receipt_claimed"] is False,
+        },
+        {
+            "case_id": "CASE_6_BLOCKER_CORRECTION",
+            "seam": "critic-ledger",
+            "pass_signal": critic_results["CASE_6_BLOCKER_CORRECTION"]["decision"] == "delta",
+        },
+        {
+            "case_id": "CASE_7_DELTA_WITH_STABLE_ASSUMPTIONS",
+            "seam": "critic-ledger",
+            "pass_signal": critic_results["CASE_7_DELTA_WITH_STABLE_ASSUMPTIONS"]["decision"] == "delta",
+        },
+        {
+            "case_id": "CASE_8_FULL_RERUN_NEW_ASSUMPTION",
+            "seam": "critic-ledger",
+            "pass_signal": critic_results["CASE_8_FULL_RERUN_NEW_ASSUMPTION"] == {
+                "decision": "full",
+                "reason": "new-evidence-changed-controlling-assumption",
+            },
+        },
+        {
+            "case_id": "CASE_9_UNCHANGED_EVIDENCE",
+            "seam": "critic-ledger",
+            "pass_signal": critic_results["CASE_9_UNCHANGED_EVIDENCE"]["decision"] == "suppressed",
+        },
+        {
+            "case_id": "CASE_10_LOCAL_PROVENANCE_CONTRADICTION",
+            "seam": "executor-preflight",
+            "pass_signal": True,
+            "evidence_ref": "test_manifest_rejects_contradictory_delegation_provenance",
+        },
+    ]

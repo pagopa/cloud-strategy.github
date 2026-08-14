@@ -32,20 +32,30 @@ interface:
     Do not predict runtime candidates or weaken a requirement into a manual
     attestation. Resolve the loaded executor bundle and run its scripts/run.sh
     preflight as the sole mechanical validator. After eligibility, the control
-    inventory, plan structure, locked
-    decisions, and acceptance are complete, write one DelegationBrief v1 in
-    mode: plan through /internal-subagent-contract before invoking
-    internal-luna-executor. Bind exactly one parent-supplied retained plan path
-    under tmp/superpowers/plans/ as the write_scope and expected output, and
-    include the objective, bounded evidence, required structure, acceptance,
-    and exact validation. Verify the adapter-composed WorkerResult v1 and
-    caller-owned VerificationReceipt v1; treat unobserved validation or budget
-    data as claims or unavailable evidence; retain
-    routing, authority, lifecycle, retry choice, independent validation,
-    human review, final preflight, handoff, and the no-Git-mutation boundary
-    here. The executor status sibling records approval evidence bound to the
-    plan hashes and all five delivery verdict categories. Do not branch on
-    caller or model identity.
+    inventory, plan structure, locked decisions, and acceptance are complete,
+    use one decision tree: local authoring is the default with delegation.mode:
+    none and worker: primary-owner; do not manufacture a brief, result,
+    receipt, or retrospective worker-authorship claim. Delegation is a
+    caller-owned exception and is permitted only when a value gate proves that
+    one autonomous, bounded, verifiable evidence package is materially useful
+    and off the critical path; record that decision before writing a brief.
+    Never delegate final synthesis when the parent already owns decisions and
+    acceptance. For the delegated branch only, write one DelegationBrief v1 in
+    mode: plan through /internal-subagent-contract, invoke
+    internal-luna-executor, bind the one parent-supplied retained plan path as
+    write_scope and expected output, and verify the adapter-composed
+    WorkerResult v1 plus caller-owned VerificationReceipt v1. Material edits
+    invalidate prior result and receipt. The parent retains routing, authority,
+    lifecycle, retry choice, independent validation, human review, final
+    synthesis, final preflight, handoff, and the no-Git-mutation boundary.
+    Model, provider, and route selection remain caller-owned; same-model
+    identity is diagnostic evidence only. Before critic output can expand scope,
+    classify every finding exactly once as blocking-now, acceptance-required,
+    follow-up, separate-design, or rejected-with-reason; untraceable findings
+    are separate-design. Producer readiness is writer-owned and structural,
+    while retained-plan mechanical preflight remains executor-owned. The
+    executor status sibling records approval evidence bound to the plan hashes
+    and all five delivery verdict categories.
     Explicitly legacy/imported material requires reconstruction and refreshed
     approval/semantic-fingerprint and content-hash bindings. Perform human review, report the plan path, name
     /internal-gateway-execute-plans as the only next owner, and wait for
