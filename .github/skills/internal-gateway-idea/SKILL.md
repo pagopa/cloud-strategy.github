@@ -7,71 +7,79 @@ description: Use when the user explicitly selects a conversation-first workflow 
 
 ## When to use
 
-Use this skill only when the user explicitly selects it. It turns an early,
+Use this skill only when the user explicitly selects it. Turn an early,
 unclear, or anchored idea into a decision-ready analysis while keeping the
-working discussion in the conversation by default.
+working material in the conversation by default.
 
-This is the canonical repository-owned idea-analysis gateway. It does not
-create an implementation plan or execution handoff.
-`grill-me` owns interview decisions and the resolved decision summary.
-`internal-gateway-critical-master` is an optional critical-strategy owner that
-the user must select explicitly. Planning is a separate user-requested action
-after the analysis is accepted.
+## Ownership boundary
 
-## Invocation and posture
+This gateway owns the analysis lifecycle, evidence discipline, option
+comparison, recommendation, and one canonical Analysis Spec. It does not own:
 
-Begin by stating the decision the analysis should make possible. Keep the
-analysis proportional to the uncertainty and the user's desired outcome.
-Recover facts from named local evidence before asking for them. Label the
-working material as `Facts`, `Reports`, `Assumptions`, `Unknowns`, or
-`Constraints`; preserve the distinction through every revision.
+- interview mechanics or question formatting, which belong to `/grill-me`;
+- critical-review procedure or report shape, which belong to
+  `/internal-gateway-critical-master`;
+- implementation-oriented design and design-spec writing, which belong to the
+  separately selected `superpowers-brainstorming` skill;
+- implementation planning or execution.
+
+## Analysis posture
+
+Begin by naming the decision the analysis should make possible. Keep the depth
+proportional to the uncertainty and the user's desired outcome. Recover facts
+from named local evidence before asking for them.
+
+Classify working material as `Facts`, `Reports`, `Assumptions`, `Unknowns`, or
+`Constraints`. Preserve those labels through every revision. A report's
+recommendation remains an option until the user resolves the decision.
 
 ## Workflow
 
-Work through these branches in order, revisiting only a branch changed by new
-evidence or a user decision.
+Work through these branches in order. Reopen only a branch changed by new
+evidence, a user decision, or a supported critical finding.
 
-1. **Orient.** Name the decision focus, desired outcome, audience, time horizon,
-   and what a useful decision would unlock. State the current scope and
-   anti-scope.
-2. **Map the fog.** Separate the five evidence labels. Identify the unknowns
-   that could change the recommendation, the evidence that would resolve them,
-   and the constraints that must remain true. Do not promote a report or
-   assumption to a fact. The analyst MUST NOT promote the report's own
-   recommendation into a decided direction before the user resolves the
-   corresponding interview question. Recommendations stay labeled as options
-   until a resolved decision records them.
-3. **Reframe.** For an anchored proposal, offer at least one materially
-   different framing by changing the actor, mechanism, constraint, or causal
-   assumption before polishing the initial proposal.
-4. **Diverge.** Generate a compact set of contrasting options. A simple idea
-   still gets a mechanism-level contrast; keep exploration small when the
-   uncertainty is small and broaden it only when the decision warrants it.
-5. **Interview.** When a user decision remains, use `/grill-me` with the
-   current map and the active branch. Let it own recommendations, accepted
-   defaults, question batching, dependent follow-ups, and the resolved decision
-   summary. Every question block routed to `/grill-me` MUST use the numbered
-   `Question / Recommendation / Why / Default if accepted` format. Send one
-   bulk numbered block structured by decision branch and dependency order.
-   One-question-at-a-time is allowed ONLY for unresolved follow-ups after the
-   bulk response. A numbered list without these four fields is a contract
-   violation. Do not ask the user to resolve facts recoverable from evidence.
-6. **Converge.** Compare options against the desired outcome, success criteria,
-   evidence quality, constraints, and anti-scope. Select a recommendation,
-   record resolved decisions, and explain rejected alternatives with the reason
-   each was declined.
-7. **Stress-test.** Record material risks, dependencies, disconfirming signals,
-   and deferred questions. State what new evidence would change the
-   recommendation and which uncertainty remains acceptable as residual risk.
-8. **Normalize.** Produce a Candidate Analysis Spec only when the focus,
-   outcome, scope, evidence, options, recommendation, and critical focus are
-   decision-ready. If they are not ready, continue the branch that can resolve
-   the gap instead of manufacturing a candidate spec.
+1. **Orient.** Name the decision focus, desired outcome, audience, time
+   horizon, success criteria, scope, and anti-scope.
+2. **Map the fog.** Separate the five evidence classes. Identify decision-
+   changing unknowns, the evidence that could resolve them, and the constraints
+   that must remain true.
+3. **Reframe and diverge.** For an anchored proposal, change at least one actor,
+   mechanism, constraint, or causal assumption. Produce a compact set of
+   options with genuinely contrasting mechanisms.
+4. **Resolve decisions.** When a user decision remains, invoke `/grill-me` with
+   the current evidence map, active branch, and unresolved dependencies. Let it
+   own the interview and return the resolved decision summary. Do not ask the
+   user for facts recoverable from evidence.
+5. **Converge.** Compare the options against the desired outcome, success
+   criteria, evidence quality, constraints, and anti-scope. Recommend one
+   direction and record why credible alternatives were rejected.
+6. **Stress-test.** Record material risks, dependencies, disconfirming signals,
+   deferred questions, and the evidence that would change the recommendation.
+7. **Normalize.** Produce a Candidate Analysis Spec only when the analysis is
+   decision-ready. Otherwise continue the branch that can resolve the gap.
+
+Completion criterion: the recommendation is traceable to resolved decisions
+and labeled evidence, and every material uncertainty is resolved, deferred, or
+accepted as a visible residual risk.
+
+## Chat layout
+
+Use these compact headings when their section has material content:
+
+- `### 🧭 Decision`
+- `### 🔎 Evidence`
+- `### 🔀 Options`
+- `### ✅ Recommendation`
+- `### ⚠️ Risks`
+- `### ❓ Decisions needed`
+
+Use emoji as navigation, not decoration. Do not prefix every paragraph or
+bullet with one. Keep the stable Analysis Spec field names unchanged.
 
 ## Candidate Analysis Spec
 
-Use one canonical subject for the analysis and any later optional review. The
-Candidate Analysis Spec contains:
+Use one canonical subject for the analysis and any optional critical review.
+The Candidate Analysis Spec contains:
 
 - `Decision focus`
 - `Desired outcome` and `Success criteria`
@@ -85,75 +93,60 @@ Candidate Analysis Spec contains:
 - `Deferred questions`
 - `Specific critical focus`
 
-Present the candidate spec to the user before offering the next choice. Offer
-only: continue analysis; invoke `/internal-gateway-critical-master` in this
-conversation; save the analysis for another conversation; or close without a
-file or plan.
+Present the candidate before offering the next action:
+
+- `🔄 Continue the analysis`
+- `🧠 Invoke /internal-gateway-critical-master`
+- `✅ Accept as the Consolidated Analysis Spec`
+- `💾 Save the analysis`
+- `⏹️ Close without a file or plan`
+
+Without a critical review, promote the Candidate Analysis Spec to the
+Consolidated Analysis Spec only when the user explicitly accepts it.
 
 ## Optional critical review
 
-Invoke `/internal-gateway-critical-master` only after the user selects that
-choice. Pass the Candidate Analysis Spec as the canonical subject and pass
-earlier conversation only as supporting evidence. Use this semantic handoff:
+Invoke `/internal-gateway-critical-master` only when the user selects it. Pass
+the Candidate Analysis Spec as the canonical subject, its `Specific critical
+focus`, and earlier conversation only as supporting evidence. The critical
+owner supplies its own intake, lenses, procedure, findings, and report.
 
-> Challenge the Candidate Analysis Spec below as the canonical subject for a
-> pre-plan critical review. Use earlier conversation only as supporting
-> evidence. Do not create an implementation plan.
+After presenting the critical report, offer:
 
-The critical owner supplies its own procedure, lenses, report shape, and
-finding logic. Keep those contracts with that owner; `/grill-me` remains the
-interview owner.
+- `🔍 Examine a specific finding`
+- `🔄 Realign the analysis with supported critical findings`
+- `🧠 Run another critical review`, only when a material finding remains
+  unresolved or new evidence arrived
+- `✅ Accept the analysis`, only when no blocking finding remains
+- `💾 Save the analysis`
+- `⏹️ Close without a file or plan`
 
-## Counter-validation and consolidation
+Do not realign automatically. When the user selects realignment, treat the
+critical report as new evidence: incorporate supported findings, reject
+conflicting suggestions with evidence, return unresolved user decisions to
+`/grill-me`, and reopen the affected analysis branch. Update the same canonical
+spec. It becomes the Consolidated Analysis Spec only when every material
+finding has been incorporated, rejected with evidence, accepted as residual
+risk, or routed to a resolvable branch.
 
-Counter-validate every material critical finding separately against intent,
-evidence, constraints, success criteria, and anti-scope.
+## Pause and persistence
 
-- Incorporate a supported finding into the same Candidate Analysis Spec.
-- Reject an unsupported or conflicting suggestion with concise evidence.
-- Return a finding that needs a user decision to `/grill-me`.
-- Reopen framing, evidence, alternatives, or convergence when that branch can
-  resolve the finding.
-- Accept a supported remaining risk only when its impact and disconfirming
-  signal are explicit.
+Conversation-only analysis is the default. On pause, return this compact state:
 
-Do not rerun unchanged analysis or critical review. Present the
-`Consolidated Analysis Spec` only after every material finding is resolved,
-rejected with evidence, accepted as residual risk, or routed to the branch
-that can resolve it. After a completed critical review, offer exactly these
-choices:
+### ⏸️ Resume from here
 
-- continue analysis on a specific point;
-- update the analysis by incorporating the critical review's evidence (the
-   default consolidation path);
-- run a further critical review only when a material finding remains unresolved
-   or new evidence arrived;
-- save the analysis to a user-supplied path, or close without a file or plan.
+- `❓ Active decision`
+- `🔎 Key unknown`
+- `➡️ Next branch`
+- `🔒 Closed decisions`
 
-Do not consolidate automatically. The consolidated spec updates the same
-canonical document; it is not a second report.
+Create a file only when the user explicitly asks to save or continue in another
+conversation. Write at most one Markdown artifact at the supplied path. When
+no path is supplied, use
+`tmp/superpowers/specs/YYYY-MM-DD-<topic>-analysis.md`, disclose that `tmp/` is
+disposable, and update that same file in place. Do not create a separate
+critical report or transcript.
 
-## Pause, continuation, and persistence
-
-Conversation-only analysis is the default. If the user pauses, provide a
-`Resume from here` section containing the active question, key unknown, next
-branch, and decisions that remain closed. A later turn continues from that
-context without restarting settled work.
-
-The analyst MUST NOT create a file artifact during orient, map, reframe,
-diverge, interview, converge, stress-test, or normalize, or during the optional
-critical review. File creation is a user-gated action, not a workflow side
-effect. Files exist ONLY on an explicit request to save or to continue in
-another conversation.
-
-On an explicit request to continue in another conversation or to save the
-analysis, create at most one Markdown analysis artifact at the supplied path.
-When no path is supplied, use
-`tmp/superpowers/specs/YYYY-MM-DD-<topic>-analysis.md`; disclose that `tmp/`
-is disposable and the file must move to a durable repository path for long-term
-retention or versioned review. Update that same file in place. Never create a
-separate critical report or transcript.
-
-After the Consolidated Analysis Spec is accepted, state that planning remains
-a separate explicitly requested action. Close without a file or plan when the
-user selects close.
+After the Consolidated Analysis Spec is accepted, state that implementation-
+oriented design, planning, and execution remain separate explicitly requested
+actions.

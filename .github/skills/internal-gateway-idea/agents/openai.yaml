@@ -2,23 +2,14 @@ interface:
   display_name: "Idea Analysis"
   short_description: "Conversation-first analysis for unclear ideas"
   default_prompt: >-
-    Use $internal-gateway-idea only when explicitly selected to turn an
-    early or unclear idea into a decision-ready Candidate Analysis Spec.
-    Keep the analysis in conversation by default, distinguish Facts, Reports,
-    Assumptions, Unknowns, and Constraints, and work through orienting,
-    uncertainty mapping, reframing, contrasting options, and /grill-me.
-    Every /grill-me question block must be one bulk numbered block in decision
-    branch and dependency order, with Question, Recommendation, Why, and
-    Default if accepted for every question. Ask one question at a time only for
-    unresolved follow-ups after the bulk response. Keep the analysis in
-    conversation by default: do not create files during any workflow branch or
-    optional critical review without an explicit user request. After critical
-    review, offer exactly continuation on a specific point, updating the
-    analysis with the critic's evidence (the default consolidation path), a
-    further review only for unresolved material findings or new evidence, or
-    saving to a user-supplied path or closing without a file or plan. If
-    critical review is selected, make the Candidate Analysis Spec its canonical
-    subject, counter-validate every material finding, and update that same spec.
-    Keep planning separate and explicitly requested.
+    Use $internal-gateway-idea only when explicitly selected to turn an early
+    or unclear idea into a decision-ready Analysis Spec. Keep the analysis in
+    conversation by default, distinguish Facts, Reports, Assumptions, Unknowns,
+    and Constraints, and use a compact emoji-guided chat layout. Delegate
+    interview mechanics to /grill-me and critical-review procedure to
+    /internal-gateway-critical-master. After a critical review, offer an
+    explicit option to realign the same analysis with supported findings. Keep
+    implementation-oriented design, planning, execution, and file creation
+    separate and user-gated.
 policy:
   allow_implicit_invocation: false
