@@ -41,8 +41,8 @@ at most one uncommitted disposable `tmp/briefs/<slug>.md`. When promotion
 creates a retained implementation plan, authority transfers to
 `/internal-gateway-writing-plans` and the brief retires as authority.
 Supporting skills may contribute evidence, but may not create competing
-briefs. `/internal-gateway-idea` and `/internal-gateway-writing-plans` remain
-the heavier routes for design/state and retained-plan work.
+briefs. `/internal-gateway-idea` owns conversation-first idea analysis and
+`/internal-gateway-writing-plans` owns retained-plan work.
 
 Before any live provider or external operation, require explicit authority.
 Use a safe local fallback when the brief permits one; otherwise stop

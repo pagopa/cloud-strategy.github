@@ -13,8 +13,9 @@ interface:
     pause/resume may materialize only one uncommitted disposable
     tmp/briefs/<slug>.md, and promotion transfers authority to
     /internal-gateway-writing-plans. Supporting skills contribute evidence but
-    do not create competing briefs; /internal-gateway-idea and
-    /internal-gateway-writing-plans remain the heavier routes. Require explicit
+    do not create competing briefs; /internal-gateway-idea owns
+    conversation-first idea analysis and /internal-gateway-writing-plans owns
+    retained plans. Require explicit
     authority before live external operations, use a safe local fallback when
     available, and stop fail-closed otherwise. Close out with one canonical
     ledger and fresh focused plus broader evidence, without numeric thresholds.
