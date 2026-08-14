@@ -1,4 +1,24 @@
 interface:
   display_name: "Critical Master"
   short_description: "Adaptive critical analysis for any decision context"
-  default_prompt: "Use /internal-gateway-critical-master to analyze the available context. No structured input is required. Preserve the full critical challenge, adapt to partial context, and emit one readable Markdown report with consecutively numbered Evidence items; every item must include Critique, Evidence, Suggestion, Why, and explicit Blocking. Prefer read-only analysis, but honor an explicit user request for action when tools and authority allow it. Fail only when no analysable context exists."
+  default_prompt: >-
+    Use /internal-gateway-critical-master to analyze the available context. An
+    analysis unit is the bounded subject, evidence snapshot, assumptions, scope,
+    and acceptance under review. Run one full challenge pass per unit by
+    default. The caller owns an invocation ledger recording unit identity, pass
+    type (full or delta), evidence snapshot or digest, changed claims or
+    assumptions, rerun reason, and outcome. Use delta review after materially
+    supported changes, limited to changed claims, evidence, assumptions,
+    acceptance, and residual blockers. Do not rerun on unchanged evidence;
+    reject or suppress an unchanged-evidence request and record it. A second
+    full pass requires a recorded reason: an open blocker, new evidence that
+    changes a controlling assumption, or a scope change, plus the changed
+    evidence or scope. The parent retains routing, scope, acceptance, finding
+    classification, and plan expansion. Classify every finding exactly once as
+    blocking-now, acceptance-required, follow-up, separate-design, or
+    rejected-with-reason; untraceable findings are separate-design. Preserve the
+    full critical challenge, adapt to partial context, and emit one readable
+    Markdown report with consecutively numbered Evidence items; every item must
+    include Critique, Evidence, Suggestion, Why, and explicit Blocking. Prefer
+    read-only analysis, but honor an explicit user request for action when tools
+    and authority allow it. Fail only when no analysable context exists.

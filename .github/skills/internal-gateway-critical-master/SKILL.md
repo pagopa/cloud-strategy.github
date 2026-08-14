@@ -53,10 +53,34 @@ files, revision numbers, or a preferred artifact format are absent.
   for an action, adapt when the available tools, authority, and safety
   conditions permit it; do not treat read-only behavior as an absolute ban.
 
+## Analysis units and reruns
+
+An `analysis unit` is the bounded subject, evidence snapshot, assumptions,
+scope, and acceptance under review. The caller owns an invocation ledger for
+each unit. Each ledger entry records the unit identity, pass type (`full` or
+`delta`), evidence snapshot or digest, changed claims or assumptions, rerun
+reason, and outcome.
+
+- Run one full challenge pass per analysis unit by default.
+- Use a delta review after a materially supported change, limited to changed
+  claims, evidence, assumptions, acceptance, and residual blockers.
+- Do not rerun on unchanged evidence. Reject or suppress a request whose unit
+  and evidence snapshot are unchanged, and record that decision in the ledger.
+- Permit a second full pass only when the ledger records one of these reasons:
+  an open blocker remains, new evidence changes a controlling assumption, or
+  scope changes. The entry must identify the changed evidence or scope.
+- The critic challenges and reports; the parent retains routing, scope,
+  acceptance, finding classification, and the decision to expand the plan.
+
+Classify every finding exactly once before it can change the current plan:
+`blocking-now`, `acceptance-required`, `follow-up`, `separate-design`, or
+`rejected-with-reason`. A finding that is not traceable to an approved
+requirement is `separate-design`.
+
 ## Critical procedure
 
-Run the following three phases once. The phases are an internal reasoning
-sequence, not a reason to ask the user for structured input.
+Run the following three phases once per permitted full pass. The phases are an
+internal reasoning sequence, not a reason to ask the user for structured input.
 
 ### Phase 1: Discover
 
