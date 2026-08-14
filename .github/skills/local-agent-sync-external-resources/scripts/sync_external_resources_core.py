@@ -521,10 +521,22 @@ _SLASH_SKILL_REF_RE = re.compile(
 _BACKTICK_SKILL_REF_RE = re.compile(
     r"(?<![A-Za-z0-9_-])`(?P<name>[a-z0-9][a-z0-9-]*)`"
 )
+_SKILL_FRONTMATTER_BLOCK_RE = re.compile(
+    r"\A---\n(?P<frontmatter>.*?)\n---\n",
+    re.DOTALL,
+)
 _SKILL_DISABLE_MODEL_INVOCATION_RE = re.compile(
     r"^disable-model-invocation\s*:\s*.*(?:\n|$)",
     re.MULTILINE,
 )
+_SUPERPOWERS_BRAINSTORMING_SKILL = "superpowers-brainstorming"
+_SUPERPOWERS_BRAINSTORMING_METADATA = """\
+interface:
+  display_name: Brainstorming
+  short_description: Explore ideas before implementation
+policy:
+  allow_implicit_invocation: false
+"""
 _MATTPOCOCK_SOURCE = "mattpocock-skills"
 _MATTPOCOCK_GIT_AUTONOMY_CONTRACT_START = (
     "<!-- local-sync:mattpocock-git-autonomy:start -->"
@@ -962,6 +974,48 @@ def _enforce_codebase_improve_workspace_contract(content: str) -> str:
     )
 
 
+def _ensure_superpowers_brainstorming_metadata(content: str) -> str:
+    if not content.strip():
+        return _SUPERPOWERS_BRAINSTORMING_METADATA
+
+    parsed = yaml.safe_load(content)
+    if not isinstance(parsed, dict):
+        raise ValueError(
+            "superpowers-brainstorming agents/openai.yaml must be a mapping."
+        )
+
+    policy = parsed.get("policy")
+    if not isinstance(policy, dict):
+        policy = {}
+    policy["allow_implicit_invocation"] = False
+    parsed["policy"] = policy
+    return yaml.safe_dump(parsed, sort_keys=False)
+
+
+def _ensure_superpowers_brainstorming_copilot_frontmatter(content: str) -> str:
+    match = _SKILL_FRONTMATTER_BLOCK_RE.match(content)
+    if match is None:
+        raise ValueError(
+            "superpowers-brainstorming SKILL.md must contain YAML frontmatter."
+        )
+
+    frontmatter = match.group("frontmatter")
+    normalized_frontmatter, replacements = _SKILL_DISABLE_MODEL_INVOCATION_RE.subn(
+        "disable-model-invocation: true\n",
+        frontmatter,
+        count=1,
+    )
+    if replacements == 0:
+        normalized_frontmatter = (
+            "disable-model-invocation: true\n" + frontmatter
+        )
+    return (
+        content[: match.start("frontmatter")]
+        + normalized_frontmatter
+        + content[match.end("frontmatter") :]
+    )
+
+
 def normalize_candidate(
     resources: ManagedResources,
     candidate: Path,
@@ -1106,10 +1160,29 @@ def normalize_candidate(
                 content = _SKILL_DISABLE_MODEL_INVOCATION_RE.sub(
                     "", content, count=1
                 )
+                if asset.canonical_name == _SUPERPOWERS_BRAINSTORMING_SKILL:
+                    content = _ensure_superpowers_brainstorming_copilot_frontmatter(
+                        content
+                    )
 
             if content != original:
                 file_path.write_text(content, encoding="utf-8")
                 changed.append(file_path.relative_to(candidate).as_posix())
+
+        if asset.canonical_name == _SUPERPOWERS_BRAINSTORMING_SKILL:
+            metadata_path = asset_dir / "agents/openai.yaml"
+            original_metadata = (
+                metadata_path.read_text(encoding="utf-8")
+                if metadata_path.exists()
+                else ""
+            )
+            metadata = _ensure_superpowers_brainstorming_metadata(
+                original_metadata
+            )
+            if metadata != original_metadata:
+                metadata_path.parent.mkdir(parents=True, exist_ok=True)
+                metadata_path.write_text(metadata, encoding="utf-8")
+                changed.append(metadata_path.relative_to(candidate).as_posix())
 
     return tuple(sorted(changed))
 

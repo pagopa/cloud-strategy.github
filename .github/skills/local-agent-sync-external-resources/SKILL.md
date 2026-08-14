@@ -91,9 +91,13 @@ This catalog is commit-pinned, not release-pinned:
 
 - Normalize every managed `SKILL.md` for Codex and GitHub Copilot while
   preserving its `/skill-name` references.
-- Remove `disable-model-invocation` from skill frontmatter. That field belongs
-  to custom agents and makes the skill invalid for Codex skill discovery.
+- Remove `disable-model-invocation` from imported skill frontmatter by default;
+  it is not part of Codex's standard skill metadata.
+
 - Keep invocation policy in each bundle's `agents/openai.yaml`.
+- Candidate normalization creates `agents/openai.yaml` for
+  `superpowers-brainstorming` with `policy.allow_implicit_invocation: false`,
+  preserving explicit human invocation while disabling implicit selection.
 
 ## Executable Python Normalization
 
