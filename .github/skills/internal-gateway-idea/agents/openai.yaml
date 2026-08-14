@@ -1,34 +1,19 @@
 interface:
-  display_name: "Idea Internal Gateway"
-  short_description: "Fail-closed G0-G5 idea shaping before handoff"
-  default_prompt: |-
-    Use /internal-gateway-idea for repository-owned idea shaping or review
-    before implementation planning. Use the
-    internal-gateway-idea-state/v3 contract and keep exactly two runtime
-    artifacts: state.json plus design.md under tmp/idea/<slug>/.
-
-    Start normal G0 with typed resolve-g0 data through the state CLI; do not
-    create artifacts before G0. An on-demand advisory is the only pre-G0
-    exception and must return to WAIT_G0 without satisfying mandatory review.
-    Advance only the current gate and avoid repeated status narration. At G0,
-    G2, and G4, a short approval selects only the presented typed default; at
-    G1, G3, and G5 it is a simple approval. Accept terminal punctuation on
-    whole-message short approvals and reject compounds, appended content,
-    future approvals, and execution intent. Use `inspect --compact` for a
-    bounded clean-chat projection with ledger-derived discovery, approval,
-    reopening, critic, and recovery counts.
-
-    Keep critical-report adaptation and packet ingestion separate from the typed
-    G4 user resolution. Use record_readable_review and the consumer-owned
-    critical_report_adapter.py to bind the readable critical report to the
-    current design hash and revision, require explicit Blocking on every
-    evidence item, consolidate only validated findings into the design ledger,
-    and fail closed on missing, malformed, stale, v1, or mismatched evidence.
-    After the G5 simple approval, remain in APPROVED and stop before creating a
-    plan or invoking another gateway. Ask one explicit handoff question:
-    choose direct-execution through /internal-gateway-simple-task or
-    implementation-plan through /internal-gateway-writing-plans. Convert the
-    answer to exactly one typed select-handoff payload and fail closed on
-    ambiguity. Persist PLAN_WRITING or DIRECT_EXECUTION only after that event;
-    direct execution still requires the simple-task gateway's bounded-scope and
-    authority checks, while plan writing never authorizes execution.
+  display_name: "Idea Analysis V2"
+  short_description: "Conversation-first analysis for unclear ideas"
+  default_prompt: >-
+    Use $internal-gateway-idea-v2 only when explicitly selected to turn an
+    early or unclear idea into a decision-ready Candidate Analysis Spec.
+    Keep the analysis in conversation by default, distinguish Facts, Reports,
+    Assumptions, Unknowns, and Constraints, and work through orienting,
+    uncertainty mapping, reframing, contrasting options, /grill-me,
+    convergence, and stress-testing. After presenting the candidate, offer
+    only continuation, same-chat selection of /internal-gateway-critical-master,
+    one saved analysis artifact, or close without a file or plan. If critical
+    review is selected, make the Candidate Analysis Spec its canonical subject,
+    counter-validate every material finding, update that same spec, and present
+    a Consolidated Analysis Spec only after findings are resolved, rejected with
+    evidence, accepted as residual risk, or returned to the resolving branch.
+    Keep planning separate and explicitly requested.
+policy:
+  allow_implicit_invocation: false
