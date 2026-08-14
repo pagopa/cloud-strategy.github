@@ -91,13 +91,22 @@ This catalog is commit-pinned, not release-pinned:
 
 - Normalize every managed `SKILL.md` for Codex and GitHub Copilot while
   preserving its `/skill-name` references.
-- Remove `disable-model-invocation` from imported skill frontmatter by default;
-  it is not part of Codex's standard skill metadata.
-
-- Keep invocation policy in each bundle's `agents/openai.yaml`.
-- Candidate normalization creates `agents/openai.yaml` for
-  `superpowers-brainstorming` with `policy.allow_implicit_invocation: false`,
-  preserving explicit human invocation while disabling implicit selection.
+- Remove `disable-model-invocation` from imported skill frontmatter by
+  default; it is not part of Codex's standard skill metadata.
+- Declare cross-runtime invocation policy per asset in
+  `managed-resources.yaml` under `invocation_policy`; the core applies the
+  declared policy generically and must not hardcode per-asset exceptions.
+  Supported fields: `copilot.disable_model_invocation` (enforces the field in
+  `SKILL.md`) and `codex.allow_implicit_invocation` (enforces
+  `agents/openai.yaml`).
+- `superpowers-brainstorming` is the declared exception: its Copilot policy
+  stays in `SKILL.md` as `disable-model-invocation: true`; its Codex policy
+  lives in `agents/openai.yaml` as `policy.allow_implicit_invocation: false`.
+  Candidate normalization enforces both projections idempotently. Do not
+  remove the Copilot field when following the default-removal rule.
+- After a refresh, manually verify that a policy-managed skill is not
+  implicitly selected in either runtime; runtime behavior is not covered by
+  static checks.
 
 ## Executable Python Normalization
 

@@ -70,6 +70,128 @@ watchlist: []
     assert manifest.sources[0].advertised_ref == "refs/heads/main"
 
 
+def test_manifest_accepts_optional_asset_invocation_policy(tmp_path: Path) -> None:
+    manifest = load_managed_resources(
+        _write_manifest(
+            tmp_path,
+            f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+watchlist: []
+""",
+        )
+    )
+    policy = manifest.sources[0].assets[0].invocation_policy
+    assert policy is not None
+    assert policy.copilot_disable_model_invocation is True
+    assert policy.codex_allow_implicit_invocation is False
+
+
+def test_manifest_asset_invocation_policy_defaults_to_none(tmp_path: Path) -> None:
+    manifest = load_managed_resources(
+        _write_manifest(
+            tmp_path,
+            f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        )
+    )
+    assert manifest.sources[0].assets[0].invocation_policy is None
+
+
+def test_manifest_rejects_invocation_policy_with_unknown_runtime(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="invocation_policy"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          unknown-runtime:
+            flag: true
+watchlist: []
+""",
+            )
+        )
+
+
+def test_manifest_rejects_invocation_policy_with_unknown_field(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="invocation_policy"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          copilot:
+            not_a_field: true
+watchlist: []
+""",
+            )
+        )
+
+
+def test_manifest_rejects_non_boolean_invocation_policy_field(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="invocation_policy"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          copilot:
+            disable_model_invocation: "yes"
+watchlist: []
+""",
+            )
+        )
+
+
 def test_manifest_rejects_short_ref(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="full lowercase commit object ID"):
         load_managed_resources(

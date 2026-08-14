@@ -23,11 +23,19 @@ _PREPARED_SOURCE_METADATA_FIELDS = (
 
 
 @dataclass(frozen=True)
+class InvocationPolicy:
+    copilot_disable_model_invocation: bool | None = None
+    codex_allow_implicit_invocation: bool | None = None
+    codex_short_description: str | None = None
+
+
+@dataclass(frozen=True)
 class ManagedAsset:
     source: str
     upstream: str
     local: str
     canonical_name: str
+    invocation_policy: InvocationPolicy | None = None
 
 
 @dataclass(frozen=True)
@@ -96,6 +104,69 @@ def _optional_non_empty_string(value: object, field: str) -> str | None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field} must be a non-empty string when provided.")
     return value.strip()
+
+
+_INVOCATION_POLICY_RUNTIME_FIELDS: dict[str, tuple[str, ...]] = {
+    "copilot": ("disable_model_invocation",),
+    "codex": ("allow_implicit_invocation", "short_description"),
+}
+
+
+def _parse_invocation_policy(value: object, field: str) -> InvocationPolicy | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ValueError(f"{field} invocation_policy must be a mapping.")
+    unknown_runtimes = sorted(set(value) - set(_INVOCATION_POLICY_RUNTIME_FIELDS))
+    if unknown_runtimes:
+        raise ValueError(
+            f"{field} invocation_policy declares unknown runtimes: "
+            f"{', '.join(unknown_runtimes)}."
+        )
+
+    parsed: dict[str, bool | str | None] = {}
+    for runtime, allowed_fields in _INVOCATION_POLICY_RUNTIME_FIELDS.items():
+        raw_runtime = value.get(runtime)
+        if raw_runtime is None:
+            continue
+        if not isinstance(raw_runtime, dict):
+            raise ValueError(
+                f"{field} invocation_policy {runtime} must be a mapping."
+            )
+        unknown_fields = sorted(set(raw_runtime) - set(allowed_fields))
+        if unknown_fields:
+            raise ValueError(
+                f"{field} invocation_policy {runtime} declares unknown fields: "
+                f"{', '.join(unknown_fields)}."
+            )
+        for allowed_field in allowed_fields:
+            raw_field = raw_runtime.get(allowed_field)
+            if raw_field is None:
+                continue
+            if allowed_field == "short_description":
+                if not isinstance(raw_field, str) or not raw_field.strip():
+                    raise ValueError(
+                        f"{field} invocation_policy {runtime}.{allowed_field} "
+                        "must be a non-empty string."
+                    )
+                parsed[f"{runtime}_{allowed_field}"] = raw_field.strip()
+                continue
+            if not isinstance(raw_field, bool):
+                raise ValueError(
+                    f"{field} invocation_policy {runtime}.{allowed_field} "
+                    "must be a boolean."
+                )
+            parsed[f"{runtime}_{allowed_field}"] = raw_field
+
+    return InvocationPolicy(
+        copilot_disable_model_invocation=parsed.get(
+            "copilot_disable_model_invocation"
+        ),
+        codex_allow_implicit_invocation=parsed.get(
+            "codex_allow_implicit_invocation"
+        ),
+        codex_short_description=parsed.get("codex_short_description"),
+    )
 
 
 def _require_commit_object_id(value: str, field: str) -> str:
@@ -179,12 +250,18 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 raise ValueError(f"duplicate canonical name: {canonical_name}")
             seen_canonical_names.add(canonical_name)
 
+            invocation_policy = _parse_invocation_policy(
+                raw_asset.get("invocation_policy"),
+                f"asset {canonical_name} in source {source_id}",
+            )
+
             assets.append(
                 ManagedAsset(
                     source=source_id,
                     upstream=upstream,
                     local=local,
                     canonical_name=canonical_name,
+                    invocation_policy=invocation_policy,
                 )
             )
 
@@ -529,13 +606,12 @@ _SKILL_DISABLE_MODEL_INVOCATION_RE = re.compile(
     r"^disable-model-invocation\s*:\s*.*(?:\n|$)",
     re.MULTILINE,
 )
-_SUPERPOWERS_BRAINSTORMING_SKILL = "superpowers-brainstorming"
-_SUPERPOWERS_BRAINSTORMING_METADATA = """\
+_CODEX_METADATA_TEMPLATE = """\
 interface:
-  display_name: Brainstorming
-  short_description: Explore ideas before implementation
+  display_name: {display_name}
+  short_description: {short_description}
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: {allow_implicit_invocation}
 """
 _MATTPOCOCK_SOURCE = "mattpocock-skills"
 _MATTPOCOCK_GIT_AUTONOMY_CONTRACT_START = (
@@ -974,29 +1050,50 @@ def _enforce_codebase_improve_workspace_contract(content: str) -> str:
     )
 
 
-def _ensure_superpowers_brainstorming_metadata(content: str) -> str:
+def _codex_display_name(canonical_name: str) -> str:
+    words = canonical_name.split("-")
+    if words and words[0] in {"superpowers", "mattpocock"}:
+        words = words[1:]
+    return " ".join(word.capitalize() for word in words) or canonical_name
+
+
+def _ensure_codex_invocation_metadata(
+    content: str,
+    asset: ManagedAsset,
+    allow_implicit_invocation: bool,
+    short_description: str | None = None,
+) -> str:
     if not content.strip():
-        return _SUPERPOWERS_BRAINSTORMING_METADATA
+        return _CODEX_METADATA_TEMPLATE.format(
+            display_name=_codex_display_name(asset.canonical_name),
+            short_description=(
+                short_description or _codex_display_name(asset.canonical_name)
+            ),
+            allow_implicit_invocation=str(allow_implicit_invocation).lower(),
+        )
 
     parsed = yaml.safe_load(content)
     if not isinstance(parsed, dict):
         raise ValueError(
-            "superpowers-brainstorming agents/openai.yaml must be a mapping."
+            f"{asset.canonical_name} agents/openai.yaml must be a mapping."
         )
 
     policy = parsed.get("policy")
     if not isinstance(policy, dict):
         policy = {}
-    policy["allow_implicit_invocation"] = False
+    policy["allow_implicit_invocation"] = allow_implicit_invocation
     parsed["policy"] = policy
     return yaml.safe_dump(parsed, sort_keys=False)
 
 
-def _ensure_superpowers_brainstorming_copilot_frontmatter(content: str) -> str:
+def _ensure_copilot_disable_model_invocation(
+    content: str,
+    asset: ManagedAsset,
+) -> str:
     match = _SKILL_FRONTMATTER_BLOCK_RE.match(content)
     if match is None:
         raise ValueError(
-            "superpowers-brainstorming SKILL.md must contain YAML frontmatter."
+            f"{asset.canonical_name} SKILL.md must contain YAML frontmatter."
         )
 
     frontmatter = match.group("frontmatter")
@@ -1160,24 +1257,34 @@ def normalize_candidate(
                 content = _SKILL_DISABLE_MODEL_INVOCATION_RE.sub(
                     "", content, count=1
                 )
-                if asset.canonical_name == _SUPERPOWERS_BRAINSTORMING_SKILL:
-                    content = _ensure_superpowers_brainstorming_copilot_frontmatter(
-                        content
+                if (
+                    asset.invocation_policy is not None
+                    and asset.invocation_policy.copilot_disable_model_invocation
+                    is True
+                ):
+                    content = _ensure_copilot_disable_model_invocation(
+                        content, asset
                     )
 
             if content != original:
                 file_path.write_text(content, encoding="utf-8")
                 changed.append(file_path.relative_to(candidate).as_posix())
 
-        if asset.canonical_name == _SUPERPOWERS_BRAINSTORMING_SKILL:
+        if (
+            asset.invocation_policy is not None
+            and asset.invocation_policy.codex_allow_implicit_invocation is not None
+        ):
             metadata_path = asset_dir / "agents/openai.yaml"
             original_metadata = (
                 metadata_path.read_text(encoding="utf-8")
                 if metadata_path.exists()
                 else ""
             )
-            metadata = _ensure_superpowers_brainstorming_metadata(
-                original_metadata
+            metadata = _ensure_codex_invocation_metadata(
+                original_metadata,
+                asset,
+                asset.invocation_policy.codex_allow_implicit_invocation,
+                asset.invocation_policy.codex_short_description,
             )
             if metadata != original_metadata:
                 metadata_path.parent.mkdir(parents=True, exist_ok=True)

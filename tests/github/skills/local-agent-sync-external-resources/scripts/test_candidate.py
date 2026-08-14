@@ -17,6 +17,7 @@ sys.path.insert(0, SCRIPT_DIR.as_posix())
 from sync_external_resources import _build_candidate_patch  # noqa: E402
 from sync_external_resources_core import (  # noqa: E402
     ImportedOverride,
+    InvocationPolicy,
     ManagedAsset,
     ManagedResources,
     ManagedSource,
@@ -91,6 +92,10 @@ def _superpowers_resources() -> ManagedResources:
         upstream="skills/brainstorming",
         local=".github/skills/superpowers-brainstorming",
         canonical_name="superpowers-brainstorming",
+        invocation_policy=InvocationPolicy(
+            copilot_disable_model_invocation=True,
+            codex_allow_implicit_invocation=False,
+        ),
     )
     source = ManagedSource(
         source_id="obra-superpowers",
@@ -643,6 +648,14 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
         upstream=f"skills/{canonical_name}",
         local=local,
         canonical_name=canonical_name,
+        invocation_policy=(
+            InvocationPolicy(
+                copilot_disable_model_invocation=True,
+                codex_allow_implicit_invocation=False,
+            )
+            if canonical_name == "superpowers-brainstorming"
+            else None
+        ),
     )
     resources = ManagedResources(
         sources=(
@@ -672,6 +685,105 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     assert "`Question`, `Recommendation`, `Why`, and `Default if accepted`" in content
     assert "Keep each question, recommendation, and reason brief" in content
     assert "overrides any earlier instruction to ask one question at a time" in content
+
+
+def _policy_driven_resources(canonical_name: str, local: str) -> ManagedResources:
+    asset = ManagedAsset(
+        source="upstream",
+        upstream=f"skills/{canonical_name}",
+        local=local,
+        canonical_name=canonical_name,
+        invocation_policy=InvocationPolicy(
+            copilot_disable_model_invocation=True,
+            codex_allow_implicit_invocation=False,
+        ),
+    )
+    return ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="upstream",
+                repository="https://example.com/upstream.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+
+def test_normalization_applies_declared_invocation_policy_to_any_asset(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example-human-only"
+    skill = candidate / local / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: example-human-only\n---\nAsk questions.\n",
+        encoding="utf-8",
+    )
+
+    first_changed = normalize_candidate(
+        _policy_driven_resources("example-human-only", local), candidate
+    )
+    second_changed = normalize_candidate(
+        _policy_driven_resources("example-human-only", local), candidate
+    )
+
+    assert first_changed == tuple(
+        sorted((f"{local}/SKILL.md", f"{local}/agents/openai.yaml"))
+    )
+    assert second_changed == ()
+    frontmatter = yaml.safe_load(skill.read_text(encoding="utf-8").split("---", 2)[1])
+    assert frontmatter["disable-model-invocation"] is True
+    metadata = yaml.safe_load(
+        (candidate / local / "agents/openai.yaml").read_text(encoding="utf-8")
+    )
+    assert metadata["policy"]["allow_implicit_invocation"] is False
+    assert metadata["interface"]["display_name"] == "Example Human Only"
+
+
+def test_normalization_without_invocation_policy_creates_no_codex_metadata(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example"
+    skill = candidate / local / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: example\ndisable-model-invocation: true\n---\nBody.\n",
+        encoding="utf-8",
+    )
+
+    changed = normalize_candidate(
+        ManagedResources(
+            sources=(
+                ManagedSource(
+                    source_id="upstream",
+                    repository="https://example.com/upstream.git",
+                    ref="a" * 40,
+                    advertised_ref=None,
+                    assets=(
+                        ManagedAsset(
+                            source="upstream",
+                            upstream="skills/example",
+                            local=local,
+                            canonical_name="example",
+                        ),
+                    ),
+                ),
+            ),
+            replacements=(),
+            watchlist=(),
+        ),
+        candidate,
+    )
+
+    assert changed == (f"{local}/SKILL.md",)
+    assert not (candidate / local / "agents/openai.yaml").exists()
+    assert "disable-model-invocation" not in skill.read_text(encoding="utf-8")
 
 
 def test_normalization_enforces_teach_workspace_without_upstream_text_coupling(

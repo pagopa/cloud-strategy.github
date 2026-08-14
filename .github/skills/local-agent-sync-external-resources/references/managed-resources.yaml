@@ -48,6 +48,12 @@ sources:
       - upstream: skills/brainstorming
         local: .github/skills/superpowers-brainstorming
         canonical_name: superpowers-brainstorming
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+            short_description: Explore ideas before implementation
       - upstream: skills/dispatching-parallel-agents
         local: .github/skills/superpowers-dispatching-parallel-agents
         canonical_name: superpowers-dispatching-parallel-agents
