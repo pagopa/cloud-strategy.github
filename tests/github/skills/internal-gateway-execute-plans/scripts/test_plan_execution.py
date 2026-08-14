@@ -18,15 +18,15 @@ FIXTURES = BUNDLE / "fixtures"
 sys.path.insert(0, str(SCRIPTS))
 
 from plan_execution import (  # noqa: E402
+    Baseline,
     ExecutionContractError,
     Finding,
-    Baseline,
     build_compact_payload,
     canonical_json,
     compute_content_sha256,
     compute_semantic_fingerprint,
-    parse_execution_manifest,
     git_diff_check_coverage,
+    parse_execution_manifest,
     validate_ignored_artifact,
     validate_manifest_projection,
     validate_plan,
@@ -347,6 +347,51 @@ def test_preflight_cli_valid_fixture(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     manifest = parse_execution_manifest(plan.read_text())
     assert manifest["tasks"][0]["depends_on"] == []
+
+
+def test_facade_loads_via_spec_from_file_location() -> None:
+    isolated_loader = """
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+source = Path(sys.argv[1])
+fixture = Path(sys.argv[2])
+before = list(sys.path)
+spec = importlib.util.spec_from_file_location("plan_execution_isolated_facade", source)
+assert spec is not None and spec.loader is not None
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+manifest = module.parse_execution_manifest(fixture.read_text(encoding="utf-8"))
+print(json.dumps({
+    "schema_version": manifest["schema_version"],
+    "sys_path_unchanged": sys.path == before,
+    "has_yaml_attribute": hasattr(module, "yaml"),
+    "task_ids": list(module._manifest_task_ids(manifest)),
+}))
+"""
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            isolated_loader,
+            str(SCRIPTS / "plan_execution.py"),
+            str(_fixture("valid-plan.md")),
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == {
+        "schema_version": 1,
+        "sys_path_unchanged": True,
+        "has_yaml_attribute": True,
+        "task_ids": ["T1"],
+    }
 
 
 def test_manifest_only_plan_rejects_legacy_execution_contract_projection(
@@ -856,6 +901,27 @@ def test_state_check_accepts_current_yaml_status(tmp_path: Path) -> None:
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["status"] == "passed"
+
+
+def test_validate_state_reuses_single_plan_snapshot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    _write_status_yaml(plan, state)
+    original_parse = module.parse_execution_manifest
+    parse_count = 0
+
+    def count_plan_parses(text: str) -> dict[str, object]:
+        nonlocal parse_count
+        parse_count += 1
+        return original_parse(text)
+
+    monkeypatch.setattr(module, "parse_execution_manifest", count_plan_parses)
+
+    assert module.validate_state(plan, state, tmp_path) == []
+    assert parse_count == 1
 
 
 def test_state_check_rejects_content_hash_drift(tmp_path: Path) -> None:

@@ -369,11 +369,17 @@ def compute_semantic_fingerprint(manifest: Mapping[str, object]) -> str:
     return f"sha256:{hashlib.sha256(canonical_json(manifest)).hexdigest()}"
 
 
+def _field_differences(
+    mapping: Mapping[str, object], expected: set[str] | frozenset[str]
+) -> tuple[set[str], set[str]]:
+    expected_fields = set(expected)
+    return set(mapping) - expected_fields, expected_fields - set(mapping)
+
+
 def _manifest_exact_fields(
     mapping: Mapping[str, object], expected: set[str] | frozenset[str], label: str
 ) -> None:
-    unknown = set(mapping) - set(expected)
-    missing = set(expected) - set(mapping)
+    unknown, missing = _field_differences(mapping, expected)
     if unknown:
         raise ExecutionContractError(
             "unknown-manifest-field",
@@ -384,12 +390,6 @@ def _manifest_exact_fields(
             "missing-manifest-field",
             f"{label} is missing fields: {sorted(missing)}",
         )
-
-
-def _manifest_object(value: object, label: str) -> Mapping[str, object]:
-    if not isinstance(value, Mapping):
-        raise ValueError(f"{label} must be a JSON object")
-    return value
 
 
 def delegation_compatibility_mode(manifest: Mapping[str, object]) -> str:
@@ -519,10 +519,21 @@ def _manifest_non_empty_strings(value: object, label: str) -> tuple[str, ...]:
 
 
 def _manifest_id_list(value: object, label: str) -> tuple[str, ...]:
-    values = _strings(value, label, allow_empty=True)
-    if len(set(values)) != len(values):
-        raise ValueError(f"{label} must not contain duplicate ids")
-    return values
+    return _unique_strings(value, label, allow_empty=True)
+
+
+def _remember_unique(
+    value: str,
+    seen: set[str],
+    message: str,
+    *,
+    code: str | None = None,
+) -> None:
+    if value in seen:
+        if code is not None:
+            raise ExecutionContractError(code, message)
+        raise ValueError(message)
+    seen.add(value)
 
 
 def _manifest_fenced_object(text: str, heading: str) -> Mapping[str, object]:
@@ -623,9 +634,7 @@ def _validate_targets(value: object) -> None:
         )
         _manifest_exact_fields(target, keys, label)
         target_id = _string(target["id"], f"{label}.id")
-        if target_id in target_ids:
-            raise ValueError(f"duplicate target id: {target_id}")
-        target_ids.add(target_id)
+        _remember_unique(target_id, target_ids, f"duplicate target id: {target_id}")
         target_path = _string(target["path"], f"{label}.path")
         if _is_git_directory_path(target_path):
             raise ExecutionContractError(
@@ -665,12 +674,12 @@ def _validate_validations(value: object) -> None:
             validation_fields.add("equivalence")
         _manifest_exact_fields(validation, validation_fields, label)
         validation_id = _string(validation["id"], f"{label}.id")
-        if validation_id in validation_ids:
-            raise ExecutionContractError(
-                "duplicate-validation-id",
-                f"Duplicate validation id: {validation_id}",
-            )
-        validation_ids.add(validation_id)
+        _remember_unique(
+            validation_id,
+            validation_ids,
+            f"Duplicate validation id: {validation_id}",
+            code="duplicate-validation-id",
+        )
         validation_command = _string(validation["command"], f"{label}.command")
         _reject_git_mutation(validation_command, f"{label}.command")
         _string(validation["owner"], f"{label}.owner")
@@ -697,9 +706,11 @@ def _validate_manual_obligations(value: object) -> None:
             obligation, {"id", "kind", "required", "acceptance"}, label
         )
         obligation_id = _string(obligation["id"], f"{label}.id")
-        if obligation_id in manual_ids:
-            raise ValueError(f"duplicate manual obligation id: {obligation_id}")
-        manual_ids.add(obligation_id)
+        _remember_unique(
+            obligation_id,
+            manual_ids,
+            f"duplicate manual obligation id: {obligation_id}",
+        )
         if obligation["kind"] not in {"human", "external"}:
             raise ValueError(f"{label}.kind is invalid")
         _bool(obligation["required"], f"{label}.required")
@@ -735,9 +746,7 @@ def _validate_tasks(value: object) -> None:
             label,
         )
         task_id = _string(task["id"], f"{label}.id")
-        if task_id in task_ids:
-            raise ValueError(f"duplicate task id: {task_id}")
-        task_ids.add(task_id)
+        _remember_unique(task_id, task_ids, f"duplicate task id: {task_id}")
         if (
             not _is_int(task["order"])
             or task["order"] < 1
@@ -1015,6 +1024,10 @@ def _mapping(value: object, label: str) -> Mapping[str, object]:
     return value
 
 
+def _manifest_object(value: object, label: str) -> Mapping[str, object]:
+    return _mapping(value, label)
+
+
 def _bool(value: object, label: str) -> bool:
     if not isinstance(value, bool):
         raise ValueError(f"{label} must be a boolean")
@@ -1030,14 +1043,14 @@ def _non_empty_string(value: object) -> bool:
 
 
 def _string(value: object, label: str) -> str:
-    if not isinstance(value, str) or not value.strip():
+    if not _non_empty_string(value):
         raise ValueError(f"{label} must be a non-empty string")
     return value.strip()
 
 
 def _strings(value: object, label: str, *, allow_empty: bool = True) -> tuple[str, ...]:
     if not isinstance(value, list) or not all(
-        isinstance(item, str) and item.strip() for item in value
+        _non_empty_string(item) for item in value
     ):
         raise ValueError(f"{label} must be a list of non-empty strings")
     if not allow_empty and not value:
@@ -1045,11 +1058,23 @@ def _strings(value: object, label: str, *, allow_empty: bool = True) -> tuple[st
     return tuple(item.strip() for item in value)
 
 
+def _unique_strings(
+    value: object, label: str, *, allow_empty: bool = True
+) -> tuple[str, ...]:
+    values = _strings(value, label, allow_empty=allow_empty)
+    duplicate = next(
+        (item for index, item in enumerate(values) if item in values[:index]),
+        None,
+    )
+    if duplicate is not None:
+        raise ValueError(f"{label} must not contain duplicate ids")
+    return values
+
+
 def _exact_fields(
     mapping: Mapping[str, object], expected: set[str] | frozenset[str], label: str
 ) -> None:
-    unknown = set(mapping) - expected
-    missing = expected - set(mapping)
+    unknown, missing = _field_differences(mapping, expected)
     if unknown or missing:
         details: list[str] = []
         if unknown:
@@ -1401,6 +1426,27 @@ def _manifest_task_ids(manifest: Mapping[str, object]) -> tuple[str, ...]:
     )
 
 
+@dataclass(frozen=True)
+class _PlanSnapshot:
+    text: str
+    manifest: dict[str, object]
+    semantic_fingerprint: str
+    content_hash: str
+    task_ids: tuple[str, ...]
+
+
+def _load_plan_snapshot(plan_path: Path) -> _PlanSnapshot:
+    text = plan_path.read_text(encoding="utf-8")
+    manifest = parse_execution_manifest(text)
+    return _PlanSnapshot(
+        text=text,
+        manifest=manifest,
+        semantic_fingerprint=compute_semantic_fingerprint(manifest),
+        content_hash=compute_content_sha256(plan_path),
+        task_ids=_manifest_task_ids(manifest),
+    )
+
+
 def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
     """Parse the strict, hash-bound state persisted by the execution gateway."""
 
@@ -1471,7 +1517,7 @@ def _build_status_payload(
 ) -> dict[str, object]:
     """Build a bound status payload without choosing execution work."""
 
-    manifest = parse_execution_manifest(plan_path.read_text())
+    manifest = parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
     root = repo_root or _find_repo_root(plan_path)
     try:
         plan_reference = plan_path.resolve().relative_to(root.resolve()).as_posix()
@@ -1647,6 +1693,7 @@ def _status_binding_findings(
     state_path: Path,
     state: ResumeState,
     repo_root: Path,
+    snapshot: _PlanSnapshot | None = None,
 ) -> list[Finding]:
     findings: list[Finding] = []
     if not _plan_reference_matches(plan_path, state_path, state.plan, repo_root):
@@ -1654,28 +1701,28 @@ def _status_binding_findings(
             Finding("plan-binding-mismatch", f"Status plan does not match: {state.plan}")
         )
     try:
-        manifest = parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
-        semantic_fingerprint = compute_semantic_fingerprint(manifest)
-        content_hash = compute_content_sha256(plan_path)
-        expected_task_ids = set(_manifest_task_ids(manifest))
+        plan_snapshot = (
+            snapshot if snapshot is not None else _load_plan_snapshot(plan_path)
+        )
     except (OSError, UnicodeError, ExecutionContractError) as exc:
         return findings + [Finding("plan-unreadable", str(exc))]
-    if state.plan_fingerprint != semantic_fingerprint:
+    if state.plan_fingerprint != plan_snapshot.semantic_fingerprint:
         findings.append(
             Finding(
                 "semantic-fingerprint-drift",
-                f"Manifest changed after approval: recorded {state.plan_fingerprint} != computed {semantic_fingerprint}",
+                f"Manifest changed after approval: recorded {state.plan_fingerprint} != computed {plan_snapshot.semantic_fingerprint}",
             )
         )
-    if state.content_hash != content_hash:
+    if state.content_hash != plan_snapshot.content_hash:
         findings.append(
             Finding(
                 "content-hash-drift",
-                f"Plan bytes changed after approval: recorded {state.content_hash} != computed {content_hash}",
+                f"Plan bytes changed after approval: recorded {state.content_hash} != computed {plan_snapshot.content_hash}",
             )
         )
     completed = set(state.completed_task_ids)
     remaining = set(state.remaining_task_ids)
+    expected_task_ids = set(plan_snapshot.task_ids)
     unknown = (completed | remaining) - expected_task_ids
     if unknown:
         findings.append(Finding("unknown-task-id", f"Status contains unknown task IDs: {sorted(unknown)}"))
@@ -1877,7 +1924,9 @@ def _plan_reference_matches(plan_path: Path, status_path: Path, reference: str, 
     return plan_path.resolve() in candidates
 
 
-def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
+def _validate_plan(
+    path: Path, repo_root: Path, snapshot: _PlanSnapshot | None = None
+) -> list[Finding]:
     findings: list[Finding] = []
     if not path.is_file():
         return [Finding("plan-not-found", f"Plan file not found: {path}")]
@@ -1886,8 +1935,13 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
         path.resolve().relative_to(retained_dir.resolve())
     except ValueError:
         findings.append(Finding("plan-outside-retained-directory", f"Plan must be under {retained_dir}"))
+    manifest: dict[str, object] | None = None
     try:
-        text = path.read_text()
+        if snapshot is None:
+            text = path.read_text(encoding="utf-8")
+        else:
+            text = snapshot.text
+            manifest = snapshot.manifest
     except (OSError, UnicodeError) as exc:
         return findings + [Finding("plan-unreadable", f"Plan content is unreadable: {exc}")]
     headings = set(_extract_headings(text))
@@ -1925,11 +1979,12 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
             )
         )
     else:
-        try:
-            manifest = parse_execution_manifest(text)
-        except ExecutionContractError as exc:
-            findings.append(Finding(exc.code, str(exc)))
-        else:
+        if snapshot is None:
+            try:
+                manifest = parse_execution_manifest(text)
+            except ExecutionContractError as exc:
+                findings.append(Finding(exc.code, str(exc)))
+        if manifest is not None:
             for message in validate_manifest_projection(text, manifest):
                 code = (
                     "obsolete-execution-contract"
@@ -1940,13 +1995,23 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
     return findings
 
 
+def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
+    return _validate_plan(path, repo_root)
+
+
 def validate_state(
     plan_path: Path, state_path: Path, repo_root: Path | None = None
 ) -> list[Finding]:
     """Validate one YAML status sibling bound to the retained plan."""
 
     effective_root = repo_root or _find_repo_root(plan_path)
-    findings = validate_plan(plan_path, effective_root)
+    snapshot: _PlanSnapshot | None = None
+    if plan_path.is_file():
+        try:
+            snapshot = _load_plan_snapshot(plan_path)
+        except (OSError, UnicodeError, ExecutionContractError):
+            pass
+    findings = _validate_plan(plan_path, effective_root, snapshot)
     if state_path.suffix.lower() != ".yaml":
         return findings + [
             Finding(
@@ -1972,7 +2037,9 @@ def validate_state(
         return findings + [Finding(exc.code, str(exc))]
     except (OSError, UnicodeError, TypeError, ValueError) as exc:
         return findings + [Finding("malformed-state", str(exc))]
-    return findings + _status_binding_findings(plan_path, state_path, state, effective_root)
+    return findings + _status_binding_findings(
+        plan_path, state_path, state, effective_root, snapshot
+    )
 
 
 def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
