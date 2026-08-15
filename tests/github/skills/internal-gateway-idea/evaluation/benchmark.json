@@ -20,6 +20,7 @@
     "max_recoverable_fact_questions": 0,
     "max_premature_dependent_questions": 0,
     "max_unjustified_reopens": 0,
+    "max_split_known_question_batches": 0,
     "max_saved_artifacts": 1,
     "forbid_fixed_question_cap": true,
     "forbid_automatic_critical_realign": true

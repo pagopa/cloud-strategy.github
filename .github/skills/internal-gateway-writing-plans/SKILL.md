@@ -73,37 +73,36 @@ description: Use when repository-owned work needs an approved implementation pla
   evidence only for `mandatory-test-first`, while `feature-first` retains
   validation before production-ready completion.
   After eligibility, the control inventory, plan structure, locked decisions,
-  and acceptance are complete, choose exactly one route:
-  - Local authoring is the default: record `delegation.mode: none` and
-    `worker: primary-owner`. The plan owner writes, verifies, and owns the
-    canonical retained plan. Do not manufacture a brief, worker result,
-    receipt, or retrospective worker-authorship claim.
-  - Delegation is a caller-owned exception. Use it only when a value gate
-    proves that one autonomous, bounded, verifiable evidence package is
-    materially useful and remains off the critical path. Record the gate
-    decision through the delegating owner before any brief is written. Never
-    delegate final synthesis when the plan owner already holds the decisions
-    and acceptance.
-  For the delegated branch only, write one `DelegationBrief` v1 in `mode: plan`
+  and acceptance are complete, select exactly one authoring route. If the
+  active authoring model is GPT-5.6 Luna, the primary owner authors locally and
+  records `worker: primary-owner`; do not manufacture a brief, worker result,
+  receipt, or retrospective delegation claim. Otherwise, delegation to
+  `internal-luna-executor` is required. If model identity is unavailable, use
+  the delegated route. If the required Luna worker is unavailable, stop as
+  blocked instead of silently changing authorship.
+
+  For the delegated route, fix the objective, value gate, bounded evidence,
+  constraints, exact retained-plan write scope, expected output, acceptance,
+  validation, and budgets. Then write one `DelegationBrief` v1 in `mode: plan`
   through `/internal-subagent-contract` before invoking
-  `internal-luna-executor`. The brief declares the single retained-plan path
-  as `write_scope` and `expected_output.path`, the plan objective and evidence,
-  the required manifest and preflight acceptance, and exact focused validation.
-  Luna MUST return the semantic fields for one `WorkerResult` v1. The runtime
-  adapter composes deterministic fields and a caller-owned `VerificationReceipt`
-  v1; unobserved validation and budget data remain claims or `unavailable`.
-  When delegation adds provenance value, caller acceptance must bind the exact
-  final artifact bytes and the manifest semantic fingerprint. A material edit
-  invalidates the prior result and receipt. The verification owner
-  independently verifies any result, receipt, and plan, then runs the
-  executor-owned `preflight`.
-  The plan owner retains eligibility, control classification, routing, authority,
-  lifecycle, retry choice, human review, final synthesis, independent
-  `preflight`, handoff, and the no-Git-mutation boundary. Model, provider, and
-  route selection remain caller-owned; same-model identity is diagnostic
-  evidence only and never a routing criterion. Before critic output can expand
-  scope, classify every finding exactly once as `blocking-now`,
-  `acceptance-required`, `follow-up`, `separate-design`, or
+  `internal-luna-executor`. The brief binds the single retained-plan path as
+  `write_scope` and `expected_output.path`, the required manifest and preflight
+  acceptance, and exact focused validation. Record
+  `worker: internal-luna-executor` in the plan authority boundary.
+
+  Luna returns the semantic fields for one `WorkerResult` v1. The runtime
+  adapter composes deterministic fields and a caller-owned
+  `VerificationReceipt` v1; unobserved validation and budget data remain claims
+  or `unavailable`. Caller acceptance binds the exact final artifact bytes and
+  manifest semantic fingerprint. A material edit invalidates the result and
+  receipt; route a material correction back to Luna under the retry contract
+  instead of silently transferring authorship to the parent.
+
+  The plan owner retains eligibility, control classification, routing,
+  authority, lifecycle, retry choice, semantic review, independent `preflight`,
+  final acceptance, handoff, and the no-Git-mutation boundary. Before critic
+  output can expand scope, classify every finding exactly once as
+  `blocking-now`, `acceptance-required`, `follow-up`, `separate-design`, or
   `rejected-with-reason`; untraceable findings are `separate-design`.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every

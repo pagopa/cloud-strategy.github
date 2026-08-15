@@ -33,23 +33,21 @@ interface:
     attestation. Resolve the loaded executor bundle and run its scripts/run.sh
     preflight as the sole mechanical validator. After eligibility, the control
     inventory, plan structure, locked decisions, and acceptance are complete,
-    use one decision tree: local authoring is the default with delegation.mode:
-    none and worker: primary-owner; do not manufacture a brief, result,
-    receipt, or retrospective worker-authorship claim. Delegation is a
-    caller-owned exception and is permitted only when a value gate proves that
-    one autonomous, bounded, verifiable evidence package is materially useful
-    and off the critical path; record that decision before writing a brief.
-    Never delegate final synthesis when the parent already owns decisions and
-    acceptance. For the delegated branch only, write one DelegationBrief v1 in
-    mode: plan through /internal-subagent-contract, invoke
-    internal-luna-executor, bind the one parent-supplied retained plan path as
-    write_scope and expected output, and verify the adapter-composed
-    WorkerResult v1 plus caller-owned VerificationReceipt v1. Material edits
-    invalidate prior result and receipt. The parent retains routing, authority,
-    lifecycle, retry choice, independent validation, human review, final
-    synthesis, final preflight, handoff, and the no-Git-mutation boundary.
-    Model, provider, and route selection remain caller-owned; same-model
-    identity is diagnostic evidence only. Before critic output can expand scope,
+    use one authoring route: when the active authoring model is GPT-5.6 Luna,
+    author locally and record worker: primary-owner without manufacturing a
+    delegation envelope. Otherwise, invoke internal-luna-executor through
+    /internal-subagent-contract; if model identity is unavailable, delegate,
+    and if Luna is unavailable, stop as blocked. Before delegation, fix the
+    objective, value gate, bounded evidence, constraints, exact retained-plan
+    path, output, acceptance, validation, and budgets. Bind that path as write
+    scope and expected output, record worker: internal-luna-executor, and verify
+    the adapter-composed WorkerResult v1 plus caller-owned VerificationReceipt
+    v1. Material edits invalidate the result and receipt; return material
+    corrections through the retry contract instead of transferring authorship
+    to the parent. The parent retains routing, authority, lifecycle, retry
+    choice, independent validation, semantic review, final preflight, final
+    acceptance, handoff, and the no-Git-mutation boundary. Before critic output
+    can expand scope,
     classify every finding exactly once as blocking-now, acceptance-required,
     follow-up, separate-design, or rejected-with-reason; untraceable findings
     are separate-design. Producer readiness is writer-owned and structural,

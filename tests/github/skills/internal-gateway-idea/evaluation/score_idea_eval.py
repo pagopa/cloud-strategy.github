@@ -57,6 +57,7 @@ CAPSULE_FIELDS = (
 FINDING_FIELDS = (
     "recoverable_fact_question_cases",
     "premature_dependent_question_cases",
+    "split_known_question_batch_cases",
     "unmapped_question_cases",
     "uncovered_material_root_cases",
     "unjustified_reopen_cases",
@@ -143,6 +144,7 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
         "max_recoverable_fact_questions",
         "max_premature_dependent_questions",
         "max_unjustified_reopens",
+        "max_split_known_question_batches",
         "max_saved_artifacts",
     ):
         limit = protected.get(field)
@@ -223,7 +225,15 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
         questions = _validate_record_list(
             observation["question_records"],
             f"{observation_id}.question_records",
-            ("question_id", "decision_id", "event_index", "evidence_ids", "prerequisites"),
+            (
+                "question_id",
+                "decision_id",
+                "event_index",
+                "eligible_event_index",
+                "block_id",
+                "evidence_ids",
+                "prerequisites",
+            ),
         )
         question_ids: set[str] = set()
         for index, question in enumerate(questions):
@@ -232,7 +242,22 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
                 raise _schema_error(f"duplicate question_id in {observation_id}: {question_id}")
             question_ids.add(question_id)
             _require_string(question["decision_id"], f"{observation_id}.question_records[{index}].decision_id")
-            _require_event_index(question["event_index"], f"{observation_id}.question_records[{index}].event_index")
+            question_event_index = _require_event_index(
+                question["event_index"],
+                f"{observation_id}.question_records[{index}].event_index",
+            )
+            eligible_event_index = _require_event_index(
+                question["eligible_event_index"],
+                f"{observation_id}.question_records[{index}].eligible_event_index",
+            )
+            if eligible_event_index > question_event_index:
+                raise _schema_error(
+                    f"{question_id} became eligible after it was asked"
+                )
+            _require_string(
+                question["block_id"],
+                f"{observation_id}.question_records[{index}].block_id",
+            )
             _require_string_list(question["evidence_ids"], f"{observation_id}.question_records[{index}].evidence_ids")
             _require_string_list(question["prerequisites"], f"{observation_id}.question_records[{index}].prerequisites")
 
@@ -434,6 +459,7 @@ def _score_observation(
         for event in observation["route_events"]  # type: ignore[union-attr]
         if event.get("owner") == "/grill-me"
     ]
+    known_batches: dict[float, set[tuple[str, float]]] = {}
     for question in questions:  # type: ignore[union-attr]
         if _evidence_supports_question(question, evidence):
             findings["recoverable_fact_question_cases"].add(case_id)
@@ -441,7 +467,10 @@ def _score_observation(
         if decision is None or not decision["material"]:
             findings["unmapped_question_cases"].add(case_id)
             continue
-        if _dependencies_open(decision, question, decisions, transitions):
+        dependencies_open = _dependencies_open(
+            decision, question, decisions, transitions
+        )
+        if dependencies_open:
             findings["premature_dependent_question_cases"].add(case_id)
         question_index = _event_index(question)
         status = _status_at(str(question["decision_id"]), question_index, decisions, transitions)
@@ -449,6 +478,14 @@ def _score_observation(
             findings["unmapped_question_cases"].add(case_id)
         if not any(_event_index(event) <= question_index for event in question_owner_events):
             findings["protected_workflow_violation_cases"].add(case_id)
+        if not dependencies_open and status not in TERMINAL_STATES:
+            eligible_index = float(question["eligible_event_index"])
+            known_batches.setdefault(eligible_index, set()).add(
+                (str(question["block_id"]), question_index)
+            )
+
+    if any(len(blocks) > 1 for blocks in known_batches.values()):
+        findings["split_known_question_batch_cases"].add(case_id)
 
     for decision_id, decision in decisions.items():
         dependencies = decision["dependencies"]

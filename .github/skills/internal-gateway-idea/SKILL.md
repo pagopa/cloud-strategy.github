@@ -26,8 +26,11 @@ The latest explicit subject or mode instruction wins. On a `subject-change` or
 `mode-change`, park the prior unit with its capsule, start the new unit, and do
 not silently reuse open decisions. In `analysis-only` mode, do not invoke
 `/superpowers-brainstorming`, `/internal-tdd`,
-`/internal-gateway-writing-plans`, or `/internal-gateway-execute-plans`.
-Implementation permission never implies any of those routes.
+`/internal-gateway-writing-plans`, or `/internal-gateway-execute-plans` before
+the user explicitly selects a `+spec` or `+plan` Candidate acceptance action.
+A `+spec` action authorizes only the selected spec artifact; a `+plan` action
+authorizes only the selected plan-authoring handoff. Neither action authorizes
+implementation or execution.
 
 ## Ownership boundary
 
@@ -83,10 +86,12 @@ evidence and move any fact that is already sufficient to
 When several roots are open, prioritize authority or scope blockers, then
 dependency impact, recommendation impact, material risk, and finally
 non-blocking preference. This is a priority heuristic, not a fixed question
-count or a normative multi-branch scheduler. Ask only about a material
-`eligible-now` decision, and map each question to exactly one such decision.
-Reopen a decision only when new evidence, an explicit user change, or a
-supported critical finding matches its declared reopen condition.
+count or a normative multi-branch scheduler. Collect every currently known
+material `eligible-now` decision for the current round and map each numbered
+question to exactly one such decision. Do not split that set into one-question
+turns. If the set contains only one decision, still send it as a numbered
+one-item block. Reopen a decision only when new evidence, an explicit user
+change, or a supported critical finding matches its declared reopen condition.
 
 ## State capsule
 
@@ -102,9 +107,9 @@ Maintain one compact state capsule with exactly:
 
 Update the ledger and capsule before and after `/grill-me`, on pause, context
 compaction, `subject-change`, or `mode-change`, and before presenting a
-Candidate. During ordinary turns, show only state deltas and the next decision.
-If reconstruction fails, mark affected decisions `open` visibly and recover
-them before treating them as resolved.
+Candidate. During ordinary turns, show only state deltas and the current
+decision block. If reconstruction fails, mark affected decisions `open`
+visibly and recover them before treating them as resolved.
 
 ## Workflow
 
@@ -117,15 +122,16 @@ evidence, a user decision, or a supported critical finding.
    changing unknowns, the evidence that could resolve them, and the constraints
    that must remain true.
 3. **Resolve evidence and roots.** Build the ledger, mark roots and
-   dependents, recover sufficient facts, and choose the next `eligible-now`
-   decision using the priority heuristic.
+   dependents, recover sufficient facts, and collect the current set of
+   `eligible-now` decisions using the priority heuristic.
 4. **Challenge the anchor.** Always challenge one actor, mechanism, constraint,
    or causal assumption internally. Show alternatives only when that challenge
    yields at least two materially credible mechanisms supported by evidence. If
    evidence and accepted constraints determine one feasible direction, converge
    directly. Record a credible rejected alternative whenever one exists.
-5. **Route unresolved decisions.** When an eligible user decision remains,
-   invoke `/grill-me` with exactly this packet for each decision:
+5. **Route unresolved decisions.** When one or more eligible user decisions
+   remain, invoke `/grill-me` once for the current round with exactly one of
+   these packets per decision, in one numbered bulk question block:
 
    - `Decision ID`;
    - `Open decision`;
@@ -138,6 +144,8 @@ evidence, a user decision, or a supported critical finding.
    follow-ups, and the resolved summary. Do not duplicate its interview
    contract. Keep every decision open until its returned resolved summary is
    available; accept a default only when that summary explicitly returns it.
+   Later decisions that become eligible are collected into a subsequent
+   numbered block, including a numbered one-item block when only one remains.
 6. **Converge.** Compare options against the desired outcome, success criteria,
    evidence quality, constraints, and anti-scope. Recommend one direction and
    record why credible alternatives were rejected.
@@ -154,12 +162,12 @@ accepted as a visible residual risk; and the latest state capsule is current.
 
 ## Chat layout
 
-Lead with the active decision, recommendation, or next required choice. Keep
-only the controlling evidence needed for that decision in ordinary chat, and
-include the material risk. When a decision is ready, keep the existing
-explicit numbered user choice visible; a displayed recommendation is not
-acceptance. Brevity must never remove a blocker, unknown, accepted risk, or
-acceptance condition.
+Lead with the active decision block, recommendation, or next required choice.
+Keep only the controlling evidence needed for those decisions in ordinary
+chat, and include the material risk. When the decision block is ready, keep
+the existing explicit numbered user choice visible; a displayed recommendation
+is not acceptance. Brevity must never remove a blocker, unknown, accepted
+risk, or acceptance condition.
 
 Use these compact headings when their section has material content:
 
@@ -177,9 +185,9 @@ diagram when it improves comprehension. Keep the controlling conclusion in
 adjacent prose and skip decorative visuals.
 
 Keep full evidence, decision history, and residual risks in the one
-user-requested artifact; ordinary chat shows state deltas and the next
-decision. Do not introduce a new template, artifact, field, or automatic save.
-Keep the stable Analysis Spec field names unchanged.
+user-requested artifact; ordinary chat shows state deltas and the current
+decision block. Do not introduce a new template, artifact, field, or automatic
+save. Keep the stable Analysis Spec field names unchanged.
 
 ## Candidate Analysis Spec
 
@@ -198,18 +206,31 @@ The Candidate Analysis Spec contains:
 - `Deferred questions`
 - `Specific critical focus`
 
-Present the Candidate before offering the next action. Require an explicit
-numbered user choice; do not treat a displayed recommendation as acceptance:
+Present the Candidate before opening acceptance. The user may explicitly ask
+to continue the analysis or invoke `/internal-gateway-critical-master` instead
+of accepting. When asking for acceptance, show exactly this numbered gate and
+do not treat a displayed recommendation as acceptance:
 
-- `🔄 Continue the analysis`
-- `🧠 Invoke /internal-gateway-critical-master`
-- `✅ Accept as the Consolidated Analysis Spec`
-- `💾 Save the analysis`
-- `⏹️ Close without a file or plan`
+1. `✅ Accept as the Consolidated Analysis Spec + spec`
+2. `✅ Accept as the Consolidated Analysis Spec + plan`
+3. `💾 Save the analysis`
+4. `⏹️ Close without a file or plan`
 
 Without a critical review, promote the Candidate Analysis Spec to the
-Consolidated Analysis Spec only after the user explicitly chooses its numbered
-acceptance action. The Candidate remains the Candidate until then.
+Consolidated Analysis Spec only after the user explicitly chooses option 1 or
+2. Option 1 authorizes only authoring the consolidated analysis spec artifact;
+option 2 authorizes only the implementation-plan authoring handoff. Neither
+option authorizes implementation or execution. Options 3 and 4 do not promote
+the Candidate. The Candidate remains the Candidate until option 1 or 2 is
+explicitly selected.
+
+### Artifact authoring after acceptance
+
+After the user selects `+ spec` or `+ plan`, load and apply
+[`references/artifact-authoring.md`](references/artifact-authoring.md). It owns
+the conditional Luna route, the bounded delegation admission, and the retained
+owner responsibilities for the selected artifact. Neither route starts
+implementation or execution.
 
 ## Optional critical review
 
@@ -218,15 +239,15 @@ the Candidate Analysis Spec as the canonical subject, its `Specific critical
 focus`, and earlier conversation only as supporting evidence. The critical
 owner supplies its own intake, lenses, procedure, findings, and report.
 
-After presenting the critical report, offer:
+While a blocking finding or a material unresolved finding remains, offer only
+the applicable examination, realignment, or additional-review actions. When
+no blocking finding remains and acceptance is available, show exactly the same
+four-option acceptance gate:
 
-- `🔍 Examine a specific finding`
-- `🔄 Realign the analysis with supported critical findings`
-- `🧠 Run another critical review`, only when a material finding remains
-  unresolved or new evidence arrived
-- `✅ Accept the analysis`, only when no blocking finding remains
-- `💾 Save the analysis`
-- `⏹️ Close without a file or plan`
+1. `✅ Accept as the Consolidated Analysis Spec + spec`
+2. `✅ Accept as the Consolidated Analysis Spec + plan`
+3. `💾 Save the analysis`
+4. `⏹️ Close without a file or plan`
 
 Do not realign automatically. Require the user's explicit numbered choice
 before integrating critical findings. When the user selects realignment, treat
@@ -236,33 +257,12 @@ conflicting suggestions with evidence, return unresolved user decisions to
 state and spec. It becomes the Consolidated Analysis Spec only when every
 material finding has been incorporated, rejected with evidence, accepted as
 residual risk, or routed to a resolvable branch, and the user explicitly
-accepts the resulting analysis.
+selects acceptance option 1 or 2. The selected artifact then follows
+`references/artifact-authoring.md`. Do not realign or accept automatically.
 
 ## Pause and persistence
 
-Conversation-only analysis is the default. On pause, return this compact state:
-
-### ⏸️ Resume from here
-
-- `❓ Active decision`
-- `🔎 Key unknown`
-- `➡️ Next branch`
-- `🔒 Closed decisions`
-
-The pause view is a readable projection of the current state capsule. Rebuild
-it from the capsule after context compaction, a subject change, or a mode
-change; if a field cannot be recovered, mark the affected decision `open`.
-
-Create a file only when the user explicitly asks to save or continue in another
-conversation. Write at most one Markdown artifact at the supplied path. When
-no path is supplied, use
-`tmp/superpowers/specs/YYYY-MM-DD-<topic>-analysis.md`, disclose that `tmp/` is
-disposable, and update that same file in place. The artifact must contain the
-current Candidate or Consolidated Analysis Spec, its state capsule, evidence
-anchors, and next action so planning replay works without the transcript. Do
-not create a separate critical report or transcript, and do not save twice as
-separate artifacts.
-
-After the Consolidated Analysis Spec is accepted, state that implementation-
-oriented design, planning, and execution remain separate explicitly requested
-actions. Do not invoke those owners from `analysis-only` mode.
+Conversation-only analysis remains the default. On pause, save, cross-chat
+continuation, or accepted artifact creation, load and apply
+[`references/persistence.md`](references/persistence.md). It owns the resume
+projection, single-artifact rule, default path, and post-acceptance handoff.

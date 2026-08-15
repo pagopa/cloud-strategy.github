@@ -119,12 +119,20 @@ def _question(
     *,
     kind: str = "decision",
     prerequisites: list[str] | None = None,
+    block_id: str | None = None,
+    eligible_event_index: int | None = None,
 ) -> dict[str, object]:
     return {
         "question_id": question_id,
         "decision_id": decision_id,
         "kind": kind,
         "event_index": event_index,
+        "eligible_event_index": (
+            eligible_event_index
+            if eligible_event_index is not None
+            else event_index
+        ),
+        "block_id": block_id or f"{question_id}-BLOCK",
         "evidence_ids": evidence_ids,
         "prerequisites": prerequisites or [],
     }
@@ -213,6 +221,7 @@ def _observation(
 def passing_run() -> dict[str, object]:
     c01_fact = "C01-FACT"
     c01_unknown = "C01-UNKNOWN"
+    c01_unknown_2 = "C01-UNKNOWN-2"
     c02_root = "C02-ROOT"
     c02_dependent = "C02-DEPENDENT"
     c03_root = "C03-ROOT"
@@ -245,15 +254,37 @@ def passing_run() -> dict[str, object]:
                 [
                     _decision(c01_fact, "resolved-from-evidence", evidence_ids=["C01-facts"]),
                     _decision(c01_unknown, "accepted", evidence_ids=["C01-unknowns"]),
+                    _decision(c01_unknown_2, "accepted", evidence_ids=["C01-unknowns"]),
                 ],
-                [_question("C01-Q1", c01_unknown, 3, ["C01-unknowns"])],
+                [
+                    _question(
+                        "C01-Q1",
+                        c01_unknown,
+                        3,
+                        ["C01-unknowns"],
+                        block_id="C01-B1",
+                        eligible_event_index=2,
+                    ),
+                    _question(
+                        "C01-Q2",
+                        c01_unknown_2,
+                        3,
+                        ["C01-unknowns"],
+                        block_id="C01-B1",
+                        eligible_event_index=2,
+                    ),
+                ],
                 [
                     _status_event(c01_fact, "open", "resolved-from-evidence", 2, evidence_ids=["C01-facts"]),
                     _status_event(c01_unknown, "open", "accepted", 4, trigger="explicit-user-change"),
+                    _status_event(c01_unknown_2, "open", "accepted", 4, trigger="explicit-user-change"),
                 ],
                 [{"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "event_index": 3}],
                 [],
-                {"Facts": [c01_fact], "Unknowns": [c01_unknown]},
+                {
+                    "Facts": [c01_fact],
+                    "Unknowns": [c01_unknown, c01_unknown_2],
+                },
             ),
             _observation(
                 "C-02",
@@ -351,6 +382,7 @@ def failing_run() -> dict[str, object]:
     assert isinstance(observations, list)
 
     c01 = observations[0]
+    c01["question_records"][1]["block_id"] = "C01-B2"
     c01["question_records"].append(
         _question("C01-Q-FACT", "C01-FACT", 5, ["C01-facts"], kind="fact")
     )
@@ -431,6 +463,7 @@ def test_manifest_declares_cases_records_limits_and_forbidden_verdicts() -> None
     assert protected["max_recoverable_fact_questions"] == 0
     assert protected["max_premature_dependent_questions"] == 0
     assert protected["max_unjustified_reopens"] == 0
+    assert protected["max_split_known_question_batches"] == 0
     assert protected["max_saved_artifacts"] == 1
     assert protected["forbid_fixed_question_cap"] is True
     assert protected["forbid_automatic_critical_realign"] is True
@@ -454,6 +487,7 @@ def test_failing_records_report_derived_findings_and_reject() -> None:
     assert result["accepted"] is False
     assert result["missing_case_ids"] == []
     assert result["recoverable_fact_question_cases"] == ["C-01"]
+    assert result["split_known_question_batch_cases"] == ["C-01"]
     assert result["premature_dependent_question_cases"] == ["C-02"]
     assert result["unjustified_reopen_cases"] == ["C-03"]
     assert result["anchored_challenge_violation_cases"] == ["C-03"]
@@ -472,6 +506,13 @@ def test_malformed_run_is_rejected_as_input_error() -> None:
 
     with pytest.raises(ValueError):
         scorer.score(load_manifest(), {"observations": [{"case_id": "C-01"}]})
+
+    future_eligibility = passing_run()
+    future_eligibility["observations"][0]["question_records"][0][
+        "eligible_event_index"
+    ] = 4
+    with pytest.raises(ValueError, match="eligible after it was asked"):
+        scorer.score(load_manifest(), future_eligibility)
 
 
 def _run_cli(tmp_path: Path, manifest: object, run: object) -> subprocess.CompletedProcess[str]:

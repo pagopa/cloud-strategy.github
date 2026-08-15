@@ -5,11 +5,16 @@ interface:
     Use $internal-gateway-idea only when explicitly selected to turn an early
     or unclear idea into a decision-ready Analysis Spec. Keep the analysis in
     conversation by default, distinguish Facts, Reports, Assumptions, Unknowns,
-    and Constraints, and use a compact emoji-guided chat layout. Delegate
+    and Constraints, and use a compact emoji-guided chat layout. Send all
+    currently known eligible decisions to /grill-me in one numbered bulk block
+    and use later numbered blocks only for newly eligible follow-ups. Delegate
     interview mechanics to /grill-me and critical-review procedure to
     /internal-gateway-critical-master. After a critical review, offer an
     explicit option to realign the same analysis with supported findings. Keep
-    implementation-oriented design, planning, execution, and file creation
-    separate and user-gated.
+    the exact four-option Candidate acceptance gate. Author the selected spec
+    or plan artifact through internal-luna-executor and
+    /internal-subagent-contract unless the active authoring model is already
+    GPT-5.6 Luna; retain owner review, validation, and acceptance. Keep
+    implementation-oriented design and execution separate and user-gated.
 policy:
   allow_implicit_invocation: false
