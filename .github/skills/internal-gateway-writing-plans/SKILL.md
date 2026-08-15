@@ -141,8 +141,8 @@ description: Use when repository-owned work needs an approved implementation pla
 - Write every baseline, focused, and final validation command in directly
   executable native form. The command recorded in the plan is the
   authoritative command and evidence label.
-- Do not make `rtk`, `graphify`, or another optional accelerator a prerequisite
-  or command prefix unless the task's actual subject is that tool.
+- Do not make `graphify` or another optional accelerator a prerequisite or
+  command prefix unless the task's actual subject is that tool.
 - Executor-side optimization may accelerate an invocation, but must not alter
   the recorded authoritative command or its validation meaning.
 
