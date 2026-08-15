@@ -56,10 +56,10 @@ files, revision numbers, or a preferred artifact format are absent.
 ## Analysis units and reruns
 
 An `analysis unit` is the bounded subject, evidence snapshot, assumptions,
-scope, and acceptance under review. The caller owns an invocation ledger for
-each unit. Each ledger entry records the unit identity, pass type (`full` or
-`delta`), evidence snapshot or digest, changed claims or assumptions, rerun
-reason, and outcome.
+scope, and acceptance under review. Critical Master owns the review procedure,
+review state, and invocation ledger for each unit. Each ledger entry records
+the unit identity, pass type (`full` or `delta`), evidence snapshot or digest,
+changed claims or assumptions, rerun reason, and outcome.
 
 - Run one full challenge pass per analysis unit by default.
 - Use a delta review after a materially supported change, limited to changed
@@ -69,8 +69,12 @@ reason, and outcome.
 - Permit a second full pass only when the ledger records one of these reasons:
   an open blocker remains, new evidence changes a controlling assumption, or
   scope changes. The entry must identify the changed evidence or scope.
-- The critic challenges and reports; the parent retains routing, scope,
-  acceptance, finding classification, and the decision to expand the plan.
+- The critic challenges and reports. The subject's active primary owner is
+  identified by current responsibility, not by an upstream skill or producer;
+  that owner retains subject scope and decisions. A caller retains routing,
+  finding classification, plan-expansion, and lifecycle responsibilities
+  outside the review, and the user retains acceptance on direct invocation.
+  Critical Master does not acquire subject routing or acceptance authority.
 
 Classify every finding exactly once before it can change the current plan:
 `blocking-now`, `acceptance-required`, `follow-up`, `separate-design`, or
@@ -150,6 +154,20 @@ precision that the available evidence cannot support.
 Return one concise Markdown report. The structure is a readability aid and is
 not a dependency for using this skill. Write prose in the user's language,
 while keeping the field labels below recognizable.
+
+Lead with `Assessment` and group related evidence. A full report must retain
+every material finding and the required readable-report fields: `Critique`,
+`Evidence`, `Suggestion`, `Why`, `Blocking`, relevant `Impact`, residual
+risks, open questions, and the conclusion. Brevity is subordinate to blockers
+and evidence. On a permitted delta pass, use the same required finding fields
+but emit only changed evidence, changed findings or classifications, changed
+conclusion, and residual blockers; do not repeat unchanged `Scope` or
+`Evidence` sections merely for completeness.
+
+For a material causal, dependency, ownership, or state relationship within the
+skill-owned report, strongly prefer the smallest useful Mermaid diagram when
+it improves comprehension. Keep the controlling conclusion in an adjacent
+report paragraph and do not emit a visual outside this report contract.
 
 ```markdown
 # Critical Analysis

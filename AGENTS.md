@@ -76,8 +76,27 @@ with the nearest owner.
   documentation so stale checks cannot restore the old behavior.
 - Treat prose as guidance, not enforcement. Put hard guarantees in permissions,
   validators, hooks, or CI.
-- Report the outcome first. Include changed files, validation evidence, and
-  remaining risks without repeating incidental process detail.
+### Human-Facing Responses
+
+- A direct user-requested format or an applicable skill-owned output contract
+  controls the response layout, required fields, ordering, length, visual use,
+  and machine-readable shape. Apply the following defaults only where that
+  narrower contract is silent.
+- Make analysis, review, diagnosis, comparison, report, and handoff responses
+  easy for a human to understand and act on. Lead with the outcome, decision,
+  or strongest finding. Keep the response concise and proportional to the
+  request while preserving material blockers, risks, uncertainty, validation
+  gaps, and the next required action.
+- For non-trivial flows, sequences, dependencies, ownership models, state
+  transitions, or multi-part comparisons, strongly prefer the smallest useful
+  Mermaid diagram when it communicates the relationship faster and more
+  clearly than prose alone. Skip decorative or redundant visuals. Preserve the
+  diagram's controlling conclusion in adjacent text so the response remains
+  useful when Mermaid is not rendered.
+- Keep full evidence and decision history in an existing retained artifact when
+  one already owns that detail. Use the human-facing response for the outcome,
+  material delta, risk, and next action. Do not create an artifact solely to
+  shorten the response.
 
 ## Protected Skill Boundary
 

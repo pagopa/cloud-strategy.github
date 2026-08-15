@@ -154,6 +154,13 @@ accepted as a visible residual risk; and the latest state capsule is current.
 
 ## Chat layout
 
+Lead with the active decision, recommendation, or next required choice. Keep
+only the controlling evidence needed for that decision in ordinary chat, and
+include the material risk. When a decision is ready, keep the existing
+explicit numbered user choice visible; a displayed recommendation is not
+acceptance. Brevity must never remove a blocker, unknown, accepted risk, or
+acceptance condition.
+
 Use these compact headings when their section has material content:
 
 - `### 🧭 Decision`
@@ -164,7 +171,15 @@ Use these compact headings when their section has material content:
 - `### ❓ Decisions needed`
 
 Use emoji as navigation, not decoration. Do not prefix every paragraph or
-bullet with one. Keep the stable Analysis Spec field names unchanged.
+bullet with one. For a non-trivial decision flow, dependency, ownership
+relation, or option mechanism, strongly prefer the smallest useful Mermaid
+diagram when it improves comprehension. Keep the controlling conclusion in
+adjacent prose and skip decorative visuals.
+
+Keep full evidence, decision history, and residual risks in the one
+user-requested artifact; ordinary chat shows state deltas and the next
+decision. Do not introduce a new template, artifact, field, or automatic save.
+Keep the stable Analysis Spec field names unchanged.
 
 ## Candidate Analysis Spec
 

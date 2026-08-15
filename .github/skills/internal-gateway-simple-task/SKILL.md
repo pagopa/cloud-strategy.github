@@ -114,9 +114,10 @@ validation, and final reporting.
   validation are locked. Use `/internal-subagent-contract` for one
   `DelegationBrief` v1 and verify the adapter-composed `WorkerResult` v1 plus
   caller-owned `VerificationReceipt` v1 here. Treat worker validation and
-  budget data as claims unless the receipt records runtime observation. The
-  caller retains routing, scope, authority, lifecycle, retry choice,
-  independent validation, acceptance, and closeout; do not branch on caller or
+  budget data as claims unless the receipt records runtime observation. This
+  gateway, as the active primary owner, retains routing, scope, authority,
+  lifecycle, retry choice, independent validation, acceptance, and closeout.
+  Delegated worker evidence remains subordinate; do not branch on producer or
   model identity.
 - Use one initial worker attempt, at most one context refill, and at most one
   corrective retry. A repeated progress signature is `stalled`; Minor,
@@ -124,10 +125,11 @@ validation, and final reporting.
   worker is unavailable, perform the work locally only when the locked brief
   permits that fallback.
 - For executable or evaluable behavior, load `/internal-tdd` before editing and
-  record exactly one selected posture. This prompt/skill-only refactor is
-  `validation-only`: it has no useful executable seam, so use the strict skill
-  validator, routing fixture, inventory assertion, and human review instead of
-  manufacturing a wording test or harness.
+  record exactly one selected posture for the current task. Use
+  `validation-only` only when that task has no useful executable or evaluable
+  seam; record the seam gap and alternate validation. Do not pre-classify all
+  prompt or skill work as `validation-only`, and do not manufacture a wording
+  test or harness.
 - Load `/addyosmani-code-simplification` only for an explicit simplification
   request or an already-approved simplification remediation, after a passing
   behavior baseline exists. Preserve behavior, local conventions, and scope.
@@ -143,6 +145,19 @@ the canonical evidence ledger. Check that every changed requirement has fresh
 evidence. Classify failures as task-local, pre-existing, unrelated/external,
 environmental, or unknown. Repair once only when the repair is safe, in scope,
 and produces new evidence; rerun the authoritative command.
+
+After successful validation, report these fields in this order:
+
+- `Outcome` — what is complete and the controlling conclusion;
+- `Changed` — the in-scope files or behavior delta;
+- `Checks` — the focused and broader validation evidence;
+- `Risks` — material residual risks, gaps, or unavailable evidence;
+- `Next` — one required action or `none`.
+
+Keep each field concise, include residual gaps, and do not repeat commentary.
+Within `Outcome`, strongly prefer the smallest useful Mermaid diagram only
+when the completed result spans a material multi-component relationship. Keep
+the controlling conclusion in text; simple results remain prose-only.
 
 Before any completion, passing, fixed, or no-gap claim, load
 `/superpowers-verification-before-completion`, run the full required checks,

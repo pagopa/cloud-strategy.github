@@ -26,11 +26,15 @@ description: Use when repository-owned work needs an approved implementation pla
 ## Contract
 
 0. Establish writing eligibility before any implementation-plan writing.
-  A user-accepted `Consolidated Analysis Spec` supplied by
-  `/internal-gateway-idea` authorizes implementation-plan writing only when
-  the user explicitly requests it. A direct invocation of this gateway
-  requires explicit user approval in the current conversation. Neither path
-  authorizes plan execution, status creation, or Git mutation.
+  Eligibility requires a current explicit request to write an implementation
+  plan, a verifiable approval state for that writing, the target and
+  anti-scope, consolidated decisions and residual risks, the nearest owner and
+  authority boundary, observable acceptance and validation path, and stop
+  conditions. A user-accepted `Consolidated Analysis Spec` from
+  `/internal-gateway-idea`, an approved design, a reviewed retained spec, or
+  equivalent direct input is eligible only when all of those conditions are
+  present. Producer identity does not substitute for any condition. Neither
+  path authorizes plan execution, status creation, or Git mutation.
 1. Capture the target, anti-scope, nearest owner, validation path, stop
    conditions, and observable acceptance. Build a control inventory before
    delegation: classify every task, acceptance criterion, and declared
@@ -40,7 +44,7 @@ description: Use when repository-owned work needs an approved implementation pla
    under `## Global Constraints` and a compact `## Control Inventory` in every
    current plan. Completion: all six facts, the no-mutation rule, and one owner
    for every obligation are recorded before delegation.
-2. Lock exactly one parent-supplied retained plan path under
+2. Lock exactly one plan-owner-locked retained plan path under
     `tmp/superpowers/plans/` and its required structure before delegation:
     ordered actionable tasks, concrete file targets, focused validation, a
     compact `## Control Inventory`, an execution handoff, and one normative
@@ -71,14 +75,15 @@ description: Use when repository-owned work needs an approved implementation pla
   After eligibility, the control inventory, plan structure, locked decisions,
   and acceptance are complete, choose exactly one route:
   - Local authoring is the default: record `delegation.mode: none` and
-    `worker: primary-owner`. The parent writes, verifies, and owns the
+    `worker: primary-owner`. The plan owner writes, verifies, and owns the
     canonical retained plan. Do not manufacture a brief, worker result,
     receipt, or retrospective worker-authorship claim.
   - Delegation is a caller-owned exception. Use it only when a value gate
     proves that one autonomous, bounded, verifiable evidence package is
     materially useful and remains off the critical path. Record the gate
-    decision before any brief is written. Never delegate final synthesis when
-    the parent already holds the decisions and acceptance.
+    decision through the delegating owner before any brief is written. Never
+    delegate final synthesis when the plan owner already holds the decisions
+    and acceptance.
   For the delegated branch only, write one `DelegationBrief` v1 in `mode: plan`
   through `/internal-subagent-contract` before invoking
   `internal-luna-executor`. The brief declares the single retained-plan path
@@ -89,9 +94,10 @@ description: Use when repository-owned work needs an approved implementation pla
   v1; unobserved validation and budget data remain claims or `unavailable`.
   When delegation adds provenance value, caller acceptance must bind the exact
   final artifact bytes and the manifest semantic fingerprint. A material edit
-  invalidates the prior result and receipt. The parent independently verifies
-  any result, receipt, and plan, then runs the executor-owned `preflight`.
-  The parent retains eligibility, control classification, routing, authority,
+  invalidates the prior result and receipt. The verification owner
+  independently verifies any result, receipt, and plan, then runs the
+  executor-owned `preflight`.
+  The plan owner retains eligibility, control classification, routing, authority,
   lifecycle, retry choice, human review, final synthesis, independent
   `preflight`, handoff, and the no-Git-mutation boundary. Model, provider, and
   route selection remain caller-owned; same-model identity is diagnostic
@@ -123,10 +129,12 @@ description: Use when repository-owned work needs an approved implementation pla
   concluded and passed. The executor persists those categories in the YAML
   status sibling together with approval evidence bound to the plan hashes. A
   standalone `validated` flag is not a readiness claim.
-4. Report the retained plan path, name `/internal-gateway-execute-plans` as
-  the only next owner, and wait for explicit execution approval. Do not invoke
-  execution, create a status sibling, or offer an imported execution owner
-  before that approval. Completion: the path and next owner are reported and
+4. Report exactly the retained plan path, scope and readiness, material risk or
+  residual gap, and `/internal-gateway-execute-plans` as the sole next owner
+  after explicit execution approval. Keep plan details in the retained
+  artifact. Do not invoke execution, create a status sibling, or offer an
+  imported execution owner before that approval. Completion: the path,
+  readiness, material risk or gap, and sole next owner are reported and
   execution has not started without approval.
 
 ## Command Portability
