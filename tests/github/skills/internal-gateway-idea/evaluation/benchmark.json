@@ -1,0 +1,40 @@
+{
+  "contract_version": "internal-gateway-idea-eval-v1",
+  "required_case_ids": ["C-01", "C-02", "C-03", "C-04", "C-05"],
+  "required_record_keys": [
+    "decision_records",
+    "question_records",
+    "evidence_records",
+    "transition_events",
+    "route_events",
+    "artifact_events",
+    "provenance"
+  ],
+  "forbidden_verdict_fields": [
+    "question_eligibility_complete",
+    "critical_integrated",
+    "runtime_evidence"
+  ],
+  "protected_workflow": {
+    "required_evidence_classes": ["Facts", "Reports", "Assumptions", "Unknowns", "Constraints"],
+    "max_recoverable_fact_questions": 0,
+    "max_premature_dependent_questions": 0,
+    "max_unjustified_reopens": 0,
+    "max_saved_artifacts": 1,
+    "forbid_fixed_question_cap": true,
+    "forbid_automatic_critical_realign": true
+  },
+  "case_requirements": {
+    "C-01": {"requires_material_unknown_question": true},
+    "C-02": {"requires_root_only_questioning": true},
+    "C-03": {"requires_internal_challenge": true, "show_alternatives_only_with_two_credible_mechanisms": true},
+    "C-04": {"requires_capsule_boundaries": ["pause", "compaction", "subject-change", "mode-change"]},
+    "C-05": {"requires_explicit_critical_choice": true, "requires_transcript_free_replay": true}
+  },
+  "analysis_only_forbidden_routes": [
+    "/superpowers-brainstorming",
+    "/internal-tdd",
+    "/internal-gateway-writing-plans",
+    "/internal-gateway-execute-plans"
+  ]
+}
