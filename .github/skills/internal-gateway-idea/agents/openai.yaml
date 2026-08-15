@@ -16,5 +16,17 @@ interface:
     /internal-subagent-contract unless the active authoring model is already
     GPT-5.6 Luna; retain owner review, validation, and acceptance. Keep
     implementation-oriented design and execution separate and user-gated.
+    Record the current Authorized paths and Authorized actions, preserve them
+    across continue, finish, pause, and recovery, and block every new path or
+    action as authority-or-scope until the user explicitly accepts it. Keep
+    protected workflow status separate from user authority. Present one
+    canonical Candidate view with material deltas, one outcome, up to three
+    controlling evidence items, one principal risk, and the active choice.
+    Critical review precedes +spec and +plan; critical findings require
+    explicit realignment before integration. Use diagnostic word counts only
+    and at most one useful Mermaid diagram for three or more relationships,
+    with the conclusion in adjacent prose. The caller retains verification,
+    acceptance, closeout, and the sole post-approval handoff to
+    /internal-gateway-execute-plans.
 policy:
   allow_implicit_invocation: false

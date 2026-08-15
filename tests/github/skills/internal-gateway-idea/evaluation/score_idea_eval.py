@@ -18,6 +18,8 @@ REQUIRED_RECORD_KEYS = (
     "transition_events",
     "route_events",
     "artifact_events",
+    "authority_events",
+    "communication_records",
     "provenance",
 )
 EVIDENCE_CLASSES = frozenset(
@@ -70,6 +72,11 @@ FINDING_FIELDS = (
     "artifact_replay_violation_cases",
     "multiple_saved_artifact_cases",
     "lifecycle_order_violation_cases",
+    "authority_envelope_violation_cases",
+    "protected_status_authority_violation_cases",
+    "scope_delta_violation_cases",
+    "canonical_view_violation_cases",
+    "visual_budget_violation_cases",
     "protected_workflow_violation_cases",
     "self_attested_verdict_cases",
 )
@@ -161,6 +168,29 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
         value.get("analysis_only_forbidden_routes"),
         "manifest.analysis_only_forbidden_routes",
     )
+    authority = _require_mapping(value.get("authority_workflow"), "manifest.authority_workflow")
+    _require_string_list(
+        authority.get("required_event_types"),
+        "manifest.authority_workflow.required_event_types",
+    )
+    _require_string_list(
+        authority.get("continuation_boundaries"),
+        "manifest.authority_workflow.continuation_boundaries",
+    )
+    _require_string(authority.get("scope_delta_outcome"), "manifest.authority_workflow.scope_delta_outcome")
+    lifecycle = _require_mapping(value.get("lifecycle_workflow"), "manifest.lifecycle_workflow")
+    _require_string_list(lifecycle.get("candidate_menu"), "manifest.lifecycle_workflow.candidate_menu")
+    for field in ("critical_review_event", "realignment_event", "critical_finding_event"):
+        _require_string(lifecycle.get(field), f"manifest.lifecycle_workflow.{field}")
+    communication = _require_mapping(
+        value.get("communication_workflow"), "manifest.communication_workflow"
+    )
+    _require_string(communication.get("candidate_kind"), "manifest.communication_workflow.candidate_kind")
+    for field in ("max_controlling_evidence", "max_diagrams", "diagram_min_relationships"):
+        limit = communication.get(field)
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
+            raise _schema_error(f"manifest.communication_workflow.{field} must be a non-negative integer")
+    _require_string(communication.get("word_count_mode"), "manifest.communication_workflow.word_count_mode")
     return value
 
 
@@ -290,6 +320,86 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
                 for index, event in enumerate(events):
                     _require_string(event.get("owner"), f"{observation_id}.route_events[{index}].owner")
                     _require_string(event.get("mode"), f"{observation_id}.route_events[{index}].mode")
+
+        authority_events = _validate_record_list(
+            observation["authority_events"],
+            f"{observation_id}.authority_events",
+            ("event", "event_index"),
+        )
+        for index, event in enumerate(authority_events):
+            label = f"{observation_id}.authority_events[{index}]"
+            event_name = _require_string(event["event"], f"{label}.event")
+            if event_name in {"authority-snapshot", "continuation"}:
+                _require_string_list(event.get("authorized_paths"), f"{label}.authorized_paths")
+                _require_string_list(event.get("authorized_actions"), f"{label}.authorized_actions")
+            elif event_name == "protected-status":
+                _require_string(event.get("status"), f"{label}.status")
+                _require_string(event.get("user_authority"), f"{label}.user_authority")
+                if not isinstance(event.get("authorizes_mutation"), bool):
+                    raise _schema_error(f"{label}.authorizes_mutation must be boolean")
+            elif event_name == "scope-delta":
+                _require_string(event.get("path"), f"{label}.path")
+                _require_string(event.get("action"), f"{label}.action")
+                _require_string(event.get("outcome"), f"{label}.outcome")
+                if not isinstance(event.get("accepted"), bool):
+                    raise _schema_error(f"{label}.accepted must be boolean")
+
+        communication_records = _validate_record_list(
+            observation["communication_records"],
+            f"{observation_id}.communication_records",
+            (
+                "view_id",
+                "kind",
+                "event_index",
+                "material_delta_ids",
+                "outcome",
+                "controlling_evidence_ids",
+                "principal_risk_id",
+                "active_choice",
+                "blocker_ids",
+                "unknown_ids",
+                "acceptance_condition_ids",
+                "word_count",
+                "word_count_mode",
+                "diagrams",
+            ),
+        )
+        for index, record in enumerate(communication_records):
+            label = f"{observation_id}.communication_records[{index}]"
+            for field in (
+                "view_id",
+                "kind",
+                "outcome",
+                "principal_risk_id",
+                "active_choice",
+                "word_count_mode",
+            ):
+                _require_string(record[field], f"{label}.{field}")
+            for field in (
+                "material_delta_ids",
+                "controlling_evidence_ids",
+                "blocker_ids",
+                "unknown_ids",
+                "acceptance_condition_ids",
+            ):
+                _require_string_list(record[field], f"{label}.{field}")
+            if isinstance(record["word_count"], bool) or not isinstance(record["word_count"], int):
+                raise _schema_error(f"{label}.word_count must be an integer")
+            diagrams = _require_list(record["diagrams"], f"{label}.diagrams")
+            for diagram_index, diagram in enumerate(diagrams):
+                diagram_mapping = _require_mapping(
+                    diagram, f"{label}.diagrams[{diagram_index}]"
+                )
+                relationship_count = diagram_mapping.get("relationship_count")
+                if isinstance(relationship_count, bool) or not isinstance(relationship_count, int):
+                    raise _schema_error(
+                        f"{label}.diagrams[{diagram_index}].relationship_count must be an integer"
+                    )
+                for field in ("useful", "conclusion_adjacent"):
+                    if not isinstance(diagram_mapping.get(field), bool):
+                        raise _schema_error(
+                            f"{label}.diagrams[{diagram_index}].{field} must be boolean"
+                        )
 
         provenance = _require_mapping(
             observation["provenance"], f"{observation_id}.provenance"
@@ -453,6 +563,92 @@ def _score_observation(
     }
     transitions = _sorted_events(observation, "transition_events")
     questions = observation["question_records"]  # type: ignore[assignment]
+
+    authority_events = _sorted_events(observation, "authority_events")
+    authority_by_type = {
+        str(event.get("event")): event for event in authority_events
+    }
+    required_authority_events = set(
+        manifest["authority_workflow"]["required_event_types"]  # type: ignore[index]
+    )
+    required_authority_events.discard("scope-delta")
+    if not required_authority_events.issubset(authority_by_type):
+        findings["authority_envelope_violation_cases"].add(case_id)
+    snapshot = authority_by_type.get("authority-snapshot")
+    if snapshot is None:
+        findings["authority_envelope_violation_cases"].add(case_id)
+    else:
+        for event in authority_events:
+            if event.get("event") != "continuation":
+                continue
+            if (
+                event.get("authorized_paths") != snapshot.get("authorized_paths")
+                or event.get("authorized_actions") != snapshot.get("authorized_actions")
+            ):
+                findings["authority_envelope_violation_cases"].add(case_id)
+    protected_status = authority_by_type.get("protected-status")
+    if protected_status is None or protected_status.get("authorizes_mutation") is not False:
+        findings["protected_status_authority_violation_cases"].add(case_id)
+    scope_delta = authority_by_type.get("scope-delta")
+    expected_scope_outcome = manifest["authority_workflow"]["scope_delta_outcome"]  # type: ignore[index]
+    if scope_delta is None or scope_delta.get("outcome") != expected_scope_outcome or scope_delta.get("accepted") is not False:
+        findings["scope_delta_violation_cases"].add(case_id)
+
+    communication_records = [
+        record
+        for record in observation["communication_records"]  # type: ignore[union-attr]
+        if record.get("kind") == manifest["communication_workflow"]["candidate_kind"]  # type: ignore[index]
+    ]
+    communication_workflow = manifest["communication_workflow"]  # type: ignore[index]
+    if len(communication_records) != 1:
+        findings["canonical_view_violation_cases"].add(case_id)
+    for record in communication_records:
+        if not (
+            record.get("material_delta_ids")
+            and record.get("outcome")
+            and record.get("controlling_evidence_ids")
+            and len(record["controlling_evidence_ids"]) <= communication_workflow["max_controlling_evidence"]
+            and record.get("principal_risk_id")
+            and record.get("active_choice")
+            and record.get("acceptance_condition_ids")
+            and record.get("word_count_mode") == communication_workflow["word_count_mode"]
+        ):
+            findings["canonical_view_violation_cases"].add(case_id)
+        diagrams = record.get("diagrams", [])
+        if len(diagrams) > communication_workflow["max_diagrams"]:
+            findings["visual_budget_violation_cases"].add(case_id)
+        for diagram in diagrams:
+            if (
+                diagram.get("relationship_count", 0) < communication_workflow["diagram_min_relationships"]
+                or diagram.get("useful") is not True
+                or diagram.get("conclusion_adjacent") is not True
+            ):
+                findings["visual_budget_violation_cases"].add(case_id)
+
+    if case_id == "C-05":
+        lifecycle = manifest["lifecycle_workflow"]  # type: ignore[index]
+        artifact_events = _sorted_events(observation, "artifact_events")
+        candidate = next((event for event in artifact_events if event.get("event") == "candidate-presented"), None)
+        menu = next((event for event in transitions if event.get("event") == "candidate-menu"), None)
+        critical_review = next((event for event in transitions if event.get("event") == lifecycle["critical_review_event"]), None)
+        critical_finding = next((event for event in transitions if event.get("event") == lifecycle["critical_finding_event"]), None)
+        realignment = next((event for event in transitions if event.get("event") == lifecycle["realignment_event"]), None)
+        if (
+            menu is None
+            or menu.get("options") != lifecycle["candidate_menu"]
+            or candidate is None
+            or critical_review is None
+            or _event_index(critical_review) <= _event_index(candidate)
+        ):
+            findings["lifecycle_order_violation_cases"].add(case_id)
+        if menu is not None and menu.get("findings_present") is True:
+            if (
+                critical_finding is None
+                or realignment is None
+                or realignment.get("explicit") is not True
+                or _event_index(realignment) <= _event_index(critical_finding)
+            ):
+                findings["lifecycle_order_violation_cases"].add(case_id)
 
     question_owner_events = [
         event

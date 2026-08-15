@@ -5,6 +5,13 @@ change domain ownership. Before delegation, the caller fixes the objective,
 value gate, bounded evidence, constraints, exact write scope, output,
 acceptance, validation, and budgets.
 
+The current mutation authority envelope remains in force during authoring.
+Authoring may write only the explicitly selected artifact path and may not add
+implementation, planning, execution, or unrelated repository paths. The
+caller records any new path or action as `authority-or-scope` and waits for
+explicit acceptance; worker metadata, a protected status, and conversation
+continuity do not grant it.
+
 ## Consolidated Analysis Spec + spec
 
 Delegate authoring of the one canonical analysis Markdown artifact to the
@@ -14,7 +21,8 @@ when the active authoring model is already GPT-5.6 Luna.
 
 The gateway retains the artifact's subject, field structure, scope, review,
 validation, and final acceptance. When delegation is used, it independently
-verifies the worker result before acceptance.
+verifies the worker result before acceptance. The result remains one canonical
+analysis artifact; do not create a parallel transcript or critical report.
 
 ## Consolidated Analysis Spec + plan
 
@@ -31,6 +39,11 @@ safety boundaries.
 The plan owner retains final acceptance and the no-Git-mutation boundary. This
 gateway does not own implementation design or plan structure and must not start
 execution.
+
+`internal-luna-executor` is authoring metadata only. The primary owner and
+caller retain eligibility, classification, routing, authority, lifecycle,
+independent result verification, acceptance, closeout, and the sole post-
+approval handoff to `/internal-gateway-execute-plans`.
 
 ## Closeout
 

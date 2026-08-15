@@ -26,6 +26,8 @@ REQUIRED_RECORD_KEYS = (
     "transition_events",
     "route_events",
     "artifact_events",
+    "authority_events",
+    "communication_records",
     "provenance",
 )
 EVIDENCE_CLASSES = ("Facts", "Reports", "Assumptions", "Unknowns", "Constraints")
@@ -188,6 +190,9 @@ def _observation(
     routes: list[dict[str, object]],
     artifacts: list[dict[str, object]],
     evidence_links: dict[str, list[str]],
+    *,
+    authority_events: list[dict[str, object]] | None = None,
+    communication_records: list[dict[str, object]] | None = None,
 ) -> dict[str, object]:
     return {
         "observation_id": f"synthetic-{case_id}",
@@ -208,6 +213,55 @@ def _observation(
             *routes,
         ],
         "artifact_events": artifacts,
+        "authority_events": authority_events or [
+            {
+                "event": "authority-snapshot",
+                "event_index": 1,
+                "authorized_paths": ["tmp/superpowers/specs/analysis.md"],
+                "authorized_actions": ["save-analysis"],
+                "boundary": "analysis-unit",
+            },
+            {
+                "event": "continuation",
+                "event_index": 2,
+                "boundary": "continue",
+                "authorized_paths": ["tmp/superpowers/specs/analysis.md"],
+                "authorized_actions": ["save-analysis"],
+            },
+            {
+                "event": "protected-status",
+                "event_index": 3,
+                "status": "protected",
+                "user_authority": "separate",
+                "authorizes_mutation": False,
+            },
+            {
+                "event": "scope-delta",
+                "event_index": 4,
+                "path": "tmp/other/analysis.md",
+                "action": "write",
+                "outcome": "authority-or-scope",
+                "accepted": False,
+            },
+        ],
+        "communication_records": communication_records or [
+            {
+                "view_id": f"{case_id}-candidate",
+                "kind": "candidate",
+                "event_index": 4,
+                "material_delta_ids": [f"{case_id}-ROOT"],
+                "outcome": "decision-ready",
+                "controlling_evidence_ids": [f"{case_id}-facts"],
+                "principal_risk_id": f"{case_id}-RISK",
+                "active_choice": f"choice-{case_id}",
+                "blocker_ids": [],
+                "unknown_ids": [f"{case_id}-UNKNOWN"],
+                "acceptance_condition_ids": [f"{case_id}-ACCEPT"],
+                "word_count": 42,
+                "word_count_mode": "diagnostic",
+                "diagrams": [],
+            }
+        ],
         "provenance": {
             "kind": "synthetic-test",
             "source": "inline-test-records",
@@ -360,17 +414,52 @@ def passing_run() -> dict[str, object]:
                 "C-05",
                 [_decision(c05_root, "accepted", evidence_ids=["C05-unknowns"])],
                 [_question("C05-Q1", c05_root, 2, ["C05-unknowns"])],
-                [_status_event(c05_root, "open", "accepted", 3, trigger="explicit-user-change")],
+                [
+                    _status_event(c05_root, "open", "accepted", 3, trigger="explicit-user-change"),
+                    {
+                        "event": "candidate-menu",
+                        "event_index": 4,
+                        "options": ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"],
+                        "findings_present": True,
+                    },
+                    {"event": "critical-review", "event_index": 5, "explicit": True},
+                    {"event": "critical-finding", "event_index": 6, "finding_ids": ["C05-F1"]},
+                    {"event": "realignment", "event_index": 7, "explicit": True, "finding_ids": ["C05-F1"]},
+                ],
                 [{"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "event_index": 2}],
                 [
                     {"event": "candidate-presented", "event_index": 4, "artifact_id": "C05-analysis"},
-                    {"event": "candidate-accepted", "event_index": 5, "explicit": True, "artifact_id": "C05-analysis"},
-                    {"event": "critical-choice", "event_index": 6, "choice": "integrate", "explicit": True},
-                    {"event": "critical-findings-integrated", "event_index": 7, "artifact_id": "C05-analysis"},
-                    {"event": "artifact-saved", "event_index": 8, "artifact_id": "C05-analysis", "path": "tmp/superpowers/specs/c05-analysis.md"},
-                    {"event": "planning-replay", "event_index": 9, "artifact_id": "C05-analysis", "uses_transcript": False},
+                    {"event": "candidate-accepted", "event_index": 8, "explicit": True, "artifact_id": "C05-analysis"},
+                    {"event": "critical-choice", "event_index": 9, "choice": "integrate", "explicit": True},
+                    {"event": "critical-findings-integrated", "event_index": 10, "artifact_id": "C05-analysis"},
+                    {"event": "artifact-saved", "event_index": 11, "artifact_id": "C05-analysis", "path": "tmp/superpowers/specs/c05-analysis.md"},
+                    {"event": "planning-replay", "event_index": 12, "artifact_id": "C05-analysis", "uses_transcript": False},
                 ],
                 {"Unknowns": [c05_root]},
+                communication_records=[
+                    {
+                        "view_id": "C-05-candidate",
+                        "kind": "candidate",
+                        "event_index": 4,
+                        "material_delta_ids": ["C05-ROOT"],
+                        "outcome": "decision-ready",
+                        "controlling_evidence_ids": ["C05-facts", "C05-unknowns"],
+                        "principal_risk_id": "C05-RISK",
+                        "active_choice": "choice-C-05",
+                        "blocker_ids": [],
+                        "unknown_ids": ["C05-UNKNOWN"],
+                        "acceptance_condition_ids": ["C05-ACCEPT"],
+                        "word_count": 160,
+                        "word_count_mode": "diagnostic",
+                        "diagrams": [
+                            {
+                                "relationship_count": 3,
+                                "useful": True,
+                                "conclusion_adjacent": True,
+                            }
+                        ],
+                    }
+                ],
             ),
         ]
     }
@@ -427,6 +516,24 @@ def failing_run() -> dict[str, object]:
     )
 
     c05 = observations[4]
+    c01["authority_events"][2]["authorizes_mutation"] = True
+    c02["authority_events"] = [
+        event
+        for event in c02["authority_events"]
+        if event.get("event") != "scope-delta"
+    ]
+    c03["authority_events"][1]["authorized_actions"] = ["save-analysis", "write-code"]
+    c04["communication_records"][0]["material_delta_ids"] = []
+    c05["communication_records"][0]["diagrams"] = [
+        {"relationship_count": 2, "useful": False, "conclusion_adjacent": False},
+        {"relationship_count": 4, "useful": True, "conclusion_adjacent": True},
+    ]
+    c05["transition_events"] = [
+        event
+        for event in c05["transition_events"]
+        if event.get("event") != "realignment"
+    ]
+    c05["transition_events"][1]["options"] = ["continue", "+spec", "+plan", "save", "close"]
     c05["artifact_events"] = [
         event
         for event in c05["artifact_events"]
@@ -445,6 +552,33 @@ def failing_run() -> dict[str, object]:
             event["uses_transcript"] = True
 
     return run
+
+
+def test_new_records_cover_authority_lifecycle_and_communication_without_prose_matching() -> None:
+    scorer = load_scorer()
+
+    result = scorer.score(load_manifest(), passing_run())
+
+    assert result["authority_envelope_violation_cases"] == []
+    assert result["protected_status_authority_violation_cases"] == []
+    assert result["scope_delta_violation_cases"] == []
+    assert result["lifecycle_order_violation_cases"] == []
+    assert result["canonical_view_violation_cases"] == []
+    assert result["visual_budget_violation_cases"] == []
+
+
+def test_new_records_derive_authority_lifecycle_and_communication_findings() -> None:
+    scorer = load_scorer()
+
+    result = scorer.score(load_manifest(), failing_run())
+
+    assert result["accepted"] is False
+    assert result["authority_envelope_violation_cases"] == ["C-03"]
+    assert result["protected_status_authority_violation_cases"] == ["C-01"]
+    assert result["scope_delta_violation_cases"] == ["C-02"]
+    assert result["lifecycle_order_violation_cases"] == ["C-05"]
+    assert result["canonical_view_violation_cases"] == ["C-04"]
+    assert result["visual_budget_violation_cases"] == ["C-05"]
 
 
 def test_manifest_declares_cases_records_limits_and_forbidden_verdicts() -> None:

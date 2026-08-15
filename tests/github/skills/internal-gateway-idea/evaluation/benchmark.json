@@ -8,6 +8,8 @@
     "transition_events",
     "route_events",
     "artifact_events",
+    "authority_events",
+    "communication_records",
     "provenance"
   ],
   "forbidden_verdict_fields": [
@@ -37,5 +39,23 @@
     "/internal-tdd",
     "/internal-gateway-writing-plans",
     "/internal-gateway-execute-plans"
-  ]
+  ],
+  "authority_workflow": {
+    "required_event_types": ["authority-snapshot", "continuation", "protected-status", "scope-delta"],
+    "continuation_boundaries": ["continue", "finish", "pause", "context-recovery"],
+    "scope_delta_outcome": "authority-or-scope"
+  },
+  "lifecycle_workflow": {
+    "candidate_menu": ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"],
+    "critical_review_event": "critical-review",
+    "realignment_event": "realignment",
+    "critical_finding_event": "critical-finding"
+  },
+  "communication_workflow": {
+    "candidate_kind": "candidate",
+    "max_controlling_evidence": 3,
+    "max_diagrams": 1,
+    "diagram_min_relationships": 3,
+    "word_count_mode": "diagnostic"
+  }
 }

@@ -32,6 +32,22 @@ A `+spec` action authorizes only the selected spec artifact; a `+plan` action
 authorizes only the selected plan-authoring handoff. Neither action authorizes
 implementation or execution.
 
+## Mutation authority envelope
+
+Record two explicit sets for each unit: `Authorized paths` and `Authorized
+actions`; an absent item is not authorized. The default is analysis-only:
+reads, evidence recovery, non-mutating checks, and disposable temporary output
+do not expand the grant, and writes are limited to the one explicitly selected
+artifact path. This gateway has no standing grant for implementation, planning,
+execution, or unrelated paths.
+
+`continue`, `finish`, pause, compaction, and recovery preserve both sets and
+may not add a path or action. Protected workflow status is separate from user
+authority and cannot authorize a mutation. A requested item outside the sets is
+blocked with outcome `authority-or-scope` until the user explicitly accepts the
+scope delta; continuity, a resumed capsule, and a status marker are not
+acceptance. `AUTH-03` depends on preserved `AUTH-01` authority.
+
 ## Ownership boundary
 
 This gateway owns the analysis lifecycle, evidence discipline, option
@@ -97,13 +113,9 @@ change, or a supported critical finding matches its declared reopen condition.
 
 Maintain one compact state capsule with exactly:
 
-- `Subject`;
-- `Mode` and decision focus;
-- accepted, rejected, deferred, and accepted-risk IDs;
-- eligible-now IDs;
-- blocked-later IDs with prerequisites;
-- evidence anchors;
-- next action.
+`Subject`; `Mode` and decision focus; accepted, rejected, deferred, and
+accepted-risk IDs; eligible-now IDs; blocked-later IDs with prerequisites;
+evidence anchors; and next action.
 
 Update the ledger and capsule before and after `/grill-me`, on pause, context
 compaction, `subject-change`, or `mode-change`, and before presenting a
@@ -156,32 +168,36 @@ evidence, a user decision, or a supported critical finding.
    resolved, visibly deferred, or explicitly accepted as risk, and the
    recommendation is traceable to accepted decisions and labeled evidence.
 
-Completion criterion: the recommendation is traceable to resolved decisions
-and labeled evidence; every material uncertainty is resolved, deferred, or
-accepted as a visible residual risk; and the latest state capsule is current.
+### Post-Candidate menu and gate
+
+After a Candidate, present this ordered menu as applicable: `continue`,
+critical review, explicit `realign` when findings exist, `+spec`, `+plan`,
+`save`, and `close`. Critical review must complete before `+spec` or `+plan` is available. Findings never integrate automatically; require explicit choice
+to incorporate, reject with evidence, accept as residual risk, or route each
+material finding. No menu action grants implementation or execution, and
+`continue`, `finish`, `save`, and `close` preserve the authority envelope.
+
+Completion criterion: the recommendation is traceable to resolved decisions and labeled evidence, every material uncertainty is resolved/deferred/accepted as visible risk, and the latest state capsule is current.
 
 ## Chat layout
 
 Lead with the active decision block, recommendation, or next required choice.
-Keep only the controlling evidence needed for those decisions in ordinary
-chat, and include the material risk. When the decision block is ready, keep
-the existing explicit numbered user choice visible; a displayed recommendation
-is not acceptance. Brevity must never remove a blocker, unknown, accepted
-risk, or acceptance condition.
+Ordinary chat has one canonical Candidate view: material deltas, one outcome,
+up to three controlling evidence items, one principal risk, and the active
+choice. Preserve blockers, unknowns, acceptance conditions, and residual risks;
+do not duplicate the view as a report or transcript. Word counts are diagnostic
+only and must not hide content. Use at most one Mermaid, only for three or more
+relationships, with the conclusion in adjacent prose; simple content stays
+prose-only. A displayed recommendation is not acceptance.
 
-Use these compact headings when their section has material content:
-
-- `### 🧭 Decision`
-- `### 🔎 Evidence`
-- `### 🔀 Options`
-- `### ✅ Recommendation`
-- `### ⚠️ Risks`
-- `### ❓ Decisions needed`
+Use these compact headings when material: `### 🧭 Decision`, `### 🔎 Evidence`,
+`### 🔀 Options`, `### ✅ Recommendation`, `### ⚠️ Risks`, and
+`### ❓ Decisions needed`.
 
 Use emoji as navigation, not decoration. Do not prefix every paragraph or
 bullet with one. For a non-trivial decision flow, dependency, ownership
-relation, or option mechanism, strongly prefer the smallest useful Mermaid
-diagram when it improves comprehension. Keep the controlling conclusion in
+relation, or option mechanism, use the one-diagram rule above only when at
+least three relationships are clarified. Keep the controlling conclusion in
 adjacent prose and skip decorative visuals.
 
 Keep full evidence, decision history, and residual risks in the one
@@ -192,19 +208,12 @@ save. Keep the stable Analysis Spec field names unchanged.
 ## Candidate Analysis Spec
 
 Use one canonical subject for the analysis and any optional critical review.
-The Candidate Analysis Spec contains:
-
-- `Decision focus`
-- `Desired outcome` and `Success criteria`
-- `Scope` and `Anti-scope`
-- `Facts`, `Reports`, `Assumptions`, `Unknowns`, and `Constraints`
-- `Resolved decisions`
-- `Options` with their contrasting mechanisms
-- `Recommendation`
-- `Rejected alternatives` and evidence-based reasons
-- `Risks` and `Disconfirming signals`
-- `Deferred questions`
-- `Specific critical focus`
+The Candidate Analysis Spec contains `Decision focus`; `Desired outcome` and
+`Success criteria`; `Scope` and `Anti-scope`; `Facts`, `Reports`, `Assumptions`,
+`Unknowns`, and `Constraints`; `Resolved decisions`; `Options` with contrasting
+mechanisms; `Recommendation`; `Rejected alternatives` and evidence-based
+reasons; `Risks` and `Disconfirming signals`; `Deferred questions`; and
+`Specific critical focus`.
 
 Present the Candidate before opening acceptance. The user may explicitly ask
 to continue the analysis or invoke `/internal-gateway-critical-master` instead
