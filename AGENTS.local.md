@@ -52,6 +52,9 @@ as consumer-repository defaults without an explicit sync contract change.
   instructions, references, examples, fixtures, scripts, and `agents/openai.yaml`
   resolvable from the bundle itself; do not require bundle users to load
   guidance from outside the skill directory.
+- Before completion, run `.github/scripts/validate_skill_change_scope.py`
+  without an allowlist, or with only the exact currently authorized bundle
+  paths.
 
 ## Skill Test Boundaries
 

@@ -108,9 +108,6 @@ with the nearest owner.
   exact protected skill or path authorizes an edit.
 - Authorization is limited to the requested files and purpose and does not
   carry into later turns.
-- Before completion, run `.github/scripts/validate_skill_change_scope.py`
-  without an allowlist, or with only the exact currently authorized bundle
-  paths.
 - An unapproved protected-skill finding is a stop condition; do not create an
   allowlist to bypass it.
 
