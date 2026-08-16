@@ -12,6 +12,13 @@ caller records any new path or action as `authority-or-scope` and waits for
 explicit acceptance; worker metadata, a protected status, and conversation
 continuity do not grant it.
 
+Authoring consumes the one canonical recovery record. The delegation brief and
+the retained artifact must use its unit lock, state capsule, decision ledger,
+authority envelope, and communication projection without creating a parallel
+recovery record, transcript, or critical-review artifact. If the record is
+incomplete or its projections disagree, stop authoring and preserve the last
+valid record.
+
 ## Consolidated Analysis Spec + spec
 
 Delegate authoring of the one canonical analysis Markdown artifact to the

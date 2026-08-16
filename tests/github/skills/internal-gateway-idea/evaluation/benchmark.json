@@ -10,6 +10,7 @@
     "artifact_events",
     "authority_events",
     "communication_records",
+    "recovery_records",
     "provenance"
   ],
   "forbidden_verdict_fields": [
@@ -25,7 +26,8 @@
     "max_split_known_question_batches": 0,
     "max_saved_artifacts": 1,
     "forbid_fixed_question_cap": true,
-    "forbid_automatic_critical_realign": true
+    "forbid_automatic_critical_realign": true,
+    "save_is_non_promoting": true
   },
   "case_requirements": {
     "C-01": {"requires_material_unknown_question": true},
@@ -49,7 +51,10 @@
     "candidate_menu": ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"],
     "critical_review_event": "critical-review",
     "realignment_event": "realignment",
-    "critical_finding_event": "critical-finding"
+    "critical_finding_event": "critical-finding",
+    "disposition_event": "critical-disposition",
+    "promotion_options": ["+spec", "+plan"],
+    "allowed_dispositions": ["integrate", "reject", "accept-risk", "route"]
   },
   "communication_workflow": {
     "candidate_kind": "candidate",

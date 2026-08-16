@@ -9,6 +9,7 @@ from pathlib import Path
 from types import ModuleType
 
 import pytest
+import yaml
 
 
 REPO_ROOT = next(
@@ -19,6 +20,7 @@ REPO_ROOT = next(
 EVALUATION_ROOT = REPO_ROOT / "tests/github/skills/internal-gateway-idea/evaluation"
 MANIFEST_PATH = EVALUATION_ROOT / "benchmark.json"
 SCORER_PATH = EVALUATION_ROOT / "score_idea_eval.py"
+PUBLIC_WRAPPER_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/agents/openai.yaml"
 REQUIRED_RECORD_KEYS = (
     "decision_records",
     "question_records",
@@ -28,6 +30,7 @@ REQUIRED_RECORD_KEYS = (
     "artifact_events",
     "authority_events",
     "communication_records",
+    "recovery_records",
     "provenance",
 )
 EVIDENCE_CLASSES = ("Facts", "Reports", "Assumptions", "Unknowns", "Constraints")
@@ -182,6 +185,90 @@ def _capsule(
     }
 
 
+def _recovery_record(
+    case_id: str,
+    decisions: list[dict[str, object]],
+    evidence_records: list[dict[str, object]],
+    authority_events: list[dict[str, object]],
+    communication_records: list[dict[str, object]],
+    *,
+    subject: str | None = None,
+    mode: str = "analysis-only",
+) -> dict[str, object]:
+    terminal_states = {
+        "deferred",
+        "resolved-from-evidence",
+        "accepted",
+        "accepted-risk",
+        "rejected",
+    }
+    terminal_ids = [
+        str(decision["decision_id"])
+        for decision in decisions
+        if decision["status"] in terminal_states
+    ]
+    blocked_later = [
+        {
+            "decision_id": str(decision["decision_id"]),
+            "prerequisites": list(decision["dependencies"]),
+        }
+        for decision in decisions
+        if decision["status"] == "blocked-later"
+    ]
+    snapshot = next(
+        event for event in authority_events if event.get("event") == "authority-snapshot"
+    )
+    evidence_anchors = sorted(
+        {str(item["evidence_id"]) for item in evidence_records}
+    )
+    return {
+        "record_id": f"{case_id}-recovery",
+        "event_index": 99,
+        "unit_lock": {
+            "subject": subject or case_id,
+            "mode": mode,
+            "decision_focus": f"Focus {case_id}",
+            "desired_artifact": "none",
+            "implementation_permission": False,
+        },
+        "state_capsule": {
+            "subject": subject or case_id,
+            "mode": mode,
+            "decision_focus": f"Focus {case_id}",
+            "terminal_decision_ids": terminal_ids,
+            "eligible_now_ids": [
+                str(decision["decision_id"])
+                for decision in decisions
+                if decision["status"] == "eligible-now"
+            ],
+            "blocked_later": blocked_later,
+            "evidence_anchors": evidence_anchors,
+            "next_action": f"Continue {case_id}",
+        },
+        "decision_ledger": [
+            {
+                "decision_id": str(decision["decision_id"]),
+                "state": str(decision["status"]),
+                "basis": str(decision["decision"]),
+                "reopen_condition": str(decision["reopen_condition"]),
+                "dependencies": list(decision["dependencies"]),
+            }
+            for decision in decisions
+        ],
+        "authority_envelope": {
+            "authorized_paths": list(snapshot["authorized_paths"]),
+            "authorized_actions": list(snapshot["authorized_actions"]),
+            "continuation_boundaries": [
+                "continue",
+                "finish",
+                "pause",
+                "context-recovery",
+            ],
+        },
+        "communication_projection": copy.deepcopy(communication_records[0]),
+    }
+
+
 def _observation(
     case_id: str,
     decisions: list[dict[str, object]],
@@ -193,14 +280,66 @@ def _observation(
     *,
     authority_events: list[dict[str, object]] | None = None,
     communication_records: list[dict[str, object]] | None = None,
+    recovery_subject: str | None = None,
+    recovery_mode: str = "analysis-only",
 ) -> dict[str, object]:
+    evidence_records = _evidence(case_id, evidence_links)
+    effective_authority_events = authority_events or [
+        {
+            "event": "authority-snapshot",
+            "event_index": 1,
+            "authorized_paths": ["tmp/superpowers/specs/analysis.md"],
+            "authorized_actions": ["save-analysis"],
+            "boundary": "analysis-unit",
+        },
+        {
+            "event": "continuation",
+            "event_index": 2,
+            "boundary": "continue",
+            "authorized_paths": ["tmp/superpowers/specs/analysis.md"],
+            "authorized_actions": ["save-analysis"],
+        },
+        {
+            "event": "protected-status",
+            "event_index": 3,
+            "status": "protected",
+            "user_authority": "separate",
+            "authorizes_mutation": False,
+        },
+        {
+            "event": "scope-delta",
+            "event_index": 4,
+            "path": "tmp/other/analysis.md",
+            "action": "write",
+            "outcome": "authority-or-scope",
+            "accepted": False,
+        },
+    ]
+    effective_communication_records = communication_records or [
+        {
+            "view_id": f"{case_id}-candidate",
+            "kind": "candidate",
+            "event_index": 4,
+            "material_delta_ids": [f"{case_id}-ROOT"],
+            "outcome": "decision-ready",
+            "controlling_evidence_ids": [f"{case_id}-facts"],
+            "principal_risk_id": f"{case_id}-RISK",
+            "active_choice": f"choice-{case_id}",
+            "blocker_ids": [],
+            "unknown_ids": [f"{case_id}-UNKNOWN"],
+            "acceptance_condition_ids": [f"{case_id}-ACCEPT"],
+            "word_count": 42,
+            "word_count_mode": "diagnostic",
+            "diagrams": [],
+        }
+    ]
     return {
         "observation_id": f"synthetic-{case_id}",
         "case_id": case_id,
         "kind": "synthetic-test",
         "decision_records": decisions,
         "question_records": questions,
-        "evidence_records": _evidence(case_id, evidence_links),
+        "evidence_records": evidence_records,
         "transition_events": transitions,
         "route_events": [
             {
@@ -213,54 +352,18 @@ def _observation(
             *routes,
         ],
         "artifact_events": artifacts,
-        "authority_events": authority_events or [
-            {
-                "event": "authority-snapshot",
-                "event_index": 1,
-                "authorized_paths": ["tmp/superpowers/specs/analysis.md"],
-                "authorized_actions": ["save-analysis"],
-                "boundary": "analysis-unit",
-            },
-            {
-                "event": "continuation",
-                "event_index": 2,
-                "boundary": "continue",
-                "authorized_paths": ["tmp/superpowers/specs/analysis.md"],
-                "authorized_actions": ["save-analysis"],
-            },
-            {
-                "event": "protected-status",
-                "event_index": 3,
-                "status": "protected",
-                "user_authority": "separate",
-                "authorizes_mutation": False,
-            },
-            {
-                "event": "scope-delta",
-                "event_index": 4,
-                "path": "tmp/other/analysis.md",
-                "action": "write",
-                "outcome": "authority-or-scope",
-                "accepted": False,
-            },
-        ],
-        "communication_records": communication_records or [
-            {
-                "view_id": f"{case_id}-candidate",
-                "kind": "candidate",
-                "event_index": 4,
-                "material_delta_ids": [f"{case_id}-ROOT"],
-                "outcome": "decision-ready",
-                "controlling_evidence_ids": [f"{case_id}-facts"],
-                "principal_risk_id": f"{case_id}-RISK",
-                "active_choice": f"choice-{case_id}",
-                "blocker_ids": [],
-                "unknown_ids": [f"{case_id}-UNKNOWN"],
-                "acceptance_condition_ids": [f"{case_id}-ACCEPT"],
-                "word_count": 42,
-                "word_count_mode": "diagnostic",
-                "diagrams": [],
-            }
+        "authority_events": effective_authority_events,
+        "communication_records": effective_communication_records,
+        "recovery_records": [
+            _recovery_record(
+                case_id,
+                decisions,
+                evidence_records,
+                effective_authority_events,
+                effective_communication_records,
+                subject=recovery_subject,
+                mode=recovery_mode,
+            )
         ],
         "provenance": {
             "kind": "synthetic-test",
@@ -419,21 +522,38 @@ def passing_run() -> dict[str, object]:
                     {
                         "event": "candidate-menu",
                         "event_index": 4,
-                        "options": ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"],
+                        "options": ["continue", "critical-review", "save", "close"],
                         "findings_present": True,
+                        "phase": "pre-review",
                     },
                     {"event": "critical-review", "event_index": 5, "explicit": True},
                     {"event": "critical-finding", "event_index": 6, "finding_ids": ["C05-F1"]},
                     {"event": "realignment", "event_index": 7, "explicit": True, "finding_ids": ["C05-F1"]},
+                    {
+                        "event": "critical-disposition",
+                        "event_index": 8,
+                        "explicit": True,
+                        "finding_ids": ["C05-F1"],
+                        "dispositions": {"C05-F1": "integrate"},
+                    },
+                    {
+                        "event": "candidate-menu",
+                        "event_index": 9,
+                        "options": ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"],
+                        "findings_present": True,
+                        "phase": "post-review",
+                        "critical_review_complete": True,
+                        "dispositions_complete": True,
+                    },
                 ],
                 [{"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "event_index": 2}],
                 [
                     {"event": "candidate-presented", "event_index": 4, "artifact_id": "C05-analysis"},
-                    {"event": "candidate-accepted", "event_index": 8, "explicit": True, "artifact_id": "C05-analysis"},
-                    {"event": "critical-choice", "event_index": 9, "choice": "integrate", "explicit": True},
-                    {"event": "critical-findings-integrated", "event_index": 10, "artifact_id": "C05-analysis"},
-                    {"event": "artifact-saved", "event_index": 11, "artifact_id": "C05-analysis", "path": "tmp/superpowers/specs/c05-analysis.md"},
-                    {"event": "planning-replay", "event_index": 12, "artifact_id": "C05-analysis", "uses_transcript": False},
+                    {"event": "candidate-accepted", "event_index": 10, "explicit": True, "artifact_id": "C05-analysis"},
+                    {"event": "critical-choice", "event_index": 11, "choice": "integrate", "explicit": True},
+                    {"event": "critical-findings-integrated", "event_index": 12, "artifact_id": "C05-analysis"},
+                    {"event": "artifact-saved", "event_index": 13, "artifact_id": "C05-analysis", "path": "tmp/superpowers/specs/c05-analysis.md", "promotes": False, "checkpoint": True},
+                    {"event": "planning-replay", "event_index": 14, "artifact_id": "C05-analysis", "uses_transcript": False},
                 ],
                 {"Unknowns": [c05_root]},
                 communication_records=[
@@ -516,6 +636,7 @@ def failing_run() -> dict[str, object]:
     )
 
     c05 = observations[4]
+    c02["recovery_records"][0]["authority_envelope"]["authorized_actions"] = ["write-code"]
     c01["authority_events"][2]["authorizes_mutation"] = True
     c02["authority_events"] = [
         event
@@ -531,7 +652,7 @@ def failing_run() -> dict[str, object]:
     c05["transition_events"] = [
         event
         for event in c05["transition_events"]
-        if event.get("event") != "realignment"
+        if event.get("event") not in {"realignment", "critical-disposition"}
     ]
     c05["transition_events"][1]["options"] = ["continue", "+spec", "+plan", "save", "close"]
     c05["artifact_events"] = [
@@ -565,6 +686,8 @@ def test_new_records_cover_authority_lifecycle_and_communication_without_prose_m
     assert result["lifecycle_order_violation_cases"] == []
     assert result["canonical_view_violation_cases"] == []
     assert result["visual_budget_violation_cases"] == []
+    assert result["critical_disposition_violation_cases"] == []
+    assert result["save_semantics_violation_cases"] == []
 
 
 def test_new_records_derive_authority_lifecycle_and_communication_findings() -> None:
@@ -579,6 +702,8 @@ def test_new_records_derive_authority_lifecycle_and_communication_findings() -> 
     assert result["lifecycle_order_violation_cases"] == ["C-05"]
     assert result["canonical_view_violation_cases"] == ["C-04"]
     assert result["visual_budget_violation_cases"] == ["C-05"]
+    assert result["critical_disposition_violation_cases"] == ["C-05"]
+    assert result["save_semantics_violation_cases"] == ["C-05"]
 
 
 def test_manifest_declares_cases_records_limits_and_forbidden_verdicts() -> None:
@@ -601,6 +726,11 @@ def test_manifest_declares_cases_records_limits_and_forbidden_verdicts() -> None
     assert protected["max_saved_artifacts"] == 1
     assert protected["forbid_fixed_question_cap"] is True
     assert protected["forbid_automatic_critical_realign"] is True
+    assert protected["save_is_non_promoting"] is True
+    lifecycle = manifest["lifecycle_workflow"]
+    assert lifecycle["disposition_event"] == "critical-disposition"
+    assert lifecycle["promotion_options"] == ["+spec", "+plan"]
+    assert lifecycle["allowed_dispositions"] == ["integrate", "reject", "accept-risk", "route"]
 
 
 def test_passing_records_are_accepted_without_claiming_runtime_evidence() -> None:
@@ -629,6 +759,7 @@ def test_failing_records_report_derived_findings_and_reject() -> None:
     assert result["analysis_only_routing_violation_cases"] == ["C-04"]
     assert result["artifact_replay_violation_cases"] == ["C-05"]
     assert result["self_attested_verdict_cases"] == ["C-01"]
+    assert result["canonical_recovery_violation_cases"] == ["C-02", "C-04", "C-05"]
 
     for key, value in result.items():
         if key.endswith("_cases"):
@@ -701,3 +832,74 @@ def test_cli_uses_exit_zero_one_and_two_for_accept_reject_and_malformed(
     )
     assert malformed.returncode == 2
     assert malformed.stderr.startswith("error: ")
+
+
+def test_passing_records_expose_canonical_recovery_and_route_projection_findings() -> None:
+    scorer = load_scorer()
+
+    result = scorer.score(load_manifest(), passing_run())
+
+    assert result["canonical_recovery_violation_cases"] == []
+    assert result["route_projection_violation_cases"] == []
+
+
+def test_public_wrapper_projects_one_autonomous_route_without_brainstorming_handoff() -> None:
+    metadata = yaml.safe_load(PUBLIC_WRAPPER_PATH.read_text(encoding="utf-8"))
+    prompt = metadata["interface"]["default_prompt"]
+
+    assert metadata["policy"]["allow_implicit_invocation"] is False
+    assert "autonomous route" in prompt
+    assert "/superpowers-brainstorming" not in prompt
+    assert prompt.count("/internal-gateway-execute-plans") == 1
+
+
+def test_public_wrapper_declares_the_canonical_route_contract() -> None:
+    metadata = yaml.safe_load(PUBLIC_WRAPPER_PATH.read_text(encoding="utf-8"))
+
+    assert metadata["route_contract"] == {
+        "owner": "/internal-gateway-idea",
+        "mode": "analysis-only",
+        "execution_handoff": "/internal-gateway-execute-plans",
+        "forbidden_pre_acceptance_routes": [
+            "/superpowers-brainstorming",
+            "/internal-tdd",
+            "/internal-gateway-writing-plans",
+            "/internal-gateway-execute-plans",
+        ],
+    }
+
+
+def test_promotion_requires_disposition_and_save_stays_non_promoting() -> None:
+    scorer = load_scorer()
+
+    result = scorer.score(load_manifest(), passing_run())
+
+    assert result["critical_disposition_violation_cases"] == []
+    assert result["save_semantics_violation_cases"] == []
+
+
+def test_synthetic_records_keep_controlled_runtime_readiness_unavailable() -> None:
+    scorer = load_scorer()
+
+    result = scorer.score(load_manifest(), passing_run())
+
+    assert result["behavioral_evidence"]["controlled_runtime"] == "unavailable"
+    assert result["behavioral_evidence"]["merge_ready"] is False
+
+
+def test_core_token_budget_has_one_owner_and_shared_consumer_reference() -> None:
+    metadata = yaml.safe_load(PUBLIC_WRAPPER_PATH.read_text(encoding="utf-8"))
+
+    budget = metadata["token_budget"]
+
+    assert budget == {
+        "owner": "/internal-gateway-idea",
+        "reference": "internal-gateway-idea.core_token_budget",
+        "consumers": [
+            "public-wrapper",
+            "evaluator-contract",
+        ],
+    }
+    assert "question_cap" not in budget
+    assert "max_questions" not in budget
+    assert "fixed_question_cap" not in budget

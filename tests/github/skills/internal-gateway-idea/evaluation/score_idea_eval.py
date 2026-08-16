@@ -20,6 +20,7 @@ REQUIRED_RECORD_KEYS = (
     "artifact_events",
     "authority_events",
     "communication_records",
+    "recovery_records",
     "provenance",
 )
 EVIDENCE_CLASSES = frozenset(
@@ -56,6 +57,60 @@ CAPSULE_FIELDS = (
     "evidence_anchors",
     "next_action",
 )
+RECOVERY_RECORD_FIELDS = (
+    "record_id",
+    "event_index",
+    "unit_lock",
+    "state_capsule",
+    "decision_ledger",
+    "authority_envelope",
+    "communication_projection",
+)
+RECOVERY_UNIT_LOCK_FIELDS = (
+    "subject",
+    "mode",
+    "decision_focus",
+    "desired_artifact",
+    "implementation_permission",
+)
+RECOVERY_CAPSULE_FIELDS = (
+    "subject",
+    "mode",
+    "decision_focus",
+    "terminal_decision_ids",
+    "eligible_now_ids",
+    "blocked_later",
+    "evidence_anchors",
+    "next_action",
+)
+RECOVERY_LEDGER_FIELDS = (
+    "decision_id",
+    "state",
+    "basis",
+    "reopen_condition",
+    "dependencies",
+)
+RECOVERY_AUTHORITY_FIELDS = (
+    "authorized_paths",
+    "authorized_actions",
+    "continuation_boundaries",
+)
+COMMUNICATION_FIELDS = (
+    "view_id",
+    "kind",
+    "event_index",
+    "material_delta_ids",
+    "outcome",
+    "controlling_evidence_ids",
+    "principal_risk_id",
+    "active_choice",
+    "blocker_ids",
+    "unknown_ids",
+    "acceptance_condition_ids",
+    "word_count",
+    "word_count_mode",
+    "diagrams",
+)
 FINDING_FIELDS = (
     "recoverable_fact_question_cases",
     "premature_dependent_question_cases",
@@ -69,13 +124,17 @@ FINDING_FIELDS = (
     "state_continuity_violation_cases",
     "analysis_only_routing_violation_cases",
     "critical_choice_violation_cases",
+    "critical_disposition_violation_cases",
     "artifact_replay_violation_cases",
     "multiple_saved_artifact_cases",
+    "save_semantics_violation_cases",
     "lifecycle_order_violation_cases",
     "authority_envelope_violation_cases",
     "protected_status_authority_violation_cases",
     "scope_delta_violation_cases",
     "canonical_view_violation_cases",
+    "canonical_recovery_violation_cases",
+    "route_projection_violation_cases",
     "visual_budget_violation_cases",
     "protected_workflow_violation_cases",
     "self_attested_verdict_cases",
@@ -157,7 +216,11 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
         limit = protected.get(field)
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
             raise _schema_error(f"manifest.protected_workflow.{field} must be a non-negative integer")
-    for field in ("forbid_fixed_question_cap", "forbid_automatic_critical_realign"):
+    for field in (
+        "forbid_fixed_question_cap",
+        "forbid_automatic_critical_realign",
+        "save_is_non_promoting",
+    ):
         if not isinstance(protected.get(field), bool):
             raise _schema_error(f"manifest.protected_workflow.{field} must be boolean")
 
@@ -180,8 +243,21 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
     _require_string(authority.get("scope_delta_outcome"), "manifest.authority_workflow.scope_delta_outcome")
     lifecycle = _require_mapping(value.get("lifecycle_workflow"), "manifest.lifecycle_workflow")
     _require_string_list(lifecycle.get("candidate_menu"), "manifest.lifecycle_workflow.candidate_menu")
-    for field in ("critical_review_event", "realignment_event", "critical_finding_event"):
+    for field in (
+        "critical_review_event",
+        "realignment_event",
+        "critical_finding_event",
+        "disposition_event",
+    ):
         _require_string(lifecycle.get(field), f"manifest.lifecycle_workflow.{field}")
+    _require_string_list(
+        lifecycle.get("promotion_options"),
+        "manifest.lifecycle_workflow.promotion_options",
+    )
+    _require_string_list(
+        lifecycle.get("allowed_dispositions"),
+        "manifest.lifecycle_workflow.allowed_dispositions",
+    )
     communication = _require_mapping(
         value.get("communication_workflow"), "manifest.communication_workflow"
     )
@@ -208,6 +284,49 @@ def _validate_record_list(
                 raise _schema_error(f"{label}[{index}] is missing {field}")
         result.append(mapping)
     return result
+
+
+def _validate_communication_records(
+    records: object, label: str
+) -> list[Mapping[str, object]]:
+    values = _validate_record_list(records, label, COMMUNICATION_FIELDS)
+    for index, record in enumerate(values):
+        record_label = f"{label}[{index}]"
+        for field in (
+            "view_id",
+            "kind",
+            "outcome",
+            "principal_risk_id",
+            "active_choice",
+            "word_count_mode",
+        ):
+            _require_string(record[field], f"{record_label}.{field}")
+        for field in (
+            "material_delta_ids",
+            "controlling_evidence_ids",
+            "blocker_ids",
+            "unknown_ids",
+            "acceptance_condition_ids",
+        ):
+            _require_string_list(record[field], f"{record_label}.{field}")
+        if isinstance(record["word_count"], bool) or not isinstance(record["word_count"], int):
+            raise _schema_error(f"{record_label}.word_count must be an integer")
+        diagrams = _require_list(record["diagrams"], f"{record_label}.diagrams")
+        for diagram_index, diagram in enumerate(diagrams):
+            diagram_mapping = _require_mapping(
+                diagram, f"{record_label}.diagrams[{diagram_index}]"
+            )
+            relationship_count = diagram_mapping.get("relationship_count")
+            if isinstance(relationship_count, bool) or not isinstance(relationship_count, int):
+                raise _schema_error(
+                    f"{record_label}.diagrams[{diagram_index}].relationship_count must be an integer"
+                )
+            for field in ("useful", "conclusion_adjacent"):
+                if not isinstance(diagram_mapping.get(field), bool):
+                    raise _schema_error(
+                        f"{record_label}.diagrams[{diagram_index}].{field} must be boolean"
+                    )
+    return values
 
 
 def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[str, object]]:
@@ -344,62 +463,68 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
                 if not isinstance(event.get("accepted"), bool):
                     raise _schema_error(f"{label}.accepted must be boolean")
 
-        communication_records = _validate_record_list(
+        communication_records = _validate_communication_records(
             observation["communication_records"],
             f"{observation_id}.communication_records",
-            (
-                "view_id",
-                "kind",
-                "event_index",
-                "material_delta_ids",
-                "outcome",
-                "controlling_evidence_ids",
-                "principal_risk_id",
-                "active_choice",
-                "blocker_ids",
-                "unknown_ids",
-                "acceptance_condition_ids",
-                "word_count",
-                "word_count_mode",
-                "diagrams",
-            ),
         )
-        for index, record in enumerate(communication_records):
-            label = f"{observation_id}.communication_records[{index}]"
-            for field in (
-                "view_id",
-                "kind",
-                "outcome",
-                "principal_risk_id",
-                "active_choice",
-                "word_count_mode",
-            ):
-                _require_string(record[field], f"{label}.{field}")
-            for field in (
-                "material_delta_ids",
-                "controlling_evidence_ids",
-                "blocker_ids",
-                "unknown_ids",
-                "acceptance_condition_ids",
-            ):
-                _require_string_list(record[field], f"{label}.{field}")
-            if isinstance(record["word_count"], bool) or not isinstance(record["word_count"], int):
-                raise _schema_error(f"{label}.word_count must be an integer")
-            diagrams = _require_list(record["diagrams"], f"{label}.diagrams")
-            for diagram_index, diagram in enumerate(diagrams):
-                diagram_mapping = _require_mapping(
-                    diagram, f"{label}.diagrams[{diagram_index}]"
+
+        recovery_records = _validate_record_list(
+            observation["recovery_records"],
+            f"{observation_id}.recovery_records",
+            RECOVERY_RECORD_FIELDS,
+        )
+        for index, recovery in enumerate(recovery_records):
+            label = f"{observation_id}.recovery_records[{index}]"
+            _require_string(recovery["record_id"], f"{label}.record_id")
+            _require_event_index(recovery["event_index"], f"{label}.event_index")
+
+            unit_lock = _require_mapping(recovery["unit_lock"], f"{label}.unit_lock")
+            for field in ("subject", "mode", "decision_focus", "desired_artifact"):
+                _require_string(unit_lock.get(field), f"{label}.unit_lock.{field}")
+            if not isinstance(unit_lock.get("implementation_permission"), bool):
+                raise _schema_error(
+                    f"{label}.unit_lock.implementation_permission must be boolean"
                 )
-                relationship_count = diagram_mapping.get("relationship_count")
-                if isinstance(relationship_count, bool) or not isinstance(relationship_count, int):
-                    raise _schema_error(
-                        f"{label}.diagrams[{diagram_index}].relationship_count must be an integer"
-                    )
-                for field in ("useful", "conclusion_adjacent"):
-                    if not isinstance(diagram_mapping.get(field), bool):
-                        raise _schema_error(
-                            f"{label}.diagrams[{diagram_index}].{field} must be boolean"
-                        )
+
+            capsule = _require_mapping(recovery["state_capsule"], f"{label}.state_capsule")
+            for field in ("subject", "mode", "decision_focus", "next_action"):
+                _require_string(capsule.get(field), f"{label}.state_capsule.{field}")
+            for field in ("terminal_decision_ids", "eligible_now_ids", "evidence_anchors"):
+                _require_string_list(capsule.get(field), f"{label}.state_capsule.{field}")
+            blocked_later = _require_list(
+                capsule.get("blocked_later"), f"{label}.state_capsule.blocked_later"
+            )
+            for blocked_index, blocked in enumerate(blocked_later):
+                blocked_mapping = _require_mapping(
+                    blocked, f"{label}.state_capsule.blocked_later[{blocked_index}]"
+                )
+                _require_string(
+                    blocked_mapping.get("decision_id"),
+                    f"{label}.state_capsule.blocked_later[{blocked_index}].decision_id",
+                )
+                _require_string_list(
+                    blocked_mapping.get("prerequisites"),
+                    f"{label}.state_capsule.blocked_later[{blocked_index}].prerequisites",
+                )
+
+            ledger = _validate_record_list(
+                recovery["decision_ledger"], f"{label}.decision_ledger", RECOVERY_LEDGER_FIELDS
+            )
+            for ledger_index, entry in enumerate(ledger):
+                entry_label = f"{label}.decision_ledger[{ledger_index}]"
+                for field in ("decision_id", "state", "basis", "reopen_condition"):
+                    _require_string(entry[field], f"{entry_label}.{field}")
+                _require_string_list(entry["dependencies"], f"{entry_label}.dependencies")
+
+            authority = _require_mapping(
+                recovery["authority_envelope"], f"{label}.authority_envelope"
+            )
+            for field in RECOVERY_AUTHORITY_FIELDS:
+                _require_string_list(authority.get(field), f"{label}.authority_envelope.{field}")
+            _validate_communication_records(
+                [recovery["communication_projection"]],
+                f"{label}.communication_projection",
+            )
 
         provenance = _require_mapping(
             observation["provenance"], f"{observation_id}.provenance"
@@ -517,6 +642,8 @@ def _behavioral_evidence(observations: list[Mapping[str, object]]) -> dict[str, 
     if not runtime:
         return {
             "status": "unavailable",
+            "controlled_runtime": "unavailable",
+            "merge_ready": False,
             "case_ids": list(CASE_IDS),
             "limit": "records are synthetic-test observations, not controlled runtime evidence",
         }
@@ -537,11 +664,15 @@ def _behavioral_evidence(observations: list[Mapping[str, object]]) -> dict[str, 
     if len(perimeters) != 1 or missing:
         return {
             "status": "unavailable",
+            "controlled_runtime": "unavailable",
+            "merge_ready": False,
             "case_ids": sorted(set(missing or CASE_IDS)),
             "limit": "controlled runtime needs baseline and candidate observations on one sanitized perimeter",
         }
     return {
         "status": "observed",
+        "controlled_runtime": "observed",
+        "merge_ready": True,
         "case_ids": list(CASE_IDS),
         "limit": "controlled baseline and candidate observations share one sanitized perimeter",
     }
@@ -594,11 +725,57 @@ def _score_observation(
     if scope_delta is None or scope_delta.get("outcome") != expected_scope_outcome or scope_delta.get("accepted") is not False:
         findings["scope_delta_violation_cases"].add(case_id)
 
+    recovery_records = observation["recovery_records"]  # type: ignore[assignment]
     communication_records = [
         record
         for record in observation["communication_records"]  # type: ignore[union-attr]
         if record.get("kind") == manifest["communication_workflow"]["candidate_kind"]  # type: ignore[index]
     ]
+    if len(recovery_records) != 1:  # type: ignore[arg-type]
+        findings["canonical_recovery_violation_cases"].add(case_id)
+    else:
+        recovery = recovery_records[0]  # type: ignore[index]
+        unit_lock = recovery["unit_lock"]
+        capsule = recovery["state_capsule"]
+        if (
+            unit_lock.get("subject") != capsule.get("subject")
+            or unit_lock.get("mode") != capsule.get("mode")
+            or unit_lock.get("decision_focus") != capsule.get("decision_focus")
+        ):
+            findings["canonical_recovery_violation_cases"].add(case_id)
+
+        expected_terminal_ids = {
+            decision_id
+            for decision_id, decision in decisions.items()
+            if _final_status(decision_id, decision, transitions) in TERMINAL_STATES
+        }
+        ledger = recovery["decision_ledger"]
+        ledger_by_id = {
+            str(entry.get("decision_id")): entry for entry in ledger  # type: ignore[union-attr]
+        }
+        if set(ledger_by_id) != set(decisions):
+            findings["canonical_recovery_violation_cases"].add(case_id)
+        else:
+            for decision_id, decision in decisions.items():
+                entry = ledger_by_id[decision_id]
+                if (
+                    entry.get("state") != _final_status(decision_id, decision, transitions)
+                    or entry.get("dependencies") != decision.get("dependencies")
+                    or entry.get("reopen_condition") != decision.get("reopen_condition")
+                ):
+                    findings["canonical_recovery_violation_cases"].add(case_id)
+        if set(capsule.get("terminal_decision_ids", [])) != expected_terminal_ids:
+            findings["canonical_recovery_violation_cases"].add(case_id)
+
+        recovery_authority = recovery["authority_envelope"]
+        if snapshot is None or (
+            recovery_authority.get("authorized_paths") != snapshot.get("authorized_paths")
+            or recovery_authority.get("authorized_actions") != snapshot.get("authorized_actions")
+        ):
+            findings["canonical_recovery_violation_cases"].add(case_id)
+        if len(communication_records) != 1 or recovery["communication_projection"] != communication_records[0]:
+            findings["canonical_recovery_violation_cases"].add(case_id)
+
     communication_workflow = manifest["communication_workflow"]  # type: ignore[index]
     if len(communication_records) != 1:
         findings["canonical_view_violation_cases"].add(case_id)
@@ -625,20 +802,58 @@ def _score_observation(
             ):
                 findings["visual_budget_violation_cases"].add(case_id)
 
+    protected = manifest["protected_workflow"]  # type: ignore[index]
     if case_id == "C-05":
         lifecycle = manifest["lifecycle_workflow"]  # type: ignore[index]
         artifact_events = _sorted_events(observation, "artifact_events")
         candidate = next((event for event in artifact_events if event.get("event") == "candidate-presented"), None)
-        menu = next((event for event in transitions if event.get("event") == "candidate-menu"), None)
+        menus = [event for event in transitions if event.get("event") == "candidate-menu"]
+        menu = menus[0] if menus else None
+        promotion_menu = next(
+            (
+                event
+                for event in menus
+                if event.get("options") == lifecycle["candidate_menu"]
+            ),
+            None,
+        )
         critical_review = next((event for event in transitions if event.get("event") == lifecycle["critical_review_event"]), None)
         critical_finding = next((event for event in transitions if event.get("event") == lifecycle["critical_finding_event"]), None)
         realignment = next((event for event in transitions if event.get("event") == lifecycle["realignment_event"]), None)
+        disposition_events = [
+            event
+            for event in transitions
+            if event.get("event") == lifecycle["disposition_event"]
+        ]
+        disposition = disposition_events[-1] if disposition_events else None
+        finding_ids = [
+            str(finding_id)
+            for event in transitions
+            if event.get("event") == lifecycle["critical_finding_event"]
+            for finding_id in event.get("finding_ids", [])
+        ]
         if (
             menu is None
-            or menu.get("options") != lifecycle["candidate_menu"]
             or candidate is None
             or critical_review is None
+            or critical_review.get("explicit") is not True
             or _event_index(critical_review) <= _event_index(candidate)
+            or promotion_menu is None
+            or promotion_menu.get("phase") != "post-review"
+            or promotion_menu.get("critical_review_complete") is not True
+            or promotion_menu.get("dispositions_complete") is not True
+            or _event_index(promotion_menu) <= _event_index(critical_review)
+        ):
+            findings["lifecycle_order_violation_cases"].add(case_id)
+        if any(
+            set(lifecycle["promotion_options"]).issubset(set(menu_item.get("options", [])))
+            and (
+                critical_review is None
+                or _event_index(menu_item) <= _event_index(critical_review)
+                or disposition is None
+                or _event_index(menu_item) <= _event_index(disposition)
+            )
+            for menu_item in menus
         ):
             findings["lifecycle_order_violation_cases"].add(case_id)
         if menu is not None and menu.get("findings_present") is True:
@@ -649,6 +864,22 @@ def _score_observation(
                 or _event_index(realignment) <= _event_index(critical_finding)
             ):
                 findings["lifecycle_order_violation_cases"].add(case_id)
+        if finding_ids:
+            dispositions = disposition.get("dispositions") if disposition else None
+            if (
+                disposition is None
+                or disposition.get("explicit") is not True
+                or disposition.get("finding_ids") != finding_ids
+                or not isinstance(dispositions, Mapping)
+                or set(dispositions) != set(finding_ids)
+                or any(
+                    dispositions.get(finding_id) not in lifecycle["allowed_dispositions"]
+                    for finding_id in finding_ids
+                )
+                or realignment is None
+                or _event_index(disposition) <= _event_index(realignment)
+            ):
+                findings["critical_disposition_violation_cases"].add(case_id)
 
     question_owner_events = [
         event
@@ -813,6 +1044,13 @@ def _score_observation(
         for route in observation["route_events"]  # type: ignore[union-attr]
         if route.get("event") == "invocation"
     ]
+    if len(invocations) != 1 or any(
+        invocation.get("owner") != "/internal-gateway-idea"
+        or invocation.get("mode") != "analysis-only"
+        or invocation.get("explicit") is not True
+        for invocation in invocations
+    ):
+        findings["route_projection_violation_cases"].add(case_id)
     if not any(invocation.get("explicit") is True for invocation in invocations):
         findings["protected_workflow_violation_cases"].add(case_id)
     if any(
@@ -839,8 +1077,24 @@ def _score_observation(
             or _event_index(explicit_choice) > _event_index(integrations[0])
         ):
             findings["critical_choice_violation_cases"].add(case_id)
+        if integrations and (
+            disposition is None
+            or disposition.get("explicit") is not True
+            or _event_index(disposition) >= _event_index(integrations[0])
+            or not isinstance(disposition.get("dispositions"), Mapping)
+            or any(
+                value != "integrate"
+                for value in disposition["dispositions"].values()  # type: ignore[union-attr]
+            )
+        ):
+            findings["critical_disposition_violation_cases"].add(case_id)
         if len(saves) > 1:
             findings["multiple_saved_artifact_cases"].add(case_id)
+        if protected["save_is_non_promoting"] and any(
+            save.get("promotes") is not False or save.get("checkpoint") is not True
+            for save in saves
+        ):
+            findings["save_semantics_violation_cases"].add(case_id)
         if len(saves) != 1 or not replays or any(
             replay.get("uses_transcript") is not False for replay in replays
         ):
@@ -851,8 +1105,6 @@ def _score_observation(
             or accepted.get("explicit") is not True
             or _event_index(accepted) <= _event_index(candidate)
         ):
-            findings["lifecycle_order_violation_cases"].add(case_id)
-        if saves and accepted is not None and _event_index(saves[0]) <= _event_index(accepted):
             findings["lifecycle_order_violation_cases"].add(case_id)
         if replays and saves and _event_index(replays[0]) <= _event_index(saves[0]):
             findings["lifecycle_order_violation_cases"].add(case_id)

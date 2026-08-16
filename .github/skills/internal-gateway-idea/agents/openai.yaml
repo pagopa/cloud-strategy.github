@@ -2,8 +2,9 @@ interface:
   display_name: "Idea Analysis"
   short_description: "Conversation-first analysis for unclear ideas"
   default_prompt: >-
-    Use $internal-gateway-idea only when explicitly selected to turn an early
-    or unclear idea into a decision-ready Analysis Spec. Keep the analysis in
+    Use $internal-gateway-idea only when explicitly selected and keep one
+    autonomous route owned by this gateway while turning an early or unclear
+    idea into a decision-ready Analysis Spec. Keep the analysis in
     conversation by default, distinguish Facts, Reports, Assumptions, Unknowns,
     and Constraints, and use a compact emoji-guided chat layout. Send all
     currently known eligible decisions to /grill-me in one numbered bulk block
@@ -15,7 +16,8 @@ interface:
     or plan artifact through internal-luna-executor and
     /internal-subagent-contract unless the active authoring model is already
     GPT-5.6 Luna; retain owner review, validation, and acceptance. Keep
-    implementation-oriented design and execution separate and user-gated.
+    implementation-oriented design and execution separate and user-gated; do
+    not introduce an alternate brainstorming route or handoff.
     Record the current Authorized paths and Authorized actions, preserve them
     across continue, finish, pause, and recovery, and block every new path or
     action as authority-or-scope until the user explicitly accepts it. Keep
@@ -28,5 +30,20 @@ interface:
     with the conclusion in adjacent prose. The caller retains verification,
     acceptance, closeout, and the sole post-approval handoff to
     /internal-gateway-execute-plans.
+route_contract:
+  owner: "/internal-gateway-idea"
+  mode: "analysis-only"
+  execution_handoff: "/internal-gateway-execute-plans"
+  forbidden_pre_acceptance_routes:
+    - "/superpowers-brainstorming"
+    - "/internal-tdd"
+    - "/internal-gateway-writing-plans"
+    - "/internal-gateway-execute-plans"
+token_budget:
+  owner: "/internal-gateway-idea"
+  reference: "internal-gateway-idea.core_token_budget"
+  consumers:
+    - "public-wrapper"
+    - "evaluator-contract"
 policy:
   allow_implicit_invocation: false

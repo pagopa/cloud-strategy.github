@@ -17,12 +17,27 @@ projection as an authority boundary, not as a new state-capsule decision. A
 pause, continuation, or recovery never expands that envelope, and a protected
 status never supplies user authority.
 
+The state capsule, decision ledger, authority envelope, and canonical
+communication projection must be stored and recovered as one canonical
+recovery record. The resume view is only a projection of that record. Before
+continuing or authoring, verify the unit lock, stable decision IDs and states,
+evidence anchors, exact authority sets, next action, and communication fields:
+material deltas, outcome, up to three controlling evidence items, principal
+risk, active choice, blockers, unknowns, acceptance conditions, residual
+risks, and diagnostic word count. If any required projection is missing or
+conflicting, fail closed, preserve the last valid record, and leave affected
+decisions `open`; do not infer a path, action, decision, or acceptance.
+
 Create an analysis file only when the user explicitly selects `💾 Save the
 analysis`, selects the `+ spec` acceptance action, or asks to continue in
 another conversation. Write at most one Markdown artifact at the supplied
 path. When no path is supplied for the analysis artifact, use
 `tmp/superpowers/specs/YYYY-MM-DD-<topic>-analysis.md`, disclose that `tmp/` is
 disposable, and update that same file in place.
+
+`Save the analysis` is a non-promoting checkpoint and may occur before or
+after critical review. Saving does not make `+spec` or `+plan` available, does
+not dispose of findings, and does not authorize implementation or execution.
 
 The artifact must contain the current Candidate or Consolidated Analysis Spec,
 its state capsule, evidence anchors, next action, and the one canonical
