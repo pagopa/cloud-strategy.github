@@ -53,6 +53,12 @@ design; a control design precedes rollout evidence; workflow and composite-
 action authoring remain separate contract surfaces under
 `/internal-github-actions`. Keep each invocation focused on its own output.
 
+## Reference map
+
+- Load [routing matrix](references/routing-matrix.md) for collision resolution,
+  multi-deliverable sequencing, or near-miss routing when the destination table
+  does not decide.
+
 ## Completion criteria
 
 - Every requested deliverable has exactly one primary owner.
@@ -63,8 +69,8 @@ action authoring remain separate contract surfaces under
 ## Collision boundaries
 
 - When a request arrives with a `parent`, exclude that parent from destination
-  selection before invoking a specialist. For `parent: internal-review-code`,
-  never route back to `/internal-review-code`.
+  selection before invoking a specialist. For example, `parent:
+  internal-review-code` never routes back to `/internal-review-code`.
 
 - Technical review versus PR readiness: route findings and static contract
   evidence to `/internal-review-code`; route current PR state, checks, reviews,

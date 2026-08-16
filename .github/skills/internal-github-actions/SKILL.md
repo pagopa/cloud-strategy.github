@@ -1,6 +1,6 @@
 ---
 name: internal-github-actions
-description: Use when /internal-github routes GitHub Actions workflow, reusable-workflow, or composite-action work under `.github/workflows/` or `.github/actions/`.
+description: Own GitHub Actions workflow, reusable-workflow, and composite-action authoring, debugging, and contracts under `.github/workflows/` and `.github/actions/**/action.yml` or `action.yaml`; also serves as a bounded domain contributor when invoked through a routing envelope with `role: domain-routing`.
 user-invocable: false
 ---
 
@@ -69,15 +69,17 @@ commands belongs in a script.
 
 ## Conditional review contributor
 
-When this skill is conditionally loaded by `/internal-review-code`, contribute
-observations for the relevant workflow or composite-action surfaces. Inspect
+When this skill is invoked through a routing envelope carrying
+`role: domain-routing` and a contributor `deliverable`, contribute observations
+for the relevant workflow or composite-action surfaces. Inspect
 the static chain from the event through workflow or `workflow_call`, job
 permissions and environments, composite actions, repository scripts,
 artifacts or caches, and external system boundaries when the target links
 them.
 
-When reached for a review, this contributor is selected through the
-`/internal-github` gateway envelope, not invoked as a direct review entry point.
+When reached for a review, this contributor is selected through the caller's
+routing envelope. This skill does not assume a specific gateway or direct
+review entry point.
 
 For workflow surfaces, focus on OIDC and least privilege, full-SHA action pins,
 input and context validity, reuse contracts, permissions and environment
@@ -88,16 +90,15 @@ expression and environment handling, explicit Bash and strict mode,
 `$GITHUB_OUTPUT`, supported runtime versions, documentation, smoke behavior,
 and failure-path evidence.
 
-Return only the wrapper protocol fields: `domain`,
-`changed_contract_surfaces`, `observations`, `probes`,
-`applicable_validations`, `compatibility_risks`, and `evidence_gaps`. Use
+Return exactly the contributor record fields required by the caller's
+envelope and protocol. The record schema is defined by that envelope; use
 `domain: github-actions` for both workflow and composite-action observations.
 
-This contributor does not issue a verdict, severity, approval, merge decision,
-remediation plan, or operations conclusion. Addy remains the sole substantive
-review engine and `internal-review-code` remains the single public-verdict
-owner. Static evidence cannot prove runner health or successful runtime
-loading; record that limitation and route live evidence to Operations.
+The caller of the envelope owns any verdict, severity, approval, and merge
+decision. This contributor returns only the bounded record defined by the
+envelope. Static evidence cannot prove runner health or successful runtime
+loading; record that limitation and route live evidence to the operations
+owner.
 
 ## Reference map
 

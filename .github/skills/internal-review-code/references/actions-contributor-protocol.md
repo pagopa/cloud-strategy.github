@@ -1,15 +1,14 @@
 # GitHub Actions contributor protocol
 
-This protocol is portable review guidance for `internal-review-code`. It does
-not copy native `.github/instructions/` content and does not replace the Addy
-review engine.
+This protocol is portable review guidance for the GitHub Actions contributor.
+It does not copy native `.github/instructions/` content and does not replace
+the declared review engine.
 
 ## Activation
 
-- Invoke `/internal-github` when the target contains `.github/workflows/**`,
-  `.github/actions/**/action.yml`, or `.github/actions/**/action.yaml`.
-- Use only this minimal envelope; the gateway derives `forbid_destination` from
-  `parent` and selects the specialist:
+- When the target contains `.github/workflows/**`,
+  `.github/actions/**/action.yml`, or `.github/actions/**/action.yaml`, the
+  caller may use this minimal envelope:
 
   ```yaml
   role: domain-routing
@@ -17,9 +16,9 @@ review engine.
   deliverable: GitHub Actions contributor observations
   evidence: target and linked static evidence
   ```
-- The gateway reaches `internal-github-actions` through this envelope. Do not
-  invoke the specialist directly, and invoke neither contributor for unrelated
-  code.
+- The envelope fields are the caller-owned contract. The caller selects and
+  invokes the specialist; the specialist returns exactly the contributor
+  record schema defined here. Invoke neither contributor for unrelated code.
 
 ## Contributor record
 
@@ -35,8 +34,8 @@ compatibility_risks: []
 evidence_gaps: []
 ```
 
-The record describes observations and evidence for the wrapper and Addy to
-evaluate. It is not a review report or a public projection.
+The record describes observations and evidence for the declared review engine
+to evaluate. It is not a review report or a public projection.
 
 ## Static chain boundary
 
@@ -52,12 +51,12 @@ runtime loading from YAML, metadata, or static source.
 Contributors must not return or derive a public verdict, severity, approval,
 merge decision, merge authority, remediation plan, or replacement review
 procedure. They must not claim ownership of PR readiness, merge, runtime
-operations, or planning. The wrapper remains the single public-verdict owner;
-Addy remains the sole substantive review engine.
+operations, or planning. The caller remains the public-verdict owner; the
+declared review engine remains responsible for substantive review.
 
 ## Unavailable evidence
 
-If target, source, or engine evidence is insufficient for a safe review, the
+If target, source, or declared review engine evidence is insufficient for a safe review, the
 wrapper returns `REVIEW BLOCKED`. If static review is possible but runtime
 capture is unavailable, preserve the local observations and record an explicit
 evidence gap; route live evidence to the operations owner as a separate
