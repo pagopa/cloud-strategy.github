@@ -138,6 +138,12 @@ FINDING_FIELDS = (
     "visual_budget_violation_cases",
     "protected_workflow_violation_cases",
     "self_attested_verdict_cases",
+    "gate_type_violation_cases",
+    "grill_me_routing_violation_cases",
+    "critical_review_completion_violation_cases",
+    "gate_override_violation_cases",
+    "menu_projection_violation_cases",
+    "provisional_save_violation_cases",
 )
 
 
@@ -242,6 +248,24 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
     )
     _require_string(authority.get("scope_delta_outcome"), "manifest.authority_workflow.scope_delta_outcome")
     lifecycle = _require_mapping(value.get("lifecycle_workflow"), "manifest.lifecycle_workflow")
+    global_gates = _require_string_list(
+        lifecycle.get("global_gates"), "manifest.lifecycle_workflow.global_gates"
+    )
+    if global_gates != ["GRILL-ME", "CRITICAL REVIEW"]:
+        raise _schema_error("manifest.lifecycle_workflow.global_gates must contain exactly GRILL-ME and CRITICAL REVIEW")
+    if lifecycle.get("post_setup_gate") != "GRILL-ME":
+        raise _schema_error("manifest.lifecycle_workflow.post_setup_gate must be GRILL-ME")
+    review_lenses = _require_string_list(
+        lifecycle.get("review_lenses"), "manifest.lifecycle_workflow.review_lenses"
+    )
+    if review_lenses != ["primary", "evidence", "lateral"]:
+        raise _schema_error("manifest.lifecycle_workflow.review_lenses must contain the exact three review lenses")
+    lateral_lens_types = _require_string_list(
+        lifecycle.get("lateral_lens_types"),
+        "manifest.lifecycle_workflow.lateral_lens_types",
+    )
+    if lateral_lens_types != ["analogy", "reverse-assumption"]:
+        raise _schema_error("manifest.lifecycle_workflow.lateral_lens_types is unsupported")
     _require_string_list(lifecycle.get("candidate_menu"), "manifest.lifecycle_workflow.candidate_menu")
     for field in (
         "critical_review_event",
@@ -257,6 +281,14 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
     _require_string_list(
         lifecycle.get("allowed_dispositions"),
         "manifest.lifecycle_workflow.allowed_dispositions",
+    )
+    _require_string(
+        lifecycle.get("gate_override_event"),
+        "manifest.lifecycle_workflow.gate_override_event",
+    )
+    _require_string_list(
+        lifecycle.get("finding_classifications"),
+        "manifest.lifecycle_workflow.finding_classifications",
     )
     communication = _require_mapping(
         value.get("communication_workflow"), "manifest.communication_workflow"
@@ -814,6 +846,7 @@ def _score_observation(
                 event
                 for event in menus
                 if event.get("options") == lifecycle["candidate_menu"]
+                and event.get("phase") == "post-review"
             ),
             None,
         )
@@ -826,6 +859,165 @@ def _score_observation(
             if event.get("event") == lifecycle["disposition_event"]
         ]
         disposition = disposition_events[-1] if disposition_events else None
+
+        gate_events = [event for event in transitions if "gate" in event]
+        observed_gates = {str(event.get("gate")) for event in gate_events}
+        expected_gates = set(lifecycle["global_gates"])
+        if observed_gates != expected_gates or any(
+            event.get("gate") not in expected_gates for event in gate_events
+        ):
+            findings["gate_type_violation_cases"].add(case_id)
+
+        grill_events = [
+            event
+            for event in gate_events
+            if event.get("gate") == lifecycle["post_setup_gate"]
+        ]
+        post_setup = next(
+            (
+                event
+                for event in grill_events
+                if event.get("phase") == "post-setup"
+                and event.get("route_owner") == "/grill-me"
+            ),
+            None,
+        )
+        covered_question_ids = {
+            str(question_id)
+            for event in grill_events
+            for question_id in event.get("question_ids", [])
+        }
+        question_ids = {str(question["question_id"]) for question in questions}
+        if (
+            post_setup is None
+            or not question_ids.issubset(covered_question_ids)
+            or any(
+                not any(
+                    route.get("owner") == "/grill-me"
+                    and _event_index(route) <= _event_index(question)
+                    for route in observation["route_events"]  # type: ignore[union-attr]
+                )
+                for question in questions
+            )
+        ):
+            findings["grill_me_routing_violation_cases"].add(case_id)
+        for event in grill_events:
+            if event.get("repeat") is True:
+                eligible_ids = set(str(item) for item in event.get("eligible_decision_ids", []))
+                question_decision_ids = {
+                    str(question["decision_id"])
+                    for question in questions
+                    if str(question["question_id"]) in set(str(item) for item in event.get("question_ids", []))
+                }
+                if not eligible_ids or eligible_ids != question_decision_ids:
+                    findings["grill_me_routing_violation_cases"].add(case_id)
+
+        critical_review = next(
+            (
+                event
+                for event in transitions
+                if event.get("event") == lifecycle["critical_review_event"]
+            ),
+            None,
+        )
+        review_valid = False
+        if critical_review is not None:
+            lenses = critical_review.get("lenses")
+            expected_lenses = list(lifecycle["review_lenses"])
+            lens_names = [
+                str(lens.get("name"))
+                for lens in lenses
+                if isinstance(lens, Mapping)
+            ] if isinstance(lenses, list) else []
+            lateral_types = {
+                str(lens.get("type"))
+                for lens in lenses
+                if isinstance(lens, Mapping) and lens.get("name") == "lateral"
+            } if isinstance(lenses, list) else set()
+            finding_events = [
+                event
+                for event in transitions
+                if event.get("event") == lifecycle["critical_finding_event"]
+            ]
+            finding_ids = {
+                str(finding_id)
+                for event in finding_events
+                for finding_id in event.get("finding_ids", [])
+            }
+            finding_records = [
+                record
+                for event in finding_events
+                for record in event.get("findings", [])
+                if isinstance(record, Mapping)
+            ]
+            classified_ids = {
+                str(record.get("finding_id"))
+                for record in finding_records
+                if record.get("classification") in lifecycle["finding_classifications"]
+            }
+            review_valid = (
+                critical_review.get("gate") == "CRITICAL REVIEW"
+                and critical_review.get("explicit") is True
+                and critical_review.get("completed") is True
+                and lens_names == expected_lenses
+                and len(lenses) == 3  # type: ignore[arg-type]
+                and bool(lateral_types.intersection(lifecycle["lateral_lens_types"]))
+                and isinstance(critical_review.get("conclusion"), str)
+                and bool(str(critical_review.get("conclusion")).strip())
+                and classified_ids == finding_ids
+            )
+        if not review_valid:
+            findings["critical_review_completion_violation_cases"].add(case_id)
+
+        overrides = [
+            event
+            for event in transitions
+            if event.get("event") == lifecycle["gate_override_event"]
+        ]
+        for override in overrides:
+            overridden_gate = override.get("gate")
+            named_action = override.get("named_action")
+            preserved_gates = set(str(item) for item in override.get("preserved_gates", []))
+            if (
+                override.get("explicit") is not True
+                or overridden_gate not in expected_gates
+                or not isinstance(named_action, str)
+                or not named_action.strip()
+                or override.get("action") != named_action
+                or override.get("risk_disposition") != "accepted-risk"
+                or preserved_gates != expected_gates - {str(overridden_gate)}
+            ):
+                findings["gate_override_violation_cases"].add(case_id)
+
+        expected_menu = list(lifecycle["candidate_menu"])
+        if any(
+            menu_item.get("options") != expected_menu
+            or set(menu_item.get("locks", {})) != set(expected_menu)
+            or any(
+                not isinstance(menu_item.get("locks", {}).get(option), Mapping)
+                or (
+                    menu_item["locks"][option].get("locked") is True
+                    and not str(menu_item["locks"][option].get("reason", "")).strip()
+                )
+                for option in expected_menu
+            )
+            for menu_item in menus
+        ):
+            findings["menu_projection_violation_cases"].add(case_id)
+
+        saves = [event for event in artifact_events if event.get("event") == "artifact-saved"]
+        if (
+            len(saves) != 1
+            or critical_review is None
+            or saves[0].get("critical_review") != "pending"
+            or _event_index(saves[0]) >= _event_index(critical_review)
+            or saves[0].get("promotes") is not False
+            or saves[0].get("checkpoint") is not True
+            or saves[0].get("closes_findings") is not False
+            or saves[0].get("authorizes") != []
+        ):
+            findings["provisional_save_violation_cases"].add(case_id)
+
         finding_ids = [
             str(finding_id)
             for event in transitions
@@ -852,6 +1044,11 @@ def _score_observation(
                 or _event_index(menu_item) <= _event_index(critical_review)
                 or disposition is None
                 or _event_index(menu_item) <= _event_index(disposition)
+            )
+            and not all(
+                isinstance(menu_item.get("locks", {}).get(option), Mapping)
+                and menu_item["locks"][option].get("locked") is True
+                for option in lifecycle["promotion_options"]
             )
             for menu_item in menus
         ):

@@ -28,6 +28,24 @@ risks, and diagnostic word count. If any required projection is missing or
 conflicting, fail closed, preserve the last valid record, and leave affected
 decisions `open`; do not infer a path, action, decision, or acceptance.
 
+The same recovery record also carries the gate and menu projection:
+
+- `global_gates`: exactly `GRILL-ME` and `CRITICAL REVIEW`;
+- `grill_me`: the post-setup gate event, eligible decision IDs, question IDs,
+  route owner, and any repeat-round eligibility evidence;
+- `critical_review`: `pending` or `completed`, its exactly three lens records,
+  lateral lens type, classified findings, conclusion, and explicit
+  disposition state;
+- `gate_override`: absent unless one named action is explicitly recorded as
+  `accepted-risk`, with all other gates preserved;
+- `menu`: the same seven numbered entries, their positions, availability, and
+  short lock reasons for the current phase.
+
+The gate state is structural recovery data, not a second report or transcript.
+On reconstruction, reject a missing or contradictory gate/menu projection and
+preserve the last valid record. Never infer that a recommendation, checkpoint,
+status, or recovery event completed a gate.
+
 Create an analysis file only when the user explicitly selects `💾 Save the
 analysis`, selects the `+ spec` acceptance action, or asks to continue in
 another conversation. Write at most one Markdown artifact at the supplied
@@ -36,16 +54,20 @@ path. When no path is supplied for the analysis artifact, use
 disposable, and update that same file in place.
 
 `Save the analysis` is a non-promoting checkpoint and may occur before or
-after critical review. Saving does not make `+spec` or `+plan` available, does
-not dispose of findings, and does not authorize implementation or execution.
+after critical review. A pre-review checkpoint records
+`critical_review: pending` in this same canonical projection. Saving does not
+make `+spec` or `+plan` available, does not dispose of findings, does not close
+the review gate, and does not authorize implementation or execution.
 
 The artifact must contain the current Candidate or Consolidated Analysis Spec,
 its state capsule, evidence anchors, next action, and the one canonical
 communication projection: material deltas, one outcome, up to three controlling
 evidence items, one principal risk, active choice, blockers, unknowns,
-acceptance conditions, and residual risks. This keeps planning replay lossless
-without the transcript. Do not create a separate critical report or transcript
-and do not save twice as separate artifacts. A `+ plan` acceptance action uses
+acceptance conditions, and residual risks. It must also preserve the gate
+state, menu locks, finding classifications, and any named-action
+`accepted-risk` override. This keeps planning replay lossless without the
+transcript. Do not create a separate critical report or transcript and do not
+save twice as separate artifacts. A `+ plan` acceptance action uses
 the single retained plan path locked by `/internal-gateway-writing-plans`;
 this gateway does not create or structure that plan directly.
 

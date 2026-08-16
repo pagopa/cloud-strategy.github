@@ -48,13 +48,19 @@
     "scope_delta_outcome": "authority-or-scope"
   },
   "lifecycle_workflow": {
+    "global_gates": ["GRILL-ME", "CRITICAL REVIEW"],
+    "post_setup_gate": "GRILL-ME",
+    "review_lenses": ["primary", "evidence", "lateral"],
+    "lateral_lens_types": ["analogy", "reverse-assumption"],
     "candidate_menu": ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"],
     "critical_review_event": "critical-review",
+    "gate_override_event": "gate-override",
     "realignment_event": "realignment",
     "critical_finding_event": "critical-finding",
     "disposition_event": "critical-disposition",
     "promotion_options": ["+spec", "+plan"],
-    "allowed_dispositions": ["integrate", "reject", "accept-risk", "route"]
+    "allowed_dispositions": ["integrate", "reject", "accept-risk", "route"],
+    "finding_classifications": ["blocking-now", "acceptance-required", "follow-up", "separate-design", "rejected-with-reason"]
   },
   "communication_workflow": {
     "candidate_kind": "candidate",

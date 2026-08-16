@@ -163,6 +163,48 @@ def _status_event(
     }
 
 
+def _candidate_menu(
+    event_index: float,
+    *,
+    phase: str,
+    findings_present: bool,
+    critical_review_complete: bool,
+    dispositions_complete: bool,
+) -> dict[str, object]:
+    options = ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"]
+    locks = {
+        "continue": {"locked": False, "reason": "continue analysis"},
+        "critical-review": {"locked": False, "reason": "review remains available"},
+        "realign": {
+            "locked": not findings_present,
+            "reason": "no findings exist" if not findings_present else "findings are available",
+        },
+        "+spec": {
+            "locked": not critical_review_complete,
+            "reason": "critical review is pending" if not critical_review_complete else "review complete",
+        },
+        "+plan": {
+            "locked": not critical_review_complete,
+            "reason": "critical review is pending" if not critical_review_complete else "review complete",
+        },
+        "save": {"locked": False, "reason": "save is a provisional checkpoint"},
+        "close": {
+            "locked": not critical_review_complete,
+            "reason": "critical review is pending" if not critical_review_complete else "close is available",
+        },
+    }
+    return {
+        "event": "candidate-menu",
+        "event_index": event_index,
+        "options": options,
+        "locks": locks,
+        "findings_present": findings_present,
+        "phase": phase,
+        "critical_review_complete": critical_review_complete,
+        "dispositions_complete": dispositions_complete,
+    }
+
+
 def _capsule(
     case_id: str,
     event_index: int,
@@ -518,16 +560,47 @@ def passing_run() -> dict[str, object]:
                 [_decision(c05_root, "accepted", evidence_ids=["C05-unknowns"])],
                 [_question("C05-Q1", c05_root, 2, ["C05-unknowns"])],
                 [
-                    _status_event(c05_root, "open", "accepted", 3, trigger="explicit-user-change"),
+                    {"event": "setup-complete", "event_index": 1},
                     {
-                        "event": "candidate-menu",
-                        "event_index": 4,
-                        "options": ["continue", "critical-review", "save", "close"],
-                        "findings_present": True,
-                        "phase": "pre-review",
+                        "event": "gate-entered",
+                        "gate": "GRILL-ME",
+                        "phase": "post-setup",
+                        "route_owner": "/grill-me",
+                        "event_index": 2,
+                        "question_ids": ["C05-Q1"],
+                        "eligible_decision_ids": [c05_root],
+                        "repeat": False,
                     },
-                    {"event": "critical-review", "event_index": 5, "explicit": True},
-                    {"event": "critical-finding", "event_index": 6, "finding_ids": ["C05-F1"]},
+                    _status_event(c05_root, "open", "accepted", 3, trigger="explicit-user-change"),
+                    _candidate_menu(
+                        4,
+                        phase="pre-review",
+                        findings_present=True,
+                        critical_review_complete=False,
+                        dispositions_complete=False,
+                    ),
+                    {
+                        "event": "critical-review",
+                        "gate": "CRITICAL REVIEW",
+                        "event_index": 5,
+                        "explicit": True,
+                        "completed": True,
+                        "lenses": [
+                            {"name": "primary", "type": "system-boundary"},
+                            {"name": "evidence", "type": "evidence-quality"},
+                            {"name": "lateral", "type": "analogy"},
+                        ],
+                        "finding_ids": ["C05-F1"],
+                        "conclusion": "The candidate is ready after explicit finding disposition.",
+                    },
+                    {
+                        "event": "critical-finding",
+                        "event_index": 6,
+                        "finding_ids": ["C05-F1"],
+                        "findings": [
+                            {"finding_id": "C05-F1", "classification": "acceptance-required"}
+                        ],
+                    },
                     {"event": "realignment", "event_index": 7, "explicit": True, "finding_ids": ["C05-F1"]},
                     {
                         "event": "critical-disposition",
@@ -536,23 +609,31 @@ def passing_run() -> dict[str, object]:
                         "finding_ids": ["C05-F1"],
                         "dispositions": {"C05-F1": "integrate"},
                     },
+                    _candidate_menu(
+                        9,
+                        phase="post-review",
+                        findings_present=True,
+                        critical_review_complete=True,
+                        dispositions_complete=True,
+                    ),
                     {
-                        "event": "candidate-menu",
-                        "event_index": 9,
-                        "options": ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"],
-                        "findings_present": True,
-                        "phase": "post-review",
-                        "critical_review_complete": True,
-                        "dispositions_complete": True,
+                        "event": "gate-override",
+                        "gate": "CRITICAL REVIEW",
+                        "action": "close",
+                        "named_action": "close",
+                        "risk_disposition": "accepted-risk",
+                        "preserved_gates": ["GRILL-ME"],
+                        "event_index": 9.5,
+                        "explicit": True,
                     },
                 ],
                 [{"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "event_index": 2}],
                 [
                     {"event": "candidate-presented", "event_index": 4, "artifact_id": "C05-analysis"},
+                    {"event": "artifact-saved", "event_index": 4.5, "artifact_id": "C05-analysis", "path": "tmp/superpowers/specs/c05-analysis.md", "promotes": False, "checkpoint": True, "critical_review": "pending", "closes_findings": False, "authorizes": []},
                     {"event": "candidate-accepted", "event_index": 10, "explicit": True, "artifact_id": "C05-analysis"},
                     {"event": "critical-choice", "event_index": 11, "choice": "integrate", "explicit": True},
                     {"event": "critical-findings-integrated", "event_index": 12, "artifact_id": "C05-analysis"},
-                    {"event": "artifact-saved", "event_index": 13, "artifact_id": "C05-analysis", "path": "tmp/superpowers/specs/c05-analysis.md", "promotes": False, "checkpoint": True},
                     {"event": "planning-replay", "event_index": 14, "artifact_id": "C05-analysis", "uses_transcript": False},
                 ],
                 {"Unknowns": [c05_root]},
@@ -654,7 +735,17 @@ def failing_run() -> dict[str, object]:
         for event in c05["transition_events"]
         if event.get("event") not in {"realignment", "critical-disposition"}
     ]
-    c05["transition_events"][1]["options"] = ["continue", "+spec", "+plan", "save", "close"]
+    for event in c05["transition_events"]:
+        if event.get("event") == "candidate-menu" and event.get("phase") == "pre-review":
+            event["options"] = ["continue", "+spec", "+plan", "save", "close"]
+        if event.get("event") == "gate-entered":
+            event["gate"] = "ACCEPTANCE"
+        if event.get("event") == "critical-review":
+            event["lenses"] = event["lenses"][:2]
+            event["conclusion"] = ""
+        if event.get("event") == "gate-override":
+            event["preserved_gates"] = []
+            event["risk_disposition"] = "integrate"
     c05["artifact_events"] = [
         event
         for event in c05["artifact_events"]
@@ -668,6 +759,9 @@ def failing_run() -> dict[str, object]:
             "path": "tmp/superpowers/specs/c05-analysis-second.md",
         }
     )
+    for event in c05["artifact_events"]:
+        if event.get("event") == "artifact-saved":
+            event["critical_review"] = "complete"
     for event in c05["artifact_events"]:
         if event.get("event") == "planning-replay":
             event["uses_transcript"] = True
@@ -760,6 +854,12 @@ def test_failing_records_report_derived_findings_and_reject() -> None:
     assert result["artifact_replay_violation_cases"] == ["C-05"]
     assert result["self_attested_verdict_cases"] == ["C-01"]
     assert result["canonical_recovery_violation_cases"] == ["C-02", "C-04", "C-05"]
+    assert result["gate_type_violation_cases"] == ["C-05"]
+    assert result["grill_me_routing_violation_cases"] == ["C-05"]
+    assert result["critical_review_completion_violation_cases"] == ["C-05"]
+    assert result["gate_override_violation_cases"] == ["C-05"]
+    assert result["menu_projection_violation_cases"] == ["C-05"]
+    assert result["provisional_save_violation_cases"] == ["C-05"]
 
     for key, value in result.items():
         if key.endswith("_cases"):
@@ -903,3 +1003,22 @@ def test_core_token_budget_has_one_owner_and_shared_consumer_reference() -> None
     assert "question_cap" not in budget
     assert "max_questions" not in budget
     assert "fixed_question_cap" not in budget
+
+
+def test_manifest_and_records_derive_the_two_gate_contract() -> None:
+    manifest = load_manifest()
+    lifecycle = manifest["lifecycle_workflow"]
+
+    assert lifecycle.get("global_gates") == ["GRILL-ME", "CRITICAL REVIEW"]
+    assert lifecycle.get("post_setup_gate") == "GRILL-ME"
+    assert lifecycle.get("review_lenses") == ["primary", "evidence", "lateral"]
+    assert lifecycle.get("lateral_lens_types") == ["analogy", "reverse-assumption"]
+
+    scorer = load_scorer()
+    result = scorer.score(manifest, passing_run())
+    assert result.get("gate_type_violation_cases") == []
+    assert result.get("grill_me_routing_violation_cases") == []
+    assert result.get("critical_review_completion_violation_cases") == []
+    assert result.get("gate_override_violation_cases") == []
+    assert result.get("menu_projection_violation_cases") == []
+    assert result.get("provisional_save_violation_cases") == []

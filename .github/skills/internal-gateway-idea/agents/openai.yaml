@@ -8,11 +8,22 @@ interface:
     conversation by default, distinguish Facts, Reports, Assumptions, Unknowns,
     and Constraints, and use a compact emoji-guided chat layout. Send all
     currently known eligible decisions to /grill-me in one numbered bulk block
-    and use later numbered blocks only for newly eligible follow-ups. Delegate
-    interview mechanics to /grill-me and critical-review procedure to
-    /internal-gateway-critical-master. After a critical review, offer an
-    explicit option to realign the same analysis with supported findings. Keep
-    the exact four-option Candidate acceptance gate. Author the selected spec
+    immediately after setup and use later numbered blocks only for newly
+    eligible follow-ups. Route every material doubt, ambiguity, missing
+    decision, and user-input question through the mandatory GRILL-ME gate;
+    delegate interview mechanics to /grill-me and critical-review procedure to
+    /internal-gateway-critical-master. Use exactly two global gates, GRILL-ME
+    and CRITICAL REVIEW. Require CRITICAL REVIEW before close, +spec, or
+    +plan; complete it structurally with exactly three lenses including one
+    lateral analogy or reverse-assumption lens, classified findings, and a
+    conclusion. A scoped override names one action and records accepted-risk
+    while preserving every other gate. After setup and every named analysis
+    phase, project the same seven numbered entries in order: 1 🔄 continue,
+    2 🔍 critical review, 3 🧩 realign when findings exist, 4 📝 +spec,
+    5 🗺️ +plan, 6 💾 save, 7 ⏹️ close; keep locked entries visible with
+    reasons. Save is provisional and records critical_review: pending before
+    review. After a critical review, offer an explicit option to realign the
+    same analysis with supported findings. Keep the exact four-option Candidate acceptance gate. Author the selected spec
     or plan artifact through internal-luna-executor and
     /internal-subagent-contract unless the active authoring model is already
     GPT-5.6 Luna; retain owner review, validation, and acceptance. Keep

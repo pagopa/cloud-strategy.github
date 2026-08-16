@@ -51,6 +51,37 @@ sole execution handoff. The public `route_contract` projection must remain
 aligned with these boundaries and may not introduce an alternate dependency,
 route, invocation, or handoff.
 
+## Global gates
+
+This lifecycle has exactly two global gate types: `GRILL-ME` and `CRITICAL
+REVIEW`. Recommendation, `save`, realignment, status, recovery, and the
+four-option acceptance choice are actions or projections, not additional gate
+types.
+
+`GRILL-ME` is mandatory immediately after setup. Route every material doubt,
+ambiguity, missing decision, or user-input question through `/grill-me`; do not
+ask a material question in an ad-hoc route. A later round is allowed only when
+new material decisions become eligible. Do not invent a repeat round for a
+trivial or already-covered question, and do not impose a fixed question cap.
+Record the gate event, the eligible decision IDs, and the question IDs in the
+canonical recovery record. Interview mechanics and concrete phrasing remain
+owned by `/grill-me`.
+
+`CRITICAL REVIEW` is required before `close`, `+spec`, or `+plan`. The gateway
+records completion as a structural review record, while review procedure and
+report mechanics remain owned by `/internal-gateway-critical-master`. A review
+is complete only when its record contains exactly three lenses, including one
+lateral lens of type `analogy` or `reverse-assumption`, every finding has one
+classification, and a non-empty conclusion is recorded. Use the approved
+finding classes `blocking-now`, `acceptance-required`, `follow-up`,
+`separate-design`, and `rejected-with-reason`.
+
+An override must be explicit, name exactly one action, and record that action
+as `accepted-risk`. It may bypass only the named action. Preserve every other
+gate and authority boundary; an override never becomes a global bypass.
+Findings require explicit disposition as `integrate`, `reject`,
+`accept-risk`, or `route`; never integrate them automatically.
+
 ## Core token budget control
 
 `internal-gateway-idea.core_token_budget` is the one canonical control for the
@@ -230,17 +261,38 @@ evidence, a user decision, or a supported critical finding.
 
 ### Post-Candidate menu and gate
 
-After a Candidate, present this ordered menu as applicable: `continue`,
-critical review, explicit `realign` when findings exist, `+spec`, `+plan`,
-`save`, and `close`. Critical review must complete before `+spec` or `+plan` is available. Findings never integrate automatically; require explicit choice
-to incorporate, reject with evidence, accept as residual risk, or route each
-material finding. No menu action grants implementation or execution, and
-`continue`, `finish`, `save`, and `close` preserve the authority envelope.
+After setup and after every named analysis phase, present the same seven
+numbered semantic entries in the same positions. Keep locked entries visible
+and give a short reason; do not remove, renumber, or silently unlock an entry:
+
+1. `🔄 continue`
+2. `🔍 critical review`
+3. `🧩 realign when findings exist`
+4. `📝 +spec`
+5. `🗺️ +plan`
+6. `💾 save`
+7. `⏹️ close`
+
+Before `CRITICAL REVIEW` completes, lock `+spec`, `+plan`, and `close` with
+the reason `critical review is pending`. Lock `realign` when no findings
+exist. Keep `continue`, `save`, and the applicable gate action visible. After
+review, retain all seven positions and explain any remaining lock, including
+an explicit finding disposition requirement. The post-setup menu does not
+replace the mandatory `GRILL-ME` gate.
+
+Critical review must complete before `+spec`, `+plan`, or `close` is
+available, except for one explicit named-action override recorded as
+`accepted-risk`. Findings never integrate automatically; require explicit
+choice to incorporate, reject with evidence, accept as residual risk, or
+route each material finding. No menu action grants implementation or
+execution, and `continue`, `finish`, `save`, and `close` preserve the
+authority envelope.
 
 `save` is a non-promoting checkpoint and remains available before or after
-critical review. It may update the one canonical Markdown artifact in place,
-but it never makes `+spec` or `+plan` available, closes a finding, or creates a
-second artifact.
+critical review. A pre-review save must record `critical_review: pending` in
+the one canonical recovery/artifact projection. Save never makes `+spec` or
+`+plan` available, closes a finding, authorizes implementation or execution,
+or creates a second artifact.
 
 Completion criterion: the recommendation is traceable to resolved decisions and labeled evidence, every material uncertainty is resolved/deferred/accepted as visible risk, and the latest state capsule is current.
 
@@ -290,13 +342,13 @@ do not treat a displayed recommendation as acceptance:
 3. `💾 Save the analysis`
 4. `⏹️ Close without a file or plan`
 
-Without a critical review, promote the Candidate Analysis Spec to the
+After completed critical review, promote the Candidate Analysis Spec to the
 Consolidated Analysis Spec only after the user explicitly chooses option 1 or
 2. Option 1 authorizes only authoring the consolidated analysis spec artifact;
 option 2 authorizes only the implementation-plan authoring handoff. Neither
 option authorizes implementation or execution. Options 3 and 4 do not promote
-the Candidate. The Candidate remains the Candidate until option 1 or 2 is
-explicitly selected.
+the Candidate. The Candidate remains the Candidate until review is complete
+and option 1 or 2 is explicitly selected.
 
 ### Artifact authoring after acceptance
 
@@ -306,12 +358,15 @@ the conditional Luna route, the bounded delegation admission, and the retained
 owner responsibilities for the selected artifact. Neither route starts
 implementation or execution.
 
-## Optional critical review
+## Critical review procedure
 
-Invoke `/internal-gateway-critical-master` only when the user selects it. Pass
-the Candidate Analysis Spec as the canonical subject, its `Specific critical
-focus`, and earlier conversation only as supporting evidence. The critical
-owner supplies its own intake, lenses, procedure, findings, and report.
+The `CRITICAL REVIEW` gate is mandatory before close or promotion. Invoke
+`/internal-gateway-critical-master` for its procedure when the review route is
+selected or required by this lifecycle. Pass the Candidate Analysis Spec as
+the canonical subject, its `Specific critical focus`, and earlier conversation
+only as supporting evidence. The critical owner supplies its intake, lenses,
+procedure, findings, and report; this gateway records only the structural
+completion predicate and keeps ownership of lifecycle and authority.
 
 While a blocking finding or a material unresolved finding remains, offer only
 the applicable examination, realignment, or additional-review actions. When
