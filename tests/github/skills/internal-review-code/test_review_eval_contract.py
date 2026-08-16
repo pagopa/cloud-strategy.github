@@ -4,8 +4,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -102,18 +100,15 @@ def test_missing_finding_or_skill_fails_acceptance() -> None:
     assert result["loaded_skills_exact"] is False
 
 
-def test_actions_manifest_requires_all_conditional_contributors() -> None:
+def test_actions_manifest_requires_the_merged_contributor() -> None:
     scorer = _load_scorer()
     manifest = {
         **MANIFEST,
-        "required_conditional_loaded_skills": [
-            "internal-github-actions",
-            "internal-github-action-composite",
-        ],
+        "required_conditional_loaded_skills": ["internal-github-actions"],
     }
     run = {
         **PASSING_RUN,
-        "conditional_loaded_skills": ["internal-github-actions"],
+        "conditional_loaded_skills": [],
     }
 
     result = scorer.score(manifest, run)

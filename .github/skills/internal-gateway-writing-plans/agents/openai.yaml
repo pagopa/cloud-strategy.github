@@ -20,7 +20,10 @@ interface:
     concrete targets, focused validation, a traceable ## Control Inventory,
     and a normative ## Execution Manifest v1 declaring targets, controls,
     native commands, manual obligations, authority boundaries, retry posture,
-    approval binding, bootstrap metadata, and handoff. New writer output uses
+    approval binding, bootstrap metadata, and handoff. Read the Normative
+    Manifest v1 Contract before drafting: use its exact top-level and nested
+    fields, use validations[].pass_signal, and make every task reference
+    resolve to an existing manifest ID. New writer output uses
     bootstrap.mode: manifest-only and emits no legacy ## Execution Contract;
     the current migration plan is the sole exact compatibility projection.
     Require

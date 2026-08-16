@@ -770,6 +770,9 @@ def _validate_tasks(value: object) -> None:
         _manifest_id_list(task["depends_on"], f"{label}.depends_on")
         _manifest_id_list(task["target_ids"], f"{label}.target_ids")
         _manifest_id_list(task["validation_ids"], f"{label}.validation_ids")
+        _manifest_id_list(
+            task["manual_obligation_ids"], f"{label}.manual_obligation_ids"
+        )
         task_acceptance = _manifest_non_empty_strings(
             task["acceptance"], f"{label}.acceptance"
         )
@@ -778,6 +781,41 @@ def _validate_tasks(value: object) -> None:
         )
         for item in (*task_acceptance, *task_stop_conditions):
             _reject_git_mutation(item, label)
+
+
+def _manifest_entity_ids(value: object, label: str) -> set[str]:
+    if not isinstance(value, list):
+        raise ValueError(f"{label} must be a list")
+    return {
+        _string(
+            _manifest_object(item, f"{label}[{index}]")["id"],
+            f"{label}[{index}].id",
+        )
+        for index, item in enumerate(value)
+    }
+
+
+def _validate_task_references(root: Mapping[str, object]) -> None:
+    available_ids = {
+        "depends_on": _manifest_entity_ids(root["tasks"], "tasks"),
+        "target_ids": _manifest_entity_ids(root["targets"], "targets"),
+        "validation_ids": _manifest_entity_ids(
+            root["validations"], "validations"
+        ),
+        "manual_obligation_ids": _manifest_entity_ids(
+            root["manual_obligations"], "manual_obligations"
+        ),
+    }
+    for index, raw_task in enumerate(root["tasks"]):
+        task = _manifest_object(raw_task, f"tasks[{index}]")
+        for field, ids in available_ids.items():
+            references = _manifest_id_list(task[field], f"tasks[{index}].{field}")
+            unknown = sorted(set(references) - ids)
+            if unknown:
+                raise ExecutionContractError(
+                    "unknown-task-reference",
+                    f"tasks[{index}].{field} references unknown IDs: {unknown}",
+                )
 
 
 def _validate_retry_policy(value: object) -> None:
@@ -966,6 +1004,7 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
         _validate_validations(root["validations"])
         _validate_manual_obligations(root["manual_obligations"])
         _validate_tasks(root["tasks"])
+        _validate_task_references(root)
         _validate_retry_policy(root["retry_policy"])
         _validate_hashing(root["hashing"])
         compute_semantic_fingerprint(root)

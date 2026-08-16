@@ -1,4 +1,0 @@
-interface:
-  display_name: "internal-github-action-composite"
-  short_description: "GitHub composite-action authoring"
-  default_prompt: "Use /internal-github to route this request to /internal-github-action-composite."

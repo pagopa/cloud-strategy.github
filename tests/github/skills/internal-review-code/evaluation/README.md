@@ -33,8 +33,9 @@ recall, runtime skill loading, or a model's report quality.
 The `fixtures/actions-review-target/` scenario preserves the generic exact-two
 contract and adds an optional `required_conditional_loaded_skills` manifest
 field. When present, the sanitized run must provide the ordered
-`conditional_loaded_skills` list exactly. The scenario expects the wrapper and
-Addy engine plus the workflow and composite-action contributors, and records
+`conditional_loaded_skills` list exactly. The merged Actions scenario expects
+the wrapper and Addy engine plus one `internal-github-actions` contributor for
+workflow and composite-action surfaces, and records
 workflow-to-composite-to-script observations through explicit finding IDs.
 
 The scorer checks only structured run fields: contributor identity, finding

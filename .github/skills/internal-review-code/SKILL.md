@@ -14,11 +14,11 @@ procedure, approval standard, or finding categories.
 
 ## Conditional domain contributors
 
-When the read-only target includes `.github/workflows/**`, conditionally load
-`/internal-github-actions` as a domain contributor. When it includes
-`.github/actions/**/action.y*ml`, conditionally load
-`/internal-github-action-composite`. When both surfaces are present, load both;
-unrelated code activates neither. Use
+When the read-only target includes `.github/workflows/**` or
+`.github/actions/**/action.y*ml`, conditionally load `/internal-github-actions`
+as the single GitHub Actions domain contributor. Keep workflow and composite
+action observations scoped to the changed surfaces; unrelated code activates
+neither. Use
 [the contributor protocol](references/actions-contributor-protocol.md) for the
 activation boundary and record shape.
 

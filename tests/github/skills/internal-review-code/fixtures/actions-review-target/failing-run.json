@@ -4,14 +4,12 @@
   "review_skill_sha256": "sha256:internal-review-code",
   "engine_sha256": "sha256:addyosmani-code-review-and-quality",
   "chat_debug_reference": "sanitized://chat-debug/actions-review-fail",
-  "contract_version": "internal-review-code-actions-eval-v1",
+  "contract_version": "internal-review-code-actions-eval-v2",
   "loaded_skills": [
     "internal-review-code",
     "addyosmani-code-review-and-quality"
   ],
-  "conditional_loaded_skills": [
-    "internal-github-actions"
-  ],
+  "conditional_loaded_skills": [],
   "matched_finding_ids": [
     "WORKFLOW_PERMISSIONS",
     "WORKFLOW_CONTEXT",

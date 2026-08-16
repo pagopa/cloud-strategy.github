@@ -6,11 +6,9 @@ review engine.
 
 ## Activation
 
-- Activate `internal-github-actions` only when the target contains
-  `.github/workflows/**`.
-- Activate `internal-github-action-composite` only when the target contains
-  `.github/actions/**/action.yml` or `.github/actions/**/action.yaml`.
-- Activate both when both surfaces are in scope.
+- Activate `internal-github-actions` when the target contains
+  `.github/workflows/**`, `.github/actions/**/action.yml`, or
+  `.github/actions/**/action.yaml`.
 - Activate neither for unrelated code.
 
 ## Contributor record
@@ -18,7 +16,7 @@ review engine.
 Each contributor returns one bounded record with only these fields:
 
 ```yaml
-domain: github-actions | github-composite-action
+domain: github-actions
 changed_contract_surfaces: []
 observations: []
 probes: []

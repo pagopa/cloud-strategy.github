@@ -316,6 +316,29 @@ def test_current_plan_rejects_git_directory_target(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
+    "reference_field",
+    ("depends_on", "target_ids", "validation_ids", "manual_obligation_ids"),
+)
+def test_current_plan_rejects_unknown_task_references(
+    tmp_path: Path, reference_field: str
+) -> None:
+    text = _fixture("valid-plan.md").read_text()
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["tasks"][0][reference_field] = ["MISSING"]
+    text = text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    plan = _stage_valid_plan(tmp_path, text)
+
+    findings = validate_plan(plan, tmp_path)
+
+    assert any(
+        item.code == "unknown-task-reference" and reference_field in item.message
+        for item in findings
+    )
+
+
+@pytest.mark.parametrize(
     ("needle", "replacement", "message"),
     (
         ('"schema_version": 1', '"schema_version": 2', "schema_version"),
