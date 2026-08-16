@@ -847,7 +847,7 @@ def test_public_wrapper_projects_one_autonomous_route_without_brainstorming_hand
     metadata = yaml.safe_load(PUBLIC_WRAPPER_PATH.read_text(encoding="utf-8"))
     prompt = metadata["interface"]["default_prompt"]
 
-    assert metadata["policy"]["allow_implicit_invocation"] is False
+    assert "policy" not in metadata
     assert "autonomous route" in prompt
     assert "/superpowers-brainstorming" not in prompt
     assert prompt.count("/internal-gateway-execute-plans") == 1
