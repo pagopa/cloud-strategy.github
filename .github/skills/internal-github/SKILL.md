@@ -62,6 +62,10 @@ action authoring remain separate contract surfaces under
 
 ## Collision boundaries
 
+- When a request arrives with a `parent`, exclude that parent from destination
+  selection before invoking a specialist. For `parent: internal-review-code`,
+  never route back to `/internal-review-code`.
+
 - Technical review versus PR readiness: route findings and static contract
   evidence to `/internal-review-code`; route current PR state, checks, reviews,
   merge, and terminal verification to `/internal-github-pr`.

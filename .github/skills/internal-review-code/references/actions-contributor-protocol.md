@@ -6,10 +6,20 @@ review engine.
 
 ## Activation
 
-- Activate `internal-github-actions` when the target contains
-  `.github/workflows/**`, `.github/actions/**/action.yml`, or
-  `.github/actions/**/action.yaml`.
-- Activate neither for unrelated code.
+- Invoke `/internal-github` when the target contains `.github/workflows/**`,
+  `.github/actions/**/action.yml`, or `.github/actions/**/action.yaml`.
+- Use only this minimal envelope; the gateway derives `forbid_destination` from
+  `parent` and selects the specialist:
+
+  ```yaml
+  role: domain-routing
+  parent: internal-review-code
+  deliverable: GitHub Actions contributor observations
+  evidence: target and linked static evidence
+  ```
+- The gateway reaches `internal-github-actions` through this envelope. Do not
+  invoke the specialist directly, and invoke neither contributor for unrelated
+  code.
 
 ## Contributor record
 

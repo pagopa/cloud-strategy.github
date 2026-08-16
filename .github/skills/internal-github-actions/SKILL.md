@@ -76,6 +76,9 @@ permissions and environments, composite actions, repository scripts,
 artifacts or caches, and external system boundaries when the target links
 them.
 
+When reached for a review, this contributor is selected through the
+`/internal-github` gateway envelope, not invoked as a direct review entry point.
+
 For workflow surfaces, focus on OIDC and least privilege, full-SHA action pins,
 input and context validity, reuse contracts, permissions and environment
 boundaries, artifact and cache transfers, and the relevant chain links.

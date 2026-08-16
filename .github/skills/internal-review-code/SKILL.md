@@ -12,15 +12,22 @@ engine. The core owns review reasoning and severity. This wrapper owns the publi
 repository preflight, target boundaries, escalation rules, and final validation. It must not restate the engine's review axes,
 procedure, approval standard, or finding categories.
 
-## Conditional domain contributors
+## GitHub routing and conditional domain contributors
 
 When the read-only target includes `.github/workflows/**` or
-`.github/actions/**/action.y*ml`, conditionally load `/internal-github-actions`
-as the single GitHub Actions domain contributor. Keep workflow and composite
-action observations scoped to the changed surfaces; unrelated code activates
-neither. Use
-[the contributor protocol](references/actions-contributor-protocol.md) for the
-activation boundary and record shape.
+`.github/actions/**/action.y*ml`, invoke `/internal-github` with the minimal
+envelope defined in
+[the contributor protocol](references/actions-contributor-protocol.md). The
+gateway selects `/internal-github-actions` as the single domain contributor.
+Keep workflow and composite-action observations scoped to the changed
+surfaces; unrelated code invokes neither contributor. Do not invoke the
+specialist directly.
+
+For a separate non-review GitHub follow-up, invoke `/internal-github` with the
+same envelope and the follow-up as `deliverable`. Keep that follow-up
+report-only and separate from this review's verdict. The gateway owns
+destination selection and parent exclusion; the wrapper does not add a second
+routing table.
 
 Contributors are bounded observers inside this review flow. They may return
 domain observations, changed contract surfaces, execution-chain probes,

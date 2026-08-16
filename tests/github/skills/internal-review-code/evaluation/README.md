@@ -34,13 +34,16 @@ The `fixtures/actions-review-target/` scenario preserves the generic exact-two
 contract and adds an optional `required_conditional_loaded_skills` manifest
 field. When present, the sanitized run must provide the ordered
 `conditional_loaded_skills` list exactly. The merged Actions scenario expects
-the wrapper and Addy engine plus one `internal-github-actions` contributor for
-workflow and composite-action surfaces, and records
+the wrapper and Addy engine plus the ordered gateway and
+`internal-github-actions` contributor identities for workflow and
+composite-action surfaces, and records
 workflow-to-composite-to-script observations through explicit finding IDs.
 
 The scorer checks only structured run fields: contributor identity, finding
 recall, verdict, and scope violations. It does not parse report prose, prove
-runtime loading, infer runner health, or establish model report quality.
+runtime routing, or infer runner health from fixture evidence; these loaded
+identities are a proxy, not proof of runtime routing or runner health, and it
+does not establish model report quality.
 Runtime capture, when available, should record the model identity, target and
 source fingerprints, loaded identities, finding IDs, verdict, scope
 violations, and a sanitized debug reference. If capture is unavailable, retain

@@ -10,6 +10,7 @@
     "addyosmani-code-review-and-quality"
   ],
   "conditional_loaded_skills": [
+    "internal-github",
     "internal-github-actions"
   ],
   "matched_finding_ids": [
