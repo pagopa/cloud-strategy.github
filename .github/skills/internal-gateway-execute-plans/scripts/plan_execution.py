@@ -360,14 +360,17 @@ def _contains_embedded_digest(value: object) -> bool:
 
 
 def compute_semantic_fingerprint(manifest: Mapping[str, object]) -> str:
-    """Return the external SHA-256 of the canonical Execution Manifest JSON."""
+    """Return the SHA-256 of the canonical manifest without delegation metadata."""
 
-    if _contains_embedded_digest(manifest):
+    fingerprint_input = {
+        key: value for key, value in manifest.items() if key != "delegation"
+    }
+    if _contains_embedded_digest(fingerprint_input):
         raise ExecutionContractError(
             "manifest-hash-self-reference",
             "Execution Manifest must not contain a content or semantic digest value",
         )
-    return f"sha256:{hashlib.sha256(canonical_json(manifest)).hexdigest()}"
+    return f"sha256:{hashlib.sha256(canonical_json(fingerprint_input)).hexdigest()}"
 
 
 def _field_differences(
@@ -521,6 +524,18 @@ def _validate_delegation_provenance(
                 f"delegation.{record_name} must bind the accepted result hashes; "
                 "material edits require new content and semantic hashes plus acceptance",
             )
+    if result["content_hash"] == result["plan_fingerprint"]:
+        raise ExecutionContractError(
+            "delegation-hash-collision",
+            "delegation content_hash must differ from plan_fingerprint",
+        )
+
+    expected_fingerprint = compute_semantic_fingerprint(root)
+    if result["plan_fingerprint"] != expected_fingerprint:
+        raise ExecutionContractError(
+            "delegation-fingerprint-mismatch",
+            "delegation plan_fingerprint must match the delegation-excluded manifest fingerprint",
+        )
 
 
 def _manifest_non_empty_strings(value: object, label: str) -> tuple[str, ...]:
@@ -2040,6 +2055,17 @@ def _validate_plan(
                     else "bootstrap-projection-drift"
                 )
                 findings.append(Finding(code, message))
+            if (
+                delegation_compatibility_mode(manifest)
+                == LEGACY_DELEGATION_COMPATIBILITY
+            ):
+                findings.append(
+                    Finding(
+                        "legacy-delegation-compatibility",
+                        "Manifest v1 without delegation is parseable only through the named legacy compatibility path.",
+                        "notice",
+                    )
+                )
     return findings
 
 
@@ -2060,6 +2086,16 @@ def validate_state(
         except (OSError, UnicodeError, ExecutionContractError):
             pass
     findings = _validate_plan(plan_path, effective_root, snapshot)
+    if snapshot is not None and (
+        delegation_compatibility_mode(snapshot.manifest)
+        == LEGACY_DELEGATION_COMPATIBILITY
+    ):
+        findings.append(
+            Finding(
+                "legacy-delegation-state-check",
+                "Manifest v1 without delegation cannot pass state-check; reconstruct the manifest and refresh approval.",
+            )
+        )
     if state_path.suffix.lower() != ".yaml":
         return findings + [
             Finding(

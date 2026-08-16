@@ -240,9 +240,11 @@ Use these exact nested shapes and values:
   `false` respectively.
 - `hashing` has exactly `content_sha256`, `semantic_fingerprint`, and
   `self_reference`. Both hash records have algorithm `SHA-256`, a non-empty
-  input, and binding `external`; the semantic record also has a non-empty
-  `version`; `self_reference` is `false`. Do not embed either computed digest
-  in the manifest.
+  input, and binding `external`; the semantic fingerprint input is the RFC 8785
+  canonical Execution Manifest JSON with the top-level `delegation` subtree
+  excluded; the semantic record also has a non-empty `version`;
+  `self_reference` is `false`. Do not embed either computed digest in the
+  manifest.
 - `approval` has exactly `binds`, `editorial_content_change`, and
   `normative_manifest_change`; `binds` is `semantic_fingerprint` and the two
   change fields are non-empty strings.
@@ -281,6 +283,17 @@ blocking findings. The writer never creates the status sibling or claims
 execution approval. After explicit approval, the executor repeats preflight,
 binds the status sibling to the exact semantic fingerprint and content hash,
 and only then creates state and permits the first task edit.
+
+## Repository Preflight
+
+Every current retained plan must contain this heading and concrete values for
+each field below. The writer documents these fields; the executor parses and
+enforces the retained plan.
+
+- **Baseline Validation:** Run the manifest's baseline validation before edits and record the result.
+- **Recovery Policy:** Allow only one distinct, task-local correction implied by the approved acceptance.
+- **Escalation Conditions:** Stop for authority, scope, safety, or unresolved task-local failures.
+- **User-Facing Report:** Report the plan path, scope, five evidence categories, one risk, and one next action.
 
 ### Producer readiness boundary
 

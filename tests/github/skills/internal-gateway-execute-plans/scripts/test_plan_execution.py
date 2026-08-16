@@ -30,6 +30,7 @@ from plan_execution import (  # noqa: E402
     validate_ignored_artifact,
     validate_manifest_projection,
     validate_plan,
+    validate_state,
     validate_relevant_baseline,
 )
 
@@ -47,12 +48,15 @@ def _manifest_text_with_delegation(delegation: dict[str, object]) -> str:
     return text[:start] + json.dumps(manifest, indent=2) + text[end:]
 
 
-def _accepted_provenance(seed: str = "3") -> dict[str, str]:
-    next_seed = format((int(seed, 16) + 1) % 16, "x")
+def _accepted_provenance(
+    manifest: dict[str, object] | None = None, seed: str = "3"
+) -> dict[str, str]:
+    if manifest is None:
+        manifest = parse_execution_manifest(_fixture("valid-plan.md").read_text())
     return {
         "status": "accepted",
         "content_hash": "sha256:" + seed * 64,
-        "plan_fingerprint": "sha256:" + next_seed * 64,
+        "plan_fingerprint": compute_semantic_fingerprint(manifest),
     }
 
 
@@ -79,7 +83,8 @@ def test_valid_plan_parses_contract_and_has_no_findings(valid_plan: Path) -> Non
 def test_manifest_accepts_delegated_provenance_with_accepted_result(
     tmp_path: Path,
 ) -> None:
-    provenance = _accepted_provenance()
+    base = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    provenance = _accepted_provenance(base)
     text = _manifest_text_with_delegation(
         {
             "schema_version": 1,
@@ -93,6 +98,72 @@ def test_manifest_accepts_delegated_provenance_with_accepted_result(
     plan = _stage_valid_plan(tmp_path, text)
 
     assert validate_plan(plan, tmp_path) == []
+
+
+def test_semantic_fingerprint_excludes_delegation() -> None:
+    base = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    delegated = json.loads(json.dumps(base))
+    provenance = _accepted_provenance(base)
+    delegated["delegation"] = {
+        "schema_version": 1,
+        "mode": "delegated",
+        "worker": "internal-luna-executor",
+        "result": provenance,
+        "receipt": dict(provenance),
+        "acceptance": dict(provenance),
+    }
+
+    assert compute_semantic_fingerprint(base) == compute_semantic_fingerprint(delegated)
+
+
+def test_manifest_rejects_delegation_hash_collision(tmp_path: Path) -> None:
+    base = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    fingerprint = compute_semantic_fingerprint(base)
+    collision = {
+        "status": "accepted",
+        "content_hash": fingerprint,
+        "plan_fingerprint": fingerprint,
+    }
+    plan = _stage_valid_plan(
+        tmp_path,
+        _manifest_text_with_delegation(
+            {
+                "schema_version": 1,
+                "mode": "delegated",
+                "worker": "internal-luna-executor",
+                "result": collision,
+                "receipt": dict(collision),
+                "acceptance": dict(collision),
+            }
+        ),
+    )
+
+    assert "delegation-hash-collision" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_manifest_rejects_delegation_fingerprint_drift(tmp_path: Path) -> None:
+    base = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    provenance = _accepted_provenance(base)
+    provenance["plan_fingerprint"] = "sha256:" + "f" * 64
+    plan = _stage_valid_plan(
+        tmp_path,
+        _manifest_text_with_delegation(
+            {
+                "schema_version": 1,
+                "mode": "delegated",
+                "worker": "internal-luna-executor",
+                "result": provenance,
+                "receipt": dict(provenance),
+                "acceptance": dict(provenance),
+            }
+        ),
+    )
+
+    assert "delegation-fingerprint-mismatch" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
 
 
 def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None:
@@ -168,7 +239,7 @@ def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None
                 "worker": "internal-luna-executor",
                 "result": _accepted_provenance(),
                 "receipt": _accepted_provenance(),
-                "acceptance": _accepted_provenance("9"),
+                "acceptance": _accepted_provenance(seed="9"),
             },
             "stale-delegation-binding",
         ),
@@ -216,6 +287,47 @@ def test_manifest_without_delegation_uses_named_legacy_compatibility_path(
     assert getattr(sys.modules["plan_execution"], "delegation_compatibility_mode")(
         parsed
     ) == "manifest-v1-without-delegation"
+
+
+def test_manifest_without_delegation_preflight_is_notice_only(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest.pop("delegation")
+    plan = _stage_valid_plan(
+        tmp_path,
+        text[:start] + json.dumps(manifest, indent=2) + text[end:],
+    )
+
+    findings = validate_plan(plan, tmp_path)
+
+    assert any(
+        item.code == "legacy-delegation-compatibility"
+        and item.severity == "notice"
+        for item in findings
+    )
+    assert not any(item.severity == "blocking" for item in findings)
+
+
+def test_state_check_blocks_manifest_without_delegation(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest.pop("delegation")
+    plan = _stage_valid_plan(
+        tmp_path,
+        text[:start] + json.dumps(manifest, indent=2) + text[end:],
+    )
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    _write_status_yaml(plan, state)
+
+    findings = validate_state(plan, state, tmp_path)
+
+    assert "legacy-delegation-state-check" in {
+        item.code for item in findings
+    }
 
 
 def test_plan_without_execution_manifest_is_blocking(tmp_path: Path) -> None:

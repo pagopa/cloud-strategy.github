@@ -79,10 +79,12 @@ Use these exact nested shapes and values:
    and `minor_or_cosmetic_reopens`. Use `1`, `1`, `1`, `true`, `stalled`, and
    `false` respectively.
 - `hashing` has exactly `content_sha256`, `semantic_fingerprint`, and
-   `self_reference`. Both hash records have algorithm `SHA-256`, a non-empty
-   input, and binding `external`; the semantic record also has a non-empty
-   `version`; `self_reference` is `false`. Do not embed either computed digest
-   in the manifest.
+  `self_reference`. Both hash records have algorithm `SHA-256`, a non-empty
+  input, and binding `external`; the semantic fingerprint input is the RFC 8785
+  canonical Execution Manifest JSON with the top-level `delegation` subtree
+  excluded; the semantic record also has a non-empty `version`;
+  `self_reference` is `false`. Do not embed either computed digest in the
+  manifest.
 - `approval` has exactly `binds`, `editorial_content_change`, and
    `normative_manifest_change`; `binds` is `semantic_fingerprint` and the two
    change fields are non-empty strings.

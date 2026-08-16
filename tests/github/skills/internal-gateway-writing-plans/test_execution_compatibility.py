@@ -23,6 +23,14 @@ EXECUTOR_BUNDLE = REPO_ROOT / ".github/skills/internal-gateway-execute-plans"
 INVENTORY = REPO_ROOT / ".github/INVENTORY.md"
 
 
+def _normalized_manifest_contract(text: str) -> str:
+    start_marker = "A current manifest has exactly these top-level fields"
+    end_marker = "no `## Execution Contract`."
+    start = text.index(start_marker, text.index("## Normative Manifest v1 Contract"))
+    end = text.index(end_marker, start) + len(end_marker)
+    return re.sub(r"\s+", " ", text[start:end]).strip()
+
+
 def extract_manifest_projection(text: str) -> tuple[set[str], tuple[str, ...]]:
     """Extract the writer-owned control table and task IDs from the manifest."""
 
@@ -90,6 +98,28 @@ def test_writer_fixture_emits_manifest_only() -> None:
     assert "## Execution Contract" not in text
     _, task_ids = extract_manifest_projection(text)
     assert task_ids == ("T1", "T2")
+
+
+def test_gateway_normative_manifest_contracts_remain_equal() -> None:
+    executor = (REPO_ROOT / ".github/skills/internal-gateway-execute-plans/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    writer = (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
+
+    assert _normalized_manifest_contract(executor) == _normalized_manifest_contract(writer)
+
+
+def test_writer_documents_repository_preflight_fields() -> None:
+    text = (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
+
+    assert "## Repository Preflight" in text
+    for label in (
+        "Baseline Validation",
+        "Recovery Policy",
+        "Escalation Conditions",
+        "User-Facing Report",
+    ):
+        assert label in text
 
 
 def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> None:
