@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Azure Operations"
+  display_name: "internal-azure-operations"
   short_description: "Azure validation, monitoring, and evidence"
   default_prompt: "Use $internal-azure for an Azure operations request, then apply $internal-azure-operations to define the preflight, validation, monitoring, recovery, or evidence path."

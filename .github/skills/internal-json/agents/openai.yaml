@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal JSON"
+  display_name: "internal-json"
   short_description: "Strict JSON format handling"
   default_prompt: "Use $internal-json when editing or reviewing JSON syntax, encoding, duplicate keys, numeric portability, or format-owner routing."

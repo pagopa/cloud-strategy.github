@@ -1,5 +1,5 @@
 interface:
-  display_name: "Critical Master"
+  display_name: "internal-gateway-critical-master"
   short_description: "Adaptive critical analysis for any decision context"
   default_prompt: >-
     Use /internal-gateway-critical-master to analyze the available context. An

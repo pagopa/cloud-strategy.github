@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal GitHub"
+  display_name: "internal-github"
   short_description: "Official GitHub entry point and router"
   default_prompt: "Use /internal-github as the entry point for this GitHub request and invoke the minimum routed specialist set."

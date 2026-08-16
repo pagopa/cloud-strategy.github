@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal AWS"
+  display_name: "internal-aws"
   short_description: "Canonical entry point for every AWS request"
   default_prompt: "Use $internal-aws to classify this AWS request and invoke the minimum specialist lane."

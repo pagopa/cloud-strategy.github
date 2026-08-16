@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Spring Boot"
+  display_name: "internal-java-spring-boot-development"
   short_description: "Spring Boot runtime and framework semantics"
   default_prompt: "Use $internal-java-spring-boot-development when Spring Boot-specific framework or runtime semantics determine correctness."

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal AWS Operations"
+  display_name: "internal-aws-operations"
   short_description: "AWS monitoring, rollout, and recovery evidence"
   default_prompt: "Use $internal-aws-operations for this routed AWS operations task."

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal AWS MCP Research"
+  display_name: "internal-aws-mcp-research"
   short_description: "Current AWS documentation and IAM evidence"
   default_prompt: "Use $internal-aws-mcp-research for this routed AWS research task."

@@ -1,5 +1,5 @@
 interface:
-  display_name: "Simple Task Internal Gateway"
+  display_name: "internal-gateway-simple-task"
   short_description: "Fast path for concrete repository tasks"
   default_prompt: >-
     Use /internal-gateway-simple-task for concrete repository-owned

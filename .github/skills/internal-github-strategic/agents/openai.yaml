@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal GitHub Strategic"
+  display_name: "internal-github-strategic"
   short_description: "GitHub strategic decision framing"
   default_prompt: "Use /internal-github to route this request to /internal-github-strategic."

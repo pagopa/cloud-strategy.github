@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal GCP Organization Structure"
+  display_name: "internal-gcp-organization-structure"
   short_description: "GCP org, project, and topology layout"
   default_prompt: "Use $internal-gcp-organization-structure when $internal-gcp selects organization structure for GCP placement, hierarchy, billing ownership, project segmentation, or Shared VPC topology."

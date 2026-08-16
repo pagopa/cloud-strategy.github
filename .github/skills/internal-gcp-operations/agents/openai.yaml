@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal GCP Operations"
+  display_name: "internal-gcp-operations"
   short_description: "GCP validation, monitoring, and evidence"
   default_prompt: "Use $internal-gcp-operations when $internal-gcp selects operations for GCP readiness, monitoring, backup, recovery, inventory, validation, reporting, or evidence."

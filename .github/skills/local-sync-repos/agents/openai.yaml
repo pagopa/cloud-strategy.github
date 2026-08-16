@@ -1,4 +1,4 @@
 interface:
-  display_name: "Local Sync Repos"
+  display_name: "local-sync-repos"
   short_description: "Mirror the managed instruction and hygiene baseline into consumer repos"
   default_prompt: "Use $local-sync-repos to plan or apply a consumer-repository baseline sync from this standards repository."

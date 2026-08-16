@@ -1,5 +1,5 @@
 interface:
-  display_name: "Idea Analysis"
+  display_name: "internal-gateway-idea"
   short_description: "Conversation-first analysis for unclear ideas"
   default_prompt: >-
     Use $internal-gateway-idea only when explicitly selected and keep one
@@ -45,5 +45,3 @@ token_budget:
   consumers:
     - "public-wrapper"
     - "evaluator-contract"
-policy:
-  allow_implicit_invocation: false

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Java Project"
+  display_name: "internal-java-project"
   short_description: "Framework-neutral Java project design"
   default_prompt: "Use $internal-java-project when framework-neutral Java application or library boundaries and design are the primary concern."
