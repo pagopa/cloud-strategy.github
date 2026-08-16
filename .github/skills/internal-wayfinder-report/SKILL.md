@@ -17,7 +17,9 @@ acceptance, and validation are fixed. Use one `DelegationBrief` v1 and verify
 the adapter-composed `WorkerResult` v1 plus caller-owned `VerificationReceipt`
 v1. Treat unobserved validation and budget data as claims or unavailable
 evidence. Never delegate source authority, findings, diagram relationships,
-acceptance, or closeout.
+acceptance, or closeout. When timeout, interruption, executor unavailability,
+or missing terminal output prevents a worker payload, record a caller-owned
+`LifecycleRecord` and create neither a synthetic `WorkerResult` nor a receipt.
 
 ## When to use
 

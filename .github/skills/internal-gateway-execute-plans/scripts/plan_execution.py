@@ -170,6 +170,7 @@ DELEGATION_RECORD_FIELDS = frozenset(
     {"status", "content_hash", "plan_fingerprint"}
 )
 DELEGATION_MODES = frozenset({"none", "delegated"})
+LOCAL_DELEGATION_RESULT = "not_applicable"
 LEGACY_DELEGATION_COMPATIBILITY = "manifest-v1-without-delegation"
 CURRENT_DELEGATION_COMPATIBILITY = "manifest-v1-with-delegation-v1"
 
@@ -486,10 +487,18 @@ def _validate_delegation_provenance(
                 "delegation-receipt-without-worker",
                 "mode none cannot claim a delegation receipt",
             )
-        if delegation["result"] is not None or delegation["acceptance"] is not None:
+        if (
+            delegation["result"] is not None
+            and delegation["result"] != LOCAL_DELEGATION_RESULT
+        ) or delegation["acceptance"] is not None:
             raise ExecutionContractError(
                 "local-worker-authorship",
                 "mode none cannot claim worker result or acceptance",
+            )
+        if delegation["result"] != LOCAL_DELEGATION_RESULT:
+            raise ExecutionContractError(
+                "local-provenance-marker",
+                "mode none must record result not_applicable",
             )
         return
 

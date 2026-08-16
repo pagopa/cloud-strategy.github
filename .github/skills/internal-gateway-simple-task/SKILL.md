@@ -122,8 +122,10 @@ validation, and final reporting.
 - Use one initial worker attempt, at most one context refill, and at most one
   corrective retry. A repeated progress signature is `stalled`; Minor,
   cosmetic, punctuation, and prose-only findings do not reopen a retry. If the
-  worker is unavailable, perform the work locally only when the locked brief
-  permits that fallback.
+  worker times out, is interrupted, is unavailable, or emits no terminal
+  payload, record a caller-owned `LifecycleRecord` and do not fabricate a
+  `WorkerResult` or `VerificationReceipt`. Perform work locally only after the
+  locked brief permits that fallback and the caller starts a new local route.
 - For executable or evaluable behavior, load `/internal-tdd` before editing and
   record exactly one selected posture for the current task. Use
   `validation-only` only when that task has no useful executable or evaluable

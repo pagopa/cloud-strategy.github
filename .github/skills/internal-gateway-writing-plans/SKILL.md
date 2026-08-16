@@ -73,13 +73,18 @@ description: Use when repository-owned work needs an approved implementation pla
   evidence only for `mandatory-test-first`, while `feature-first` retains
   validation before production-ready completion.
   After eligibility, the control inventory, plan structure, locked decisions,
-  and acceptance are complete, select exactly one authoring route. If the
-  active authoring model is GPT-5.6 Luna, the primary owner authors locally and
-  records `worker: primary-owner`; do not manufacture a brief, worker result,
-  receipt, or retrospective delegation claim. Otherwise, delegation to
-  `internal-luna-executor` is required. If model identity is unavailable, use
-  the delegated route. If the required Luna worker is unavailable, stop as
-  blocked instead of silently changing authorship.
+  and acceptance are complete, use local authoring as the default route:
+  record `delegation.mode: none`, `worker: primary-owner`, and
+  `result: not_applicable`; do not manufacture a brief, worker result,
+  receipt, or retrospective delegation claim. Delegation is an exception only
+  when the value gate proves that one autonomous, bounded, verifiable evidence
+  package is materially more useful than a local operation and can remain off
+  the critical path. Keep final synthesis parent-owned. Model or provider
+  identity alone is not a routing reason. If delegation was explicitly chosen
+  and the worker is unavailable, record the caller-owned lifecycle event and
+  stop blocked; continue locally only after explicit caller authorization, then
+  record the new local route as `delegation.mode: none` and `worker:
+  primary-owner` with no synthetic worker artifacts.
 
   For the delegated route, fix the objective, value gate, bounded evidence,
   constraints, exact retained-plan write scope, expected output, acceptance,
@@ -128,13 +133,30 @@ description: Use when repository-owned work needs an approved implementation pla
   concluded and passed. The executor persists those categories in the YAML
   status sibling together with approval evidence bound to the plan hashes. A
   standalone `validated` flag is not a readiness claim.
-4. Report exactly the retained plan path, scope and readiness, material risk or
-  residual gap, and `/internal-gateway-execute-plans` as the sole next owner
-  after explicit execution approval. Keep plan details in the retained
-  artifact. Do not invoke execution, create a status sibling, or offer an
-  imported execution owner before that approval. Completion: the path,
-  readiness, material risk or gap, and sole next owner are reported and
-  execution has not started without approval.
+4. Report the plan through the writer-specific compact projection below. Keep
+  plan details in the retained artifact. Do not invoke execution, create a
+  status sibling, or offer an imported execution owner before explicit
+  approval. Completion: every line of the projection is present, the material
+  gap is visible, and execution has not started without approval.
+
+## Writer communication
+
+Use exactly five short lines after plan authoring or review:
+
+```text
+Plan: <retained path> | <ready, blocked, or needs review>
+Scope: <one-line target and anti-scope>
+Evidence: structure=<...>; semantic=<...>; provenance=<...>; baseline=<...>; execution=<...>
+Risk: <one material risk or none>
+Next: <one owner and action; execution owner only after explicit approval>
+```
+
+Do not copy tasks, the control inventory, or the manifest into chat. The five
+evidence categories remain distinct; a missing category keeps readiness
+inconclusive. Put acceptance conditions and residual gaps in `Risk` or
+`Next`, not in a second narrative. Use a Mermaid diagram only when the plan's
+task dependency or handoff cannot be understood clearly from the five lines;
+the diagram is supplementary, never a replacement for them.
 
 ## Command Portability
 

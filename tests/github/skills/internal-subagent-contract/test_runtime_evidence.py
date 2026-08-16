@@ -18,9 +18,11 @@ from runtime_evidence import (  # noqa: E402
     RuntimeObservation,
     bounded_diagnostics,
     compose_handoff,
+    compose_lifecycle_record,
     evaluate_runtime_evidence,
     isolated_diagnostics,
     persist_handoff,
+    persist_lifecycle_record,
     resolve_evidence_allowlist,
     validate_path_identity,
 )
@@ -31,6 +33,7 @@ from subagent_contract import (  # noqa: E402
     primary_owner_decision,
     sha256_path,
     validate_payload_schema,
+    validate_lifecycle_record,
     validate_receipt,
 )
 
@@ -283,6 +286,118 @@ def test_runtime_evaluator_distinguishes_claims_observations_and_missing_telemet
     }
     assert failed["state"] == "failed"
     assert unavailable["state"] == "unavailable"
+
+
+@pytest.mark.parametrize(
+    ("event", "terminal_state"),
+    [
+        ("timeout", "stalled"),
+        ("interrupted", "stalled"),
+        ("unavailable", "unavailable"),
+        ("no_terminal_result", "stalled"),
+    ],
+)
+def test_lifecycle_record_does_not_fabricate_worker_result_or_receipt(
+    tmp_path: Path, event: str, terminal_state: str
+) -> None:
+    brief, _, _ = _setup(tmp_path, "read")
+    brief_bytes = json.dumps(brief, sort_keys=True).encode()
+
+    record = compose_lifecycle_record(
+        brief,
+        repo_root=tmp_path,
+        brief_bytes=brief_bytes,
+        event=event,
+        reason=f"worker lifecycle ended with {event}",
+    )
+
+    assert record["delegation_id"] == brief["delegation_id"]
+    assert record["lifecycle"]["event"] == event
+    assert record["terminal"]["state"] == terminal_state
+    assert record["terminal"]["output"] is None
+    assert record["worker_result"] is None
+    assert record["verification_receipt"] is None
+
+
+def test_persist_lifecycle_record_uses_separate_sibling_without_result_or_receipt(
+    tmp_path: Path,
+) -> None:
+    brief, _, _ = _setup(tmp_path, "read")
+    brief_bytes = json.dumps(brief, sort_keys=True).encode()
+    record = compose_lifecycle_record(
+        brief,
+        repo_root=tmp_path,
+        brief_bytes=brief_bytes,
+        event="timeout",
+        reason="worker did not emit terminal output",
+    )
+
+    lifecycle_path = persist_lifecycle_record(
+        record,
+        brief,
+        repo_root=tmp_path,
+        brief_bytes=brief_bytes,
+    )
+
+    assert lifecycle_path == tmp_path / "handoff/read.lifecycle.json"
+    assert json.loads(lifecycle_path.read_text()) == record
+    assert not (tmp_path / brief["result_path"]).exists()
+    assert not (tmp_path / "handoff/read.receipt.json").exists()
+
+
+@pytest.mark.parametrize(
+    ("event", "reason", "evidence_ref", "brief_bytes", "error"),
+    [
+        ("unknown", "worker stopped", None, None, "unsupported lifecycle event"),
+        ("timeout", "   ", None, None, "reason must be non-empty"),
+        ("timeout", "worker stopped", "   ", None, "evidence_ref must be non-empty"),
+        ("timeout", "worker stopped", None, b"{}", "brief bytes do not match"),
+    ],
+)
+def test_lifecycle_record_rejects_invalid_input(
+    tmp_path: Path,
+    event: str,
+    reason: str,
+    evidence_ref: str | None,
+    brief_bytes: bytes | None,
+    error: str,
+) -> None:
+    brief, _, _ = _setup(tmp_path, "read")
+    supplied_brief_bytes = brief_bytes or json.dumps(brief, sort_keys=True).encode()
+
+    with pytest.raises(AdapterError, match=error):
+        compose_lifecycle_record(
+            brief,
+            repo_root=tmp_path,
+            brief_bytes=supplied_brief_bytes,
+            event=event,
+            reason=reason,
+            evidence_ref=evidence_ref,
+        )
+
+
+def test_validate_lifecycle_record_rejects_fabricated_terminal_payload(
+    tmp_path: Path,
+) -> None:
+    brief, _, _ = _setup(tmp_path, "read")
+    brief_bytes = json.dumps(brief, sort_keys=True).encode()
+    record = compose_lifecycle_record(
+        brief,
+        repo_root=tmp_path,
+        brief_bytes=brief_bytes,
+        event="timeout",
+        reason="worker did not emit terminal output",
+    )
+    record["worker_result"] = {"status": "completed"}
+
+    errors = validate_lifecycle_record(
+        record,
+        brief,
+        repo_root=tmp_path,
+        brief_bytes=brief_bytes,
+    )
+
+    assert "lifecycle_record.worker_result must be null" in errors
 
 
 def test_persistence_rejects_result_path_mismatch(tmp_path: Path) -> None:

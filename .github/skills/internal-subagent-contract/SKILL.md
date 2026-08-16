@@ -31,7 +31,9 @@ owner.
   bounded assignment, writes only declared artifacts, and returns semantic
   worker fields.
 - The runtime adapter composes the deterministic `WorkerResult` envelope,
-  persists it outside worker scope, and produces a `VerificationReceipt`.
+  persists it outside worker scope, and produces a `VerificationReceipt` when
+  a terminal worker payload exists. When no terminal payload exists, the
+  caller records a separate `LifecycleRecord` instead.
 - The consumer checks result and receipt before deciding acceptance, retry,
   promotion, or closeout.
 
@@ -61,6 +63,45 @@ Results use `completed`, `partial`, `blocked`, `stalled`, `invalid_input`, or
 for one pair; v1 does not own multi-attempt lineage. `retry_eligible()` is a
 deprecated caller-side compatibility utility. Missing authority and invalid
 input stop the worker. Minor or prose-only findings do not justify a retry.
+
+## Worker result projection
+
+The worker returns one compact semantic result, not a progress transcript:
+
+```text
+Status: <completed | partial | blocked | stalled | invalid_input | failed>
+Value: <true/false and one factual sentence>
+Artifacts: <path + verified kind, or none>
+Evidence: <acceptance-bound outcomes only>
+Remaining: <material gaps, or none>
+Retry: <recommended/not recommended + required new input>
+```
+
+The caller-owned `VerificationReceipt` remains separate and is not repeated in
+the worker summary. A result is not accepted because its prose sounds complete:
+the caller must verify the declared bytes, scope, evidence, receipt, and
+acceptance decision. A timeout or missing terminal result is `stalled`, never a
+successful summary. A timeout, interruption, or missing terminal result must
+be represented by a caller-owned `LifecycleRecord`; it must not be converted
+into a successful `WorkerResult` or a fabricated receipt.
+
+## Lifecycle record projection
+
+When the worker is unavailable or does not emit a terminal payload, the caller
+records lifecycle evidence separately from the worker protocol:
+
+```text
+Event: <timeout | interrupted | unavailable | no_terminal_result>
+Terminal: <stalled | unavailable>; output=<none>
+WorkerResult: <none>
+VerificationReceipt: <none>
+Owner: caller
+```
+
+`stalled` is the terminal classification for timeout, interruption, and
+missing terminal output. `unavailable` records an unavailable executor. The
+record binds the delegation ID and exact brief hash, and may be persisted as a
+`.lifecycle.json` sibling without creating result or receipt files.
 
 ## Completion criteria
 

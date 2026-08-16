@@ -49,9 +49,11 @@ shape, or evaluation command, it may invoke `internal-luna-executor` through
 `/internal-subagent-contract` with one `DelegationBrief` v1. The caller verifies
 the adapter-composed `WorkerResult` v1 and caller-owned `VerificationReceipt`
 v1; unobserved worker validation and budget data remain claims or unavailable
-evidence. Trigger, boundary, policy,
-scope, retry choice, and subjective authoring decisions remain with the
-parent.
+evidence. When timeout, interruption, executor unavailability, or missing
+terminal output prevents a worker payload, the caller records a
+`LifecycleRecord` and creates neither a synthetic `WorkerResult` nor a
+`VerificationReceipt`. Trigger, boundary, policy, scope, retry choice, and
+subjective authoring decisions remain with the parent.
 
 ## Lifecycle and retirement
 

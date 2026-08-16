@@ -12,6 +12,32 @@ engine. The core owns review reasoning and severity. This wrapper owns the publi
 repository preflight, target boundaries, escalation rules, and final validation. It must not restate the engine's review axes,
 procedure, approval standard, or finding categories.
 
+## Conditional domain contributors
+
+When the read-only target includes `.github/workflows/**`, conditionally load
+`/internal-github-actions` as a domain contributor. When it includes
+`.github/actions/**/action.y*ml`, conditionally load
+`/internal-github-action-composite`. When both surfaces are present, load both;
+unrelated code activates neither. Use
+[the contributor protocol](references/actions-contributor-protocol.md) for the
+activation boundary and record shape.
+
+Contributors are bounded observers inside this review flow. They may return
+domain observations, changed contract surfaces, execution-chain probes,
+applicable validations, compatibility risks, and evidence gaps. The wrapper
+passes those observations into the one Addy review and retains ownership of
+target preflight, provenance, differential sequence, coverage counter-analysis,
+severity projection, and the exact public verdicts. Contributors do not emit a
+verdict, severity, approval, merge decision, remediation plan, or replacement
+review procedure.
+
+For workflow and composite targets, inspect linked static evidence from the
+event through the workflow, reusable workflow or job permissions/environment,
+composite action, repository script, artifact, or external-system boundary
+when those links are present. Static review does not establish live runner
+health or runtime behavior; route that evidence to the appropriate operations
+owner and record the gap.
+
 ## When to use
 
 Use when reviewing a code-focused branch, pull request, work-in-progress diff,

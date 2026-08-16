@@ -23,18 +23,29 @@ interface:
     5 🗺️ +plan, 6 💾 save, 7 ⏹️ close; keep locked entries visible with
     reasons. Save is provisional and records critical_review: pending before
     review. After a critical review, offer an explicit option to realign the
-    same analysis with supported findings. Keep the exact four-option Candidate acceptance gate. Author the selected spec
-    or plan artifact through internal-luna-executor and
-    /internal-subagent-contract unless the active authoring model is already
-    GPT-5.6 Luna; retain owner review, validation, and acceptance. Keep
+    same analysis with supported findings. Keep the exact four-option Candidate acceptance gate. Default to local authoring with
+    delegation.mode: none, worker: primary-owner, and result: not_applicable;
+    create no delegation brief, worker result, receipt, or retrospective worker
+    claim. Delegate the selected spec or plan artifact through
+    internal-luna-executor and /internal-subagent-contract only when the
+    caller-owned value gate proves one autonomous, bounded, verifiable evidence
+    package is materially useful; retain parent-owned synthesis, review,
+    validation, and acceptance. If an explicitly selected worker is
+    unavailable, record a caller-owned LifecycleRecord and stop as blocked; a
+    manual or local continuation needs explicit caller authorization and a new
+    local route. Keep
     implementation-oriented design and execution separate and user-gated; do
     not introduce an alternate brainstorming route or handoff.
     Record the current Authorized paths and Authorized actions, preserve them
     across continue, finish, pause, and recovery, and block every new path or
     action as authority-or-scope until the user explicitly accepts it. Keep
-    protected workflow status separate from user authority. Present one
-    canonical Candidate view with material deltas, one outcome, up to three
-    controlling evidence items, one principal risk, and the active choice.
+    protected workflow status separate from user authority. Present the
+    specialized Candidate projection in this order: active decision and state
+    delta, recommendation and why, controlling evidence grouped by
+    implication, material risks and acceptance conditions, then the eligible
+    decision block. Keep full detail in the canonical record or selected
+    artifact; never repeat it as a transcript and never omit material items
+    silently.
     Critical review precedes +spec and +plan; critical findings require
     explicit realignment before integration. Use diagnostic word counts only
     and at most one useful Mermaid diagram for three or more relationships,

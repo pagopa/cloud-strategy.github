@@ -104,6 +104,33 @@ bytes, observed telemetry, and persisted artifact bytes, but it must not
 rewrite semantic worker fields. Adapter mismatches remain visible; they are
 never silently repaired.
 
+## LifecycleRecord v1
+
+When no terminal worker payload exists, the caller records a separate
+`LifecycleRecord`; it does not create a synthetic `WorkerResult` or
+`VerificationReceipt`:
+
+```json
+{
+  "schema_version": 1,
+  "delegation_id": "stable-id",
+  "brief_sha256": "sha256:<64-hex-digits>",
+  "lifecycle": {
+    "event": "timeout|interrupted|unavailable|no_terminal_result",
+    "source": "caller",
+    "reason": "why no terminal payload exists",
+    "evidence_ref": "caller:timeout"
+  },
+  "terminal": {"state": "stalled|unavailable", "output": null},
+  "worker_result": null,
+  "verification_receipt": null
+}
+```
+
+`stalled` is used for timeout, interruption, and missing terminal output.
+`unavailable` identifies an unavailable executor. The caller may persist this
+record as a deterministic `.lifecycle.json` sibling outside worker scope.
+
 ## VerificationReceipt v1
 
 `VerificationReceipt v1` is caller-owned and separate from `WorkerResult v1`.

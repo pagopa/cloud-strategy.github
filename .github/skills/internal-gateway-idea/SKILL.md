@@ -298,29 +298,32 @@ Completion criterion: the recommendation is traceable to resolved decisions and 
 
 ## Chat layout
 
-Lead with the active decision block, recommendation, or next required choice.
-Ordinary chat has one canonical Candidate view: material deltas, one outcome,
-up to three controlling evidence items, one principal risk, and the active
-choice. Preserve blockers, unknowns, acceptance conditions, and residual risks;
-do not duplicate the view as a report or transcript. Word counts are diagnostic
-only and must not hide content. Use at most one Mermaid, only for three or more
-relationships, with the conclusion in adjacent prose; simple content stays
-prose-only. A displayed recommendation is not acceptance.
+Use one compact Candidate projection, not a transcript or a second report.
+Present these sections in this order when they contain information:
 
-Use these compact headings when material: `### 🧭 Decision`, `### 🔎 Evidence`,
-`### 🔀 Options`, `### ✅ Recommendation`, `### ⚠️ Risks`, and
-`### ❓ Decisions needed`.
+1. `### 🧭 Decision` — the active decision, current state delta, and the
+  choice required from the user.
+2. `### ✅ Recommendation` — the current direction and why it satisfies the
+  accepted outcome and constraints.
+3. `### 🔎 Evidence` — only evidence that controls this decision, grouped by
+  implication instead of repeating the investigation.
+4. `### ⚠️ Risks` — blockers, unknowns, acceptance conditions, and residual
+  risks that could change the recommendation.
+5. `### ❓ Decisions needed` — one numbered block for eligible decisions, or
+  omit it when none remain.
 
-Use emoji as navigation, not decoration. Do not prefix every paragraph or
-bullet with one. For a non-trivial decision flow, dependency, ownership
-relation, or option mechanism, use the one-diagram rule above only when at
-least three relationships are clarified. Keep the controlling conclusion in
-adjacent prose and skip decorative visuals.
+Keep the seven gateway menu entries in their required positions, each as one
+compact line with its lock reason. Do not repeat the Candidate Analysis Spec,
+critical report, ledger, or recovery record in chat. The canonical record and
+selected artifact retain full detail; chat must still name every material item
+in the sections above or state that it is retained there. A recommendation is
+not acceptance.
 
-Keep full evidence, decision history, and residual risks in the one
-user-requested artifact; ordinary chat shows state deltas and the current
-decision block. Do not introduce a new template, artifact, field, or automatic
-save. Keep the stable Analysis Spec field names unchanged.
+Use at most one Mermaid diagram only when it clarifies three or more decision,
+dependency, ownership, or option relationships. Put the conclusion in adjacent
+prose and keep simple decisions prose-only. Diagnostic word counts never
+authorize dropping a blocker, unknown, acceptance condition, or residual risk.
+Keep the stable Analysis Spec field names unchanged.
 
 ## Candidate Analysis Spec
 

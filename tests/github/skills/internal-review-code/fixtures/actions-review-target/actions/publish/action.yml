@@ -1,0 +1,21 @@
+name: Publish review artifact
+description: Publish a review artifact from a caller workflow.
+
+inputs:
+  artifact-name:
+    description: Name supplied by the caller workflow.
+    required: true
+
+outputs:
+  artifact-path:
+    description: Path written by the publishing script.
+    value: ${{ steps.publish.outputs.artifact-path }}
+
+runs:
+  using: composite
+  steps:
+    - id: publish
+      shell: bash
+      env:
+        ARTIFACT_NAME: ${{ inputs.artifact-name }}
+      run: ./scripts/publish.sh "$ARTIFACT_NAME"

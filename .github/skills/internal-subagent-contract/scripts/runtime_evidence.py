@@ -10,12 +10,14 @@ from typing import Mapping, Sequence
 
 from subagent_contract import (
     ATTESTATION_NAMES,
+    LIFECYCLE_EVENTS,
     canonical_json,
     compute_progress_signature,
     receipt_path_for,
     sha256_bytes,
     sha256_path,
     validate_brief,
+    validate_lifecycle_record,
     validate_receipt,
     validate_result,
 )
@@ -54,6 +56,80 @@ class RuntimeObservation:
     command: str | None = None
     outcome: str | None = None
     evidence_ref: str | None = None
+
+
+def compose_lifecycle_record(
+    brief: Mapping[str, object],
+    *,
+    repo_root: Path,
+    brief_bytes: bytes,
+    event: str,
+    reason: str,
+    evidence_ref: str | None = None,
+) -> dict[str, object]:
+    """Record caller-owned termination without inventing a worker result."""
+
+    brief_errors = validate_brief(brief, repo_root=repo_root)
+    if brief_errors:
+        raise AdapterError("invalid brief: " + "; ".join(brief_errors))
+    if not isinstance(brief_bytes, bytes):
+        raise AdapterError("brief_bytes must be bytes")
+    if event not in LIFECYCLE_EVENTS:
+        raise AdapterError(f"unsupported lifecycle event: {event}")
+    if not isinstance(reason, str) or not reason.strip():
+        raise AdapterError("lifecycle reason must be non-empty")
+    if evidence_ref is not None and (
+        not isinstance(evidence_ref, str) or not evidence_ref.strip()
+    ):
+        raise AdapterError("lifecycle evidence_ref must be non-empty when supplied")
+    try:
+        parsed_brief = json.loads(brief_bytes.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise AdapterError(f"brief bytes are not valid JSON: {exc}") from exc
+    if not isinstance(parsed_brief, dict) or parsed_brief != dict(brief):
+        raise AdapterError("lifecycle record brief bytes do not match the brief")
+
+    record = {
+        "schema_version": 1,
+        "delegation_id": brief["delegation_id"],
+        "brief_sha256": sha256_bytes(brief_bytes),
+        "lifecycle": {
+            "event": event,
+            "source": "caller",
+            "reason": reason.strip(),
+            "evidence_ref": evidence_ref or f"caller:{event}",
+        },
+        "terminal": {
+            "state": "unavailable" if event == "unavailable" else "stalled",
+            "output": None,
+        },
+        "worker_result": None,
+        "verification_receipt": None,
+    }
+    lifecycle_errors = validate_lifecycle_record(
+        record,
+        brief,
+        repo_root=repo_root,
+        brief_bytes=brief_bytes,
+    )
+    if lifecycle_errors:
+        raise AdapterError("invalid lifecycle record: " + "; ".join(lifecycle_errors))
+    return record
+
+
+def lifecycle_path_for(result_path: str | Path) -> str:
+    """Return the deterministic caller-owned lifecycle sibling for a result path."""
+
+    path = Path(result_path)
+    if not str(result_path).strip() or not path.name:
+        raise ValueError("result_path must name a result file")
+    suffix = ".result.json"
+    lifecycle_name = (
+        f"{path.name[:-len(suffix)]}.lifecycle.json"
+        if path.name.endswith(suffix)
+        else f"{path.name}.lifecycle.json"
+    )
+    return path.with_name(lifecycle_name).as_posix()
 
 
 def validate_path_identity(
@@ -391,3 +467,45 @@ def persist_handoff(
     result_target.write_bytes(canonical_json(result) + b"\n")
     receipt_target.write_bytes(canonical_json(persisted_receipt) + b"\n")
     return result_target, receipt_target
+
+
+def persist_lifecycle_record(
+    record: Mapping[str, object],
+    brief: Mapping[str, object],
+    *,
+    repo_root: Path,
+    brief_bytes: bytes,
+) -> Path:
+    """Persist caller-owned lifecycle evidence without result or receipt files."""
+
+    if not isinstance(record, Mapping):
+        raise AdapterError("lifecycle record must be an object")
+    lifecycle_errors = validate_lifecycle_record(
+        record,
+        brief,
+        repo_root=repo_root,
+        brief_bytes=brief_bytes,
+    )
+    if lifecycle_errors:
+        raise AdapterError("invalid lifecycle record: " + "; ".join(lifecycle_errors))
+    if record.get("delegation_id") != brief.get("delegation_id"):
+        raise AdapterError("lifecycle record delegation_id does not match brief")
+    if record.get("worker_result") is not None:
+        raise AdapterError("lifecycle record must not contain a worker result")
+    if record.get("verification_receipt") is not None:
+        raise AdapterError("lifecycle record must not contain a verification receipt")
+    result_path = brief.get("result_path")
+    if not isinstance(result_path, str):
+        raise AdapterError("brief result_path must be a string")
+    lifecycle_path = lifecycle_path_for(result_path)
+    write_scope = brief.get("write_scope", [])
+    if isinstance(write_scope, list) and _scope_allows(lifecycle_path, write_scope):
+        raise AdapterError(
+            "adapter-owned lifecycle path must remain outside worker write scope"
+        )
+    lifecycle_target = repo_root / lifecycle_path
+    if not _inside(lifecycle_target, repo_root):
+        raise AdapterError("lifecycle path escapes repository scope")
+    lifecycle_target.parent.mkdir(parents=True, exist_ok=True)
+    lifecycle_target.write_bytes(canonical_json(record) + b"\n")
+    return lifecycle_target

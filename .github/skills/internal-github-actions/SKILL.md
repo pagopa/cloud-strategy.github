@@ -46,6 +46,27 @@ concurrency belong in a reusable workflow; steps and caller-visible outputs
 belong in a composite action; thin orchestration around language-specific
 commands belongs in a script.
 
+## Conditional review contributor
+
+When this skill is conditionally loaded by `/internal-review-code`, contribute
+observations only for workflow surfaces. Inspect the static chain from the
+event through workflow or `workflow_call`, job permissions and environments,
+composite actions, repository scripts, artifacts or caches, and external
+system boundaries when the target links them.
+
+Return only the wrapper protocol fields: `domain`,
+`changed_contract_surfaces`, `observations`, `probes`,
+`applicable_validations`, `compatibility_risks`, and `evidence_gaps`. Focus
+observations and probes on OIDC and least privilege, full-SHA action pins,
+input and context validity, reuse contracts, permissions and environment
+boundaries, artifact and cache transfers, and the relevant chain links.
+
+This contributor does not issue a verdict, severity, approval, merge decision,
+remediation plan, or operations conclusion. Addy remains the sole substantive
+review engine and `internal-review-code` remains the single public-verdict
+owner. Static evidence cannot prove runner health or successful runtime
+loading; record that limitation and route live evidence to Operations.
+
 ## Reference map
 
 - Load [auth snippets](references/auth-snippets.md) for AWS, Azure, and GCP

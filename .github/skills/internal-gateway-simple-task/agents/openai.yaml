@@ -34,6 +34,10 @@ interface:
     validation, acceptance, and closeout here; do not branch on caller or model
     identity. Use one initial attempt, at most one context refill, and at most
     one corrective retry; repeated progress is stalled and Minor/cosmetic
-    findings never reopen retry. Stop with the exact
+    findings never reopen retry. When timeout, interruption, executor
+    unavailability, or missing terminal output prevents a worker payload,
+    record a caller-owned LifecycleRecord and do not fabricate a WorkerResult
+    or VerificationReceipt; local fallback starts a new authorized route. Stop
+    with the exact
     violated condition, evidence, and required next decision. Use
     /superpowers-verification-before-completion before positive claims.

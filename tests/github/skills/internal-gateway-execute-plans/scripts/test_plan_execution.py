@@ -95,6 +95,22 @@ def test_manifest_accepts_delegated_provenance_with_accepted_result(
     assert validate_plan(plan, tmp_path) == []
 
 
+def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None:
+    text = _manifest_text_with_delegation(
+        {
+            "schema_version": 1,
+            "mode": "none",
+            "worker": "primary-owner",
+            "result": "not_applicable",
+            "receipt": None,
+            "acceptance": None,
+        }
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert validate_plan(plan, tmp_path) == []
+
+
 @pytest.mark.parametrize(
     ("delegation", "finding_code"),
     (
@@ -111,6 +127,17 @@ def test_manifest_accepts_delegated_provenance_with_accepted_result(
                 "acceptance": _accepted_provenance(),
             },
             "worker-result-not-accepted",
+        ),
+        (
+            {
+                "schema_version": 1,
+                "mode": "none",
+                "worker": "primary-owner",
+                "result": _accepted_provenance(),
+                "receipt": None,
+                "acceptance": None,
+            },
+            "local-worker-authorship",
         ),
         (
             {
@@ -153,6 +180,24 @@ def test_manifest_rejects_contradictory_delegation_provenance(
     plan = _stage_valid_plan(tmp_path, _manifest_text_with_delegation(delegation))
 
     assert finding_code in {item.code for item in validate_plan(plan, tmp_path)}
+
+
+def test_manifest_rejects_missing_local_provenance_marker(tmp_path: Path) -> None:
+    text = _manifest_text_with_delegation(
+        {
+            "schema_version": 1,
+            "mode": "none",
+            "worker": "primary-owner",
+            "result": None,
+            "receipt": None,
+            "acceptance": None,
+        }
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "local-provenance-marker" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
 
 
 def test_manifest_without_delegation_uses_named_legacy_compatibility_path(

@@ -31,6 +31,28 @@ the action performs its main logic.
 - Preserve backward compatibility for existing inputs and outputs, or treat a
   breaking contract as a versioning event.
 
+## Conditional review contributor
+
+When this skill is conditionally loaded by `/internal-review-code`, contribute
+observations only for `action.yml` or `action.yaml` surfaces. Inspect linked
+caller workflow, inputs, outputs, expressions, environment forwarding,
+repository scripts, compatibility/versioning, documentation, smoke checks,
+and failure paths.
+
+Return only the wrapper protocol fields: `domain`,
+`changed_contract_surfaces`, `observations`, `probes`,
+`applicable_validations`, `compatibility_risks`, and `evidence_gaps`. Focus
+observations and probes on input/output contracts, safe expression and
+environment handling, explicit Bash and strict mode, `$GITHUB_OUTPUT`,
+supported runtime versions, documentation, smoke behavior, and failure-path
+evidence.
+
+This contributor does not issue a verdict, severity, approval, merge decision,
+remediation plan, or replacement review procedure. Addy remains the sole
+substantive review engine and `internal-review-code` remains the single
+public-verdict owner. Static action.yml evidence cannot prove live runner
+health or runtime loading; record that limitation as an evidence gap.
+
 ## Reference map
 
 - Load [minimal template](references/minimal-template.md) for the smallest safe

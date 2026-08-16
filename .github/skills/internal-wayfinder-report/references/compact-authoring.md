@@ -46,9 +46,11 @@ At this point, a parent may invoke `internal-luna-executor` through
 paths, authority order, expected output, write scope, acceptance, and
 validation. Verify the adapter-composed `WorkerResult` v1 and caller-owned
 `VerificationReceipt` v1; treat unobserved validation and budget data as claims
-or unavailable evidence. The parent
-retains source authority, findings, diagram relationships, retry choice, and
-closeout.
+or unavailable evidence. When timeout, interruption, executor unavailability,
+or missing terminal output prevents a worker payload, the caller records a
+`LifecycleRecord` and creates neither a synthetic `WorkerResult` nor a
+`VerificationReceipt`. The parent retains source authority, findings, diagram
+relationships, retry choice, and closeout.
 
 Run the read-only helper once after inventory and hashing:
 

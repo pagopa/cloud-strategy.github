@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -15,6 +17,10 @@ SCRIPT_PATH = (
 )
 FIXTURE_DIR = (
     REPO_ROOT / "tests/github/skills/internal-review-code/fixtures/seeded-review-target"
+)
+ACTIONS_FIXTURE_DIR = (
+    REPO_ROOT
+    / "tests/github/skills/internal-review-code/fixtures/actions-review-target"
 )
 
 MANIFEST = {
@@ -96,6 +102,26 @@ def test_missing_finding_or_skill_fails_acceptance() -> None:
     assert result["loaded_skills_exact"] is False
 
 
+def test_actions_manifest_requires_all_conditional_contributors() -> None:
+    scorer = _load_scorer()
+    manifest = {
+        **MANIFEST,
+        "required_conditional_loaded_skills": [
+            "internal-github-actions",
+            "internal-github-action-composite",
+        ],
+    }
+    run = {
+        **PASSING_RUN,
+        "conditional_loaded_skills": ["internal-github-actions"],
+    }
+
+    result = scorer.score(manifest, run)
+
+    assert result["conditional_loaded_skills_exact"] is False
+    assert result["accepted"] is False
+
+
 def test_cli_returns_bounded_json_and_distinct_failure_codes() -> None:
     manifest_path = FIXTURE_DIR / "benchmark.json"
     passing_path = FIXTURE_DIR / "passing-run.json"
@@ -155,3 +181,45 @@ def test_cli_returns_bounded_json_and_distinct_failure_codes() -> None:
 
     assert invalid.returncode == 2
     assert invalid.stderr
+
+
+def test_actions_cli_requires_conditional_contributors_and_material_findings() -> None:
+    manifest_path = ACTIONS_FIXTURE_DIR / "benchmark.json"
+    passing_path = ACTIONS_FIXTURE_DIR / "passing-run.json"
+    failing_path = ACTIONS_FIXTURE_DIR / "failing-run.json"
+
+    passing = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--manifest",
+            str(manifest_path),
+            "--run",
+            str(passing_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert passing.returncode == 0
+    passing_result = json.loads(passing.stdout)
+    assert passing_result["accepted"] is True
+    assert passing_result["conditional_loaded_skills_exact"] is True
+
+    failing = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--manifest",
+            str(manifest_path),
+            "--run",
+            str(failing_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert failing.returncode == 1
+    failing_result = json.loads(failing.stdout)
+    assert failing_result["accepted"] is False
+    assert failing_result["conditional_loaded_skills_exact"] is False

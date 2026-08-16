@@ -57,9 +57,10 @@ verdict terms. Select only questions that can change the verdict.
 
 ## Output
 
-Lead with material findings, then decision-relevant evidence gaps, verdict, and
-residual risk. Omit non-applicable sections instead of emitting empty
-boilerplate.
+Lead with the review-specific verdict, then only the findings and evidence gaps
+that control the decision. Omit non-applicable sections instead of emitting
+boilerplate. Do not copy the reviewed artifact or use a generic cross-skill
+summary layout.
 
 Each material finding contains:
 
@@ -83,6 +84,19 @@ must be exactly one of `DECISION READY`, `DECISION READY WITH KNOWN RISK`,
 `DECISION BLOCKED`, or `REVIEW INCONCLUSIVE`. Use exactly
 `NO MATERIAL CONCERNS FOUND` or `INSUFFICIENT EVIDENCE TO ASSESS` for the
 evidence outcome. Omit an anchor when it adds no information.
+
+Use this compact review-specific order:
+
+1. `🔎 Result` — exact verdict, exact evidence outcome, and one-sentence reason.
+2. `📌 Findings` — material findings only, each containing `Evidence`,
+   `Impact`, `Severity`, `Confidence`, `Recommendation`, `Fix owner`, and
+   `Expected verification`.
+3. `🧪 Evidence gaps` — only gaps that can change the verdict.
+4. `👉 Next` — one decision-relevant follow-up and its owner.
+
+Keep residual risk beside the finding or evidence gap it qualifies. Use a
+Mermaid diagram only for a material relationship that is clearer visually;
+retain the conclusion in prose and never use the diagram as the sole evidence.
 
 ## Completion
 

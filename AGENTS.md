@@ -76,17 +76,20 @@ with the nearest owner.
   documentation so stale checks cannot restore the old behavior.
 - Treat prose as guidance, not enforcement. Put hard guarantees in permissions,
   validators, hooks, or CI.
+
 ### Human-Facing Responses
 
 - A direct user-requested format or an applicable skill-owned output contract
   controls the response layout, required fields, ordering, length, visual use,
   and machine-readable shape. Apply the following defaults only where that
   narrower contract is silent.
-- Make analysis, review, diagnosis, comparison, report, and handoff responses
-  easy for a human to understand and act on. Lead with the outcome, decision,
-  or strongest finding. Keep the response concise and proportional to the
-  request while preserving material blockers, risks, uncertainty, validation
-  gaps, and the next required action.
+- Do not invent a cross-skill response template. When a skill owns the
+  response, use that skill's specialized projection and preserve its field
+  order. The root policy is only a fallback for work with no narrower owner.
+- Keep analysis, review, diagnosis, comparison, report, and handoff responses
+  concise and proportional. Preserve material blockers, risks, uncertainty,
+  validation gaps, and the next required action in the locations defined by
+  the owning skill.
 - For non-trivial flows, sequences, dependencies, ownership models, state
   transitions, or multi-part comparisons, strongly prefer the smallest useful
   Mermaid diagram when it communicates the relationship faster and more

@@ -37,7 +37,10 @@ through `/internal-subagent-contract` with one `DelegationBrief` v1. The parent
 retains trigger, boundary, policy, scope, retry choice, independent validation,
 acceptance, semantic review, and closeout; it verifies one bound `WorkerResult`
 v1 and caller-owned `VerificationReceipt` v1. Treat unobserved validation and
-budget data as claims or unavailable evidence.
+budget data as claims or unavailable evidence. When timeout, interruption,
+executor unavailability, or missing terminal output prevents a worker payload,
+record a caller-owned `LifecycleRecord` and create neither a synthetic
+`WorkerResult` nor a receipt.
 
 Keep a single command, one obvious edit, an unresolved policy, boundary,
 authority, or acceptance decision, incomplete acceptance, and unverifiable

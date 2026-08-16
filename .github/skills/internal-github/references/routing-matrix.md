@@ -9,6 +9,7 @@
 | Runner fleet health | Operational evidence and continuity proof | `/internal-github-operations` |
 | `.github/workflows/` deployment edit | Workflow behavior | `/internal-github-actions` |
 | `.github/actions/` `action.yml` edit | Composite-action contract | `/internal-github-action-composite` |
+| Non-empty diff or explicit read-only code target | Technical review findings | `/internal-review-code` |
 | Merge readiness for one PR | Pull-request terminal state | `/internal-github-pr` |
 | Current Copilot frontmatter behavior | Current-source platform research | `/internal-copilot-docs-research` |
 
@@ -23,6 +24,8 @@ different work products:
 | Required-review policy versus readiness of one PR | `/internal-github-governance` versus `/internal-github-pr` | Route the repository control to governance; route the state of one pull request to PR. |
 | Workflow failure versus runner-fleet health | `/internal-github-operations` | Route workflow-specific failure evidence and fleet-wide runner evidence to operations. |
 | Reuse-pattern decision versus composite-action authoring | `/internal-github-actions` versus `/internal-github-action-composite` | Route the selection among inline, reusable-workflow, and composite options to Actions; route the concrete `action.yml` contract to composite. |
+| Technical review versus PR readiness | `/internal-review-code` versus `/internal-github-pr` | Route technical findings to review; route current PR state, checks, reviews, merge, and terminal verification to PR. Findings do not establish readiness. |
+| Caller workflow contract versus concrete action contract | `/internal-github-actions` versus `/internal-github-action-composite` | Route caller workflow events, jobs, permissions, reuse, and context to Actions; route concrete `action.yml` inputs, outputs, shell, compatibility, and documentation to composite. |
 
 ## Multi-deliverable sequencing
 
@@ -31,6 +34,7 @@ different work products:
 | Choose a repository model, define its ruleset, then prove rollout | `/internal-github-strategic` → `/internal-github-governance` → `/internal-github-operations` |
 | Select a workflow reuse pattern, author the workflow, then validate a failed run | `/internal-github-actions` → `/internal-github-actions` → `/internal-github-operations` |
 | Draft a PR body, verify required reviews, then confirm terminal state | `/internal-github-pr` for each PR deliverable in dependency order |
+| Review a code diff, then verify readiness of its PR | `/internal-review-code` → `/internal-github-pr` |
 
 ## Near misses
 

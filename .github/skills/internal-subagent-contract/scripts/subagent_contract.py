@@ -59,11 +59,30 @@ RESULT_FIELDS = frozenset(
         "budgets_used",
     }
 )
+LIFECYCLE_RECORD_FIELDS = frozenset(
+    {
+        "schema_version",
+        "delegation_id",
+        "brief_sha256",
+        "lifecycle",
+        "terminal",
+        "worker_result",
+        "verification_receipt",
+    }
+)
+LIFECYCLE_FIELDS = frozenset(
+    {"event", "source", "reason", "evidence_ref"}
+)
+TERMINAL_FIELDS = frozenset({"state", "output"})
 
 MODES = frozenset({"read", "write", "plan"})
 STATUSES = frozenset(
     {"completed", "partial", "blocked", "stalled", "invalid_input", "failed"}
 )
+LIFECYCLE_EVENTS = frozenset(
+    {"timeout", "interrupted", "unavailable", "no_terminal_result"}
+)
+LIFECYCLE_TERMINAL_STATES = frozenset({"stalled", "unavailable"})
 OUTPUT_KINDS = frozenset({"artifact", "analysis", "patch", "validation"})
 OUTPUT_FORMATS = frozenset({"json", "markdown", "patch", "text"})
 VALIDATION_OWNERS = frozenset({"worker", "caller"})
@@ -697,6 +716,66 @@ def validate_result(
         errors.extend(_relative_path(str(supplied), "result_path", root))
         if str(supplied) != str(brief.get("result_path")):
             errors.append("result_path must match brief.result_path")
+    return errors
+
+
+def validate_lifecycle_record(
+    record: Mapping[str, object],
+    brief: Mapping[str, object],
+    *,
+    repo_root: Path | None = None,
+    brief_bytes: bytes | None = None,
+) -> list[str]:
+    """Return binding and invariant findings for a caller-owned lifecycle record."""
+
+    root = (repo_root or Path.cwd()).resolve()
+    errors = _field_errors(record, LIFECYCLE_RECORD_FIELDS, "lifecycle_record")
+    if errors:
+        return errors
+    errors.extend(validate_brief(brief, repo_root=root))
+
+    if record["schema_version"] != 1 or not _is_int(record["schema_version"]):
+        errors.append("lifecycle_record.schema_version must be integer 1")
+    if record["delegation_id"] != brief.get("delegation_id"):
+        errors.append("lifecycle_record.delegation_id must match brief.delegation_id")
+    expected_brief_hash = (
+        sha256_bytes(brief_bytes)
+        if brief_bytes is not None
+        else sha256_bytes(canonical_json(brief))
+    )
+    if not _hash_matches(record["brief_sha256"], expected_brief_hash):
+        errors.append("lifecycle_record.brief_sha256 does not match the exact brief bytes")
+
+    lifecycle = record["lifecycle"]
+    errors.extend(_field_errors(lifecycle, LIFECYCLE_FIELDS, "lifecycle_record.lifecycle"))
+    if isinstance(lifecycle, Mapping):
+        event = lifecycle.get("event")
+        if event not in LIFECYCLE_EVENTS:
+            errors.append("lifecycle_record.lifecycle.event is invalid")
+        if lifecycle.get("source") != "caller":
+            errors.append("lifecycle_record.lifecycle.source must be caller")
+        if not _non_empty(lifecycle.get("reason")):
+            errors.append("lifecycle_record.lifecycle.reason must be non-empty")
+        if not _non_empty(lifecycle.get("evidence_ref")):
+            errors.append("lifecycle_record.lifecycle.evidence_ref must be non-empty")
+
+    terminal = record["terminal"]
+    errors.extend(_field_errors(terminal, TERMINAL_FIELDS, "lifecycle_record.terminal"))
+    if isinstance(terminal, Mapping):
+        state = terminal.get("state")
+        if state not in LIFECYCLE_TERMINAL_STATES:
+            errors.append("lifecycle_record.terminal.state is invalid")
+        if terminal.get("output") is not None:
+            errors.append("lifecycle_record.terminal.output must be null")
+        if isinstance(lifecycle, Mapping) and lifecycle.get("event") in LIFECYCLE_EVENTS:
+            expected_state = "unavailable" if lifecycle["event"] == "unavailable" else "stalled"
+            if state != expected_state:
+                errors.append("lifecycle_record.terminal.state does not match event")
+
+    if record["worker_result"] is not None:
+        errors.append("lifecycle_record.worker_result must be null")
+    if record["verification_receipt"] is not None:
+        errors.append("lifecycle_record.verification_receipt must be null")
     return errors
 
 

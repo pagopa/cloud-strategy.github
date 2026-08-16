@@ -55,11 +55,12 @@ files, revision numbers, or a preferred artifact format are absent.
 
 ## Analysis units and reruns
 
-An `analysis unit` is the bounded subject, evidence snapshot, assumptions,
-scope, and acceptance under review. Critical Master owns the review procedure,
-review state, and invocation ledger for each unit. Each ledger entry records
-the unit identity, pass type (`full` or `delta`), evidence snapshot or digest,
-changed claims or assumptions, rerun reason, and outcome.
+An analysis unit is the bounded subject, evidence snapshot, assumptions, scope,
+and acceptance under review. The caller owns one invocation ledger for each
+unit. Each entry records the unit identity, pass type (`full` or `delta`),
+evidence snapshot or digest, changed claims or assumptions, rerun reason, and
+outcome. Critical Master supplies those pass details and does not create a
+competing ledger.
 
 - Run one full challenge pass per analysis unit by default.
 - Use a delta review after a materially supported change, limited to changed
@@ -151,65 +152,27 @@ precision that the available evidence cannot support.
 
 ## Readable report
 
-Return one concise Markdown report. The structure is a readability aid and is
-not a dependency for using this skill. Write prose in the user's language,
-while keeping the field labels below recognizable.
+Return one compact Markdown review, not a transcript. Use this order:
 
-Lead with `Assessment` and group related evidence. A full report must retain
-every material finding and the required readable-report fields: `Critique`,
-`Evidence`, `Suggestion`, `Why`, `Blocking`, relevant `Impact`, residual
-risks, open questions, and the conclusion. Brevity is subordinate to blockers
-and evidence. On a permitted delta pass, use the same required finding fields
-but emit only changed evidence, changed findings or classifications, changed
-conclusion, and residual blockers; do not repeat unchanged `Scope` or
-`Evidence` sections merely for completeness.
+1. `# Critical Analysis` and `## Assessment` with the conclusion and the
+  strongest supported objection.
+2. `## Evidence` with consecutively numbered findings. Each finding is a
+  compact block containing `Critique`, `Evidence`, `Impact` when relevant,
+  `Severity`, `Confidence`, `Suggestion`, `Why`, `Fix owner`, `Expected
+  verification`, and `Blocking`.
+3. `## Residual Risks` and `## Open Questions`, only when material.
+4. `## Conclusion` with the exact outcome and one next condition.
 
-For a material causal, dependency, ownership, or state relationship within the
-skill-owned report, strongly prefer the smallest useful Mermaid diagram when
-it improves comprehension. Keep the controlling conclusion in an adjacent
-report paragraph and do not emit a visual outside this report contract.
+Group evidence inside its finding by consequence. Do not repeat the same fact
+in Assessment, a finding, and Conclusion. A full pass includes the scope only
+when it changes interpretation. A delta pass emits only changed evidence,
+findings, classifications, conclusion, and residual blockers. Preserve every
+material finding, but compact it by grouping rather than deleting it.
 
-```markdown
-# Critical Analysis
-
-## Scope
-<what is being analyzed and why>
-
-## Assessment
-<short overall assessment>
-
-### Evidence 1 — <short title>
-**Critique:** <what is wrong or uncertain>
-**Evidence:** <fact, passage, observation, or missing proof supporting the critique>
-**Suggestion:** <what should be changed, checked, or decided>
-**Why:** <why this suggestion improves the outcome or reduces the risk>
-**Impact:** <material consequence if the point is ignored>
-**Blocking:** <true or false>
-
-### Evidence 2 — <short title>
-...
-
-## Residual Risks
-- <risk that remains after the recommendations>
-
-## Open Questions
-- <question only when its answer could change the conclusion>
-
-## Conclusion
-**Outcome:** <accepted | revise-design | reopen-analysis | needs-clarification>
-**Summary:** <strongest supported conclusion and next condition>
-```
-
-Evidence headings must be numbered consecutively. Every evidence must contain
-the four decision fields `Critique`, `Evidence`, `Suggestion`, and `Why`, plus
-an explicit `Blocking` classification. `Impact` should also be present whenever
-it is relevant; use `Blocking: false` when the finding is material but not a
-stop condition.
-
-Include every material finding, not only the strongest one. Keep the report
-focused on decisions, risks, consequences, and actionable recommendations.
-Do not emit an unrelated card, a machine-only object, a preamble, or internal
-working notes outside the report.
+Use the smallest useful Mermaid diagram only for a material causal,
+dependency, ownership, or state relationship. Keep the conclusion in adjacent
+prose and do not make the diagram the sole carrier of evidence. Do not emit an
+unrelated card, machine-only object, preamble, or internal working notes.
 
 ## No-context failure
 

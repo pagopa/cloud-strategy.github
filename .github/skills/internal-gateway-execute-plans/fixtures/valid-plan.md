@@ -55,7 +55,7 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
     "schema_version": 1,
     "mode": "none",
     "worker": "primary-owner",
-    "result": null,
+    "result": "not_applicable",
     "receipt": null,
     "acceptance": null
   },

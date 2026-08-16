@@ -33,20 +33,26 @@ interface:
     attestation. Resolve the loaded executor bundle and run its scripts/run.sh
     preflight as the sole mechanical validator. After eligibility, the control
     inventory, plan structure, locked decisions, and acceptance are complete,
-    use one authoring route: when the active authoring model is GPT-5.6 Luna,
-    author locally and record worker: primary-owner without manufacturing a
-    delegation envelope. Otherwise, invoke internal-luna-executor through
-    /internal-subagent-contract; if model identity is unavailable, delegate,
-    and if Luna is unavailable, stop as blocked. Before delegation, fix the
-    objective, value gate, bounded evidence, constraints, exact retained-plan
-    path, output, acceptance, validation, and budgets. Bind that path as write
-    scope and expected output, record worker: internal-luna-executor, and verify
-    the adapter-composed WorkerResult v1 plus caller-owned VerificationReceipt
-    v1. Material edits invalidate the result and receipt; return material
-    corrections through the retry contract instead of transferring authorship
-    to the parent. The parent retains routing, authority, lifecycle, retry
-    choice, independent validation, semantic review, final preflight, final
-    acceptance, handoff, and the no-Git-mutation boundary. Before critic output
+    default to local authoring with delegation.mode: none, worker:
+    primary-owner, and result: not_applicable, without a delegation brief,
+    worker result, receipt, or retrospective worker claim. Delegate only when
+    a caller-owned value gate proves one autonomous, bounded, verifiable
+    evidence package is materially more useful than a local operation and can
+    remain off the critical path; keep final synthesis parent-owned. Model or
+    provider identity alone is not a routing reason. If an explicitly selected
+    worker is unavailable, record a caller-owned LifecycleRecord and stop as
+    blocked; continue locally only after explicit caller authorization, using a
+    new local route with delegation.mode: none and worker: primary-owner and no
+    synthetic worker artifacts. Before delegation, fix the objective, value
+    gate, bounded evidence, constraints, exact retained-plan path, output,
+    acceptance, validation, and budgets. Bind that path as write scope and
+    expected output, record worker: internal-luna-executor, and verify the
+    adapter-composed WorkerResult v1 plus caller-owned VerificationReceipt v1.
+    Material edits invalidate the result and receipt; return material
+    corrections through the retry contract instead of silently transferring
+    authorship to the parent. The parent retains routing, authority, lifecycle,
+    retry choice, independent validation, semantic review, final preflight,
+    final acceptance, handoff, and the no-Git-mutation boundary. Before critic output
     can expand scope,
     classify every finding exactly once as blocking-now, acceptance-required,
     follow-up, separate-design, or rejected-with-reason; untraceable findings
@@ -54,10 +60,13 @@ interface:
     while retained-plan mechanical preflight remains executor-owned. The
     executor status sibling records approval evidence bound to the plan hashes
     and all five delivery verdict categories.
-    Explicitly legacy/imported material requires reconstruction and refreshed
-    approval/semantic-fingerprint and content-hash bindings. Perform human review, report the plan path, name
-    /internal-gateway-execute-plans as the only next owner, and wait for
-    explicit execution approval. Observe the No-Commit Rule: no Git mutations.
+    explicitly legacy/imported material requires reconstruction and refreshed
+    approval/semantic-fingerprint and content-hash bindings. Perform human
+    review, then use the writer projection: Plan, Scope, the five distinct
+    evidence verdicts, Risk, and one Next action. Do not copy the manifest or
+    tasks into chat. Name /internal-gateway-execute-plans as the only next
+    owner after explicit execution approval. Observe the No-Commit Rule: no Git
+    mutations.
     Producer readiness remains writer-owned and structural; writer compatibility
     checks must not import executor-private code, while retained-plan mechanical
     preflight remains executor-owned.

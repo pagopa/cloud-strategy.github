@@ -128,7 +128,14 @@ def test_writer_plan_remains_actionable_through_preflight_cli(tmp_path: Path) ->
         plan.read_text(encoding="utf-8"),
     )
     assert manifest_match
-    assert "delegation" not in json.loads(manifest_match.group(1))
+    assert json.loads(manifest_match.group(1))["delegation"] == {
+        "schema_version": 1,
+        "mode": "none",
+        "worker": "primary-owner",
+        "result": "not_applicable",
+        "receipt": None,
+        "acceptance": None,
+    }
 
     result = subprocess.run(
         [
