@@ -56,6 +56,13 @@ The postures are mutually exclusive. A new-feature label alone never grants
 instructional source and asserting its wording does not create an evaluable
 seam.
 
+For deterministic configuration or infrastructure-template edits where the
+owning format provides a native validator, such as `terraform fmt` and
+`terraform test` for Terraform, that native validator is the executable seam:
+recording it as the selected validation satisfies the chosen posture, and no
+additional wording test, external harness, or manufactured test-first history
+may be required for such edits.
+
 ## Execution Contract
 
 1. Identify the observable behavior, risk, or evaluable contract and select

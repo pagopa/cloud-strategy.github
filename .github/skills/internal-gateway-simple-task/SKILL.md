@@ -85,11 +85,25 @@ stop with the exact boundary and required decision.
 Classify the work as `trivial` or `non-trivial`.
 
 - `trivial`: a local answer, tiny deterministic edit, focused read, or validator
-  run with no material ambiguity or risk and an obvious validation path. Execute
-  directly and report the evidence.
+  run whose implementation scope is small, whose contract is evident, and
+  whose local validator evidence is evident, such as `terraform fmt` plus
+  `terraform test` for Terraform or the owning format's equivalent. A small
+  local deterministic edit qualifies even when it carries future operational
+  risk, such as possible resource replacement; surface that risk in the report
+  instead of escalating the classification. Execute directly and report the
+  evidence.
 - `non-trivial`: every other same-run task that still fits this route. Write the
   smallest clean action plan with target, anti-scope, dependencies, acceptance,
   validation, and stop conditions before implementation.
+
+**Downgrade:** After classification, when recovered local evidence shows that
+the task satisfies the trivial criteria, downgrade to `trivial` instead of
+continuing the non-trivial route. This is permitted only when all three fences
+hold: (a) a deterministic local validator is identified; (b) no contract or
+consumer changes; and (c) the downgrade rationale is recorded in the Internal
+Execution Brief. Always notify the user of the downgrade in the report. If the
+downgrade would touch any contract or consumer, require explicit user
+confirmation before execution.
 
 Stop when the task becomes multi-phase, materially ambiguous, approval-bound,
 unsafe, too costly for the session, or not locally verifiable.
@@ -127,11 +141,15 @@ validation, and final reporting.
   `WorkerResult` or `VerificationReceipt`. Perform work locally only after the
   locked brief permits that fallback and the caller starts a new local route.
 - For executable or evaluable behavior, load `/internal-tdd` before editing and
-  record exactly one selected posture for the current task. Use
-  `validation-only` only when that task has no useful executable or evaluable
-  seam; record the seam gap and alternate validation. Do not pre-classify all
-  prompt or skill work as `validation-only`, and do not manufacture a wording
-  test or harness.
+  record exactly one selected posture for the current task. For deterministic
+  configuration or infrastructure-template edits where the owning format
+  provides a native validator, such as `terraform fmt` and `terraform test`,
+  that native validator is the selected validation seam; recording it in the
+  brief satisfies the TDD posture requirement. Use `validation-only` only when
+  that task has no useful executable or evaluable seam; record the seam gap and
+  alternate validation. Do not pre-classify all prompt or skill work as
+  `validation-only`, and do not require an additional wording test, harness,
+  or manufactured TDD ceremony for such edits.
 - Load `/addyosmani-code-simplification` only for an explicit simplification
   request or an already-approved simplification remediation, after a passing
   behavior baseline exists. Preserve behavior, local conventions, and scope.
