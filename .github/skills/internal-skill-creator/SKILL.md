@@ -68,7 +68,8 @@ its boundary or trigger, or selecting an evaluation branch.
 
 Read the target `SKILL.md`, the nearest competing skills, and the applicable
 `AGENTS.md`. Inventory every existing sibling in the touched bundle:
-`SKILL.md`, `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.
+`SKILL.md`, `references/`, `scripts/`, `assets/`, `agents/openai.yaml`, and
+the paired `.github/agents/<name>.agent.md` when one exists.
 Distinguish real consumption from mere existence by mapping selectors,
 cross-skill routing, validators, tests, inventory, and sync surfaces. Read
 `.github/INVENTORY.md` when adding, retiring, renaming, or replacing a skill.
@@ -102,12 +103,20 @@ and completion status are explicit.
 
 ### 4. Repository closure
 
-1. Update `agents/openai.yaml` to match the revised skill purpose.
+1. Sync every public projection of the revised contract when the SKILL.md
+   purpose, report, or output contract changes: `agents/openai.yaml` and, when
+   a paired `.github/agents/<name>.agent.md` exists, its Output section. A
+   projection must not require output fields or sections that SKILL.md
+   excludes from chat.
 2. Run `python3 .github/scripts/validate_internal_skills.py --skill <name> --strict`.
 3. Check routing fallout in nearby skills and agents.
 4. For replacement or retirement work, remove hollow references and obsolete
    entrypoints, then record before/after line and word counts for the touched
    bundle.
+5. Record the runtime propagation limit: a session started before a contract
+   change keeps the previous skill snapshot in memory. Do not validate the new
+   contract from an in-flight session; restart or use a newly started session
+   to prove the new behavior.
 
 Completion criterion: structural validation passes, routing fallout is resolved, and
 before/after measurements are recorded.

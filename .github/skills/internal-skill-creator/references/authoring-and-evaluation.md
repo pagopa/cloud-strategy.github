@@ -63,8 +63,12 @@ hollow references or unmanaged catalog fallout.
 
 ## Propagation and proof
 
-Name each affected inventory, sync, validator, and test surface. Prefer the
-smallest deterministic proof and record unavailable proof as a gap.
+Name each affected inventory, sync, validator, and test surface. A report or
+output-contract change propagates to three surfaces: the SKILL.md contract,
+`agents/openai.yaml`, and the paired `.github/agents/<name>.agent.md` when one
+exists. A session started before the change keeps the previous snapshot; prove
+the new contract from a newly started session. Prefer the smallest
+deterministic proof and record unavailable proof as a gap.
 
 ## Self-review risk
 
