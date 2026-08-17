@@ -138,7 +138,8 @@ Use `IMPORTANT` for a correction or follow-up that does not independently
 block merge. It is not a third undefined severity scale.
 
 This mapping depends on the imported engine's categories; after an engine
-refresh, rerun the review-engine contract before relying on this projection.
+refresh, run `python3 scripts/check_engine_contract.py` from this bundle and
+treat any reported drift as `REVIEW BLOCKED` until the mapping is realigned.
 
 Keep internal review details hidden unless they alter the verdict. State that
 no changes were applied. For request-changes results, invite the user to
