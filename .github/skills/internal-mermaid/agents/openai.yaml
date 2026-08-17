@@ -1,0 +1,4 @@
+interface:
+  display_name: "internal-mermaid"
+  short_description: "Mermaid diagram workflow guidance"
+  default_prompt: "Use $internal-mermaid when generating, modifying, validating, reviewing, or troubleshooting Mermaid diagrams."

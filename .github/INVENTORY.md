@@ -109,6 +109,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-makefile/SKILL.md`
 - `.github/skills/internal-markdown/SKILL.md`
 - `.github/skills/internal-markitdown/SKILL.md`
+- `.github/skills/internal-mermaid/SKILL.md`
 - `.github/skills/internal-nodejs-project/SKILL.md`
 - `.github/skills/internal-nodejs/SKILL.md`
 - `.github/skills/internal-oop-design-patterns/SKILL.md`
@@ -195,15 +196,11 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Agents
 
-Each agent marked `paired` is a public projection of the named skill bundle;
-its Output section must stay aligned with that skill's SKILL.md output
-contract (see the `stale-output-contract` validator check).
-
-- `.github/agents/internal-gateway-critical-master.agent.md` (paired: `internal-gateway-critical-master`)
+- `.github/agents/internal-gateway-critical-master.agent.md`
 - `.github/agents/internal-luna-executor.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
-- `.github/agents/local-sync-repos.agent.md` (paired: `local-sync-repos`)
+- `.github/agents/local-sync-repos.agent.md`
 
 ## Prompts
 
