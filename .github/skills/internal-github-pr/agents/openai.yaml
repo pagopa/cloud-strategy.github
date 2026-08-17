@@ -2,3 +2,5 @@ interface:
   display_name: "internal-github-pr"
   short_description: "Create, update, validate, and merge repository pull requests."
   default_prompt: "Use /internal-github to route this request to /internal-github-pr."
+policy:
+  allow_implicit_invocation: false

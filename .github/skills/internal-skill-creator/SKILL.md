@@ -60,7 +60,10 @@ inventory, approval records, protected bundles, or broad directories.
 ## Local reference
 
 Read `references/authoring-and-evaluation.md` when creating a skill, changing
-its boundary or trigger, or selecting an evaluation branch.
+its boundary or trigger, or selecting an evaluation branch. Read
+`references/cache-and-token-efficiency.md` when creating or materially
+revising a bundle so the always-loaded prefix stays cache-stable and within
+progressive-disclosure budgets.
 
 ## Workflow
 
@@ -82,16 +85,22 @@ repository validation path are explicit.
 Load `/mattpocock-writing-great-skills` as the core method. Draft or revise the
 smallest coherent bundle. Check invocation, description, information hierarchy,
 retrieval quality, and predictability. Remove duplication, sediment, and no-ops;
-revise the draft in place instead of only reporting findings.
+revise the draft in place instead of only reporting findings. Apply the
+portable frontmatter rules and route invocation policy to agents/openai.yaml.
+Apply the cache-stability rules, progressive-disclosure budgets, and sediment
+review in
+[`references/cache-and-token-efficiency.md`](references/cache-and-token-efficiency.md):
+no volatile content may enter an always-loaded surface.
 
 Completion criterion: every applicable core rule is reflected in the draft,
-and each retained local instruction has a repository-specific reason to exist.
+each retained local instruction has a repository-specific reason to exist, and
+the always-loaded surfaces are byte-stable and within budget.
 
 ### 3. Proportional evaluation
 
 Read `references/authoring-and-evaluation.md`. Select the applicable evaluation
 branches, including compatibility, lifecycle, propagation, and retirement when
-material. Record skipped branches and reasons.
+material. Record skipped branches and reasons. Apply the evaluation-harness requirements in `references/authoring-and-evaluation.md`.
 
 Use the reference's evaluation-selection matrix to choose evidence for each
 change surface. Do not manufacture tests that assert instructional wording;
@@ -111,8 +120,9 @@ and completion status are explicit.
 2. Run `python3 .github/scripts/validate_internal_skills.py --skill <name> --strict`.
 3. Check routing fallout in nearby skills and agents.
 4. For replacement or retirement work, remove hollow references and obsolete
-   entrypoints, then record before/after line and word counts for the touched
-   bundle.
+   entrypoints. For any material revision, record before/after line, word, and
+   estimated token counts for the always-loaded surfaces, and confirm no
+   volatile content entered a cached prefix.
 5. Record the runtime propagation limit: a session started before a contract
    change keeps the previous skill snapshot in memory. Do not validate the new
    contract from an in-flight session; restart or use a newly started session

@@ -2,3 +2,5 @@ interface:
   display_name: "internal-github-operations"
   short_description: "GitHub validation, runner health, and evidence"
   default_prompt: "Use /internal-github to route this request to /internal-github-operations."
+policy:
+  allow_implicit_invocation: false

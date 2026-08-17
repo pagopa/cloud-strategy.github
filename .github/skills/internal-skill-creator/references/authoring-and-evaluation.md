@@ -118,3 +118,18 @@ set. Record a gap when the runtime cannot measure invocation.
 Stop when the accepted prompts and validators pass, the user accepts subjective
 outputs, or another iteration adds no decision-relevant evidence. Keep required
 evidence gaps blocked.
+
+## Portability and invocation contract
+
+`SKILL.md` frontmatter allows only `name`, `description`, `metadata`, `license`,
+and `compatibility`. Invocation policy goes to `agents/openai.yaml` under
+`policy.allow_implicit_invocation`. Provenance fields (`source`, `risk`,
+`date_added`, and `revision`) go under `metadata`. The validator blocks
+non-portable fields.
+
+## Skill evaluation harness
+
+A new skill requires at least three realistic scenario prompts, should-trigger
+and should-not-trigger cases (including one competing-owner near-miss), and a
+baseline comparison without the skill. A material revision re-runs trigger
+checks only when the description changed.

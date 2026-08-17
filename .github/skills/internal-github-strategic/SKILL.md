@@ -1,7 +1,6 @@
 ---
 name: internal-github-strategic
 description: Use when /internal-github routes a GitHub platform or operating-model decision that requires option comparison, tradeoff analysis, or multi-lens strategic framing.
-user-invocable: false
 ---
 
 # Internal GitHub Strategic

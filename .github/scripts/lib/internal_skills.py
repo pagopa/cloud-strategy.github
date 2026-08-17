@@ -59,6 +59,10 @@ LEGACY_OUTPUT_FIELD_TOKENS: tuple[str, ...] = (
     "explicit Blocking",
     "Start with Assessment",
 )
+PORTABLE_FRONTMATTER_FIELDS = frozenset(
+    {"name", "description", "metadata", "license", "compatibility"}
+)
+EXTERNAL_URL_PATTERN = re.compile(r"https?://\S+")
 
 
 @dataclass(frozen=True)
@@ -473,6 +477,24 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
                 )
             )
 
+        non_portable_fields = sorted(set(frontmatter) - PORTABLE_FRONTMATTER_FIELDS)
+        if non_portable_fields:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="non-portable-frontmatter-field",
+                    path=skill_md.as_posix(),
+                    message=(
+                        "SKILL.md frontmatter contains non-portable top-level fields: "
+                        + ", ".join(non_portable_fields)
+                        + "."
+                    ),
+                    suggestion=(
+                        "Move the field under metadata or into agents/openai.yaml policy."
+                    ),
+                )
+            )
+
     if "## When to use" not in body:
         findings.append(
             Finding(
@@ -488,6 +510,7 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
     findings.extend(validate_output_contract_projection(root, skill_dir, skill_name))
     findings.extend(validate_local_references(root, skill_dir))
     findings.extend(validate_token_hygiene(skill_dir, skill_md, body))
+    findings.extend(detect_bundle_security_findings(skill_dir))
     return findings
 
 
@@ -588,6 +611,34 @@ def validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
     short_description = interface.get("short_description")
     default_prompt = interface.get("default_prompt")
 
+    policy = parsed.get("policy")
+    if isinstance(policy, dict) and "allow_implicit_invocation" in policy:
+        if not isinstance(policy["allow_implicit_invocation"], bool):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="invalid-policy-value",
+                    path=openai_yaml.as_posix(),
+                    message="policy.allow_implicit_invocation must be a boolean.",
+                    suggestion="Set policy.allow_implicit_invocation to true or false.",
+                )
+            )
+
+    for icon_field in ("icon_small", "icon_large"):
+        icon_path = interface.get(icon_field)
+        if isinstance(icon_path, str) and icon_path:
+            resolved_icon = skill_dir / icon_path
+            if not resolved_icon.exists():
+                findings.append(
+                    Finding(
+                        severity="blocking",
+                        code="missing-icon-asset",
+                        path=openai_yaml.as_posix(),
+                        message=f"interface.{icon_field} points to a missing asset: {icon_path}.",
+                        suggestion="Add the referenced icon asset to the skill bundle.",
+                    )
+                )
+
     if not isinstance(display_name, str) or not display_name.strip():
         findings.append(
             Finding(
@@ -647,6 +698,29 @@ def validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
             )
         )
 
+    return findings
+
+
+def detect_bundle_security_findings(skill_dir: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    scripts_dir = skill_dir / "scripts"
+    if not scripts_dir.exists():
+        return findings
+    for script_path in sorted(path for path in scripts_dir.rglob("*") if path.is_file()):
+        try:
+            text = read_text(script_path)
+        except (OSError, UnicodeDecodeError):
+            continue
+        if EXTERNAL_URL_PATTERN.search(text):
+            findings.append(
+                Finding(
+                    severity="non-blocking",
+                    code="bundle-script-external-url",
+                    path=script_path.as_posix(),
+                    message="Bundle script contains an external HTTP(S) URL.",
+                    suggestion="Confirm and document the external endpoint.",
+                )
+            )
     return findings
 
 

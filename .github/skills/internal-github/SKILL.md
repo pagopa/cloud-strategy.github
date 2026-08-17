@@ -1,7 +1,6 @@
 ---
 name: internal-github
 description: Official entry point for any GitHub task. Routes every GitHub request to the right specialist - governance, Actions workflows and composite actions, operations, PR lifecycle, or Copilot platform research - or to /internal-github-strategic for high-level decision framing. Use for any GitHub request, scoped or ambiguous.
-user-invocable: true
 ---
 
 # Internal GitHub

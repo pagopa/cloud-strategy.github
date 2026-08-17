@@ -1,7 +1,6 @@
 ---
 name: internal-github-pr
 description: Use when /internal-github routes pull-request lifecycle work covering creation, body updates, readiness, reviews, merge, or terminal-state verification.
-user-invocable: false
 ---
 
 # Internal GitHub PR

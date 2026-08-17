@@ -1,7 +1,8 @@
 ---
 name: internal-gateway-critical-master
 description: Use when any plan, proposal, decision, design, workflow, requirement, or assumption set needs a thorough critical challenge before action.
-revision: 2026-08-17
+metadata:
+  revision: 2026-08-17
 ---
 
 # Critical Master

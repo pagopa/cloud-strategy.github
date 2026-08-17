@@ -1,7 +1,8 @@
 ---
 name: internal-review-high-level
 description: Use when a user needs an independent, evidence-first, report-only review of a non-code artifact or change, including AI resources, architectures, mature proposals, documents, policies, plans, specifications, decisions, or processes.
-revision: 2026-08-17
+metadata:
+  revision: 2026-08-17
 ---
 
 # Internal Review High Level

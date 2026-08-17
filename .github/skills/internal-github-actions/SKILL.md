@@ -1,7 +1,6 @@
 ---
 name: internal-github-actions
-description: Own GitHub Actions workflow, reusable-workflow, and composite-action authoring, debugging, and contracts under `.github/workflows/` and `.github/actions/**/action.yml` or `action.yaml`; also serves as a bounded domain contributor when invoked through a routing envelope with `role: domain-routing`.
-user-invocable: false
+description: "Use when authoring, debugging, or defining contracts for GitHub Actions workflows, reusable workflows, and composite actions under `.github/workflows/` and `.github/actions/**/action.yml` or `action.yaml`; also serves as a bounded domain contributor when invoked through a routing envelope with `role: domain-routing`."
 ---
 
 # GitHub Actions Skill
