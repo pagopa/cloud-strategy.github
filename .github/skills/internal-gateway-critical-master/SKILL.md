@@ -1,6 +1,7 @@
 ---
 name: internal-gateway-critical-master
 description: Use when any plan, proposal, decision, design, workflow, requirement, or assumption set needs a thorough critical challenge before action.
+revision: 2026-08-17
 ---
 
 # Critical Master
@@ -19,6 +20,9 @@ Receive and analyze whatever relevant context is available, identify the most
 important weaknesses and risks, and return a useful critical assessment. The
 subject may be a plan, proposal, decision, design, workflow, requirement,
 document, architecture, or another action context.
+For an independent, evidence-first, report-only assurance review of an existing
+non-code artifact or change, use `internal-review-high-level` instead; use this
+skill for an interactive critical challenge before action.
 
 ## Context intake
 
@@ -62,6 +66,11 @@ evidence snapshot or digest, changed claims or assumptions, rerun reason, and
 outcome. Critical Master supplies those pass details and does not create a
 competing ledger.
 
+When no caller-owned ledger exists because the user invoked this skill directly,
+the critic maintains an equivalent in-conversation unit record for the current
+analysis unit: unit identity, pass type, evidence snapshot digest, rerun reason,
+and outcome. The same rerun rules apply against that record.
+
 - Run one full challenge pass per analysis unit by default.
 - Use a delta review after a materially supported change, limited to changed
   claims, evidence, assumptions, acceptance, and residual blockers.
@@ -80,7 +89,11 @@ competing ledger.
 Classify every finding exactly once before it can change the current plan:
 `blocking-now`, `acceptance-required`, `follow-up`, `separate-design`, or
 `rejected-with-reason`. A finding that is not traceable to an approved
-requirement is `separate-design`.
+requirement is `separate-design`. When the subject has no approved requirement
+baseline, do not deflect a finding to `separate-design` merely for missing
+traceability; classify it by consequence as `blocking-now`,
+`acceptance-required`, or `follow-up`, and record the missing baseline as an
+evidence gap.
 
 ## Critical procedure
 
@@ -100,8 +113,10 @@ criteria, anti-scope, and evidence gaps are understood well enough to critique.
 
 ### Phase 2: Challenge
 
-Select exactly three lenses based on the highest-risk gaps. The third lens must
-be lateral: `analogy` or `reverse-assumption`. Apply each selected lens once.
+Select at least three lenses based on the highest-risk gaps. The third lens must
+still be lateral (`analogy` or `reverse-assumption`). Each additional lens
+beyond three is permitted only when it covers a material gap the first three do
+not. Apply each selected lens once.
 
 | Lens | Question | Use when |
 | --- | --- | --- |
@@ -127,7 +142,7 @@ Ask at most one root question internally when its answer could change the
 critique. Treat mitigations as conditions for continuing, not as implementation
 designs that silently rescue a weak proposal.
 
-Completion criterion: exactly three lenses were applied, the third is lateral,
+Completion criterion: at least three lenses were applied, the third is lateral,
 all material findings are represented, and material failure modes appear in a
 finding or residual risk.
 
@@ -210,10 +225,11 @@ is acceptable to report only with its consequence stated.
 
 ### Open shape
 
-State one real question in plain language. When the answer is a choice, list
-lettered options with their consequence (for example `A)` keep the current
-owner, `B)` propose a separate design). Omit the section when nothing material
-is open.
+Each open question is numbered and stated in plain language. When the answer
+is a choice, list lettered options with their consequence (for example `A)`
+keep the current owner, `B)` propose a separate design), then add one
+suggested option marked with `💡` together with a one-sentence reason. Omit
+the section when nothing material is open.
 
 ### Next shape
 

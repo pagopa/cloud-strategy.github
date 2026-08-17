@@ -1,6 +1,7 @@
 ---
 name: internal-review-high-level
 description: Use when a user needs an independent, evidence-first, report-only review of a non-code artifact or change, including AI resources, architectures, mature proposals, documents, policies, plans, specifications, decisions, or processes.
+revision: 2026-08-17
 ---
 
 # Internal Review High Level
@@ -27,6 +28,9 @@ review is outside this boundary and identify the accepted non-code limit.
 Use this skill when a user wants system-level assurance of a non-code artifact
 or change, including its intent, boundaries, evidence, risk, ownership, or
 decision readiness.
+For an interactive pre-action critical challenge of a plan, proposal, decision,
+or design, use `internal-gateway-critical-master` instead; use this skill for
+independent, report-only assurance.
 
 ## Review frame
 
@@ -62,19 +66,17 @@ that control the decision. Omit non-applicable sections instead of emitting
 boilerplate. Do not copy the reviewed artifact or use a generic cross-skill
 summary layout.
 
-Each material finding contains:
+The report language must always follow the language of the current chat, in
+headings, findings, open questions, and next actions alike. Keep the three
+finding field names stable per language (English: `Problem` / `Suggestion` /
+`Why`; Italian: `Problema` / `Suggerimento` / `Perché`); add a stable
+equivalent when a new language first appears. Use only Latin characters.
 
-- `Evidence`: the observed fact or explicit gap, with a traceable location.
-- `Impact`: the consequence if the concern remains unresolved.
-- `Severity`: consequence-based materiality.
-- `Confidence`: evidence strength, separate from severity.
-- `Recommendation`: the smallest useful report-only follow-up.
-- `Fix owner`: the accountable role or team, when known.
-- `Expected verification`: the check that would confirm resolution.
-
-Keep `NO MATERIAL CONCERNS FOUND` distinct from `INSUFFICIENT EVIDENCE TO
-ASSESS`. A concern without enough support remains an evidence gap and does not
-become a finding.
+Keep `NO MATERIAL CONCERNS FOUND` distinct from `MATERIAL CONCERNS SUPPORTED`
+and `INSUFFICIENT EVIDENCE TO ASSESS`. Use `MATERIAL CONCERNS SUPPORTED` when
+the review is adequately evidenced and at least one material finding is
+supported. A concern without enough support remains an evidence gap and does
+not become a finding.
 
 ## Public projection
 
@@ -82,21 +84,81 @@ Use `🔎` for the review result, `📌` for the reason, `🧪` for evidence or 
 evidence gap, and `👉` for the next decision-relevant follow-up. The verdict
 must be exactly one of `DECISION READY`, `DECISION READY WITH KNOWN RISK`,
 `DECISION BLOCKED`, or `REVIEW INCONCLUSIVE`. Use exactly
-`NO MATERIAL CONCERNS FOUND` or `INSUFFICIENT EVIDENCE TO ASSESS` for the
-evidence outcome. Omit an anchor when it adds no information.
+`NO MATERIAL CONCERNS FOUND`, `MATERIAL CONCERNS SUPPORTED`, or
+`INSUFFICIENT EVIDENCE TO ASSESS` for the evidence outcome. Omit an anchor when
+it adds no information.
 
-Use this compact review-specific order:
+Use exactly this compact review-specific order:
 
-1. `🔎 Result` — exact verdict, exact evidence outcome, and one-sentence reason.
-2. `📌 Findings` — material findings only, each containing `Evidence`,
-   `Impact`, `Severity`, `Confidence`, `Recommendation`, `Fix owner`, and
-   `Expected verification`.
-3. `🧪 Evidence gaps` — only gaps that can change the verdict.
-4. `👉 Next` — one decision-relevant follow-up and its owner.
+1. `# 🛰️ Review High Level: <target>` — fixed title prefix `🛰️ Review High
+   Level` to differentiate this report from the critical-review report,
+   followed by the reviewed target name.
+2. Verdict line — the exact verdict and the exact evidence outcome, followed
+   by a one-sentence reason as a blockquote.
+3. Optional single Mermaid diagram when it clarifies three or more material
+   causal, dependency, ownership, or state relationships (rules below).
+4. `## 📌 Findings` — material findings only, as numbered finding blocks.
+5. `## 🧪 Evidence gaps` — only gaps that can change the verdict.
+6. `## ❓ Open` — only when a material open question remains.
+7. `## 👉 Next` — numbered decision-relevant follow-up.
 
-Keep residual risk beside the finding or evidence gap it qualifies. Use a
-Mermaid diagram only for a material relationship that is clearer visually;
-retain the conclusion in prose and never use the diagram as the sole evidence.
+### Finding block shape
+
+Each finding is one compact block:
+
+```markdown
+**N. <dot> <short title>** — <severity>/<confidence>
+
+- **<Problem>:** what is wrong, one to two sentences, with a traceable
+  location such as `path:line` or section reference.
+- **<Suggestion>:** the smallest useful report-only follow-up, one to two
+  sentences.
+- **<Why>:** why it matters for the verdict, one to two sentences.
+```
+
+Rules:
+
+- Severity dots are stable: 🔴 high, 🟡 medium, 🟢 low.
+- Each field must be understandable without rereading the investigation:
+  name the file, section, decision, or mechanism involved; never a cryptic ID
+  alone.
+- Do not emit `Fix owner` or `Expected verification` fields in chat; route
+  them to the caller-owned record when one exists.
+- Keep residual risk beside the finding or evidence gap it qualifies.
+
+### Evidence gaps shape
+
+Each gap is a bold name followed by what stays unconfirmed and why it can
+change the verdict. A bare name or one-word entry is invalid.
+
+### Open shape
+
+Each open question is numbered and stated in plain language. When the answer
+is a choice, list lettered options with their consequence (for example `A)`
+keep the current owner, `B)` propose a separate design), then add one
+suggested option marked with `💡` together with a one-sentence reason. Omit
+the section when nothing material is open.
+
+### Next shape
+
+Number each action, make it concrete, and reference the finding, evidence
+gap, or open question it closes. One action per step; no vague instructions
+such as "improve the document".
+
+### Mermaid rules
+
+Use at most one diagram, and only when it clarifies three or more material
+causal, dependency, ownership, or state relationships. Use a top-down
+flowchart with:
+
+- one node per finding or effect, anchored as `Finding N` or by its short
+  name;
+- short self-explanatory phrases of two to four `\n`-broken lines, not bare
+  IDs;
+- an emoji prefix per node and semantic fills: red for the problem, amber for
+  decision-level effects, yellow for verdict-level effects;
+- the controlling conclusion in adjacent prose; the diagram is never the sole
+  carrier of evidence.
 
 ## Completion
 

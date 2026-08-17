@@ -41,20 +41,21 @@ Confidence describes evidence strength and is separate from severity:
 - `REVIEW INCONCLUSIVE`: evidence gaps prevent a reliable decision.
 
 Use `NO MATERIAL CONCERNS FOUND` when the review is adequately evidenced and no
-material concern is supported. Use `INSUFFICIENT EVIDENCE TO ASSESS` when
-evidence gaps prevent that conclusion; these outcomes are not interchangeable.
+material concern is supported. Use `MATERIAL CONCERNS SUPPORTED` when the
+review is adequately evidenced and at least one material finding is supported.
+Use `INSUFFICIENT EVIDENCE TO ASSESS` when evidence gaps prevent either
+conclusion; these outcomes are not interchangeable.
 
 ## Material finding
 
-Every material finding uses the same seven fields:
+Each finding is one compact block with stable field names per language:
 
-- `Evidence`: observed fact or explicit gap with a traceable location.
-- `Impact`: consequence if the concern remains unresolved.
-- `Severity`: consequence-based materiality.
-- `Confidence`: strength of the supporting evidence.
-- `Recommendation`: smallest useful report-only follow-up.
-- `Fix owner`: accountable role or team, when known.
-- `Expected verification`: check that would confirm resolution.
+- English: `Problem` / `Suggestion` / `Why`.
+- Italian: `Problema` / `Suggerimento` / `Perché`.
+
+Severity and confidence appear in the block header. Deeper bookkeeping fields
+such as `Fix owner` and `Expected verification` go to the caller-owned record
+when one exists; they do not appear in chat.
 
 Recommendations describe the decision-relevant outcome and expected
 verification. They do not provide replacement artifact content or perform the
