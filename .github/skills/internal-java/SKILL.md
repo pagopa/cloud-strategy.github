@@ -1,6 +1,6 @@
 ---
 name: internal-java
-description: Use when Java language or source correctness, readability, resource handling, error behavior, or generic Maven/Gradle build metadata is the primary concern, including compiler release, toolchains, plugins, dependencies, reproducibility, and focused build validation. Do not use when module or domain design, API and concurrency architecture, or framework-managed runtime behavior determines correctness.
+description: Use when Java language or source correctness, readability, resource handling, error behavior, or generic Maven/Gradle build metadata is the primary concern, including compiler release, toolchains, plugins, dependencies, reproducibility, and focused build validation. Do not use when module or domain design, API and concurrency architecture, or framework-managed runtime behavior determines correctness; route framework-neutral design to /internal-java-project and Spring Boot runtime semantics to /internal-java-spring-boot-development.
 ---
 
 # Internal Java
@@ -23,9 +23,10 @@ description: Use when Java language or source correctness, readability, resource
 ## When not to use
 
 - Module, package, domain, API, collaborator, or concurrency architecture is
-  the main concern.
+  the main concern; route it to /internal-java-project.
 - Framework-managed wiring, configuration, lifecycle, transactions, test
-  contexts, or runtime semantics determine correctness.
+  contexts, or runtime semantics determine correctness; route Spring Boot
+  runtime semantics to /internal-java-spring-boot-development.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
 ## Working contract

@@ -22,29 +22,13 @@ Use only the minimum set of lenses needed for the request. If the user names
 lenses, prioritize those. Otherwise infer the smallest useful set from the
 decision.
 
-Available lenses include:
-
-- security
-- identity and access
-- organization-structure
-- governance
-- operations
-- monitoring and observability
-- BC/DR
-- FinOps
-- compliance
-- rollout and rollback
-- blast radius
-- maintainability
-
 Start narrow and expand only when the request is broad, risky, or ambiguous.
 Keep active lenses explicit when more than one is in play.
 
-## Optional BC/DR lens
-
-Activate BC/DR only when resilience, backup, recovery, failover, RTO, RPO, or
-multi-region continuity changes the recommendation. Otherwise state that the
-continuity lens was not material.
+For lens selection or combination guidance, load
+`references/lens-playbook.md`. Activate BC/DR only when resilience, backup,
+recovery, failover, RTO, RPO, or multi-region continuity changes the
+recommendation; otherwise state that the continuity lens was not material.
 
 ## Freshness dependency
 
@@ -86,7 +70,6 @@ radius, reversibility, and evidence requirements.
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
 | Forcing full multi-lens analysis for a small question | The answer becomes heavier than the decision requires | Start with the smallest useful lens set |
-| Treating BC/DR as mandatory for every answer | Continuity language crowds out the actual tradeoff | Activate it only when continuity changes the recommendation |
 | Recommending a direction without current-source verification when freshness matters | Support boundaries or limits may have changed | Call out the freshness dependency and unresolved evidence |
 | Confusing decision support with implementation guidance | The requested decision becomes hard to evaluate | Keep the answer at decision level |
 | Expanding into tool or IaC selection without a request | The response drifts from AWS platform tradeoffs | Center the recommendation on the AWS choice |

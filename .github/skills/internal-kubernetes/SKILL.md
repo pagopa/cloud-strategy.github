@@ -5,15 +5,15 @@ description: Use when the task involves Kubernetes but the winning lane is not o
 
 # Internal Kubernetes
 
-## Referenced skills
+## Canonical lane routing
 
 Treat the referenced skills below as on-demand owners. Do not preload the whole
 Kubernetes family; load them only when the request proves whether syntax,
 workload delivery, or platform architecture is the real problem.
 
-- `internal-yaml`: YAML formatting and parser-safety baseline when manifest syntax itself is the blocker.
-- `internal-kubernetes-deployment`: workload manifests, service exposure, probes, autoscaling, rollout strategy, and production hardening when delivery semantics are the task.
-- `antigravity-kubernetes-architect`: Kubernetes platform architecture, GitOps operating model, service mesh, and multi-cluster strategy when platform shape is the task.
+- `internal-yaml`: use when YAML formatting or parser safety is the blocker.
+- `internal-kubernetes-deployment`: use for workload manifests, service exposure, probes, autoscaling, rollout strategy, and production hardening when delivery semantics are the task.
+- `antigravity-kubernetes-architect`: use for Kubernetes platform architecture, GitOps operating model, service mesh, and multi-cluster strategy when platform shape is the task.
 
 Use this skill to choose the right Kubernetes lane before drafting guidance or editing delivery assets.
 
@@ -28,7 +28,7 @@ Use this skill to choose the right Kubernetes lane before drafting guidance or e
 1. Classify the pressure.
    Decide whether the request is mainly about platform strategy, workload delivery authoring, or rollout and recovery.
 2. Pick the winning Kubernetes asset.
-   Use `antigravity-kubernetes-architect` for platform architecture and `internal-kubernetes-deployment` for workload manifests, rollout safety, and production hardening.
+   Use the canonical lane-routing table above.
 3. Keep adjacent guidance scoped.
    Use `internal-yaml` only for YAML formatting or parser concerns; use the deployment or architecture owner for Kubernetes semantics.
 4. Return one clear next lane.
@@ -36,9 +36,7 @@ Use this skill to choose the right Kubernetes lane before drafting guidance or e
 
 ## Winning lanes
 
-- Strategic platform architecture: cluster topology, GitOps operating model, service mesh, multi-cluster shape, and platform security boundaries.
-- Tactical workload authoring: workload shape, controller choice, service exposure, ingress, probes, autoscaling, config, and secret handling.
-- Operational rollout and recovery: rollout strategy, rollback, observability hooks, network-policy verification, and production-readiness checks.
+See the canonical lane-routing table above for each lane and its trigger.
 
 Load `references/routing-matrix.md` when the request mixes platform, manifest, and rollout concerns or when the boundary between strategy and delivery is unclear.
 

@@ -16,10 +16,10 @@ description: Use when Spring Boot-specific framework or runtime semantics determ
 
 ## When not to use
 
-- Ordinary Java source correctness or generic Maven/Gradle metadata is the main
-  concern and no Spring Boot-specific behavior determines the outcome.
-- Framework-neutral module, package, domain, API, collaborator, concurrency, or
-  test design is the main concern.
+- Route ordinary Java source correctness or generic Maven/Gradle metadata to
+  /internal-java when no Spring Boot-specific behavior determines the outcome.
+- Route framework-neutral module, package, domain, API, collaborator,
+  concurrency, or test design to /internal-java-project.
 
 ## Workflow
 

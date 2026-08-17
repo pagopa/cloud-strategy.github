@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: true
 interface:
   display_name: "internal-aws"
   short_description: "Canonical entry point for every AWS request"

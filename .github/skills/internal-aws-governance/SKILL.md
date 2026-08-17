@@ -11,10 +11,10 @@ permission decisions auditable.
 
 ## When to use
 
-- IAM operating-model guidance across accounts.
-- SCP, trust, federation, or permission-boundary guidance.
+- IAM operating-model guidance across accounts, including role and group strategy.
+- SCP, trust, federation, permission-boundary, or session-constraint guidance, including role assumption.
 - Separating preventive controls from granted permissions.
-- Guardrail design, exception handling, or access-governance review.
+- Guardrail design, exception handling, or access-governance review, including identity and access security guardrails.
 
 ## Core rules
 
@@ -26,10 +26,6 @@ permission decisions auditable.
 - On `AccessDenied` with "explicit deny in a service control policy", treat the SCP as the blocking control; target-account IAM grants cannot override an explicit SCP deny.
 
 Load `references/guardrail-map.md` when the governance surface is ambiguous or a deeper split between IAM, trust, SCP, and boundary controls is needed.
-
-## Domains
-
-IAM operating model · role and group strategy · trust-policy boundaries · permission boundaries and session constraints · federation and role assumption · SCP and tag-policy guardrails · exception and break-glass handling · security guardrails tied to identity and access.
 
 ## Common mistakes
 

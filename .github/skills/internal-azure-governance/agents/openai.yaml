@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: false
 interface:
   display_name: "internal-azure-governance"
   short_description: "Azure RBAC, Policy, and guardrail guidance"

@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: true
 interface:
   display_name: "internal-github"
   short_description: "Official GitHub entry point and router"

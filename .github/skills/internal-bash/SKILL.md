@@ -22,7 +22,8 @@ description: Use when creating, analyzing, reviewing, or modifying embedded Bash
 ## When not to use
 
 - Standalone script design, standalone script review, launcher behavior,
-  operator UX, or script templates.
+  operator UX, or script templates. Route standalone scripts, utilities,
+  wrappers, and launchers to `/internal-bash-script`.
 - Shell embedded in an automation format whose enclosing platform contract is
   the primary subject.
 - Workflow-level behavior beyond the shell fragment itself.
@@ -35,7 +36,7 @@ execution environment, and the compatibility target as the dialect contract:
 
 - `Dialect: Bash` when the caller, entrypoint, runtime, or repository contract
   explicitly provides Bash.
-- `Dialect: POSIX`sh`` when the caller or target requires POSIX shell syntax.
+- `Dialect: POSIX sh` when the caller or target requires POSIX shell syntax.
 
 Require an explicit POSIX baseline before treating Issue 8 behavior as
 portable. Do not infer portability from Bash invoked as `sh`.
@@ -57,7 +58,7 @@ for dynamic commands, `[[ ]]`, `local`, and Bash-specific traps or options.
 
 ## POSIX `sh` branch
 
-For `Dialect: POSIX`sh``, use the shebang convention declared by the target
+For `Dialect: POSIX sh`, use the shebang convention declared by the target
 repository or platform. Use `set -eu` with contextual `-e` caveats, scalar
 variables and positional parameters, and `[ ]` or `test`. Do not use Bash arrays
 or `local`. Use `pipefail` only when POSIX.1-2024 Issue 8 is an explicit
@@ -74,7 +75,7 @@ baseline; it is not a safe assumption for an unspecified `/bin/sh`.
 ## Validation
 
 For `Dialect: Bash`, run `bash -n <script>.sh` and
-`shellcheck -s bash <script>.sh` when available. For `Dialect: POSIX`sh``, run
+`shellcheck -s bash <script>.sh` when available. For `Dialect: POSIX sh`, run
 `sh -n <script>.sh`, `shellcheck -s sh <script>.sh`, and execute under each
 repository-supported `sh` implementation. Bash invoked as `sh` is not
 cross-shell portability proof. Run the repository wrapper or focused command

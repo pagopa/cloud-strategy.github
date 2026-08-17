@@ -5,13 +5,7 @@ description: Use when auditing repository-owned GitHub Copilot assets for overla
 
 # Internal Copilot Audit
 
-## Referenced skills
-
-- None.
-
 Use this skill when auditing the health of the Copilot customization catalog.
-
-This skill is often invoked by planning or sync lanes, but it can also be used directly for a focused repository audit when the user explicitly wants overlap, stale-reference, or governance-drift findings.
 
 Treat the declared governance contract in the relevant agent, root `AGENTS.md`, and `.github/copilot-instructions.md` as the policy source of truth. Treat the current `.github/` catalog on disk as evidence to compare against that policy.
 
@@ -53,6 +47,10 @@ For skill bundles, treat `references/`, `scripts/`, `assets/`, and `agents/opena
 10. Check whether governance files still describe superseded or removed assets.
 
 Before classifying a cleanup as high-evidence, verify the candidate paths exist on the current filesystem. Absent paths are stale plan evidence, not executable deletion work.
+
+## Completion criteria
+
+An audit is complete only when every catalog area in scope has been audited, each finding is recorded with its asset path, and `./.github/scripts/run.sh check_catalog_consistency` has been invoked.
 
 Load `references/audit-checklist.md` when you need the detailed issue taxonomy, flagging criteria, or example findings.
 

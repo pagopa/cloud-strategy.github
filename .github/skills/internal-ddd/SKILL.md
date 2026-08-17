@@ -1,6 +1,6 @@
 ---
 name: internal-ddd
-description: Use when deciding whether a complex domain needs Domain-Driven Design, framing the current DDD stage from strategic modeling through tactical and evented patterns, and producing only the artifacts justified by real domain pressure.
+description: Use when deciding whether a complex domain needs Domain-Driven Design and framing the current DDD stage from strategic modeling through tactical and evented patterns.
 ---
 
 # Internal DDD
@@ -69,7 +69,7 @@ Always return:
 
 ## Guardrails
 
-- Do not present this skill as a router; it is a decision and artifact workflow.
+- This skill decides the DDD stage and artifacts; routing to other owners happens only after that decision.
 - Do not recommend CQRS, event sourcing, or sagas without a clear pressure from workflow complexity or integration boundaries.
 - Do not recommend read-write separation, event history as source of truth, or read models unless the operational reason is explicit.
 - Do not let DDD vocabulary replace concrete domain terms.

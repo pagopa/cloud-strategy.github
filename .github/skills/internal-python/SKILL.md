@@ -24,7 +24,9 @@ linter-owned diagnostics to the configured tooling.
   runtime, dependencies, tests, or output boundaries.
 - Lightweight reviews or small fixes where direct operator-facing execution
   versus importable application behavior is not yet clear.
-- `.py` changes that need the shared baseline before a narrower owner is chosen.
+- `.py` changes that need the shared baseline before a narrower owner is chosen:
+  `/internal-python-project` for reusable imported behavior and
+  `/internal-python-script` for directly executed scripts.
 
 ## When not to use
 
@@ -45,17 +47,11 @@ linter-owned diagnostics to the configured tooling.
   filesystem, protocol, JSON, or wrapper behavior. Reading another
   technology's source or configuration alone does not establish a Python test
   boundary.
-- Use the repository-declared runtime and declared dependency manager. For
-  pip-managed requirements, preserve exact pins and hashes in the owning lock
-  artifact; use the other manager's canonical frozen or locked validation when
-  applicable.
+- Baseline dependency and output rules are owned by the selected owner.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback
   dependency mirrors.
 - Add focused `pytest` coverage for new or changed behavior and use the nearest
   repository-owned syntax or runtime check for syntax-only changes.
-- Keep human-facing console reporting separate from reusable logging and
-  machine-readable output. Human output belongs at an execution boundary;
-  JSON and other data outputs stay plain and neutral.
 
 ## Validation
 

@@ -95,8 +95,7 @@ proposed, but no separate simplification runtime is loaded.
 - Read the spec, task, and tests before implementation when those sources
   exist. Review only the requested code surface and immediate evidence.
 - During the review pass, do not edit files, apply fixes, or author plans.
-- Keep the review pass report-only. Planning or remediation requires a
-  separate explicit request and remains outside the current review.
+- Report-only: no fixes; see boundary above.
 
 ## Completion criteria
 

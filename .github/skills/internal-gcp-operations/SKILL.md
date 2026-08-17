@@ -25,12 +25,10 @@ Load `references/validation-and-evidence.md` only when an evidence path needs de
 
 ## Output
 
-- operational objective and affected surface
-- rollout unit, preflight signals, owners, and rollback trigger
-- staged observation and validation plan
-- expected versus observed evidence
-- backup, restore, and recovery evidence when stateful or critical services are involved
-- inventory, reporting, and remaining operational risk
+- a concise operational-readiness report
+- a staged validation plan
+- an evidence package
+- a risk and rollout recommendation
 
 ## Completion
 

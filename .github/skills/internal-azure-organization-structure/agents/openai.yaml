@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: false
 interface:
   display_name: "internal-azure-organization-structure"
   short_description: "Azure tenant, landing-zone, and topology layout"

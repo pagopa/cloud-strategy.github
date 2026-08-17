@@ -13,7 +13,8 @@ description: Use when creating, reviewing, or modifying standalone Bash or POSIX
 
 ## When not to use
 
-- Embedded shell fragments.
+- Embedded shell fragments and sourced helpers inside another program; route
+  them to `/internal-bash`.
 - Sourced or non-operator Bash helpers that do not own an operator-facing
   entrypoint.
 - Workflow or platform behavior beyond the standalone shell entrypoint.
@@ -91,3 +92,5 @@ Load `references/common-mistakes.md` for the full mistake table.
 - `bash -n script.sh` (syntax check)
 - `shellcheck -s bash script.sh` (lint)
 - `shfmt -d script.sh` (format diff, if available)
+- `sh -n script.sh` (POSIX `sh` syntax check)
+- `shellcheck -s sh script.sh` (POSIX `sh` lint)

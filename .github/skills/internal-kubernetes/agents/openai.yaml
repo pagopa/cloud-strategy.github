@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: true
 interface:
   display_name: "internal-kubernetes"
   short_description: "Route Kubernetes work by operating scope"

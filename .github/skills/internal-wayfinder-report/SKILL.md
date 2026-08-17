@@ -13,13 +13,11 @@ authoritative.
 The parent may invoke `internal-luna-executor` through
 `/internal-subagent-contract` for candidate evidence inventory or report
 drafting only after the relevant sources, authority, report structure,
-acceptance, and validation are fixed. Use one `DelegationBrief` v1 and verify
-the adapter-composed `WorkerResult` v1 plus caller-owned `VerificationReceipt`
-v1. Treat unobserved validation and budget data as claims or unavailable
-evidence. Never delegate source authority, findings, diagram relationships,
-acceptance, or closeout. When timeout, interruption, executor unavailability,
-or missing terminal output prevents a worker payload, record a caller-owned
-`LifecycleRecord` and create neither a synthetic `WorkerResult` nor a receipt.
+acceptance, and validation are fixed. Follow
+`/internal-subagent-contract` and its `references/protocol.md` for the
+`DelegationBrief`, `WorkerResult`, `VerificationReceipt`, and
+`LifecycleRecord` protocol. Never delegate source authority, findings, diagram
+relationships, acceptance, or closeout.
 
 ## When to use
 
@@ -43,7 +41,9 @@ other local analysis assets before writing the report input. See
 [compact-authoring.md](references/compact-authoring.md) for the preflight-first
 bounded authoring sequence. “Read each distinct source path once in a bounded
 pass” means complete file coverage with bounded retained notes; it does not
-authorize skipping an issue. The source-note helper is navigation-only, and
+authorize skipping an issue. The source-note helper is
+`scripts/collect_source_notes.py`, used once after inventory and hashing for
+bounded, navigation-only notes, and
 `render_report.py` remains the final evidence validator. Generated files under
 `report/` may be read when resuming, but are not source authority.
 

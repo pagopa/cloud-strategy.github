@@ -13,9 +13,10 @@ for every failure loop; load only the owner proved by the active diagnosis,
 next claim, or validated handoff.
 
 - `internal-performance-optimization`: performance owner when measured slowness or throughput is primary.
-- `internal-tdd`: regression-test owner after the root cause is understood.
-- `superpowers-systematic-debugging`: stricter diagnosis discipline for hard, flaky, or guess-prone failures.
-- `superpowers-verification-before-completion`: evidence gate before claiming the original loop is fixed.
+- `internal-tdd`: regression-test owner after the root cause is understood, including public-interface test seams.
+- `superpowers-systematic-debugging`: stricter diagnosis discipline when the failure is hard, flaky, or tempting to guess at.
+- `superpowers-verification-before-completion`: evidence gate before claiming that the bug, failing loop, or drift signal is resolved.
+- Runtime-specific internal skills: language, workflow, Terraform, GitHub Actions, or script owners for idiomatic fixes and validation.
 
 Use this skill as the repository-owned owner for root-cause diagnosis. Build a
 feedback loop before changing behavior, then use evidence to narrow the cause.
@@ -32,9 +33,9 @@ When an unexpected failure appears, stop adjacent feature work, preserve the cur
 
 ## When not to use
 
-- Use `internal-performance-optimization` when slowness or throughput is the
+- Use `/internal-performance-optimization` when slowness or throughput is the
   primary problem and a measurable performance question exists.
-- Use `internal-tdd` when the main job is test-first delivery of new executable
+- Use `/internal-tdd` when the main job is test-first delivery of new executable
   behavior, not diagnosing a current failure.
 - Do not force this skill onto Markdown-only, prompt-only, agent-only, or
   governance prose edits unless a validator or generated artifact is actually
@@ -56,21 +57,10 @@ When an unexpected failure appears, stop adjacent feature work, preserve the cur
    flaky, raise the reproduction rate with controlled repetition or narrowed
    timing before guessing.
 6. Add or update a regression test at the correct seam when executable behavior
-   changed. Use `internal-tdd` for the red-green-refactor loop when the seam is
+    changed. Use `/internal-tdd` for the red-green-refactor loop when the seam is
    meaningful.
 7. Apply the root-cause fix, rerun the original loop, rerun the regression test
    or validator, and confirm all temporary probes are gone.
-
-## Support Skills
-
-- `superpowers-systematic-debugging`: stricter diagnosis discipline when the
-  failure is hard, flaky, or tempting to guess at.
-- `superpowers-verification-before-completion`: evidence gate before claiming
-  that the bug, failing loop, or drift signal is resolved.
-- `internal-tdd`: regression tests and public-interface test seams after the
-  root cause is understood.
-- Runtime-specific internal skills: language, workflow, Terraform, GitHub
-  Actions, or script owners for idiomatic fixes and validation.
 
 ## Completion Requirements
 
@@ -80,7 +70,7 @@ When an unexpected failure appears, stop adjacent feature work, preserve the cur
 - Show the regression test, validator, or explicit seam gap.
 - Confirm temporary instrumentation, throwaway fixtures, and debug-only files
   were removed or intentionally retained with a clear route.
-- Use `superpowers-verification-before-completion` before claiming the bug,
+- Use `/superpowers-verification-before-completion` before claiming the bug,
   original loop, or drift signal is fixed.
 
 ## Common mistakes

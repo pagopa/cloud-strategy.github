@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: true
 interface:
   display_name: "internal-gcp"
   short_description: "Official and default GCP entry point"

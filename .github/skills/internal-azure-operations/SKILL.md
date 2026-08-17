@@ -10,8 +10,8 @@ decision.
 
 ## When to use
 
-Use when `/internal-azure` selects an operational readiness, evidence,
-monitoring, recovery, or reporting deliverable.
+Use when `/internal-azure` routes work requiring operational proof or
+validation.
 
 ## Workflow
 
@@ -28,9 +28,7 @@ monitoring, recovery, or reporting deliverable.
 6. Add recovery proof when stateful services, business criticality, or
    continuity expectations make it relevant; distinguish backup, restore, and
    DR evidence.
-7. Apply the completion criteria: evidence is attributable to the rollout unit,
-   open risks are named, rollback conditions are actionable, and widening has
-   fresh proof.
+7. Verify every item in Completion criteria before finishing.
 
 ## Evidence patterns
 

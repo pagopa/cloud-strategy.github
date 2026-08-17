@@ -9,8 +9,8 @@ description: Use when performance is the primary problem, such as profiling slow
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `antigravity-network-engineer`: network-specific owner when latency, DNS, load-balancer behavior, or topology is primary.
-- `superpowers-verification-before-completion`: evidence gate before claiming a performance gain.
+- `/antigravity-network-engineer`: load when latency, DNS, load-balancer behavior, or network topology is the primary bottleneck.
+- `/superpowers-verification-before-completion`: load before claiming a performance gain.
 
 Use this skill when performance is the primary constraint. Start from measured
 evidence, not intuition.
@@ -47,45 +47,10 @@ evidence, not intuition.
 - Keep measurement probes scoped and remove temporary timing or profiling code
   before completion unless it becomes an intentional diagnostic surface.
 
-## Frontend Checks
+## Domain Checklists
 
-- Re-render frequency
-- Bundle size and lazy loading
-- DOM churn and expensive layout work
-- Image, font, and asset weight
-- Request waterfalls and client caching
-
-## Backend Checks
-
-- N+1 patterns
-- Avoidable I/O round-trips
-- Unbounded concurrency
-- Slow serialization or parsing
-- Inefficient algorithms or data structures
-
-## Database Checks
-
-- Execution plan shape and row-estimate mismatches
-- Missing or badly ordered indexes
-- Functions on indexed columns in predicates
-- Over-fetching
-- Offset pagination on large tables
-- Repeated aggregations that should be consolidated
-
-## PostgreSQL-Specific Checks
-
-- `EXPLAIN ANALYZE` and `pg_stat_statements`
-- JSONB with GIN indexes only when the workload truly benefits
-- Partial and expression indexes for selective predicates
-- Full-text search when text filtering outgrows `LIKE`
-- Extension choices only when they are explicit, justified, and operationally supportable
-
-## Memory and CPU
-
-- High allocation churn
-- Duplicate object creation
-- Work that should be streamed or batched
-- Work happening on the critical path that can move off it
+Load `references/optimization-checklists.md` for the domain checklist matching
+the measured bottleneck.
 
 ## Regression Prevention
 
@@ -100,9 +65,8 @@ After a fix, add at least one of:
 
 ## Cross-references
 
-- Use `superpowers-verification-before-completion` before claiming latency,
-  throughput, allocation, or query-plan improvement.
-- Use `antigravity-network-engineer` when latency, packet flow, DNS, load-balancer behavior, or network topology is the primary bottleneck.
+- Use `/superpowers-verification-before-completion`.
+- Use `/antigravity-network-engineer`.
 
 ## Validation
 
@@ -110,8 +74,7 @@ After a fix, add at least one of:
 - The claimed gain is backed by fresh output, traces, telemetry, or benchmark
   evidence.
 - Regression protection exists, or the explicit protection gap is recorded.
-- Use `superpowers-verification-before-completion` before claiming a performance
-  improvement.
+- Use `/superpowers-verification-before-completion`.
 
 ## Anti-Patterns
 

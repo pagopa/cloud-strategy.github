@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: false
 interface:
   display_name: "internal-gcp-organization-structure"
   short_description: "GCP org, project, and topology layout"

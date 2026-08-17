@@ -34,7 +34,7 @@ Prefer a singular core-skill architecture for routers and broader command center
 
 - The requested deliverable is a skill, prompt, scoped instruction, validator, doc, or sync workflow instead of an agent.
 - The work is catalog-wide sync governance rather than one or more concrete agent contracts.
-- The task needs current GitHub Copilot or VS Code platform facts before agent editing can continue; load `internal-copilot-docs-research` for that verification first.
+- The task needs current GitHub Copilot or VS Code platform facts before agent editing can continue; load /internal-copilot-docs-research for that verification first.
 
 ## Goals
 
@@ -69,7 +69,7 @@ Load these inputs before finalizing an internal agent:
 - `references/official-source-map.md` when platform or OpenAI guidance affects the authoring rule
 - `references/review-checklist.md` before final validation or when reviewing an existing agent
 - `references/subagent-patterns.md` when the agent needs to invoke or be invoked as a subagent, or when designing coordinator/worker workflows
-- `internal-copilot-docs-research` when the change depends on current GitHub Copilot or VS Code platform behavior
+- /internal-copilot-docs-research when the change depends on current GitHub Copilot or VS Code platform behavior
 
 Use `scripts/audit_agent_contract.py` before material agent authoring or review when the existing `.github/agents` catalog should be used as a benchmark. Use `scripts/measure_skill_bundle_tokens.py` after material edits to this skill bundle so code and loaded-context token costs stay visible.
 
@@ -93,7 +93,7 @@ Choose an agent only when the repository benefits from a stable command center, 
 
 ## Agent Contract
 
-Read `references/agent-contract.md` before changing frontmatter, tool scope, core-skill sections, or subagent controls.
+Read the relevant entries flagged in Read First before changing frontmatter, tool scope, core-skill sections, or subagent controls.
 
 Keep these rules visible while drafting:
 
@@ -112,7 +112,7 @@ Keep these rules visible while drafting:
 
 Before changing claims about frontmatter support, tool aliases, MCP behavior, or subagent invocation:
 
-- load `internal-copilot-docs-research` to identify the authoritative source map
+- Read the relevant entry flagged in Read First to identify the authoritative source map
 - verify the authoritative documentation for the exact surface involved
 - mark the claim as unverified if the docs are unreachable
 

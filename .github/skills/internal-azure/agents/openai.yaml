@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: true
 interface:
   display_name: "internal-azure"
   short_description: "Azure platform entry point and deliverable selector"

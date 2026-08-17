@@ -132,6 +132,12 @@ source files when (a) modifying/debugging specific code, (b) the graph lacks the
 
 Type `/graphify` in Copilot Chat to build or update the graph.
 
+## GitHub Work Routing
+
+Route GitHub requests through `/internal-github`, which selects the governance,
+actions, operations, PR, or strategic lane. Route current Copilot or MCP
+platform documentation needs to `/internal-copilot-docs-research`.
+
 ## Optional Repository-Local Policy
 
 If `AGENTS.local.md` exists next to this file, load and apply it after this

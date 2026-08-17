@@ -8,11 +8,6 @@ description: Use when /internal-azure selects Azure authorization, workload iden
 Use this workflow to define auditable Azure identity, access, and guardrail
 decisions.
 
-## When to use
-
-Use when `/internal-azure` selects an Azure governance deliverable involving
-RBAC, workload identity, PIM/PAM, Policy, tagging, or exceptions.
-
 ## Workflow
 
 1. State the governance objective: the access, prevention, detection, or
@@ -25,9 +20,7 @@ RBAC, workload identity, PIM/PAM, Policy, tagging, or exceptions.
    control, expiry or review date, and audit evidence.
 5. Stage the rollout with a safe scope, compliance or access checks, rollback
    triggers, and evidence collection.
-6. Apply the completion criteria: scope is explicit, controls are classified,
-   authorization is least-privilege, exceptions are reviewable, and rollout
-   evidence is recorded.
+6. Verify every item in Completion criteria before finishing.
 
 ## Azure governance patterns
 

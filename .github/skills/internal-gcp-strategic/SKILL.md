@@ -25,14 +25,11 @@ Load `references/lens-playbook.md` only when lens choice or option comparison ne
 
 ## Output
 
-Choose the lightest useful format:
-
-- Quick answer: recommendation, short rationale, and material risk.
-- Decision note: decision statement, assumptions, options, recommendation, and validation note.
-- Deep analysis: context, assumptions, active lenses, options, recommendation, tradeoffs, blast radius, and validation path.
+Provide only the selected format's deliverable: a recommendation with short rationale and material risk; a decision statement with assumptions, options, recommendation, and validation note; or context, active lenses, options, tradeoffs, blast radius, and validation path.
 
 ## Completion
 
+- Choose one mode: quick answer, decision note, or deep analysis.
 - The decision statement is explicit and narrow enough to evaluate.
 - Assumptions, active lenses, and the main tradeoff are named.
 - The recommendation compares realistic options and includes reversibility or blast-radius guidance when material.

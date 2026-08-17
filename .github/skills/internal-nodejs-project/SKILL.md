@@ -17,8 +17,8 @@ description: Use when creating, modifying, reviewing, or refactoring Node.js or 
 
 - Do not use for metadata-only, toolchain, dependency, compiler, or lockfile
   work.
-- Do not use for isolated module changes whose application boundaries and
-  validation path are already established.
+- Route localized changes, package metadata, and dependencies to
+  `/internal-nodejs`.
 - Route frontend design, Docker, workflows, and infrastructure to their domain
   owners.
 
@@ -58,8 +58,6 @@ description: Use when creating, modifying, reviewing, or refactoring Node.js or 
 - Keep programmer errors visible while handling expected operational failures
   through the application's central error path.
 
-Load `references/examples.md` when you need a minimal module or test example.
-
 ## Test design
 
 - Follow the repository's established test stack and keep tests focused on
@@ -76,3 +74,7 @@ Load `references/common-mistakes.md` for the full mistake table.
 
 - Run the repository-native tests and the closest configured validation for the
   changed application boundary.
+
+## References
+
+- Load `references/examples.md` when you need a minimal module or test example.

@@ -1,6 +1,6 @@
 ---
 name: internal-lesson-codification
-description: Use before adding, updating, or codifying retained lessons, LESSONS_LEARNED.md rows, lessons learned, lezioni apprese, or retained-learning corrections so each lesson is routed to the smallest valid canonical owner first.
+description: Use before adding, updating, or codifying retained lessons or lessons learned so each lesson is routed to the smallest valid canonical owner first.
 ---
 
 # Internal Lesson Codification
@@ -33,8 +33,6 @@ Do not default to `LESSONS_LEARNED.md`.
 First try to codify the lesson in the smallest valid canonical owner. Use the ledger only for stable, reusable, repository-relevant lessons that remain pending after that check.
 
 Do not add a lesson directly to `AGENTS.md` or `.github/copilot-instructions.md`. If a lesson appears truly repository-wide and always-on, prepare a short proposal and ask before editing either file.
-
-Route `release/release-please` lessons, auto-merge release safety changes, and release-testing corrections toward a skill-depth owner or a follow-up owner, not toward the always-on baseline mirrored instruction set by default. Treat GitHub Actions generated release automation as a domain-specific skill concern, not as generic infrastructure policy that belongs in always-on guidance without a justification.
 
 ## Workflow
 

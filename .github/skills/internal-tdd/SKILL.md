@@ -82,16 +82,12 @@ may be required for such edits.
 4. For prompt, agent, or LLM-output drift, define concrete evaluation examples
    or failure cases before changing behavior.
 5. After the parent locks the posture, boundary, artifact shape, write scope,
-   acceptance, and validation, it may invoke `internal-luna-executor` through
-   `/internal-subagent-contract` with one `DelegationBrief` v1. The parent
-   retains posture choice, boundary choice, routing, authority, lifecycle,
-   retry choice, red proof, refactor, independent validation, and final
-   verification; it verifies the adapter-composed `WorkerResult` v1 and
-   caller-owned `VerificationReceipt` v1, treats unobserved worker validation
-   as a claim, and never branches on caller or model identity.
-   When timeout, interruption, executor unavailability, or missing terminal
-   output prevents a worker payload, record a caller-owned `LifecycleRecord`
-   and create neither a synthetic `WorkerResult` nor a receipt.
+   acceptance, and validation, it may delegate through
+   `/internal-subagent-contract` with one `DelegationBrief` v1. Load its
+   `references/protocol.md` for result, receipt, and lifecycle projections.
+   The parent retains posture choice, boundary choice, routing, authority,
+   lifecycle, retry choice, red proof, refactor, independent validation, and
+   final verification.
 6. Run the focused check and closest broader validation, then load
    `/superpowers-verification-before-completion` before positive claims.
 

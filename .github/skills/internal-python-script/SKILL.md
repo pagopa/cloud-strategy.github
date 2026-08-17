@@ -16,8 +16,10 @@ skill.
 
 - New or changed standalone scripts, CLIs, automation, or data-processing
   entrypoints whose primary contract is direct execution.
-- Small multi-entrypoint toolkits that remain operator-facing even when they
-  have tests, a `lib/` folder, or several maintained files.
+- Small multi-entrypoint toolkits stay here when their primary contract is
+  direct execution, even when they have tests, a `lib/` folder, or several
+  maintained files; when reusable imported behavior is the primary contract,
+  route to `/internal-python-project`.
 
 ## When not to use
 

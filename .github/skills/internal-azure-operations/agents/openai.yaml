@@ -1,3 +1,5 @@
+policy:
+  allow_implicit_invocation: false
 interface:
   display_name: "internal-azure-operations"
   short_description: "Azure validation, monitoring, and evidence"
