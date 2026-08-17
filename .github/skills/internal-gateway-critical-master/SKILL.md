@@ -152,27 +152,98 @@ precision that the available evidence cannot support.
 
 ## Readable report
 
-Return one compact Markdown review, not a transcript. Use this order:
+Return one compact chat-first Markdown review, not a transcript. The report
+must fit one mental screen: every section is brief but self-contained, and no
+item may be reduced to a bare phrase the reader cannot interpret without the
+conversation.
 
-1. `# Critical Analysis` and `## Assessment` with the conclusion and the
-  strongest supported objection.
-2. `## Evidence` with consecutively numbered findings. Each finding is a
-  compact block containing `Critique`, `Evidence`, `Impact` when relevant,
-  `Severity`, `Confidence`, `Suggestion`, `Why`, `Fix owner`, `Expected
-  verification`, and `Blocking`.
-3. `## Residual Risks` and `## Open Questions`, only when material.
-4. `## Conclusion` with the exact outcome and one next condition.
+The report language must always follow the language of the current chat, in
+headings, findings, residuals, open questions, and next actions alike. Keep
+the three finding field names stable per language (English: `Problem` /
+`Suggestion` / `Why`; Italian: `Problema` / `Suggerimento` / `Perché`); add a
+stable equivalent when a new language first appears.
 
-Group evidence inside its finding by consequence. Do not repeat the same fact
-in Assessment, a finding, and Conclusion. A full pass includes the scope only
-when it changes interpretation. A delta pass emits only changed evidence,
-findings, classifications, conclusion, and residual blockers. Preserve every
-material finding, but compact it by grouping rather than deleting it.
+### Fixed layout
 
-Use the smallest useful Mermaid diagram only for a material causal,
-dependency, ownership, or state relationship. Keep the conclusion in adjacent
-prose and do not make the diagram the sole carrier of evidence. Do not emit an
-unrelated card, machine-only object, preamble, or internal working notes.
+Use exactly this order and these anchors:
+
+1. `# 🔍 Critical Analysis` — title.
+2. `🎯` conclusion line — the exact outcome plus a blocking/non-blocking count,
+   then the strongest supported objection as a one-sentence blockquote.
+3. Optional single Mermaid diagram (rules below).
+4. `## 🧾 Findings` — numbered finding blocks (shape below).
+5. `## ⚠️ Residuals` — only when material (shape below).
+6. `## ❓ Open` — only when a material open question remains (shape below).
+7. `## ✅ Next` — numbered concrete actions.
+
+Omit empty sections; never pad. Do not repeat the same fact in the conclusion
+line, a finding, and `Next`.
+
+### Finding block shape
+
+Each finding is one compact block:
+
+```markdown
+**N. <dot> <short title>** — <classification> · <severity>/<confidence>
+
+- **<Problem>:** what is wrong, one to two sentences, concrete.
+- **<Suggestion>:** the smallest change that fixes it, one to two sentences.
+- **<Why>:** why it matters, one to two sentences.
+```
+
+Rules:
+
+- Severity dots are stable: 🔴 high, 🟡 medium, 🟢 low.
+- Each of the three fields must be understandable without rereading the
+  investigation: name the file, decision, or mechanism involved; never a
+  cryptic ID alone.
+- A defense of the subject is not a finding. Do not record it as one;
+  defenses belong in the subject's own rationale.
+- Deeper bookkeeping fields (`Fix owner`, `Expected verification`) go to the
+  caller-owned ledger when one exists; they do not appear in chat.
+
+### Residuals shape
+
+Each residual risk is a bold name followed by an explanation of what stays
+open and why it matters. A bare name or one-word entry is invalid. A deferral
+is acceptable to report only with its consequence stated.
+
+### Open shape
+
+State one real question in plain language. When the answer is a choice, list
+lettered options with their consequence (for example `A)` keep the current
+owner, `B)` propose a separate design). Omit the section when nothing material
+is open.
+
+### Next shape
+
+Number each action, make it concrete, and reference the finding or residual it
+closes. One action per step; no vague instructions such as "improve the spec".
+
+### Mermaid rules
+
+Use at most one diagram, and only when it clarifies three or more material
+causal, dependency, ownership, or state relationships. Use a top-down
+flowchart with:
+
+- one node per finding or effect, anchored as `Finding N` or by its short
+  name;
+- short self-explanatory phrases of two to four `\n`-broken lines, not bare
+  IDs;
+- an emoji prefix per node and semantic fills: red for the problem, amber for
+  decision-level effects, yellow for recommendation-level effects;
+- the controlling conclusion in adjacent prose; the diagram is never the sole
+  carrier of evidence.
+
+Do not emit an unrelated card, machine-only object, preamble, or internal
+working notes.
+
+### Delta passes
+
+A delta pass keeps the same layout and emits only changed evidence, findings,
+classifications, conclusion, and residual blockers. Preserve every material
+finding, compacting by grouping rather than deleting. A full pass includes the
+scope only when it changes interpretation.
 
 ## No-context failure
 
