@@ -13,8 +13,8 @@ authoritative.
 The parent may invoke `internal-luna-executor` through
 `/internal-subagent-contract` for candidate evidence inventory or report
 drafting only after the relevant sources, authority, report structure,
-acceptance, and validation are fixed. Follow
-`/internal-subagent-contract` and its `references/protocol.md` for the
+acceptance, and validation are fixed. Follow `/internal-subagent-contract`
+and its protocol for the
 `DelegationBrief`, `WorkerResult`, `VerificationReceipt`, and
 `LifecycleRecord` protocol. Never delegate source authority, findings, diagram
 relationships, acceptance, or closeout.

@@ -30,7 +30,7 @@ Use this skill to choose the right Kubernetes lane before drafting guidance or e
 2. Pick the winning Kubernetes asset.
    Use the canonical lane-routing table above.
 3. Keep adjacent guidance scoped.
-   Use `internal-yaml` only for YAML formatting or parser concerns; use the deployment or architecture owner for Kubernetes semantics.
+   Use /internal-yaml only for YAML formatting or parser concerns; use the deployment or architecture owner for Kubernetes semantics.
 4. Return one clear next lane.
    State which skill wins, why it wins, and what validation or artifact should follow.
 

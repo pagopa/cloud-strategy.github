@@ -7,6 +7,12 @@ description: Use when /internal-azure selects Azure hierarchy, subscription, lan
 
 Use this workflow for Azure tenant and platform layout decisions.
 
+## When to use
+
+Arrive here only when /internal-azure selects the organization-structure
+lane: Azure hierarchy, subscriptions, landing zones, residency, or platform
+topology.
+
 ## Workflow
 
 1. State the Azure objective: the platform capability, ownership model, or

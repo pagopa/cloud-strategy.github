@@ -8,6 +8,12 @@ description: Use when /internal-azure selects Azure authorization, workload iden
 Use this workflow to define auditable Azure identity, access, and guardrail
 decisions.
 
+## When to use
+
+Arrive here only when /internal-azure selects the governance lane: Azure
+authorization, workload identity, privileged access, Policy, guardrails, or
+governed exceptions.
+
 ## Workflow
 
 1. State the governance objective: the access, prevention, detection, or

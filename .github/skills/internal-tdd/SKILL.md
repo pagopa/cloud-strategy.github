@@ -83,8 +83,8 @@ may be required for such edits.
    or failure cases before changing behavior.
 5. After the parent locks the posture, boundary, artifact shape, write scope,
    acceptance, and validation, it may delegate through
-   `/internal-subagent-contract` with one `DelegationBrief` v1. Load its
-   `references/protocol.md` for result, receipt, and lifecycle projections.
+   `/internal-subagent-contract` with one `DelegationBrief` v1 and follow its
+   protocol for result, receipt, and lifecycle projections.
    The parent retains posture choice, boundary choice, routing, authority,
    lifecycle, retry choice, red proof, refactor, independent validation, and
    final verification.
