@@ -70,3 +70,4 @@ or aggregation logic in ad-hoc scripts or one-off shell pipelines.
 - `bash tools/analyze_copilot_debug_log/run.sh prompt-exports --help`
 - `bash tools/analyze_copilot_debug_log/run.sh debug-logs --help`
 - `./.github/scripts/run.sh analyze_copilot_debug_log --help`
+- `python3 -m pytest tests/tools/analyze_copilot_debug_log -q`

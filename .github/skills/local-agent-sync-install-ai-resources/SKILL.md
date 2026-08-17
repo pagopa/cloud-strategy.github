@@ -52,6 +52,8 @@ compatibility entrypoint.
 When the user calls this skill with an `agents.md` request, `agents.md` means `sync --targets agents.md`.
 Accept `agents-md` as a CLI alias for the same target.
 
+`scripts/run.sh` bootstraps its own environment: on first run it creates a skill-local `.venv` under `scripts/` and installs `requirements.txt` with `pip --require-hashes` behind a recorded requirements hash, re-installing only when that hash changes. `PYTHON_BIN` overrides the default `python3` interpreter. No manual environment setup is required.
+
 ## Operating Contract
 
 - Keep `~/.agents/skills/` a real directory. Never replace the root with a
