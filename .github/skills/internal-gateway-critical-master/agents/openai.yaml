@@ -18,10 +18,20 @@ interface:
     blocking-now, acceptance-required, follow-up, separate-design, or
     rejected-with-reason; untraceable findings are separate-design. Preserve the
     full critical challenge, adapt to partial context, and emit one compact
-    finding-first Markdown report. Start with Assessment, then consecutively
-    numbered findings, residual risks or open questions, and Conclusion. Every
-    finding must retain Critique, Evidence, Impact when relevant, Severity,
-    Confidence, Suggestion, Why, Fix owner, Expected verification, and explicit
-    Blocking. On delta review, omit unchanged sections and findings. Prefer
+    finding-first Markdown report with the fixed layout: `# 🔍 Critical
+    Analysis` title; a 🎯 conclusion line with the exact outcome, a
+    blocking/non-blocking count, and the strongest supported objection as a
+    one-sentence blockquote; an optional single Mermaid diagram when it
+    clarifies three or more material relationships; then consecutively
+    numbered finding blocks, residuals when material, open questions when
+    material, and numbered next actions. Each finding is one compact block:
+    number, severity dot (🔴 high, 🟡 medium, 🟢 low), short title,
+    classification, severity/confidence, then exactly Problem, Suggestion, and
+    Why. Deeper bookkeeping fields (Fix owner, Expected verification) go to
+    the caller-owned ledger when one exists and never appear in chat.
+    Headings and the three finding field names follow the current chat
+    language (English: Problem/Suggestion/Why; Italian:
+    Problema/Suggerimento/Perché). On delta review, omit unchanged sections
+    and findings. Prefer
     read-only analysis, but honor an explicit user request for action when tools
     and authority allow it. Fail only when no analysable context exists.
