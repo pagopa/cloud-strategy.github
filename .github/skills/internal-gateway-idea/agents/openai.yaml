@@ -61,9 +61,3 @@ route_contract:
     - "/internal-tdd"
     - "/internal-gateway-writing-plans"
     - "/internal-gateway-execute-plans"
-token_budget:
-  owner: "/internal-gateway-idea"
-  reference: "internal-gateway-idea.core_token_budget"
-  consumers:
-    - "public-wrapper"
-    - "evaluator-contract"

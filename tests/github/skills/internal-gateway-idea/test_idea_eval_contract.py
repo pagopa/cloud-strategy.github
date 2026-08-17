@@ -987,22 +987,13 @@ def test_synthetic_records_keep_controlled_runtime_readiness_unavailable() -> No
     assert result["behavioral_evidence"]["merge_ready"] is False
 
 
-def test_core_token_budget_has_one_owner_and_shared_consumer_reference() -> None:
+def test_public_wrapper_declares_no_token_budget_or_question_cap() -> None:
     metadata = yaml.safe_load(PUBLIC_WRAPPER_PATH.read_text(encoding="utf-8"))
 
-    budget = metadata["token_budget"]
-
-    assert budget == {
-        "owner": "/internal-gateway-idea",
-        "reference": "internal-gateway-idea.core_token_budget",
-        "consumers": [
-            "public-wrapper",
-            "evaluator-contract",
-        ],
-    }
-    assert "question_cap" not in budget
-    assert "max_questions" not in budget
-    assert "fixed_question_cap" not in budget
+    assert "token_budget" not in metadata
+    assert "question_cap" not in metadata
+    assert "max_questions" not in metadata
+    assert "fixed_question_cap" not in metadata
 
 
 def test_manifest_and_records_derive_the_two_gate_contract() -> None:

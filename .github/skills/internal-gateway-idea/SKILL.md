@@ -82,16 +82,6 @@ gate and authority boundary; an override never becomes a global bypass.
 Findings require explicit disposition as `integrate`, `reject`,
 `accept-risk`, or `route`; never integrate them automatically.
 
-## Core token budget control
-
-`internal-gateway-idea.core_token_budget` is the one canonical control for the
-full gateway route. The caller or approved runtime supplies its positive token
-value; if the value is unavailable, fail closed rather than inventing a local
-default. Propagate this reference unchanged to the public wrapper and the
-evaluator-facing contract. Consumers may not add a fixed question cap,
-duplicate token budget, or conflicting local limit. Diagnostic communication
-word counts describe presentation only and never enforce the core budget.
-
 ## Canonical recovery record
 
 Maintain exactly one canonical recovery record for the active analysis unit.
