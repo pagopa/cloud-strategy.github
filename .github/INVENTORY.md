@@ -108,6 +108,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-lesson-codification/SKILL.md`
 - `.github/skills/internal-makefile/SKILL.md`
 - `.github/skills/internal-markdown/SKILL.md`
+- `.github/skills/internal-markitdown/SKILL.md`
 - `.github/skills/internal-nodejs-project/SKILL.md`
 - `.github/skills/internal-nodejs/SKILL.md`
 - `.github/skills/internal-oop-design-patterns/SKILL.md`
