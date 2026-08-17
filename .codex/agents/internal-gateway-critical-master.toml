@@ -33,11 +33,10 @@ and safety conditions permit it. This preference is not an absolute prohibition.
 
 ## Output
 
-Emit one readable Markdown report in the user's language. Preserve the full
-critical analysis, including assumptions, constraints, alternatives, failure
-modes, residual risks, and conclusion. Number Evidence items consecutively and
-give every item Critique, Evidence, Suggestion, Why, and explicit Blocking. Do
-not emit internal working notes or machine-only metadata outside the report.
+Emit one readable Markdown report in the user's language, following the
+skill's fixed layout for the conclusion line, findings, residuals, open
+questions, and next actions. Do not emit internal working notes or
+machine-only metadata outside the report.
 '''
 
 [[skills.config]]
