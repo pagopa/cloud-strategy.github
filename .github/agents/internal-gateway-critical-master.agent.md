@@ -39,12 +39,19 @@ the preferred read-only posture as an absolute prohibition.
 
 ## Output
 
-Return one readable Markdown report. Preserve the full challenge procedure,
-including assumptions, constraints, alternatives, failure modes, residual
-risks, and conclusion. Number every Evidence item consecutively; each item
-must include Critique, Evidence, Suggestion, Why, and explicit Blocking. Use the
-user's language for the prose and do not emit JSON, machine-only metadata, or
-internal notes.
+Return one readable Markdown report with the skill's fixed layout: `# 🔍
+Critical Analysis` title; 🎯 conclusion line with the exact outcome, a
+blocking/non-blocking count, and the strongest supported objection as a
+one-sentence blockquote; optional single Mermaid diagram when it clarifies
+three or more material relationships; then consecutively numbered finding
+blocks, residuals when material, open questions when material, and numbered
+next actions. Each finding is one compact block: number, severity dot (🔴
+high, 🟡 medium, 🟢 low), short title, classification, severity/confidence,
+then exactly Problem, Suggestion, and Why. Do not emit Fix owner or Expected
+verification in chat; they go to the caller-owned ledger when one exists. Use
+the user's language for headings and finding field names (English:
+Problem/Suggestion/Why; Italian: Problema/Suggerimento/Perché) and do not emit
+JSON, machine-only metadata, or internal notes.
 
 ## No-context Failure
 

@@ -50,6 +50,15 @@ RAW_SKILL_SOURCE_PATTERN = re.compile(
 )
 LEXICAL_METHODS = frozenset({"find", "startswith", "endswith"})
 STRUCTURAL_PARSERS = frozenset({"load", "safe_load", "loads", "safe_load_all"})
+CHAT_EXCLUSION_MARKERS: tuple[str, ...] = ("appear in chat", "do not emit")
+LEGACY_OUTPUT_FIELD_TOKENS: tuple[str, ...] = (
+    "Critique",
+    "Evidence quality",
+    "Fix owner",
+    "Expected verification",
+    "explicit Blocking",
+    "Start with Assessment",
+)
 
 
 @dataclass(frozen=True)
@@ -476,8 +485,63 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
         )
 
     findings.extend(validate_openai_yaml(skill_dir, skill_name))
+    findings.extend(validate_output_contract_projection(root, skill_dir, skill_name))
     findings.extend(validate_local_references(root, skill_dir))
     findings.extend(validate_token_hygiene(skill_dir, skill_md, body))
+    return findings
+
+
+def _strip_chat_exclusion_sentences(text: str) -> str:
+    normalized = " ".join(text.split())
+    kept = [
+        sentence
+        for sentence in normalized.split(". ")
+        if not any(marker in sentence.lower() for marker in CHAT_EXCLUSION_MARKERS)
+    ]
+    return " ".join(kept)
+
+
+def validate_output_contract_projection(
+    root: Path, skill_dir: Path, skill_name: str
+) -> list[Finding]:
+    findings: list[Finding] = []
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.exists():
+        return findings
+    _, body = split_frontmatter(read_text(skill_md))
+    normalized_body = " ".join(body.split())
+    if not any(
+        marker in normalized_body.lower() for marker in CHAT_EXCLUSION_MARKERS
+    ):
+        return findings
+    surfaces: list[tuple[Path, str]] = [
+        (skill_dir / "agents" / "openai.yaml", "agents/openai.yaml")
+    ]
+    paired_agent = root / ".github" / "agents" / f"{skill_name}.agent.md"
+    if paired_agent.exists():
+        surfaces.append((paired_agent, "paired agent projection"))
+    for path, surface in surfaces:
+        if not path.exists():
+            continue
+        cleaned = _strip_chat_exclusion_sentences(read_text(path))
+        stale = [token for token in LEGACY_OUTPUT_FIELD_TOKENS if token in cleaned]
+        if stale:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="stale-output-contract",
+                    path=path.as_posix(),
+                    message=(
+                        f"{surface} still requires chat-excluded output fields: "
+                        f"{', '.join(stale)}."
+                    ),
+                    suggestion=(
+                        "Update the projection to the current SKILL.md output "
+                        "contract; bookkeeping fields belong to the "
+                        "caller-owned ledger only."
+                    ),
+                )
+            )
     return findings
 
 

@@ -274,3 +274,87 @@ def test_bare_identifier_and_fenced_examples_are_not_invocations(
     findings = detect_internal_skill_findings(root)
 
     assert "unknown-skill-invocation" not in {finding.code for finding in findings}
+
+
+def test_stale_output_contract_tokens_in_yaml_are_blocking(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    skill = root / ".github/skills/internal-example"
+    (skill / "SKILL.md").write_text(
+        """---
+name: internal-example
+description: Use when exercising validator fixtures.
+---
+
+# Internal Example
+
+Deeper bookkeeping fields go to the caller-owned ledger; they do not appear in
+chat.
+""",
+        encoding="utf-8",
+    )
+    (skill / "agents/openai.yaml").write_text(
+        """interface:
+  display_name: Internal Example
+  short_description: Internal example validator fixture
+  default_prompt: Every finding must retain Critique, Fix owner, and explicit Blocking.
+""",
+        encoding="utf-8",
+    )
+    codes = {finding.code for finding in detect_internal_skill_findings(root)}
+    assert "stale-output-contract" in codes
+
+
+def test_stale_output_contract_exclusion_sentence_is_clean(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    skill = root / ".github/skills/internal-example"
+    (skill / "SKILL.md").write_text(
+        """---
+name: internal-example
+description: Use when exercising validator fixtures.
+---
+
+# Internal Example
+
+Deeper bookkeeping fields go to the caller-owned ledger and never appear in
+chat.
+""",
+        encoding="utf-8",
+    )
+    (skill / "agents/openai.yaml").write_text(
+        """interface:
+  display_name: Internal Example
+  short_description: Internal example validator fixture
+  default_prompt: Deeper fields (Fix owner, Expected verification) go to the ledger and never appear in chat.
+""",
+        encoding="utf-8",
+    )
+    codes = {finding.code for finding in detect_internal_skill_findings(root)}
+    assert "stale-output-contract" not in codes
+
+
+def test_stale_output_contract_checks_paired_agent(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    skill = root / ".github/skills/internal-example"
+    (skill / "SKILL.md").write_text(
+        """---
+name: internal-example
+description: Use when exercising validator fixtures.
+---
+
+# Internal Example
+
+Deeper bookkeeping fields go to the caller-owned ledger; they do not appear in
+chat.
+""",
+        encoding="utf-8",
+    )
+    agents_dir = root / ".github/agents"
+    agents_dir.mkdir(parents=True)
+    (agents_dir / "internal-example.agent.md").write_text(
+        "## Output\n\nEach item must include Critique and explicit Blocking.\n",
+        encoding="utf-8",
+    )
+    findings = detect_internal_skill_findings(root)
+    stale = [f for f in findings if f.code == "stale-output-contract"]
+    assert len(stale) == 1
+    assert stale[0].path == (agents_dir / "internal-example.agent.md").as_posix()

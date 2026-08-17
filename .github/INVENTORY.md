@@ -194,11 +194,15 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Agents
 
-- `.github/agents/internal-gateway-critical-master.agent.md`
+Each agent marked `paired` is a public projection of the named skill bundle;
+its Output section must stay aligned with that skill's SKILL.md output
+contract (see the `stale-output-contract` validator check).
+
+- `.github/agents/internal-gateway-critical-master.agent.md` (paired: `internal-gateway-critical-master`)
 - `.github/agents/internal-luna-executor.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
-- `.github/agents/local-sync-repos.agent.md`
+- `.github/agents/local-sync-repos.agent.md` (paired: `local-sync-repos`)
 
 ## Prompts
 
