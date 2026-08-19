@@ -1,7 +1,5 @@
 name = "internal-gateway-critical-master"
 description = "Generic adaptive critical-analysis specialist for plans, proposals, decisions, designs, workflows, requirements, and assumption sets."
-model = "gpt-5.6-sol"
-model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 
 developer_instructions = '''

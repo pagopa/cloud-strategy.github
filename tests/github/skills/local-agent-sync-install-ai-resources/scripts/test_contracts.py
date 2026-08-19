@@ -16,7 +16,11 @@ REPO_ROOT = next(
 SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
-from agent_translation import target_extension, translate_agent_for_target  # noqa: E402
+from agent_translation import (  # noqa: E402
+    parse_frontmatter_and_body,
+    target_extension,
+    translate_agent_for_target,
+)
 from home_sync_contract import (  # noqa: E402
     discover_agent_resources,
     load_home_sync_catalog,
@@ -404,6 +408,17 @@ def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -
     assert "Main body instructions." in payload["developer_instructions"]
     assert "## Handoffs" in payload["developer_instructions"]
     assert "review-specialist" in payload["developer_instructions"]
+
+
+def test_translate_critical_master_for_opencode_does_not_pin_model() -> None:
+    source_path = REPO_ROOT / ".github/agents/internal-gateway-critical-master.agent.md"
+
+    translated = translate_agent_for_target(source_path, "opencode")
+    frontmatter, _ = parse_frontmatter_and_body(translated)
+
+    assert frontmatter["mode"] == "subagent"
+    assert "model" not in frontmatter
+    assert "model_reasoning_effort" not in frontmatter
 
 
 def test_translate_agent_for_codex_projects_sidecar_overrides(

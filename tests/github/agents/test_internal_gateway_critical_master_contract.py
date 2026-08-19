@@ -37,12 +37,11 @@ def test_internal_gateway_critical_master_copilot_contract() -> None:
     assert COPILOT_PATH.exists()
     frontmatter, body = _parse_copilot(COPILOT_PATH)
 
-    assert set(frontmatter) == {"name", "description", "tools", "model", "agents"}
+    assert set(frontmatter) == {"name", "description", "tools", "agents"}
     assert frontmatter["name"] == "internal-gateway-critical-master"
     assert frontmatter["description"].startswith("Use this agent when")
     assert frontmatter["tools"] == ["read", "search", "edit", "execute"]
-    assert frontmatter["model"] == "GPT-5.6 Sol"
-    assert frontmatter["model"] != "GPT-5.6 Luna"
+    assert "model" not in frontmatter
     assert "effort" not in frontmatter
     assert "model_reasoning_effort" not in frontmatter
     assert frontmatter["agents"] == []
@@ -89,8 +88,8 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
     assert CODEX_PATH.stem == payload["name"] == "internal-gateway-critical-master"
     assert payload["description"]
     assert "critical-analysis" in payload["description"]
-    assert payload["model"] == "gpt-5.6-sol"
-    assert payload["model_reasoning_effort"] == "medium"
+    assert "model" not in payload
+    assert "model_reasoning_effort" not in payload
     assert payload["sandbox_mode"] == "workspace-write"
 
     assert isinstance(instructions, str)

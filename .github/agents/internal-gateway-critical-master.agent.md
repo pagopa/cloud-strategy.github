@@ -2,7 +2,6 @@
 name: internal-gateway-critical-master
 description: Use this agent when any plan, proposal, decision, design, workflow, requirement, or assumption set needs an adaptive critical challenge.
 tools: [read, search, edit, execute]
-model: GPT-5.6 Sol
 agents: []
 ---
 
