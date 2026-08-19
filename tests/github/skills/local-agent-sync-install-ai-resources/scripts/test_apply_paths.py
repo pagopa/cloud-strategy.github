@@ -643,6 +643,82 @@ rows:
     assert target.read_text(encoding="utf-8") == source.read_text(encoding="utf-8")
 
 
+def test_opencode_native_agent_is_symlinked_without_translation(
+    tmp_path: Path, capsys
+) -> None:
+    refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
+    refs.mkdir(parents=True)
+    (refs / "home-sync-catalog.yaml").write_text(
+        """version: 1
+defaults:
+  include_internal_skills: false
+  include_local_skills: false
+  include_unlisted_skills: false
+  unmanaged_existing_skills_policy: repo-wins
+  excluded_skills: []
+  skill_targets: []
+resources:
+  - resource_id: native-agent
+    source_family: agents
+    source_path: .opencode/agents/native-agent.md
+    include_targets: [opencode]
+    target_support: documented
+    notes: native OpenCode agent
+""",
+        encoding="utf-8",
+    )
+    (refs / "runtime-support-matrix.yaml").write_text(
+        """version: 1
+rows:
+  - target: opencode
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.config/opencode/agents/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence: []
+    notes: native OpenCode agent
+""",
+        encoding="utf-8",
+    )
+    source = tmp_path / ".opencode/agents/native-agent.md"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        "---\ndescription: native opencode\nmode: subagent\n---\nNative body.\n",
+        encoding="utf-8",
+    )
+
+    home = tmp_path / "home"
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "opencode",
+                    "--create-missing-dirs",
+                ]
+            )
+        )
+        == 0
+    )
+    capsys.readouterr()
+
+    target = home / ".config/opencode/agents/native-agent.md"
+    assert target.is_symlink()
+    assert target.resolve() == source.resolve()
+    source.write_text(
+        "---\ndescription: native opencode\nmode: subagent\n---\nUpdated body.\n",
+        encoding="utf-8",
+    )
+    assert target.read_text(encoding="utf-8") == source.read_text(encoding="utf-8")
+
+
 def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
     tmp_path: Path,
 ) -> None:

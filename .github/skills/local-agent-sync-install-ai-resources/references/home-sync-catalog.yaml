@@ -55,3 +55,10 @@ resources:
       - codex
     target_support: See runtime support matrix
     notes: Installs the native critical-challenge agent in ~/.codex/agents/.
+  - resource_id: internal-gateway-critical-master
+    source_family: agents
+    source_path: .opencode/agents/internal-gateway-critical-master.md
+    include_targets:
+      - opencode
+    target_support: See runtime support matrix
+    notes: Installs the native critical-challenge agent in ~/.config/opencode/agents/ as a canonical link to the repository source.

@@ -213,12 +213,15 @@ def discover_agent_resources(source_root: Path) -> list[dict[str, object]]:
     discovery_roots = (
         (source_root / ".github" / "agents", "*.agent.md", AGENT_TARGETS),
         (source_root / ".codex" / "agents", "*.toml", ("codex",)),
+        (source_root / ".opencode" / "agents", "*.md", ("opencode",)),
     )
     for agents_root, pattern, targets in discovery_roots:
         if not agents_root.is_dir():
             continue
         for agent_path in sorted(agents_root.glob(pattern)):
-            resource_id = agent_path.name.removesuffix(".agent.md").removesuffix(".toml")
+            resource_id = (
+                agent_path.name.removesuffix(".agent.md").removesuffix(".toml").removesuffix(".md")
+            )
             if resource_id.startswith("local-"):
                 continue
             resources.append(

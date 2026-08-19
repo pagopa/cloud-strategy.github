@@ -1419,12 +1419,19 @@ def _is_valid_v2_manifest_row(item: dict[str, object]) -> bool:
             and Path(link_target).resolve().as_posix() == link_target
             and content_hash is None
         )
-    if family == "agents" and item.get("target") == "codex":
+    if family == "agents" and item.get("target") in {"codex", "opencode"}:
         source_path = item.get("source_path")
+        is_native = (
+            isinstance(source_path, str)
+            and (
+                Path(source_path).suffix == ".toml"
+                if item.get("target") == "codex"
+                else is_native_opencode_agent(Path(source_path))
+            )
+        )
         return (
             materialization == "symlink"
-            and isinstance(source_path, str)
-            and Path(source_path).suffix == ".toml"
+            and is_native
             and isinstance(link_target, str)
             and Path(link_target).is_absolute()
             and Path(link_target).resolve().as_posix() == link_target
@@ -1502,29 +1509,48 @@ def resource_block_code(source_family: str) -> str:
 
 
 def is_native_agent_source(path: Path) -> bool:
-    return path.suffix == ".toml"
+    return path.suffix == ".toml" or is_native_opencode_agent(path)
+
+
+def is_native_opencode_agent(path: Path) -> bool:
+    return (
+        path.suffix == ".md"
+        and path.parent.name == "agents"
+        and path.parent.parent.name == ".opencode"
+    )
 
 
 def is_linkable_agent(resource_family: str, source_path: Path, target: str) -> bool:
-    return resource_family == "agents" and (
-        target == "copilot" or (target == "codex" and is_native_agent_source(source_path))
-    )
+    if resource_family != "agents":
+        return False
+    if target == "copilot":
+        return True
+    if target == "codex":
+        return source_path.suffix == ".toml"
+    if target == "opencode":
+        return is_native_opencode_agent(source_path)
+    return False
 
 
 def is_linkable_manifest_row(item: dict[str, object]) -> bool:
     if item.get("resource_family") == "skills":
         return True
-    return (
-        item.get("resource_family") == "agents"
-        and (
-            item.get("target") == "copilot"
-            or (
-                item.get("target") == "codex"
-                and isinstance(item.get("source_path"), str)
-                and Path(str(item["source_path"])).suffix == ".toml"
-            )
+    if item.get("resource_family") != "agents":
+        return False
+    target = item.get("target")
+    if target == "copilot":
+        return True
+    if target == "codex":
+        return (
+            isinstance(item.get("source_path"), str)
+            and Path(str(item["source_path"])).suffix == ".toml"
         )
-    )
+    if target == "opencode":
+        return (
+            isinstance(item.get("source_path"), str)
+            and is_native_opencode_agent(Path(str(item["source_path"])))
+        )
+    return False
 
 
 def hash_resource(path: Path) -> str:

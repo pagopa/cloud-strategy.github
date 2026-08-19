@@ -122,6 +122,9 @@ def test_live_catalog_scopes_native_paired_agents_to_owning_runtimes() -> None:
     assert resources[
         ".github/agents/internal-gateway-critical-master.agent.md"
     ].include_targets == ("copilot",)
+    assert resources[
+        ".opencode/agents/internal-gateway-critical-master.md"
+    ].include_targets == ("opencode",)
 
 
 def test_agent_discovery_finds_native_codex_agents_only_for_codex(
@@ -135,6 +138,11 @@ def test_agent_discovery_finds_native_codex_agents_only_for_codex(
     codex_root = tmp_path / ".codex/agents"
     codex_root.mkdir(parents=True)
     (codex_root / "native.toml").write_text('name = "native"\n', encoding="utf-8")
+    opencode_root = tmp_path / ".opencode/agents"
+    opencode_root.mkdir(parents=True)
+    (opencode_root / "native.md").write_text(
+        "---\ndescription: native opencode\n---\n", encoding="utf-8"
+    )
 
     resources = discover_agent_resources(tmp_path)
 
@@ -143,6 +151,7 @@ def test_agent_discovery_finds_native_codex_agents_only_for_codex(
     } == {
         ".github/agents/review.agent.md": ["codex", "copilot", "opencode"],
         ".codex/agents/native.toml": ["codex"],
+        ".opencode/agents/native.md": ["opencode"],
     }
 
 

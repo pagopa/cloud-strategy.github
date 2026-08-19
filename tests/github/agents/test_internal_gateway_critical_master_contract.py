@@ -11,6 +11,11 @@ REPO_ROOT = next(
 )
 CODEX_PATH = REPO_ROOT / ".codex/agents/internal-gateway-critical-master.toml"
 COPILOT_PATH = REPO_ROOT / ".github/agents/internal-gateway-critical-master.agent.md"
+OPENCODE_PATH = REPO_ROOT / ".opencode/agents/internal-gateway-critical-master.md"
+CATALOG_PATH = (
+    REPO_ROOT
+    / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
+)
 SKILL_REPO_PATH = REPO_ROOT / ".github/skills/internal-gateway-critical-master/SKILL.md"
 SKILL_HOME_PATH = Path.home() / ".agents/skills/internal-gateway-critical-master/SKILL.md"
 
@@ -118,3 +123,43 @@ def test_internal_gateway_critical_master_home_skill_matches_repo() -> None:
     assert SKILL_REPO_PATH.exists()
     assert SKILL_HOME_PATH.exists()
     assert SKILL_HOME_PATH.read_bytes() == SKILL_REPO_PATH.read_bytes()
+
+
+def test_internal_gateway_critical_master_opencode_native_contract() -> None:
+    assert OPENCODE_PATH.exists()
+    frontmatter, body = _parse_copilot(OPENCODE_PATH)
+
+    assert frontmatter["description"].startswith("Use this agent when")
+    assert frontmatter["mode"] == "subagent"
+    assert frontmatter["hidden"] is True
+    assert "model" not in frontmatter
+    assert frontmatter["permission"] == {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "edit": "ask",
+        "bash": "ask",
+        "list": "allow",
+    }
+
+    assert body.count("- `internal-gateway-critical-master`") == 1
+    lowered = body.lower()
+    for marker in (
+        "load and follow `internal-gateway-critical-master`",
+        "prefer read-only",
+        "readable markdown report",
+        "no-context failure",
+    ):
+        assert marker.lower() in lowered
+
+
+def test_internal_gateway_critical_master_catalog_scopes_native_opencode_agent() -> None:
+    catalog = yaml.safe_load(CATALOG_PATH.read_text(encoding="utf-8"))
+    entries = [
+        resource
+        for resource in catalog.get("resources", [])
+        if resource.get("source_path")
+        == ".opencode/agents/internal-gateway-critical-master.md"
+    ]
+    assert entries, "critical-master native OpenCode agent missing from home sync catalog"
+    assert entries[0].get("include_targets") == ["opencode"]
