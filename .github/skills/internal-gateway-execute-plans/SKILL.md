@@ -111,9 +111,10 @@ is `2`, and both successful terminal statuses require all five delivery categori
 
 The writer must independently run the physical executor bundle's
 `scripts/run.sh preflight <plan> --format compact` with zero blocking findings
-before handoff. After explicit approval, this executor repeats preflight,
-records approval evidence with only its source and exact statement, and only
-then creates state and permits the first task edit.
+before handoff. The writer-approved plan is the execution authority: this
+executor repeats preflight, records approval evidence derived from the
+approved plan, and then creates state and permits the first task edit without
+asking the user to re-confirm approval.
 
 Before any task edit, resolve the executor from its physically loaded bundle
 entrypoint; a consumer working directory or a home-directory fallback is never
@@ -140,17 +141,18 @@ Do not replace those records with a standalone `validated` field.
 
 ## Bind Before Editing
 
-1. Confirm the exact retained-plan path and explicit approval.
+1. Confirm the exact retained-plan path. Do not ask the user to re-confirm
+   approval; the approved plan is the authority.
 2. Resolve the loaded physical bundle and run its runner:
    `bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`.
-3. Record explicit approval evidence with source and exact statement, then
-   create the one `PARTIAL` status sibling with zero completed tasks before the
-   first task edit.
+3. Record approval evidence as `external-authority-record` citing the approved
+   plan, then create the one `PARTIAL` status sibling with zero completed tasks
+   before the first task edit.
 4. Record the worktree baseline and the plan's required baseline validation.
 5. Read `## Control Inventory` and map each obligation to a validation,
    external or human follow-up, or authority boundary.
-6. Stop when a required control is uncovered, the plan is stale, or approval is
-   absent. Ask one focused authority question only after local checks are
+6. Stop when a required control is uncovered or the plan is stale. Ask one
+   focused authority question only after local checks are
    exhausted.
 
 ## Direct Finish Loop
@@ -213,10 +215,11 @@ YAML is the only runtime status representation.
   prevents progress; record one focused next action and make no out-of-scope
   edit.
 
-`approval_evidence` records exactly the source and statement of explicit
-execution approval. The supported sources are `current-conversation` and
-`external-authority-record`; the statement is exactly `explicit execution
-approval`. `delivery_verdicts` contains the five canonical category records.
+`approval_evidence` records exactly the source and statement of execution
+approval. The executor derives it from the approved plan as
+`external-authority-record` without asking the user; `current-conversation`
+remains admissible only when an explicit statement already exists. The
+statement is exactly `explicit execution approval`. `delivery_verdicts` contains the five canonical category records.
 Each warning has exactly `kind`, `evidence`, and `next_action`. Each deviation
 has exactly `task`, `mismatch`, and `resolution`; only unequivocal path moves,
 structural ID/name alignment, equivalent missing-tool replacements, and targets

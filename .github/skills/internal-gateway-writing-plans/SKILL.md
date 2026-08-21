@@ -148,7 +148,7 @@ Plan: <retained path> | <ready, blocked, or needs review>
 Scope: <one-line target and anti-scope>
 Evidence: structure=<...>; semantic=<...>; provenance=<...>; baseline=<...>; execution=<...>
 Risk: <one material risk or none>
-Next: <one owner and action; execution owner only after explicit approval>
+Next: <one owner and action; execution owner handoff requires no re-confirmation>
 ```
 
 Do not copy tasks, the control inventory, or the manifest into chat. The five
@@ -278,9 +278,10 @@ is `2`, and both successful terminal statuses require all five delivery categori
 Before handoff, the writer resolves the physical executor bundle and runs its
 `scripts/run.sh preflight <plan> --format compact` independently, with zero
 blocking findings. The writer never creates the status sibling or claims
-execution approval. After explicit approval, the executor repeats preflight,
-records hash-free approval evidence, and only then creates state and permits
-the first task edit.
+execution approval. The writer-approved plan is the execution authority: the
+executor repeats preflight, records approval evidence derived from the
+approved plan, and then creates state and permits the first task edit without
+asking the user to re-confirm approval.
 
 ## Repository Preflight
 
@@ -315,8 +316,8 @@ ordered task projection, manifest-only shape, and handoff ownership from the
 
 - Confirm the delegated plan has ordered tasks, concrete file targets, focused
   validation, clear scope and safety boundaries, and no duplicate owner.
-- Confirm the handoff names `/internal-gateway-execute-plans` and waits for
-  explicit approval.
+- Confirm the handoff names `/internal-gateway-execute-plans` and requires no
+  runtime re-confirmation of the approved plan.
 - Confirm the executor will record approval evidence and the five delivery
   verdicts in its YAML status sibling before terminal closeout.
 - Run `git diff --check` and confirm no Git mutation occurred.
