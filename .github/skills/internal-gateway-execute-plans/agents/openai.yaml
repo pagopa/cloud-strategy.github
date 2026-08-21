@@ -4,8 +4,8 @@ interface:
   default_prompt: >-
     Use /internal-gateway-execute-plans for approved retained-plan execution or
     resume under tmp/superpowers/plans/. Bind the writer-owned versioned
-     Execution Manifest v2, explicit approval, control inventory, and native
-     validations. Read the Normative Manifest v2 Contract and require its exact
+     Execution Manifest v3, explicit approval, control inventory, and native
+     validations. Read the Normative Manifest v3 Contract and require its exact
      fields, pass_signal names, and task
     reference integrity before state creation. Execute every task directly
     in the current session and use /internal-tdd at executable task boundaries.

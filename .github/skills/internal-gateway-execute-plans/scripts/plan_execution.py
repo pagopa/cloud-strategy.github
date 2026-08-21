@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validator for retained plans and Manifest v2 execution status."""
+"""Validator for Manifest v3 retained plans and schema v2 runtime status."""
 from __future__ import annotations
 
 import argparse
@@ -137,6 +137,7 @@ MANIFEST_POSTURES = frozenset(
     {"mandatory-test-first", "feature-first", "prototype-unverified", "validation-only"}
 )
 MANIFEST_TARGET_STATES = frozenset({"create", "modify", "inspect"})
+MANIFEST_BOOTSTRAP_MODES = frozenset({"explicit-single-plan", "manifest-only"})
 MANIFEST_PHASES = frozenset({"baseline", "focused", "final"})
 MANIFEST_EQUIVALENCE = frozenset({"exact-only", "allowed-if-admissible"})
 MANIFEST_FIELDS = frozenset(
@@ -165,7 +166,7 @@ DELEGATION_FIELDS = frozenset(
 )
 DELEGATION_MODES = frozenset({"none", "delegated"})
 LOCAL_DELEGATION_RESULT = "not_applicable"
-CURRENT_DELEGATION_COMPATIBILITY = "manifest-v2"
+CURRENT_DELEGATION_COMPATIBILITY = "manifest-v3"
 
 TASK_HEADING_RE = re.compile(r"(?im)^#{2,6}\s+Task(?:\s+\d+)?(?:\s*:|\b)")
 UNCHECKED_TASK_RE = re.compile(r"(?m)^\s*[-*]\s+\[\s\]\s+\S")
@@ -417,7 +418,7 @@ def _manifest_exact_fields(
 
 
 def delegation_compatibility_mode(manifest: Mapping[str, object]) -> str:
-    """Name the current local Manifest v2 provenance mode."""
+    """Name the current local Manifest v3 provenance mode."""
 
     return CURRENT_DELEGATION_COMPATIBILITY
 
@@ -541,9 +542,9 @@ def _validate_manifest_identity(root: Mapping[str, object]) -> None:
         )
     if (
         not _non_empty_string(root["manifest_version"])
-        or root["manifest_version"] != "execution-manifest/v2"
+        or root["manifest_version"] != "execution-manifest/v3"
     ):
-        raise ValueError("manifest_version must be execution-manifest/v2")
+        raise ValueError("manifest_version must be execution-manifest/v3")
     if not _non_empty_string(root["plan_id"]):
         raise ValueError("plan_id must be non-empty")
     if root["repository_root"] != ".":
@@ -809,46 +810,6 @@ def _validate_retry_policy(value: object) -> None:
         raise ValueError("retry_policy.minor_or_cosmetic_reopens must be false")
 
 
-def _validate_hashing(value: object) -> None:
-    hashing = _manifest_object(value, "hashing")
-    _manifest_exact_fields(
-        hashing,
-        {"content_sha256", "semantic_fingerprint", "self_reference"},
-        "hashing",
-    )
-    content_hash = _manifest_object(
-        hashing["content_sha256"], "hashing.content_sha256"
-    )
-    semantic_hash = _manifest_object(
-        hashing["semantic_fingerprint"], "hashing.semantic_fingerprint"
-    )
-    _manifest_exact_fields(
-        content_hash,
-        {"algorithm", "input", "binding"},
-        "hashing.content_sha256",
-    )
-    _manifest_exact_fields(
-        semantic_hash,
-        {"algorithm", "input", "version", "binding"},
-        "hashing.semantic_fingerprint",
-    )
-    if (
-        content_hash["algorithm"] != "SHA-256"
-        or semantic_hash["algorithm"] != "SHA-256"
-    ):
-        raise ValueError("hashing algorithms must be SHA-256")
-    _string(content_hash["input"], "hashing.content_sha256.input")
-    _string(semantic_hash["input"], "hashing.semantic_fingerprint.input")
-    if (
-        content_hash["binding"] != "external"
-        or semantic_hash["binding"] != "external"
-    ):
-        raise ValueError("hashing bindings must be external")
-    _string(semantic_hash["version"], "hashing.semantic_fingerprint.version")
-    if hashing["self_reference"] is not False:
-        raise ValueError("hashing.self_reference must be false")
-
-
 def _validate_approval(value: object) -> None:
     approval = _manifest_object(value, "approval")
     _manifest_exact_fields(
@@ -928,7 +889,7 @@ def _validate_rollout_and_handoff(root: Mapping[str, object]) -> None:
     )
     for required in (
         "human approval",
-        "exact Manifest v2 review",
+        "exact Manifest v3 review",
         "zero blocking preflight findings",
     ):
         if required not in requires:
@@ -1505,7 +1466,7 @@ def _load_plan_snapshot(plan_path: Path) -> _PlanSnapshot:
 
 
 def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
-    """Parse the strict Manifest v2 state persisted by the execution gateway."""
+    """Parse the strict schema v2 runtime state persisted by the execution gateway."""
 
     try:
         mapping = _mapping(payload, "resume state")
@@ -1592,7 +1553,7 @@ def _build_status_payload(
     deviations: Sequence[Mapping[str, str]] = (),
     repo_root: Path | None = None,
 ) -> dict[str, object]:
-    """Build a Manifest v2 status payload without choosing execution work."""
+    """Build a schema v2 runtime status payload without choosing execution work."""
 
     parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
     root = repo_root or _find_repo_root(plan_path)
@@ -1717,7 +1678,7 @@ def build_status_yaml(
     deviations: Sequence[Mapping[str, str]] = (),
     repo_root: Path | None = None,
 ) -> dict[str, object]:
-    """Build a Manifest v2 YAML status payload without choosing execution work."""
+    """Build a schema v2 runtime status YAML payload without choosing execution work."""
 
     payload = _build_status_payload(
         plan_path,

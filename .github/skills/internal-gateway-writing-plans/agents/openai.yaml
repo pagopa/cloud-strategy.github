@@ -18,10 +18,10 @@ interface:
     to define exactly one parent-supplied retained plan path under
     tmp/superpowers/plans/ with ordered tasks,
     concrete targets, focused validation, a traceable ## Control Inventory,
-     and a normative ## Execution Manifest v2 declaring targets, controls,
+     and a normative ## Execution Manifest v3 declaring targets, controls,
     native commands, manual obligations, authority boundaries, retry posture,
      approval metadata, bootstrap metadata, and handoff. Read the Normative
-     Manifest v2 Contract before drafting: use its exact top-level and nested
+     Manifest v3 Contract before drafting: use its exact top-level and nested
     fields, use validations[].pass_signal, and make every task reference
     resolve to an existing manifest ID. New writer output uses
     bootstrap.mode: manifest-only and emits no legacy ## Execution Contract;
@@ -64,7 +64,7 @@ interface:
      executor status sibling records hash-free approval evidence, typed
      warnings/deviations, and all five delivery verdict categories.
      explicitly legacy/imported material requires reconstruction and refreshed
-     v2 approval. Probe every validations[].command before handoff with command
+     v3 approval. Probe every validations[].command before handoff with command
      -v or a native path check, distinguish command-not-found from validation
      failure, and handle exit 127 as a missing-tool condition. Perform human
     review, then use the writer projection: Plan, Scope, the five distinct

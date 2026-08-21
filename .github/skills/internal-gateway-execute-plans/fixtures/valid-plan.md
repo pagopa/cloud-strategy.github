@@ -75,6 +75,18 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
   ],
   "retry_policy": {"initial_attempts": 1, "max_context_refills": 1, "max_corrective_retries": 1, "caller_may_lower": true, "repeat_progress_status": "stalled", "minor_or_cosmetic_reopens": false},
   "approval": {"editorial_content_change": "retain approval for non-normative wording", "normative_manifest_change": "require renewed approval and v3 preflight"},
+  "bootstrap": {
+    "mode": "manifest-only",
+    "compatibility_projection": [],
+    "projection_binding": {
+      "controls": "manifest.controls",
+      "tasks": "manifest.tasks",
+      "validations": "manifest.validations",
+      "authority": "manifest.authority_boundaries"
+    },
+    "legacy_only": "reject",
+    "retirement_evidence": "This retained plan emits no legacy projection; the Manifest v3 object is the sole execution contract."
+  },
   "rollout": ["baseline", "final"],
   "handoff": {"next_owner": "/internal-gateway-execute-plans", "requires": ["human approval", "exact Manifest v3 review", "zero blocking preflight findings"], "status_sibling": "none", "git_mutation": "prohibited"}
 }
