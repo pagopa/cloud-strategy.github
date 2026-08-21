@@ -24,9 +24,9 @@ INVENTORY = REPO_ROOT / ".github/INVENTORY.md"
 
 
 def _normalized_manifest_contract(text: str) -> str:
-    start_marker = "A current manifest has exactly these top-level fields"
+    start_marker = "A current"
     end_marker = "no `## Execution Contract`."
-    start = text.index(start_marker, text.index("## Normative Manifest v1 Contract"))
+    start = text.index(start_marker, text.index("## Normative Manifest v2 Contract"))
     end = text.index(end_marker, start) + len(end_marker)
     return re.sub(r"\s+", " ", text[start:end]).strip()
 
@@ -111,15 +111,25 @@ def test_gateway_normative_manifest_contracts_remain_equal() -> None:
 
 def test_writer_documents_repository_preflight_fields() -> None:
     text = (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
+    headings = {
+        line.lstrip("#").strip()
+        for line in text.splitlines()
+        if line.startswith("#")
+    }
+    preflight = text.split("## Repository Preflight", 1)[1].split("## ", 1)[0]
+    fields = {
+        line.split(":", 1)[0].strip(" -*")
+        for line in preflight.splitlines()
+        if ":" in line
+    }
 
-    assert "## Repository Preflight" in text
-    for label in (
+    assert "Repository Preflight" in headings
+    assert {
         "Baseline Validation",
         "Recovery Policy",
         "Escalation Conditions",
         "User-Facing Report",
-    ):
-        assert label in text
+    } <= fields
 
 
 def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> None:

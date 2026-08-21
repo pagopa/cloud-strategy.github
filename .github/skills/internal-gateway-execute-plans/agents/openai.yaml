@@ -4,23 +4,26 @@ interface:
   default_prompt: >-
     Use /internal-gateway-execute-plans for approved retained-plan execution or
     resume under tmp/superpowers/plans/. Bind the writer-owned versioned
-    Execution Manifest v1, explicit approval, semantic fingerprint, content
-    hash, control inventory, and native validations. Read the Normative Manifest
-    v1 Contract and require its exact fields, pass_signal names, and task
+     Execution Manifest v2, explicit approval, control inventory, and native
+     validations. Read the Normative Manifest v2 Contract and require its exact
+     fields, pass_signal names, and task
     reference integrity before state creation. Execute every task directly
     in the current session and use /internal-tdd at executable task boundaries.
     Diagnose failures, repair only clearly implied omissions inside approved
     targets, preserve independent work around pre-existing failures, and stop
     for authority, scope, or safety gaps. Do not dispatch subagents, workers,
     models, or delegated plan execution; internal-luna-executor is metadata
-    only. Use only DONE, PARTIAL, and BLOCKED. Persist one YAML status sibling
-    with schema version 2, approval_evidence bound to the plan hashes, and all
-    five delivery verdicts; DONE requires every verdict to pass. Older status
+     only. Use only DONE, DONE_WITH_WARNINGS, PARTIAL, and BLOCKED. Persist one YAML status sibling
+     with schema version 2, hash-free approval_evidence, typed warnings, strict
+     deviations, and all five delivery verdicts; both successful states require
+     every verdict to pass. Older status
     siblings must be regenerated. Validate it with the loaded bundle's
     scripts/run.sh state-check. Never mutate Git.
     Before a completion claim, run the plan's final validations,
-    git diff --check, and /superpowers-verification-before-completion. Return
-    exactly four lines labeled Plan, Changed, Checks, and Next.
+     git diff --check, and /superpowers-verification-before-completion. Return
+     the compact four-line projection for DONE, a warning line for
+     DONE_WITH_WARNINGS, and evidence-backed causes/actions for PARTIAL or
+     BLOCKED.
     Resolve the executor from the loaded physical bundle and use its
     hash-locked scripts/requirements.txt through scripts/run.sh for both
     preflight and state-check; never fall back to consumer-relative or

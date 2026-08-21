@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validator for retained plans and hash-bound execution status."""
+"""Validator for retained plans and Manifest v2 execution status."""
 from __future__ import annotations
 
 import argparse
@@ -64,26 +64,25 @@ class Verdict:
 class ApprovalEvidence:
     source: str
     statement: str
-    plan_fingerprint: str
-    content_hash: str
 
     def as_dict(self) -> dict[str, str]:
         return {
             "source": self.source,
             "statement": self.statement,
-            "plan_fingerprint": self.plan_fingerprint,
-            "content_hash": self.content_hash,
         }
 
 
-MANIFEST_SCHEMA_VERSION = 1
+MANIFEST_SCHEMA_VERSION = 2
 STATE_SCHEMA_VERSION = 2
-STATE_STATUSES = frozenset({"DONE", "PARTIAL", "BLOCKED"})
+STATE_STATUSES = frozenset({"DONE", "DONE_WITH_WARNINGS", "PARTIAL", "BLOCKED"})
+SUCCESS_STATUSES = frozenset({"DONE", "DONE_WITH_WARNINGS"})
 APPROVAL_SOURCES = frozenset({"current-conversation", "external-authority-record"})
 APPROVAL_STATEMENT = "explicit execution approval"
-APPROVAL_EVIDENCE_FIELDS = frozenset(
-    {"source", "statement", "plan_fingerprint", "content_hash"}
+APPROVAL_EVIDENCE_FIELDS = frozenset({"source", "statement"})
+WARNING_KINDS = frozenset(
+    {"human-follow-up", "external-unavailable", "missing-tool-equivalent"}
 )
+DEVIATION_FIELDS = frozenset({"task", "mismatch", "resolution"})
 GIT_MUTATING_SUBCOMMANDS = frozenset(
     {
         "add",
@@ -155,7 +154,6 @@ MANIFEST_FIELDS = frozenset(
         "manual_obligations",
         "tasks",
         "retry_policy",
-        "hashing",
         "approval",
         "bootstrap",
         "rollout",
@@ -166,13 +164,9 @@ SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 DELEGATION_FIELDS = frozenset(
     {"schema_version", "mode", "worker", "result", "receipt", "acceptance"}
 )
-DELEGATION_RECORD_FIELDS = frozenset(
-    {"status", "content_hash", "plan_fingerprint"}
-)
 DELEGATION_MODES = frozenset({"none", "delegated"})
 LOCAL_DELEGATION_RESULT = "not_applicable"
-LEGACY_DELEGATION_COMPATIBILITY = "manifest-v1-without-delegation"
-CURRENT_DELEGATION_COMPATIBILITY = "manifest-v1-with-delegation-v1"
+CURRENT_DELEGATION_COMPATIBILITY = "manifest-v2"
 
 TASK_HEADING_RE = re.compile(r"(?im)^#{2,6}\s+Task(?:\s+\d+)?(?:\s*:|\b)")
 UNCHECKED_TASK_RE = re.compile(r"(?m)^\s*[-*]\s+\[\s\]\s+\S")
@@ -191,14 +185,14 @@ STATE_FIELDS = frozenset(
         "schema_version",
         "status",
         "plan",
-        "plan_fingerprint",
-        "content_hash",
         "approval_evidence",
         "delivery_verdicts",
         "completed_task_ids",
         "remaining_task_ids",
         "last_validation",
         "next_action",
+        "warnings",
+        "deviations",
     }
 )
 
@@ -209,6 +203,33 @@ class ExecutionContractError(ValueError):
     def __init__(self, code: str, message: str) -> None:
         super().__init__(message)
         self.code = code
+
+
+def build_non_done_report(
+    causes: Sequence[str], actions: Sequence[str]
+) -> tuple[str, ...]:
+    """Build the bounded report projection for PARTIAL and BLOCKED outcomes."""
+
+    if not 1 <= len(causes) <= 3:
+        raise ExecutionContractError(
+            "report-causes-bounded", "Non-DONE reports require 1-3 causes"
+        )
+    if not 2 <= len(actions) <= 4:
+        raise ExecutionContractError(
+            "report-actions-bounded", "Non-DONE reports require 2-4 actions"
+        )
+    values = (*causes, *actions)
+    if any(not isinstance(value, str) or not value.strip() for value in values):
+        raise ExecutionContractError(
+            "report-evidence-required",
+            "Non-DONE report causes and actions must be concrete non-empty strings",
+        )
+    return (
+        "Perch\u00e9 mi sono fermato",
+        *(f"- {cause.strip()}" for cause in causes),
+        "Cosa fare",
+        *(f"- {action.strip()}" for action in actions),
+    )
 
 
 BootstrapStatus = Literal["PASS", "BLOCKED"]
@@ -397,66 +418,14 @@ def _manifest_exact_fields(
 
 
 def delegation_compatibility_mode(manifest: Mapping[str, object]) -> str:
-    """Name the explicit compatibility path for Manifest v1 provenance."""
+    """Name the current local Manifest v2 provenance mode."""
 
-    if "delegation" not in manifest:
-        return LEGACY_DELEGATION_COMPATIBILITY
     return CURRENT_DELEGATION_COMPATIBILITY
-
-
-def _delegation_record(value: object, label: str) -> dict[str, str]:
-    if value is None:
-        code = (
-            "worker-result-not-accepted"
-            if label == "delegation.result"
-            else "delegation-acceptance-required"
-        )
-        raise ExecutionContractError(
-            code, f"{label} must be an accepted provenance record"
-        )
-    try:
-        record = _manifest_object(value, label)
-        _manifest_exact_fields(record, DELEGATION_RECORD_FIELDS, label)
-        status = _string(record["status"], f"{label}.status")
-        content_hash = _string(record["content_hash"], f"{label}.content_hash")
-        plan_fingerprint = _string(
-            record["plan_fingerprint"], f"{label}.plan_fingerprint"
-        )
-    except (TypeError, ValueError) as exc:
-        raise ExecutionContractError(
-            "malformed-delegation-record", str(exc)
-        ) from exc
-
-    if status != "accepted":
-        code = (
-            "worker-result-not-accepted"
-            if label == "delegation.result"
-            else "delegation-acceptance-required"
-        )
-        raise ExecutionContractError(code, f"{label}.status must be accepted")
-    if not SHA256_RE.fullmatch(content_hash):
-        raise ExecutionContractError(
-            "invalid-delegation-hash",
-            f"{label}.content_hash must be a SHA-256 digest",
-        )
-    if not SHA256_RE.fullmatch(plan_fingerprint):
-        raise ExecutionContractError(
-            "invalid-delegation-hash",
-            f"{label}.plan_fingerprint must be a SHA-256 digest",
-        )
-    return {
-        "status": status,
-        "content_hash": content_hash,
-        "plan_fingerprint": plan_fingerprint,
-    }
 
 
 def _validate_delegation_provenance(
     root: Mapping[str, object], authority: Mapping[str, object]
 ) -> None:
-    if "delegation" not in root:
-        return
-
     try:
         delegation = _manifest_object(root["delegation"], "delegation")
         _manifest_exact_fields(delegation, DELEGATION_FIELDS, "delegation")
@@ -504,38 +473,10 @@ def _validate_delegation_provenance(
                 "mode none must record result not_applicable",
             )
         return
-
-    if worker != authority["worker"]:
-        raise ExecutionContractError(
-            "delegation-worker-mismatch",
-            "delegated worker must match authority_boundaries.worker",
-        )
-    result = _delegation_record(delegation["result"], "delegation.result")
-    receipt = _delegation_record(delegation["receipt"], "delegation.receipt")
-    acceptance = _delegation_record(
-        delegation["acceptance"], "delegation.acceptance"
+    raise ExecutionContractError(
+        "delegation-not-supported-v2",
+        "Manifest v2 supports only local primary-owner authoring; do not manufacture worker provenance.",
     )
-    for record_name, record in (("receipt", receipt), ("acceptance", acceptance)):
-        if record["content_hash"] != result["content_hash"] or record[
-            "plan_fingerprint"
-        ] != result["plan_fingerprint"]:
-            raise ExecutionContractError(
-                "stale-delegation-binding",
-                f"delegation.{record_name} must bind the accepted result hashes; "
-                "material edits require new content and semantic hashes plus acceptance",
-            )
-    if result["content_hash"] == result["plan_fingerprint"]:
-        raise ExecutionContractError(
-            "delegation-hash-collision",
-            "delegation content_hash must differ from plan_fingerprint",
-        )
-
-    expected_fingerprint = compute_semantic_fingerprint(root)
-    if result["plan_fingerprint"] != expected_fingerprint:
-        raise ExecutionContractError(
-            "delegation-fingerprint-mismatch",
-            "delegation plan_fingerprint must match the delegation-excluded manifest fingerprint",
-        )
 
 
 def _manifest_non_empty_strings(value: object, label: str) -> tuple[str, ...]:
@@ -601,9 +542,9 @@ def _validate_manifest_identity(root: Mapping[str, object]) -> None:
         )
     if (
         not _non_empty_string(root["manifest_version"])
-        or root["manifest_version"] != "execution-manifest/v1"
+        or root["manifest_version"] != "execution-manifest/v2"
     ):
-        raise ValueError("manifest_version must be execution-manifest/v1")
+        raise ValueError("manifest_version must be execution-manifest/v2")
     if not _non_empty_string(root["plan_id"]):
         raise ValueError("plan_id must be non-empty")
     if root["repository_root"] != ".":
@@ -913,11 +854,9 @@ def _validate_approval(value: object) -> None:
     approval = _manifest_object(value, "approval")
     _manifest_exact_fields(
         approval,
-        {"binds", "editorial_content_change", "normative_manifest_change"},
+        {"editorial_content_change", "normative_manifest_change"},
         "approval",
     )
-    if approval["binds"] != "semantic_fingerprint":
-        raise ValueError("approval.binds must be semantic_fingerprint")
     _string(
         approval["editorial_content_change"], "approval.editorial_content_change"
     )
@@ -990,7 +929,7 @@ def _validate_rollout_and_handoff(root: Mapping[str, object]) -> None:
     )
     for required in (
         "human approval",
-        "exact semantic_fingerprint review",
+        "exact Manifest v2 review",
         "zero blocking preflight findings",
     ):
         if required not in requires:
@@ -1003,12 +942,7 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
     """Parse and validate exactly one normative Execution Manifest object."""
 
     root = _manifest_fenced_object(text, "Execution Manifest")
-    manifest_fields = (
-        MANIFEST_FIELDS
-        if "delegation" in root
-        else MANIFEST_FIELDS - {"delegation"}
-    )
-    _manifest_exact_fields(root, manifest_fields, "Execution Manifest")
+    _manifest_exact_fields(root, MANIFEST_FIELDS, "Execution Manifest")
     try:
         _validate_manifest_identity(root)
         authority = _validate_authority_boundaries(root)
@@ -1021,8 +955,6 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
         _validate_tasks(root["tasks"])
         _validate_task_references(root)
         _validate_retry_policy(root["retry_policy"])
-        _validate_hashing(root["hashing"])
-        compute_semantic_fingerprint(root)
         _validate_approval(root["approval"])
         _validate_bootstrap(root["bootstrap"])
         _validate_rollout_and_handoff(root)
@@ -1183,20 +1115,12 @@ def _is_git_directory_path(value: str) -> bool:
     return ".git" in Path(value).parts
 
 
-def _parse_approval_evidence(
-    value: object, plan_fingerprint: str, content_hash: str
-) -> ApprovalEvidence:
+def _parse_approval_evidence(value: object) -> ApprovalEvidence:
     try:
         mapping = _mapping(value, "approval_evidence")
         _exact_fields(mapping, APPROVAL_EVIDENCE_FIELDS, "approval_evidence")
         source = _string(mapping["source"], "approval_evidence.source")
         statement = _string(mapping["statement"], "approval_evidence.statement")
-        recorded_plan_fingerprint = _string(
-            mapping["plan_fingerprint"], "approval_evidence.plan_fingerprint"
-        )
-        recorded_content_hash = _string(
-            mapping["content_hash"], "approval_evidence.content_hash"
-        )
     except (TypeError, ValueError) as exc:
         raise ExecutionContractError(
             "malformed-approval-evidence", str(exc)
@@ -1212,17 +1136,7 @@ def _parse_approval_evidence(
             "approval-statement-required",
             f"approval_evidence.statement must be {APPROVAL_STATEMENT!r}",
         )
-    if recorded_plan_fingerprint != plan_fingerprint or recorded_content_hash != content_hash:
-        raise ExecutionContractError(
-            "approval-binding-mismatch",
-            "approval evidence must bind the current plan fingerprint and content hash",
-        )
-    return ApprovalEvidence(
-        source,
-        statement,
-        recorded_plan_fingerprint,
-        recorded_content_hash,
-    )
+    return ApprovalEvidence(source, statement)
 
 
 def _parse_delivery_verdicts(value: object) -> tuple[Verdict, ...]:
@@ -1260,6 +1174,91 @@ def _parse_delivery_verdicts(value: object) -> tuple[Verdict, ...]:
     return tuple(verdicts)
 
 
+def _parse_warnings(value: object) -> tuple[dict[str, str], ...]:
+    if not isinstance(value, list):
+        raise ExecutionContractError(
+            "malformed-warnings", "warnings must be a list"
+        )
+    warnings: list[dict[str, str]] = []
+    for index, raw_warning in enumerate(value):
+        label = f"warnings[{index}]"
+        try:
+            mapping = _mapping(raw_warning, label)
+            _exact_fields(mapping, {"kind", "evidence", "next_action"}, label)
+            kind = _string(mapping["kind"], f"{label}.kind")
+            evidence = _string(mapping["evidence"], f"{label}.evidence")
+            next_action = _string(mapping["next_action"], f"{label}.next_action")
+        except (TypeError, ValueError) as exc:
+            raise ExecutionContractError("malformed-warning", str(exc)) from exc
+        if kind not in WARNING_KINDS:
+            raise ExecutionContractError(
+                "invalid-warning-kind",
+                f"{label}.kind must be one of {sorted(WARNING_KINDS)}",
+            )
+        warnings.append(
+            {"kind": kind, "evidence": evidence, "next_action": next_action}
+        )
+    return tuple(warnings)
+
+
+def _deviation_class(text: str) -> str | None:
+    lowered = text.lower()
+    forbidden = (
+        "ambiguous",
+        "semantic scope",
+        "authority",
+        "contract change",
+        "multi-task",
+        "multi task",
+    )
+    if any(marker in lowered for marker in forbidden):
+        return None
+    if "path" in lowered and any(
+        marker in lowered for marker in ("move", "moved", "relocat")
+    ):
+        return "path-move"
+    if "structural" in lowered and any(
+        marker in lowered for marker in ("id", "name")
+    ):
+        return "structural-alignment"
+    if "id/name" in lowered or "id or name" in lowered:
+        return "structural-alignment"
+    if "equivalent" in lowered and any(
+        marker in lowered for marker in ("missing tool", "tool unavailable", "exit 127")
+    ):
+        return "missing-tool-equivalent"
+    if "already" in lowered and "declared state" in lowered:
+        return "target-already-declared-state"
+    return None
+
+
+def _parse_deviations(value: object) -> tuple[dict[str, str], ...]:
+    if not isinstance(value, list):
+        raise ExecutionContractError(
+            "malformed-deviations", "deviations must be a list"
+        )
+    deviations: list[dict[str, str]] = []
+    for index, raw_deviation in enumerate(value):
+        label = f"deviations[{index}]"
+        try:
+            mapping = _mapping(raw_deviation, label)
+            _exact_fields(mapping, DEVIATION_FIELDS, label)
+            task = _string(mapping["task"], f"{label}.task")
+            mismatch = _string(mapping["mismatch"], f"{label}.mismatch")
+            resolution = _string(mapping["resolution"], f"{label}.resolution")
+        except (TypeError, ValueError) as exc:
+            raise ExecutionContractError("malformed-deviation", str(exc)) from exc
+        if _deviation_class(f"{mismatch} {resolution}") is None:
+            raise ExecutionContractError(
+                "invalid-deviation",
+                f"{label} is not an unequivocal path, structural, missing-tool, or declared-state resolution",
+            )
+        deviations.append(
+            {"task": task, "mismatch": mismatch, "resolution": resolution}
+        )
+    return tuple(deviations)
+
+
 def compute_sha256(path: Path) -> str:
     return compute_content_sha256(path)
 
@@ -1273,16 +1272,16 @@ def compute_content_sha256(path: Path) -> str:
 @dataclass(frozen=True)
 class ResumeState:
     schema_version: Literal[2]
-    status: Literal["DONE", "PARTIAL", "BLOCKED"]
+    status: Literal["DONE", "DONE_WITH_WARNINGS", "PARTIAL", "BLOCKED"]
     plan: str
-    plan_fingerprint: str
-    content_hash: str
     approval_evidence: ApprovalEvidence
     delivery_verdicts: tuple[Verdict, ...]
     completed_task_ids: tuple[str, ...]
     remaining_task_ids: tuple[str, ...]
     last_validation: str
     next_action: str
+    warnings: tuple[dict[str, str], ...]
+    deviations: tuple[dict[str, str], ...]
 
 
 @dataclass(frozen=True)
@@ -1493,8 +1492,6 @@ def _manifest_task_ids(manifest: Mapping[str, object]) -> tuple[str, ...]:
 class _PlanSnapshot:
     text: str
     manifest: dict[str, object]
-    semantic_fingerprint: str
-    content_hash: str
     task_ids: tuple[str, ...]
 
 
@@ -1504,17 +1501,18 @@ def _load_plan_snapshot(plan_path: Path) -> _PlanSnapshot:
     return _PlanSnapshot(
         text=text,
         manifest=manifest,
-        semantic_fingerprint=compute_semantic_fingerprint(manifest),
-        content_hash=compute_content_sha256(plan_path),
         task_ids=_manifest_task_ids(manifest),
     )
 
 
 def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
-    """Parse the strict, hash-bound state persisted by the execution gateway."""
+    """Parse the strict Manifest v2 state persisted by the execution gateway."""
 
-    mapping = _mapping(payload, "resume state")
-    _exact_fields(mapping, STATE_FIELDS, "resume state")
+    try:
+        mapping = _mapping(payload, "resume state")
+        _exact_fields(mapping, STATE_FIELDS, "resume state")
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError("malformed-resume-state", str(exc)) from exc
     if not _is_int(mapping["schema_version"]) or mapping["schema_version"] != STATE_SCHEMA_VERSION:
         raise ExecutionContractError(
             "unsupported-state-schema",
@@ -1526,17 +1524,11 @@ def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
             "unknown-status",
             f"resume state.status must be one of {sorted(STATE_STATUSES)}",
         )
-    plan_fingerprint = _string(mapping["plan_fingerprint"], "resume state.plan_fingerprint")
-    content_hash = _string(mapping["content_hash"], "resume state.content_hash")
-    if not SHA256_RE.fullmatch(plan_fingerprint):
-        raise ExecutionContractError("invalid-plan-fingerprint", "resume state.plan_fingerprint must be a SHA-256 digest")
-    if not SHA256_RE.fullmatch(content_hash):
-        raise ExecutionContractError("invalid-content-hash", "resume state.content_hash must be a SHA-256 digest")
-    approval_evidence = _parse_approval_evidence(
-        mapping["approval_evidence"], plan_fingerprint, content_hash
-    )
+    approval_evidence = _parse_approval_evidence(mapping["approval_evidence"])
     delivery_verdicts = _parse_delivery_verdicts(mapping["delivery_verdicts"])
-    if status == "DONE":
+    warnings = _parse_warnings(mapping["warnings"])
+    deviations = _parse_deviations(mapping["deviations"])
+    if status in SUCCESS_STATUSES:
         aggregate = aggregate_verdict(
             VERDICT_CATEGORIES,
             {verdict.category: verdict for verdict in delivery_verdicts},
@@ -1546,6 +1538,27 @@ def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
                 "done-with-unpassed-delivery-verdicts",
                 "DONE status requires all five delivery verdicts to be passed",
             )
+    if status == "DONE" and (warnings or deviations):
+        raise ExecutionContractError(
+            "done-with-warning-records",
+            "DONE status requires empty warnings and deviations",
+        )
+    if status == "DONE_WITH_WARNINGS" and not warnings:
+        raise ExecutionContractError(
+            "warnings-required",
+            "DONE_WITH_WARNINGS status requires at least one typed warning",
+        )
+    if status == "DONE_WITH_WARNINGS" and any(
+        warning["kind"] == "missing-tool-equivalent" for warning in warnings
+    ) and not any(
+        _deviation_class(f"{item['mismatch']} {item['resolution']}")
+        == "missing-tool-equivalent"
+        for item in deviations
+    ):
+        raise ExecutionContractError(
+            "missing-tool-equivalent-deviation",
+            "A missing-tool-equivalent warning requires a matching accepted deviation",
+        )
     completed = _strings(mapping["completed_task_ids"], "resume state.completed_task_ids")
     remaining = _strings(mapping["remaining_task_ids"], "resume state.remaining_task_ids")
     if len(set(completed)) != len(completed) or len(set(remaining)) != len(remaining):
@@ -1556,14 +1569,14 @@ def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
         STATE_SCHEMA_VERSION,
         status,  # type: ignore[arg-type]
         _string(mapping["plan"], "resume state.plan"),
-        plan_fingerprint,
-        content_hash,
         approval_evidence,
         delivery_verdicts,
         completed,
         remaining,
         _string(mapping["last_validation"], "resume state.last_validation"),
         _string(mapping["next_action"], "resume state.next_action"),
+        warnings,
+        deviations,
     )
 
 
@@ -1576,11 +1589,13 @@ def _build_status_payload(
     next_action: str,
     approval_source: str,
     delivery_verdicts: Mapping[str, Verdict],
+    warnings: Sequence[Mapping[str, str]] = (),
+    deviations: Sequence[Mapping[str, str]] = (),
     repo_root: Path | None = None,
 ) -> dict[str, object]:
-    """Build a bound status payload without choosing execution work."""
+    """Build a Manifest v2 status payload without choosing execution work."""
 
-    manifest = parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
+    parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
     root = repo_root or _find_repo_root(plan_path)
     try:
         plan_reference = plan_path.resolve().relative_to(root.resolve()).as_posix()
@@ -1597,25 +1612,21 @@ def _build_status_payload(
             "delivery_verdicts must provide exactly the five required categories",
         )
     delivery_payload = build_verdict_payload(VERDICT_CATEGORIES, delivery_verdicts)
-    plan_fingerprint = compute_semantic_fingerprint(manifest)
-    content_hash = compute_content_sha256(plan_path)
     payload: dict[str, object] = {
         "schema_version": STATE_SCHEMA_VERSION,
         "status": status,
         "plan": plan_reference,
-        "plan_fingerprint": plan_fingerprint,
-        "content_hash": content_hash,
         "approval_evidence": {
             "source": approval_source,
             "statement": APPROVAL_STATEMENT,
-            "plan_fingerprint": plan_fingerprint,
-            "content_hash": content_hash,
         },
         "delivery_verdicts": list(delivery_payload["verdicts"].values()),
         "completed_task_ids": list(completed_task_ids),
         "remaining_task_ids": list(remaining_task_ids),
         "last_validation": last_validation,
         "next_action": next_action,
+        "warnings": list(warnings),
+        "deviations": list(deviations),
     }
     parse_resume_state(payload)
     return payload
@@ -1658,11 +1669,11 @@ def _load_status_yaml(text: str) -> Mapping[str, object]:
 
 
 def status_sibling_paths(plan_path: Path) -> tuple[Path, ...]:
-    """Return the three canonical YAML status siblings for a retained plan."""
+    """Return the four canonical YAML status siblings for a retained plan."""
 
     return tuple(
         plan_path.with_name(f"{plan_path.stem}.{status}.yaml")
-        for status in ("DONE", "PARTIAL", "BLOCKED")
+        for status in ("DONE", "DONE_WITH_WARNINGS", "PARTIAL", "BLOCKED")
     )
 
 
@@ -1681,7 +1692,8 @@ def parse_status_yaml(payload: Mapping[str, object], source_path: Path) -> Resum
     if status_from_filename not in STATE_STATUSES:
         raise ExecutionContractError(
             "invalid-status-filename",
-            f"Status YAML filename must end in .DONE.yaml, .PARTIAL.yaml, or .BLOCKED.yaml: {source_path.name}",
+            "Status YAML filename must end in .DONE.yaml, .DONE_WITH_WARNINGS.yaml, .PARTIAL.yaml, or .BLOCKED.yaml: "
+            f"{source_path.name}",
         )
     state = parse_resume_state(_mapping(payload, "status YAML"))
     if state.status != status_from_filename:
@@ -1702,9 +1714,11 @@ def build_status_yaml(
     *,
     approval_source: str,
     delivery_verdicts: Mapping[str, Verdict],
+    warnings: Sequence[Mapping[str, str]] = (),
+    deviations: Sequence[Mapping[str, str]] = (),
     repo_root: Path | None = None,
 ) -> dict[str, object]:
-    """Build a hash-bound YAML status payload without choosing execution work."""
+    """Build a Manifest v2 YAML status payload without choosing execution work."""
 
     payload = _build_status_payload(
         plan_path,
@@ -1715,6 +1729,8 @@ def build_status_yaml(
         next_action,
         approval_source,
         delivery_verdicts,
+        warnings,
+        deviations,
         repo_root,
     )
     if status not in STATE_STATUSES:
@@ -1733,8 +1749,6 @@ def write_status_yaml(path: Path, payload: Mapping[str, object]) -> None:
             "schema_version": state.schema_version,
             "status": state.status,
             "plan": state.plan,
-            "plan_fingerprint": state.plan_fingerprint,
-            "content_hash": state.content_hash,
             "approval_evidence": state.approval_evidence.as_dict(),
             "delivery_verdicts": [
                 verdict.as_dict() for verdict in state.delivery_verdicts
@@ -1743,6 +1757,8 @@ def write_status_yaml(path: Path, payload: Mapping[str, object]) -> None:
             "remaining_task_ids": list(state.remaining_task_ids),
             "last_validation": state.last_validation,
             "next_action": state.next_action,
+            "warnings": list(state.warnings),
+            "deviations": list(state.deviations),
         },
         sort_keys=False,
     )
@@ -1769,20 +1785,6 @@ def _status_binding_findings(
         )
     except (OSError, UnicodeError, ExecutionContractError) as exc:
         return findings + [Finding("plan-unreadable", str(exc))]
-    if state.plan_fingerprint != plan_snapshot.semantic_fingerprint:
-        findings.append(
-            Finding(
-                "semantic-fingerprint-drift",
-                f"Manifest changed after approval: recorded {state.plan_fingerprint} != computed {plan_snapshot.semantic_fingerprint}",
-            )
-        )
-    if state.content_hash != plan_snapshot.content_hash:
-        findings.append(
-            Finding(
-                "content-hash-drift",
-                f"Plan bytes changed after approval: recorded {state.content_hash} != computed {plan_snapshot.content_hash}",
-            )
-        )
     completed = set(state.completed_task_ids)
     remaining = set(state.remaining_task_ids)
     expected_task_ids = set(plan_snapshot.task_ids)
@@ -1791,11 +1793,26 @@ def _status_binding_findings(
         findings.append(Finding("unknown-task-id", f"Status contains unknown task IDs: {sorted(unknown)}"))
     if completed & remaining:
         findings.append(Finding("task-progress-overlap", "Status completed and remaining tasks overlap"))
+    unknown_deviation_tasks = sorted(
+        set(item["task"] for item in state.deviations) - expected_task_ids
+    )
+    if unknown_deviation_tasks:
+        findings.append(
+            Finding(
+                "unknown-deviation-task",
+                f"Status deviations contain unknown task IDs: {unknown_deviation_tasks}",
+            )
+        )
     if completed | remaining != expected_task_ids:
         findings.append(Finding("incomplete-task-progress", "Status must account for every manifest task exactly once"))
-    if state.status == "DONE" and remaining:
-        findings.append(Finding("done-with-remaining-tasks", "DONE status must not contain remaining tasks"))
-    if state.status != "DONE" and not remaining:
+    if state.status in SUCCESS_STATUSES and remaining:
+        findings.append(
+            Finding(
+                "done-with-remaining-tasks",
+                "Successful terminal status must not contain remaining tasks",
+            )
+        )
+    if state.status not in SUCCESS_STATUSES and not remaining:
         findings.append(Finding("status-progress-mismatch", "A complete task set must use DONE status"))
     return findings
 
@@ -2055,17 +2072,6 @@ def _validate_plan(
                     else "bootstrap-projection-drift"
                 )
                 findings.append(Finding(code, message))
-            if (
-                delegation_compatibility_mode(manifest)
-                == LEGACY_DELEGATION_COMPATIBILITY
-            ):
-                findings.append(
-                    Finding(
-                        "legacy-delegation-compatibility",
-                        "Manifest v1 without delegation is parseable only through the named legacy compatibility path.",
-                        "notice",
-                    )
-                )
     return findings
 
 
@@ -2086,16 +2092,6 @@ def validate_state(
         except (OSError, UnicodeError, ExecutionContractError):
             pass
     findings = _validate_plan(plan_path, effective_root, snapshot)
-    if snapshot is not None and (
-        delegation_compatibility_mode(snapshot.manifest)
-        == LEGACY_DELEGATION_COMPATIBILITY
-    ):
-        findings.append(
-            Finding(
-                "legacy-delegation-state-check",
-                "Manifest v1 without delegation cannot pass state-check; reconstruct the manifest and refresh approval.",
-            )
-        )
     if state_path.suffix.lower() != ".yaml":
         return findings + [
             Finding(

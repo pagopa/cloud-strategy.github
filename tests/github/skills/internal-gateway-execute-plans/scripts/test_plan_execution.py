@@ -30,8 +30,8 @@ from plan_execution import (  # noqa: E402
     validate_ignored_artifact,
     validate_manifest_projection,
     validate_plan,
-    validate_state,
     validate_relevant_baseline,
+    validate_state,
 )
 
 
@@ -72,10 +72,10 @@ def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
 
 
 def test_valid_plan_parses_contract_and_has_no_findings(valid_plan: Path) -> None:
-    assert parse_execution_manifest(valid_plan.read_text())["schema_version"] == 1
+    assert parse_execution_manifest(valid_plan.read_text())["schema_version"] == 2
     assert (
         parse_execution_manifest(valid_plan.read_text())["manifest_version"]
-        == "execution-manifest/v1"
+        == "execution-manifest/v2"
     )
     assert validate_plan(valid_plan, repo_root=valid_plan.parents[3]) == []
 
@@ -97,7 +97,9 @@ def test_manifest_accepts_delegated_provenance_with_accepted_result(
     )
     plan = _stage_valid_plan(tmp_path, text)
 
-    assert validate_plan(plan, tmp_path) == []
+    assert "delegation-not-supported-v2" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
 
 
 def test_semantic_fingerprint_excludes_delegation() -> None:
@@ -138,7 +140,7 @@ def test_manifest_rejects_delegation_hash_collision(tmp_path: Path) -> None:
         ),
     )
 
-    assert "delegation-hash-collision" in {
+    assert "delegation-not-supported-v2" in {
         item.code for item in validate_plan(plan, tmp_path)
     }
 
@@ -161,7 +163,7 @@ def test_manifest_rejects_delegation_fingerprint_drift(tmp_path: Path) -> None:
         ),
     )
 
-    assert "delegation-fingerprint-mismatch" in {
+    assert "delegation-not-supported-v2" in {
         item.code for item in validate_plan(plan, tmp_path)
     }
 
@@ -195,9 +197,9 @@ def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None
                     "status": "pending",
                 },
                 "receipt": _accepted_provenance(),
-                "acceptance": _accepted_provenance(),
-            },
-            "worker-result-not-accepted",
+                    "acceptance": _accepted_provenance(),
+                },
+                "delegation-not-supported-v2",
         ),
         (
             {
@@ -239,9 +241,9 @@ def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None
                 "worker": "internal-luna-executor",
                 "result": _accepted_provenance(),
                 "receipt": _accepted_provenance(),
-                "acceptance": _accepted_provenance(seed="9"),
-            },
-            "stale-delegation-binding",
+                    "acceptance": _accepted_provenance(seed="9"),
+                },
+                "delegation-not-supported-v2",
         ),
     ),
 )
@@ -271,7 +273,7 @@ def test_manifest_rejects_missing_local_provenance_marker(tmp_path: Path) -> Non
     }
 
 
-def test_manifest_without_delegation_uses_named_legacy_compatibility_path(
+def test_manifest_without_delegation_is_rejected_in_v2(
     tmp_path: Path,
 ) -> None:
     text = _fixture("valid-plan.md").read_text(encoding="utf-8")
@@ -282,14 +284,13 @@ def test_manifest_without_delegation_uses_named_legacy_compatibility_path(
     legacy_text = text[:start] + json.dumps(manifest, indent=2) + text[end:]
     plan = _stage_valid_plan(tmp_path, legacy_text)
 
-    parsed = parse_execution_manifest(plan.read_text(encoding="utf-8"))
+    with pytest.raises(ExecutionContractError) as exc:
+        parse_execution_manifest(plan.read_text(encoding="utf-8"))
 
-    assert getattr(sys.modules["plan_execution"], "delegation_compatibility_mode")(
-        parsed
-    ) == "manifest-v1-without-delegation"
+    assert exc.value.code == "missing-manifest-field"
 
 
-def test_manifest_without_delegation_preflight_is_notice_only(tmp_path: Path) -> None:
+def test_manifest_without_delegation_preflight_is_blocking(tmp_path: Path) -> None:
     text = _fixture("valid-plan.md").read_text(encoding="utf-8")
     start = text.index("```json\n") + len("```json\n")
     end = text.index("\n```", start)
@@ -302,12 +303,8 @@ def test_manifest_without_delegation_preflight_is_notice_only(tmp_path: Path) ->
 
     findings = validate_plan(plan, tmp_path)
 
-    assert any(
-        item.code == "legacy-delegation-compatibility"
-        and item.severity == "notice"
-        for item in findings
-    )
-    assert not any(item.severity == "blocking" for item in findings)
+    assert "missing-manifest-field" in {item.code for item in findings}
+    assert any(item.severity == "blocking" for item in findings)
 
 
 def test_state_check_blocks_manifest_without_delegation(tmp_path: Path) -> None:
@@ -321,13 +318,9 @@ def test_state_check_blocks_manifest_without_delegation(tmp_path: Path) -> None:
         text[:start] + json.dumps(manifest, indent=2) + text[end:],
     )
     state = plan.with_name(f"{plan.stem}.DONE.yaml")
-    _write_status_yaml(plan, state)
-
     findings = validate_state(plan, state, tmp_path)
 
-    assert "legacy-delegation-state-check" in {
-        item.code for item in findings
-    }
+    assert "missing-manifest-field" in {item.code for item in findings}
 
 
 def test_plan_without_execution_manifest_is_blocking(tmp_path: Path) -> None:
@@ -567,7 +560,7 @@ print(json.dumps({
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == {
-        "schema_version": 1,
+        "schema_version": 2,
         "sys_path_unchanged": True,
         "has_yaml_attribute": True,
         "task_ids": ["T1"],
@@ -647,7 +640,7 @@ def test_execution_manifest_parses_and_binds_current_bootstrap_projection() -> N
     text = _manifest_text(plan)
     manifest = parse_execution_manifest(text)
 
-    assert manifest["manifest_version"] == "execution-manifest/v1"
+    assert manifest["manifest_version"] == "execution-manifest/v2"
     assert validate_manifest_projection(text, manifest) == []
 
 
@@ -664,8 +657,8 @@ def test_execution_manifest_rejects_unknown_fields(tmp_path: Path) -> None:
     plan = _current_bootstrap_plan()
     text = _manifest_text(plan)
     text = text.replace(
-        '"manifest_version": "execution-manifest/v1"',
-        '"unknown": true,\n  "manifest_version": "execution-manifest/v1"',
+        '"manifest_version": "execution-manifest/v2"',
+        '"unknown": true,\n  "manifest_version": "execution-manifest/v2"',
         1,
     )
 
@@ -896,7 +889,7 @@ def _passing_verdicts(module):
     }
 
 
-def test_status_persists_hash_bound_approval_and_delivery_verdicts(tmp_path: Path) -> None:
+def test_status_persists_hash_free_approval_and_delivery_verdicts(tmp_path: Path) -> None:
     module = sys.modules["plan_execution"]
     plan = _stage_valid_plan(tmp_path)
     payload = _status_payload(module, plan)
@@ -905,8 +898,6 @@ def test_status_persists_hash_bound_approval_and_delivery_verdicts(tmp_path: Pat
     assert payload["approval_evidence"] == {
         "source": "current-conversation",
         "statement": "explicit execution approval",
-        "plan_fingerprint": payload["plan_fingerprint"],
-        "content_hash": payload["content_hash"],
     }
     assert [item["category"] for item in payload["delivery_verdicts"]] == list(
         module.VERDICT_CATEGORIES
@@ -921,7 +912,7 @@ def test_status_persists_hash_bound_approval_and_delivery_verdicts(tmp_path: Pat
     )
 
 
-def test_status_rejects_approval_hash_drift(tmp_path: Path) -> None:
+def test_status_rejects_retired_approval_hash_fields(tmp_path: Path) -> None:
     module = sys.modules["plan_execution"]
     plan = _stage_valid_plan(tmp_path)
     payload = _status_payload(module, plan)
@@ -930,7 +921,7 @@ def test_status_rejects_approval_hash_drift(tmp_path: Path) -> None:
     with pytest.raises(module.ExecutionContractError) as exc:
         module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.DONE.yaml"))
 
-    assert exc.value.code == "approval-binding-mismatch"
+    assert exc.value.code == "malformed-approval-evidence"
 
 
 def test_done_state_rejects_unpassed_delivery_verdicts(tmp_path: Path) -> None:
@@ -963,7 +954,7 @@ def _status_payload(
     completed_task_ids = (
         completed
         if completed is not None
-        else (task_ids if status == "DONE" else ())
+        else (task_ids if status in {"DONE", "DONE_WITH_WARNINGS"} else ())
     )
     remaining_task_ids = tuple(
         task_id for task_id in task_ids if task_id not in completed_task_ids
@@ -978,7 +969,9 @@ def _status_payload(
         completed_task_ids,
         remaining_task_ids,
         "focused: native tests passed",
-        "No further execution is required." if status == "DONE" else "Continue the approved task loop.",
+        "No further execution is required."
+        if status in {"DONE", "DONE_WITH_WARNINGS"}
+        else "Continue the approved task loop.",
         approval_source="current-conversation",
         delivery_verdicts=delivery_verdicts,
         repo_root=plan.parents[3],
@@ -1026,7 +1019,7 @@ def test_status_discovery_rejects_interrupted_transition(tmp_path: Path) -> None
     }
 
 
-def test_yaml_state_check_rejects_plan_or_hash_drift(tmp_path: Path) -> None:
+def test_yaml_state_check_allows_editorial_drift_without_hash_binding(tmp_path: Path) -> None:
     module = sys.modules["plan_execution"]
     plan = _stage_valid_plan(tmp_path)
     state = plan.with_name(f"{plan.stem}.DONE.yaml")
@@ -1035,10 +1028,7 @@ def test_yaml_state_check_rejects_plan_or_hash_drift(tmp_path: Path) -> None:
 
     result = _run_state_check(plan, state, tmp_path)
 
-    assert result.returncode != 0
-    assert "content-hash-drift" in {
-        item["code"] for item in json.loads(result.stdout)["finding_sample"]
-    }
+    assert result.returncode == 0, result.stderr or result.stdout
 
 
 def test_legacy_only_plan_has_no_manifest_fallback() -> None:
@@ -1104,7 +1094,7 @@ def test_validate_state_reuses_single_plan_snapshot(
     assert parse_count == 1
 
 
-def test_state_check_rejects_content_hash_drift(tmp_path: Path) -> None:
+def test_state_check_accepts_content_drift_without_hash_binding(tmp_path: Path) -> None:
     plan = _stage_valid_plan(tmp_path)
     state = plan.with_name(f"{plan.stem}.DONE.yaml")
     _write_status_yaml(plan, state)
@@ -1112,10 +1102,7 @@ def test_state_check_rejects_content_hash_drift(tmp_path: Path) -> None:
 
     result = _run_state_check(plan, state, tmp_path)
 
-    assert result.returncode != 0
-    assert "content-hash-drift" in {
-        item["code"] for item in json.loads(result.stdout)["finding_sample"]
-    }
+    assert result.returncode == 0, result.stderr or result.stdout
 
 
 @pytest.mark.parametrize("status", ("DONE", "PARTIAL", "BLOCKED"))

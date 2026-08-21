@@ -48,9 +48,9 @@ description: Use when repository-owned work needs an approved implementation pla
     `tmp/superpowers/plans/` and its required structure before delegation:
     ordered actionable tasks, concrete file targets, focused validation, a
     compact `## Control Inventory`, an execution handoff, and one normative
-    `## Execution Manifest` v1 fenced JSON object. The manifest owns targets,
+   `## Execution Manifest` v2 fenced JSON object. The manifest owns targets,
     controls, validations, tasks, authority boundaries, retry posture, approval
-    binding, bootstrap metadata, and handoff. Imported
+   approval metadata, bootstrap metadata, and handoff. Imported
     `/superpowers-writing-plans` mechanics define plan structure only; they do
     not own approval eligibility or handoff. Each inventory row records a stable ID,
    preserved requirement, nearest owner, command or trigger, pass/fail signal,
@@ -63,7 +63,7 @@ description: Use when repository-owned work needs an approved implementation pla
    failure as the same kind of non-blocking follow-up. Authority and approval
    rows remain pre-execution gates. Completion: one
    plan exists at the retained path and contains those artifact properties plus
-   one `## Execution Manifest` v1 fenced JSON object. New writer output uses
+   one `## Execution Manifest` v2 fenced JSON object. New writer output uses
    `bootstrap.mode: manifest-only` and emits no legacy `## Execution Contract`.
    The current migration plan is the sole explicit compatibility projection;
    it is accepted only when its manifest metadata and Markdown projection bind
@@ -131,7 +131,7 @@ description: Use when repository-owned work needs an approved implementation pla
   distinct verdict categories. Each category names its outcome, coverage, and
   limit; an aggregate green result requires every required category to be
   concluded and passed. The executor persists those categories in the YAML
-  status sibling together with approval evidence bound to the plan hashes. A
+   status sibling together with hash-free approval evidence, warnings, and deviations. A
   standalone `validated` flag is not a readiness claim.
 4. Report the plan through the writer-specific compact projection below. Keep
   plan details in the retained artifact. Do not invoke execution, create a
@@ -167,43 +167,48 @@ the diagram is supplementary, never a replacement for them.
   command prefix unless the task's actual subject is that tool.
 - Executor-side optimization may accelerate an invocation, but must not alter
   the recorded authoritative command or its validation meaning.
+- Before handoff, run an existence probe for every `validations[].command`.
+  Probe the executable or path with `command -v` or the native path check before
+  running the validation. Distinguish command-not-found from a validation
+  failure. Exit 127 is a missing-tool condition: record an unambiguous native
+  equivalent and its deviation, or retain the residual obligation and stop.
+- Order tasks so non-blocking discovery and availability checks come first,
+  implementation work stays in the middle, and environment-dependent
+  verification runs after implementation.
 
 The executor owns the single mechanical plan validator. Do not add a
 writer-local validator, a second implementation-plan writing lifecycle, or a
 duplicate parser contract. The executor validates one normative Execution
-Manifest v1; a legacy `## Execution Contract` is accepted only as the exact
-compatibility projection declared by the migration manifest, never as a
-standalone plan schema.
+Manifest v2. There is no dual v1/v2 parser. A legacy `## Execution Contract`
+is never a standalone plan schema and requires writer-side regeneration.
 Before handoff, the parent gateway MUST resolve the executor's loaded physical
 bundle and run its `scripts/run.sh preflight` independently against the written
 current plan, then confirm zero blocking findings. The command is:
 `bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`.
 Explicitly
 `legacy/imported` material is the only reconstruction path; it is not a current
-plan exemption and requires refreshed approval and semantic fingerprint. Plans
+plan exemption and requires refreshed approval as Manifest v2. Plans
 without the versioned manifest are not actionable. Do not leave an automatable
 obligation as narrative-only evidence or downgrade it to a manual obligation
 to make preflight or closeout pass.
 
-## Normative Manifest v1 Contract
+## Normative Manifest v2 Contract
 
 The following is the shared producer-consumer contract. It is an authoring
 checklist, not a second parser. The executor's `plan_execution.py` and
 `scripts/run.sh preflight` are the sole mechanical authority; if this text and
 the parser differ, the parser wins.
 
-A current manifest has exactly these top-level fields, with no additions or
+A current Manifest v2 has exactly these top-level fields, with no additions or
 omissions:
 
 `schema_version`, `manifest_version`, `plan_id`, `repository_root`,
 `authority_boundaries`, `delegation`, `targets`, `controls`, `validations`,
-`manual_obligations`, `tasks`, `retry_policy`, `hashing`, `approval`,
+`manual_obligations`, `tasks`, `retry_policy`, `approval`,
 `bootstrap`, `rollout`, and `handoff`.
 
-The parser has one named compatibility exception: an imported or legacy
-Manifest v1 may omit `delegation`. That exception is not current writer output
-and is not readiness; reconstruct the manifest, refresh approval, and rerun
-preflight before handoff.
+There is no v1/v2 parser compatibility mode. Imported or legacy plans must be
+regenerated by the writer route as Manifest v2, then approved and preflighted.
 
 Use these exact nested shapes and values:
 
@@ -214,8 +219,7 @@ Use these exact nested shapes and values:
   `result`, `receipt`, and `acceptance`. Local authoring uses
   `schema_version: 1`, `mode: none`, `worker: primary-owner`, and
   `result: not_applicable`, with `receipt` and `acceptance` set to `null`.
-  A delegated route uses accepted hash-bound records and the worker declared
-  by `authority_boundaries`; do not manufacture those records.
+  Manifest v2 does not manufacture delegated worker provenance.
 - Each `targets` item has `id`, `path`, and `state`; `condition` is the only
   optional target field. `state` is `create`, `modify`, or `inspect`, and no
   target may be inside `.git`.
@@ -238,16 +242,8 @@ Use these exact nested shapes and values:
   `max_corrective_retries`, `caller_may_lower`, `repeat_progress_status`,
   and `minor_or_cosmetic_reopens`. Use `1`, `1`, `1`, `true`, `stalled`, and
   `false` respectively.
-- `hashing` has exactly `content_sha256`, `semantic_fingerprint`, and
-  `self_reference`. Both hash records have algorithm `SHA-256`, a non-empty
-  input, and binding `external`; the semantic fingerprint input is the RFC 8785
-  canonical Execution Manifest JSON with the top-level `delegation` subtree
-  excluded; the semantic record also has a non-empty `version`;
-  `self_reference` is `false`. Do not embed either computed digest in the
-  manifest.
-- `approval` has exactly `binds`, `editorial_content_change`, and
-  `normative_manifest_change`; `binds` is `semantic_fingerprint` and the two
-  change fields are non-empty strings.
+- `approval` has exactly `editorial_content_change` and
+   `normative_manifest_change`; both fields are non-empty strings.
 - `bootstrap` has exactly `mode`, `compatibility_projection`,
   `projection_binding`, `legacy_only`, and `retirement_evidence`. Current
   output uses `mode: manifest-only`, an empty compatibility projection, the
@@ -258,7 +254,7 @@ Use these exact nested shapes and values:
 - `rollout` is a non-empty list of strings. `handoff` has exactly
   `next_owner`, `requires`, `status_sibling`, and `git_mutation`; its owner is
   `/internal-gateway-execute-plans`, its requirements include human approval,
-  exact semantic-fingerprint review, and zero blocking preflight findings, and
+   exact Manifest v2 review, and zero blocking preflight findings, and
   it declares `status_sibling: none` and `git_mutation: prohibited`.
 
 The Markdown projection must also bind exactly: Control Inventory IDs equal
@@ -267,13 +263,13 @@ task references resolve to manifest targets, validations, manual obligations,
 and tasks; and manifest-only plans contain no `## Execution Contract`.
 
 Keep plan metadata separate from runtime state. The plan does not contain
-`plan_fingerprint`, `content_hash`, `approval_evidence`, `delivery_verdicts`,
-`completed_task_ids`, `remaining_task_ids`, `last_validation`, or
-`next_action`. After approval, the executor creates one YAML status sibling
-with exactly `schema_version`, `status`, `plan`, `plan_fingerprint`,
-`content_hash`, `approval_evidence`, `delivery_verdicts`, `completed_task_ids`,
-`remaining_task_ids`, `last_validation`, and `next_action`; schema version is
-`2`, and `DONE` requires all five delivery categories to pass:
+`approval_evidence`, `delivery_verdicts`, `completed_task_ids`,
+`remaining_task_ids`, `last_validation`, `next_action`, `warnings`, or
+`deviations`. After approval, the executor creates one YAML status sibling
+with exactly `schema_version`, `status`, `plan`, `approval_evidence`,
+`delivery_verdicts`, `completed_task_ids`, `remaining_task_ids`,
+`last_validation`, `next_action`, `warnings`, and `deviations`; schema version
+is `2`, and both successful terminal statuses require all five delivery categories to pass:
 `structure`, `semantic_review`, `artifact_provenance`, `source_baseline`, and
 `execution_readiness`.
 
@@ -281,8 +277,8 @@ Before handoff, the writer resolves the physical executor bundle and runs its
 `scripts/run.sh preflight <plan> --format compact` independently, with zero
 blocking findings. The writer never creates the status sibling or claims
 execution approval. After explicit approval, the executor repeats preflight,
-binds the status sibling to the exact semantic fingerprint and content hash,
-and only then creates state and permits the first task edit.
+records hash-free approval evidence, and only then creates state and permits
+the first task edit.
 
 ## Repository Preflight
 
