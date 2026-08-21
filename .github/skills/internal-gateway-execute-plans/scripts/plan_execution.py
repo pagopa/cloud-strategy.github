@@ -72,7 +72,7 @@ class ApprovalEvidence:
         }
 
 
-MANIFEST_SCHEMA_VERSION = 2
+MANIFEST_SCHEMA_VERSION = 3
 STATE_SCHEMA_VERSION = 2
 STATE_STATUSES = frozenset({"DONE", "DONE_WITH_WARNINGS", "PARTIAL", "BLOCKED"})
 SUCCESS_STATUSES = frozenset({"DONE", "DONE_WITH_WARNINGS"})
@@ -137,7 +137,6 @@ MANIFEST_POSTURES = frozenset(
     {"mandatory-test-first", "feature-first", "prototype-unverified", "validation-only"}
 )
 MANIFEST_TARGET_STATES = frozenset({"create", "modify", "inspect"})
-MANIFEST_BOOTSTRAP_MODES = frozenset({"explicit-single-plan", "manifest-only"})
 MANIFEST_PHASES = frozenset({"baseline", "focused", "final"})
 MANIFEST_EQUIVALENCE = frozenset({"exact-only", "allowed-if-admissible"})
 MANIFEST_FIELDS = frozenset(
@@ -474,8 +473,8 @@ def _validate_delegation_provenance(
             )
         return
     raise ExecutionContractError(
-        "delegation-not-supported-v2",
-        "Manifest v2 supports only local primary-owner authoring; do not manufacture worker provenance.",
+        "delegation-not-supported",
+        "The Execution Manifest supports only local primary-owner authoring; do not manufacture worker provenance.",
     )
 
 

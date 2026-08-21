@@ -32,16 +32,8 @@ def _fixture_manifest() -> tuple[str, dict[str, object]]:
     return text, json.loads(text[start:end])
 
 
-def _v2_text(*, include_hashing: bool = False) -> str:
+def _v3_text(*, include_hashing: bool = False) -> str:
     text, manifest = _fixture_manifest()
-    manifest["schema_version"] = 2
-    manifest["manifest_version"] = "execution-manifest/v2"
-    manifest["approval"].pop("binds", None)
-    manifest["handoff"]["requires"] = [
-        "human approval",
-        "exact Manifest v2 review",
-        "zero blocking preflight findings",
-    ]
     if include_hashing:
         manifest["hashing"] = {
             "content_sha256": {
@@ -69,8 +61,8 @@ def _stage_plan(tmp_path: Path, text: str | None = None) -> tuple[Path, Path]:
     (tmp_path / ".github").mkdir()
     plan_dir = tmp_path / "tmp/superpowers/plans"
     plan_dir.mkdir(parents=True)
-    plan = plan_dir / "v2-plan.md"
-    plan.write_text(text or _v2_text(), encoding="utf-8")
+    plan = plan_dir / "v3-plan.md"
+    plan.write_text(text or _v3_text(), encoding="utf-8")
     return tmp_path, plan
 
 
@@ -97,7 +89,7 @@ def _verdicts(*, failed: str | None = None) -> list[dict[str, str]]:
         {
             "category": category,
             "outcome": "failed" if category == failed else "passed",
-            "coverage": "observed v2 contract",
+            "coverage": "observed v3 contract",
             "limit": "technical failure" if category == failed else "none",
         }
         for category in VERDICT_CATEGORIES
@@ -117,7 +109,7 @@ def _status_payload(
     payload: dict[str, object] = {
         "schema_version": 2,
         "status": status,
-        "plan": "tmp/superpowers/plans/v2-plan.md",
+        "plan": "tmp/superpowers/plans/v3-plan.md",
         "approval_evidence": {
             "source": "current-conversation",
             "statement": "explicit execution approval",
@@ -125,7 +117,7 @@ def _status_payload(
         "delivery_verdicts": _verdicts(failed=failed_verdict),
         "completed_task_ids": list(TASK_IDS if complete else ()),
         "remaining_task_ids": list(() if complete else TASK_IDS),
-        "last_validation": "focused v2 contract validation",
+        "last_validation": "focused v3 contract validation",
         "next_action": "none" if complete else "Continue the approved task loop.",
         "warnings": warnings or [],
         "deviations": deviations or [],
@@ -163,8 +155,8 @@ def _finding_codes(result: subprocess.CompletedProcess[str]) -> set[str]:
     }
 
 
-def test_manifest_v2_rejects_hash_fields(tmp_path: Path) -> None:
-    root, plan = _stage_plan(tmp_path, _v2_text(include_hashing=True))
+def test_manifest_v3_rejects_hash_fields(tmp_path: Path) -> None:
+    root, plan = _stage_plan(tmp_path, _v3_text(include_hashing=True))
 
     result = _run_preflight(root, plan)
 
@@ -172,7 +164,7 @@ def test_manifest_v2_rejects_hash_fields(tmp_path: Path) -> None:
     assert "unknown-manifest-field" in _finding_codes(result)
 
 
-def test_manifest_v2_accepts_hash_free_approval(tmp_path: Path) -> None:
+def test_manifest_v3_accepts_hash_free_approval(tmp_path: Path) -> None:
     root, plan = _stage_plan(tmp_path)
 
     result = _run_preflight(root, plan)
@@ -285,7 +277,7 @@ def test_writer_requires_command_probe() -> None:
 
 def test_non_done_report_contains_causes_and_actions() -> None:
     source = EXECUTOR_BUNDLE / "scripts/plan_execution.py"
-    spec = importlib.util.spec_from_file_location("v2_report_parser", source)
+    spec = importlib.util.spec_from_file_location("v3_report_parser", source)
     assert spec is not None and spec.loader is not None
     executor = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = executor

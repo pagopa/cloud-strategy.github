@@ -26,7 +26,7 @@ INVENTORY = REPO_ROOT / ".github/INVENTORY.md"
 def _normalized_manifest_contract(text: str) -> str:
     start_marker = "A current"
     end_marker = "no `## Execution Contract`."
-    start = text.index(start_marker, text.index("## Normative Manifest v2 Contract"))
+    start = text.index(start_marker, text.index("## Normative Manifest v3 Contract"))
     end = text.index(end_marker, start) + len(end_marker)
     return re.sub(r"\s+", " ", text[start:end]).strip()
 

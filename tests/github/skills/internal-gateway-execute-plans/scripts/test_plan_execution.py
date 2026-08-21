@@ -72,10 +72,10 @@ def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
 
 
 def test_valid_plan_parses_contract_and_has_no_findings(valid_plan: Path) -> None:
-    assert parse_execution_manifest(valid_plan.read_text())["schema_version"] == 2
+    assert parse_execution_manifest(valid_plan.read_text())["schema_version"] == 3
     assert (
         parse_execution_manifest(valid_plan.read_text())["manifest_version"]
-        == "execution-manifest/v2"
+        == "execution-manifest/v3"
     )
     assert validate_plan(valid_plan, repo_root=valid_plan.parents[3]) == []
 
@@ -97,7 +97,7 @@ def test_manifest_accepts_delegated_provenance_with_accepted_result(
     )
     plan = _stage_valid_plan(tmp_path, text)
 
-    assert "delegation-not-supported-v2" in {
+    assert "delegation-not-supported" in {
         item.code for item in validate_plan(plan, tmp_path)
     }
 
@@ -140,7 +140,7 @@ def test_manifest_rejects_delegation_hash_collision(tmp_path: Path) -> None:
         ),
     )
 
-    assert "delegation-not-supported-v2" in {
+    assert "delegation-not-supported" in {
         item.code for item in validate_plan(plan, tmp_path)
     }
 
@@ -163,7 +163,7 @@ def test_manifest_rejects_delegation_fingerprint_drift(tmp_path: Path) -> None:
         ),
     )
 
-    assert "delegation-not-supported-v2" in {
+    assert "delegation-not-supported" in {
         item.code for item in validate_plan(plan, tmp_path)
     }
 
@@ -199,7 +199,7 @@ def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None
                 "receipt": _accepted_provenance(),
                     "acceptance": _accepted_provenance(),
                 },
-                "delegation-not-supported-v2",
+                "delegation-not-supported",
         ),
         (
             {
@@ -243,7 +243,7 @@ def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None
                 "receipt": _accepted_provenance(),
                     "acceptance": _accepted_provenance(seed="9"),
                 },
-                "delegation-not-supported-v2",
+                "delegation-not-supported",
         ),
     ),
 )
@@ -458,7 +458,7 @@ def test_current_plan_rejects_unknown_task_references(
             "command",
         ),
         ('"phases": ["final"]', '"phases": ["other"]', "phases"),
-        ('"mode": "manifest-only"', '"mode": "unsupported"', "bootstrap.mode"),
+        ('"state": "inspect"', '"state": "unknown"', "state"),
     ),
 )
 def test_execution_manifest_rejects_invalid_fields(
@@ -560,14 +560,14 @@ print(json.dumps({
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == {
-        "schema_version": 2,
+        "schema_version": 3,
         "sys_path_unchanged": True,
         "has_yaml_attribute": True,
         "task_ids": ["T1"],
     }
 
 
-def test_manifest_only_plan_rejects_legacy_execution_contract_projection(
+def test_current_plan_rejects_legacy_execution_contract_projection(
     tmp_path: Path,
 ) -> None:
     text = _fixture("valid-plan.md").read_text()
@@ -627,7 +627,7 @@ def test_git_diff_check_coverage_names_git_visible_limit() -> None:
     assert "ignored" in coverage["limit"].lower()
 
 
-def _current_bootstrap_plan() -> Path:
+def _current_plan() -> Path:
     return FIXTURES / "valid-plan.md"
 
 
@@ -635,17 +635,17 @@ def _manifest_text(plan: Path) -> str:
     return plan.read_text(encoding="utf-8")
 
 
-def test_execution_manifest_parses_and_binds_current_bootstrap_projection() -> None:
-    plan = _current_bootstrap_plan()
+def test_execution_manifest_parses_and_binds_current_projection() -> None:
+    plan = _current_plan()
     text = _manifest_text(plan)
     manifest = parse_execution_manifest(text)
 
-    assert manifest["manifest_version"] == "execution-manifest/v2"
+    assert manifest["manifest_version"] == "execution-manifest/v3"
     assert validate_manifest_projection(text, manifest) == []
 
 
 def test_execution_manifest_rejects_duplicate_fenced_blocks(tmp_path: Path) -> None:
-    plan = _current_bootstrap_plan()
+    plan = _current_plan()
     text = _manifest_text(plan) + "\n## Execution Manifest\n\n```json\n{}\n```\n"
 
     with pytest.raises(ExecutionContractError) as exc:
@@ -654,11 +654,11 @@ def test_execution_manifest_rejects_duplicate_fenced_blocks(tmp_path: Path) -> N
 
 
 def test_execution_manifest_rejects_unknown_fields(tmp_path: Path) -> None:
-    plan = _current_bootstrap_plan()
+    plan = _current_plan()
     text = _manifest_text(plan)
     text = text.replace(
-        '"manifest_version": "execution-manifest/v2"',
-        '"unknown": true,\n  "manifest_version": "execution-manifest/v2"',
+        '"manifest_version": "execution-manifest/v3"',
+        '"unknown": true,\n  "manifest_version": "execution-manifest/v3"',
         1,
     )
 
@@ -670,7 +670,7 @@ def test_execution_manifest_rejects_unknown_fields(tmp_path: Path) -> None:
 def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(
     tmp_path: Path,
 ) -> None:
-    plan = _current_bootstrap_plan()
+    plan = _current_plan()
     original = _manifest_text(plan)
     editorial = original + "\nEditorial note that does not change the manifest.\n"
     original_manifest = parse_execution_manifest(original)
@@ -694,12 +694,12 @@ def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(
             lambda m: m["controls"]["CI-01"]["binding"].append("T8"),
         lambda m: m["validations"][0].update({"command": "make changed"}),
         lambda m: m["tasks"][0].update({"depends_on": ["T8"]}),
-        lambda m: m["bootstrap"].update({"mode": "generic"}),
+        lambda m: m["retry_policy"].update({"max_corrective_retries": 2}),
         lambda m: m["handoff"].update({"next_owner": "/other-owner"}),
     ],
 )
 def test_every_normative_manifest_class_changes_semantic_fingerprint(mutator) -> None:
-    manifest = parse_execution_manifest(_manifest_text(_current_bootstrap_plan()))
+    manifest = parse_execution_manifest(_manifest_text(_current_plan()))
     changed = json.loads(json.dumps(manifest))
     mutator(changed)
 
@@ -709,8 +709,8 @@ def test_every_normative_manifest_class_changes_semantic_fingerprint(mutator) ->
 
 
 def test_manifest_hashes_are_external_and_self_reference_is_rejected() -> None:
-    manifest = parse_execution_manifest(_manifest_text(_current_bootstrap_plan()))
-    content_hash = compute_content_sha256(_current_bootstrap_plan())
+    manifest = parse_execution_manifest(_manifest_text(_current_plan()))
+    content_hash = compute_content_sha256(_current_plan())
     semantic_hash = compute_semantic_fingerprint(manifest)
     encoded = canonical_json(manifest)
 
@@ -724,8 +724,8 @@ def test_manifest_hashes_are_external_and_self_reference_is_rejected() -> None:
     assert exc.value.code == "manifest-hash-self-reference"
 
 
-def test_bootstrap_projection_drift_fails_closed() -> None:
-    text = _manifest_text(_current_bootstrap_plan())
+def test_projection_drift_fails_closed() -> None:
+    text = _manifest_text(_current_plan())
     manifest = parse_execution_manifest(text)
     changed = json.loads(json.dumps(manifest))
     changed["controls"].pop("CI-01")

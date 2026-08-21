@@ -23,7 +23,7 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
 ## Status Contract
 
 - YAML is the current runtime status and uses one uppercase sibling: `<plan-basename>.DONE.yaml`, `<plan-basename>.DONE_WITH_WARNINGS.yaml`, `<plan-basename>.PARTIAL.yaml`, or `<plan-basename>.BLOCKED.yaml`.
-- Runtime status and the Execution Manifest use schema version `2`.
+- The Execution Manifest uses schema version `3`; runtime status uses schema version `2`.
 - The filename status and YAML `status` value must agree.
 - `approval_evidence` records only the source and exact statement of explicit execution approval.
 - `delivery_verdicts` records `structure`, `semantic_review`, `artifact_provenance`, `source_baseline`, and `execution_readiness`; `DONE` requires all five to pass.
@@ -33,14 +33,14 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
 
 | ID | Requirement | Class | Owner | Command or trigger | Pass/fail | Evidence | Fallback/boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| CI-01 | Current retained plans expose the required structural controls. | automatable-local | gateway preflight | `gateway-tests` | Pass: manifest, inventory, and no-Git constraint are present; fail: any is missing. | Focused pytest output. | Legacy/imported plans remain non-actionable until reconstructed. |
+| CI-01 | Current retained plans expose the required structural controls. | automatable-local | gateway preflight | `gateway-tests` | Pass: manifest, inventory, and no-Git constraint are present; fail: any is missing. | Focused pytest output. | Imported or pre-v3 plans remain non-actionable until reconstructed. |
 
 ## Execution Manifest
 
 ```json
 {
-  "schema_version": 2,
-  "manifest_version": "execution-manifest/v2",
+  "schema_version": 3,
+  "manifest_version": "execution-manifest/v3",
   "plan_id": "valid-plan",
   "repository_root": ".",
   "authority_boundaries": {
@@ -74,10 +74,9 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
     {"id": "T1", "order": 1, "posture": "validation-only", "objective": "Validate the manifest-authoritative CLI fixture.", "depends_on": [], "target_ids": ["TGT-FIXTURE"], "validation_ids": ["focused-tests", "diff-check"], "manual_obligation_ids": [], "acceptance": ["Manifest parses and binds its projection."], "stop_conditions": ["Fixture is incomplete."]}
   ],
   "retry_policy": {"initial_attempts": 1, "max_context_refills": 1, "max_corrective_retries": 1, "caller_may_lower": true, "repeat_progress_status": "stalled", "minor_or_cosmetic_reopens": false},
-  "approval": {"editorial_content_change": "retain approval for non-normative wording", "normative_manifest_change": "require renewed approval and v2 preflight"},
-  "bootstrap": {"mode": "manifest-only", "compatibility_projection": [], "projection_binding": {"controls": "manifest.controls", "tasks": "manifest.tasks", "validations": "manifest.validations", "authority": "manifest.authority_boundaries"}, "legacy_only": "reject", "retirement_evidence": "The writer emits this manifest without a legacy Execution Contract projection."},
+  "approval": {"editorial_content_change": "retain approval for non-normative wording", "normative_manifest_change": "require renewed approval and v3 preflight"},
   "rollout": ["baseline", "final"],
-  "handoff": {"next_owner": "/internal-gateway-execute-plans", "requires": ["human approval", "exact Manifest v2 review", "zero blocking preflight findings"], "status_sibling": "none", "git_mutation": "prohibited"}
+  "handoff": {"next_owner": "/internal-gateway-execute-plans", "requires": ["human approval", "exact Manifest v3 review", "zero blocking preflight findings"], "status_sibling": "none", "git_mutation": "prohibited"}
 }
 ```
 
