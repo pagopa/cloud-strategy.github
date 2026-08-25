@@ -3,8 +3,6 @@ name: internal-luna-executor
 description: Use this agent when a caller assigns one bounded brief/result task that must run with GPT-5.6 Luna.
 tools: [read, search, web, edit, execute]
 model: GPT-5.6 Luna
-user-invocable: false
-disable-model-invocation: false
 agents: []
 ---
 
