@@ -385,8 +385,13 @@ def _unique_ids(items: Sequence[object], label: str) -> list[str]:
     return errors
 
 
-def validate_value_gate(value: object) -> list[str]:
-    errors = _field_errors(value, {"autonomous", "verifiable", "leverage"}, "value_gate")
+def validate_value_gate(
+    value: object, *, require_plan_admission: bool = False
+) -> list[str]:
+    expected = {"autonomous", "verifiable", "leverage"}
+    if require_plan_admission:
+        expected.update({"local_alternative", "off_critical_path"})
+    errors = _field_errors(value, expected, "value_gate")
     if errors:
         return errors
     assert isinstance(value, Mapping)
@@ -396,6 +401,10 @@ def validate_value_gate(value: object) -> list[str]:
         errors.append("value_gate.verifiable must be true")
     if not _non_empty(value["leverage"]):
         errors.append("value_gate.leverage must explain material leverage")
+    if require_plan_admission:
+        for field in ("local_alternative", "off_critical_path"):
+            if not _non_empty(value[field]):
+                errors.append(f"value_gate.{field} must be non-empty")
     return errors
 
 
@@ -415,7 +424,11 @@ def validate_brief(brief: Mapping[str, object], *, repo_root: Path | None = None
         errors.append(f"brief.mode must be one of: {', '.join(sorted(MODES))}")
     if not _non_empty(brief["objective"]):
         errors.append("brief.objective must be a non-empty measurable outcome")
-    errors.extend(validate_value_gate(brief["value_gate"]))
+    errors.extend(
+        validate_value_gate(
+            brief["value_gate"], require_plan_admission=brief["mode"] == "plan"
+        )
+    )
 
     evidence = brief["evidence"]
     if not isinstance(evidence, list) or not evidence:

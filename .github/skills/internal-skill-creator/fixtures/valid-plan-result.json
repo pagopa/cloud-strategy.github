@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "delegation_id": "creator-plan-draft",
-  "brief_sha256": "sha256:abe5f8c53b48beffc3c5f159f5e8ad51a44594b17f67623cfd0ae8f8f5771357",
+  "brief_sha256": "sha256:aab911b4b0aecfce032d3df2aae5b4be48ce5225524bfb14eb221a74f3c57756",
   "status": "completed",
   "value_delivered": true,
   "summary": "The bounded creator draft was written at the declared path for parent review.",

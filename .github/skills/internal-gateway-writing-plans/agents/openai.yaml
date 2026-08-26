@@ -46,14 +46,25 @@ interface:
     worker is unavailable, record a caller-owned LifecycleRecord and stop as
     blocked; continue locally only after explicit caller authorization, using a
     new local route with delegation.mode: none and worker: primary-owner and no
-    synthetic worker artifacts. Before delegation, fix the objective, value
+    synthetic worker artifacts. Before any worker invocation, materialize the
+    exact retained-plan skeleton and output path with the final Manifest tuple,
+    resolve the loaded physical executor bundle, and run its scripts/run.sh
+    preflight against the skeleton. A nonzero result or blocking
+    delegation-not-supported finding prevents dispatch; run the same physical
+    preflight against final bytes before acceptance and handoff. Current
+    Manifest v3 accepts only delegation.mode none, worker primary-owner, and
+    result not_applicable; never ask a worker to emit a delegated Manifest
+    tuple. Before delegation, fix the objective, value
     gate, bounded evidence, constraints, exact retained-plan path, output,
     acceptance, validation, and budgets. Bind that path as write scope and
     expected output, record worker: internal-luna-executor, and verify the
     adapter-composed WorkerResult v1 plus caller-owned VerificationReceipt v1.
     Material edits invalidate the result and receipt; return material
-    corrections through the retry contract instead of silently transferring
-    authorship to the parent. The parent retains routing, authority, lifecycle,
+    corrections through one new evidence-bound brief under the retry contract
+    instead of silently transferring authorship to the parent. If the caller
+    explicitly authorizes local continuation, start a fresh local route with
+    delegation.mode none, worker primary-owner, and no inherited worker
+    artifacts. The parent retains routing, authority, lifecycle,
     retry choice, independent validation, semantic review, final preflight,
     final acceptance, handoff, and the no-Git-mutation boundary. Before critic output
     can expand scope,

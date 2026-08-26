@@ -111,6 +111,53 @@ def test_invalid_value_fixture_fails_closed() -> None:
     assert any("value_gate" in error for error in errors)
 
 
+@pytest.mark.parametrize("field", ["local_alternative", "off_critical_path"])
+def test_plan_brief_requires_explicit_admission_evidence(field: str) -> None:
+    brief = _valid_brief()
+    brief["mode"] = "plan"
+    brief["value_gate"].update(
+        {
+            "local_alternative": "The primary owner can author the same retained plan locally.",
+            "off_critical_path": "The bounded worker package is not required to unblock the next handoff.",
+        }
+    )
+    brief["value_gate"].pop(field)
+
+    errors = validate_brief(brief, repo_root=REPO_ROOT)
+
+    assert any(field in error for error in errors)
+
+
+def test_plan_brief_accepts_explicit_admission_evidence() -> None:
+    brief = _valid_brief()
+    brief["mode"] = "plan"
+    brief["value_gate"].update(
+        {
+            "local_alternative": "The primary owner can author the same retained plan locally.",
+            "off_critical_path": "The bounded worker package is not required to unblock the next handoff.",
+        }
+    )
+
+    assert validate_brief(brief, repo_root=REPO_ROOT) == []
+
+
+@pytest.mark.parametrize("field", ["local_alternative", "off_critical_path"])
+def test_plan_brief_rejects_blank_admission_evidence(field: str) -> None:
+    brief = _valid_brief()
+    brief["mode"] = "plan"
+    brief["value_gate"].update(
+        {
+            "local_alternative": "The primary owner can author the same retained plan locally.",
+            "off_critical_path": "The bounded worker package is not required to unblock the next handoff.",
+        }
+    )
+    brief["value_gate"][field] = "   "
+
+    errors = validate_brief(brief, repo_root=REPO_ROOT)
+
+    assert any(field in error for error in errors)
+
+
 def test_brief_rejects_unknown_and_missing_fields() -> None:
     brief = _valid_brief()
     brief["unexpected"] = True
@@ -143,6 +190,13 @@ def test_three_modes_are_structural_not_caller_identity(mode: str) -> None:
     if mode == "read":
         brief["write_scope"] = []
         brief["expected_output"]["path"] = None
+    elif mode == "plan":
+        brief["value_gate"].update(
+            {
+                "local_alternative": "The primary owner can author the same retained plan locally.",
+                "off_critical_path": "The bounded worker package is not required to unblock the next handoff.",
+            }
+        )
 
     assert validate_brief(brief, repo_root=REPO_ROOT) == []
 

@@ -6,7 +6,9 @@
   "value_gate": {
     "autonomous": true,
     "verifiable": true,
-    "leverage": "The worker can turn a fixed outline into one reviewable draft while the parent retains semantic acceptance."
+    "leverage": "The worker can turn a fixed outline into one reviewable draft while the parent retains semantic acceptance.",
+    "local_alternative": "The primary owner can author the same retained plan locally.",
+    "off_critical_path": "The bounded worker package is not required to unblock the next handoff."
   },
   "evidence": [
     {

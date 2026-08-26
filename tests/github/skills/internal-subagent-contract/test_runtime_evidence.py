@@ -40,16 +40,24 @@ from subagent_contract import (  # noqa: E402
 
 def _brief(root: Path, mode: str = "write") -> dict:
     output = "out/result.md" if mode != "read" else None
+    value_gate = {
+        "autonomous": True,
+        "verifiable": True,
+        "leverage": "Multiple bounded checks.",
+    }
+    if mode == "plan":
+        value_gate.update(
+            {
+                "local_alternative": "The primary owner can author the same retained plan locally.",
+                "off_critical_path": "The bounded worker package is not required to unblock the next handoff.",
+            }
+        )
     return {
         "schema_version": 1,
         "delegation_id": f"flow-{mode}",
         "mode": mode,
         "objective": "Produce one bounded observable result.",
-        "value_gate": {
-            "autonomous": True,
-            "verifiable": True,
-            "leverage": "Multiple bounded checks.",
-        },
+        "value_gate": value_gate,
         "evidence": [{"ref": "path:inputs", "purpose": "Authorized input root"}],
         "constraints": ["Use only authorized evidence."],
         "write_scope": [] if mode == "read" else ["out"],

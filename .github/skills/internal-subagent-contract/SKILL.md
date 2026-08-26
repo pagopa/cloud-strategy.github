@@ -45,6 +45,15 @@ answer, one obvious edit, one command, or an unverifiable request fails the
 gate. `value_delivered: true` requires an artifact or acceptance-bound pass
 evidence; a prose summary is not value.
 
+For `mode: plan`, the `value_gate` also requires non-empty
+`local_alternative` and `off_critical_path` fields. The caller must compare the
+worker package with the actual primary-owner alternative and explain why the
+package is not on the critical path. The validator checks only that these
+fields are present and non-empty; the caller owns the semantic admission
+decision. If the comparison or rationale is not substantive, the caller must
+use local authoring with `mode: none` rather than invoke a worker. Provider or
+model identity never satisfies this gate.
+
 ## Three protocol branches
 
 - `read` supplies bounded evidence and produces no worker write scope.

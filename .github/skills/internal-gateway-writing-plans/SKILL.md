@@ -86,6 +86,22 @@ description: Use when repository-owned work needs an approved implementation pla
   record the new local route as `delegation.mode: none` and `worker:
   primary-owner` with no synthetic worker artifacts.
 
+  Before invoking any worker, materialize the exact retained-plan skeleton and
+  output path with the final Manifest tuple. Resolve the physical executor
+  bundle from its loaded runner and run
+  `bash <physical-executor-bundle>/scripts/run.sh preflight <skeleton> --format compact`.
+  A nonzero result or any blocking finding, including
+  `delegation-not-supported`, prevents dispatch and requires local authoring or
+  a corrected route. Run the same physical preflight against the final bytes
+  before caller acceptance and handoff.
+
+  Current Manifest v3 execution accepts only the local primary-owner tuple:
+  `delegation.mode: none`, `worker: primary-owner`, and
+  `result: not_applicable`. A worker may provide a bounded evidence or draft
+  package only when the final retained artifact keeps that tuple and the
+  caller-owned receipt remains separate. Never ask a worker to emit an
+  unsupported delegated Manifest tuple.
+
   For the delegated route, fix the objective, value gate, bounded evidence,
   constraints, exact retained-plan write scope, expected output, acceptance,
   validation, and budgets. Then write one `DelegationBrief` v1 in `mode: plan`
@@ -100,8 +116,12 @@ description: Use when repository-owned work needs an approved implementation pla
   `VerificationReceipt` v1; unobserved validation and budget data remain claims
   or `unavailable`. Caller acceptance binds the exact final artifact bytes and
   manifest semantic fingerprint. A material edit invalidates the result and
-  receipt; route a material correction back to Luna under the retry contract
-  instead of silently transferring authorship to the parent.
+  receipt; route one new evidence-bound corrective brief back to Luna under the
+  retry contract instead of silently transferring authorship to the parent. If
+  the caller explicitly authorizes local continuation, begin a fresh local
+  route with `delegation.mode: none`, `worker: primary-owner`, and no inherited
+  worker result, receipt, or other worker artifacts. Preserve the final-byte
+  physical preflight requirement on either branch.
 
   The plan owner retains eligibility, control classification, routing,
   authority, lifecycle, retry choice, semantic review, independent `preflight`,

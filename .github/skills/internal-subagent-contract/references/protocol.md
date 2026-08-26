@@ -49,6 +49,15 @@ parent traversal. The producer may lower the attempt/refill budgets but may
 not raise the protocol bounds. Evidence and acceptance entries are bounded
 facts, not a pasted conversation.
 
+For `mode: plan`, `value_gate` has exactly two additional required fields:
+`local_alternative` explains the actual primary-owner alternative, and
+`off_critical_path` explains why the worker package is not required to unblock
+the next handoff. The validator requires both values to be non-empty and
+leaves their semantic truth and routing decision with the caller. If the
+comparison is not substantive, the caller uses local authoring with
+`mode: none`; provider or model identity is never admission evidence. Read and
+write briefs retain the three-field value gate shown above.
+
 Evidence references use a deterministic v1 convention: `fact:<text>` is an
 inline fact, `path:<repository-relative-path>` is an explicit path, and a bare
 repository-relative path is retained as the compatibility form of a path

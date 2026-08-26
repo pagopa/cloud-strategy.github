@@ -194,3 +194,54 @@ def test_writer_plan_remains_actionable_through_preflight_cli(tmp_path: Path) ->
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["status"] == "passed"
+
+
+def test_executor_blocks_unsupported_delegated_manifest_tuple(tmp_path: Path) -> None:
+    retained = tmp_path / "tmp" / "superpowers" / "plans"
+    retained.mkdir(parents=True)
+    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
+    (tmp_path / ".github").mkdir()
+    plan = retained / WRITER_FIXTURE.name
+    text = WRITER_FIXTURE.read_text(encoding="utf-8")
+    manifest_match = re.search(
+        r"(?ms)(^## Execution Manifest\s*\n\s*```json\s*\n)(.*?)(\n```\s*$)",
+        text,
+    )
+    assert manifest_match
+    manifest = json.loads(manifest_match.group(2))
+    manifest["delegation"] = {
+        "schema_version": 1,
+        "mode": "delegated",
+        "worker": "internal-luna-executor",
+        "result": "worker-result",
+        "receipt": "worker-receipt",
+        "acceptance": "caller-acceptance",
+    }
+    plan.write_text(
+        text[: manifest_match.start(2)]
+        + json.dumps(manifest, indent=2)
+        + text[manifest_match.end(2) :],
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(EXECUTOR_SCRIPT),
+            "preflight",
+            str(plan),
+            "--repo-root",
+            str(tmp_path),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0
+    payload = json.loads(result.stdout)
+    assert any(
+        finding["code"] == "delegation-not-supported"
+        for finding in payload["findings"]
+    )
