@@ -101,12 +101,65 @@ def test_writer_fixture_emits_manifest_only() -> None:
 
 
 def test_gateway_normative_manifest_contracts_remain_equal() -> None:
-    executor = (REPO_ROOT / ".github/skills/internal-gateway-execute-plans/SKILL.md").read_text(
+    executor = (
+        EXECUTOR_BUNDLE / "references/manifest-v3.md"
+    ).read_text(encoding="utf-8")
+    writer = (BUNDLE / "references/manifest-v3.md").read_text(encoding="utf-8")
+
+    assert re.sub(r"\s+", " ", executor).strip() == re.sub(
+        r"\s+", " ", writer
+    ).strip()
+
+
+def test_manifest_references_are_local_and_cover_normative_contract() -> None:
+    writer_reference = BUNDLE / "references/manifest-v3.md"
+    executor_reference = EXECUTOR_BUNDLE / "references/manifest-v3.md"
+
+    assert writer_reference.is_file()
+    assert executor_reference.is_file()
+    required_terms = {
+        "schema_version",
+        "manifest_version",
+        "authority_boundaries",
+        "delegation",
+        "targets",
+        "controls",
+        "validations",
+        "manual_obligations",
+        "tasks",
+        "retry_policy",
+        "approval",
+        "bootstrap",
+        "rollout",
+        "handoff",
+        "semantic_fingerprint",
+        "status sibling",
+        "parser",
+    }
+    writer_text = writer_reference.read_text(encoding="utf-8")
+    executor_text = executor_reference.read_text(encoding="utf-8")
+    assert required_terms <= set(re.findall(r"[A-Za-z_]+(?: [A-Za-z_]+)?", writer_text))
+    assert required_terms <= set(re.findall(r"[A-Za-z_]+(?: [A-Za-z_]+)?", executor_text))
+    normalize = lambda text: re.sub(r"\s+", " ", text).strip()
+    assert normalize(writer_text) == normalize(executor_text)
+
+
+def test_always_loaded_gateway_surfaces_keep_routing_and_shrink() -> None:
+    writer = (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
+    executor = (EXECUTOR_BUNDLE / "SKILL.md").read_text(encoding="utf-8")
+
+    for text in (writer, executor):
+        assert "Manifest v3" in text
+        assert "preflight" in text
+        assert "no Git" in text or "Git mutation" in text
+    assert len(writer) < 17000
+    assert len(executor) < 15000
+    writer_metadata = (BUNDLE / "agents/openai.yaml").read_text(encoding="utf-8")
+    executor_metadata = (EXECUTOR_BUNDLE / "agents/openai.yaml").read_text(
         encoding="utf-8"
     )
-    writer = (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
-
-    assert _normalized_manifest_contract(executor) == _normalized_manifest_contract(writer)
+    assert "references/manifest-v3.md" in writer_metadata
+    assert "references/manifest-v3.md" in executor_metadata
 
 
 def test_writer_documents_repository_preflight_fields() -> None:
@@ -142,6 +195,18 @@ def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> No
     executor_fixture = (EXECUTOR_BUNDLE / "fixtures/valid-plan.md").read_text(
         encoding="utf-8"
     )
+    writer_manifest = json.loads(
+        re.search(
+            r"(?ms)^## Execution Manifest\s*\n\s*```json\s*\n(.*?)\n```\s*$",
+            WRITER_FIXTURE.read_text(encoding="utf-8"),
+        ).group(1)
+    )
+    executor_manifest = json.loads(
+        re.search(
+            r"(?ms)^## Execution Manifest\s*\n\s*```json\s*\n(.*?)\n```\s*$",
+            executor_fixture,
+        ).group(1)
+    )
     inventory = INVENTORY.read_text(encoding="utf-8")
 
     assert isinstance(writer_metadata, dict) and "interface" in writer_metadata
@@ -151,6 +216,16 @@ def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> No
     assert (EXECUTOR_BUNDLE / "scripts/requirements.txt").is_file()
     assert "## Status Contract" in executor_fixture
     assert "status" in executor_fixture.lower()
+    assert writer_manifest["schema_version"] == 3
+    assert executor_manifest["schema_version"] == 3
+    assert writer_manifest["manifest_version"] == "execution-manifest/v3"
+    assert executor_manifest["manifest_version"] == "execution-manifest/v3"
+    assert writer_manifest["retry_policy"]["max_corrective_retries"] == 3
+    assert executor_manifest["retry_policy"]["max_corrective_retries"] == 3
+    assert "semantic_fingerprint" in (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
+    assert "content hash" not in (BUNDLE / "SKILL.md").read_text(encoding="utf-8").lower()
+    assert "## Execution Contract" not in executor_fixture
+    assert "schema_version: 2" in executor_fixture
     assert ".github/skills/internal-gateway-writing-plans/SKILL.md" in inventory
     assert ".github/skills/internal-gateway-execute-plans/SKILL.md" in inventory
 

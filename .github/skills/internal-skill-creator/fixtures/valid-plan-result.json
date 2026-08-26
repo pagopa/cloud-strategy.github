@@ -1,14 +1,12 @@
 {
   "schema_version": 1,
   "delegation_id": "creator-plan-draft",
-  "brief_sha256": "sha256:aab911b4b0aecfce032d3df2aae5b4be48ce5225524bfb14eb221a74f3c57756",
   "status": "completed",
   "value_delivered": true,
   "summary": "The bounded creator draft was written at the declared path for parent review.",
   "artifacts": [
     {
       "path": ".github/skills/internal-skill-creator/fixtures/worker-output.md",
-      "sha256": "sha256:c9f956a60629771c190e54eb82d0b402fecaef687604ff1c2e3ddbdaa39fb58d",
       "kind": "draft"
     }
   ],
@@ -21,15 +19,9 @@
   ],
   "non_blocking_findings": [],
   "remaining": [],
-  "progress_signature": "sha256:1e1ff9deee9b58f8e9ada08de38d85f7b6431d9c3856aefa0cb2a73a90bdc293",
   "retry": {
     "recommended": false,
     "reason": "The declared artifact and acceptance evidence are complete.",
     "required_new_input": null
-  },
-  "budgets_used": {
-    "wall_seconds": null,
-    "attempts": 1,
-    "context_refills": 0
   }
 }

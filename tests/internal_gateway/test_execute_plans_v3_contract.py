@@ -32,6 +32,16 @@ def _fixture_manifest() -> tuple[str, dict[str, object]]:
     return text, json.loads(text[start:end])
 
 
+def _executor_module():
+    source = EXECUTOR_BUNDLE / "scripts/plan_execution.py"
+    spec = importlib.util.spec_from_file_location("v3_contract_executor", source)
+    assert spec is not None and spec.loader is not None
+    executor = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = executor
+    spec.loader.exec_module(executor)
+    return executor
+
+
 def _v3_text(*, include_hashing: bool = False) -> str:
     text, manifest = _fixture_manifest()
     if include_hashing:
@@ -106,6 +116,10 @@ def _status_payload(
     deviations: list[dict[str, str]] | None = None,
 ) -> tuple[Path, dict[str, object]]:
     complete = status in {"DONE", "DONE_WITH_WARNINGS"}
+    text = plan.read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
     payload: dict[str, object] = {
         "schema_version": 2,
         "status": status,
@@ -113,6 +127,9 @@ def _status_payload(
         "approval_evidence": {
             "source": "current-conversation",
             "statement": "explicit execution approval",
+            "semantic_fingerprint": _executor_module().compute_semantic_fingerprint(
+                manifest
+            ),
         },
         "delivery_verdicts": _verdicts(failed=failed_verdict),
         "completed_task_ids": list(TASK_IDS if complete else ()),

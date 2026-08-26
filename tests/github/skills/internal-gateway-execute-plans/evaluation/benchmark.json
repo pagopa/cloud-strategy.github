@@ -15,7 +15,7 @@
     "delegated-plan"
   ],
   "report_labels": ["Plan", "Changed", "Checks", "Next"],
-  "observable_evidence": ["order", "bytes", "scope", "invalidation", "residuals"],
+  "observable_evidence": ["order", "semantic-approval", "scope", "invalidation", "recovery", "residuals"],
   "bootstrap_fields": ["check", "status", "next_action"],
   "bootstrap_statuses": ["PASS", "BLOCKED"],
   "delivery_verdict_fields": ["category", "outcome", "coverage", "limit"],

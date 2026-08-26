@@ -73,7 +73,7 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
   "tasks": [
     {"id": "T1", "order": 1, "posture": "validation-only", "objective": "Validate the manifest-authoritative CLI fixture.", "depends_on": [], "target_ids": ["TGT-FIXTURE"], "validation_ids": ["focused-tests", "diff-check"], "manual_obligation_ids": [], "acceptance": ["Manifest parses and binds its projection."], "stop_conditions": ["Fixture is incomplete."]}
   ],
-  "retry_policy": {"initial_attempts": 1, "max_context_refills": 1, "max_corrective_retries": 1, "caller_may_lower": true, "repeat_progress_status": "stalled", "minor_or_cosmetic_reopens": false},
+  "retry_policy": {"initial_attempts": 1, "max_context_refills": 1, "max_corrective_retries": 3, "caller_may_lower": true, "repeat_progress_status": "stalled", "minor_or_cosmetic_reopens": false},
   "approval": {"editorial_content_change": "retain approval for non-normative wording", "normative_manifest_change": "require renewed approval and v3 preflight"},
   "bootstrap": {
     "mode": "manifest-only",

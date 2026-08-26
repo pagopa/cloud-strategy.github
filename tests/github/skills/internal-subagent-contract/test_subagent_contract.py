@@ -32,6 +32,7 @@ from subagent_contract import (  # noqa: E402
     validate_receipt,
     validate_result,
 )
+from runtime_evidence import compose_handoff  # noqa: E402
 
 
 def _load(name: str) -> dict:
@@ -43,7 +44,18 @@ def _valid_brief() -> dict:
 
 
 def _valid_result() -> dict:
-    return _load("valid-result.json")
+    template = _load("valid-result.json")
+    brief = _valid_brief()
+    raw_worker = dict(template)
+    raw_worker_bytes = canonical_json(raw_worker)
+    materialized, _ = compose_handoff(
+        raw_worker,
+        brief,
+        repo_root=REPO_ROOT,
+        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+        raw_worker_bytes=raw_worker_bytes,
+    )
+    return materialized
 
 
 def _valid_receipt(brief: dict, raw_worker: bytes) -> dict:
@@ -212,6 +224,39 @@ def test_valid_result_binds_delegation_brief_artifact_and_acceptance() -> None:
     )
 
     assert errors == []
+
+
+def test_valid_result_template_materializes_through_adapter_and_disk_round_trip(
+    tmp_path: Path,
+) -> None:
+    template = _load("valid-result.json")
+    assert not {"brief_sha256", "progress_signature", "budgets_used"} & set(template)
+
+    brief = _valid_brief()
+    raw_worker = {
+        key: value
+        for key, value in template.items()
+        if key not in {"brief_sha256", "progress_signature", "budgets_used"}
+    }
+    raw_worker_bytes = canonical_json(raw_worker)
+    materialized, _ = compose_handoff(
+        raw_worker,
+        brief,
+        repo_root=REPO_ROOT,
+        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+        raw_worker_bytes=raw_worker_bytes,
+    )
+
+    result_path = tmp_path / "materialized-result.json"
+    result_path.write_bytes(canonical_json(materialized) + b"\n")
+    persisted = json.loads(result_path.read_text(encoding="utf-8"))
+
+    assert validate_result(
+        persisted,
+        brief,
+        repo_root=REPO_ROOT,
+        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+    ) == []
 
 
 def test_verification_receipt_binds_exact_pair_and_keeps_decision_separate() -> None:

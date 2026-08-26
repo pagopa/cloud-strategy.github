@@ -20,9 +20,9 @@ interface:
     concrete targets, focused validation, a traceable ## Control Inventory,
      and a normative ## Execution Manifest v3 declaring targets, controls,
     native commands, manual obligations, authority boundaries, retry posture,
-     approval metadata, bootstrap metadata, and handoff. Read the Normative
-     Manifest v3 Contract before drafting: use its exact top-level and nested
-    fields, use validations[].pass_signal, and make every task reference
+    approval metadata, bootstrap metadata, and handoff. Load the bundle-local
+    references/manifest-v3.md only for Manifest authoring or review; use its
+    exact top-level and nested fields, use validations[].pass_signal, and make every task reference
     resolve to an existing manifest ID. New writer output uses
     bootstrap.mode: manifest-only and emits no legacy ## Execution Contract;
     the current migration plan is the sole exact compatibility projection.
@@ -72,7 +72,7 @@ interface:
     follow-up, separate-design, or rejected-with-reason; untraceable findings
     are separate-design. Producer readiness is writer-owned and structural,
     while retained-plan mechanical preflight remains executor-owned. The
-     executor status sibling records hash-free approval evidence, typed
+    executor status sibling records externally computed semantic approval evidence, typed
      warnings/deviations, and all five delivery verdict categories.
      explicitly legacy/imported material requires reconstruction and refreshed
      v3 approval. Probe every validations[].command before handoff with command

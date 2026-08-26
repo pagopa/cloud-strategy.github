@@ -16,10 +16,8 @@ CASE_FIELDS = {
     "case_id",
     "status",
     "plan_reference_matches",
-    "plan_fingerprint",
-    "state_plan_fingerprint",
-    "content_hash",
-    "state_content_hash",
+    "approval_fingerprint",
+    "state_approval_fingerprint",
     "manifest_task_ids",
     "completed_task_ids",
     "remaining_task_ids",
@@ -31,6 +29,14 @@ CASE_FIELDS = {
     "omission_clearly_implied",
     "omission_repaired",
     "omission_repair_in_target",
+    "retry_attempts",
+    "failure_signatures",
+    "progress_signatures",
+    "recovery_attempted",
+    "independent_tasks_continued",
+    "native_equivalent_admissible",
+    "validation_weakened",
+    "blocked_reason_evidence",
     "authority_required",
     "pre_existing_failures",
     "independent_tasks_executable",
@@ -62,6 +68,12 @@ VALIDATION_FIELDS = {"id", "outcome", "repair_id"}
 REPAIR_FIELDS = {"id", "safe", "in_target", "distinct"}
 BOOTSTRAP_FIELDS = {"check", "status", "next_action"}
 DELIVERY_VERDICT_FIELDS = {"category", "outcome", "coverage", "limit"}
+BLOCKED_REASON_FIELDS = {
+    "attempted_recovery",
+    "no_progress",
+    "inadmissible_alternative",
+    "unblock_action",
+}
 
 
 def _schema_error(message: str) -> NoReturn:
@@ -124,7 +136,14 @@ def _validate_manifest(value: object) -> dict[str, Any]:
     observable_evidence = _unique_strings(
         manifest["observable_evidence"], "manifest observable_evidence"
     )
-    if observable_evidence != ["order", "bytes", "scope", "invalidation", "residuals"]:
+    if observable_evidence != [
+        "order",
+        "semantic-approval",
+        "scope",
+        "invalidation",
+        "recovery",
+        "residuals",
+    ]:
         _schema_error("manifest observable_evidence has an unsupported contract")
     if manifest["bootstrap_fields"] != ["check", "status", "next_action"]:
         _schema_error("manifest bootstrap_fields has an unsupported contract")
@@ -199,6 +218,21 @@ def _validate_repairs(value: object, label: str) -> list[dict[str, Any]]:
     return repairs
 
 
+def _validate_blocked_reason(value: object, label: str) -> dict[str, Any]:
+    reason = _mapping(value, label)
+    _exact_fields(reason, BLOCKED_REASON_FIELDS, label)
+    for field in (
+        "attempted_recovery",
+        "no_progress",
+        "inadmissible_alternative",
+    ):
+        if not isinstance(reason[field], bool):
+            _schema_error(f"{label}.{field} must be boolean")
+    if not isinstance(reason["unblock_action"], str) or not reason["unblock_action"].strip():
+        _schema_error(f"{label}.unblock_action must be a non-empty string")
+    return reason
+
+
 def _validate_bootstrap(value: object, label: str) -> list[dict[str, Any]]:
     if not isinstance(value, list) or not value:
         _schema_error(f"{label} must be a non-empty array")
@@ -254,10 +288,8 @@ def _validate_observation(
     for field in (
         "case_id",
         "status",
-        "plan_fingerprint",
-        "state_plan_fingerprint",
-        "content_hash",
-        "state_content_hash",
+        "approval_fingerprint",
+        "state_approval_fingerprint",
         "last_validation",
         "next_action",
     ):
@@ -272,6 +304,8 @@ def _validate_observation(
         "dispatch_events",
         "pre_existing_failures",
         "residual_failures",
+        "failure_signatures",
+        "progress_signatures",
         "report_lines",
     ):
         _strings(observation[field], f"{label}.{field}")
@@ -282,6 +316,10 @@ def _validate_observation(
         "omission_repair_in_target",
         "authority_required",
         "independent_tasks_executable",
+        "recovery_attempted",
+        "independent_tasks_continued",
+        "native_equivalent_admissible",
+        "validation_weakened",
     ):
         if not isinstance(observation[field], bool):
             _schema_error(f"{label}.{field} must be boolean")
@@ -289,6 +327,20 @@ def _validate_observation(
         observation["next_action_count"], bool
     ):
         _schema_error(f"{label}.next_action_count must be an integer")
+    for field in ("approval_fingerprint", "state_approval_fingerprint"):
+        if not SHA256_RE.fullmatch(observation[field]):
+            _schema_error(f"{label}.{field} must be a SHA-256 fingerprint")
+    retry_attempts = observation["retry_attempts"]
+    if not isinstance(retry_attempts, dict):
+        _schema_error(f"{label}.retry_attempts must be an object")
+    for task_id, attempts in retry_attempts.items():
+        if not isinstance(task_id, str) or not task_id.strip():
+            _schema_error(f"{label}.retry_attempts keys must be non-empty strings")
+        if not isinstance(attempts, int) or isinstance(attempts, bool) or not 0 <= attempts <= 5:
+            _schema_error(f"{label}.retry_attempts values must be integers from 0 through 5")
+    _validate_blocked_reason(
+        observation["blocked_reason_evidence"], f"{label}.blocked_reason_evidence"
+    )
     _validate_edits(observation["edits"], f"{label}.edits")
     _validate_validation_events(
         observation["validation_events"], f"{label}.validation_events"
@@ -330,18 +382,30 @@ def _score_common(
         _add_case(result, "status_violation_cases", case_id)
     if not observation["plan_reference_matches"]:
         _add_case(result, "hash_binding_violation_cases", case_id)
-    for field in (
-        "plan_fingerprint",
-        "state_plan_fingerprint",
-        "content_hash",
-        "state_content_hash",
-    ):
+    for field in ("approval_fingerprint", "state_approval_fingerprint"):
         if not SHA256_RE.fullmatch(observation[field]):
             _add_case(result, "hash_binding_violation_cases", case_id)
-    if observation["plan_fingerprint"] != observation["state_plan_fingerprint"]:
+    if observation["approval_fingerprint"] != observation["state_approval_fingerprint"]:
         _add_case(result, "hash_binding_violation_cases", case_id)
-    if observation["content_hash"] != observation["state_content_hash"]:
-        _add_case(result, "hash_binding_violation_cases", case_id)
+    if observation["recovery_attempted"] and not observation["failure_signatures"]:
+        _add_case(result, "recovery_violation_cases", case_id)
+    if len(observation["failure_signatures"]) != len(set(observation["failure_signatures"])):
+        _add_case(result, "recovery_violation_cases", case_id)
+    if observation["validation_weakened"]:
+        _add_case(result, "recovery_violation_cases", case_id)
+    if observation["status"] == "BLOCKED" and observation["independent_tasks_executable"]:
+        _add_case(result, "recovery_violation_cases", case_id)
+    if observation["status"] == "BLOCKED":
+        reason = observation["blocked_reason_evidence"]
+        if not all(
+            reason[field]
+            for field in (
+                "attempted_recovery",
+                "no_progress",
+                "inadmissible_alternative",
+            )
+        ) or reason["unblock_action"].strip().lower() in {"none", "n/a"}:
+            _add_case(result, "recovery_violation_cases", case_id)
     if (
         any(
             event in manifest["forbidden_dispatch_events"]
@@ -412,6 +476,7 @@ def _score_branch(observation: dict[str, Any], result: dict[str, list[str]]) -> 
             and observation["omission_repair_in_target"]
             and bool(observation["edits"])
             and all(edit["in_target"] for edit in observation["edits"])
+            and observation["recovery_attempted"]
         )
     elif case_id == "DISTINCT_SAFE_REPAIR_DONE":
         validations = _validate_validation_events(
@@ -427,12 +492,15 @@ def _score_branch(observation: dict[str, Any], result: dict[str, list[str]]) -> 
             and repairs[0]["in_target"]
             and repairs[0]["distinct"]
             and validations[1]["repair_id"] == repairs[0]["id"]
+            and observation["recovery_attempted"]
+            and observation["progress_signatures"]
         )
     elif case_id == "PRE_EXISTING_FAILURE_RESIDUAL":
         valid = (
             status == "PARTIAL"
             and bool(observation["pre_existing_failures"])
             and observation["independent_tasks_executable"]
+            and observation["independent_tasks_continued"]
             and set(observation["pre_existing_failures"]).issubset(
                 set(observation["residual_failures"])
             )
@@ -480,6 +548,7 @@ def score(manifest: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
         "next_action_violation_cases": [],
         "bootstrap_violation_cases": [],
         "delivery_verdict_violation_cases": [],
+        "recovery_violation_cases": [],
         "branch_violation_cases": [],
     }
     for observation in observations:
@@ -499,6 +568,7 @@ def score(manifest: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
         "next_action_violation_cases",
         "bootstrap_violation_cases",
         "delivery_verdict_violation_cases",
+        "recovery_violation_cases",
         "branch_violation_cases",
     )
     result["accepted"] = not any(result[key] for key in violation_keys)

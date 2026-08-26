@@ -667,6 +667,38 @@ def test_execution_manifest_rejects_unknown_fields(tmp_path: Path) -> None:
     assert exc.value.code == "unknown-manifest-field"
 
 
+@pytest.mark.parametrize(
+    ("value", "valid"),
+    [(1, True), (2, True), (3, True), (4, True), (5, True), (0, False), (6, False), (2.5, False), ("3", False)],
+)
+def test_retry_policy_corrective_budget_is_finite_and_per_task(
+    tmp_path: Path, value: object, valid: bool
+) -> None:
+    text = _manifest_text(_current_plan())
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["retry_policy"]["max_corrective_retries"] = value
+    plan = _stage_valid_plan(tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:])
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert bool(findings) is (not valid)
+
+
+def test_retry_policy_requires_corrective_budget_field(tmp_path: Path) -> None:
+    text = _manifest_text(_current_plan())
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["retry_policy"].pop("max_corrective_retries")
+    plan = _stage_valid_plan(tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:])
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert "missing-manifest-field" in {finding.code for finding in findings}
+
+
 def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(
     tmp_path: Path,
 ) -> None:
@@ -898,6 +930,9 @@ def test_status_persists_hash_free_approval_and_delivery_verdicts(tmp_path: Path
     assert payload["approval_evidence"] == {
         "source": "current-conversation",
         "statement": "explicit execution approval",
+        "semantic_fingerprint": compute_semantic_fingerprint(
+            module.parse_execution_manifest(plan.read_text())
+        ),
     }
     assert [item["category"] for item in payload["delivery_verdicts"]] == list(
         module.VERDICT_CATEGORIES
@@ -907,6 +942,9 @@ def test_status_persists_hash_free_approval_and_delivery_verdicts(tmp_path: Path
         payload, plan.with_name(f"{plan.stem}.DONE.yaml")
     )
     assert parsed.approval_evidence.source == "current-conversation"
+    assert parsed.approval_evidence.semantic_fingerprint == payload[
+        "approval_evidence"
+    ]["semantic_fingerprint"]
     assert {item.category for item in parsed.delivery_verdicts} == set(
         module.VERDICT_CATEGORIES
     )
@@ -922,6 +960,52 @@ def test_status_rejects_retired_approval_hash_fields(tmp_path: Path) -> None:
         module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.DONE.yaml"))
 
     assert exc.value.code == "malformed-approval-evidence"
+
+
+def test_status_rejects_normative_manifest_drift_without_refreshed_approval(
+    tmp_path: Path,
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    module.write_status_yaml(state, _status_payload(module, plan))
+
+    plan_text = plan.read_text()
+    plan.write_text(
+        plan_text.replace(
+            '"rollout": [',
+            '"rollout": [\n    "Normative drift",',
+            1,
+        )
+    )
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode != 0
+    assert "approval-semantic-mismatch" in {
+        item["code"] for item in json.loads(result.stdout)["finding_sample"]
+    }
+
+
+def test_status_builder_computes_approval_from_parsed_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    observed: list[dict[str, object]] = []
+    original = module.compute_semantic_fingerprint
+
+    def capture(manifest: dict[str, object]) -> str:
+        observed.append(manifest)
+        return original(manifest)
+
+    monkeypatch.setattr(module, "compute_semantic_fingerprint", capture)
+    payload = _status_payload(module, plan)
+
+    assert observed
+    assert payload["approval_evidence"]["semantic_fingerprint"] == original(
+        observed[-1]
+    )
 
 
 def test_done_state_rejects_unpassed_delivery_verdicts(tmp_path: Path) -> None:

@@ -5,8 +5,8 @@ interface:
     Use /internal-gateway-execute-plans for approved retained-plan execution or
     resume under tmp/superpowers/plans/. Bind the writer-owned versioned
      Execution Manifest v3, explicit approval, control inventory, and native
-     validations. Read the Normative Manifest v3 Contract and require its exact
-     fields, pass_signal names, and task
+    validations. Load references/manifest-v3.md only for Manifest validation
+    or review; require its exact fields, pass_signal names, and task
     reference integrity before state creation. Execute every task directly
     in the current session and use /internal-tdd at executable task boundaries.
     Diagnose failures, repair only clearly implied omissions inside approved
@@ -19,6 +19,13 @@ interface:
      every verdict to pass. Older status
     siblings must be regenerated. Validate it with the loaded bundle's
     scripts/run.sh state-check. Never mutate Git.
+      Apply the finite per-task corrective retry budget (1 through 5), retain
+      retry state, require distinct in-scope safe recovery with progress, and
+      continue independent tasks around pre-existing failures. Stop for
+      no-progress or authority, scope, and safety barriers with attempted-
+      recovery evidence, inadmissible-alternative reasoning, and one concrete
+      unblock action; never weaken validation or use DONE_WITH_WARNINGS for a
+      technical failure.
     Before a completion claim, run the plan's final validations,
      git diff --check, and /superpowers-verification-before-completion. Return
      the compact four-line projection for DONE, a warning line for

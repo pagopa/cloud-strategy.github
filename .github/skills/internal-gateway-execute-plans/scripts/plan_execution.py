@@ -64,11 +64,13 @@ class Verdict:
 class ApprovalEvidence:
     source: str
     statement: str
+    semantic_fingerprint: str
 
     def as_dict(self) -> dict[str, str]:
         return {
             "source": self.source,
             "statement": self.statement,
+            "semantic_fingerprint": self.semantic_fingerprint,
         }
 
 
@@ -78,7 +80,9 @@ STATE_STATUSES = frozenset({"DONE", "DONE_WITH_WARNINGS", "PARTIAL", "BLOCKED"})
 SUCCESS_STATUSES = frozenset({"DONE", "DONE_WITH_WARNINGS"})
 APPROVAL_SOURCES = frozenset({"current-conversation", "external-authority-record"})
 APPROVAL_STATEMENT = "explicit execution approval"
-APPROVAL_EVIDENCE_FIELDS = frozenset({"source", "statement"})
+APPROVAL_EVIDENCE_FIELDS = frozenset(
+    {"source", "statement", "semantic_fingerprint"}
+)
 WARNING_KINDS = frozenset(
     {"human-follow-up", "external-unavailable", "missing-tool-equivalent"}
 )
@@ -791,17 +795,16 @@ def _validate_retry_policy(value: object) -> None:
     for field in (
         "initial_attempts",
         "max_context_refills",
-        "max_corrective_retries",
     ):
         if not _is_int(retry[field]) or retry[field] < 0:
             raise ValueError(f"retry_policy.{field} must be a non-negative integer")
-    if (
-        retry["initial_attempts"] != 1
-        or retry["max_context_refills"] != 1
-        or retry["max_corrective_retries"] != 1
-    ):
+    if not _is_int(retry["max_corrective_retries"]) or not 1 <= retry["max_corrective_retries"] <= 5:
         raise ValueError(
-            "retry_policy must retain one initial attempt, one refill, and one corrective retry"
+            "retry_policy.max_corrective_retries must be between 1 and 5"
+        )
+    if retry["initial_attempts"] != 1 or retry["max_context_refills"] != 1:
+        raise ValueError(
+            "retry_policy must retain one initial attempt and one context refill"
         )
     _bool(retry["caller_may_lower"], "retry_policy.caller_may_lower")
     if retry["repeat_progress_status"] != "stalled":
@@ -1081,6 +1084,10 @@ def _parse_approval_evidence(value: object) -> ApprovalEvidence:
         _exact_fields(mapping, APPROVAL_EVIDENCE_FIELDS, "approval_evidence")
         source = _string(mapping["source"], "approval_evidence.source")
         statement = _string(mapping["statement"], "approval_evidence.statement")
+        semantic_fingerprint = _string(
+            mapping["semantic_fingerprint"],
+            "approval_evidence.semantic_fingerprint",
+        )
     except (TypeError, ValueError) as exc:
         raise ExecutionContractError(
             "malformed-approval-evidence", str(exc)
@@ -1096,7 +1103,12 @@ def _parse_approval_evidence(value: object) -> ApprovalEvidence:
             "approval-statement-required",
             f"approval_evidence.statement must be {APPROVAL_STATEMENT!r}",
         )
-    return ApprovalEvidence(source, statement)
+    if not SHA256_RE.fullmatch(semantic_fingerprint):
+        raise ExecutionContractError(
+            "malformed-approval-evidence",
+            "approval_evidence.semantic_fingerprint must be a SHA-256 fingerprint",
+        )
+    return ApprovalEvidence(source, statement, semantic_fingerprint)
 
 
 def _parse_delivery_verdicts(value: object) -> tuple[Verdict, ...]:
@@ -1555,7 +1567,8 @@ def _build_status_payload(
 ) -> dict[str, object]:
     """Build a schema v2 runtime status payload without choosing execution work."""
 
-    parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
+    manifest = parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
+    semantic_fingerprint = compute_semantic_fingerprint(manifest)
     root = repo_root or _find_repo_root(plan_path)
     try:
         plan_reference = plan_path.resolve().relative_to(root.resolve()).as_posix()
@@ -1579,6 +1592,7 @@ def _build_status_payload(
         "approval_evidence": {
             "source": approval_source,
             "statement": APPROVAL_STATEMENT,
+            "semantic_fingerprint": semantic_fingerprint,
         },
         "delivery_verdicts": list(delivery_payload["verdicts"].values()),
         "completed_task_ids": list(completed_task_ids),
@@ -1745,6 +1759,14 @@ def _status_binding_findings(
         )
     except (OSError, UnicodeError, ExecutionContractError) as exc:
         return findings + [Finding("plan-unreadable", str(exc))]
+    current_fingerprint = compute_semantic_fingerprint(plan_snapshot.manifest)
+    if state.approval_evidence.semantic_fingerprint != current_fingerprint:
+        findings.append(
+            Finding(
+                "approval-semantic-mismatch",
+                "Status approval evidence does not match the current Manifest semantics",
+            )
+        )
     completed = set(state.completed_task_ids)
     remaining = set(state.remaining_task_ids)
     expected_task_ids = set(plan_snapshot.task_ids)
