@@ -36,7 +36,7 @@ description: Use when editing or reviewing YAML or YML syntax, encoding, parser 
 Run the bundle-owned checker with explicit files:
 
 ```bash
-.github/skills/internal-yaml/scripts/check.sh FILE [FILE ...]
+bash scripts/check.sh FILE [FILE ...]
 ```
 
 The checker returns `0` when checks passed within supported scope, `1` for

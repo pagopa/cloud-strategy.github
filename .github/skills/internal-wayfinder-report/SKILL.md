@@ -122,14 +122,14 @@ rendering fails.
 Run validation before loading the template or replacing output:
 
 ```bash
-python3 .github/skills/internal-wayfinder-report/scripts/render_report.py --workspace tmp/.wayfinder/<analysis-slug> --data tmp/.wayfinder/<analysis-slug>/report/report.json --check --format json
+python3 scripts/render_report.py --workspace tmp/.wayfinder/<analysis-slug> --data tmp/.wayfinder/<analysis-slug>/report/report.json --check --format json
 ```
 
 `--check` emits only bounded metrics and warnings and does not create or
 replace `report/index.html`. After it is valid, run the normal render command:
 
 ```bash
-python3 .github/skills/internal-wayfinder-report/scripts/render_report.py --workspace tmp/.wayfinder/<analysis-slug> --data tmp/.wayfinder/<analysis-slug>/report/report.json
+python3 scripts/render_report.py --workspace tmp/.wayfinder/<analysis-slug> --data tmp/.wayfinder/<analysis-slug>/report/report.json
 ```
 
 The renderer writes only

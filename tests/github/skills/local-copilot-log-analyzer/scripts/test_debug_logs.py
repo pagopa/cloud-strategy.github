@@ -1,9 +1,19 @@
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
-from tools.analyze_copilot_debug_log.debug_logs import (
+REPO_ROOT = next(
+    parent
+    for parent in Path(__file__).resolve().parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
+SCRIPT_ROOT = REPO_ROOT / ".github/skills/local-copilot-log-analyzer/scripts"
+if str(SCRIPT_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_ROOT))
+
+from analyze_copilot_debug_log.debug_logs import (  # noqa: E402
     build_report,
     load_input,
     render_markdown,

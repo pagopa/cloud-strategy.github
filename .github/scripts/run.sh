@@ -118,7 +118,7 @@ resolve_script() {
             printf '%s\n' "$SCRIPT_DIR/github_catalog_validation.py"
             ;;
         analyze_copilot_debug_log|analyze_copilot_debug_log.sh)
-            printf '%s\n' "$REPO_ROOT/tools/analyze_copilot_debug_log/run.sh"
+            printf '%s\n' "$REPO_ROOT/.github/skills/local-copilot-log-analyzer/scripts/run.sh"
             ;;
         benchmark_skill_tokens|benchmark_skill_tokens.py)
             printf '%s\n' "$SCRIPT_DIR/benchmark_skill_tokens.py"
@@ -191,7 +191,7 @@ main() {
 
     if [[ "$tool_name" == "analyze_copilot_debug_log" || "$tool_name" == "analyze_copilot_debug_log.sh" ]]; then
         shift
-        exec bash "$REPO_ROOT/tools/analyze_copilot_debug_log/run.sh" "$@"
+        exec bash "$REPO_ROOT/.github/skills/local-copilot-log-analyzer/scripts/run.sh" "$@"
     fi
 
     script_path="$(resolve_script "$tool_name")" || {

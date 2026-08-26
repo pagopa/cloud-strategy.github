@@ -10,7 +10,7 @@ Set the workspace to `tmp/.wayfinder/<analysis-slug>`. Validate the existing
 `report/report.json` before reading source bodies:
 
 ```bash
-python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
+python3 scripts/render_report.py \
   --workspace tmp/.wayfinder/<analysis-slug> \
   --data tmp/.wayfinder/<analysis-slug>/report/report.json \
   --check --format json
@@ -55,7 +55,7 @@ relationships, retry choice, and closeout.
 Run the read-only helper once after inventory and hashing:
 
 ```bash
-python3 .github/skills/internal-wayfinder-report/scripts/collect_source_notes.py \
+python3 scripts/collect_source_notes.py \
   --workspace tmp/.wayfinder/<analysis-slug> \
   --format json \
   --max-preview-lines 12
@@ -105,7 +105,7 @@ Write `report/report.json` once, then run validation-only preflight again and
 fix every contract error before rendering:
 
 ```bash
-python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
+python3 scripts/render_report.py \
   --workspace tmp/.wayfinder/<analysis-slug> \
   --data tmp/.wayfinder/<analysis-slug>/report/report.json \
   --check --format json
@@ -114,7 +114,7 @@ python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
 After preflight is valid, render the single artifact:
 
 ```bash
-python3 .github/skills/internal-wayfinder-report/scripts/render_report.py \
+python3 scripts/render_report.py \
   --workspace tmp/.wayfinder/<analysis-slug> \
   --data tmp/.wayfinder/<analysis-slug>/report/report.json
 ```

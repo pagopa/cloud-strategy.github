@@ -49,7 +49,7 @@ jobs:
           cache-dependency-path: |
             .python-version
             .github/scripts/requirements.txt
-            tools/analyze_copilot_debug_log/requirements.txt
+            .github/skills/local-copilot-log-analyzer/scripts/requirements.txt
 
       - name: 🔎 Show Python version
         run: |
@@ -66,8 +66,8 @@ jobs:
 
       - name: 🔥 Smoke test Python entry points
         run: |
-          bash tools/analyze_copilot_debug_log/run.sh prompt-exports --help
-          bash tools/analyze_copilot_debug_log/run.sh debug-logs --help
+          bash .github/skills/local-copilot-log-analyzer/scripts/run.sh prompt-exports --help
+          bash .github/skills/local-copilot-log-analyzer/scripts/run.sh debug-logs --help
           ./.github/scripts/run.sh analyze_copilot_debug_log --help
           ./.github/scripts/run.sh benchmark_skill_tokens --help
           "${TEST_VENV}/bin/python" ".github/scripts/build_inventory.py" --help
@@ -82,7 +82,7 @@ jobs:
         run: |
           ./.github/scripts/run.sh --help || true
           bash -n .github/scripts/run.sh
-          bash -n tools/analyze_copilot_debug_log/run.sh
+          bash -n .github/skills/local-copilot-log-analyzer/scripts/run.sh
           bash -n .github/scripts/install-graphify-hooks.sh
           bash -n .github/scripts/graphify-file-change-hook.sh
           bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh

@@ -3,7 +3,7 @@
 Run the checker with Python 3.10 or newer and explicit JSON paths:
 
 ```bash
-python3 .github/skills/internal-json/scripts/check.py [--format text|json] FILE [FILE ...]
+python3 scripts/check.py [--format text|json] FILE [FILE ...]
 ```
 
 The script uses only the Python standard library and never installs

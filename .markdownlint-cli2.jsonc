@@ -9,8 +9,6 @@
     "tmp/**",
     // Ignore the local script venv because it is generated tooling state, not repo-owned content.
     ".github/scripts/.venv/**",
-    // Ignore local tool virtualenv artifacts generated during development.
-    "tools/analyze_copilot_debug_log/.venv/**",
     // Ignore any generated virtual environment, including task-specific variants.
     "**/.venv*/**",
     // Ignore temporary retained execution artifacts outside tmp/.

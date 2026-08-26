@@ -30,7 +30,9 @@ def test_resolve_script_handles_current_catalog_and_debug_log_tools() -> None:
     assert lines[0].endswith(
         ".github/scripts/build_inventory.py"
     )
-    assert lines[1].endswith("tools/analyze_copilot_debug_log/run.sh")
+    assert lines[1].endswith(
+        ".github/skills/local-copilot-log-analyzer/scripts/run.sh"
+    )
     assert lines[2].endswith(
         ".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
     )

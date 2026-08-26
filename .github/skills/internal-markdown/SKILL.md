@@ -31,7 +31,7 @@ description: Use when editing or reviewing Markdown structure, fences, reference
 Run the bundle-owned checker with explicit files:
 
 ```bash
-.github/skills/internal-markdown/scripts/check.sh FILE [FILE ...]
+bash scripts/check.sh FILE [FILE ...]
 ```
 
 The checker returns `0` when checks passed within supported scope, `1` for

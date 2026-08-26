@@ -35,7 +35,7 @@ bundle directly.
 
 ## Commands
 
-Use `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh`.
+Use `scripts/run.sh`.
 
 | Request | Command |
 | --- | --- |
@@ -119,6 +119,6 @@ action; see `references/error-codes.md`.
 
 - Run focused tests under
   `tests/github/skills/local-agent-sync-install-ai-resources/scripts`.
-- Run `bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
+- Run `bash -n scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
 - Rebuild `.github/INVENTORY.md` with `./.github/scripts/run.sh build_inventory --root .` after bundle changes.
 - Run `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks` after bundle or automation changes.

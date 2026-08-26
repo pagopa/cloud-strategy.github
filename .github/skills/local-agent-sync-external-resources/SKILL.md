@@ -173,10 +173,10 @@ read them from the manifest or the upstream commit.
 ## Canonical Commands
 
 ```bash
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py prepare --workspace ../cloud-strategy.github-external-refresh --format tsv
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py audit --format tsv
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py plan --workspace ../cloud-strategy.github-external-refresh --format tsv
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py apply --workspace ../cloud-strategy.github-external-refresh --format tsv
+python3 scripts/sync_external_resources.py prepare --workspace ../cloud-strategy.github-external-refresh --format tsv
+python3 scripts/sync_external_resources.py audit --format tsv
+python3 scripts/sync_external_resources.py plan --workspace ../cloud-strategy.github-external-refresh --format tsv
+python3 scripts/sync_external_resources.py apply --workspace ../cloud-strategy.github-external-refresh --format tsv
 ```
 
 ## Live Network Benchmark (Separate Authorization Required)
@@ -189,7 +189,7 @@ separate authorization.
 
 ## Validation
 
-- `python3 -m compileall .github/skills/local-agent-sync-external-resources/scripts`
+- `python3 -m compileall scripts`
 - `python3 -m pytest -q tests/github/skills/local-agent-sync-external-resources/scripts`
 - `python3 .github/scripts/validate_internal_skills.py --skill local-agent-sync-external-resources --strict`
 - `make inventory-build`

@@ -3,7 +3,6 @@ line-length = 88
 target-version = "py313"
 exclude = [
     ".github/scripts/.venv",
-    "tools/analyze_copilot_debug_log/.venv",
 ]
 
 [tool.ruff.lint]

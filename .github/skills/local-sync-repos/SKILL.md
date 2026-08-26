@@ -30,8 +30,8 @@ Do not synchronize agents, skills, prompts, inventory, documentation, lesson led
 ## Commands
 
 ```bash
-python3 .github/skills/local-sync-repos/scripts/sync_repos.py plan --source-root . --target-repo <path> --format compact
-python3 .github/skills/local-sync-repos/scripts/sync_repos.py apply --source-root . --target-repo <path> --format compact
+python3 scripts/sync_repos.py plan --source-root . --target-repo <path> --format compact
+python3 scripts/sync_repos.py apply --source-root . --target-repo <path> --format compact
 ```
 
 - `plan` is the default safe mode. It writes only `tmp/local-sync-repos.plan.md` in the target.
