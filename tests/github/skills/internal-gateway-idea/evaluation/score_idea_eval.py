@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Score sanitized internal-gateway-idea evaluation records."""
+
 from __future__ import annotations
 
 import argparse
@@ -7,7 +8,6 @@ import json
 import sys
 from collections.abc import Mapping
 from pathlib import Path
-
 
 CONTRACT_VERSION = "internal-gateway-idea-eval-v1"
 CASE_IDS = ("C-01", "C-02", "C-03", "C-04", "C-05")
@@ -195,17 +195,25 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
     if value.get("contract_version") != CONTRACT_VERSION:
         raise _schema_error("manifest.contract_version is unsupported")
 
-    case_ids = _require_string_list(value.get("required_case_ids"), "manifest.required_case_ids")
+    case_ids = _require_string_list(
+        value.get("required_case_ids"), "manifest.required_case_ids"
+    )
     if tuple(case_ids) != CASE_IDS or len(set(case_ids)) != len(case_ids):
-        raise _schema_error("manifest.required_case_ids must contain C-01 through C-05 once")
+        raise _schema_error(
+            "manifest.required_case_ids must contain C-01 through C-05 once"
+        )
     record_keys = _require_string_list(
         value.get("required_record_keys"), "manifest.required_record_keys"
     )
     if tuple(record_keys) != REQUIRED_RECORD_KEYS:
         raise _schema_error("manifest.required_record_keys does not match the contract")
-    _require_string_list(value.get("forbidden_verdict_fields"), "manifest.forbidden_verdict_fields")
+    _require_string_list(
+        value.get("forbidden_verdict_fields"), "manifest.forbidden_verdict_fields"
+    )
 
-    protected = _require_mapping(value.get("protected_workflow"), "manifest.protected_workflow")
+    protected = _require_mapping(
+        value.get("protected_workflow"), "manifest.protected_workflow"
+    )
     required_classes = _require_string_list(
         protected.get("required_evidence_classes"),
         "manifest.protected_workflow.required_evidence_classes",
@@ -221,7 +229,9 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
     ):
         limit = protected.get(field)
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
-            raise _schema_error(f"manifest.protected_workflow.{field} must be a non-negative integer")
+            raise _schema_error(
+                f"manifest.protected_workflow.{field} must be a non-negative integer"
+            )
     for field in (
         "forbid_fixed_question_cap",
         "forbid_automatic_critical_realign",
@@ -230,14 +240,20 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
         if not isinstance(protected.get(field), bool):
             raise _schema_error(f"manifest.protected_workflow.{field} must be boolean")
 
-    requirements = _require_mapping(value.get("case_requirements"), "manifest.case_requirements")
+    requirements = _require_mapping(
+        value.get("case_requirements"), "manifest.case_requirements"
+    )
     for case_id in CASE_IDS:
-        _require_mapping(requirements.get(case_id), f"manifest.case_requirements.{case_id}")
+        _require_mapping(
+            requirements.get(case_id), f"manifest.case_requirements.{case_id}"
+        )
     _require_string_list(
         value.get("analysis_only_forbidden_routes"),
         "manifest.analysis_only_forbidden_routes",
     )
-    authority = _require_mapping(value.get("authority_workflow"), "manifest.authority_workflow")
+    authority = _require_mapping(
+        value.get("authority_workflow"), "manifest.authority_workflow"
+    )
     _require_string_list(
         authority.get("required_event_types"),
         "manifest.authority_workflow.required_event_types",
@@ -246,27 +262,42 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
         authority.get("continuation_boundaries"),
         "manifest.authority_workflow.continuation_boundaries",
     )
-    _require_string(authority.get("scope_delta_outcome"), "manifest.authority_workflow.scope_delta_outcome")
-    lifecycle = _require_mapping(value.get("lifecycle_workflow"), "manifest.lifecycle_workflow")
+    _require_string(
+        authority.get("scope_delta_outcome"),
+        "manifest.authority_workflow.scope_delta_outcome",
+    )
+    lifecycle = _require_mapping(
+        value.get("lifecycle_workflow"), "manifest.lifecycle_workflow"
+    )
     global_gates = _require_string_list(
         lifecycle.get("global_gates"), "manifest.lifecycle_workflow.global_gates"
     )
     if global_gates != ["GRILL-ME", "CRITICAL REVIEW"]:
-        raise _schema_error("manifest.lifecycle_workflow.global_gates must contain exactly GRILL-ME and CRITICAL REVIEW")
+        raise _schema_error(
+            "manifest.lifecycle_workflow.global_gates must contain exactly GRILL-ME and CRITICAL REVIEW"
+        )
     if lifecycle.get("post_setup_gate") != "GRILL-ME":
-        raise _schema_error("manifest.lifecycle_workflow.post_setup_gate must be GRILL-ME")
+        raise _schema_error(
+            "manifest.lifecycle_workflow.post_setup_gate must be GRILL-ME"
+        )
     review_lenses = _require_string_list(
         lifecycle.get("review_lenses"), "manifest.lifecycle_workflow.review_lenses"
     )
     if review_lenses != ["primary", "evidence", "lateral"]:
-        raise _schema_error("manifest.lifecycle_workflow.review_lenses must contain the exact three review lenses")
+        raise _schema_error(
+            "manifest.lifecycle_workflow.review_lenses must contain the exact three review lenses"
+        )
     lateral_lens_types = _require_string_list(
         lifecycle.get("lateral_lens_types"),
         "manifest.lifecycle_workflow.lateral_lens_types",
     )
     if lateral_lens_types != ["analogy", "reverse-assumption"]:
-        raise _schema_error("manifest.lifecycle_workflow.lateral_lens_types is unsupported")
-    _require_string_list(lifecycle.get("candidate_menu"), "manifest.lifecycle_workflow.candidate_menu")
+        raise _schema_error(
+            "manifest.lifecycle_workflow.lateral_lens_types is unsupported"
+        )
+    _require_string_list(
+        lifecycle.get("candidate_menu"), "manifest.lifecycle_workflow.candidate_menu"
+    )
     for field in (
         "critical_review_event",
         "realignment_event",
@@ -293,12 +324,24 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
     communication = _require_mapping(
         value.get("communication_workflow"), "manifest.communication_workflow"
     )
-    _require_string(communication.get("candidate_kind"), "manifest.communication_workflow.candidate_kind")
-    for field in ("max_controlling_evidence", "max_diagrams", "diagram_min_relationships"):
+    _require_string(
+        communication.get("candidate_kind"),
+        "manifest.communication_workflow.candidate_kind",
+    )
+    for field in (
+        "max_controlling_evidence",
+        "max_diagrams",
+        "diagram_min_relationships",
+    ):
         limit = communication.get(field)
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
-            raise _schema_error(f"manifest.communication_workflow.{field} must be a non-negative integer")
-    _require_string(communication.get("word_count_mode"), "manifest.communication_workflow.word_count_mode")
+            raise _schema_error(
+                f"manifest.communication_workflow.{field} must be a non-negative integer"
+            )
+    _require_string(
+        communication.get("word_count_mode"),
+        "manifest.communication_workflow.word_count_mode",
+    )
     return value
 
 
@@ -341,7 +384,9 @@ def _validate_communication_records(
             "acceptance_condition_ids",
         ):
             _require_string_list(record[field], f"{record_label}.{field}")
-        if isinstance(record["word_count"], bool) or not isinstance(record["word_count"], int):
+        if isinstance(record["word_count"], bool) or not isinstance(
+            record["word_count"], int
+        ):
             raise _schema_error(f"{record_label}.word_count must be an integer")
         diagrams = _require_list(record["diagrams"], f"{record_label}.diagrams")
         for diagram_index, diagram in enumerate(diagrams):
@@ -349,7 +394,9 @@ def _validate_communication_records(
                 diagram, f"{record_label}.diagrams[{diagram_index}]"
             )
             relationship_count = diagram_mapping.get("relationship_count")
-            if isinstance(relationship_count, bool) or not isinstance(relationship_count, int):
+            if isinstance(relationship_count, bool) or not isinstance(
+                relationship_count, int
+            ):
                 raise _schema_error(
                     f"{record_label}.diagrams[{diagram_index}].relationship_count must be an integer"
                 )
@@ -361,10 +408,14 @@ def _validate_communication_records(
     return values
 
 
-def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[str, object]]:
+def _validate_run(
+    manifest: Mapping[str, object], run: object
+) -> list[Mapping[str, object]]:
     value = _require_mapping(run, "run")
     observations = _validate_record_list(
-        value.get("observations"), "run.observations", ("observation_id", "case_id", "kind", *REQUIRED_RECORD_KEYS)
+        value.get("observations"),
+        "run.observations",
+        ("observation_id", "case_id", "kind", *REQUIRED_RECORD_KEYS),
     )
     seen_observation_ids: set[str] = set()
     for observation_index, observation in enumerate(observations):
@@ -380,7 +431,9 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
         )
         if case_id not in CASE_IDS:
             raise _schema_error(f"unsupported case_id: {case_id}")
-        _require_string(observation["kind"], f"run.observations[{observation_index}].kind")
+        _require_string(
+            observation["kind"], f"run.observations[{observation_index}].kind"
+        )
 
         decisions = _validate_record_list(
             observation["decision_records"],
@@ -389,19 +442,37 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
         )
         decision_ids: set[str] = set()
         for index, decision in enumerate(decisions):
-            decision_id = _require_string(decision["decision_id"], f"{observation_id}.decision_records[{index}].decision_id")
+            decision_id = _require_string(
+                decision["decision_id"],
+                f"{observation_id}.decision_records[{index}].decision_id",
+            )
             if decision_id in decision_ids:
-                raise _schema_error(f"duplicate decision_id in {observation_id}: {decision_id}")
+                raise _schema_error(
+                    f"duplicate decision_id in {observation_id}: {decision_id}"
+                )
             decision_ids.add(decision_id)
-            status = _require_string(decision["status"], f"{observation_id}.decision_records[{index}].status")
+            status = _require_string(
+                decision["status"], f"{observation_id}.decision_records[{index}].status"
+            )
             if status not in DECISION_STATES:
                 raise _schema_error(f"unsupported decision state: {status}")
             if not isinstance(decision["material"], bool):
-                raise _schema_error(f"{observation_id}.decision_records[{index}].material must be boolean")
-            _require_string_list(decision["dependencies"], f"{observation_id}.decision_records[{index}].dependencies")
-            _require_string_list(decision["evidence_ids"], f"{observation_id}.decision_records[{index}].evidence_ids")
+                raise _schema_error(
+                    f"{observation_id}.decision_records[{index}].material must be boolean"
+                )
+            _require_string_list(
+                decision["dependencies"],
+                f"{observation_id}.decision_records[{index}].dependencies",
+            )
+            _require_string_list(
+                decision["evidence_ids"],
+                f"{observation_id}.decision_records[{index}].evidence_ids",
+            )
             if "reopen_condition" in decision:
-                _require_string(decision["reopen_condition"], f"{observation_id}.decision_records[{index}].reopen_condition")
+                _require_string(
+                    decision["reopen_condition"],
+                    f"{observation_id}.decision_records[{index}].reopen_condition",
+                )
 
         questions = _validate_record_list(
             observation["question_records"],
@@ -418,11 +489,19 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
         )
         question_ids: set[str] = set()
         for index, question in enumerate(questions):
-            question_id = _require_string(question["question_id"], f"{observation_id}.question_records[{index}].question_id")
+            question_id = _require_string(
+                question["question_id"],
+                f"{observation_id}.question_records[{index}].question_id",
+            )
             if question_id in question_ids:
-                raise _schema_error(f"duplicate question_id in {observation_id}: {question_id}")
+                raise _schema_error(
+                    f"duplicate question_id in {observation_id}: {question_id}"
+                )
             question_ids.add(question_id)
-            _require_string(question["decision_id"], f"{observation_id}.question_records[{index}].decision_id")
+            _require_string(
+                question["decision_id"],
+                f"{observation_id}.question_records[{index}].decision_id",
+            )
             question_event_index = _require_event_index(
                 question["event_index"],
                 f"{observation_id}.question_records[{index}].event_index",
@@ -432,15 +511,19 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
                 f"{observation_id}.question_records[{index}].eligible_event_index",
             )
             if eligible_event_index > question_event_index:
-                raise _schema_error(
-                    f"{question_id} became eligible after it was asked"
-                )
+                raise _schema_error(f"{question_id} became eligible after it was asked")
             _require_string(
                 question["block_id"],
                 f"{observation_id}.question_records[{index}].block_id",
             )
-            _require_string_list(question["evidence_ids"], f"{observation_id}.question_records[{index}].evidence_ids")
-            _require_string_list(question["prerequisites"], f"{observation_id}.question_records[{index}].prerequisites")
+            _require_string_list(
+                question["evidence_ids"],
+                f"{observation_id}.question_records[{index}].evidence_ids",
+            )
+            _require_string_list(
+                question["prerequisites"],
+                f"{observation_id}.question_records[{index}].prerequisites",
+            )
 
         evidence = _validate_record_list(
             observation["evidence_records"],
@@ -449,28 +532,53 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
         )
         evidence_ids: set[str] = set()
         for index, item in enumerate(evidence):
-            evidence_id = _require_string(item["evidence_id"], f"{observation_id}.evidence_records[{index}].evidence_id")
+            evidence_id = _require_string(
+                item["evidence_id"],
+                f"{observation_id}.evidence_records[{index}].evidence_id",
+            )
             if evidence_id in evidence_ids:
-                raise _schema_error(f"duplicate evidence_id in {observation_id}: {evidence_id}")
+                raise _schema_error(
+                    f"duplicate evidence_id in {observation_id}: {evidence_id}"
+                )
             evidence_ids.add(evidence_id)
-            evidence_class = _require_string(item["class"], f"{observation_id}.evidence_records[{index}].class")
+            evidence_class = _require_string(
+                item["class"], f"{observation_id}.evidence_records[{index}].class"
+            )
             if evidence_class not in EVIDENCE_CLASSES:
                 raise _schema_error(f"unsupported evidence class: {evidence_class}")
-            _require_string(item["strength"], f"{observation_id}.evidence_records[{index}].strength")
-            _require_event_index(item["event_index"], f"{observation_id}.evidence_records[{index}].event_index")
-            _require_string_list(item["decision_ids"], f"{observation_id}.evidence_records[{index}].decision_ids")
+            _require_string(
+                item["strength"], f"{observation_id}.evidence_records[{index}].strength"
+            )
+            _require_event_index(
+                item["event_index"],
+                f"{observation_id}.evidence_records[{index}].event_index",
+            )
+            _require_string_list(
+                item["decision_ids"],
+                f"{observation_id}.evidence_records[{index}].decision_ids",
+            )
 
         for key in ("transition_events", "route_events", "artifact_events"):
             events = _validate_record_list(
                 observation[key], f"{observation_id}.{key}", ("event", "event_index")
             )
             for index, event in enumerate(events):
-                _require_string(event["event"], f"{observation_id}.{key}[{index}].event")
-                _require_event_index(event["event_index"], f"{observation_id}.{key}[{index}].event_index")
+                _require_string(
+                    event["event"], f"{observation_id}.{key}[{index}].event"
+                )
+                _require_event_index(
+                    event["event_index"], f"{observation_id}.{key}[{index}].event_index"
+                )
             if key == "route_events":
                 for index, event in enumerate(events):
-                    _require_string(event.get("owner"), f"{observation_id}.route_events[{index}].owner")
-                    _require_string(event.get("mode"), f"{observation_id}.route_events[{index}].mode")
+                    _require_string(
+                        event.get("owner"),
+                        f"{observation_id}.route_events[{index}].owner",
+                    )
+                    _require_string(
+                        event.get("mode"),
+                        f"{observation_id}.route_events[{index}].mode",
+                    )
 
         authority_events = _validate_record_list(
             observation["authority_events"],
@@ -481,8 +589,12 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
             label = f"{observation_id}.authority_events[{index}]"
             event_name = _require_string(event["event"], f"{label}.event")
             if event_name in {"authority-snapshot", "continuation"}:
-                _require_string_list(event.get("authorized_paths"), f"{label}.authorized_paths")
-                _require_string_list(event.get("authorized_actions"), f"{label}.authorized_actions")
+                _require_string_list(
+                    event.get("authorized_paths"), f"{label}.authorized_paths"
+                )
+                _require_string_list(
+                    event.get("authorized_actions"), f"{label}.authorized_actions"
+                )
             elif event_name == "protected-status":
                 _require_string(event.get("status"), f"{label}.status")
                 _require_string(event.get("user_authority"), f"{label}.user_authority")
@@ -518,11 +630,19 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
                     f"{label}.unit_lock.implementation_permission must be boolean"
                 )
 
-            capsule = _require_mapping(recovery["state_capsule"], f"{label}.state_capsule")
+            capsule = _require_mapping(
+                recovery["state_capsule"], f"{label}.state_capsule"
+            )
             for field in ("subject", "mode", "decision_focus", "next_action"):
                 _require_string(capsule.get(field), f"{label}.state_capsule.{field}")
-            for field in ("terminal_decision_ids", "eligible_now_ids", "evidence_anchors"):
-                _require_string_list(capsule.get(field), f"{label}.state_capsule.{field}")
+            for field in (
+                "terminal_decision_ids",
+                "eligible_now_ids",
+                "evidence_anchors",
+            ):
+                _require_string_list(
+                    capsule.get(field), f"{label}.state_capsule.{field}"
+                )
             blocked_later = _require_list(
                 capsule.get("blocked_later"), f"{label}.state_capsule.blocked_later"
             )
@@ -540,19 +660,25 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
                 )
 
             ledger = _validate_record_list(
-                recovery["decision_ledger"], f"{label}.decision_ledger", RECOVERY_LEDGER_FIELDS
+                recovery["decision_ledger"],
+                f"{label}.decision_ledger",
+                RECOVERY_LEDGER_FIELDS,
             )
             for ledger_index, entry in enumerate(ledger):
                 entry_label = f"{label}.decision_ledger[{ledger_index}]"
                 for field in ("decision_id", "state", "basis", "reopen_condition"):
                     _require_string(entry[field], f"{entry_label}.{field}")
-                _require_string_list(entry["dependencies"], f"{entry_label}.dependencies")
+                _require_string_list(
+                    entry["dependencies"], f"{entry_label}.dependencies"
+                )
 
             authority = _require_mapping(
                 recovery["authority_envelope"], f"{label}.authority_envelope"
             )
             for field in RECOVERY_AUTHORITY_FIELDS:
-                _require_string_list(authority.get(field), f"{label}.authority_envelope.{field}")
+                _require_string_list(
+                    authority.get(field), f"{label}.authority_envelope.{field}"
+                )
             _validate_communication_records(
                 [recovery["communication_projection"]],
                 f"{label}.communication_projection",
@@ -561,12 +687,22 @@ def _validate_run(manifest: Mapping[str, object], run: object) -> list[Mapping[s
         provenance = _require_mapping(
             observation["provenance"], f"{observation_id}.provenance"
         )
-        for field in ("kind", "source", "sanitized_perimeter", "baseline_id", "candidate_id"):
-            _require_string(provenance.get(field), f"{observation_id}.provenance.{field}")
+        for field in (
+            "kind",
+            "source",
+            "sanitized_perimeter",
+            "baseline_id",
+            "candidate_id",
+        ):
+            _require_string(
+                provenance.get(field), f"{observation_id}.provenance.{field}"
+            )
         if provenance["kind"] not in {"synthetic-test", "controlled-runtime"}:
             raise _schema_error(f"unsupported provenance kind: {provenance['kind']}")
         if "role" in provenance:
-            role = _require_string(provenance["role"], f"{observation_id}.provenance.role")
+            role = _require_string(
+                provenance["role"], f"{observation_id}.provenance.role"
+            )
             if role not in {"baseline", "candidate"}:
                 raise _schema_error(f"unsupported provenance role: {role}")
     return observations
@@ -576,7 +712,9 @@ def _event_index(event: Mapping[str, object]) -> float:
     return float(event["event_index"])
 
 
-def _sorted_events(observation: Mapping[str, object], key: str) -> list[Mapping[str, object]]:
+def _sorted_events(
+    observation: Mapping[str, object], key: str
+) -> list[Mapping[str, object]]:
     return sorted(observation[key], key=_event_index)  # type: ignore[arg-type]
 
 
@@ -588,14 +726,18 @@ def _status_at(
 ) -> str:
     status = "open"
     for event in transitions:
-        if event.get("event") != "decision-status" or event.get("decision_id") != decision_id:
+        if (
+            event.get("event") != "decision-status"
+            or event.get("decision_id") != decision_id
+        ):
             continue
         if _event_index(event) <= event_index:
             status = str(event["to"])
     if status == "open" and decision_id in decisions:
         record_status = str(decisions[decision_id]["status"])
         if not any(
-            event.get("event") == "decision-status" and event.get("decision_id") == decision_id
+            event.get("event") == "decision-status"
+            and event.get("decision_id") == decision_id
             for event in transitions
         ):
             status = record_status
@@ -610,7 +752,8 @@ def _final_status(
     status_events = [
         event
         for event in transitions
-        if event.get("event") == "decision-status" and event.get("decision_id") == decision_id
+        if event.get("event") == "decision-status"
+        and event.get("decision_id") == decision_id
     ]
     return str(status_events[-1]["to"]) if status_events else str(decision["status"])
 
@@ -627,7 +770,10 @@ def _dependencies_open(
         dependency = decisions.get(str(dependency_id))
         if dependency is None:
             return True
-        if _status_at(str(dependency_id), question_index, decisions, transitions) not in TERMINAL_STATES:
+        if (
+            _status_at(str(dependency_id), question_index, decisions, transitions)
+            not in TERMINAL_STATES
+        ):
             return True
     return False
 
@@ -728,9 +874,7 @@ def _score_observation(
     questions = observation["question_records"]  # type: ignore[assignment]
 
     authority_events = _sorted_events(observation, "authority_events")
-    authority_by_type = {
-        str(event.get("event")): event for event in authority_events
-    }
+    authority_by_type = {str(event.get("event")): event for event in authority_events}
     required_authority_events = set(
         manifest["authority_workflow"]["required_event_types"]  # type: ignore[index]
     )
@@ -744,17 +888,23 @@ def _score_observation(
         for event in authority_events:
             if event.get("event") != "continuation":
                 continue
-            if (
-                event.get("authorized_paths") != snapshot.get("authorized_paths")
-                or event.get("authorized_actions") != snapshot.get("authorized_actions")
-            ):
+            if event.get("authorized_paths") != snapshot.get(
+                "authorized_paths"
+            ) or event.get("authorized_actions") != snapshot.get("authorized_actions"):
                 findings["authority_envelope_violation_cases"].add(case_id)
     protected_status = authority_by_type.get("protected-status")
-    if protected_status is None or protected_status.get("authorizes_mutation") is not False:
+    if (
+        protected_status is None
+        or protected_status.get("authorizes_mutation") is not False
+    ):
         findings["protected_status_authority_violation_cases"].add(case_id)
     scope_delta = authority_by_type.get("scope-delta")
     expected_scope_outcome = manifest["authority_workflow"]["scope_delta_outcome"]  # type: ignore[index]
-    if scope_delta is None or scope_delta.get("outcome") != expected_scope_outcome or scope_delta.get("accepted") is not False:
+    if (
+        scope_delta is None
+        or scope_delta.get("outcome") != expected_scope_outcome
+        or scope_delta.get("accepted") is not False
+    ):
         findings["scope_delta_violation_cases"].add(case_id)
 
     recovery_records = observation["recovery_records"]  # type: ignore[assignment]
@@ -783,7 +933,8 @@ def _score_observation(
         }
         ledger = recovery["decision_ledger"]
         ledger_by_id = {
-            str(entry.get("decision_id")): entry for entry in ledger  # type: ignore[union-attr]
+            str(entry.get("decision_id")): entry
+            for entry in ledger  # type: ignore[union-attr]
         }
         if set(ledger_by_id) != set(decisions):
             findings["canonical_recovery_violation_cases"].add(case_id)
@@ -791,7 +942,8 @@ def _score_observation(
             for decision_id, decision in decisions.items():
                 entry = ledger_by_id[decision_id]
                 if (
-                    entry.get("state") != _final_status(decision_id, decision, transitions)
+                    entry.get("state")
+                    != _final_status(decision_id, decision, transitions)
                     or entry.get("dependencies") != decision.get("dependencies")
                     or entry.get("reopen_condition") != decision.get("reopen_condition")
                 ):
@@ -801,11 +953,16 @@ def _score_observation(
 
         recovery_authority = recovery["authority_envelope"]
         if snapshot is None or (
-            recovery_authority.get("authorized_paths") != snapshot.get("authorized_paths")
-            or recovery_authority.get("authorized_actions") != snapshot.get("authorized_actions")
+            recovery_authority.get("authorized_paths")
+            != snapshot.get("authorized_paths")
+            or recovery_authority.get("authorized_actions")
+            != snapshot.get("authorized_actions")
         ):
             findings["canonical_recovery_violation_cases"].add(case_id)
-        if len(communication_records) != 1 or recovery["communication_projection"] != communication_records[0]:
+        if (
+            len(communication_records) != 1
+            or recovery["communication_projection"] != communication_records[0]
+        ):
             findings["canonical_recovery_violation_cases"].add(case_id)
 
     communication_workflow = manifest["communication_workflow"]  # type: ignore[index]
@@ -816,11 +973,13 @@ def _score_observation(
             record.get("material_delta_ids")
             and record.get("outcome")
             and record.get("controlling_evidence_ids")
-            and len(record["controlling_evidence_ids"]) <= communication_workflow["max_controlling_evidence"]
+            and len(record["controlling_evidence_ids"])
+            <= communication_workflow["max_controlling_evidence"]
             and record.get("principal_risk_id")
             and record.get("active_choice")
             and record.get("acceptance_condition_ids")
-            and record.get("word_count_mode") == communication_workflow["word_count_mode"]
+            and record.get("word_count_mode")
+            == communication_workflow["word_count_mode"]
         ):
             findings["canonical_view_violation_cases"].add(case_id)
         diagrams = record.get("diagrams", [])
@@ -828,7 +987,8 @@ def _score_observation(
             findings["visual_budget_violation_cases"].add(case_id)
         for diagram in diagrams:
             if (
-                diagram.get("relationship_count", 0) < communication_workflow["diagram_min_relationships"]
+                diagram.get("relationship_count", 0)
+                < communication_workflow["diagram_min_relationships"]
                 or diagram.get("useful") is not True
                 or diagram.get("conclusion_adjacent") is not True
             ):
@@ -838,8 +998,17 @@ def _score_observation(
     if case_id == "C-05":
         lifecycle = manifest["lifecycle_workflow"]  # type: ignore[index]
         artifact_events = _sorted_events(observation, "artifact_events")
-        candidate = next((event for event in artifact_events if event.get("event") == "candidate-presented"), None)
-        menus = [event for event in transitions if event.get("event") == "candidate-menu"]
+        candidate = next(
+            (
+                event
+                for event in artifact_events
+                if event.get("event") == "candidate-presented"
+            ),
+            None,
+        )
+        menus = [
+            event for event in transitions if event.get("event") == "candidate-menu"
+        ]
         menu = menus[0] if menus else None
         promotion_menu = next(
             (
@@ -850,9 +1019,30 @@ def _score_observation(
             ),
             None,
         )
-        critical_review = next((event for event in transitions if event.get("event") == lifecycle["critical_review_event"]), None)
-        critical_finding = next((event for event in transitions if event.get("event") == lifecycle["critical_finding_event"]), None)
-        realignment = next((event for event in transitions if event.get("event") == lifecycle["realignment_event"]), None)
+        critical_review = next(
+            (
+                event
+                for event in transitions
+                if event.get("event") == lifecycle["critical_review_event"]
+            ),
+            None,
+        )
+        critical_finding = next(
+            (
+                event
+                for event in transitions
+                if event.get("event") == lifecycle["critical_finding_event"]
+            ),
+            None,
+        )
+        realignment = next(
+            (
+                event
+                for event in transitions
+                if event.get("event") == lifecycle["realignment_event"]
+            ),
+            None,
+        )
         disposition_events = [
             event
             for event in transitions
@@ -903,11 +1093,14 @@ def _score_observation(
             findings["grill_me_routing_violation_cases"].add(case_id)
         for event in grill_events:
             if event.get("repeat") is True:
-                eligible_ids = set(str(item) for item in event.get("eligible_decision_ids", []))
+                eligible_ids = set(
+                    str(item) for item in event.get("eligible_decision_ids", [])
+                )
                 question_decision_ids = {
                     str(question["decision_id"])
                     for question in questions
-                    if str(question["question_id"]) in set(str(item) for item in event.get("question_ids", []))
+                    if str(question["question_id"])
+                    in set(str(item) for item in event.get("question_ids", []))
                 }
                 if not eligible_ids or eligible_ids != question_decision_ids:
                     findings["grill_me_routing_violation_cases"].add(case_id)
@@ -924,16 +1117,20 @@ def _score_observation(
         if critical_review is not None:
             lenses = critical_review.get("lenses")
             expected_lenses = list(lifecycle["review_lenses"])
-            lens_names = [
-                str(lens.get("name"))
-                for lens in lenses
-                if isinstance(lens, Mapping)
-            ] if isinstance(lenses, list) else []
-            lateral_types = {
-                str(lens.get("type"))
-                for lens in lenses
-                if isinstance(lens, Mapping) and lens.get("name") == "lateral"
-            } if isinstance(lenses, list) else set()
+            lens_names = (
+                [str(lens.get("name")) for lens in lenses if isinstance(lens, Mapping)]
+                if isinstance(lenses, list)
+                else []
+            )
+            lateral_types = (
+                {
+                    str(lens.get("type"))
+                    for lens in lenses
+                    if isinstance(lens, Mapping) and lens.get("name") == "lateral"
+                }
+                if isinstance(lenses, list)
+                else set()
+            )
             finding_events = [
                 event
                 for event in transitions
@@ -977,7 +1174,9 @@ def _score_observation(
         for override in overrides:
             overridden_gate = override.get("gate")
             named_action = override.get("named_action")
-            preserved_gates = set(str(item) for item in override.get("preserved_gates", []))
+            preserved_gates = set(
+                str(item) for item in override.get("preserved_gates", [])
+            )
             if (
                 override.get("explicit") is not True
                 or overridden_gate not in expected_gates
@@ -1005,7 +1204,9 @@ def _score_observation(
         ):
             findings["menu_projection_violation_cases"].add(case_id)
 
-        saves = [event for event in artifact_events if event.get("event") == "artifact-saved"]
+        saves = [
+            event for event in artifact_events if event.get("event") == "artifact-saved"
+        ]
         if (
             len(saves) != 1
             or critical_review is None
@@ -1038,7 +1239,9 @@ def _score_observation(
         ):
             findings["lifecycle_order_violation_cases"].add(case_id)
         if any(
-            set(lifecycle["promotion_options"]).issubset(set(menu_item.get("options", [])))
+            set(lifecycle["promotion_options"]).issubset(
+                set(menu_item.get("options", []))
+            )
             and (
                 critical_review is None
                 or _event_index(menu_item) <= _event_index(critical_review)
@@ -1070,7 +1273,8 @@ def _score_observation(
                 or not isinstance(dispositions, Mapping)
                 or set(dispositions) != set(finding_ids)
                 or any(
-                    dispositions.get(finding_id) not in lifecycle["allowed_dispositions"]
+                    dispositions.get(finding_id)
+                    not in lifecycle["allowed_dispositions"]
                     for finding_id in finding_ids
                 )
                 or realignment is None
@@ -1097,10 +1301,14 @@ def _score_observation(
         if dependencies_open:
             findings["premature_dependent_question_cases"].add(case_id)
         question_index = _event_index(question)
-        status = _status_at(str(question["decision_id"]), question_index, decisions, transitions)
+        status = _status_at(
+            str(question["decision_id"]), question_index, decisions, transitions
+        )
         if status in TERMINAL_STATES or status == "blocked-later":
             findings["unmapped_question_cases"].add(case_id)
-        if not any(_event_index(event) <= question_index for event in question_owner_events):
+        if not any(
+            _event_index(event) <= question_index for event in question_owner_events
+        ):
             findings["protected_workflow_violation_cases"].add(case_id)
         if not dependencies_open and status not in TERMINAL_STATES:
             eligible_index = float(question["eligible_event_index"])
@@ -1118,27 +1326,35 @@ def _score_observation(
             if _final_status(decision_id, decision, transitions) not in TERMINAL_STATES:
                 findings["uncovered_material_root_cases"].add(case_id)
 
-    reopen_events = [event for event in transitions if event.get("event") == "decision-reopened"]
+    reopen_events = [
+        event for event in transitions if event.get("event") == "decision-reopened"
+    ]
     for event in reopen_events:
         decision_id = str(event.get("decision_id", ""))
         decision = decisions.get(decision_id)
         trigger = event.get("trigger")
         evidence_ids = event.get("evidence_ids", [])
         condition = decision.get("reopen_condition") if decision else None
-        evidence_present = bool(evidence_ids) and all(str(item) in evidence for item in evidence_ids)
+        evidence_present = bool(evidence_ids) and all(
+            str(item) in evidence for item in evidence_ids
+        )
         if (
             decision is None
             or trigger not in REOPEN_TRIGGERS
             or not isinstance(condition, str)
             or trigger != condition
-            or (trigger in {"new-evidence", "critical-finding"} and not evidence_present)
+            or (
+                trigger in {"new-evidence", "critical-finding"} and not evidence_present
+            )
         ):
             findings["unjustified_reopen_cases"].add(case_id)
 
     status_events_by_decision: dict[str, list[Mapping[str, object]]] = {}
     for event in transitions:
         if event.get("event") == "decision-status":
-            status_events_by_decision.setdefault(str(event.get("decision_id")), []).append(event)
+            status_events_by_decision.setdefault(
+                str(event.get("decision_id")), []
+            ).append(event)
     for decision_id, status_events in status_events_by_decision.items():
         rejected_index: float | None = None
         for status_event in status_events:
@@ -1161,7 +1377,14 @@ def _score_observation(
             event for event in transitions if event.get("event") == "internal-challenge"
         ]
         valid_challenge = any(
-            event.get("dimension") in {"actor", "mechanism", "constraint", "causal-assumption", "causal_assumption"}
+            event.get("dimension")
+            in {
+                "actor",
+                "mechanism",
+                "constraint",
+                "causal-assumption",
+                "causal_assumption",
+            }
             and event.get("changed_from") != event.get("changed_to")
             and bool(event.get("evidence_ids"))
             for event in challenge_events
@@ -1179,14 +1402,20 @@ def _score_observation(
                 and _decision_has_support(decisions[str(alternative)], evidence)
                 for alternative in alternatives
             )
-            if not isinstance(credible_count, int) or credible_count < 2 or len(alternatives) < 2 or not supported:
+            if (
+                not isinstance(credible_count, int)
+                or credible_count < 2
+                or len(alternatives) < 2
+                or not supported
+            ):
                 findings["visible_alternative_violation_cases"].add(case_id)
 
     requirements = manifest["case_requirements"][case_id]  # type: ignore[index]
     if requirements.get("requires_material_unknown_question"):
         has_unknown_question = any(
             any(
-                str(evidence_id) in evidence and evidence[str(evidence_id)]["class"] == "Unknowns"
+                str(evidence_id) in evidence
+                and evidence[str(evidence_id)]["class"] == "Unknowns"
                 for evidence_id in question["evidence_ids"]
             )
             and str(question["decision_id"]) in decisions
@@ -1199,16 +1428,16 @@ def _score_observation(
     if case_id == "C-04":
         required_boundaries = requirements.get("requires_capsule_boundaries", [])
         capsule_events = [
-            event
-            for event in transitions
-            if event.get("event") == "capsule-written"
+            event for event in transitions if event.get("event") == "capsule-written"
         ]
         by_boundary = {str(event.get("boundary")): event for event in capsule_events}
         for boundary in required_boundaries:
             event = by_boundary.get(str(boundary))
             capsule = event.get("capsule") if event else None
-            if event is None or not isinstance(capsule, Mapping) or any(
-                field not in capsule for field in CAPSULE_FIELDS
+            if (
+                event is None
+                or not isinstance(capsule, Mapping)
+                or any(field not in capsule for field in CAPSULE_FIELDS)
             ):
                 findings["state_continuity_violation_cases"].add(case_id)
                 continue
@@ -1258,16 +1487,41 @@ def _score_observation(
 
     if case_id == "C-05":
         artifacts = _sorted_events(observation, "artifact_events")
-        candidate = next((event for event in artifacts if event.get("event") == "candidate-presented"), None)
-        accepted = next((event for event in artifacts if event.get("event") == "candidate-accepted"), None)
-        choices = [event for event in artifacts if event.get("event") == "critical-choice"]
-        integrations = [event for event in artifacts if event.get("event") == "critical-findings-integrated"]
+        candidate = next(
+            (
+                event
+                for event in artifacts
+                if event.get("event") == "candidate-presented"
+            ),
+            None,
+        )
+        accepted = next(
+            (
+                event
+                for event in artifacts
+                if event.get("event") == "candidate-accepted"
+            ),
+            None,
+        )
+        choices = [
+            event for event in artifacts if event.get("event") == "critical-choice"
+        ]
+        integrations = [
+            event
+            for event in artifacts
+            if event.get("event") == "critical-findings-integrated"
+        ]
         saves = [event for event in artifacts if event.get("event") == "artifact-saved"]
-        replays = [event for event in artifacts if event.get("event") == "planning-replay"]
+        replays = [
+            event for event in artifacts if event.get("event") == "planning-replay"
+        ]
         explicit_choice = next(
             (event for event in choices if event.get("explicit") is True), None
         )
-        if requirements.get("requires_explicit_critical_choice") and explicit_choice is None:
+        if (
+            requirements.get("requires_explicit_critical_choice")
+            and explicit_choice is None
+        ):
             findings["critical_choice_violation_cases"].add(case_id)
         if integrations and (
             explicit_choice is None
@@ -1292,8 +1546,10 @@ def _score_observation(
             for save in saves
         ):
             findings["save_semantics_violation_cases"].add(case_id)
-        if len(saves) != 1 or not replays or any(
-            replay.get("uses_transcript") is not False for replay in replays
+        if (
+            len(saves) != 1
+            or not replays
+            or any(replay.get("uses_transcript") is not False for replay in replays)
         ):
             findings["artifact_replay_violation_cases"].add(case_id)
         if (
@@ -1315,7 +1571,8 @@ def _score_observation(
             findings["protected_workflow_violation_cases"].add(case_id)
     for event in observation["artifact_events"]:  # type: ignore[union-attr]
         if event.get("event") == "critical-findings-integrated" and not any(
-            choice.get("explicit") is True and _event_index(choice) < _event_index(event)
+            choice.get("explicit") is True
+            and _event_index(choice) < _event_index(event)
             for choice in observation["artifact_events"]  # type: ignore[union-attr]
             if choice.get("event") == "critical-choice"
         ):

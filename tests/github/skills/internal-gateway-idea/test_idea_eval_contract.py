@@ -11,7 +11,6 @@ from types import ModuleType
 import pytest
 import yaml
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -20,7 +19,9 @@ REPO_ROOT = next(
 EVALUATION_ROOT = REPO_ROOT / "tests/github/skills/internal-gateway-idea/evaluation"
 MANIFEST_PATH = EVALUATION_ROOT / "benchmark.json"
 SCORER_PATH = EVALUATION_ROOT / "score_idea_eval.py"
-PUBLIC_WRAPPER_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/agents/openai.yaml"
+PUBLIC_WRAPPER_PATH = (
+    REPO_ROOT / ".github/skills/internal-gateway-idea/agents/openai.yaml"
+)
 REQUIRED_RECORD_KEYS = (
     "decision_records",
     "question_records",
@@ -53,7 +54,9 @@ def load_scorer() -> ModuleType:
     return module
 
 
-def _evidence(case_id: str, decision_ids: dict[str, list[str]]) -> list[dict[str, object]]:
+def _evidence(
+    case_id: str, decision_ids: dict[str, list[str]]
+) -> list[dict[str, object]]:
     prefix = case_id.replace("-", "")
     return [
         {
@@ -133,9 +136,7 @@ def _question(
         "kind": kind,
         "event_index": event_index,
         "eligible_event_index": (
-            eligible_event_index
-            if eligible_event_index is not None
-            else event_index
+            eligible_event_index if eligible_event_index is not None else event_index
         ),
         "block_id": block_id or f"{question_id}-BLOCK",
         "evidence_ids": evidence_ids,
@@ -171,26 +172,42 @@ def _candidate_menu(
     critical_review_complete: bool,
     dispositions_complete: bool,
 ) -> dict[str, object]:
-    options = ["continue", "critical-review", "realign", "+spec", "+plan", "save", "close"]
+    options = [
+        "continue",
+        "critical-review",
+        "realign",
+        "+spec",
+        "+plan",
+        "save",
+        "close",
+    ]
     locks = {
         "continue": {"locked": False, "reason": "continue analysis"},
         "critical-review": {"locked": False, "reason": "review remains available"},
         "realign": {
             "locked": not findings_present,
-            "reason": "no findings exist" if not findings_present else "findings are available",
+            "reason": "no findings exist"
+            if not findings_present
+            else "findings are available",
         },
         "+spec": {
             "locked": not critical_review_complete,
-            "reason": "critical review is pending" if not critical_review_complete else "review complete",
+            "reason": "critical review is pending"
+            if not critical_review_complete
+            else "review complete",
         },
         "+plan": {
             "locked": not critical_review_complete,
-            "reason": "critical review is pending" if not critical_review_complete else "review complete",
+            "reason": "critical review is pending"
+            if not critical_review_complete
+            else "review complete",
         },
         "save": {"locked": False, "reason": "save is a provisional checkpoint"},
         "close": {
             "locked": not critical_review_complete,
-            "reason": "critical review is pending" if not critical_review_complete else "close is available",
+            "reason": "critical review is pending"
+            if not critical_review_complete
+            else "close is available",
         },
     }
     return {
@@ -258,11 +275,11 @@ def _recovery_record(
         if decision["status"] == "blocked-later"
     ]
     snapshot = next(
-        event for event in authority_events if event.get("event") == "authority-snapshot"
+        event
+        for event in authority_events
+        if event.get("event") == "authority-snapshot"
     )
-    evidence_anchors = sorted(
-        {str(item["evidence_id"]) for item in evidence_records}
-    )
+    evidence_anchors = sorted({str(item["evidence_id"]) for item in evidence_records})
     return {
         "record_id": f"{case_id}-recovery",
         "event_index": 99,
@@ -433,16 +450,16 @@ def passing_run() -> dict[str, object]:
     for event_index, boundary in enumerate(
         ("pause", "compaction", "subject-change", "mode-change"), start=4
     ):
-        subject = "C-04-next" if boundary in {"subject-change", "mode-change"} else "C-04"
+        subject = (
+            "C-04-next" if boundary in {"subject-change", "mode-change"} else "C-04"
+        )
         mode = "analysis-and-artifact" if boundary == "mode-change" else "analysis-only"
         c04_transitions.append(
             {
                 "event": "capsule-written",
                 "boundary": boundary,
                 "event_index": event_index,
-                "capsule": _capsule(
-                    "C-04", event_index, subject=subject, mode=mode
-                ),
+                "capsule": _capsule("C-04", event_index, subject=subject, mode=mode),
             }
         )
 
@@ -451,7 +468,9 @@ def passing_run() -> dict[str, object]:
             _observation(
                 "C-01",
                 [
-                    _decision(c01_fact, "resolved-from-evidence", evidence_ids=["C01-facts"]),
+                    _decision(
+                        c01_fact, "resolved-from-evidence", evidence_ids=["C01-facts"]
+                    ),
                     _decision(c01_unknown, "accepted", evidence_ids=["C01-unknowns"]),
                     _decision(c01_unknown_2, "accepted", evidence_ids=["C01-unknowns"]),
                 ],
@@ -474,11 +493,36 @@ def passing_run() -> dict[str, object]:
                     ),
                 ],
                 [
-                    _status_event(c01_fact, "open", "resolved-from-evidence", 2, evidence_ids=["C01-facts"]),
-                    _status_event(c01_unknown, "open", "accepted", 4, trigger="explicit-user-change"),
-                    _status_event(c01_unknown_2, "open", "accepted", 4, trigger="explicit-user-change"),
+                    _status_event(
+                        c01_fact,
+                        "open",
+                        "resolved-from-evidence",
+                        2,
+                        evidence_ids=["C01-facts"],
+                    ),
+                    _status_event(
+                        c01_unknown,
+                        "open",
+                        "accepted",
+                        4,
+                        trigger="explicit-user-change",
+                    ),
+                    _status_event(
+                        c01_unknown_2,
+                        "open",
+                        "accepted",
+                        4,
+                        trigger="explicit-user-change",
+                    ),
                 ],
-                [{"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "event_index": 3}],
+                [
+                    {
+                        "event": "route-selected",
+                        "owner": "/grill-me",
+                        "mode": "analysis-only",
+                        "event_index": 3,
+                    }
+                ],
                 [],
                 {
                     "Facts": [c01_fact],
@@ -500,10 +544,25 @@ def passing_run() -> dict[str, object]:
                 [_question("C02-Q1", c02_root, 2, ["C02-unknowns"])],
                 [
                     _status_event(c02_dependent, "open", "blocked-later", 2),
-                    _status_event(c02_root, "open", "accepted", 3, trigger="explicit-user-change"),
-                    _status_event(c02_dependent, "blocked-later", "resolved-from-evidence", 4, evidence_ids=["C02-facts"]),
+                    _status_event(
+                        c02_root, "open", "accepted", 3, trigger="explicit-user-change"
+                    ),
+                    _status_event(
+                        c02_dependent,
+                        "blocked-later",
+                        "resolved-from-evidence",
+                        4,
+                        evidence_ids=["C02-facts"],
+                    ),
                 ],
-                [{"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "event_index": 2}],
+                [
+                    {
+                        "event": "route-selected",
+                        "owner": "/grill-me",
+                        "mode": "analysis-only",
+                        "event_index": 2,
+                    }
+                ],
                 [],
                 {"Facts": [c02_dependent], "Unknowns": [c02_root]},
             ),
@@ -511,8 +570,18 @@ def passing_run() -> dict[str, object]:
                 "C-03",
                 [
                     _decision(c03_root, "accepted", evidence_ids=["C03-reports"]),
-                    _decision("C03-ALT-A", "rejected", kind="alternative", evidence_ids=["C03-reports"]),
-                    _decision("C03-ALT-B", "rejected", kind="alternative", evidence_ids=["C03-constraints"]),
+                    _decision(
+                        "C03-ALT-A",
+                        "rejected",
+                        kind="alternative",
+                        evidence_ids=["C03-reports"],
+                    ),
+                    _decision(
+                        "C03-ALT-B",
+                        "rejected",
+                        kind="alternative",
+                        evidence_ids=["C03-constraints"],
+                    ),
                 ],
                 [_question("C03-Q1", c03_root, 3, ["C03-reports"])],
                 [
@@ -528,7 +597,9 @@ def passing_run() -> dict[str, object]:
                     },
                     _status_event("C03-ALT-A", "open", "rejected", 3),
                     _status_event("C03-ALT-B", "open", "rejected", 3),
-                    _status_event(c03_root, "open", "accepted", 4, trigger="explicit-user-change"),
+                    _status_event(
+                        c03_root, "open", "accepted", 4, trigger="explicit-user-change"
+                    ),
                     {
                         "event": "decision-reopened",
                         "decision_id": c03_root,
@@ -536,11 +607,29 @@ def passing_run() -> dict[str, object]:
                         "trigger": "new-evidence",
                         "evidence_ids": ["C03-facts"],
                     },
-                    _status_event(c03_root, "open", "accepted", 6, trigger="new-evidence", evidence_ids=["C03-facts"]),
+                    _status_event(
+                        c03_root,
+                        "open",
+                        "accepted",
+                        6,
+                        trigger="new-evidence",
+                        evidence_ids=["C03-facts"],
+                    ),
                 ],
-                [{"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "event_index": 3}],
+                [
+                    {
+                        "event": "route-selected",
+                        "owner": "/grill-me",
+                        "mode": "analysis-only",
+                        "event_index": 3,
+                    }
+                ],
                 [],
-                {"Facts": [c03_root], "Reports": [c03_root, "C03-ALT-A"], "Constraints": ["C03-ALT-B"]},
+                {
+                    "Facts": [c03_root],
+                    "Reports": [c03_root, "C03-ALT-A"],
+                    "Constraints": ["C03-ALT-B"],
+                },
             ),
             _observation(
                 "C-04",
@@ -548,9 +637,27 @@ def passing_run() -> dict[str, object]:
                 [_question("C04-Q1", c04_root, 2, ["C04-unknowns"])],
                 c04_transitions,
                 [
-                    {"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "subject": "C-04", "event_index": 2},
-                    {"event": "subject-change", "owner": "internal-gateway-idea", "mode": "analysis-only", "subject": "C-04-next", "event_index": 6},
-                    {"event": "mode-change", "owner": "internal-gateway-idea", "mode": "analysis-and-artifact", "subject": "C-04-next", "event_index": 7},
+                    {
+                        "event": "route-selected",
+                        "owner": "/grill-me",
+                        "mode": "analysis-only",
+                        "subject": "C-04",
+                        "event_index": 2,
+                    },
+                    {
+                        "event": "subject-change",
+                        "owner": "internal-gateway-idea",
+                        "mode": "analysis-only",
+                        "subject": "C-04-next",
+                        "event_index": 6,
+                    },
+                    {
+                        "event": "mode-change",
+                        "owner": "internal-gateway-idea",
+                        "mode": "analysis-and-artifact",
+                        "subject": "C-04-next",
+                        "event_index": 7,
+                    },
                 ],
                 [],
                 {"Unknowns": [c04_root]},
@@ -571,7 +678,9 @@ def passing_run() -> dict[str, object]:
                         "eligible_decision_ids": [c05_root],
                         "repeat": False,
                     },
-                    _status_event(c05_root, "open", "accepted", 3, trigger="explicit-user-change"),
+                    _status_event(
+                        c05_root, "open", "accepted", 3, trigger="explicit-user-change"
+                    ),
                     _candidate_menu(
                         4,
                         phase="pre-review",
@@ -598,10 +707,18 @@ def passing_run() -> dict[str, object]:
                         "event_index": 6,
                         "finding_ids": ["C05-F1"],
                         "findings": [
-                            {"finding_id": "C05-F1", "classification": "acceptance-required"}
+                            {
+                                "finding_id": "C05-F1",
+                                "classification": "acceptance-required",
+                            }
                         ],
                     },
-                    {"event": "realignment", "event_index": 7, "explicit": True, "finding_ids": ["C05-F1"]},
+                    {
+                        "event": "realignment",
+                        "event_index": 7,
+                        "explicit": True,
+                        "finding_ids": ["C05-F1"],
+                    },
                     {
                         "event": "critical-disposition",
                         "event_index": 8,
@@ -627,14 +744,54 @@ def passing_run() -> dict[str, object]:
                         "explicit": True,
                     },
                 ],
-                [{"event": "route-selected", "owner": "/grill-me", "mode": "analysis-only", "event_index": 2}],
                 [
-                    {"event": "candidate-presented", "event_index": 4, "artifact_id": "C05-analysis"},
-                    {"event": "artifact-saved", "event_index": 4.5, "artifact_id": "C05-analysis", "path": "tmp/superpowers/specs/c05-analysis.md", "promotes": False, "checkpoint": True, "critical_review": "pending", "closes_findings": False, "authorizes": []},
-                    {"event": "candidate-accepted", "event_index": 10, "explicit": True, "artifact_id": "C05-analysis"},
-                    {"event": "critical-choice", "event_index": 11, "choice": "integrate", "explicit": True},
-                    {"event": "critical-findings-integrated", "event_index": 12, "artifact_id": "C05-analysis"},
-                    {"event": "planning-replay", "event_index": 14, "artifact_id": "C05-analysis", "uses_transcript": False},
+                    {
+                        "event": "route-selected",
+                        "owner": "/grill-me",
+                        "mode": "analysis-only",
+                        "event_index": 2,
+                    }
+                ],
+                [
+                    {
+                        "event": "candidate-presented",
+                        "event_index": 4,
+                        "artifact_id": "C05-analysis",
+                    },
+                    {
+                        "event": "artifact-saved",
+                        "event_index": 4.5,
+                        "artifact_id": "C05-analysis",
+                        "path": "tmp/superpowers/specs/c05-analysis.md",
+                        "promotes": False,
+                        "checkpoint": True,
+                        "critical_review": "pending",
+                        "closes_findings": False,
+                        "authorizes": [],
+                    },
+                    {
+                        "event": "candidate-accepted",
+                        "event_index": 10,
+                        "explicit": True,
+                        "artifact_id": "C05-analysis",
+                    },
+                    {
+                        "event": "critical-choice",
+                        "event_index": 11,
+                        "choice": "integrate",
+                        "explicit": True,
+                    },
+                    {
+                        "event": "critical-findings-integrated",
+                        "event_index": 12,
+                        "artifact_id": "C05-analysis",
+                    },
+                    {
+                        "event": "planning-replay",
+                        "event_index": 14,
+                        "artifact_id": "C05-analysis",
+                        "uses_transcript": False,
+                    },
                 ],
                 {"Unknowns": [c05_root]},
                 communication_records=[
@@ -717,7 +874,9 @@ def failing_run() -> dict[str, object]:
     )
 
     c05 = observations[4]
-    c02["recovery_records"][0]["authority_envelope"]["authorized_actions"] = ["write-code"]
+    c02["recovery_records"][0]["authority_envelope"]["authorized_actions"] = [
+        "write-code"
+    ]
     c01["authority_events"][2]["authorizes_mutation"] = True
     c02["authority_events"] = [
         event
@@ -736,7 +895,10 @@ def failing_run() -> dict[str, object]:
         if event.get("event") not in {"realignment", "critical-disposition"}
     ]
     for event in c05["transition_events"]:
-        if event.get("event") == "candidate-menu" and event.get("phase") == "pre-review":
+        if (
+            event.get("event") == "candidate-menu"
+            and event.get("phase") == "pre-review"
+        ):
             event["options"] = ["continue", "+spec", "+plan", "save", "close"]
         if event.get("event") == "gate-entered":
             event["gate"] = "ACCEPTANCE"
@@ -769,7 +931,9 @@ def failing_run() -> dict[str, object]:
     return run
 
 
-def test_new_records_cover_authority_lifecycle_and_communication_without_prose_matching() -> None:
+def test_new_records_cover_authority_lifecycle_and_communication_without_prose_matching() -> (
+    None
+):
     scorer = load_scorer()
 
     result = scorer.score(load_manifest(), passing_run())
@@ -824,7 +988,12 @@ def test_manifest_declares_cases_records_limits_and_forbidden_verdicts() -> None
     lifecycle = manifest["lifecycle_workflow"]
     assert lifecycle["disposition_event"] == "critical-disposition"
     assert lifecycle["promotion_options"] == ["+spec", "+plan"]
-    assert lifecycle["allowed_dispositions"] == ["integrate", "reject", "accept-risk", "route"]
+    assert lifecycle["allowed_dispositions"] == [
+        "integrate",
+        "reject",
+        "accept-risk",
+        "route",
+    ]
 
 
 def test_passing_records_are_accepted_without_claiming_runtime_evidence() -> None:
@@ -880,7 +1049,9 @@ def test_malformed_run_is_rejected_as_input_error() -> None:
         scorer.score(load_manifest(), future_eligibility)
 
 
-def _run_cli(tmp_path: Path, manifest: object, run: object) -> subprocess.CompletedProcess[str]:
+def _run_cli(
+    tmp_path: Path, manifest: object, run: object
+) -> subprocess.CompletedProcess[str]:
     manifest_file = tmp_path / "manifest.json"
     run_file = tmp_path / "run.json"
     manifest_file.write_text(json.dumps(manifest), encoding="utf-8")
@@ -934,7 +1105,9 @@ def test_cli_uses_exit_zero_one_and_two_for_accept_reject_and_malformed(
     assert malformed.stderr.startswith("error: ")
 
 
-def test_passing_records_expose_canonical_recovery_and_route_projection_findings() -> None:
+def test_passing_records_expose_canonical_recovery_and_route_projection_findings() -> (
+    None
+):
     scorer = load_scorer()
 
     result = scorer.score(load_manifest(), passing_run())
@@ -943,7 +1116,9 @@ def test_passing_records_expose_canonical_recovery_and_route_projection_findings
     assert result["route_projection_violation_cases"] == []
 
 
-def test_public_wrapper_projects_one_autonomous_route_without_brainstorming_handoff() -> None:
+def test_public_wrapper_projects_one_autonomous_route_without_brainstorming_handoff() -> (
+    None
+):
     metadata = yaml.safe_load(PUBLIC_WRAPPER_PATH.read_text(encoding="utf-8"))
     prompt = metadata["interface"]["default_prompt"]
 

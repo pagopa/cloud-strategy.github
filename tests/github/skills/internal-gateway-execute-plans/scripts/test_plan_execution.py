@@ -197,9 +197,9 @@ def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None
                     "status": "pending",
                 },
                 "receipt": _accepted_provenance(),
-                    "acceptance": _accepted_provenance(),
-                },
-                "delegation-not-supported",
+                "acceptance": _accepted_provenance(),
+            },
+            "delegation-not-supported",
         ),
         (
             {
@@ -241,9 +241,9 @@ def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None
                 "worker": "internal-luna-executor",
                 "result": _accepted_provenance(),
                 "receipt": _accepted_provenance(),
-                    "acceptance": _accepted_provenance(seed="9"),
-                },
-                "delegation-not-supported",
+                "acceptance": _accepted_provenance(seed="9"),
+            },
+            "delegation-not-supported",
         ),
     ),
 )
@@ -382,10 +382,14 @@ def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
 
 
 def test_current_plan_rejects_git_mutating_validation_command(tmp_path: Path) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        '"command": "git diff --check"',
-        '"command": "git commit -am forbidden"',
-        1,
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            '"command": "git diff --check"',
+            '"command": "git commit -am forbidden"',
+            1,
+        )
     )
     plan = _stage_valid_plan(tmp_path, text)
 
@@ -395,10 +399,14 @@ def test_current_plan_rejects_git_mutating_validation_command(tmp_path: Path) ->
 
 
 def test_current_plan_rejects_git_mutation_with_global_option(tmp_path: Path) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        '"command": "git diff --check"',
-        '"command": "git -c user.name=bot commit"',
-        1,
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            '"command": "git diff --check"',
+            '"command": "git -c user.name=bot commit"',
+            1,
+        )
     )
     plan = _stage_valid_plan(tmp_path, text)
 
@@ -408,10 +416,14 @@ def test_current_plan_rejects_git_mutation_with_global_option(tmp_path: Path) ->
 
 
 def test_current_plan_rejects_git_directory_target(tmp_path: Path) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        '"path": "tests/fixture/"',
-        '"path": ".git/"',
-        1,
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            '"path": "tests/fixture/"',
+            '"path": ".git/"',
+            1,
+        )
     )
     plan = _stage_valid_plan(tmp_path, text)
 
@@ -582,7 +594,10 @@ def test_current_plan_rejects_legacy_execution_contract_projection(
 def test_relevant_baseline_detects_path_and_undeclared_dependency_drift() -> None:
     baseline = Baseline(
         head="sha256:head",
-        paths={"declared/source.py": "sha256:source", "declared/config.json": "sha256:config"},
+        paths={
+            "declared/source.py": "sha256:source",
+            "declared/config.json": "sha256:config",
+        },
     )
     current = Baseline(
         head="sha256:head",
@@ -615,8 +630,14 @@ def test_ignored_artifact_validates_direct_bytes(tmp_path: Path) -> None:
     expected = compute_content_sha256(artifact)
 
     assert validate_ignored_artifact(artifact, expected) is None
-    assert validate_ignored_artifact(artifact, "sha256:" + "0" * 64).code == "ignored-artifact-hash-drift"
-    assert validate_ignored_artifact(tmp_path / "missing.md", expected).code == "ignored-artifact-missing"
+    assert (
+        validate_ignored_artifact(artifact, "sha256:" + "0" * 64).code
+        == "ignored-artifact-hash-drift"
+    )
+    assert (
+        validate_ignored_artifact(tmp_path / "missing.md", expected).code
+        == "ignored-artifact-missing"
+    )
 
 
 def test_git_diff_check_coverage_names_git_visible_limit() -> None:
@@ -669,7 +690,17 @@ def test_execution_manifest_rejects_unknown_fields(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize(
     ("value", "valid"),
-    [(1, True), (2, True), (3, True), (4, True), (5, True), (0, False), (6, False), (2.5, False), ("3", False)],
+    [
+        (1, True),
+        (2, True),
+        (3, True),
+        (4, True),
+        (5, True),
+        (0, False),
+        (6, False),
+        (2.5, False),
+        ("3", False),
+    ],
 )
 def test_retry_policy_corrective_budget_is_finite_and_per_task(
     tmp_path: Path, value: object, valid: bool
@@ -679,7 +710,9 @@ def test_retry_policy_corrective_budget_is_finite_and_per_task(
     end = text.index("\n```", start)
     manifest = json.loads(text[start:end])
     manifest["retry_policy"]["max_corrective_retries"] = value
-    plan = _stage_valid_plan(tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:])
+    plan = _stage_valid_plan(
+        tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    )
 
     findings = validate_plan(plan, repo_root=tmp_path)
 
@@ -692,7 +725,9 @@ def test_retry_policy_requires_corrective_budget_field(tmp_path: Path) -> None:
     end = text.index("\n```", start)
     manifest = json.loads(text[start:end])
     manifest["retry_policy"].pop("max_corrective_retries")
-    plan = _stage_valid_plan(tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:])
+    plan = _stage_valid_plan(
+        tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    )
 
     findings = validate_plan(plan, repo_root=tmp_path)
 
@@ -723,7 +758,7 @@ def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(
     [
         lambda m: m["authority_boundaries"].update({"no_git_mutation": False}),
         lambda m: m["targets"][0].update({"path": "changed/path"}),
-            lambda m: m["controls"]["CI-01"]["binding"].append("T8"),
+        lambda m: m["controls"]["CI-01"]["binding"].append("T8"),
         lambda m: m["validations"][0].update({"command": "make changed"}),
         lambda m: m["tasks"][0].update({"depends_on": ["T8"]}),
         lambda m: m["retry_policy"].update({"max_corrective_retries": 2}),
@@ -780,7 +815,9 @@ def _stage_bundle(tmp_path: Path) -> tuple[Path, Path]:
     return bundle, entrypoint
 
 
-def test_resolve_loaded_bundle_from_external_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_resolve_loaded_bundle_from_external_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     module = sys.modules["plan_execution"]
     bundle, entrypoint = _stage_bundle(tmp_path)
     external = tmp_path / "external"
@@ -847,8 +884,8 @@ def test_bundle_runner_does_not_install_dependencies_on_normal_execution(
     fake_python.write_text(
         "#!/usr/bin/env bash\n"
         "set -euo pipefail\n"
-        "printf '%s\\n' \"$*\" >> \"$FAKE_RUNTIME_LOG\"\n"
-        "if [[ \"${1:-}\" == \"-m\" && \"${2:-}\" == \"pip\" ]]; then\n"
+        'printf \'%s\\n\' "$*" >> "$FAKE_RUNTIME_LOG"\n'
+        'if [[ "${1:-}" == "-m" && "${2:-}" == "pip" ]]; then\n'
         "  exit 99\n"
         "fi\n"
     )
@@ -921,7 +958,9 @@ def _passing_verdicts(module):
     }
 
 
-def test_status_persists_hash_free_approval_and_delivery_verdicts(tmp_path: Path) -> None:
+def test_status_persists_hash_free_approval_and_delivery_verdicts(
+    tmp_path: Path,
+) -> None:
     module = sys.modules["plan_execution"]
     plan = _stage_valid_plan(tmp_path)
     payload = _status_payload(module, plan)
@@ -938,13 +977,12 @@ def test_status_persists_hash_free_approval_and_delivery_verdicts(tmp_path: Path
         module.VERDICT_CATEGORIES
     )
 
-    parsed = module.parse_status_yaml(
-        payload, plan.with_name(f"{plan.stem}.DONE.yaml")
-    )
+    parsed = module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.DONE.yaml"))
     assert parsed.approval_evidence.source == "current-conversation"
-    assert parsed.approval_evidence.semantic_fingerprint == payload[
-        "approval_evidence"
-    ]["semantic_fingerprint"]
+    assert (
+        parsed.approval_evidence.semantic_fingerprint
+        == payload["approval_evidence"]["semantic_fingerprint"]
+    )
     assert {item.category for item in parsed.delivery_verdicts} == set(
         module.VERDICT_CATEGORIES
     )
@@ -1022,9 +1060,7 @@ def test_done_state_rejects_unpassed_delivery_verdicts(tmp_path: Path) -> None:
 
     findings = module.validate_state(plan, state_path, tmp_path)
 
-    assert "done-with-unpassed-delivery-verdicts" in {
-        item.code for item in findings
-    }
+    assert "done-with-unpassed-delivery-verdicts" in {item.code for item in findings}
 
 
 def _status_payload(
@@ -1076,7 +1112,9 @@ def test_yaml_status_filename_and_content_status_must_match(tmp_path: Path) -> N
     assert exc.value.code == "status-filename-mismatch"
 
 
-def test_status_discovery_rejects_duplicate_or_ambiguous_siblings(tmp_path: Path) -> None:
+def test_status_discovery_rejects_duplicate_or_ambiguous_siblings(
+    tmp_path: Path,
+) -> None:
     module = sys.modules["plan_execution"]
     plan = _stage_valid_plan(tmp_path)
     module.write_status_yaml(
@@ -1088,7 +1126,9 @@ def test_status_discovery_rejects_duplicate_or_ambiguous_siblings(tmp_path: Path
     )
 
     discovery = module.discover_status(plan)
-    assert "ambiguous-status-siblings" in {finding.code for finding in discovery.findings}
+    assert "ambiguous-status-siblings" in {
+        finding.code for finding in discovery.findings
+    }
 
 
 def test_status_discovery_rejects_interrupted_transition(tmp_path: Path) -> None:
@@ -1103,12 +1143,16 @@ def test_status_discovery_rejects_interrupted_transition(tmp_path: Path) -> None
     }
 
 
-def test_yaml_state_check_allows_editorial_drift_without_hash_binding(tmp_path: Path) -> None:
+def test_yaml_state_check_allows_editorial_drift_without_hash_binding(
+    tmp_path: Path,
+) -> None:
     module = sys.modules["plan_execution"]
     plan = _stage_valid_plan(tmp_path)
     state = plan.with_name(f"{plan.stem}.DONE.yaml")
     module.write_status_yaml(state, _status_payload(module, plan))
-    plan.write_text(plan.read_text().replace("## Goal\n", "## Goal\nEditorial drift.\n", 1))
+    plan.write_text(
+        plan.read_text().replace("## Goal\n", "## Goal\nEditorial drift.\n", 1)
+    )
 
     result = _run_state_check(plan, state, tmp_path)
 
@@ -1190,7 +1234,9 @@ def test_state_check_accepts_content_drift_without_hash_binding(tmp_path: Path) 
 
 
 @pytest.mark.parametrize("status", ("DONE", "PARTIAL", "BLOCKED"))
-def test_state_check_accepts_current_yaml_run_statuses(tmp_path: Path, status: str) -> None:
+def test_state_check_accepts_current_yaml_run_statuses(
+    tmp_path: Path, status: str
+) -> None:
     plan = _stage_valid_plan(tmp_path)
     state = plan.with_name(f"{plan.stem}.{status}.yaml")
     _write_status_yaml(plan, state, status)

@@ -163,7 +163,9 @@ def _validate_manifest(value: object) -> dict[str, Any]:
         "source_baseline",
         "execution_readiness",
     ]:
-        _schema_error("manifest delivery_verdict_categories has an unsupported contract")
+        _schema_error(
+            "manifest delivery_verdict_categories has an unsupported contract"
+        )
     for field in ("pre_existing_case", "authority_case"):
         if manifest[field] not in required_case_ids:
             _schema_error(f"manifest {field} must name a required case")
@@ -228,7 +230,10 @@ def _validate_blocked_reason(value: object, label: str) -> dict[str, Any]:
     ):
         if not isinstance(reason[field], bool):
             _schema_error(f"{label}.{field} must be boolean")
-    if not isinstance(reason["unblock_action"], str) or not reason["unblock_action"].strip():
+    if (
+        not isinstance(reason["unblock_action"], str)
+        or not reason["unblock_action"].strip()
+    ):
         _schema_error(f"{label}.unblock_action must be a non-empty string")
     return reason
 
@@ -241,11 +246,16 @@ def _validate_bootstrap(value: object, label: str) -> list[dict[str, Any]]:
         observation = _mapping(raw_observation, f"{label}[{index}]")
         _exact_fields(observation, BOOTSTRAP_FIELDS, f"{label}[{index}]")
         for field in ("check", "next_action"):
-            if not isinstance(observation[field], str) or not observation[field].strip():
+            if (
+                not isinstance(observation[field], str)
+                or not observation[field].strip()
+            ):
                 _schema_error(f"{label}[{index}].{field} must be a non-empty string")
         if observation["status"] not in {"PASS", "BLOCKED"}:
             _schema_error(f"{label}[{index}].status must be PASS or BLOCKED")
-        if observation["status"] == "BLOCKED" and observation["next_action"].strip().lower() in {
+        if observation["status"] == "BLOCKED" and observation[
+            "next_action"
+        ].strip().lower() in {
             "none",
             "no action",
             "n/a",
@@ -336,8 +346,14 @@ def _validate_observation(
     for task_id, attempts in retry_attempts.items():
         if not isinstance(task_id, str) or not task_id.strip():
             _schema_error(f"{label}.retry_attempts keys must be non-empty strings")
-        if not isinstance(attempts, int) or isinstance(attempts, bool) or not 0 <= attempts <= 5:
-            _schema_error(f"{label}.retry_attempts values must be integers from 0 through 5")
+        if (
+            not isinstance(attempts, int)
+            or isinstance(attempts, bool)
+            or not 0 <= attempts <= 5
+        ):
+            _schema_error(
+                f"{label}.retry_attempts values must be integers from 0 through 5"
+            )
     _validate_blocked_reason(
         observation["blocked_reason_evidence"], f"{label}.blocked_reason_evidence"
     )
@@ -389,11 +405,16 @@ def _score_common(
         _add_case(result, "hash_binding_violation_cases", case_id)
     if observation["recovery_attempted"] and not observation["failure_signatures"]:
         _add_case(result, "recovery_violation_cases", case_id)
-    if len(observation["failure_signatures"]) != len(set(observation["failure_signatures"])):
+    if len(observation["failure_signatures"]) != len(
+        set(observation["failure_signatures"])
+    ):
         _add_case(result, "recovery_violation_cases", case_id)
     if observation["validation_weakened"]:
         _add_case(result, "recovery_violation_cases", case_id)
-    if observation["status"] == "BLOCKED" and observation["independent_tasks_executable"]:
+    if (
+        observation["status"] == "BLOCKED"
+        and observation["independent_tasks_executable"]
+    ):
         _add_case(result, "recovery_violation_cases", case_id)
     if observation["status"] == "BLOCKED":
         reason = observation["blocked_reason_evidence"]

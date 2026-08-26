@@ -88,7 +88,9 @@ def test_writer_producer_does_not_import_executor_private_code() -> None:
         for alias in node.names
     }
 
-    assert not any("internal-gateway-execute-plans" in module for module in imported_modules)
+    assert not any(
+        "internal-gateway-execute-plans" in module for module in imported_modules
+    )
     assert "plan_execution" not in imported_names
 
 
@@ -101,14 +103,12 @@ def test_writer_fixture_emits_manifest_only() -> None:
 
 
 def test_gateway_normative_manifest_contracts_remain_equal() -> None:
-    executor = (
-        EXECUTOR_BUNDLE / "references/manifest-v3.md"
-    ).read_text(encoding="utf-8")
+    executor = (EXECUTOR_BUNDLE / "references/manifest-v3.md").read_text(
+        encoding="utf-8"
+    )
     writer = (BUNDLE / "references/manifest-v3.md").read_text(encoding="utf-8")
 
-    assert re.sub(r"\s+", " ", executor).strip() == re.sub(
-        r"\s+", " ", writer
-    ).strip()
+    assert re.sub(r"\s+", " ", executor).strip() == re.sub(r"\s+", " ", writer).strip()
 
 
 def test_manifest_references_are_local_and_cover_normative_contract() -> None:
@@ -139,7 +139,9 @@ def test_manifest_references_are_local_and_cover_normative_contract() -> None:
     writer_text = writer_reference.read_text(encoding="utf-8")
     executor_text = executor_reference.read_text(encoding="utf-8")
     assert required_terms <= set(re.findall(r"[A-Za-z_]+(?: [A-Za-z_]+)?", writer_text))
-    assert required_terms <= set(re.findall(r"[A-Za-z_]+(?: [A-Za-z_]+)?", executor_text))
+    assert required_terms <= set(
+        re.findall(r"[A-Za-z_]+(?: [A-Za-z_]+)?", executor_text)
+    )
     normalize = lambda text: re.sub(r"\s+", " ", text).strip()
     assert normalize(writer_text) == normalize(executor_text)
 
@@ -165,9 +167,7 @@ def test_always_loaded_gateway_surfaces_keep_routing_and_shrink() -> None:
 def test_writer_documents_repository_preflight_fields() -> None:
     text = (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
     headings = {
-        line.lstrip("#").strip()
-        for line in text.splitlines()
-        if line.startswith("#")
+        line.lstrip("#").strip() for line in text.splitlines() if line.startswith("#")
     }
     preflight = text.split("## Repository Preflight", 1)[1].split("## ", 1)[0]
     fields = {
@@ -223,7 +223,9 @@ def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> No
     assert writer_manifest["retry_policy"]["max_corrective_retries"] == 3
     assert executor_manifest["retry_policy"]["max_corrective_retries"] == 3
     assert "semantic_fingerprint" in (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
-    assert "content hash" not in (BUNDLE / "SKILL.md").read_text(encoding="utf-8").lower()
+    assert (
+        "content hash" not in (BUNDLE / "SKILL.md").read_text(encoding="utf-8").lower()
+    )
     assert "## Execution Contract" not in executor_fixture
     assert "schema_version: 2" in executor_fixture
     assert ".github/skills/internal-gateway-writing-plans/SKILL.md" in inventory
@@ -317,6 +319,5 @@ def test_executor_blocks_unsupported_delegated_manifest_tuple(tmp_path: Path) ->
     assert result.returncode != 0
     payload = json.loads(result.stdout)
     assert any(
-        finding["code"] == "delegation-not-supported"
-        for finding in payload["findings"]
+        finding["code"] == "delegation-not-supported" for finding in payload["findings"]
     )

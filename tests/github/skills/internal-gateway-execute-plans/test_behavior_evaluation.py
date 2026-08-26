@@ -45,7 +45,9 @@ def _load_scorer():
 
 
 def _load_executor():
-    spec = importlib.util.spec_from_file_location("plan_execution_eval", EXECUTOR_SCRIPT)
+    spec = importlib.util.spec_from_file_location(
+        "plan_execution_eval", EXECUTOR_SCRIPT
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -62,9 +64,7 @@ def _observation(case_id: str, status: str) -> dict[str, object]:
             "check": "local-preflight",
             "status": "BLOCKED" if status == "BLOCKED" else "PASS",
             "next_action": (
-                "Request explicit scope approval."
-                if status == "BLOCKED"
-                else "none"
+                "Request explicit scope approval." if status == "BLOCKED" else "none"
             ),
         }
     ]
@@ -298,12 +298,16 @@ def test_ten_workflow_cases_have_one_observable_seam_and_pass_signal() -> None:
         "CASE_9_UNCHANGED_EVIDENCE",
         "CASE_10_LOCAL_PROVENANCE_CONTRADICTION",
     }
-    assert all(item["seam"] in {
-        "producer-routing",
-        "runtime-only",
-        "critic-ledger",
-        "executor-preflight",
-    } for item in observations)
+    assert all(
+        item["seam"]
+        in {
+            "producer-routing",
+            "runtime-only",
+            "critic-ledger",
+            "executor-preflight",
+        }
+        for item in observations
+    )
     assert all(item["pass_signal"] for item in observations)
 
 
@@ -532,7 +536,10 @@ def test_bootstrap_collects_local_checks_then_stops_before_external_work() -> No
 
     result = executor.run_local_bootstrap(checks)
 
-    assert [item["check"] for item in result] == ["bundle-resolution", "manifest-binding"]
+    assert [item["check"] for item in result] == [
+        "bundle-resolution",
+        "manifest-binding",
+    ]
     assert result[-1]["status"] == "BLOCKED"
 
 
@@ -585,21 +592,19 @@ def test_yaml_status_cases_preserve_five_verdict_categories() -> None:
         parsed = executor.parse_status_yaml(
             payload, plan.with_name(f"{plan.stem}.{status}.yaml")
         )
-        delivery = executor.build_verdict_payload(
-            executor.VERDICT_CATEGORIES, verdicts
-        )
+        delivery = executor.build_verdict_payload(executor.VERDICT_CATEGORIES, verdicts)
 
         assert parsed.status == status
         assert set(delivery["verdicts"]) == set(executor.VERDICT_CATEGORIES)
         assert "validated" not in json.dumps(delivery).lower()
 
 
-def test_aggregate_verdict_stays_inconclusive_for_missing_or_unresolved_categories() -> None:
+def test_aggregate_verdict_stays_inconclusive_for_missing_or_unresolved_categories() -> (
+    None
+):
     executor = _load_executor()
     verdicts = {
-        "structure": executor.Verdict(
-            "structure", "passed", "manifest parsed", "none"
-        ),
+        "structure": executor.Verdict("structure", "passed", "manifest parsed", "none"),
         "semantic_review": executor.Verdict(
             "semantic_review", "inconclusive", "no review receipt", "review missing"
         ),
@@ -616,9 +621,7 @@ def test_aggregate_verdict_stays_inconclusive_for_missing_or_unresolved_categori
 
 
 def test_structured_branches_preserve_residual_and_authority_limits() -> None:
-    observations = {
-        item["case_id"]: item for item in _passing_run()["observations"]
-    }
+    observations = {item["case_id"]: item for item in _passing_run()["observations"]}
 
     residual = observations["PRE_EXISTING_FAILURE_RESIDUAL"]
     blocked = observations["AUTHORITY_GAP_BLOCKED"]
@@ -661,7 +664,13 @@ def _writer_route(
 ) -> dict[str, object]:
     gate_passed = all(
         value_gate.get(field, False)
-        for field in ("autonomous", "verifiable", "bounded", "material_value", "off_critical_path")
+        for field in (
+            "autonomous",
+            "verifiable",
+            "bounded",
+            "material_value",
+            "off_critical_path",
+        )
     )
     if (
         not parent_has_decisions
@@ -682,7 +691,9 @@ def _writer_route(
     }
 
 
-def _critic_followup(previous: dict[str, object], current: dict[str, object]) -> dict[str, str]:
+def _critic_followup(
+    previous: dict[str, object], current: dict[str, object]
+) -> dict[str, str]:
     if (
         previous["unit_id"] == current["unit_id"]
         and previous["evidence_digest"] == current["evidence_digest"]
@@ -811,7 +822,8 @@ def evaluate_workflow_seams() -> list[dict[str, object]]:
         {
             "case_id": "CASE_1_COMPLETE_PARENT_CONTEXT",
             "seam": "producer-routing",
-            "pass_signal": complete_context == {
+            "pass_signal": complete_context
+            == {
                 "mode": "none",
                 "worker": "primary-owner",
                 "canonical_owner": "parent",
@@ -848,17 +860,22 @@ def evaluate_workflow_seams() -> list[dict[str, object]]:
         {
             "case_id": "CASE_6_BLOCKER_CORRECTION",
             "seam": "critic-ledger",
-            "pass_signal": critic_results["CASE_6_BLOCKER_CORRECTION"]["decision"] == "delta",
+            "pass_signal": critic_results["CASE_6_BLOCKER_CORRECTION"]["decision"]
+            == "delta",
         },
         {
             "case_id": "CASE_7_DELTA_WITH_STABLE_ASSUMPTIONS",
             "seam": "critic-ledger",
-            "pass_signal": critic_results["CASE_7_DELTA_WITH_STABLE_ASSUMPTIONS"]["decision"] == "delta",
+            "pass_signal": critic_results["CASE_7_DELTA_WITH_STABLE_ASSUMPTIONS"][
+                "decision"
+            ]
+            == "delta",
         },
         {
             "case_id": "CASE_8_FULL_RERUN_NEW_ASSUMPTION",
             "seam": "critic-ledger",
-            "pass_signal": critic_results["CASE_8_FULL_RERUN_NEW_ASSUMPTION"] == {
+            "pass_signal": critic_results["CASE_8_FULL_RERUN_NEW_ASSUMPTION"]
+            == {
                 "decision": "full",
                 "reason": "new-evidence-changed-controlling-assumption",
             },
@@ -866,7 +883,8 @@ def evaluate_workflow_seams() -> list[dict[str, object]]:
         {
             "case_id": "CASE_9_UNCHANGED_EVIDENCE",
             "seam": "critic-ledger",
-            "pass_signal": critic_results["CASE_9_UNCHANGED_EVIDENCE"]["decision"] == "suppressed",
+            "pass_signal": critic_results["CASE_9_UNCHANGED_EVIDENCE"]["decision"]
+            == "suppressed",
         },
         {
             "case_id": "CASE_10_LOCAL_PROVENANCE_CONTRADICTION",

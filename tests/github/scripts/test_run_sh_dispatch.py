@@ -27,12 +27,8 @@ def test_resolve_script_handles_current_catalog_and_debug_log_tools() -> None:
     )
     assert result.returncode == 0
     lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    assert lines[0].endswith(
-        ".github/scripts/build_inventory.py"
-    )
-    assert lines[1].endswith(
-        ".github/skills/local-copilot-log-analyzer/scripts/run.sh"
-    )
+    assert lines[0].endswith(".github/scripts/build_inventory.py")
+    assert lines[1].endswith(".github/skills/local-copilot-log-analyzer/scripts/run.sh")
     assert lines[2].endswith(
         ".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
     )

@@ -14,13 +14,13 @@ BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-skill-creator"
 FIXTURES = BUNDLE_ROOT / "fixtures"
 sys.path.insert(0, str(REPO_ROOT / ".github/skills/internal-subagent-contract/scripts"))
 
+from runtime_evidence import compose_handoff  # noqa: E402
 from subagent_contract import (  # noqa: E402
     canonical_json,
     compute_progress_signature,
     validate_brief,
     validate_result,
 )
-from runtime_evidence import compose_handoff  # noqa: E402
 
 
 def _load(name: str) -> dict:
@@ -109,9 +109,7 @@ def test_valid_creator_result_binds_artifact_acceptance_and_progress(
 
 
 @pytest.mark.parametrize("tamper", ["brief_hash", "artifact_hash", "artifact_path"])
-def test_creator_result_rejects_tampered_binding(
-    tmp_path: Path, tamper: str
-) -> None:
+def test_creator_result_rejects_tampered_binding(tmp_path: Path, tamper: str) -> None:
     brief, materialized = _materialize_creator_result(tmp_path)
     result = copy.deepcopy(materialized)
 

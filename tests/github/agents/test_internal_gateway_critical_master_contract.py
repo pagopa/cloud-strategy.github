@@ -17,7 +17,9 @@ CATALOG_PATH = (
     / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
 )
 SKILL_REPO_PATH = REPO_ROOT / ".github/skills/internal-gateway-critical-master/SKILL.md"
-SKILL_HOME_PATH = Path.home() / ".agents/skills/internal-gateway-critical-master/SKILL.md"
+SKILL_HOME_PATH = (
+    Path.home() / ".agents/skills/internal-gateway-critical-master/SKILL.md"
+)
 
 
 def _parse_copilot(path: Path) -> tuple[dict, str]:
@@ -153,7 +155,9 @@ def test_internal_gateway_critical_master_opencode_native_contract() -> None:
         assert marker.lower() in lowered
 
 
-def test_internal_gateway_critical_master_catalog_scopes_native_opencode_agent() -> None:
+def test_internal_gateway_critical_master_catalog_scopes_native_opencode_agent() -> (
+    None
+):
     catalog = yaml.safe_load(CATALOG_PATH.read_text(encoding="utf-8"))
     entries = [
         resource
@@ -161,5 +165,7 @@ def test_internal_gateway_critical_master_catalog_scopes_native_opencode_agent()
         if resource.get("source_path")
         == ".opencode/agents/internal-gateway-critical-master.md"
     ]
-    assert entries, "critical-master native OpenCode agent missing from home sync catalog"
+    assert entries, (
+        "critical-master native OpenCode agent missing from home sync catalog"
+    )
     assert entries[0].get("include_targets") == ["opencode"]

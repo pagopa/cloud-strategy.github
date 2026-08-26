@@ -608,8 +608,7 @@ def test_normalization_creates_human_only_brainstorming_metadata_idempotently(
 
     metadata = yaml.safe_load(
         (
-            candidate
-            / ".github/skills/superpowers-brainstorming/agents/openai.yaml"
+            candidate / ".github/skills/superpowers-brainstorming/agents/openai.yaml"
         ).read_text(encoding="utf-8")
     )
     assert first_changed == tuple(

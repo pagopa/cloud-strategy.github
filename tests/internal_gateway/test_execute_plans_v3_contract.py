@@ -9,9 +9,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-EXECUTOR_BUNDLE = (
-    REPO_ROOT / ".github" / "skills" / "internal-gateway-execute-plans"
-)
+EXECUTOR_BUNDLE = REPO_ROOT / ".github" / "skills" / "internal-gateway-execute-plans"
 WRITER_BUNDLE = REPO_ROOT / ".github" / "skills" / "internal-gateway-writing-plans"
 RUNNER = EXECUTOR_BUNDLE / "scripts/run.sh"
 FIXTURE = EXECUTOR_BUNDLE / "fixtures/valid-plan.md"
@@ -167,8 +165,7 @@ def _run_state_check(
 
 def _finding_codes(result: subprocess.CompletedProcess[str]) -> set[str]:
     return {
-        item["code"]
-        for item in json.loads(result.stdout).get("finding_sample", [])
+        item["code"] for item in json.loads(result.stdout).get("finding_sample", [])
     }
 
 
@@ -227,9 +224,7 @@ def test_done_with_warnings_requires_passed_verdicts(tmp_path: Path) -> None:
     )
     missing_tool_result = _run_state_check(root, plan, missing_tool_state)
     assert missing_tool_result.returncode != 0
-    assert "missing-tool-equivalent-deviation" in _finding_codes(
-        missing_tool_result
-    )
+    assert "missing-tool-equivalent-deviation" in _finding_codes(missing_tool_result)
 
 
 def test_blocked_technical_failure_cannot_become_warning(tmp_path: Path) -> None:

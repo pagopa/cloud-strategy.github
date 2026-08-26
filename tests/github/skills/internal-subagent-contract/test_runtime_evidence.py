@@ -32,8 +32,8 @@ from subagent_contract import (  # noqa: E402
     invalidate_attestation,
     primary_owner_decision,
     sha256_path,
-    validate_payload_schema,
     validate_lifecycle_record,
+    validate_payload_schema,
     validate_receipt,
 )
 
@@ -467,10 +467,9 @@ def test_bind_final_artifact_binds_final_bytes_and_semantic_fingerprint(
     assert binding.receipt["final_artifact"]["sha256"] == sha256_path(
         tmp_path / "out/result.md"
     )
-    assert (
-        binding.receipt["final_artifact"]["semantic_fingerprint"]
-        == compute_semantic_fingerprint(manifest)
-    )
+    assert binding.receipt["final_artifact"][
+        "semantic_fingerprint"
+    ] == compute_semantic_fingerprint(manifest)
 
 
 def test_stale_receipt_rejects_material_artifact_edit(tmp_path: Path) -> None:
@@ -506,7 +505,10 @@ def test_stale_receipt_rejects_material_artifact_edit(tmp_path: Path) -> None:
 
 
 def test_material_edit_invalidation_marks_attestation_failed() -> None:
-    receipt = {"attestations": {"artifact_integrity": {"state": "verified"}}, "value_verified": True}
+    receipt = {
+        "attestations": {"artifact_integrity": {"state": "verified"}},
+        "value_verified": True,
+    }
 
     invalidated = invalidate_attestation(receipt, "material edit")
 

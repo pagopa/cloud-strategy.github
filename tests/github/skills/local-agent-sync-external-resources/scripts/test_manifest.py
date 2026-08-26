@@ -120,7 +120,9 @@ watchlist: []
     assert manifest.sources[0].assets[0].invocation_policy is None
 
 
-def test_manifest_rejects_invocation_policy_with_unknown_runtime(tmp_path: Path) -> None:
+def test_manifest_rejects_invocation_policy_with_unknown_runtime(
+    tmp_path: Path,
+) -> None:
     with pytest.raises(ValueError, match="invocation_policy"):
         load_managed_resources(
             _write_manifest(

@@ -375,7 +375,9 @@ def test_non_portable_frontmatter_field_is_blocking(tmp_path: Path) -> None:
     findings = detect_internal_skill_findings(root)
 
     portability = [
-        finding for finding in findings if finding.code == "non-portable-frontmatter-field"
+        finding
+        for finding in findings
+        if finding.code == "non-portable-frontmatter-field"
     ]
     assert len(portability) == 1
     assert portability[0].severity == "blocking"
@@ -402,7 +404,7 @@ def test_invalid_policy_value_is_blocking(tmp_path: Path) -> None:
     openai_yaml = root / ".github/skills/internal-example/agents/openai.yaml"
     openai_yaml.write_text(
         openai_yaml.read_text(encoding="utf-8")
-        + "\npolicy:\n  allow_implicit_invocation: \"yes\"\n",
+        + '\npolicy:\n  allow_implicit_invocation: "yes"\n',
         encoding="utf-8",
     )
 

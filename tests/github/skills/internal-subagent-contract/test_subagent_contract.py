@@ -14,6 +14,7 @@ BUNDLE = REPO_ROOT / ".github/skills/internal-subagent-contract"
 FIXTURES = BUNDLE / "fixtures"
 sys.path.insert(0, str(BUNDLE / "scripts"))
 
+from runtime_evidence import compose_handoff  # noqa: E402
 from subagent_contract import (  # noqa: E402
     ATTESTATION_NAMES,
     ATTESTATION_STATES,
@@ -32,7 +33,6 @@ from subagent_contract import (  # noqa: E402
     validate_receipt,
     validate_result,
 )
-from runtime_evidence import compose_handoff  # noqa: E402
 
 
 def _load(name: str) -> dict:
@@ -81,9 +81,7 @@ def _valid_receipt(brief: dict, raw_worker: bytes) -> dict:
         "value_verified": True,
         "final_artifact": {
             "path": ".github/skills/internal-subagent-contract/fixtures/valid-brief.json",
-            "sha256": sha256_bytes(
-                (FIXTURES / "valid-brief.json").read_bytes()
-            ),
+            "sha256": sha256_bytes((FIXTURES / "valid-brief.json").read_bytes()),
             "semantic_fingerprint": sha256_bytes(b"manifest"),
         },
     }
@@ -251,12 +249,15 @@ def test_valid_result_template_materializes_through_adapter_and_disk_round_trip(
     result_path.write_bytes(canonical_json(materialized) + b"\n")
     persisted = json.loads(result_path.read_text(encoding="utf-8"))
 
-    assert validate_result(
-        persisted,
-        brief,
-        repo_root=REPO_ROOT,
-        brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
-    ) == []
+    assert (
+        validate_result(
+            persisted,
+            brief,
+            repo_root=REPO_ROOT,
+            brief_bytes=(FIXTURES / "valid-brief.json").read_bytes(),
+        )
+        == []
+    )
 
 
 def test_verification_receipt_binds_exact_pair_and_keeps_decision_separate() -> None:

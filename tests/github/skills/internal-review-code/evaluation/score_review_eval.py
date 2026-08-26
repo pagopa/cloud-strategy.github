@@ -63,7 +63,10 @@ def _validate_schema(manifest: dict[str, Any], run: dict[str, Any]) -> None:
         errors.append(f"run missing fields: {', '.join(missing_run)}")
     if run.get("contract_version") != manifest.get("contract_version"):
         errors.append("manifest and run contract_version differ")
-    if "required_conditional_loaded_skills" in manifest and "conditional_loaded_skills" not in run:
+    if (
+        "required_conditional_loaded_skills" in manifest
+        and "conditional_loaded_skills" not in run
+    ):
         errors.append("run missing fields: conditional_loaded_skills")
     if errors:
         raise ValueError("; ".join(errors))
