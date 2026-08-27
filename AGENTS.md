@@ -1,8 +1,8 @@
 # AGENTS.md - Repository Operating Core
 
-`AGENTS.md` is the always-on policy entrypoint for coding agents in this
-repository. Keep it a compact map of stable rules; place specialized guidance
-with the nearest owner.
+`AGENTS.md` is the always-on, portable policy baseline for coding agents. Keep
+it generic enough to reuse in any repository; keep repository-specific rules in
+`AGENTS.local.md` and specialized guidance with the nearest owner.
 
 ## Precedence And Scope
 
@@ -12,10 +12,6 @@ with the nearest owner.
   broader defaults when they conflict.
 - Use only policy that exists on disk. Removed files, generated output,
   historical aliases, and past automation are not active policy.
-- `AGENTS.md` owns repository-wide precedence, boundaries, and tactical defaults.
-  `.github/INVENTORY.md` owns the exact live GitHub Copilot catalog.
-- `.github/instructions/**` contains platform-native Copilot projections.
-  Portable agents must not load those files manually as portable policy.
 
 ## Working Agreement
 
@@ -42,10 +38,10 @@ with the nearest owner.
 - Reason from repository evidence. Do not invent runtimes, validators, sync
   flows, tests, or policy.
 - Downshift for policy-only work. When the target state is a small declared
-  policy change in known files, use only the nearest owner, the mandatory TDD
-  guardrail, the scope validator, and adjacent tests. Load graphify, critical
-  review, brainstorming, or external research only on concrete ambiguity or
-  contradiction.
+  policy change in known files, use only the nearest owner, the mandatory
+  test-first guardrail, the repository's change-scope validation, and adjacent
+  tests. Load graphify, critical review, brainstorming, or external research
+  only on concrete ambiguity or contradiction.
 - On a dirty working tree, snapshot the initial state, declare the task file
   allowlist, and run targeted checks before global ones. Classify global
   failures outside the allowlist as pre-existing; do not reopen
@@ -68,8 +64,8 @@ with the nearest owner.
 
 ## Validation And Delivery
 
-- Route executable or evaluable behavior changes through `/internal-tdd` before
-  implementation; that skill owns test posture and sequencing.
+- Route executable or evaluable behavior changes through a test-first workflow
+  before implementation. Define or update the failing check before the fix.
 - Name the closest executable validation early. Run it after the change and
   report unavailable checks or evidence gaps explicitly.
 - When policy or a contract changes, align its owning tests, validators, and
@@ -103,8 +99,9 @@ with the nearest owner.
 
 ## Protected Skill Boundary
 
-- Skill bundles under `.github/skills/` whose names do not start with
-  `internal-` or `local-` are protected and read-only by default.
+- Imported or third-party skill bundles are protected and read-only by default.
+  Where a repository uses origin prefixes, treat bundles whose names do not
+  start with `internal-` or `local-` as protected.
 - Invocation, wrapping, synchronization, dependency, or perceived necessity
   never implies authorization to edit a protected skill.
 - Only an explicit instruction in the current user conversation naming the
@@ -131,12 +128,6 @@ source files when (a) modifying/debugging specific code, (b) the graph lacks the
 (c) the graph is missing or stale.
 
 Type `/graphify` in Copilot Chat to build or update the graph.
-
-## GitHub Work Routing
-
-Route GitHub requests through `/internal-github`, which selects the governance,
-actions, operations, PR, or strategic lane. Route current Copilot or MCP
-platform documentation needs to `/internal-copilot-docs-research`.
 
 ## Optional Repository-Local Policy
 

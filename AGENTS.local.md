@@ -10,6 +10,22 @@
 - Keep standards-repository-only policy separate from the shared baseline.
 - Keep architecture and local context in `docs/` knowledge documents.
 
+## Repository Precedence Extensions
+
+- `AGENTS.md` owns repository-wide precedence, boundaries, and tactical
+  defaults. `.github/INVENTORY.md` owns the exact live GitHub Copilot catalog.
+- `.github/instructions/**` contains platform-native Copilot projections.
+  Portable agents must not load those files manually as portable policy.
+
+## Repository Skill Routing
+
+- Route executable or evaluable behavior changes through `/internal-tdd` before
+  implementation; that skill owns test posture and sequencing.
+- Route GitHub requests through `/internal-github`, which selects the
+  governance, actions, operations, PR, or strategic lane.
+- Route current Copilot or MCP platform documentation needs to
+  `/internal-copilot-docs-research`.
+
 ## Agent skills
 
 ### Issue tracker
