@@ -23,6 +23,7 @@ MANAGED_COPY_PATHS_EXPECTED = (
     ".python-version",
     ".pre-commit-config.yaml",
     ".editorconfig",
+    ".vscode/settings.json",
     ".github/copilot-instructions.md",
     ".github/workflows/_pre-commit.yml",
     ".github/workflows/_pr-title.yml",
@@ -48,6 +49,17 @@ def _populate_source(source: Path) -> None:
     (source / ".python-version").write_text("3.13\n", encoding="utf-8")
     (source / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
     (source / ".editorconfig").write_text("root = true\n", encoding="utf-8")
+    settings = source / ".vscode" / "settings.json"
+    settings.parent.mkdir(parents=True, exist_ok=True)
+    settings.write_text(
+        '{\n'
+        '  "chat.permissions.default": "default",\n'
+        '  "chat.tools.global.autoApprove": false,\n'
+        '  "chat.tools.terminal.autoReplyToPrompts": false,\n'
+        '  "chat.tools.terminal.enableAutoApprove": false\n'
+        '}\n',
+        encoding="utf-8",
+    )
     (source / ".github").mkdir(exist_ok=True)
     (source / ".github" / "copilot-instructions.md").write_text(
         "# copilot\n", encoding="utf-8"
@@ -120,6 +132,15 @@ def test_build_plan_updates_changed_managed_file(
     (target_repo / ".editorconfig").write_text("target\n", encoding="utf-8")
     plan = build_plan(source_repo, target_repo)
     assert ("update", ".editorconfig") in {
+        (item.action, item.path) for item in plan.operations
+    }
+
+
+def test_build_plan_manages_workspace_chat_settings(
+    source_repo: Path, target_repo: Path
+) -> None:
+    plan = build_plan(source_repo, target_repo)
+    assert ("create", ".vscode/settings.json") in {
         (item.action, item.path) for item in plan.operations
     }
 

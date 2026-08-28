@@ -1,6 +1,6 @@
 ---
 name: local-sync-repos
-description: Use when aligning a consumer repository to this repository's managed instruction, root-policy, and shared-hygiene baseline while preserving target local-* assets.
+description: Use when aligning a consumer repository to this repository's managed instruction, root-policy, shared-hygiene, and workspace Copilot approval baseline while preserving target local-* assets.
 ---
 
 # Local Sync Repos
@@ -19,13 +19,26 @@ Manage only these exact target paths:
 - `.python-version`
 - `.pre-commit-config.yaml`
 - `.editorconfig`
+- `.vscode/settings.json`
 - `.github/copilot-instructions.md`
 - `.github/workflows/_pre-commit.yml`
 - `.github/workflows/_pr-title.yml`
 - `.github/instructions/**` (source-authoritative; preserve target `local-*` filenames)
 - `AGENTS.local.md` (create-once header-only seed from template; never overwrite or delete)
 
-Do not synchronize agents, skills, prompts, inventory, documentation, lesson ledgers, VS Code settings, or unrelated workflows.
+Do not synchronize agents, skills, prompts, inventory, documentation, lesson ledgers, or unrelated workflows.
+
+## Copilot approval posture
+
+- `.vscode/settings.json` is a source-managed workspace profile. It carries the requested `chat.permissions.default` and approval settings as exact JSON values.
+- `Agent` is the general-purpose agent role that can reason and invoke enabled tools; it is not an approval policy.
+- `Default Approvals` uses the configured approval rules and pauses for tool confirmation or clarification when needed.
+- `Bypass Approvals` auto-approves tool calls but still asks clarifying questions.
+- `Autopilot` is an agent mode, not a permission level. It auto-approves tools, retries errors, and can auto-respond to questions, so it must not be selected when a human decision is required.
+- `chat.agent.maxRequests` only limits the number of agent-loop iterations/requests; it does not disable automatic answers or make the agent wait for the user.
+- Workspace settings apply only to this repository. To apply the same posture to every workspace, copy the profile into VS Code User Settings (JSON); repository sync never edits the user's home settings.
+- Approval settings govern tool execution, not every generated sentence. A workflow that must stop after a decision question also needs an active instruction or agent contract that requires waiting for the user's reply.
+- When this workflow needs a user decision, ask one explicit question and stop; do not invent a default, continue, edit files, or run commands until the user replies.
 
 ## Commands
 

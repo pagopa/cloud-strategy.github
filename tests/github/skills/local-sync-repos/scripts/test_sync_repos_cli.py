@@ -18,6 +18,7 @@ MANAGED_COPY_PATHS_EXPECTED = (
     ".python-version",
     ".pre-commit-config.yaml",
     ".editorconfig",
+    ".vscode/settings.json",
     ".github/copilot-instructions.md",
     ".github/workflows/_pre-commit.yml",
     ".github/workflows/_pr-title.yml",
@@ -43,6 +44,17 @@ def _populate_source(source: Path) -> None:
     (source / ".python-version").write_text("3.13\n", encoding="utf-8")
     (source / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
     (source / ".editorconfig").write_text("root = true\n", encoding="utf-8")
+    settings = source / ".vscode" / "settings.json"
+    settings.parent.mkdir(parents=True, exist_ok=True)
+    settings.write_text(
+        '{\n'
+        '  "chat.permissions.default": "default",\n'
+        '  "chat.tools.global.autoApprove": false,\n'
+        '  "chat.tools.terminal.autoReplyToPrompts": false,\n'
+        '  "chat.tools.terminal.enableAutoApprove": false\n'
+        '}\n',
+        encoding="utf-8",
+    )
     (source / ".github").mkdir(exist_ok=True)
     (source / ".github" / "copilot-instructions.md").write_text(
         "# copilot\n", encoding="utf-8"
@@ -151,6 +163,9 @@ def test_apply_converges_and_preserves_consumer_owned_files(
     assert payload["managed_mutation_paths"] == []
     assert (target_repo / ".github/workflows/_pr-title.yml").read_bytes() == (
         source_repo / ".github/workflows/_pr-title.yml"
+    ).read_bytes()
+    assert (target_repo / ".vscode/settings.json").read_bytes() == (
+        source_repo / ".vscode/settings.json"
     ).read_bytes()
     assert local_instruction.read_bytes() == b"local instruction\n"
     assert local_agents.read_bytes() == b"local policy\n"
