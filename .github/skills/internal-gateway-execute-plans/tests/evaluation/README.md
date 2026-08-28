@@ -35,8 +35,8 @@ does not replace `state-check` or manufacture approval evidence.
 Run the scorer with:
 
 ```sh
-python3 tests/github/skills/internal-gateway-execute-plans/evaluation/score_executor_eval.py \
-  --manifest tests/github/skills/internal-gateway-execute-plans/evaluation/benchmark.json \
+python3 .github/skills/internal-gateway-execute-plans/tests/evaluation/score_executor_eval.py \
+  --manifest .github/skills/internal-gateway-execute-plans/tests/evaluation/benchmark.json \
   --run <sanitized-run.json>
 ```
 

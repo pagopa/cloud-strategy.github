@@ -16,7 +16,7 @@ REPO_ROOT = next(
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-EVALUATION_ROOT = REPO_ROOT / "tests/github/skills/internal-gateway-idea/evaluation"
+EVALUATION_ROOT = REPO_ROOT / ".github/skills/internal-gateway-idea/tests/evaluation"
 MANIFEST_PATH = EVALUATION_ROOT / "benchmark.json"
 SCORER_PATH = EVALUATION_ROOT / "score_idea_eval.py"
 PUBLIC_WRAPPER_PATH = (

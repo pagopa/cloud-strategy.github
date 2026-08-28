@@ -7,6 +7,7 @@ from pathlib import Path
 
 import yaml
 
+from .repo_paths import iter_test_python_files
 from .shared import Finding, find_repo_root, read_text, split_frontmatter
 
 INLINE_PATH_PATTERN = re.compile(
@@ -303,8 +304,7 @@ class _SkillProseTaintAnalyzer:
 def detect_skill_prose_assertion_findings(root: Path) -> list[Finding]:
     repo_root = find_repo_root(root)
     findings: list[Finding] = []
-    tests_root = repo_root / "tests"
-    for source_path in sorted(tests_root.rglob("*.py")):
+    for source_path in iter_test_python_files(repo_root):
         try:
             tree = ast.parse(read_text(source_path), filename=source_path.as_posix())
         except (OSError, SyntaxError):

@@ -11,14 +11,14 @@ REPO_ROOT = next(
 )
 SCRIPT_PATH = (
     REPO_ROOT
-    / "tests/github/skills/internal-review-code/evaluation/score_review_eval.py"
+    / ".github/skills/internal-review-code/tests/evaluation/score_review_eval.py"
 )
 FIXTURE_DIR = (
-    REPO_ROOT / "tests/github/skills/internal-review-code/fixtures/seeded-review-target"
+    REPO_ROOT / ".github/skills/internal-review-code/tests/fixtures/seeded-review-target"
 )
 ACTIONS_FIXTURE_DIR = (
     REPO_ROOT
-    / "tests/github/skills/internal-review-code/fixtures/actions-review-target"
+    / ".github/skills/internal-review-code/tests/fixtures/actions-review-target"
 )
 
 MANIFEST = {

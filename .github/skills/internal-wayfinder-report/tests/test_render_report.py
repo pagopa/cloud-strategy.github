@@ -17,7 +17,7 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report"
-FIXTURES_ROOT = REPO_ROOT / "tests/github/skills/internal-wayfinder-report/fixtures"
+FIXTURES_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report/tests/fixtures"
 RENDERER = BUNDLE_ROOT / "scripts/render_report.py"
 SECTION_IDS = ("overview", "solution", "decisions", "scope", "review")
 MERMAID_PINNED_VERSION = "mermaid@11.6.0"

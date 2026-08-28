@@ -3,7 +3,8 @@ PYTHON_VERSION := $(strip $(shell head -n 1 $(PYTHON_VERSION_FILE) 2>/dev/null))
 PYTHON_MAJOR_MINOR := $(strip $(shell printf '%s' "$(PYTHON_VERSION)" | awk -F. 'NF >= 2 { print $$1 "." $$2 }'))
 PYTHON ?= $(if $(PYTHON_MAJOR_MINOR),python$(PYTHON_MAJOR_MINOR),python3)
 SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh)
-PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests
+SKILL_TEST_PATHS := $(wildcard .github/skills/*/tests)
+PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests $(SKILL_TEST_PATHS)
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
 RUFF := $(if $(wildcard $(SCRIPTS_VENV)/bin/ruff),$(SCRIPTS_VENV)/bin/ruff,ruff)
@@ -28,12 +29,12 @@ lint: python-version-check docs-lint
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	@if command -v shellcheck >/dev/null 2>&1; then shellcheck -s bash $(SHELL_SCRIPTS); else printf '%s\n' 'shellcheck not installed; skipping.'; fi
 	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
-	$(RUFF) check .github/scripts tools tests
+	$(RUFF) check .github/scripts tools tests $(SKILL_TEST_PATHS)
 
 catalog-lint: python-version-check
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
-	$(RUFF) check .github/scripts tools tests
+	$(RUFF) check .github/scripts tools tests $(SKILL_TEST_PATHS)
 
 catalog-fast-check: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) build_inventory --root . --check
@@ -50,7 +51,7 @@ github-catalog-validation: python-version-check
 	@$(SCRIPTS_RUNNER) github_catalog_validation --root .
 
 test: scripts-bootstrap
-	@$(SCRIPTS_VENV)/bin/python -m pytest tests -q
+	@$(SCRIPTS_VENV)/bin/python -m pytest -q
 
 catalog-check: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) check_catalog_consistency --root . --include-token-risks

@@ -46,7 +46,7 @@ occur after the report.
 Run the scorer with:
 
 ```bash
-python3 tests/github/skills/internal-gateway-codebase-improvement/evaluation/score_gateway_eval.py --manifest tests/github/skills/internal-gateway-codebase-improvement/evaluation/benchmark.json --run <sanitized-run.json>
+python3 tests/internal_gateway/codebase_improvement/evaluation/score_gateway_eval.py --manifest tests/internal_gateway/codebase_improvement/evaluation/benchmark.json --run <sanitized-run.json>
 ```
 
 Exit `0` means accepted, `1` means the structured run was scored and rejected,

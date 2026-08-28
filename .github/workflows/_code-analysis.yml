@@ -89,4 +89,4 @@ jobs:
 
       - name: ✅ Run pytest
         run: |
-          "${TEST_VENV}/bin/python" -m pytest tests -q
+          "${TEST_VENV}/bin/python" -m pytest -q

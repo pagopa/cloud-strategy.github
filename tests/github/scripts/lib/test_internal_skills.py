@@ -74,6 +74,30 @@ def test_contract():
     assert findings[0].path.endswith("tests/test_contract.py:7")
 
 
+def test_skill_local_wording_assertion_is_blocking(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "def test_root_fixture():\n    assert True\n")
+    skill_tests = root / ".github/skills/internal-example/tests"
+    skill_tests.mkdir()
+    source_path = skill_tests / "test_contract.py"
+    source_path.write_text(
+        """
+from pathlib import Path
+SKILL = Path(".github/skills/internal-example/SKILL.md")
+text = SKILL.read_text()
+
+def test_contract():
+    assert "required wording" in text
+""",
+        encoding="utf-8",
+    )
+
+    findings = detect_skill_prose_assertion_findings(root)
+
+    assert len(findings) == 1
+    assert findings[0].code == "skill-prose-lexical-assertion"
+    assert findings[0].path.startswith(source_path.as_posix())
+
+
 def test_lexical_predicates_on_skill_text_are_blocking(tmp_path: Path) -> None:
     predicates = (
         'assert "wording" not in text',

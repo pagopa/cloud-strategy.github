@@ -13,7 +13,7 @@ REPO_ROOT = next(
 )
 SCRIPT_PATH = REPO_ROOT / ".github/scripts/benchmark_skill_tokens.py"
 FIXTURE_PATH = (
-    REPO_ROOT / "tests/github/skills/internal-terraform/fixtures/routing-cases.json"
+    REPO_ROOT / ".github/skills/internal-terraform/tests/fixtures/routing-cases.json"
 )
 
 

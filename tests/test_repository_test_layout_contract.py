@@ -1,3 +1,4 @@
+import configparser
 import re
 import shlex
 from pathlib import Path
@@ -8,7 +9,9 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 TESTS_ROOT = REPO_ROOT / "tests"
+SKILLS_ROOT = REPO_ROOT / ".github/skills"
 MAKEFILE = REPO_ROOT / "Makefile"
+PYTEST_CONFIG = REPO_ROOT / "pytest.ini"
 SKILL_PATH_PATTERN = re.compile(r"\.github/skills/([a-z0-9-]+)(?:/|[\"'])")
 AGENT_PATH_PATTERN = re.compile(r"\.github/agents/([a-z0-9-]+)\.agent\.md")
 
@@ -74,3 +77,33 @@ def test_catalog_fast_check_lists_existing_test_files() -> None:
     assert not missing_paths, (
         f"catalog-fast-check lists missing tests: {', '.join(missing_paths)}"
     )
+
+
+def test_skill_tests_are_co_located_with_live_skill_bundles() -> None:
+    legacy_root = TESTS_ROOT / "github/skills"
+    legacy_files = sorted(
+        path.relative_to(REPO_ROOT).as_posix()
+        for path in legacy_root.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts
+    )
+    orphaned_skill_test_roots = sorted(
+        path.relative_to(REPO_ROOT).as_posix()
+        for path in SKILLS_ROOT.glob("*/tests")
+        if not (path.parent / "SKILL.md").is_file()
+    )
+
+    assert not legacy_files, (
+        "skill-owned tests and fixtures must live under their bundle; stale paths: "
+        + ", ".join(legacy_files)
+    )
+    assert not orphaned_skill_test_roots, (
+        "skill test roots must belong to a live bundle: "
+        + ", ".join(orphaned_skill_test_roots)
+    )
+
+
+def test_pytest_config_discovers_root_and_skill_test_roots() -> None:
+    config = configparser.ConfigParser()
+    config.read(PYTEST_CONFIG, encoding="utf-8")
+
+    assert config["pytest"]["testpaths"].split() == ["tests", ".github/skills"]

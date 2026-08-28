@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 REPO_ROOT = next(
@@ -7,11 +8,10 @@ REPO_ROOT = next(
 )
 
 
-def test_makefile_does_not_reference_skill_scripts() -> None:
+def test_makefile_does_not_reference_skill_runtime_scripts() -> None:
     makefile = (REPO_ROOT / "Makefile").read_text()
 
     forbidden = (
-        ".github/skills/",
         "critical-validate",
         "internal-gateway-idea-fast-check",
         "retained-plan-check",
@@ -20,6 +20,7 @@ def test_makefile_does_not_reference_skill_scripts() -> None:
         "plan_execution",
     )
     assert not any(marker in makefile for marker in forbidden)
+    assert not re.search(r"\.github/skills/[^\s]+/scripts", makefile)
 
 
 def test_github_catalog_validation_uses_the_repository_script_runner() -> None:

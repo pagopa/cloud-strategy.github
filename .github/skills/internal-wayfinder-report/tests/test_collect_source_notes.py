@@ -14,7 +14,7 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report"
-FIXTURES_ROOT = REPO_ROOT / "tests/github/skills/internal-wayfinder-report/fixtures"
+FIXTURES_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report/tests/fixtures"
 COLLECTOR = BUNDLE_ROOT / "scripts/collect_source_notes.py"
 
 

@@ -70,4 +70,4 @@ logic in ad-hoc scripts or one-off shell pipelines.
 - `bash scripts/run.sh prompt-exports --help`
 - `bash scripts/run.sh debug-logs --help`
 - `./.github/scripts/run.sh analyze_copilot_debug_log --help`
-- `python3 -m pytest tests/github/skills/local-copilot-log-analyzer/scripts -q`
+- `python3 -m pytest .github/skills/local-copilot-log-analyzer/tests/scripts -q`

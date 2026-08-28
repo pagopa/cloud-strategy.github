@@ -67,6 +67,6 @@ python3 scripts/sync_repos.py apply --source-root . --target-repo <path> --forma
 
 ## Validation
 
-- Focused pytest: `python3.13 -m pytest tests/github/skills/local-sync-repos -q`
+- Focused pytest: `python3.13 -m pytest .github/skills/local-sync-repos/tests -q`
 - Strict skill validation: `python3.13 ./.github/scripts/validate_internal_skills.py --skill local-sync-repos --strict`
 - Catalog consistency: `python3.13 ./.github/scripts/check_catalog_consistency.py --root . --include-token-risks`

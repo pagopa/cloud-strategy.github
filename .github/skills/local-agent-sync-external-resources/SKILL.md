@@ -198,7 +198,7 @@ separate authorization.
 ## Validation
 
 - `python3 -m compileall scripts`
-- `python3 -m pytest -q tests/github/skills/local-agent-sync-external-resources/scripts`
+- `python3 -m pytest -q .github/skills/local-agent-sync-external-resources/tests/scripts`
 - `python3 .github/scripts/validate_internal_skills.py --skill local-agent-sync-external-resources --strict`
 - `make inventory-build`
 - `make token-risks`
