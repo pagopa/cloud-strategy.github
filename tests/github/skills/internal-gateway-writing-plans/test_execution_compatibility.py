@@ -142,7 +142,10 @@ def test_manifest_references_are_local_and_cover_normative_contract() -> None:
     assert required_terms <= set(
         re.findall(r"[A-Za-z_]+(?: [A-Za-z_]+)?", executor_text)
     )
-    normalize = lambda text: re.sub(r"\s+", " ", text).strip()
+
+    def normalize(text: str) -> str:
+        return re.sub(r"\s+", " ", text).strip()
+
     assert normalize(writer_text) == normalize(executor_text)
 
 

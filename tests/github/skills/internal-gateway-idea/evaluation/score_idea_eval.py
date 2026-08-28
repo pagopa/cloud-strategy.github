@@ -607,7 +607,7 @@ def _validate_run(
                 if not isinstance(event.get("accepted"), bool):
                     raise _schema_error(f"{label}.accepted must be boolean")
 
-        communication_records = _validate_communication_records(
+        _validate_communication_records(
             observation["communication_records"],
             f"{observation_id}.communication_records",
         )
