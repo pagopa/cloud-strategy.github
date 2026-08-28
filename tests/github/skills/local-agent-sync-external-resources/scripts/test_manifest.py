@@ -325,8 +325,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
     assert len(matt_source.assets) == 25
     expected_canonical_names = {
         name if name in {"grill-me", "grilling"} else f"mattpocock-{name}"
-        for name in _MATTPOCOCK_ENGINEERING_SKILLS
-        | _MATTPOCOCK_PRODUCTIVITY_SKILLS
+        for name in _MATTPOCOCK_ENGINEERING_SKILLS | _MATTPOCOCK_PRODUCTIVITY_SKILLS
     }
     assert {asset.canonical_name for asset in matt_source.assets} == (
         expected_canonical_names
@@ -364,9 +363,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         if item.source_family == "mattpocock/skills"
     }
     assert "mattpocock-writing-great-skills" not in expected_canonical_names
-    assert not (
-        repo_root / ".github/skills/mattpocock-writing-great-skills"
-    ).exists()
+    assert not (repo_root / ".github/skills/mattpocock-writing-great-skills").exists()
     inventory = (repo_root / ".github/INVENTORY.md").read_text(encoding="utf-8")
     for canonical_name in expected_canonical_names:
         assert f".github/skills/{canonical_name}/SKILL.md" in inventory
