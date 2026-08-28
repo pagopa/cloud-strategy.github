@@ -52,12 +52,12 @@ def _populate_source(source: Path) -> None:
     settings = source / ".vscode" / "settings.json"
     settings.parent.mkdir(parents=True, exist_ok=True)
     settings.write_text(
-        '{\n'
+        "{\n"
         '  "chat.permissions.default": "default",\n'
         '  "chat.tools.global.autoApprove": false,\n'
         '  "chat.tools.terminal.autoReplyToPrompts": false,\n'
         '  "chat.tools.terminal.enableAutoApprove": false\n'
-        '}\n',
+        "}\n",
         encoding="utf-8",
     )
     (source / ".github").mkdir(exist_ok=True)
