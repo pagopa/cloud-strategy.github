@@ -7,7 +7,7 @@ description: Use when creating, materially revising, replacing, or retiring repo
 
 ## Core method
 
-`/mattpocock-writing-great-skills` is the core method for skill authoring and
+`/mattpocock-writing-for-agents` is the core method for skill authoring and
 revision. Load it before drafting. Apply its relevant rules throughout the
 change instead of repeating them here.
 
@@ -82,7 +82,7 @@ repository validation path are explicit.
 
 ### 2. Core authoring and revision
 
-Load `/mattpocock-writing-great-skills` as the core method. Draft or revise the
+Load `/mattpocock-writing-for-agents` as the core method. Draft or revise the
 smallest coherent bundle. Check invocation, description, information hierarchy,
 retrieval quality, and predictability. Remove duplication, sediment, and no-ops;
 revise the draft in place instead of only reporting findings. Apply the

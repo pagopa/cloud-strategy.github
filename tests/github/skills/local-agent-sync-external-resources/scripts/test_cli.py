@@ -69,7 +69,118 @@ def test_audit_does_not_fetch_or_write(repo_root: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["mode"] == "audit"
     assert payload["repository_changed"] is False
-    assert payload["managed_assets"] == 58
+    assert payload["managed_assets"] == 67
+
+
+def test_plan_materializes_only_the_selected_source(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    workspace = tmp_path / "external-workspace"
+    workspace.mkdir()
+
+    manifest = tmp_path / "manifest.yaml"
+    manifest.write_text(
+        """\
+version: 1
+sources:
+  selected-source:
+    repository: https://example.com/selected.git
+    ref: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    assets:
+      - upstream: skills/selected
+        local: .github/skills/selected
+        canonical_name: selected
+  unrelated-source:
+    repository: https://example.com/unrelated.git
+    ref: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    assets:
+      - upstream: skills/unrelated
+        local: .github/skills/unrelated
+        canonical_name: unrelated
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+    overrides = tmp_path / "overrides.yaml"
+    overrides.write_text(
+        """\
+version: 1
+overrides:
+  - id: unrelated-override
+    target_path: .github/skills/unrelated/SKILL.md
+    patch_path: patches/missing.patch
+    apply_strategy: strict
+    expected_content_hash: sha256:unused
+""",
+        encoding="utf-8",
+    )
+
+    sources_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
+    selected = sources_root / "selected-source" / "skills" / "selected"
+    selected.mkdir(parents=True)
+    (selected / "SKILL.md").write_text(
+        "---\nname: selected\n---\nSelected content.\n", encoding="utf-8"
+    )
+    _write_source_metadata_for_fixture(
+        sources_root,
+        "selected-source",
+        "https://example.com/selected.git",
+        "a" * 40,
+        "skills/selected",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "plan",
+            "--repo-root",
+            str(repo),
+            "--workspace",
+            str(workspace),
+            "--manifest",
+            str(manifest),
+            "--overrides",
+            str(overrides),
+            "--source",
+            "selected-source",
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["managed_assets"] == 1
+    assert (workspace / "candidate/.github/skills/selected/SKILL.md").exists()
+    assert not (workspace / "candidate/.github/skills/unrelated").exists()
+
+
+def test_audit_rejects_an_unknown_source(repo_root: Path) -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "audit",
+            "--repo-root",
+            str(repo_root),
+            "--source",
+            "missing-source",
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert json.loads(result.stdout)["blockers"] == [
+        "unknown source id: missing-source"
+    ]
 
 
 def test_apply_refuses_dirty_target(tmp_path: Path) -> None:
@@ -778,6 +889,22 @@ watchlist: []
     payload = json.loads(result.stdout)
     assert payload["blockers"] == [
         "dirty managed targets: .github/skills/example/SKILL.md"
+    ]
+
+    allowed_result = subprocess.run(
+        [*result.args, "--allow-dirty"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert allowed_result.returncode == 0
+    allowed_payload = json.loads(allowed_result.stdout)
+    assert allowed_payload["blockers"] == []
+    assert allowed_payload["validations"] == [
+        "manifest-parsed",
+        "overrides-parsed",
+        "override-patches-exist",
     ]
 
 

@@ -16,6 +16,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_external_resources_core import (  # noqa: E402
+    ImportedOverride,
     ManagedAsset,
     ManagedResources,
     OverrideResult,
@@ -196,7 +197,8 @@ class SyncOutcome:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Audit, plan, or apply declared external resource refreshes."
+        description="Audit, plan, or apply declared external resource refreshes.",
+        allow_abbrev=False,
     )
     parser.add_argument("mode", choices=("prepare", "audit", "plan", "apply"))
     parser.add_argument("--repo-root", default=".")
@@ -207,6 +209,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--source-root",
         help="Use prepared source checkouts instead of network fetch.",
     )
+    parser.add_argument(
+        "--source",
+        action="append",
+        dest="sources",
+        help="Limit the operation to one source ID; repeat to select more than one.",
+    )
     parser.add_argument("--allow-dirty", action="store_true")
     parser.add_argument("--format", choices=("text", "tsv", "json"), default="text")
     parser.add_argument(
@@ -215,6 +223,46 @@ def build_parser() -> argparse.ArgumentParser:
         help="Force rebuild of the Git object cache (prepare mode only).",
     )
     return parser
+
+
+def _select_resources(
+    resources: ManagedResources, requested_source_ids: Sequence[str] | None
+) -> ManagedResources:
+    if not requested_source_ids:
+        return resources
+
+    requested = set(requested_source_ids)
+    available = {source.source_id for source in resources.sources}
+    unknown = sorted(requested - available)
+    if unknown:
+        raise ValueError(f"unknown source id: {', '.join(unknown)}")
+
+    return ManagedResources(
+        sources=tuple(
+            source for source in resources.sources if source.source_id in requested
+        ),
+        replacements=tuple(
+            replacement
+            for replacement in resources.replacements
+            if replacement.source in requested
+        ),
+        watchlist=resources.watchlist,
+    )
+
+
+def _applicable_overrides(
+    overrides: tuple[ImportedOverride, ...], resources: ManagedResources
+) -> tuple[ImportedOverride, ...]:
+    managed_roots = tuple(asset.local.rstrip("/") for asset in resources.assets)
+    return tuple(
+        override
+        for override in overrides
+        if any(
+            override.target_path == root
+            or override.target_path.startswith(f"{root}/")
+            for root in managed_roots
+        )
+    )
 
 
 def _run_git(repo_root: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -425,15 +473,16 @@ def _audit(
     repo_root: Path,
     resources: ManagedResources,
     overrides_path: Path,
+    allow_dirty: bool,
 ) -> SyncOutcome:
     blockers: list[str] = []
     dirty = find_dirty_targets(repo_root, resources.assets)
-    if dirty:
+    if dirty and not allow_dirty:
         blockers.append(f"dirty managed targets: {', '.join(dirty)}")
 
     validations: list[str] = ["manifest-parsed"]
     if overrides_path.exists():
-        overrides = load_overrides(overrides_path)
+        overrides = _applicable_overrides(load_overrides(overrides_path), resources)
         validations.append("overrides-parsed")
         bundle_root = overrides_path.parent.parent
         try:
@@ -521,7 +570,7 @@ def _plan(
 
     override_results: tuple[OverrideResult, ...] = ()
     if overrides_path.exists():
-        overrides = load_overrides(overrides_path)
+        overrides = _applicable_overrides(load_overrides(overrides_path), resources)
         bundle_root = overrides_path.parent.parent
         validate_override_patches(overrides, bundle_root)
         override_results = replay_overrides(candidate, overrides, bundle_root)
@@ -582,7 +631,7 @@ def _apply(
 
     override_results: tuple[OverrideResult, ...] = ()
     if overrides_path.exists():
-        overrides = load_overrides(overrides_path)
+        overrides = _applicable_overrides(load_overrides(overrides_path), resources)
         bundle_root = overrides_path.parent.parent
         validate_override_patches(overrides, bundle_root)
         override_results = replay_overrides(candidate, overrides, bundle_root)
@@ -650,7 +699,9 @@ def run(argv: Sequence[str] | None = None) -> int:
     if not overrides_path.is_absolute():
         overrides_path = repo_root / overrides_path
 
-    resources = load_managed_resources(manifest_path)
+    resources = _select_resources(
+        load_managed_resources(manifest_path), args.sources
+    )
 
     if args.mode == "prepare":
         if not args.workspace:
@@ -664,7 +715,7 @@ def run(argv: Sequence[str] | None = None) -> int:
     elif args.mode == "audit":
         if args.rebuild_cache:
             parser.error("--rebuild-cache is only valid for prepare mode")
-        outcome = _audit(repo_root, resources, overrides_path)
+        outcome = _audit(repo_root, resources, overrides_path, args.allow_dirty)
     elif args.mode == "plan":
         if not args.workspace:
             parser.error("plan mode requires --workspace")

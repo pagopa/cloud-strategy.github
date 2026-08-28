@@ -136,6 +136,22 @@ def _mattpocock_resources() -> ManagedResources:
             local=".github/skills/mattpocock-domain-modeling",
             canonical_name="mattpocock-domain-modeling",
         ),
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/productivity/grill-me",
+            local=".github/skills/grill-me",
+            canonical_name="grill-me",
+            invocation_policy=InvocationPolicy(
+                copilot_disable_model_invocation=True,
+                codex_allow_implicit_invocation=False,
+            ),
+        ),
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/productivity/grilling",
+            local=".github/skills/grilling",
+            canonical_name="grilling",
+        ),
     )
     source = ManagedSource(
         source_id="mattpocock-skills",
@@ -146,17 +162,10 @@ def _mattpocock_resources() -> ManagedResources:
         rewrite_skill_references=True,
         backtick_skill_references=("tdd",),
     )
-    replacement = TextReplacement(
-        source="mattpocock-skills",
-        old="/grilling",
-        new="/grill-me",
-    )
-    return ManagedResources(
-        sources=(source,), replacements=(replacement,), watchlist=()
-    )
+    return ManagedResources(sources=(source,), replacements=(), watchlist=())
 
 
-def test_normalization_enforces_mattpocock_git_autonomy_source_wide(
+def test_normalization_does_not_add_retired_mattpocock_git_autonomy_contract(
     tmp_path: Path,
 ) -> None:
     candidate = tmp_path / "candidate"
@@ -200,32 +209,16 @@ def test_normalization_enforces_mattpocock_git_autonomy_source_wide(
     first_changed = normalize_candidate(resources, candidate)
     second_changed = normalize_candidate(resources, candidate)
 
-    assert first_changed == tuple(sorted(f"{asset.local}/SKILL.md" for asset in assets))
+    assert first_changed == ()
     assert second_changed == ()
     for asset in assets:
         content = (candidate / asset.local / "SKILL.md").read_text(encoding="utf-8")
-        assert content.count("local-sync:mattpocock-git-autonomy:start") == 1
-        assert content.count("local-sync:mattpocock-git-autonomy:end") == 1
-        assert "may stage only changes owned by the current task" in content
-        assert "Leave changes uncommitted and unpushed" in content
-        assert "explicitly requests the specific commit or push action" in content
+        assert "local-sync:mattpocock-git-autonomy" not in content
 
 
 @pytest.mark.parametrize(
     ("canonical_name", "file_name", "legacy", "expected"),
     [
-        (
-            "mattpocock-setup-matt-pocock-skills",
-            "issue-tracker-local.md",
-            ".scratch/<feature>/",
-            "tmp/.issues/<feature>/",
-        ),
-        (
-            "mattpocock-triage",
-            "OUT-OF-SCOPE.md",
-            ".out-of-scope/<concept>.md",
-            "tmp/.out-of-scope/<concept>.md",
-        ),
         (
             "mattpocock-handoff",
             "SKILL.md",
@@ -287,6 +280,60 @@ def test_normalization_rewrites_mattpocock_legacy_workspace_paths(
     assert expected in content
 
 
+@pytest.mark.parametrize(
+    ("canonical_name", "file_name", "upstream_path"),
+    [
+        (
+            "mattpocock-setup-matt-pocock-skills",
+            "issue-tracker-local.md",
+            ".scratch/<feature>/",
+        ),
+        (
+            "mattpocock-triage",
+            "OUT-OF-SCOPE.md",
+            ".out-of-scope/<concept>.md",
+        ),
+    ],
+)
+def test_normalization_does_not_rewrite_retired_mattpocock_paths(
+    tmp_path: Path,
+    canonical_name: str,
+    file_name: str,
+    upstream_path: str,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = f".github/skills/{canonical_name}"
+    target = candidate / local / file_name
+    target.parent.mkdir(parents=True)
+    target.write_text(f"Upstream path: {upstream_path}\n", encoding="utf-8")
+    asset = ManagedAsset(
+        source="mattpocock-skills",
+        upstream=f"skills/{canonical_name}",
+        local=local,
+        canonical_name=canonical_name,
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    assert first_changed == ()
+    assert second_changed == ()
+    assert upstream_path in target.read_text(encoding="utf-8")
+
+
 def test_normalization_updates_wayfinder_contracts_without_changing_lifecycle(
     tmp_path: Path,
 ) -> None:
@@ -312,13 +359,7 @@ def test_normalization_updates_wayfinder_contracts_without_changing_lifecycle(
 """
     skill.write_text(
         upstream_lifecycle
-        + "\nCapture findings on a throwaway `research/<name>` branch.\n\n"
-        + "<!-- local-sync:wayfinder-critical-validation:start -->\n"
-        + "Run the gate before every artifact.\n"
-        + "<!-- local-sync:wayfinder-critical-validation:end -->\n\n"
-        + "<!-- local-sync:wayfinder-grilling:start -->\n"
-        + "Ask one question at a time.\n"
-        + "<!-- local-sync:wayfinder-grilling:end -->\n",
+        + "\nCapture findings on a throwaway `research/<name>` branch.\n",
         encoding="utf-8",
     )
     asset = ManagedAsset(
@@ -345,33 +386,11 @@ def test_normalization_updates_wayfinder_contracts_without_changing_lifecycle(
     second_changed = normalize_candidate(resources, candidate)
 
     wayfinder_content = skill.read_text(encoding="utf-8")
-    normalized_text = " ".join(wayfinder_content.split())
-    assert f"{local}/SKILL.md" in first_changed
+    assert first_changed == ()
     assert second_changed == ()
     assert wayfinder_content.startswith(upstream_lifecycle)
-    assert "local-sync:wayfinder-workspace:start" in wayfinder_content
-    assert "local-sync:wayfinder-workspace:end" in wayfinder_content
-    assert (
-        wayfinder_content.count("local-sync:wayfinder-critical-validation:start") == 1
-    )
-    assert wayfinder_content.count("local-sync:wayfinder-critical-validation:end") == 1
-    assert "`/internal-gateway-critical-master`" in wayfinder_content
-    assert "Counter-validate every material critique" in wayfinder_content
-    assert "one analysis unit" in wayfinder_content
-    assert "entire batch of content-producing writes" in normalized_text
-    assert "ticket claim remains the first coordination action" in normalized_text
-    assert "Do not rerun the critic against unchanged evidence" in normalized_text
-    assert "Run the gate before every artifact." not in wayfinder_content
-    assert wayfinder_content.count("local-sync:wayfinder-grilling:start") == 1
-    assert wayfinder_content.count("local-sync:wayfinder-grilling:end") == 1
-    assert "one numbered bulk block" in wayfinder_content
-    for field in ("Question", "Recommendation", "Why", "Default if accepted"):
-        assert f"`{field}`" in wayfinder_content
-    assert "`tmp/.wayfinder/<analysis-slug>/`" in wayfinder_content
-    assert "`tmp/.wayfinder/<analysis-slug>/map.md`" in wayfinder_content
-    assert "`tmp/.wayfinder/<analysis-slug>/issues/`" in wayfinder_content
-    assert "tracker-owned `tmp/.issues/`" not in wayfinder_content
-    assert "throwaway `research/<name>` branch" not in wayfinder_content
+    assert "local-sync:wayfinder-" not in wayfinder_content
+    assert "throwaway `research/<name>` branch" in wayfinder_content
 
 
 def test_normalization_enforces_mattpocock_research_workspace_contract(
@@ -415,7 +434,7 @@ def test_normalization_enforces_mattpocock_research_workspace_contract(
     assert "`tmp/.research/YYYY-MM-DD-<slug>.md`" in research_content
 
 
-def test_normalization_enforces_mattpocock_research_luna_delegation_contract(
+def test_normalization_enforces_conditional_mattpocock_research_delegation_contract(
     tmp_path: Path,
 ) -> None:
     candidate = tmp_path / "candidate"
@@ -458,20 +477,17 @@ def test_normalization_enforces_mattpocock_research_luna_delegation_contract(
     research_content = skill.read_text(encoding="utf-8")
     metadata_content = metadata.read_text(encoding="utf-8")
     assert f"{local}/SKILL.md" in first_changed
-    assert f"{local}/agents/openai.yaml" in first_changed
+    assert f"{local}/agents/openai.yaml" not in first_changed
     assert second_changed == ()
     assert "local-sync:research-delegation:start" in research_content
     assert "local-sync:research-delegation:end" in research_content
-    assert "`internal-luna-executor`" in research_content
-    assert "self-contained brief" in research_content
-    assert "report a blocker instead of switching to another agent" in research_content
-    assert "local-sync:research-description:start" in metadata_content
-    assert (
-        'short_description: "Research from high-trust sources via Luna"'
-        in metadata_content
-    )
+    assert "`/internal-subagent-contract`" in research_content
+    assert "delegate only when" in research_content.lower()
+    assert "value" in research_content.lower()
+    assert "Delegate every research run" not in research_content
+    assert "local-sync:research-description" not in metadata_content
     assert yaml.safe_load(metadata_content)["interface"]["short_description"] == (
-        "Research from high-trust sources via Luna"
+        "Research from high-trust sources"
     )
 
 
@@ -626,14 +642,10 @@ def test_normalization_creates_human_only_brainstorming_metadata_idempotently(
     assert frontmatter["disable-model-invocation"] is True
 
 
-@pytest.mark.parametrize(
-    "canonical_name",
-    ("superpowers-brainstorming", "grill-me"),
-)
 def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     tmp_path: Path,
-    canonical_name: str,
 ) -> None:
+    canonical_name = "superpowers-brainstorming"
     candidate = tmp_path / "candidate"
     local = f".github/skills/{canonical_name}"
     skill = candidate / local / "SKILL.md"
@@ -647,13 +659,9 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
         upstream=f"skills/{canonical_name}",
         local=local,
         canonical_name=canonical_name,
-        invocation_policy=(
-            InvocationPolicy(
-                copilot_disable_model_invocation=True,
-                codex_allow_implicit_invocation=False,
-            )
-            if canonical_name == "superpowers-brainstorming"
-            else None
+        invocation_policy=InvocationPolicy(
+            copilot_disable_model_invocation=True,
+            codex_allow_implicit_invocation=False,
         ),
     )
     resources = ManagedResources(
@@ -674,9 +682,7 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     second_changed = normalize_candidate(resources, candidate)
 
     content = skill.read_text(encoding="utf-8")
-    expected_changed = [f"{local}/SKILL.md"]
-    if canonical_name == "superpowers-brainstorming":
-        expected_changed.append(f"{local}/agents/openai.yaml")
+    expected_changed = [f"{local}/SKILL.md", f"{local}/agents/openai.yaml"]
     assert first_changed == tuple(sorted(expected_changed))
     assert second_changed == ()
     assert content.count("Local guided-question contract") == 1
@@ -916,6 +922,41 @@ def test_normalization_rewrites_declared_mattpocock_skill_references(
     assert "/grilling" not in content
     assert "/domain-modeling" not in content
     assert "/unmanaged" in content
+
+
+def test_normalization_preserves_grill_me_wrapper_and_grilling_engine(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    wrapper = candidate / ".github/skills/grill-me/SKILL.md"
+    engine = candidate / ".github/skills/grilling/SKILL.md"
+    wrapper.parent.mkdir(parents=True)
+    engine.parent.mkdir(parents=True)
+    wrapper.write_text(
+        "---\nname: grill-me\ndisable-model-invocation: true\n---\n"
+        'Call the Skill tool with "grilling" and then use `/grilling`.\n',
+        encoding="utf-8",
+    )
+    engine.write_text(
+        "---\nname: grilling\n---\nInterview the user without legacy bulk fields.\n",
+        encoding="utf-8",
+    )
+
+    first_changed = normalize_candidate(_mattpocock_resources(), candidate)
+    second_changed = normalize_candidate(_mattpocock_resources(), candidate)
+
+    assert first_changed
+    assert second_changed == ()
+    wrapper_content = wrapper.read_text(encoding="utf-8")
+    engine_content = engine.read_text(encoding="utf-8")
+    assert wrapper_content.count("/grilling") == 1
+    assert "/grill-me" not in wrapper_content
+    assert "local-sync:guided-questions" not in wrapper_content
+    assert "local-sync:mattpocock-git-autonomy" not in wrapper_content
+    assert "local-sync:mattpocock-git-autonomy" not in engine_content
+    for legacy_field in ("Recommendation", "Why", "Default if accepted"):
+        assert legacy_field not in wrapper_content
+        assert legacy_field not in engine_content
 
 
 def test_normalization_removes_unsupported_invocation_field_from_all_mattpocock_skills(

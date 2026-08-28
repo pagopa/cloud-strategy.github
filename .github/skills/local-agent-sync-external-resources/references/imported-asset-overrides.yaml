@@ -60,17 +60,3 @@ overrides:
   baseline_repo_commit: 10cc5e9
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     the shortened company-knowledge trigger still covers internal search requests.
-- id: mattpocock-writing-great-skills-delegated-invocation
-  target_path: .github/skills/mattpocock-writing-great-skills/SKILL.md
-  source_family: mattpocock/skills
-  lifecycle_mode: post-refresh-patch
-  apply_strategy: git-apply
-  approval: explicit-user-counter-validated
-  reason: Narrow the imported Matt Pocock writing-great-skills description to delegation-oriented
-    use by internal-skill-creator during the predictability review stage. The
-    source-wide normalization owns cross-runtime invocation compatibility.
-  patch_path: patches/mattpocock-writing-great-skills-delegated-invocation.patch
-  expected_content_hash: 7c285ac1270647ced867cf6d945c2ebf94d3f32794c349ee4a5140d00faf6f6f
-  baseline_repo_commit: ed37663cc5fbef691ddfecd080dff42f7e7e350d
-  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
-    the delegation contract still matches the intended orchestration order.

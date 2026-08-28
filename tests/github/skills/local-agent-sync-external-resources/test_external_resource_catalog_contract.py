@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+import yaml
+
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -103,3 +105,19 @@ def test_catalog_check_rejects_residual_managed_upstream_name(
     assert any(
         finding.code == "superpowers-import-skill-name-mismatch" for finding in findings
     )
+
+
+def test_internal_grill_me_is_an_explicit_only_legacy_bundle() -> None:
+    bundle = REPO_ROOT / ".github/skills/internal-grill-me"
+    skill_path = bundle / "SKILL.md"
+    assert skill_path.exists(), "the explicit legacy bundle must exist"
+    skill_content = skill_path.read_text(encoding="utf-8")
+    frontmatter = yaml.safe_load(skill_content.split("---", 2)[1])
+    metadata = yaml.safe_load(
+        (bundle / "agents/openai.yaml").read_text(encoding="utf-8")
+    )
+
+    assert frontmatter["name"] == "internal-grill-me"
+    assert metadata["policy"]["allow_implicit_invocation"] is False
+    for field in ("Question", "Recommendation", "Why", "Default if accepted"):
+        assert field in skill_content
