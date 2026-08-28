@@ -14,19 +14,11 @@ live observation, or inference.
 Use this lane for current AWS documentation, regional availability, service
 behavior, IAM observations, and policy-simulation evidence.
 
-## Research scope
-
-- Current AWS documentation, regional availability, or official guidance that may have changed.
-- Safe IAM inspection or policy simulation for Organizations, SCPs, IAM policies, roles, or delegated administrators.
-- AWS Knowledge MCP or AWS IAM MCP should be preferred when available, with an AWS-doc fallback.
-
 ## Source priority
 
 1. AWS Knowledge MCP — current docs, latest guidance, regional availability.
 2. AWS IAM MCP (read-only) — account-specific IAM inspection and policy simulation.
 3. Official AWS documentation when MCP is unavailable or insufficient.
-
-Do not assume both MCP servers are configured in the current client.
 
 ## Server identities
 
@@ -46,18 +38,8 @@ Exact configured name can vary by client.
 4. If AWS MCP is unavailable, use `references/official-source-map.md`.
 5. Summarize with source type labeled: AWS docs / Knowledge MCP guidance / live IAM observation / inferred recommendation.
 
-## Knowledge MCP tool patterns
-
-- `search_documentation` — find relevant pages
-- `read_documentation` — pull exact page into markdown
-- `recommend` — expand from one page to adjacent guidance
-- `list_regions`, `get_regional_availability` — region-sensitive design
-
-## IAM MCP tool patterns (read-only default)
-
-- `list_users`, `get_user`, `list_roles`, `list_groups`, `get_group`
-- `list_policies`, `get_user_policy`, `get_role_policy`, `list_user_policies`, `list_role_policies`
-- `simulate_principal_policy` — test policy effects before proposing rollout
+Load `references/mcp-capabilities.md` for capability splits and tool patterns
+when selecting an AWS MCP server or tool.
 
 ## Safety rules
 
@@ -65,8 +47,6 @@ Exact configured name can vary by client.
 - Do not create, delete, attach, detach, or rotate IAM resources unless the user explicitly asks and blast radius is understood.
 - Prefer `simulate_principal_policy` before proposing policy rollout.
 - Distinguish documentation-backed statements from observations of a real AWS account.
-
-Load `references/mcp-capabilities.md` for capability splits across the two MCP servers.
 
 ## Output contract
 

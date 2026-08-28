@@ -13,6 +13,15 @@ description: Use when editing or reviewing YAML or YML syntax, encoding, parser 
 - Routing a file to a narrower owner when platform or schema semantics are the
   real concern.
 
+## When not to use
+
+- JSON grammar or encoding; route those concerns to /internal-json.
+- Markdown structure; route those concerns to /internal-markdown.
+- Makefile syntax; route those concerns to /internal-makefile.
+- YAML embedded in Kubernetes manifests or GitHub Actions workflows remains
+  owned here for format concerns; route domain semantics to the relevant domain
+  skill.
+
 ## Baseline
 
 - Use 2-space indentation and never use tabs for indentation.
@@ -27,7 +36,7 @@ description: Use when editing or reviewing YAML or YML syntax, encoding, parser 
 Run the bundle-owned checker with explicit files:
 
 ```bash
-.github/skills/internal-yaml/scripts/check.sh FILE [FILE ...]
+bash scripts/check.sh FILE [FILE ...]
 ```
 
 The checker returns `0` when checks passed within supported scope, `1` for

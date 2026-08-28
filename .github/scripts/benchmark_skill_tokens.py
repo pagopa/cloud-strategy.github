@@ -27,8 +27,88 @@ SCENARIOS = [
     ("Java metadata", "pom.xml", "internal-java"),
     ("Java project", "src/main/java/App.java", "internal-java-project"),
     ("YAML generic", "config/app.yaml", "internal-yaml"),
-    ("Terraform", "infra/main.tf", "internal-terraform"),
 ]
+
+ANTON_CORE_SKILL = "antonbabenko-terraform-skill"
+
+TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
+    {
+        "scenario": "hcl-only",
+        "primary_owner": "internal-tf",
+        "delegated_owner": None,
+        "delegated_core_owner": None,
+        "loaded_local_references": ["references/common-mistakes.md"],
+        "forbidden_local_references": [
+            "references/existing-infrastructure-adoption.md",
+            "references/operational-validation.md",
+        ],
+    },
+    {
+        "scenario": "tfvars-json-only",
+        "primary_owner": "internal-tf",
+        "delegated_owner": None,
+        "delegated_core_owner": None,
+        "loaded_local_references": ["references/structure-standard.md"],
+        "forbidden_local_references": [
+            "references/existing-infrastructure-adoption.md",
+            "references/operational-validation.md",
+        ],
+    },
+    {
+        "scenario": "mixed-adoption",
+        "primary_owner": "internal-terraform",
+        "delegated_owner": "internal-tf",
+        "delegated_core_owner": ANTON_CORE_SKILL,
+        "loaded_local_references": [
+            "references/existing-infrastructure-adoption.md",
+            "references/structure-standard.md",
+        ],
+        "forbidden_local_references": ["references/operational-validation.md"],
+    },
+    {
+        "scenario": "native-test",
+        "primary_owner": "internal-terraform",
+        "delegated_owner": None,
+        "delegated_core_owner": ANTON_CORE_SKILL,
+        "loaded_local_references": ["references/operational-validation.md"],
+        "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+    },
+    {
+        "scenario": "state-or-drift",
+        "primary_owner": "internal-terraform",
+        "delegated_owner": None,
+        "delegated_core_owner": ANTON_CORE_SKILL,
+        "loaded_local_references": ["references/operational-validation.md"],
+        "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+    },
+    {
+        "scenario": "module-architecture",
+        "primary_owner": "internal-terraform",
+        "delegated_owner": None,
+        "delegated_core_owner": ANTON_CORE_SKILL,
+        "loaded_local_references": [],
+        "forbidden_local_references": [
+            "references/existing-infrastructure-adoption.md",
+            "references/operational-validation.md",
+        ],
+    },
+    {
+        "scenario": "ci-or-provider-operation",
+        "primary_owner": "internal-terraform",
+        "delegated_owner": None,
+        "delegated_core_owner": ANTON_CORE_SKILL,
+        "loaded_local_references": ["references/operational-validation.md"],
+        "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+    },
+    {
+        "scenario": "ambiguous-adoption-identity",
+        "primary_owner": "internal-terraform",
+        "delegated_owner": None,
+        "delegated_core_owner": ANTON_CORE_SKILL,
+        "loaded_local_references": ["references/existing-infrastructure-adoption.md"],
+        "forbidden_local_references": [],
+    },
+)
 
 CHAIN_RISK_PATTERNS = [
     re.compile(r"[Ll]oad `internal-[^`]+` (?:first |only )?for the shared"),
@@ -107,11 +187,69 @@ def build_scenario_report(root: Path) -> list[dict[str, Any]]:
     return reports
 
 
+def _estimate_reference_tokens(
+    reference: str,
+    owners: list[str],
+    root: Path,
+) -> int:
+    for owner in owners:
+        reference_path = root / ".github" / "skills" / owner / reference
+        if reference_path.is_file():
+            return estimate_tokens(reference_path)
+    return 0
+
+
+def build_terraform_scenario_report(root: Path) -> list[dict[str, Any]]:
+    reports: list[dict[str, Any]] = []
+    for scenario in TERRAFORM_SCENARIOS:
+        primary_owner = scenario["primary_owner"]
+        delegated_owner = scenario["delegated_owner"]
+        owners = [primary_owner]
+        if delegated_owner:
+            owners.append(delegated_owner)
+
+        local_skill_tokens = estimate_skill_tokens(primary_owner, root)
+        conditional_reference_tokens = sum(
+            _estimate_reference_tokens(reference, owners, root)
+            for reference in scenario["loaded_local_references"]
+        )
+        delegated_core_owner = scenario["delegated_core_owner"]
+        delegated_core_tokens = (
+            estimate_skill_tokens(delegated_core_owner, root)
+            if delegated_core_owner
+            else 0
+        )
+
+        reports.append(
+            {
+                "scenario": scenario["scenario"],
+                "primary_owner": primary_owner,
+                "delegated_owner": delegated_owner,
+                "delegated_core_owner": delegated_core_owner,
+                "loaded_local_references": list(
+                    scenario["loaded_local_references"]
+                ),
+                "forbidden_local_references": list(
+                    scenario["forbidden_local_references"]
+                ),
+                "local_skill_tokens": local_skill_tokens,
+                "conditional_reference_tokens": conditional_reference_tokens,
+                "delegated_core_tokens": delegated_core_tokens,
+                "scenario_proxy_tokens": (
+                    local_skill_tokens
+                    + conditional_reference_tokens
+                    + delegated_core_tokens
+                ),
+            }
+        )
+    return reports
+
+
 GATEWAY_SKILL = "internal-gateway-idea"
 REVIEW_COUNTERCHECK_SKILL = "internal-gateway-critical-master"
 
 GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
-    "Direct execute": [GATEWAY_SKILL],
+    "Direct execute": [GATEWAY_SKILL, "internal-gateway-simple-task"],
     "Define Gate 0": [GATEWAY_SKILL, "grill-me"],
     "Define idea and critical": [
         GATEWAY_SKILL, "grill-me", "internal-gateway-critical-master",
@@ -265,6 +403,7 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(args.root)
 
     scenario_reports = build_scenario_report(root)
+    terraform_scenario_reports = build_terraform_scenario_report(root)
     description_reports = build_description_report(root)
     gateway_report = build_gateway_report(root)
     idea_gateway_report = build_idea_gateway_report(root)
@@ -272,15 +411,26 @@ def main(argv: list[str] | None = None) -> int:
     description_reports.sort(key=lambda r: r["description_tokens"], reverse=True)
 
     output = {
+        "measurement_note": (
+            "This is a static proxy; it does not prove runtime loading, "
+            "cache behavior, or billed-token savings."
+        ),
         "scenarios": scenario_reports,
+        "terraform_scenarios": terraform_scenario_reports,
         "descriptions": description_reports,
         "gateway": gateway_report,
         "idea_gateway": idea_gateway_report,
         "summary": {
-            "total_scenarios": len(scenario_reports),
+            "total_scenarios": len(scenario_reports) + len(terraform_scenario_reports),
             "total_skills_measured": len(description_reports),
             "highest_description_tokens": description_reports[0]["description_tokens"] if description_reports else 0,
-            "highest_scenario_proxy": max((r["scenario_proxy"] for r in scenario_reports), default=0),
+            "highest_scenario_proxy": max(
+                [
+                    *(r["scenario_proxy"] for r in scenario_reports),
+                    *(r["scenario_proxy_tokens"] for r in terraform_scenario_reports),
+                ],
+                default=0,
+            ),
             "gateway_core_bytes": gateway_report["core_bytes"],
             "gateway_bundle_bytes": gateway_report["bundle_bytes"],
         },

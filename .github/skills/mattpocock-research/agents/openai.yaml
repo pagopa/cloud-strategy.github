@@ -1,3 +1,5 @@
 interface:
-  display_name: "Research"
-  short_description: "Research from high-trust sources"
+  display_name: "mattpocock-research"
+  # local-sync:research-description:start
+  short_description: "Research from high-trust sources via Luna"
+  # local-sync:research-description:end

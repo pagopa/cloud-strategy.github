@@ -1,0 +1,17 @@
+interface:
+  display_name: "internal-subagent-contract"
+  short_description: "Validate bounded caller-owned subagent briefs and results"
+  default_prompt: >-
+    Use $internal-subagent-contract for one bounded, caller-owned brief/result
+    pair; return one compact semantic result with status, value, artifacts,
+    evidence, remaining gaps, and retry recommendation; keep semantic worker
+    fields separate from deterministic adapter data; validate the
+    adapter-composed WorkerResult v1 and caller-owned VerificationReceipt v1;
+    for mode plan, require the caller to record the actual primary-owner
+    alternative and why the worker package is off the critical path, with the
+    validator checking presence while the caller owns semantic admission;
+    provider or model identity cannot satisfy that gate, and a failed gate
+    falls back to local authoring; when timeout, interruption, executor
+    unavailability, or missing terminal output prevents a payload, record a
+    separate caller-owned LifecycleRecord and never fabricate a WorkerResult or
+    receipt; and never route, retry, or decide acceptance.

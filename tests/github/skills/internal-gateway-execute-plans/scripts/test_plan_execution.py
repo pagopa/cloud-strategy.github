@@ -1,4 +1,6 @@
 import json
+import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -16,22 +18,46 @@ FIXTURES = BUNDLE / "fixtures"
 sys.path.insert(0, str(SCRIPTS))
 
 from plan_execution import (  # noqa: E402
-    DISCOVERY_CATEGORIES,
+    Baseline,
+    ExecutionContractError,
     Finding,
     build_compact_payload,
-    classify_closeout,
-    compute_sha256,
-    parse_execution_contract,
-    status_for_route,
-    validate_completion,
+    canonical_json,
+    compute_content_sha256,
+    compute_semantic_fingerprint,
+    git_diff_check_coverage,
+    parse_execution_manifest,
+    validate_ignored_artifact,
+    validate_manifest_projection,
     validate_plan,
-    validate_resume,
-    validate_status,
+    validate_relevant_baseline,
+    validate_state,
 )
 
 
 def _fixture(name: str) -> Path:
     return FIXTURES / name
+
+
+def _manifest_text_with_delegation(delegation: dict[str, object]) -> str:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["delegation"] = delegation
+    return text[:start] + json.dumps(manifest, indent=2) + text[end:]
+
+
+def _accepted_provenance(
+    manifest: dict[str, object] | None = None, seed: str = "3"
+) -> dict[str, str]:
+    if manifest is None:
+        manifest = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    return {
+        "status": "accepted",
+        "content_hash": "sha256:" + seed * 64,
+        "plan_fingerprint": compute_semantic_fingerprint(manifest),
+    }
 
 
 def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
@@ -45,129 +71,259 @@ def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
     return plan
 
 
-def _contract(plan: Path):
-    return parse_execution_contract(plan.read_text())
-
-
-def _discovery() -> list[dict[str, object]]:
-    return [
-        {
-            "category": category,
-            "status": "not-found",
-            "candidates": [],
-            "evidence": f"No candidate found in {category}.",
-        }
-        for category in DISCOVERY_CATEGORIES
-    ]
-
-
-def _validation(
-    plan: Path,
-    validation_id: str,
-    *,
-    outcome: str = "exact-pass",
-    candidate: dict[str, object] | None = None,
-    authority_state: str = "not-required",
-    equivalent_evidence: dict[str, bool] | None = None,
-) -> dict[str, object]:
-    declared = {item.id: item for item in _contract(plan).validations}[validation_id]
-    value: dict[str, object] = {
-        "id": declared.id,
-        "command": declared.command,
-        "required": declared.required,
-        "outcome": outcome,
-        "phase": declared.phases[-1],
-        "equivalence": declared.equivalence,
-    }
-    if equivalent_evidence is not None:
-        value["outcome"] = "equivalent-pass"
-        value["equivalence_evidence"] = equivalent_evidence
-    if outcome in {"unresolved", "regression"} or equivalent_evidence is not None:
-        value.update(
-            {
-                "failure_phase": "validator-result",
-                "discovery_results": _discovery(),
-                "candidates": [candidate] if candidate else [],
-                "authority": {
-                    "state": authority_state,
-                    "action": "dependency-installation"
-                    if authority_state != "not-required"
-                    else "read-only-discovery",
-                },
-            }
-        )
-    return value
-
-
-def _closeout_evidence(
-    plan: Path,
-    *,
-    validations: list[dict[str, object]] | None = None,
-    outcome: str = "exact-pass",
-    candidate: dict[str, object] | None = None,
-    authority_state: str = "not-required",
-    tasks_complete: bool = True,
-    tasks_remaining: list[str] | None = None,
-    pause_requested: bool = False,
-    fatal_conditions: list[str] | None = None,
-    exhaustion_evidence: list[str] | None = None,
-    manual_obligations: list[dict[str, object]] | None = None,
-) -> dict[str, object]:
-    if validations is None:
-        declared = list(_contract(plan).validations)
-        validations = [
-            _validation(
-                plan,
-                item.id,
-                outcome=outcome,
-                candidate=candidate if index == 0 else None,
-                authority_state=authority_state,
-            )
-            for index, item in enumerate(declared)
-        ]
-    return {
-        "plan_fingerprint": compute_sha256(plan),
-        "tasks_complete": tasks_complete,
-        "tasks_remaining": tasks_remaining or [],
-        "pause_requested": pause_requested,
-        "fatal_conditions": fatal_conditions or [],
-        "validations": validations,
-        "manual_obligations": manual_obligations or [],
-        "exhaustion_evidence": exhaustion_evidence or [],
-    }
-
-
-def _minimal_status(plan: Path, status: str = "PARTIAL") -> str:
-    reason = (
-        "Recovery exhausted for an environmental validation."
-        if status == "NEEDS_REVIEW"
-        else "Classifier route is paused by the caller."
-    )
-    exhaustion = (
-        "No safe candidate remains after complete discovery."
-        if status in {"BLOCKED", "NEEDS_REVIEW"}
-        else "None; execution remains resumable."
-    )
-    return (
-        f"## Status\n\n`{status}`\n\n"
-        f"## Plan\n\n`{plan}`\n\n"
-        f"## Plan Fingerprint\n\n`{compute_sha256(plan)}`\n\n"
-        "## Completed\n\n- Task 1\n\n"
-        "## Remaining\n\n- Task 2\n\n"
-        "## Validation\n\n- `python3 -m pytest -q tests/fixture/` — passed.\n\n"
-        "## Next\n\nResume Task 2.\n\n"
-        "## Closeout Decision\n\n- Route: " + reason + "\n\n"
-        "## Recovery Attempts\n\n- None beyond recorded evidence.\n\n"
-        "## Recovery Exhaustion\n\n- " + exhaustion + "\n"
-    )
-
-
 def test_valid_plan_parses_contract_and_has_no_findings(valid_plan: Path) -> None:
-    assert parse_execution_contract(valid_plan.read_text()).schema_version == 1
+    assert parse_execution_manifest(valid_plan.read_text())["schema_version"] == 3
+    assert (
+        parse_execution_manifest(valid_plan.read_text())["manifest_version"]
+        == "execution-manifest/v3"
+    )
     assert validate_plan(valid_plan, repo_root=valid_plan.parents[3]) == []
 
 
-def test_plan_without_execution_contract_is_blocking(tmp_path: Path) -> None:
+def test_manifest_accepts_delegated_provenance_with_accepted_result(
+    tmp_path: Path,
+) -> None:
+    base = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    provenance = _accepted_provenance(base)
+    text = _manifest_text_with_delegation(
+        {
+            "schema_version": 1,
+            "mode": "delegated",
+            "worker": "internal-luna-executor",
+            "result": provenance,
+            "receipt": dict(provenance),
+            "acceptance": dict(provenance),
+        }
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "delegation-not-supported" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_semantic_fingerprint_excludes_delegation() -> None:
+    base = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    delegated = json.loads(json.dumps(base))
+    provenance = _accepted_provenance(base)
+    delegated["delegation"] = {
+        "schema_version": 1,
+        "mode": "delegated",
+        "worker": "internal-luna-executor",
+        "result": provenance,
+        "receipt": dict(provenance),
+        "acceptance": dict(provenance),
+    }
+
+    assert compute_semantic_fingerprint(base) == compute_semantic_fingerprint(delegated)
+
+
+def test_manifest_rejects_delegation_hash_collision(tmp_path: Path) -> None:
+    base = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    fingerprint = compute_semantic_fingerprint(base)
+    collision = {
+        "status": "accepted",
+        "content_hash": fingerprint,
+        "plan_fingerprint": fingerprint,
+    }
+    plan = _stage_valid_plan(
+        tmp_path,
+        _manifest_text_with_delegation(
+            {
+                "schema_version": 1,
+                "mode": "delegated",
+                "worker": "internal-luna-executor",
+                "result": collision,
+                "receipt": dict(collision),
+                "acceptance": dict(collision),
+            }
+        ),
+    )
+
+    assert "delegation-not-supported" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_manifest_rejects_delegation_fingerprint_drift(tmp_path: Path) -> None:
+    base = parse_execution_manifest(_fixture("valid-plan.md").read_text())
+    provenance = _accepted_provenance(base)
+    provenance["plan_fingerprint"] = "sha256:" + "f" * 64
+    plan = _stage_valid_plan(
+        tmp_path,
+        _manifest_text_with_delegation(
+            {
+                "schema_version": 1,
+                "mode": "delegated",
+                "worker": "internal-luna-executor",
+                "result": provenance,
+                "receipt": dict(provenance),
+                "acceptance": dict(provenance),
+            }
+        ),
+    )
+
+    assert "delegation-not-supported" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_manifest_accepts_local_primary_owner_provenance(tmp_path: Path) -> None:
+    text = _manifest_text_with_delegation(
+        {
+            "schema_version": 1,
+            "mode": "none",
+            "worker": "primary-owner",
+            "result": "not_applicable",
+            "receipt": None,
+            "acceptance": None,
+        }
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert validate_plan(plan, tmp_path) == []
+
+
+@pytest.mark.parametrize(
+    ("delegation", "finding_code"),
+    (
+        (
+            {
+                "schema_version": 1,
+                "mode": "delegated",
+                "worker": "internal-luna-executor",
+                "result": {
+                    **_accepted_provenance(),
+                    "status": "pending",
+                },
+                "receipt": _accepted_provenance(),
+                "acceptance": _accepted_provenance(),
+            },
+            "delegation-not-supported",
+        ),
+        (
+            {
+                "schema_version": 1,
+                "mode": "none",
+                "worker": "primary-owner",
+                "result": _accepted_provenance(),
+                "receipt": None,
+                "acceptance": None,
+            },
+            "local-worker-authorship",
+        ),
+        (
+            {
+                "schema_version": 1,
+                "mode": "none",
+                "worker": "primary-owner",
+                "result": None,
+                "receipt": _accepted_provenance(),
+                "acceptance": None,
+            },
+            "delegation-receipt-without-worker",
+        ),
+        (
+            {
+                "schema_version": 1,
+                "mode": "none",
+                "worker": "internal-luna-executor",
+                "result": None,
+                "receipt": None,
+                "acceptance": None,
+            },
+            "local-worker-authorship",
+        ),
+        (
+            {
+                "schema_version": 1,
+                "mode": "delegated",
+                "worker": "internal-luna-executor",
+                "result": _accepted_provenance(),
+                "receipt": _accepted_provenance(),
+                "acceptance": _accepted_provenance(seed="9"),
+            },
+            "delegation-not-supported",
+        ),
+    ),
+)
+def test_manifest_rejects_contradictory_delegation_provenance(
+    tmp_path: Path, delegation: dict[str, object], finding_code: str
+) -> None:
+    plan = _stage_valid_plan(tmp_path, _manifest_text_with_delegation(delegation))
+
+    assert finding_code in {item.code for item in validate_plan(plan, tmp_path)}
+
+
+def test_manifest_rejects_missing_local_provenance_marker(tmp_path: Path) -> None:
+    text = _manifest_text_with_delegation(
+        {
+            "schema_version": 1,
+            "mode": "none",
+            "worker": "primary-owner",
+            "result": None,
+            "receipt": None,
+            "acceptance": None,
+        }
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "local-provenance-marker" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_manifest_without_delegation_is_rejected_in_v2(
+    tmp_path: Path,
+) -> None:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest.pop("delegation")
+    legacy_text = text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    plan = _stage_valid_plan(tmp_path, legacy_text)
+
+    with pytest.raises(ExecutionContractError) as exc:
+        parse_execution_manifest(plan.read_text(encoding="utf-8"))
+
+    assert exc.value.code == "missing-manifest-field"
+
+
+def test_manifest_without_delegation_preflight_is_blocking(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest.pop("delegation")
+    plan = _stage_valid_plan(
+        tmp_path,
+        text[:start] + json.dumps(manifest, indent=2) + text[end:],
+    )
+
+    findings = validate_plan(plan, tmp_path)
+
+    assert "missing-manifest-field" in {item.code for item in findings}
+    assert any(item.severity == "blocking" for item in findings)
+
+
+def test_state_check_blocks_manifest_without_delegation(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest.pop("delegation")
+    plan = _stage_valid_plan(
+        tmp_path,
+        text[:start] + json.dumps(manifest, indent=2) + text[end:],
+    )
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    findings = validate_state(plan, state, tmp_path)
+
+    assert "missing-manifest-field" in {item.code for item in findings}
+
+
+def test_plan_without_execution_manifest_is_blocking(tmp_path: Path) -> None:
     plan = _stage_valid_plan(
         tmp_path,
         "# Plan\n\n## Goal\n\nStrict plan.\n\n"
@@ -179,12 +335,37 @@ def test_plan_without_execution_contract_is_blocking(tmp_path: Path) -> None:
         "## Task 1: Validate\n\n- [ ] Run validation.\n",
     )
     findings = validate_plan(plan, repo_root=tmp_path)
-    assert "missing-execution-contract" in {item.code for item in findings}
+    assert "missing-execution-manifest" in {item.code for item in findings}
     assert any(item.severity == "blocking" for item in findings)
 
 
+def test_current_plan_requires_control_inventory(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text()
+    start = text.index("## Control Inventory")
+    end = text.index("\n## ", start + 1)
+    plan = _stage_valid_plan(tmp_path, text[:start] + text[end + 1 :])
+    assert "missing-control-inventory" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_current_plan_requires_explicit_no_git_constraint(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace("- No Git mutation.\n", "", 1)
+    plan = _stage_valid_plan(tmp_path, text)
+    assert "missing-no-git-constraint" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_explicit_legacy_or_imported_plan_remains_non_actionable(
+    tmp_path: Path,
+) -> None:
+    plan = _stage_valid_plan(tmp_path, "# Legacy plan\n\n## Goal\n\nNo manifest.\n")
+    assert any(item.severity == "blocking" for item in validate_plan(plan, tmp_path))
+
+
 def test_legacy_plan_is_rejected(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path, _fixture("legacy-draft-plan.md").read_text())
+    plan = _stage_valid_plan(tmp_path, "# Legacy plan\n\n## Goal\n\nNo manifest.\n")
     assert any(item.severity == "blocking" for item in validate_plan(plan, tmp_path))
 
 
@@ -192,7 +373,7 @@ def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
     text = (
         _fixture("valid-plan.md")
         .read_text()
-        .replace('"id": "diff-check"', '"id": "focused-tests"')
+        .replace('"id": "diff-check", "command"', '"id": "focused-tests", "command"')
     )
     plan = _stage_valid_plan(tmp_path, text)
     assert "duplicate-validation-id" in {
@@ -200,13 +381,87 @@ def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
     }
 
 
+def test_current_plan_rejects_git_mutating_validation_command(tmp_path: Path) -> None:
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            '"command": "git diff --check"',
+            '"command": "git commit -am forbidden"',
+            1,
+        )
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "git-mutation-command" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_current_plan_rejects_git_mutation_with_global_option(tmp_path: Path) -> None:
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            '"command": "git diff --check"',
+            '"command": "git -c user.name=bot commit"',
+            1,
+        )
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "git-mutation-command" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_current_plan_rejects_git_directory_target(tmp_path: Path) -> None:
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            '"path": "tests/fixture/"',
+            '"path": ".git/"',
+            1,
+        )
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "git-target-prohibited" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+@pytest.mark.parametrize(
+    "reference_field",
+    ("depends_on", "target_ids", "validation_ids", "manual_obligation_ids"),
+)
+def test_current_plan_rejects_unknown_task_references(
+    tmp_path: Path, reference_field: str
+) -> None:
+    text = _fixture("valid-plan.md").read_text()
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["tasks"][0][reference_field] = ["MISSING"]
+    text = text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    plan = _stage_valid_plan(tmp_path, text)
+
+    findings = validate_plan(plan, tmp_path)
+
+    assert any(
+        item.code == "unknown-task-reference" and reference_field in item.message
+        for item in findings
+    )
+
+
 @pytest.mark.parametrize(
     ("needle", "replacement", "message"),
     (
         ('"schema_version": 1', '"schema_version": 2', "schema_version"),
         (
-            '"id": "focused-tests"',
-            '"id": "focused-tests", "unknown": true',
+            '"id": "focused-tests", "command"',
+            '"id": "focused-tests", "unknown": true, "command"',
             "unknown fields",
         ),
         (
@@ -215,10 +470,10 @@ def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
             "command",
         ),
         ('"phases": ["final"]', '"phases": ["other"]', "phases"),
-        ('"equivalence": "exact-only"', '"equivalence": "never"', "equivalence"),
+        ('"state": "inspect"', '"state": "unknown"', "state"),
     ),
 )
-def test_execution_contract_rejects_invalid_fields(
+def test_execution_manifest_rejects_invalid_fields(
     tmp_path: Path, needle: str, replacement: str, message: str
 ) -> None:
     plan = _stage_valid_plan(
@@ -227,7 +482,7 @@ def test_execution_contract_rejects_invalid_fields(
     assert any(message in item.message for item in validate_plan(plan, tmp_path))
 
 
-def test_execution_contract_rejects_malformed_json_and_duplicate_blocks(
+def test_execution_manifest_rejects_malformed_json_and_duplicate_blocks(
     tmp_path: Path,
 ) -> None:
     malformed = _stage_valid_plan(
@@ -236,215 +491,17 @@ def test_execution_contract_rejects_malformed_json_and_duplicate_blocks(
         .read_text()
         .replace('"schema_version": 1', '"schema_version":', 1),
     )
-    assert "malformed-execution-contract" in {
+    assert "malformed-execution-manifest" in {
         item.code for item in validate_plan(malformed, tmp_path)
     }
     duplicate = _stage_valid_plan(
         tmp_path / "duplicate",
         _fixture("valid-plan.md").read_text()
-        + "\n## Execution Contract\n\n```json\n{}\n```\n",
+        + "\n## Execution Manifest\n\n```json\n{}\n```\n",
     )
-    assert "duplicate-execution-contract" in {
+    assert "duplicate-execution-manifest" in {
         item.code for item in validate_plan(duplicate, duplicate.parents[3])
     }
-
-
-def test_closeout_is_done_when_all_required_obligations_pass_exactly(
-    valid_plan: Path,
-) -> None:
-    decision = classify_closeout(_contract(valid_plan), _closeout_evidence(valid_plan))
-    assert decision.route == "DONE"
-
-
-def test_closeout_accepts_admissible_equivalent_validation(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(
-        valid_plan,
-        validations=[
-            _validation(
-                valid_plan,
-                "focused-tests",
-                equivalent_evidence={
-                    "target_did_not_start": True,
-                    "same_checks": True,
-                    "same_inputs": True,
-                    "runtime_not_material": True,
-                },
-            ),
-            _validation(valid_plan, "diff-check"),
-        ],
-    )
-    assert classify_closeout(_contract(valid_plan), evidence).route == "DONE"
-
-
-def test_closeout_rejects_omitted_required_plan_validation(valid_plan: Path) -> None:
-    with pytest.raises(ValueError, match="missing required validation"):
-        classify_closeout(
-            _contract(valid_plan), _closeout_evidence(valid_plan, validations=[])
-        )
-
-
-def test_closeout_rejects_changed_command_and_unknown_id(valid_plan: Path) -> None:
-    changed = _closeout_evidence(valid_plan)
-    changed["validations"][0]["command"] = "make unrelated"  # type: ignore[index]
-    with pytest.raises(ValueError, match="command mismatch"):
-        classify_closeout(_contract(valid_plan), changed)
-    unknown = _closeout_evidence(valid_plan)
-    unknown["validations"][0]["id"] = "unknown"  # type: ignore[index]
-    with pytest.raises(ValueError, match="unknown validation id"):
-        classify_closeout(_contract(valid_plan), unknown)
-
-
-def test_closeout_continues_on_safe_untried_candidate(valid_plan: Path) -> None:
-    candidate = {
-        "name": "retry with compatible runtime",
-        "source": "path-executable",
-        "safe": True,
-        "requires_authority": False,
-        "attempted": False,
-        "result": "not-run",
-        "evidence_delta": "candidate has not been tried",
-    }
-    assert (
-        classify_closeout(
-            _contract(valid_plan),
-            _closeout_evidence(valid_plan, outcome="unresolved", candidate=candidate),
-        ).route
-        == "continue-recovery"
-    )
-
-
-def test_closeout_requests_authority_before_terminal_status(valid_plan: Path) -> None:
-    candidate = {
-        "name": "install compatible runtime",
-        "source": "path-executable",
-        "safe": False,
-        "requires_authority": True,
-        "attempted": False,
-        "result": "not-run",
-        "evidence_delta": "compatible runtime is not installed",
-    }
-    assert (
-        classify_closeout(
-            _contract(valid_plan),
-            _closeout_evidence(
-                valid_plan,
-                outcome="unresolved",
-                candidate=candidate,
-                authority_state="required-unrequested",
-            ),
-        ).route
-        == "request-authority"
-    )
-
-
-def test_closeout_rejects_narrative_only_exhaustion(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(
-        valid_plan,
-        outcome="unresolved",
-        exhaustion_evidence=["no compatible interpreter is available"],
-    )
-    evidence["validations"][0].pop("discovery_results")  # type: ignore[index]
-    with pytest.raises(ValueError, match="structured recovery"):
-        classify_closeout(_contract(valid_plan), evidence)
-
-
-def test_closeout_blocks_fatal_task_local_regression(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(
-        valid_plan, fatal_conditions=["task-local regression exhausted"]
-    )
-    assert classify_closeout(_contract(valid_plan), evidence).route == "BLOCKED"
-
-
-def test_closeout_routes_incomplete_work_and_explicit_pause(valid_plan: Path) -> None:
-    active = _closeout_evidence(
-        valid_plan, tasks_complete=False, tasks_remaining=["Task 2"]
-    )
-    paused = _closeout_evidence(
-        valid_plan,
-        tasks_complete=False,
-        tasks_remaining=["Task 2"],
-        pause_requested=True,
-    )
-    assert (
-        classify_closeout(_contract(valid_plan), active).route == "continue-execution"
-    )
-    assert classify_closeout(_contract(valid_plan), paused).route == "PARTIAL"
-
-
-def test_closeout_requires_review_for_pending_manual_obligation(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(
-        tmp_path,
-        _fixture("valid-plan.md")
-        .read_text()
-        .replace(
-            '"manual_obligations": []',
-            '"manual_obligations": [{"id": "owner-check", "kind": "human", "required": true, "acceptance": "Owner confirms output."}]',
-        ),
-    )
-    evidence = _closeout_evidence(
-        plan,
-        manual_obligations=[
-            {"id": "owner-check", "satisfied": False, "evidence": "Awaiting owner."}
-        ],
-    )
-    assert classify_closeout(_contract(plan), evidence).route == "NEEDS_REVIEW"
-
-
-@pytest.mark.parametrize(
-    "route", ("continue-execution", "continue-recovery", "request-authority")
-)
-def test_active_route_cannot_be_serialized_as_terminal_status(route: str) -> None:
-    assert status_for_route(route) is None
-
-
-def test_minimal_status_is_valid(tmp_path: Path, valid_plan: Path) -> None:
-    status = tmp_path / "valid-plan.PARTIAL.md"
-    status.write_text(_minimal_status(valid_plan))
-    assert validate_status(status) == []
-
-
-def test_needs_review_requires_bound_reason(tmp_path: Path, valid_plan: Path) -> None:
-    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
-    status.write_text(
-        _minimal_status(valid_plan, "NEEDS_REVIEW").replace(
-            "Recovery exhausted for an environmental validation.", "Pending work."
-        )
-    )
-    assert "needs-review-without-bound-reason" in {
-        item.code for item in validate_status(status)
-    }
-
-
-def test_status_rejects_unknown_state_and_missing_headings(
-    invalid_status: Path,
-) -> None:
-    codes = {item.code for item in validate_status(invalid_status)}
-    assert "unknown-status" in codes
-    assert "missing-heading" in codes
-
-
-def test_resume_rejects_plan_fingerprint_drift(
-    valid_plan: Path, valid_partial_status: Path
-) -> None:
-    valid_plan.write_text(valid_plan.read_text() + "\nChanged after approval.\n")
-    assert "plan-fingerprint-drift" in {
-        item.code for item in validate_resume(valid_plan, valid_partial_status)
-    }
-
-
-def test_resume_accepts_matching_status_binding(
-    valid_plan: Path, valid_partial_status: Path
-) -> None:
-    assert validate_resume(valid_plan, valid_partial_status) == []
-
-
-def test_completion_requires_done_and_no_remaining(
-    valid_plan: Path, valid_partial_status: Path
-) -> None:
-    findings = validate_completion(valid_plan, valid_partial_status)
-    assert "not-done" in {
-        item.code for item in findings
-    } or "plan-fingerprint-drift" in {item.code for item in findings}
 
 
 def test_compact_output_is_bounded() -> None:
@@ -473,87 +530,759 @@ def test_preflight_cli_valid_fixture(tmp_path: Path) -> None:
         text=True,
     )
     assert result.returncode == 0, result.stderr
+    manifest = parse_execution_manifest(plan.read_text())
+    assert manifest["tasks"][0]["depends_on"] == []
 
 
-def test_closeout_cli_binds_plan_and_evidence(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path)
-    evidence = tmp_path / "closeout.json"
-    evidence.write_text(json.dumps(_closeout_evidence(plan)))
+def test_facade_loads_via_spec_from_file_location() -> None:
+    isolated_loader = """
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+source = Path(sys.argv[1])
+fixture = Path(sys.argv[2])
+before = list(sys.path)
+spec = importlib.util.spec_from_file_location("plan_execution_isolated_facade", source)
+assert spec is not None and spec.loader is not None
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+manifest = module.parse_execution_manifest(fixture.read_text(encoding="utf-8"))
+print(json.dumps({
+    "schema_version": manifest["schema_version"],
+    "sys_path_unchanged": sys.path == before,
+    "has_yaml_attribute": hasattr(module, "yaml"),
+    "task_ids": list(module._manifest_task_ids(manifest)),
+}))
+"""
+
     result = subprocess.run(
         [
             sys.executable,
+            "-c",
+            isolated_loader,
             str(SCRIPTS / "plan_execution.py"),
-            "closeout-check",
-            str(plan),
-            str(evidence),
-            "--format",
-            "compact",
+            str(_fixture("valid-plan.md")),
         ],
         capture_output=True,
         text=True,
     )
+
     assert result.returncode == 0, result.stderr
-    assert json.loads(result.stdout)["route"] == "DONE"
+    assert json.loads(result.stdout) == {
+        "schema_version": 3,
+        "sys_path_unchanged": True,
+        "has_yaml_attribute": True,
+        "task_ids": ["T1"],
+    }
 
 
-def test_closeout_cli_rejects_fingerprint_mismatch(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path)
-    evidence = tmp_path / "closeout.json"
-    payload = _closeout_evidence(plan)
-    payload["plan_fingerprint"] = "sha256:wrong"
-    evidence.write_text(json.dumps(payload))
+def test_current_plan_rejects_legacy_execution_contract_projection(
+    tmp_path: Path,
+) -> None:
+    text = _fixture("valid-plan.md").read_text()
+    plan = _stage_valid_plan(
+        tmp_path,
+        text + "\n## Execution Contract\n\n```json\n{}\n```\n",
+    )
+    codes = {item.code for item in validate_plan(plan, tmp_path)}
+    assert "obsolete-execution-contract" in codes
+
+
+def test_relevant_baseline_detects_path_and_undeclared_dependency_drift() -> None:
+    baseline = Baseline(
+        head="sha256:head",
+        paths={
+            "declared/source.py": "sha256:source",
+            "declared/config.json": "sha256:config",
+        },
+    )
+    current = Baseline(
+        head="sha256:head",
+        paths={
+            "declared/source.py": "sha256:changed",
+            "declared/config.json": "sha256:config",
+            "undeclared/dependency.py": "sha256:new",
+        },
+    )
+
+    findings = validate_relevant_baseline(baseline, current)
+    codes = {finding.code for finding in findings}
+
+    assert "relevant-path-drift" in codes
+    assert "undeclared-dependency-drift" in codes
+
+
+def test_relevant_baseline_accepts_clean_declared_paths() -> None:
+    baseline = Baseline(
+        head="sha256:head",
+        paths={"declared/source.py": "sha256:source"},
+    )
+
+    assert validate_relevant_baseline(baseline, baseline) == []
+
+
+def test_ignored_artifact_validates_direct_bytes(tmp_path: Path) -> None:
+    artifact = tmp_path / "ignored-plan.md"
+    artifact.write_text("retained bytes", encoding="utf-8")
+    expected = compute_content_sha256(artifact)
+
+    assert validate_ignored_artifact(artifact, expected) is None
+    assert (
+        validate_ignored_artifact(artifact, "sha256:" + "0" * 64).code
+        == "ignored-artifact-hash-drift"
+    )
+    assert (
+        validate_ignored_artifact(tmp_path / "missing.md", expected).code
+        == "ignored-artifact-missing"
+    )
+
+
+def test_git_diff_check_coverage_names_git_visible_limit() -> None:
+    coverage = git_diff_check_coverage("passed")
+
+    assert coverage["outcome"] == "passed"
+    assert coverage["coverage"] == "Git-visible paths only"
+    assert "ignored" in coverage["limit"].lower()
+
+
+def _current_plan() -> Path:
+    return FIXTURES / "valid-plan.md"
+
+
+def _manifest_text(plan: Path) -> str:
+    return plan.read_text(encoding="utf-8")
+
+
+def test_execution_manifest_parses_and_binds_current_projection() -> None:
+    plan = _current_plan()
+    text = _manifest_text(plan)
+    manifest = parse_execution_manifest(text)
+
+    assert manifest["manifest_version"] == "execution-manifest/v3"
+    assert validate_manifest_projection(text, manifest) == []
+
+
+def test_execution_manifest_rejects_duplicate_fenced_blocks(tmp_path: Path) -> None:
+    plan = _current_plan()
+    text = _manifest_text(plan) + "\n## Execution Manifest\n\n```json\n{}\n```\n"
+
+    with pytest.raises(ExecutionContractError) as exc:
+        parse_execution_manifest(text)
+    assert exc.value.code == "duplicate-execution-manifest"
+
+
+def test_execution_manifest_rejects_unknown_fields(tmp_path: Path) -> None:
+    plan = _current_plan()
+    text = _manifest_text(plan)
+    text = text.replace(
+        '"manifest_version": "execution-manifest/v3"',
+        '"unknown": true,\n  "manifest_version": "execution-manifest/v3"',
+        1,
+    )
+
+    with pytest.raises(ExecutionContractError) as exc:
+        parse_execution_manifest(text)
+    assert exc.value.code == "unknown-manifest-field"
+
+
+@pytest.mark.parametrize(
+    ("value", "valid"),
+    [
+        (1, True),
+        (2, True),
+        (3, True),
+        (4, True),
+        (5, True),
+        (0, False),
+        (6, False),
+        (2.5, False),
+        ("3", False),
+    ],
+)
+def test_retry_policy_corrective_budget_is_finite_and_per_task(
+    tmp_path: Path, value: object, valid: bool
+) -> None:
+    text = _manifest_text(_current_plan())
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["retry_policy"]["max_corrective_retries"] = value
+    plan = _stage_valid_plan(
+        tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    )
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert bool(findings) is (not valid)
+
+
+def test_retry_policy_requires_corrective_budget_field(tmp_path: Path) -> None:
+    text = _manifest_text(_current_plan())
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["retry_policy"].pop("max_corrective_retries")
+    plan = _stage_valid_plan(
+        tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    )
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert "missing-manifest-field" in {finding.code for finding in findings}
+
+
+def test_content_hash_tracks_editorial_bytes_but_semantic_hash_does_not(
+    tmp_path: Path,
+) -> None:
+    plan = _current_plan()
+    original = _manifest_text(plan)
+    editorial = original + "\nEditorial note that does not change the manifest.\n"
+    original_manifest = parse_execution_manifest(original)
+    editorial_manifest = parse_execution_manifest(editorial)
+
+    (tmp_path / "original.md").write_text(original, encoding="utf-8")
+    (tmp_path / "editorial.md").write_text(editorial, encoding="utf-8")
+    assert compute_content_sha256(tmp_path / "original.md") != compute_content_sha256(
+        tmp_path / "editorial.md"
+    )
+    assert compute_semantic_fingerprint(
+        original_manifest
+    ) == compute_semantic_fingerprint(editorial_manifest)
+
+
+@pytest.mark.parametrize(
+    "mutator",
+    [
+        lambda m: m["authority_boundaries"].update({"no_git_mutation": False}),
+        lambda m: m["targets"][0].update({"path": "changed/path"}),
+        lambda m: m["controls"]["CI-01"]["binding"].append("T8"),
+        lambda m: m["validations"][0].update({"command": "make changed"}),
+        lambda m: m["tasks"][0].update({"depends_on": ["T8"]}),
+        lambda m: m["retry_policy"].update({"max_corrective_retries": 2}),
+        lambda m: m["handoff"].update({"next_owner": "/other-owner"}),
+    ],
+)
+def test_every_normative_manifest_class_changes_semantic_fingerprint(mutator) -> None:
+    manifest = parse_execution_manifest(_manifest_text(_current_plan()))
+    changed = json.loads(json.dumps(manifest))
+    mutator(changed)
+
+    assert compute_semantic_fingerprint(manifest) != compute_semantic_fingerprint(
+        changed
+    )
+
+
+def test_manifest_hashes_are_external_and_self_reference_is_rejected() -> None:
+    manifest = parse_execution_manifest(_manifest_text(_current_plan()))
+    content_hash = compute_content_sha256(_current_plan())
+    semantic_hash = compute_semantic_fingerprint(manifest)
+    encoded = canonical_json(manifest)
+
+    assert content_hash.encode() not in encoded
+    assert semantic_hash.encode() not in encoded
+
+    polluted = json.loads(encoded)
+    polluted["semantic_fingerprint"] = semantic_hash
+    with pytest.raises(ExecutionContractError) as exc:
+        compute_semantic_fingerprint(polluted)
+    assert exc.value.code == "manifest-hash-self-reference"
+
+
+def test_projection_drift_fails_closed() -> None:
+    text = _manifest_text(_current_plan())
+    manifest = parse_execution_manifest(text)
+    changed = json.loads(json.dumps(manifest))
+    changed["controls"].pop("CI-01")
+
+    findings = validate_manifest_projection(text, changed)
+
+    assert any("projection" in finding.lower() for finding in findings)
+
+
+def _stage_bundle(tmp_path: Path) -> tuple[Path, Path]:
+    bundle = tmp_path / "canonical" / "internal-gateway-execute-plans"
+    scripts = bundle / "scripts"
+    scripts.mkdir(parents=True)
+    (bundle / "SKILL.md").write_text("# Executor bundle\n")
+    entrypoint = scripts / "plan_execution.py"
+    entrypoint.write_text("#!/usr/bin/env python3\n")
+    runner = scripts / "run.sh"
+    runner.write_text("#!/usr/bin/env bash\n")
+    runner.chmod(0o755)
+    return bundle, entrypoint
+
+
+def test_resolve_loaded_bundle_from_external_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = sys.modules["plan_execution"]
+    bundle, entrypoint = _stage_bundle(tmp_path)
+    external = tmp_path / "external"
+    external.mkdir()
+    monkeypatch.chdir(external)
+
+    assert module.resolve_loaded_bundle(entrypoint) == bundle.resolve()
+
+
+def test_resolve_loaded_bundle_accepts_canonical_symlink(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    bundle, entrypoint = _stage_bundle(tmp_path)
+    loaded = tmp_path / "loaded" / "plan_execution.py"
+    loaded.parent.mkdir()
+    loaded.symlink_to(entrypoint)
+
+    assert module.resolve_loaded_bundle(loaded) == bundle.resolve()
+
+
+def test_resolve_loaded_bundle_rejects_stale_symlink(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    loaded = tmp_path / "loaded" / "plan_execution.py"
+    loaded.parent.mkdir()
+    loaded.symlink_to(tmp_path / "missing" / "plan_execution.py")
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.resolve_loaded_bundle(loaded)
+
+    assert exc.value.code == "loaded-bundle-stale"
+    assert "next action" in str(exc.value).lower()
+
+
+def test_bundle_runner_uses_loaded_bundle_from_external_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = sys.modules["plan_execution"]
+    bundle, entrypoint = _stage_bundle(tmp_path)
+    loaded = tmp_path / "loaded" / "plan_execution.py"
+    loaded.parent.mkdir()
+    loaded.symlink_to(entrypoint)
+    external = tmp_path / "external"
+    external.mkdir()
+    monkeypatch.chdir(external)
+
+    command = module.bundle_runner_command(
+        loaded, ("preflight", "tmp/superpowers/plans/plan.md"), external
+    )
+
+    assert command == [
+        "bash",
+        str(bundle / "scripts" / "run.sh"),
+        "preflight",
+        "tmp/superpowers/plans/plan.md",
+    ]
+
+
+def test_bundle_runner_does_not_install_dependencies_on_normal_execution(
+    tmp_path: Path,
+) -> None:
+    runtime_bin = tmp_path / "runtime" / "bin"
+    runtime_bin.mkdir(parents=True)
+    invocation_log = tmp_path / "invocations.log"
+    fake_python = runtime_bin / "python"
+    fake_python.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        'printf \'%s\\n\' "$*" >> "$FAKE_RUNTIME_LOG"\n'
+        'if [[ "${1:-}" == "-m" && "${2:-}" == "pip" ]]; then\n'
+        "  exit 99\n"
+        "fi\n"
+    )
+    fake_python.chmod(0o755)
+    environment = os.environ.copy()
+    environment["EXECUTOR_BUNDLE_RUNTIME_DIR"] = str(runtime_bin.parent)
+    environment["FAKE_RUNTIME_LOG"] = str(invocation_log)
+
     result = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPTS / "plan_execution.py"),
-            "closeout-check",
-            str(plan),
-            str(evidence),
-            "--format",
-            "compact",
-        ],
+        ["bash", str(SCRIPTS / "run.sh"), "preflight", "ignored-plan.md"],
+        env=environment,
         capture_output=True,
         text=True,
+        check=False,
     )
-    assert result.returncode != 0
-    assert "fingerprint" in result.stderr
 
-
-def test_status_check_cli_valid() -> None:
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPTS / "plan_execution.py"),
-            "status-check",
-            str(_fixture("valid-plan.PARTIAL.md")),
-            "--format",
-            "compact",
-        ],
-        capture_output=True,
-        text=True,
-    )
     assert result.returncode == 0, result.stderr
+    assert "-m pip" not in invocation_log.read_text()
 
 
-def test_resume_check_cli_detects_drift(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path)
-    status = tmp_path / "valid-plan.PARTIAL.md"
-    status.write_text(_fixture("valid-plan.PARTIAL.md").read_text())
-    plan.write_text(plan.read_text() + "\nDrifted.\n")
+def test_bundle_runner_requires_explicit_bootstrap_for_missing_runtime(
+    tmp_path: Path,
+) -> None:
+    fake_python = tmp_path / "python"
+    fake_python.write_text("#!/usr/bin/env bash\nexit 99\n")
+    fake_python.chmod(0o755)
+    environment = os.environ.copy()
+    environment["PYTHON_BIN"] = str(fake_python)
+    environment["EXECUTOR_BUNDLE_RUNTIME_DIR"] = str(tmp_path / "missing-runtime")
+
     result = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPTS / "plan_execution.py"),
-            "resume-check",
-            str(plan),
-            str(status),
-            "--format",
-            "compact",
-        ],
+        ["bash", str(SCRIPTS / "run.sh"), "preflight", "ignored-plan.md"],
+        env=environment,
         capture_output=True,
         text=True,
+        check=False,
     )
+
     assert result.returncode != 0
-    assert "plan-fingerprint-drift" in {
+    assert "not provisioned" in result.stderr
+
+
+def test_bundle_runner_rejects_stale_loaded_symlink(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    loaded = tmp_path / "loaded" / "plan_execution.py"
+    loaded.parent.mkdir()
+    loaded.symlink_to(tmp_path / "missing" / "plan_execution.py")
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.bundle_runner_command(loaded, (), tmp_path)
+
+    assert exc.value.code == "loaded-bundle-stale"
+    assert "next action" in str(exc.value).lower()
+
+
+def test_dependency_lock_contains_hash_locked_pyyaml() -> None:
+    requirements_in = SCRIPTS / "requirements.in"
+    requirements_lock = SCRIPTS / "requirements.txt"
+
+    assert "PyYAML" in requirements_in.read_text(encoding="utf-8")
+    lock_text = requirements_lock.read_text(encoding="utf-8")
+    assert re.search(r"(?im)^pyyaml==[0-9][^\\s]*", lock_text)
+    assert re.search(r"(?im)^\s+--hash=sha256:[0-9a-f]{64}", lock_text)
+
+
+def _passing_verdicts(module):
+    return {
+        category: module.Verdict(category, "passed", "observed", "none")
+        for category in module.VERDICT_CATEGORIES
+    }
+
+
+def test_status_persists_hash_free_approval_and_delivery_verdicts(
+    tmp_path: Path,
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan)
+
+    assert payload["schema_version"] == 2
+    assert payload["approval_evidence"] == {
+        "source": "current-conversation",
+        "statement": "explicit execution approval",
+        "semantic_fingerprint": compute_semantic_fingerprint(
+            module.parse_execution_manifest(plan.read_text())
+        ),
+    }
+    assert [item["category"] for item in payload["delivery_verdicts"]] == list(
+        module.VERDICT_CATEGORIES
+    )
+
+    parsed = module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.DONE.yaml"))
+    assert parsed.approval_evidence.source == "current-conversation"
+    assert (
+        parsed.approval_evidence.semantic_fingerprint
+        == payload["approval_evidence"]["semantic_fingerprint"]
+    )
+    assert {item.category for item in parsed.delivery_verdicts} == set(
+        module.VERDICT_CATEGORIES
+    )
+
+
+def test_status_rejects_retired_approval_hash_fields(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan)
+    payload["approval_evidence"]["content_hash"] = "sha256:" + "0" * 64
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.DONE.yaml"))
+
+    assert exc.value.code == "malformed-approval-evidence"
+
+
+def test_status_rejects_normative_manifest_drift_without_refreshed_approval(
+    tmp_path: Path,
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    module.write_status_yaml(state, _status_payload(module, plan))
+
+    plan_text = plan.read_text()
+    plan.write_text(
+        plan_text.replace(
+            '"rollout": [',
+            '"rollout": [\n    "Normative drift",',
+            1,
+        )
+    )
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode != 0
+    assert "approval-semantic-mismatch" in {
         item["code"] for item in json.loads(result.stdout)["finding_sample"]
     }
+
+
+def test_status_builder_computes_approval_from_parsed_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    observed: list[dict[str, object]] = []
+    original = module.compute_semantic_fingerprint
+
+    def capture(manifest: dict[str, object]) -> str:
+        observed.append(manifest)
+        return original(manifest)
+
+    monkeypatch.setattr(module, "compute_semantic_fingerprint", capture)
+    payload = _status_payload(module, plan)
+
+    assert observed
+    assert payload["approval_evidence"]["semantic_fingerprint"] == original(
+        observed[-1]
+    )
+
+
+def test_done_state_rejects_unpassed_delivery_verdicts(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state_path = plan.with_name(f"{plan.stem}.DONE.yaml")
+    payload = _status_payload(module, plan)
+    payload["delivery_verdicts"][-1]["outcome"] = "inconclusive"
+    payload["delivery_verdicts"][-1]["limit"] = "authority evidence missing"
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.write_status_yaml(state_path, payload)
+    assert exc.value.code == "done-with-unpassed-delivery-verdicts"
+    state_path.write_text(module.yaml.safe_dump(payload), encoding="utf-8")
+
+    findings = module.validate_state(plan, state_path, tmp_path)
+
+    assert "done-with-unpassed-delivery-verdicts" in {item.code for item in findings}
+
+
+def _status_payload(
+    module,
+    plan: Path,
+    status: str = "DONE",
+    completed: tuple[str, ...] | None = None,
+) -> dict[str, object]:
+    manifest = module.parse_execution_manifest(plan.read_text())
+    task_ids = tuple(module._manifest_task_ids(manifest))
+    completed_task_ids = (
+        completed
+        if completed is not None
+        else (task_ids if status in {"DONE", "DONE_WITH_WARNINGS"} else ())
+    )
+    remaining_task_ids = tuple(
+        task_id for task_id in task_ids if task_id not in completed_task_ids
+    )
+    delivery_verdicts = {
+        category: module.Verdict(category, "passed", "observed", "none")
+        for category in module.VERDICT_CATEGORIES
+    }
+    return module.build_status_yaml(
+        plan,
+        status,
+        completed_task_ids,
+        remaining_task_ids,
+        "focused: native tests passed",
+        "No further execution is required."
+        if status in {"DONE", "DONE_WITH_WARNINGS"}
+        else "Continue the approved task loop.",
+        approval_source="current-conversation",
+        delivery_verdicts=delivery_verdicts,
+        repo_root=plan.parents[3],
+    )
+
+
+def test_yaml_status_filename_and_content_status_must_match(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    done_path = plan.with_name(f"{plan.stem}.DONE.yaml")
+    payload = _status_payload(module, plan)
+
+    assert module.parse_status_yaml(payload, done_path).status == "DONE"
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.PARTIAL.yaml"))
+
+    assert exc.value.code == "status-filename-mismatch"
+
+
+def test_status_discovery_rejects_duplicate_or_ambiguous_siblings(
+    tmp_path: Path,
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    module.write_status_yaml(
+        plan.with_name(f"{plan.stem}.DONE.yaml"), _status_payload(module, plan, "DONE")
+    )
+    module.write_status_yaml(
+        plan.with_name(f"{plan.stem}.PARTIAL.yaml"),
+        _status_payload(module, plan, "PARTIAL"),
+    )
+
+    discovery = module.discover_status(plan)
+    assert "ambiguous-status-siblings" in {
+        finding.code for finding in discovery.findings
+    }
+
+
+def test_status_discovery_rejects_interrupted_transition(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    transition = plan.with_name(f"{plan.stem}.DONE.yaml.tmp")
+    transition.write_text("incomplete transition\n")
+
+    discovery = module.discover_status(plan)
+    assert "interrupted-status-transition" in {
+        finding.code for finding in discovery.findings
+    }
+
+
+def test_yaml_state_check_allows_editorial_drift_without_hash_binding(
+    tmp_path: Path,
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    module.write_status_yaml(state, _status_payload(module, plan))
+    plan.write_text(
+        plan.read_text().replace("## Goal\n", "## Goal\nEditorial drift.\n", 1)
+    )
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+
+
+def test_legacy_only_plan_has_no_manifest_fallback() -> None:
+    with pytest.raises(ExecutionContractError) as exc:
+        parse_execution_manifest("# Legacy plan\n\n## Goal\n\nNo manifest.\n")
+    assert exc.value.code == "missing-execution-manifest"
+
+
+def _write_status_yaml(plan: Path, state: Path, status: str = "DONE") -> None:
+    module = sys.modules["plan_execution"]
+    module.write_status_yaml(state, _status_payload(module, plan, status))
+
+
+def _run_state_check(
+    plan: Path, state: Path, repo_root: Path
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "state-check",
+            str(plan),
+            str(state),
+            "--repo-root",
+            str(repo_root),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_state_check_accepts_current_yaml_status(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    _write_status_yaml(plan, state)
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)["status"] == "passed"
+
+
+def test_validate_state_reuses_single_plan_snapshot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    _write_status_yaml(plan, state)
+    original_parse = module.parse_execution_manifest
+    parse_count = 0
+
+    def count_plan_parses(text: str) -> dict[str, object]:
+        nonlocal parse_count
+        parse_count += 1
+        return original_parse(text)
+
+    monkeypatch.setattr(module, "parse_execution_manifest", count_plan_parses)
+
+    assert module.validate_state(plan, state, tmp_path) == []
+    assert parse_count == 1
+
+
+def test_state_check_accepts_content_drift_without_hash_binding(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    _write_status_yaml(plan, state)
+    plan.write_text(plan.read_text() + "\nEditorial drift.\n")
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+
+
+@pytest.mark.parametrize("status", ("DONE", "PARTIAL", "BLOCKED"))
+def test_state_check_accepts_current_yaml_run_statuses(
+    tmp_path: Path, status: str
+) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.{status}.yaml")
+    _write_status_yaml(plan, state, status)
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode == 0, result.stderr
+
+
+def test_state_check_rejects_current_yaml_retired_status(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    payload = _status_payload(sys.modules["plan_execution"], plan, "DONE")
+    payload["status"] = "NEEDS_REVIEW"
+    state.write_text(sys.modules["plan_execution"].yaml.safe_dump(payload))
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode != 0
+    assert "unknown-status" in {
+        item["code"] for item in json.loads(result.stdout)["finding_sample"]
+    }
+
+
+def test_state_check_rejects_non_yaml_status_path(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.txt")
+    state.write_text("not a runtime status\n")
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode != 0
+    assert "status-format-required" in {
+        item["code"] for item in json.loads(result.stdout)["finding_sample"]
+    }
+
+
+@pytest.mark.parametrize(
+    "retired_command",
+    ("status-check", "resume-check", "closeout-check", "completion-check"),
+)
+def test_retired_status_protocol_commands_are_not_exposed(retired_command: str) -> None:
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS / "plan_execution.py"), retired_command, "--help"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0

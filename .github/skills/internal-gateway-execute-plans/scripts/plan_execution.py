@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
-"""Read-only validator for retained plans, recovery evidence, and statuses."""
+"""Validator for Manifest v3 retained plans and schema v2 runtime status."""
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
 import re
+import shlex
+import subprocess
 import sys
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Sequence
+
+import yaml
 
 
 @dataclass(frozen=True)
@@ -20,37 +25,153 @@ class Finding:
     severity: Literal["blocking", "notice"] = "blocking"
 
 
-CloseoutRoute = Literal[
-    "continue-execution",
-    "continue-recovery",
-    "request-authority",
-    "DONE",
-    "PARTIAL",
-    "BLOCKED",
-    "NEEDS_REVIEW",
-]
-
-
-DISCOVERY_CATEGORIES = (
-    "repository-runtime",
-    "path-executable",
-    "absolute-executable",
-    "supported-override",
-    "native-command",
-    "cached-dependency",
+VerdictOutcome = Literal["passed", "failed", "inconclusive"]
+VERDICT_CATEGORIES = (
+    "structure",
+    "semantic_review",
+    "artifact_provenance",
+    "source_baseline",
+    "execution_readiness",
 )
+VERDICT_OUTCOMES = frozenset({"passed", "failed", "inconclusive"})
 
-CONTRACT_SCHEMA_VERSION = 1
-CONTRACT_PHASES = frozenset({"baseline", "focused", "final"})
-CONTRACT_EQUIVALENCE = frozenset({"exact-only", "allowed-if-admissible"})
-CLOSEOUT_OUTCOMES = frozenset(
-    {"exact-pass", "equivalent-pass", "warning", "unresolved", "regression"}
-)
-ALLOWED_STATUSES = frozenset({"DONE", "PARTIAL", "BLOCKED", "NEEDS_REVIEW"})
 
-STATUS_FILENAME_RE = re.compile(
-    r"^(?P<basename>.+)\.(?P<status>DONE|PARTIAL|BLOCKED|NEEDS_REVIEW)\.md$"
+@dataclass(frozen=True)
+class Verdict:
+    category: str
+    outcome: VerdictOutcome
+    coverage: str
+    limit: str
+
+    def __post_init__(self) -> None:
+        if self.category not in VERDICT_CATEGORIES and self.category != "aggregate":
+            raise ValueError(f"unsupported verdict category: {self.category}")
+        if self.outcome not in VERDICT_OUTCOMES:
+            raise ValueError(f"unsupported verdict outcome: {self.outcome}")
+        if not self.coverage.strip() or not self.limit.strip():
+            raise ValueError("verdict coverage and limit must be non-empty")
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "category": self.category,
+            "outcome": self.outcome,
+            "coverage": self.coverage,
+            "limit": self.limit,
+        }
+
+
+@dataclass(frozen=True)
+class ApprovalEvidence:
+    source: str
+    statement: str
+    semantic_fingerprint: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "source": self.source,
+            "statement": self.statement,
+            "semantic_fingerprint": self.semantic_fingerprint,
+        }
+
+
+MANIFEST_SCHEMA_VERSION = 3
+STATE_SCHEMA_VERSION = 2
+STATE_STATUSES = frozenset({"DONE", "DONE_WITH_WARNINGS", "PARTIAL", "BLOCKED"})
+SUCCESS_STATUSES = frozenset({"DONE", "DONE_WITH_WARNINGS"})
+APPROVAL_SOURCES = frozenset({"current-conversation", "external-authority-record"})
+APPROVAL_STATEMENT = "explicit execution approval"
+APPROVAL_EVIDENCE_FIELDS = frozenset(
+    {"source", "statement", "semantic_fingerprint"}
 )
+WARNING_KINDS = frozenset(
+    {"human-follow-up", "external-unavailable", "missing-tool-equivalent"}
+)
+DEVIATION_FIELDS = frozenset({"task", "mismatch", "resolution"})
+GIT_MUTATING_SUBCOMMANDS = frozenset(
+    {
+        "add",
+        "am",
+        "apply",
+        "branch",
+        "checkout",
+        "clean",
+        "clone",
+        "commit",
+        "config",
+        "fetch",
+        "gc",
+        "init",
+        "merge",
+        "mv",
+        "pull",
+        "push",
+        "rebase",
+        "reflog",
+        "reset",
+        "restore",
+        "rm",
+        "stash",
+        "switch",
+        "tag",
+        "update-ref",
+        "worktree",
+    }
+)
+GIT_OPTIONS_WITH_VALUE = frozenset(
+    {
+        "-C",
+        "-c",
+        "--config-env",
+        "--exec-path",
+        "--git-dir",
+        "--namespace",
+        "--work-tree",
+    }
+)
+MANIFEST_CONTROL_CLASSES = frozenset(
+    {
+        "automatable-local",
+        "observable-runtime",
+        "external-capability",
+        "authority-or-scope",
+        "genuine-human-judgment",
+    }
+)
+MANIFEST_POSTURES = frozenset(
+    {"mandatory-test-first", "feature-first", "prototype-unverified", "validation-only"}
+)
+MANIFEST_TARGET_STATES = frozenset({"create", "modify", "inspect"})
+MANIFEST_BOOTSTRAP_MODES = frozenset({"explicit-single-plan", "manifest-only"})
+MANIFEST_PHASES = frozenset({"baseline", "focused", "final"})
+MANIFEST_EQUIVALENCE = frozenset({"exact-only", "allowed-if-admissible"})
+MANIFEST_FIELDS = frozenset(
+    {
+        "schema_version",
+        "manifest_version",
+        "plan_id",
+        "repository_root",
+        "authority_boundaries",
+        "delegation",
+        "targets",
+        "controls",
+        "validations",
+        "manual_obligations",
+        "tasks",
+        "retry_policy",
+        "approval",
+        "bootstrap",
+        "rollout",
+        "handoff",
+    }
+)
+SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
+DELEGATION_FIELDS = frozenset(
+    {"schema_version", "mode", "worker", "result", "receipt", "acceptance"}
+)
+DELEGATION_MODES = frozenset({"none", "delegated"})
+LOCAL_DELEGATION_RESULT = "not_applicable"
+CURRENT_DELEGATION_COMPATIBILITY = "manifest-v3"
+
 TASK_HEADING_RE = re.compile(r"(?im)^#{2,6}\s+Task(?:\s+\d+)?(?:\s*:|\b)")
 UNCHECKED_TASK_RE = re.compile(r"(?m)^\s*[-*]\s+\[\s\]\s+\S")
 PLAN_HEADING_ALIASES = {
@@ -63,14 +184,20 @@ REQUIRED_EXECUTION_FIELDS = (
     "Escalation Conditions",
     "User-Facing Report",
 )
-REQUIRED_STATUS_HEADINGS = (
-    "Status",
-    "Plan",
-    "Plan Fingerprint",
-    "Completed",
-    "Remaining",
-    "Validation",
-    "Next",
+STATE_FIELDS = frozenset(
+    {
+        "schema_version",
+        "status",
+        "plan",
+        "approval_evidence",
+        "delivery_verdicts",
+        "completed_task_ids",
+        "remaining_task_ids",
+        "last_validation",
+        "next_action",
+        "warnings",
+        "deviations",
+    }
 )
 
 
@@ -82,133 +209,771 @@ class ExecutionContractError(ValueError):
         self.code = code
 
 
-@dataclass(frozen=True)
-class ValidationContract:
-    id: str
-    command: str
-    phases: tuple[Literal["baseline", "focused", "final"], ...]
-    required: bool
-    success: Literal["exit-code-0"]
-    equivalence: Literal["exact-only", "allowed-if-admissible"]
+def build_non_done_report(
+    causes: Sequence[str], actions: Sequence[str]
+) -> tuple[str, ...]:
+    """Build the bounded report projection for PARTIAL and BLOCKED outcomes."""
+
+    if not 1 <= len(causes) <= 3:
+        raise ExecutionContractError(
+            "report-causes-bounded", "Non-DONE reports require 1-3 causes"
+        )
+    if not 2 <= len(actions) <= 4:
+        raise ExecutionContractError(
+            "report-actions-bounded", "Non-DONE reports require 2-4 actions"
+        )
+    values = (*causes, *actions)
+    if any(not isinstance(value, str) or not value.strip() for value in values):
+        raise ExecutionContractError(
+            "report-evidence-required",
+            "Non-DONE report causes and actions must be concrete non-empty strings",
+        )
+    return (
+        "Perch\u00e9 mi sono fermato",
+        *(f"- {cause.strip()}" for cause in causes),
+        "Cosa fare",
+        *(f"- {action.strip()}" for action in actions),
+    )
+
+
+BootstrapStatus = Literal["PASS", "BLOCKED"]
 
 
 @dataclass(frozen=True)
-class ManualObligation:
-    id: str
-    kind: Literal["human", "external"]
-    required: bool
-    acceptance: str
+class BootstrapCheck:
+    check: str
+    status: BootstrapStatus
+    next_action: str
+    external: bool = False
 
 
-@dataclass(frozen=True)
-class AuthorityContract:
-    autonomous: tuple[str, ...]
-    requires_approval: tuple[str, ...]
+def build_bootstrap_payload(
+    check: str, status: BootstrapStatus, next_action: str
+) -> dict[str, str]:
+    """Build the compact three-field local bootstrap projection."""
+
+    if not isinstance(check, str) or not check.strip():
+        raise ExecutionContractError(
+            "bootstrap-check-required", "Bootstrap check must be non-empty"
+        )
+    if status not in {"PASS", "BLOCKED"}:
+        raise ExecutionContractError(
+            "bootstrap-status-invalid", "Bootstrap status must be PASS or BLOCKED"
+        )
+    if not isinstance(next_action, str) or not next_action.strip():
+        raise ExecutionContractError(
+            "bootstrap-next-action-required",
+            "Bootstrap next_action must be concrete and non-empty",
+        )
+    if status == "BLOCKED" and next_action.strip().lower() in {"none", "no action", "n/a"}:
+        raise ExecutionContractError(
+            "bootstrap-next-action-required",
+            "A blocked bootstrap check must name one concrete next action",
+        )
+    return {
+        "check": check.strip(),
+        "status": status,
+        "next_action": next_action.strip(),
+    }
 
 
-@dataclass(frozen=True)
-class ExecutionContract:
-    schema_version: Literal[1]
-    validations: tuple[ValidationContract, ...]
-    manual_obligations: tuple[ManualObligation, ...]
-    authority: AuthorityContract
+def run_local_bootstrap(
+    checks: Sequence[BootstrapCheck],
+) -> tuple[dict[str, str], ...]:
+    """Collect finite local checks and stop before external work after a block."""
+
+    results: list[dict[str, str]] = []
+    for check in checks:
+        if check.external:
+            break
+        results.append(build_bootstrap_payload(check.check, check.status, check.next_action))
+        if check.status == "BLOCKED":
+            break
+    return tuple(results)
 
 
-@dataclass(frozen=True)
-class ValidationEquivalence:
-    target_did_not_start: bool
-    same_checks: bool
-    same_inputs: bool
-    runtime_not_material: bool
+def resolve_loaded_bundle(entrypoint: Path) -> Path:
+    """Resolve the physical executor bundle owning a loaded entrypoint."""
 
-    @property
-    def admissible(self) -> bool:
-        return all(
-            (
-                self.target_did_not_start,
-                self.same_checks,
-                self.same_inputs,
-                self.runtime_not_material,
-            )
+    if entrypoint.is_symlink() and not entrypoint.exists():
+        raise ExecutionContractError(
+            "loaded-bundle-stale",
+            f"Loaded executor entrypoint is a stale symlink: {entrypoint}; "
+            "next action: repair the loaded bundle link before execution.",
+        )
+    try:
+        physical_entrypoint = entrypoint.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise ExecutionContractError(
+            "loaded-bundle-missing",
+            f"Loaded executor entrypoint is unavailable: {entrypoint}; "
+            "next action: load the executor bundle before execution.",
+        ) from exc
+    if not physical_entrypoint.is_file():
+        raise ExecutionContractError(
+            "loaded-bundle-invalid",
+            f"Loaded executor entrypoint is not a file: {physical_entrypoint}; "
+            "next action: repair the loaded executor bundle.",
+        )
+    scripts_dir = physical_entrypoint.parent
+    bundle_root = scripts_dir.parent
+    if (
+        physical_entrypoint.name != "plan_execution.py"
+        or scripts_dir.name != "scripts"
+        or not (bundle_root / "SKILL.md").is_file()
+    ):
+        raise ExecutionContractError(
+            "loaded-bundle-invalid",
+            f"Loaded entrypoint does not belong to an executor bundle: {physical_entrypoint}; "
+            "next action: use the physical internal-gateway-execute-plans bundle.",
+        )
+    return bundle_root
+
+def bundle_runner_command(
+    bundle_entrypoint: Path, argv: Sequence[str], cwd: Path
+) -> list[str]:
+    """Build the runner command from a loaded entrypoint, independent of cwd."""
+
+    entrypoint = bundle_entrypoint
+    if not entrypoint.is_absolute():
+        entrypoint = cwd / entrypoint
+    bundle_root = resolve_loaded_bundle(entrypoint)
+    runner = bundle_root / "scripts" / "run.sh"
+    if not runner.is_file():
+        raise ExecutionContractError(
+            "bundle-runner-missing",
+            f"Executor bundle runner is missing: {runner}; "
+            "next action: restore scripts/run.sh in the loaded bundle.",
+        )
+    return ["bash", str(runner), *(str(argument) for argument in argv)]
+
+
+def canonical_json(value: object) -> bytes:
+    """Serialize manifest values using compact, sorted-key JSON for JCS inputs."""
+
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+
+
+def _reject_duplicate_json_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON field: {key}")
+        result[key] = value
+    return result
+
+
+def _contains_embedded_digest(value: object) -> bool:
+    if isinstance(value, Mapping):
+        for key, child in value.items():
+            if key in {"content_sha256", "semantic_fingerprint"} and isinstance(
+                child, str
+            ):
+                if SHA256_RE.fullmatch(child):
+                    return True
+            if _contains_embedded_digest(child):
+                return True
+    elif isinstance(value, list):
+        return any(_contains_embedded_digest(item) for item in value)
+    return False
+
+
+def compute_semantic_fingerprint(manifest: Mapping[str, object]) -> str:
+    """Return the SHA-256 of the canonical manifest without delegation metadata."""
+
+    fingerprint_input = {
+        key: value for key, value in manifest.items() if key != "delegation"
+    }
+    if _contains_embedded_digest(fingerprint_input):
+        raise ExecutionContractError(
+            "manifest-hash-self-reference",
+            "Execution Manifest must not contain a content or semantic digest value",
+        )
+    return f"sha256:{hashlib.sha256(canonical_json(fingerprint_input)).hexdigest()}"
+
+
+def _field_differences(
+    mapping: Mapping[str, object], expected: set[str] | frozenset[str]
+) -> tuple[set[str], set[str]]:
+    expected_fields = set(expected)
+    return set(mapping) - expected_fields, expected_fields - set(mapping)
+
+
+def _manifest_exact_fields(
+    mapping: Mapping[str, object], expected: set[str] | frozenset[str], label: str
+) -> None:
+    unknown, missing = _field_differences(mapping, expected)
+    if unknown:
+        raise ExecutionContractError(
+            "unknown-manifest-field",
+            f"{label} has unknown fields: {sorted(unknown)}",
+        )
+    if missing:
+        raise ExecutionContractError(
+            "missing-manifest-field",
+            f"{label} is missing fields: {sorted(missing)}",
         )
 
 
-@dataclass(frozen=True)
-class DiscoveryResult:
-    category: str
-    status: Literal["found", "not-found", "not-applicable"]
-    candidates: tuple[str, ...]
-    evidence: str
+def delegation_compatibility_mode(manifest: Mapping[str, object]) -> str:
+    """Name the current local Manifest v3 provenance mode."""
+
+    return CURRENT_DELEGATION_COMPATIBILITY
 
 
-@dataclass(frozen=True)
-class RecoveryCandidate:
-    name: str
-    source: str
-    safe: bool
-    requires_authority: bool
-    attempted: bool
-    result: Literal["not-run", "passed", "failed", "rejected"]
-    evidence_delta: str
+def _validate_delegation_provenance(
+    root: Mapping[str, object], authority: Mapping[str, object]
+) -> None:
+    try:
+        delegation = _manifest_object(root["delegation"], "delegation")
+        _manifest_exact_fields(delegation, DELEGATION_FIELDS, "delegation")
+        schema_version = delegation["schema_version"]
+        mode = _string(delegation["mode"], "delegation.mode")
+        worker = _string(delegation["worker"], "delegation.worker")
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError(
+            "malformed-delegation-extension", str(exc)
+        ) from exc
+
+    if not _is_int(schema_version) or schema_version != 1:
+        raise ExecutionContractError(
+            "unsupported-delegation-schema",
+            "delegation.schema_version must be 1",
+        )
+    if mode not in DELEGATION_MODES:
+        raise ExecutionContractError(
+            "invalid-delegation-mode",
+            "delegation.mode must be none or delegated",
+        )
+
+    if mode == "none":
+        if worker != "primary-owner":
+            raise ExecutionContractError(
+                "local-worker-authorship",
+                "mode none must use worker primary-owner",
+            )
+        if delegation["receipt"] is not None:
+            raise ExecutionContractError(
+                "delegation-receipt-without-worker",
+                "mode none cannot claim a delegation receipt",
+            )
+        if (
+            delegation["result"] is not None
+            and delegation["result"] != LOCAL_DELEGATION_RESULT
+        ) or delegation["acceptance"] is not None:
+            raise ExecutionContractError(
+                "local-worker-authorship",
+                "mode none cannot claim worker result or acceptance",
+            )
+        if delegation["result"] != LOCAL_DELEGATION_RESULT:
+            raise ExecutionContractError(
+                "local-provenance-marker",
+                "mode none must record result not_applicable",
+            )
+        return
+    raise ExecutionContractError(
+        "delegation-not-supported",
+        "The Execution Manifest supports only local primary-owner authoring; do not manufacture worker provenance.",
+    )
 
 
-@dataclass(frozen=True)
-class AuthorityState:
-    state: Literal[
-        "not-required",
-        "required-unrequested",
-        "requested-granted",
-        "requested-declined",
-    ]
-    action: str
+def _manifest_non_empty_strings(value: object, label: str) -> tuple[str, ...]:
+    return _strings(value, label, allow_empty=False)
 
 
-@dataclass(frozen=True)
-class ValidationObligation:
-    id: str
-    command: str
-    required: bool
-    outcome: str
-    phase: str | None = None
-    equivalence: str | None = None
-    equivalence_evidence: ValidationEquivalence | None = None
-    failure_phase: str | None = None
-    discovery_results: tuple[DiscoveryResult, ...] = ()
-    candidates: tuple[RecoveryCandidate, ...] = ()
-    authority: AuthorityState = AuthorityState("not-required", "")
+def _manifest_id_list(value: object, label: str) -> tuple[str, ...]:
+    return _unique_strings(value, label, allow_empty=True)
 
 
-@dataclass(frozen=True)
-class ManualResult:
-    id: str
-    satisfied: bool
-    evidence: str
+def _remember_unique(
+    value: str,
+    seen: set[str],
+    message: str,
+    *,
+    code: str | None = None,
+) -> None:
+    if value in seen:
+        if code is not None:
+            raise ExecutionContractError(code, message)
+        raise ValueError(message)
+    seen.add(value)
 
 
-@dataclass(frozen=True)
-class CloseoutEvidence:
-    plan_fingerprint: str
-    tasks_complete: bool
-    tasks_remaining: tuple[str, ...]
-    fatal_conditions: tuple[str, ...]
-    validations: tuple[ValidationObligation, ...]
-    manual_obligations: tuple[ManualResult, ...]
-    pause_requested: bool = False
-    exhaustion_evidence: tuple[str, ...] = ()
+def _manifest_fenced_object(text: str, heading: str) -> Mapping[str, object]:
+    matches = list(re.finditer(rf"(?m)^## {re.escape(heading)}\s*$", text))
+    if not matches:
+        raise ExecutionContractError(
+            "missing-execution-manifest",
+            f"Plan must contain exactly one ## {heading}",
+        )
+    if len(matches) > 1:
+        raise ExecutionContractError(
+            "duplicate-execution-manifest",
+            f"Plan must contain only one ## {heading}",
+        )
+    start = matches[0].end()
+    next_heading = re.search(r"(?m)^#{2,6}\s+", text[start:])
+    body = text[start : start + next_heading.start()] if next_heading else text[start:]
+    fenced = re.fullmatch(r"\s*```json\s*\n(.*?)\n```\s*", body, re.DOTALL)
+    if not fenced:
+        raise ExecutionContractError(
+            "malformed-execution-manifest",
+            f"{heading} must contain exactly one immediately contained ```json fenced object",
+        )
+    try:
+        raw = json.loads(fenced.group(1), object_pairs_hook=_reject_duplicate_json_fields)
+    except ValueError as exc:
+        message = str(exc)
+        code = "duplicate-manifest-field" if message.startswith("duplicate JSON field") else "malformed-execution-manifest"
+        raise ExecutionContractError(code, f"{heading} JSON is malformed: {message}") from exc
+    return _manifest_object(raw, heading)
 
 
-@dataclass(frozen=True)
-class CloseoutDecision:
-    route: CloseoutRoute
-    reasons: tuple[str, ...]
-    next_action: str
+def _validate_manifest_identity(root: Mapping[str, object]) -> None:
+    if (
+        not _is_int(root["schema_version"])
+        or root["schema_version"] != MANIFEST_SCHEMA_VERSION
+    ):
+        raise ExecutionContractError(
+            "unsupported-manifest-schema",
+            f"Execution Manifest schema_version must be {MANIFEST_SCHEMA_VERSION}",
+        )
+    if (
+        not _non_empty_string(root["manifest_version"])
+        or root["manifest_version"] != "execution-manifest/v3"
+    ):
+        raise ValueError("manifest_version must be execution-manifest/v3")
+    if not _non_empty_string(root["plan_id"]):
+        raise ValueError("plan_id must be non-empty")
+    if root["repository_root"] != ".":
+        raise ValueError("repository_root must be .")
 
-    def as_dict(self) -> dict[str, object]:
-        return {
-            "route": self.route,
-            "reason_codes": list(self.reasons),
-            "next_action": self.next_action,
-        }
+
+def _validate_authority_boundaries(
+    root: Mapping[str, object]
+) -> Mapping[str, object]:
+    authority = _manifest_object(root["authority_boundaries"], "authority_boundaries")
+    _manifest_exact_fields(
+        authority,
+        {
+            "normative_owner",
+            "execution_owner",
+            "worker",
+            "caller_owns",
+            "protected_paths",
+            "no_git_mutation",
+        },
+        "authority_boundaries",
+    )
+    if not _non_empty_string(authority["normative_owner"]) or not _non_empty_string(
+        authority["execution_owner"]
+    ):
+        raise ValueError("authority owners must be non-empty")
+    if not _non_empty_string(authority["worker"]):
+        raise ValueError("authority_boundaries.worker must be non-empty")
+    _manifest_non_empty_strings(
+        authority["caller_owns"], "authority_boundaries.caller_owns"
+    )
+    _manifest_non_empty_strings(
+        authority["protected_paths"], "authority_boundaries.protected_paths"
+    )
+    if not _bool(authority["no_git_mutation"], "authority_boundaries.no_git_mutation"):
+        raise ValueError("authority_boundaries.no_git_mutation must be true")
+    return authority
+
+
+def _validate_targets(value: object) -> None:
+    targets = value
+    if not isinstance(targets, list) or not targets:
+        raise ValueError("targets must be a non-empty list")
+    target_ids: set[str] = set()
+    for index, raw_target in enumerate(targets):
+        label = f"targets[{index}]"
+        target = _manifest_object(raw_target, label)
+        keys = (
+            {"id", "path", "state", "condition"}
+            if "condition" in target
+            else {"id", "path", "state"}
+        )
+        _manifest_exact_fields(target, keys, label)
+        target_id = _string(target["id"], f"{label}.id")
+        _remember_unique(target_id, target_ids, f"duplicate target id: {target_id}")
+        target_path = _string(target["path"], f"{label}.path")
+        if _is_git_directory_path(target_path):
+            raise ExecutionContractError(
+                "git-target-prohibited",
+                f"{label}.path must not target the .git directory",
+            )
+        if target["state"] not in MANIFEST_TARGET_STATES:
+            raise ValueError(f"{label}.state is invalid")
+        if "condition" in target:
+            _string(target["condition"], f"{label}.condition")
+
+
+def _validate_controls(value: object) -> None:
+    controls = _manifest_object(value, "controls")
+    if not controls:
+        raise ValueError("controls must not be empty")
+    for control_id, raw_control in controls.items():
+        label = f"controls.{control_id}"
+        control = _manifest_object(raw_control, label)
+        _manifest_exact_fields(control, {"class", "owner", "binding"}, label)
+        if control["class"] not in MANIFEST_CONTROL_CLASSES:
+            raise ValueError(f"{label}.class is invalid")
+        _string(control["owner"], f"{label}.owner")
+        _manifest_non_empty_strings(control["binding"], f"{label}.binding")
+
+
+def _validate_validations(value: object) -> None:
+    validations = value
+    if not isinstance(validations, list) or not validations:
+        raise ValueError("validations must be a non-empty list")
+    validation_ids: set[str] = set()
+    for index, raw_validation in enumerate(validations):
+        label = f"validations[{index}]"
+        validation = _manifest_object(raw_validation, label)
+        validation_fields = {"id", "command", "owner", "pass_signal", "phases"}
+        if "equivalence" in validation:
+            validation_fields.add("equivalence")
+        _manifest_exact_fields(validation, validation_fields, label)
+        validation_id = _string(validation["id"], f"{label}.id")
+        _remember_unique(
+            validation_id,
+            validation_ids,
+            f"Duplicate validation id: {validation_id}",
+            code="duplicate-validation-id",
+        )
+        validation_command = _string(validation["command"], f"{label}.command")
+        _reject_git_mutation(validation_command, f"{label}.command")
+        _string(validation["owner"], f"{label}.owner")
+        _string(validation["pass_signal"], f"{label}.pass_signal")
+        phases = _manifest_non_empty_strings(validation["phases"], f"{label}.phases")
+        if any(phase not in MANIFEST_PHASES for phase in phases):
+            raise ValueError(f"{label}.phases contains an unsupported phase")
+        if (
+            "equivalence" in validation
+            and validation["equivalence"] not in MANIFEST_EQUIVALENCE
+        ):
+            raise ValueError(f"{label}.equivalence is invalid")
+
+
+def _validate_manual_obligations(value: object) -> None:
+    manual = value
+    if not isinstance(manual, list):
+        raise ValueError("manual_obligations must be a list")
+    manual_ids: set[str] = set()
+    for index, raw_obligation in enumerate(manual):
+        label = f"manual_obligations[{index}]"
+        obligation = _manifest_object(raw_obligation, label)
+        _manifest_exact_fields(
+            obligation, {"id", "kind", "required", "acceptance"}, label
+        )
+        obligation_id = _string(obligation["id"], f"{label}.id")
+        _remember_unique(
+            obligation_id,
+            manual_ids,
+            f"duplicate manual obligation id: {obligation_id}",
+        )
+        if obligation["kind"] not in {"human", "external"}:
+            raise ValueError(f"{label}.kind is invalid")
+        _bool(obligation["required"], f"{label}.required")
+        obligation_acceptance = _string(
+            obligation["acceptance"], f"{label}.acceptance"
+        )
+        _reject_git_mutation(obligation_acceptance, f"{label}.acceptance")
+
+
+def _validate_tasks(value: object) -> None:
+    tasks = value
+    if not isinstance(tasks, list) or not tasks:
+        raise ValueError("tasks must be a non-empty list")
+    task_ids: set[str] = set()
+    orders: set[int] = set()
+    for index, raw_task in enumerate(tasks):
+        label = f"tasks[{index}]"
+        task = _manifest_object(raw_task, label)
+        _manifest_exact_fields(
+            task,
+            {
+                "id",
+                "order",
+                "posture",
+                "objective",
+                "depends_on",
+                "target_ids",
+                "validation_ids",
+                "manual_obligation_ids",
+                "acceptance",
+                "stop_conditions",
+            },
+            label,
+        )
+        task_id = _string(task["id"], f"{label}.id")
+        _remember_unique(task_id, task_ids, f"duplicate task id: {task_id}")
+        if (
+            not _is_int(task["order"])
+            or task["order"] < 1
+            or task["order"] in orders
+        ):
+            raise ValueError(f"{label}.order must be a unique positive integer")
+        orders.add(task["order"])
+        if task["posture"] not in MANIFEST_POSTURES:
+            raise ValueError(f"{label}.posture is invalid")
+        task_objective = _string(task["objective"], f"{label}.objective")
+        _reject_git_mutation(task_objective, f"{label}.objective")
+        _manifest_id_list(task["depends_on"], f"{label}.depends_on")
+        _manifest_id_list(task["target_ids"], f"{label}.target_ids")
+        _manifest_id_list(task["validation_ids"], f"{label}.validation_ids")
+        _manifest_id_list(
+            task["manual_obligation_ids"], f"{label}.manual_obligation_ids"
+        )
+        task_acceptance = _manifest_non_empty_strings(
+            task["acceptance"], f"{label}.acceptance"
+        )
+        task_stop_conditions = _manifest_non_empty_strings(
+            task["stop_conditions"], f"{label}.stop_conditions"
+        )
+        for item in (*task_acceptance, *task_stop_conditions):
+            _reject_git_mutation(item, label)
+
+
+def _manifest_entity_ids(value: object, label: str) -> set[str]:
+    if not isinstance(value, list):
+        raise ValueError(f"{label} must be a list")
+    return {
+        _string(
+            _manifest_object(item, f"{label}[{index}]")["id"],
+            f"{label}[{index}].id",
+        )
+        for index, item in enumerate(value)
+    }
+
+
+def _validate_task_references(root: Mapping[str, object]) -> None:
+    available_ids = {
+        "depends_on": _manifest_entity_ids(root["tasks"], "tasks"),
+        "target_ids": _manifest_entity_ids(root["targets"], "targets"),
+        "validation_ids": _manifest_entity_ids(
+            root["validations"], "validations"
+        ),
+        "manual_obligation_ids": _manifest_entity_ids(
+            root["manual_obligations"], "manual_obligations"
+        ),
+    }
+    for index, raw_task in enumerate(root["tasks"]):
+        task = _manifest_object(raw_task, f"tasks[{index}]")
+        for field, ids in available_ids.items():
+            references = _manifest_id_list(task[field], f"tasks[{index}].{field}")
+            unknown = sorted(set(references) - ids)
+            if unknown:
+                raise ExecutionContractError(
+                    "unknown-task-reference",
+                    f"tasks[{index}].{field} references unknown IDs: {unknown}",
+                )
+
+
+def _validate_retry_policy(value: object) -> None:
+    retry = _manifest_object(value, "retry_policy")
+    _manifest_exact_fields(
+        retry,
+        {
+            "initial_attempts",
+            "max_context_refills",
+            "max_corrective_retries",
+            "caller_may_lower",
+            "repeat_progress_status",
+            "minor_or_cosmetic_reopens",
+        },
+        "retry_policy",
+    )
+    for field in (
+        "initial_attempts",
+        "max_context_refills",
+    ):
+        if not _is_int(retry[field]) or retry[field] < 0:
+            raise ValueError(f"retry_policy.{field} must be a non-negative integer")
+    if not _is_int(retry["max_corrective_retries"]) or not 1 <= retry["max_corrective_retries"] <= 5:
+        raise ValueError(
+            "retry_policy.max_corrective_retries must be between 1 and 5"
+        )
+    if retry["initial_attempts"] != 1 or retry["max_context_refills"] != 1:
+        raise ValueError(
+            "retry_policy must retain one initial attempt and one context refill"
+        )
+    _bool(retry["caller_may_lower"], "retry_policy.caller_may_lower")
+    if retry["repeat_progress_status"] != "stalled":
+        raise ValueError("retry_policy.repeat_progress_status must be stalled")
+    if retry["minor_or_cosmetic_reopens"] is not False:
+        raise ValueError("retry_policy.minor_or_cosmetic_reopens must be false")
+
+
+def _validate_approval(value: object) -> None:
+    approval = _manifest_object(value, "approval")
+    _manifest_exact_fields(
+        approval,
+        {"editorial_content_change", "normative_manifest_change"},
+        "approval",
+    )
+    _string(
+        approval["editorial_content_change"], "approval.editorial_content_change"
+    )
+    _string(
+        approval["normative_manifest_change"], "approval.normative_manifest_change"
+    )
+
+
+def _validate_bootstrap(value: object) -> None:
+    bootstrap = _manifest_object(value, "bootstrap")
+    _manifest_exact_fields(
+        bootstrap,
+        {
+            "mode",
+            "compatibility_projection",
+            "projection_binding",
+            "legacy_only",
+            "retirement_evidence",
+        },
+        "bootstrap",
+    )
+    mode = _string(bootstrap["mode"], "bootstrap.mode")
+    if mode not in MANIFEST_BOOTSTRAP_MODES:
+        raise ValueError("bootstrap.mode is invalid")
+    projection = _strings(
+        bootstrap["compatibility_projection"], "bootstrap.compatibility_projection"
+    )
+    if mode == "explicit-single-plan" and projection != (
+        "Control Inventory",
+        "Task headings",
+        "Execution Contract",
+    ):
+        raise ValueError(
+            "bootstrap.compatibility_projection is not the supported projection"
+        )
+    if mode == "manifest-only" and projection:
+        raise ValueError("manifest-only plans must not emit a compatibility projection")
+    binding = _manifest_object(
+        bootstrap["projection_binding"], "bootstrap.projection_binding"
+    )
+    _manifest_exact_fields(
+        binding,
+        {"controls", "tasks", "validations", "authority"},
+        "bootstrap.projection_binding",
+    )
+    if dict(binding) != {
+        "controls": "manifest.controls",
+        "tasks": "manifest.tasks",
+        "validations": "manifest.validations",
+        "authority": "manifest.authority_boundaries",
+    }:
+        raise ValueError("bootstrap.projection_binding is conflicting")
+    if bootstrap["legacy_only"] != "reject":
+        raise ValueError("bootstrap.legacy_only must be reject")
+    _string(bootstrap["retirement_evidence"], "bootstrap.retirement_evidence")
+
+
+def _validate_rollout_and_handoff(root: Mapping[str, object]) -> None:
+    _manifest_non_empty_strings(root["rollout"], "rollout")
+    handoff = _manifest_object(root["handoff"], "handoff")
+    _manifest_exact_fields(
+        handoff,
+        {"next_owner", "requires", "status_sibling", "git_mutation"},
+        "handoff",
+    )
+    if handoff["next_owner"] != "/internal-gateway-execute-plans":
+        raise ValueError("handoff.next_owner must be /internal-gateway-execute-plans")
+    requires = _manifest_non_empty_strings(
+        handoff["requires"], "handoff.requires"
+    )
+    for required in (
+        "human approval",
+        "exact Manifest v3 review",
+        "zero blocking preflight findings",
+    ):
+        if required not in requires:
+            raise ValueError(f"handoff.requires is missing {required}")
+    if handoff["status_sibling"] != "none" or handoff["git_mutation"] != "prohibited":
+        raise ValueError("handoff must prohibit status sibling and Git mutation")
+
+
+def parse_execution_manifest(text: str) -> dict[str, object]:
+    """Parse and validate exactly one normative Execution Manifest object."""
+
+    root = _manifest_fenced_object(text, "Execution Manifest")
+    _manifest_exact_fields(root, MANIFEST_FIELDS, "Execution Manifest")
+    try:
+        _validate_manifest_identity(root)
+        authority = _validate_authority_boundaries(root)
+        _validate_delegation_provenance(root, authority)
+
+        _validate_targets(root["targets"])
+        _validate_controls(root["controls"])
+        _validate_validations(root["validations"])
+        _validate_manual_obligations(root["manual_obligations"])
+        _validate_tasks(root["tasks"])
+        _validate_task_references(root)
+        _validate_retry_policy(root["retry_policy"])
+        _validate_approval(root["approval"])
+        _validate_bootstrap(root["bootstrap"])
+        _validate_rollout_and_handoff(root)
+    except ExecutionContractError:
+        raise
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError("malformed-execution-manifest", str(exc)) from exc
+    return dict(root)
+
+
+def _parse_bootstrap_projection(
+    text: str,
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    """Read only the validation and manual IDs needed for bootstrap drift checks."""
+
+    root = _manifest_fenced_object(text, "Execution Contract")
+    raw_validations = root.get("validations")
+    raw_manual_obligations = root.get("manual_obligations", [])
+    if not isinstance(raw_validations, list) or not isinstance(raw_manual_obligations, list):
+        raise ExecutionContractError(
+            "malformed-execution-contract",
+            "Execution Contract projection must contain validation and manual-obligation lists",
+        )
+    validations: list[dict[str, object]] = []
+    validation_ids: set[str] = set()
+    for index, raw_validation in enumerate(raw_validations):
+        validation = _manifest_object(raw_validation, f"Execution Contract validations[{index}]")
+        validation_id = _string(validation.get("id"), "Execution Contract validation id")
+        if validation_id in validation_ids:
+            raise ExecutionContractError(
+                "duplicate-execution-contract-validation-id",
+                f"Duplicate Execution Contract validation id: {validation_id}",
+            )
+        validation_ids.add(validation_id)
+        validations.append(
+            {
+                "id": validation_id,
+                "command": _string(validation.get("command"), "Execution Contract validation command"),
+                "phases": list(_manifest_non_empty_strings(validation.get("phases"), "Execution Contract validation phases")),
+            }
+        )
+    manual_obligations: list[dict[str, object]] = []
+    manual_ids: set[str] = set()
+    for index, raw_obligation in enumerate(raw_manual_obligations):
+        obligation = _manifest_object(raw_obligation, f"Execution Contract manual_obligations[{index}]")
+        obligation_id = _string(obligation.get("id"), "Execution Contract manual obligation id")
+        if obligation_id in manual_ids:
+            raise ExecutionContractError(
+                "duplicate-execution-contract-manual-id",
+                f"Duplicate Execution Contract manual obligation id: {obligation_id}",
+            )
+        manual_ids.add(obligation_id)
+        manual_obligations.append(
+            {"id": obligation_id}
+        )
+    return validations, manual_obligations
 
 
 def _mapping(value: object, label: str) -> Mapping[str, object]:
@@ -217,21 +982,33 @@ def _mapping(value: object, label: str) -> Mapping[str, object]:
     return value
 
 
+def _manifest_object(value: object, label: str) -> Mapping[str, object]:
+    return _mapping(value, label)
+
+
 def _bool(value: object, label: str) -> bool:
     if not isinstance(value, bool):
         raise ValueError(f"{label} must be a boolean")
     return value
 
 
+def _is_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _non_empty_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
 def _string(value: object, label: str) -> str:
-    if not isinstance(value, str) or not value.strip():
+    if not _non_empty_string(value):
         raise ValueError(f"{label} must be a non-empty string")
     return value.strip()
 
 
 def _strings(value: object, label: str, *, allow_empty: bool = True) -> tuple[str, ...]:
     if not isinstance(value, list) or not all(
-        isinstance(item, str) and item.strip() for item in value
+        _non_empty_string(item) for item in value
     ):
         raise ValueError(f"{label} must be a list of non-empty strings")
     if not allow_empty and not value:
@@ -239,9 +1016,23 @@ def _strings(value: object, label: str, *, allow_empty: bool = True) -> tuple[st
     return tuple(item.strip() for item in value)
 
 
-def _exact_fields(mapping: Mapping[str, object], expected: set[str], label: str) -> None:
-    unknown = set(mapping) - expected
-    missing = expected - set(mapping)
+def _unique_strings(
+    value: object, label: str, *, allow_empty: bool = True
+) -> tuple[str, ...]:
+    values = _strings(value, label, allow_empty=allow_empty)
+    duplicate = next(
+        (item for index, item in enumerate(values) if item in values[:index]),
+        None,
+    )
+    if duplicate is not None:
+        raise ValueError(f"{label} must not contain duplicate ids")
+    return values
+
+
+def _exact_fields(
+    mapping: Mapping[str, object], expected: set[str] | frozenset[str], label: str
+) -> None:
+    unknown, missing = _field_differences(mapping, expected)
     if unknown or missing:
         details: list[str] = []
         if unknown:
@@ -251,345 +1042,809 @@ def _exact_fields(mapping: Mapping[str, object], expected: set[str], label: str)
         raise ValueError(f"{label} is malformed ({'; '.join(details)})")
 
 
-def _contract_string_list(value: object, label: str) -> tuple[str, ...]:
-    return _strings(value, label)
+def _git_mutating_subcommands(value: str) -> tuple[str, ...]:
+    """Return explicitly mutating Git subcommands found in a command-like value."""
 
-
-def parse_execution_contract(text: str) -> ExecutionContract:
-    matches = list(re.finditer(r"(?m)^## Execution Contract\s*$", text))
-    if not matches:
-        raise ExecutionContractError(
-            "missing-execution-contract", "Plan must contain exactly one ## Execution Contract"
-        )
-    if len(matches) > 1:
-        raise ExecutionContractError(
-            "duplicate-execution-contract", "Plan must contain only one ## Execution Contract"
-        )
-
-    start = matches[0].end()
-    next_heading = re.search(r"(?m)^#{2,6}\s+", text[start:])
-    body = text[start : start + next_heading.start()] if next_heading else text[start:]
-    body = re.sub(r"\n\s*---\s*$", "\n", body)
-    fenced = re.fullmatch(r"\s*```json\s*\n(.*?)\n```\s*", body, re.DOTALL)
-    if not fenced:
-        raise ExecutionContractError(
-            "malformed-execution-contract",
-            "Execution Contract must contain exactly one immediately contained ```json fenced object",
-        )
     try:
-        raw = json.loads(fenced.group(1))
-    except json.JSONDecodeError as exc:
+        tokens = shlex.split(value)
+    except ValueError:
+        return ()
+
+    found: list[str] = []
+    for index, token in enumerate(tokens):
+        if Path(token).name != "git":
+            continue
+        cursor = index + 1
+        while cursor < len(tokens) and tokens[cursor].startswith("-"):
+            option = tokens[cursor]
+            cursor += 1
+            if option in GIT_OPTIONS_WITH_VALUE and cursor < len(tokens):
+                cursor += 1
+        if cursor < len(tokens) and tokens[cursor] in GIT_MUTATING_SUBCOMMANDS:
+            found.append(tokens[cursor])
+    return tuple(dict.fromkeys(found))
+
+
+def _reject_git_mutation(value: str, label: str) -> None:
+    mutations = _git_mutating_subcommands(value)
+    if mutations:
         raise ExecutionContractError(
-            "malformed-execution-contract", f"Execution Contract JSON is malformed: {exc}"
+            "git-mutation-command",
+            f"{label} contains prohibited Git mutation: {', '.join(mutations)}",
+        )
+
+
+def _is_git_directory_path(value: str) -> bool:
+    return ".git" in Path(value).parts
+
+
+def _parse_approval_evidence(value: object) -> ApprovalEvidence:
+    try:
+        mapping = _mapping(value, "approval_evidence")
+        _exact_fields(mapping, APPROVAL_EVIDENCE_FIELDS, "approval_evidence")
+        source = _string(mapping["source"], "approval_evidence.source")
+        statement = _string(mapping["statement"], "approval_evidence.statement")
+        semantic_fingerprint = _string(
+            mapping["semantic_fingerprint"],
+            "approval_evidence.semantic_fingerprint",
+        )
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError(
+            "malformed-approval-evidence", str(exc)
         ) from exc
-    try:
-        root = _mapping(raw, "Execution Contract")
-        _exact_fields(root, {"schema_version", "validations", "manual_obligations", "authority"}, "Execution Contract")
-        version = root["schema_version"]
-        if version != CONTRACT_SCHEMA_VERSION:
-            raise ExecutionContractError(
-                "unsupported-schema-version",
-                f"schema_version must be {CONTRACT_SCHEMA_VERSION}",
-            )
-        raw_validations = root["validations"]
-        if not isinstance(raw_validations, list) or not raw_validations:
-            raise ValueError("validations must be a non-empty list")
-        validations: list[ValidationContract] = []
-        seen_ids: set[str] = set()
-        for index, raw_validation in enumerate(raw_validations):
-            label = f"validations[{index}]"
-            item = _mapping(raw_validation, label)
-            _exact_fields(item, {"id", "command", "phases", "required", "success", "equivalence"}, label)
-            validation_id = _string(item["id"], f"{label}.id")
-            if validation_id in seen_ids:
-                raise ExecutionContractError("duplicate-validation-id", f"Duplicate validation id: {validation_id}")
-            seen_ids.add(validation_id)
-            phases = _strings(item["phases"], f"{label}.phases", allow_empty=False)
-            if any(phase not in CONTRACT_PHASES for phase in phases):
-                raise ValueError(f"{label}.phases must use only {sorted(CONTRACT_PHASES)}")
-            success = _string(item["success"], f"{label}.success")
-            if success != "exit-code-0":
-                raise ValueError(f"{label}.success must be exit-code-0")
-            equivalence = _string(item["equivalence"], f"{label}.equivalence")
-            if equivalence not in CONTRACT_EQUIVALENCE:
-                raise ValueError(f"{label}.equivalence must be one of {sorted(CONTRACT_EQUIVALENCE)}")
-            validations.append(
-                ValidationContract(
-                    validation_id,
-                    _string(item["command"], f"{label}.command"),
-                    tuple(phases),
-                    _bool(item["required"], f"{label}.required"),
-                    success,  # type: ignore[arg-type]
-                    equivalence,  # type: ignore[arg-type]
+
+    if source not in APPROVAL_SOURCES:
+        raise ExecutionContractError(
+            "invalid-approval-source",
+            f"approval_evidence.source must be one of {sorted(APPROVAL_SOURCES)}",
+        )
+    if statement != APPROVAL_STATEMENT:
+        raise ExecutionContractError(
+            "approval-statement-required",
+            f"approval_evidence.statement must be {APPROVAL_STATEMENT!r}",
+        )
+    if not SHA256_RE.fullmatch(semantic_fingerprint):
+        raise ExecutionContractError(
+            "malformed-approval-evidence",
+            "approval_evidence.semantic_fingerprint must be a SHA-256 fingerprint",
+        )
+    return ApprovalEvidence(source, statement, semantic_fingerprint)
+
+
+def _parse_delivery_verdicts(value: object) -> tuple[Verdict, ...]:
+    if not isinstance(value, list):
+        raise ExecutionContractError(
+            "malformed-delivery-verdicts",
+            "delivery_verdicts must be a list",
+        )
+
+    verdicts: list[Verdict] = []
+    for index, raw_verdict in enumerate(value):
+        label = f"delivery_verdicts[{index}]"
+        try:
+            mapping = _mapping(raw_verdict, label)
+            _exact_fields(mapping, {"category", "outcome", "coverage", "limit"}, label)
+            verdicts.append(
+                Verdict(
+                    _string(mapping["category"], f"{label}.category"),
+                    _string(mapping["outcome"], f"{label}.outcome"),
+                    _string(mapping["coverage"], f"{label}.coverage"),
+                    _string(mapping["limit"], f"{label}.limit"),
                 )
             )
+        except (TypeError, ValueError) as exc:
+            raise ExecutionContractError(
+                "malformed-delivery-verdicts", str(exc)
+            ) from exc
 
-        raw_manual = root["manual_obligations"]
-        if not isinstance(raw_manual, list):
-            raise ValueError("manual_obligations must be a list")
-        manual: list[ManualObligation] = []
-        manual_ids: set[str] = set()
-        for index, raw_obligation in enumerate(raw_manual):
-            label = f"manual_obligations[{index}]"
-            item = _mapping(raw_obligation, label)
-            _exact_fields(item, {"id", "kind", "required", "acceptance"}, label)
-            obligation_id = _string(item["id"], f"{label}.id")
-            if obligation_id in manual_ids:
-                raise ExecutionContractError("duplicate-manual-obligation-id", f"Duplicate manual obligation id: {obligation_id}")
-            manual_ids.add(obligation_id)
-            kind = _string(item["kind"], f"{label}.kind")
-            if kind not in {"human", "external"}:
-                raise ValueError(f"{label}.kind must be human or external")
-            manual.append(ManualObligation(obligation_id, kind, _bool(item["required"], f"{label}.required"), _string(item["acceptance"], f"{label}.acceptance")))
-
-        authority = _mapping(root["authority"], "authority")
-        _exact_fields(authority, {"autonomous", "requires_approval"}, "authority")
-        return ExecutionContract(
-            1,
-            tuple(validations),
-            tuple(manual),
-            AuthorityContract(
-                _contract_string_list(authority["autonomous"], "authority.autonomous"),
-                _contract_string_list(authority["requires_approval"], "authority.requires_approval"),
-            ),
+    categories = tuple(verdict.category for verdict in verdicts)
+    if categories != VERDICT_CATEGORIES:
+        raise ExecutionContractError(
+            "delivery-verdict-categories",
+            "delivery_verdicts must contain the five categories in canonical order",
         )
-    except ExecutionContractError:
-        raise
-    except (TypeError, ValueError) as exc:
-        raise ExecutionContractError("malformed-execution-contract", str(exc)) from exc
+    return tuple(verdicts)
 
 
-def _parse_equivalence(value: object, label: str) -> ValidationEquivalence:
-    mapping = _mapping(value, label)
-    expected = {"target_did_not_start", "same_checks", "same_inputs", "runtime_not_material"}
-    _exact_fields(mapping, expected, label)
-    return ValidationEquivalence(
-        _bool(mapping["target_did_not_start"], f"{label}.target_did_not_start"),
-        _bool(mapping["same_checks"], f"{label}.same_checks"),
-        _bool(mapping["same_inputs"], f"{label}.same_inputs"),
-        _bool(mapping["runtime_not_material"], f"{label}.runtime_not_material"),
+def _parse_warnings(value: object) -> tuple[dict[str, str], ...]:
+    if not isinstance(value, list):
+        raise ExecutionContractError(
+            "malformed-warnings", "warnings must be a list"
+        )
+    warnings: list[dict[str, str]] = []
+    for index, raw_warning in enumerate(value):
+        label = f"warnings[{index}]"
+        try:
+            mapping = _mapping(raw_warning, label)
+            _exact_fields(mapping, {"kind", "evidence", "next_action"}, label)
+            kind = _string(mapping["kind"], f"{label}.kind")
+            evidence = _string(mapping["evidence"], f"{label}.evidence")
+            next_action = _string(mapping["next_action"], f"{label}.next_action")
+        except (TypeError, ValueError) as exc:
+            raise ExecutionContractError("malformed-warning", str(exc)) from exc
+        if kind not in WARNING_KINDS:
+            raise ExecutionContractError(
+                "invalid-warning-kind",
+                f"{label}.kind must be one of {sorted(WARNING_KINDS)}",
+            )
+        warnings.append(
+            {"kind": kind, "evidence": evidence, "next_action": next_action}
+        )
+    return tuple(warnings)
+
+
+def _deviation_class(text: str) -> str | None:
+    lowered = text.lower()
+    forbidden = (
+        "ambiguous",
+        "semantic scope",
+        "authority",
+        "contract change",
+        "multi-task",
+        "multi task",
     )
-
-
-def _parse_discovery(value: object, label: str) -> DiscoveryResult:
-    mapping = _mapping(value, label)
-    _exact_fields(mapping, {"category", "status", "candidates", "evidence"}, label)
-    category = _string(mapping["category"], f"{label}.category")
-    status = _string(mapping["status"], f"{label}.status")
-    if category not in DISCOVERY_CATEGORIES:
-        raise ValueError(f"{label}.category must be one of {list(DISCOVERY_CATEGORIES)}")
-    if status not in {"found", "not-found", "not-applicable"}:
-        raise ValueError(f"{label}.status is invalid")
-    return DiscoveryResult(category, status, _strings(mapping["candidates"], f"{label}.candidates"), _string(mapping["evidence"], f"{label}.evidence"))
-
-
-def _parse_candidate(value: object, label: str) -> RecoveryCandidate:
-    mapping = _mapping(value, label)
-    _exact_fields(mapping, {"name", "source", "safe", "requires_authority", "attempted", "result", "evidence_delta"}, label)
-    result = _string(mapping["result"], f"{label}.result")
-    if result not in {"not-run", "passed", "failed", "rejected"}:
-        raise ValueError(f"{label}.result is invalid")
-    candidate = RecoveryCandidate(
-        _string(mapping["name"], f"{label}.name"),
-        _string(mapping["source"], f"{label}.source"),
-        _bool(mapping["safe"], f"{label}.safe"),
-        _bool(mapping["requires_authority"], f"{label}.requires_authority"),
-        _bool(mapping["attempted"], f"{label}.attempted"),
-        result,  # type: ignore[arg-type]
-        _string(mapping["evidence_delta"], f"{label}.evidence_delta"),
-    )
-    if not candidate.attempted and candidate.result != "not-run":
-        raise ValueError(f"{label} not-run candidates must have result not-run")
-    if candidate.attempted and not candidate.evidence_delta:
-        raise ValueError(f"{label}.evidence_delta is required after an attempt")
-    return candidate
-
-
-def _parse_authority(value: object, label: str) -> AuthorityState:
-    mapping = _mapping(value, label)
-    _exact_fields(mapping, {"state", "action"}, label)
-    state = _string(mapping["state"], f"{label}.state")
-    allowed = {"not-required", "required-unrequested", "requested-granted", "requested-declined"}
-    if state not in allowed:
-        raise ValueError(f"{label}.state is invalid")
-    return AuthorityState(state, _string(mapping["action"], f"{label}.action") if mapping["action"] else "")  # type: ignore[arg-type]
-
-
-def parse_closeout_evidence(payload: Mapping[str, object]) -> CloseoutEvidence:
-    mapping = _mapping(payload, "closeout evidence")
-    allowed = {"plan_fingerprint", "tasks_complete", "tasks_remaining", "pause_requested", "fatal_conditions", "validations", "manual_obligations", "exhaustion_evidence"}
-    unknown = set(mapping) - allowed
-    missing = {"plan_fingerprint", "tasks_complete", "tasks_remaining", "validations"} - set(mapping)
-    if unknown or missing:
-        details = []
-        if unknown:
-            details.append(f"unknown fields: {sorted(unknown)}")
-        if missing:
-            details.append(f"missing fields: {sorted(missing)}")
-        raise ValueError(f"closeout evidence is malformed ({'; '.join(details)})")
-    raw_validations = mapping["validations"]
-    if not isinstance(raw_validations, list):
-        raise ValueError("validations must be a list")
-    validations: list[ValidationObligation] = []
-    seen_ids: set[str] = set()
-    for index, raw in enumerate(raw_validations):
-        label = f"validations[{index}]"
-        item = _mapping(raw, label)
-        required = {"id", "command", "required", "outcome"}
-        optional = {"phase", "equivalence", "equivalence_evidence", "failure_phase", "discovery_results", "candidates", "authority"}
-        unknown = set(item) - required - optional
-        missing = required - set(item)
-        if unknown or missing:
-            details = []
-            if unknown:
-                details.append(f"unknown fields: {sorted(unknown)}")
-            if missing:
-                details.append(f"missing fields: {sorted(missing)}")
-            raise ValueError(f"{label} is malformed ({'; '.join(details)})")
-        validation_id = _string(item["id"], f"{label}.id")
-        if validation_id in seen_ids:
-            raise ValueError(f"duplicate validation id: {validation_id}")
-        seen_ids.add(validation_id)
-        outcome = _string(item["outcome"], f"{label}.outcome")
-        if outcome not in CLOSEOUT_OUTCOMES:
-            raise ValueError(f"{label}.outcome must be one of {sorted(CLOSEOUT_OUTCOMES)}")
-        equivalence = item.get("equivalence")
-        equivalence_policy = _string(equivalence, f"{label}.equivalence") if equivalence is not None and isinstance(equivalence, str) else None
-        equivalence_evidence = _parse_equivalence(item["equivalence_evidence"], f"{label}.equivalence_evidence") if "equivalence_evidence" in item else None
-        if isinstance(equivalence, Mapping):
-            equivalence_evidence = _parse_equivalence(equivalence, f"{label}.equivalence")
-            equivalence_policy = "allowed-if-admissible"
-        if outcome == "equivalent-pass" and equivalence_evidence is None:
-            raise ValueError(f"{label}.equivalence_evidence is required for equivalent-pass")
-        discovery = tuple(_parse_discovery(value, f"{label}.discovery_results[{index2}]") for index2, value in enumerate(item.get("discovery_results", [])))
-        candidates = tuple(_parse_candidate(value, f"{label}.candidates[{index2}]") for index2, value in enumerate(item.get("candidates", [])))
-        authority = _parse_authority(item["authority"], f"{label}.authority") if "authority" in item else AuthorityState("not-required", "")
-        validations.append(ValidationObligation(validation_id, _string(item["command"], f"{label}.command"), _bool(item["required"], f"{label}.required"), outcome, item.get("phase"), equivalence_policy, equivalence_evidence, item.get("failure_phase"), discovery, candidates, authority))
-    raw_manual = mapping.get("manual_obligations", [])
-    if not isinstance(raw_manual, list):
-        raise ValueError("manual_obligations must be a list")
-    manuals: list[ManualResult] = []
-    manual_ids: set[str] = set()
-    for index, raw in enumerate(raw_manual):
-        label = f"manual_obligations[{index}]"
-        item = _mapping(raw, label)
-        _exact_fields(item, {"id", "satisfied", "evidence"}, label)
-        manual_id = _string(item["id"], f"{label}.id")
-        if manual_id in manual_ids:
-            raise ValueError(f"duplicate manual obligation id: {manual_id}")
-        manual_ids.add(manual_id)
-        manuals.append(ManualResult(manual_id, _bool(item["satisfied"], f"{label}.satisfied"), _string(item["evidence"], f"{label}.evidence")))
-    return CloseoutEvidence(
-        _string(mapping["plan_fingerprint"], "plan_fingerprint"),
-        _bool(mapping["tasks_complete"], "tasks_complete"),
-        _strings(mapping["tasks_remaining"], "tasks_remaining"),
-        _strings(mapping.get("fatal_conditions", []), "fatal_conditions"),
-        tuple(validations),
-        tuple(manuals),
-        _bool(mapping.get("pause_requested", False), "pause_requested"),
-        _strings(mapping.get("exhaustion_evidence", []), "exhaustion_evidence"),
-    )
-
-
-def _closeout_decision(route: CloseoutRoute, reasons: list[str], next_action: str) -> CloseoutDecision:
-    return CloseoutDecision(route, tuple(reasons[:6]), next_action)
-
-
-def _validate_bound_evidence(contract: ExecutionContract, evidence: CloseoutEvidence) -> dict[str, ValidationObligation]:
-    expected = {item.id: item for item in contract.validations}
-    actual: dict[str, ValidationObligation] = {}
-    for validation in evidence.validations:
-        if validation.id in actual:
-            raise ValueError(f"duplicate validation id: {validation.id}")
-        if validation.id not in expected:
-            raise ValueError(f"unknown validation id: {validation.id}")
-        declared = expected[validation.id]
-        if validation.command != declared.command:
-            raise ValueError(f"command mismatch for validation {validation.id}")
-        if validation.required != declared.required:
-            raise ValueError(f"required flag mismatch for validation {validation.id}")
-        if validation.equivalence != declared.equivalence:
-            raise ValueError(f"equivalence policy mismatch for validation {validation.id}")
-        if validation.outcome == "equivalent-pass" and declared.equivalence == "exact-only":
-            raise ValueError(f"equivalence is not allowed for validation {validation.id}")
-        if validation.phase is not None and validation.phase not in declared.phases:
-            raise ValueError(f"invalid phase for validation {validation.id}")
-        for candidate in validation.candidates:
-            action = validation.authority.action
-            if validation.authority.state == "required-unrequested" and action not in contract.authority.requires_approval:
-                raise ValueError(f"undeclared authority action for validation {validation.id}: {action}")
-            if validation.authority.state == "not-required" and action and action not in contract.authority.autonomous and action not in contract.authority.requires_approval:
-                raise ValueError(f"undeclared authority action for validation {validation.id}: {action}")
-        actual[validation.id] = validation
-    missing = [item.id for item in contract.validations if item.id not in actual]
-    required_missing = [item.id for item in contract.validations if item.required and item.id not in actual]
-    if required_missing:
-        raise ValueError(f"missing required validation: {', '.join(required_missing)}")
-    if missing:
-        raise ValueError(f"missing plan validation: {', '.join(missing)}")
-    manual_expected = {item.id for item in contract.manual_obligations}
-    manual_actual = {item.id for item in evidence.manual_obligations}
-    if manual_actual - manual_expected:
-        raise ValueError(f"unknown manual obligation: {sorted(manual_actual - manual_expected)[0]}")
-    missing_manual = manual_expected - manual_actual
-    if missing_manual:
-        raise ValueError(f"missing manual obligation: {sorted(missing_manual)[0]}")
-    return actual
-
-
-def _recovery_state(validation: ValidationObligation) -> tuple[bool, bool, bool, bool]:
-    categories = [item.category for item in validation.discovery_results]
-    complete = len(categories) == len(DISCOVERY_CATEGORIES) and set(categories) == set(DISCOVERY_CATEGORIES)
-    duplicate = len(categories) != len(set(categories))
-    safe_untried = any(candidate.safe and not candidate.requires_authority and not candidate.attempted and candidate.result == "not-run" for candidate in validation.candidates)
-    authority_needed = any(candidate.requires_authority and not candidate.attempted and candidate.result == "not-run" for candidate in validation.candidates) and validation.authority.state == "required-unrequested"
-    return complete, duplicate, safe_untried, authority_needed
-
-
-def classify_closeout(contract: ExecutionContract, evidence: CloseoutEvidence | Mapping[str, object]) -> CloseoutDecision:
-    if not isinstance(evidence, CloseoutEvidence):
-        evidence = parse_closeout_evidence(evidence)
-    bound = _validate_bound_evidence(contract, evidence)
-    if evidence.fatal_conditions:
-        return _closeout_decision("BLOCKED", ["fatal-condition-exhausted"], "Resolve the fatal condition before resuming execution.")
-    if not evidence.tasks_complete or evidence.tasks_remaining:
-        if evidence.pause_requested:
-            return _closeout_decision("PARTIAL", ["pause-requested", "unfinished-tasks"], "Resume the first remaining executable task.")
-        return _closeout_decision("continue-execution", ["unfinished-tasks"], "Continue execution with the first remaining task.")
-
-    unresolved = [item for item in bound.values() if item.outcome in {"unresolved", "regression"} or (item.outcome == "equivalent-pass" and (item.equivalence_evidence is None or not item.equivalence_evidence.admissible)) or (item.outcome == "warning" and item.required)]
-    for validation in unresolved:
-        complete, duplicate, safe_untried, authority_needed = _recovery_state(validation)
-        if duplicate:
-            raise ValueError(f"structured recovery has duplicate discovery category for {validation.id}")
-        if not complete:
-            raise ValueError(f"structured recovery is incomplete for {validation.id}")
-        if not validation.failure_phase:
-            raise ValueError(f"structured recovery requires failure phase for {validation.id}")
-        if safe_untried:
-            return _closeout_decision("continue-recovery", ["safe-recovery-candidate", f"validation:{validation.id}"], f"Run the next safe recovery candidate for {validation.id}.")
-        if authority_needed:
-            return _closeout_decision("request-authority", ["authority-required", f"validation:{validation.id}"], f"Request approval for the recovery action for {validation.id}.")
-        if validation.authority.state == "requested-declined":
-            return _closeout_decision("NEEDS_REVIEW", ["authority-declined", f"validation:{validation.id}"], "Obtain the required authority, then rerun closeout-check.")
-        if any(not candidate.attempted and candidate.result == "not-run" for candidate in validation.candidates):
-            raise ValueError(f"structured recovery has an unclassified candidate for {validation.id}")
-    if unresolved:
-        return _closeout_decision("NEEDS_REVIEW", ["recovery-exhausted"], "Resolve the environmental or external obligation, then rerun closeout-check.")
-    pending_manual = [item.id for item in evidence.manual_obligations if not item.satisfied]
-    if pending_manual:
-        return _closeout_decision("NEEDS_REVIEW", ["manual-obligation-pending", f"obligation:{pending_manual[0]}"], "Complete the pending plan-declared obligation, then rerun closeout-check.")
-    return _closeout_decision("DONE", ["all-required-validations-passed"], "No further execution is required.")
-
-
-def status_for_route(route: CloseoutRoute) -> str | None:
-    if route in {"continue-execution", "continue-recovery", "request-authority"}:
+    if any(marker in lowered for marker in forbidden):
         return None
-    return route
+    if "path" in lowered and any(
+        marker in lowered for marker in ("move", "moved", "relocat")
+    ):
+        return "path-move"
+    if "structural" in lowered and any(
+        marker in lowered for marker in ("id", "name")
+    ):
+        return "structural-alignment"
+    if "id/name" in lowered or "id or name" in lowered:
+        return "structural-alignment"
+    if "equivalent" in lowered and any(
+        marker in lowered for marker in ("missing tool", "tool unavailable", "exit 127")
+    ):
+        return "missing-tool-equivalent"
+    if "already" in lowered and "declared state" in lowered:
+        return "target-already-declared-state"
+    return None
+
+
+def _parse_deviations(value: object) -> tuple[dict[str, str], ...]:
+    if not isinstance(value, list):
+        raise ExecutionContractError(
+            "malformed-deviations", "deviations must be a list"
+        )
+    deviations: list[dict[str, str]] = []
+    for index, raw_deviation in enumerate(value):
+        label = f"deviations[{index}]"
+        try:
+            mapping = _mapping(raw_deviation, label)
+            _exact_fields(mapping, DEVIATION_FIELDS, label)
+            task = _string(mapping["task"], f"{label}.task")
+            mismatch = _string(mapping["mismatch"], f"{label}.mismatch")
+            resolution = _string(mapping["resolution"], f"{label}.resolution")
+        except (TypeError, ValueError) as exc:
+            raise ExecutionContractError("malformed-deviation", str(exc)) from exc
+        if _deviation_class(f"{mismatch} {resolution}") is None:
+            raise ExecutionContractError(
+                "invalid-deviation",
+                f"{label} is not an unequivocal path, structural, missing-tool, or declared-state resolution",
+            )
+        deviations.append(
+            {"task": task, "mismatch": mismatch, "resolution": resolution}
+        )
+    return tuple(deviations)
 
 
 def compute_sha256(path: Path) -> str:
+    return compute_content_sha256(path)
+
+
+def compute_content_sha256(path: Path) -> str:
+    """Hash the exact retained-plan bytes for external audit binding."""
+
     return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
+
+
+@dataclass(frozen=True)
+class ResumeState:
+    schema_version: Literal[2]
+    status: Literal["DONE", "DONE_WITH_WARNINGS", "PARTIAL", "BLOCKED"]
+    plan: str
+    approval_evidence: ApprovalEvidence
+    delivery_verdicts: tuple[Verdict, ...]
+    completed_task_ids: tuple[str, ...]
+    remaining_task_ids: tuple[str, ...]
+    last_validation: str
+    next_action: str
+    warnings: tuple[dict[str, str], ...]
+    deviations: tuple[dict[str, str], ...]
+
+
+@dataclass(frozen=True)
+class StatusDiscovery:
+    path: Path | None
+    state: ResumeState | None
+    findings: tuple[Finding, ...]
+
+
+@dataclass(frozen=True)
+class Baseline:
+    head: str
+    paths: Mapping[str, str]
+
+
+def _git_head(repo_root: Path) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ExecutionContractError(
+            "baseline-head-unavailable",
+            f"Unable to resolve repository HEAD: {exc}",
+        ) from exc
+    head = completed.stdout.strip()
+    if not head:
+        raise ExecutionContractError("baseline-head-unavailable", "Repository HEAD is empty")
+    return head
+
+
+def _relevant_files(repo_root: Path, declared_paths: Sequence[str]) -> dict[str, str]:
+    hashes: dict[str, str] = {}
+    root = repo_root.resolve()
+    for declared in declared_paths:
+        candidate = Path(declared)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            raise ExecutionContractError(
+                "invalid-baseline-path",
+                f"Relevant baseline path must remain repository-relative: {declared}",
+            )
+        target = (root / candidate).resolve()
+        try:
+            target.relative_to(root)
+        except ValueError as exc:
+            raise ExecutionContractError(
+                "invalid-baseline-path",
+                f"Relevant baseline path escapes repository: {declared}",
+            ) from exc
+        if target.is_file():
+            hashes[candidate.as_posix()] = compute_content_sha256(target)
+        elif target.is_dir():
+            for entry in sorted(target.rglob("*")):
+                if not entry.is_file():
+                    continue
+                relative = entry.resolve().relative_to(root).as_posix()
+                hashes[relative] = compute_content_sha256(entry)
+        else:
+            hashes[candidate.as_posix()] = "<missing>"
+    return hashes
+
+
+def compute_relevant_baseline(repo_root: Path, paths: Sequence[str]) -> Baseline:
+    """Capture HEAD and exact dirty bytes for explicitly relevant paths."""
+
+    return Baseline(_git_head(repo_root.resolve()), _relevant_files(repo_root, paths))
+
+
+def validate_relevant_baseline(
+    baseline: Baseline, current: Baseline
+) -> list[Finding]:
+    """Fail closed on HEAD, declared-path, or undeclared dependency drift."""
+
+    findings: list[Finding] = []
+    if baseline.head != current.head:
+        findings.append(
+            Finding(
+                "baseline-head-drift",
+                f"Repository HEAD changed: {baseline.head} != {current.head}",
+            )
+        )
+    baseline_paths = dict(baseline.paths)
+    current_paths = dict(current.paths)
+    for path, expected in baseline_paths.items():
+        actual = current_paths.get(path, "<missing>")
+        if actual != expected:
+            findings.append(
+                Finding(
+                    "relevant-path-drift",
+                    f"Relevant path changed: {path}",
+                )
+            )
+    for path in sorted(set(current_paths) - set(baseline_paths)):
+        findings.append(
+            Finding(
+                "undeclared-dependency-drift",
+                f"Current baseline contains undeclared path: {path}",
+            )
+        )
+    return findings
+
+
+def validate_ignored_artifact(path: Path, expected_hash: str) -> Finding | None:
+    """Validate an ignored retained artifact by reading its exact bytes."""
+
+    if not path.is_file():
+        return Finding("ignored-artifact-missing", f"Ignored artifact is missing: {path}")
+    actual_hash = compute_content_sha256(path)
+    if actual_hash != expected_hash:
+        return Finding(
+            "ignored-artifact-hash-drift",
+            f"Ignored artifact bytes changed: {path}",
+        )
+    return None
+
+
+def git_diff_check_coverage(outcome: str) -> dict[str, str]:
+    """Describe the narrow coverage of `git diff --check` without overclaiming."""
+
+    if not outcome.strip():
+        raise ValueError("git diff --check outcome must be non-empty")
+    return {
+        "command": "git diff --check",
+        "outcome": outcome,
+        "coverage": "Git-visible paths only",
+        "limit": "Ignored paths are not covered and require direct byte validation",
+    }
+
+
+def aggregate_verdict(
+    required: Sequence[str], verdicts: Mapping[str, Verdict]
+) -> Verdict:
+    """Combine independent verdicts without hiding missing or inconclusive work."""
+
+    required_categories = tuple(required)
+    if not required_categories or len(set(required_categories)) != len(required_categories):
+        raise ValueError("required verdict categories must be unique and non-empty")
+    unsupported = set(required_categories) - set(VERDICT_CATEGORIES)
+    if unsupported:
+        raise ValueError(f"unsupported required verdict categories: {sorted(unsupported)}")
+
+    missing = [category for category in required_categories if category not in verdicts]
+    inconclusive = [
+        category
+        for category in required_categories
+        if category in verdicts and verdicts[category].outcome == "inconclusive"
+    ]
+    failed = [
+        category
+        for category in required_categories
+        if category in verdicts and verdicts[category].outcome == "failed"
+    ]
+    if missing or inconclusive:
+        outcome: VerdictOutcome = "inconclusive"
+        limits: list[str] = []
+        if missing:
+            limits.append(f"missing={','.join(missing)}")
+        if inconclusive:
+            limits.append(f"inconclusive={','.join(inconclusive)}")
+        limit = "; ".join(limits)
+    elif failed:
+        outcome = "failed"
+        limit = f"failed={','.join(failed)}"
+    else:
+        outcome = "passed"
+        limit = "none"
+    coverage = f"required categories={','.join(required_categories)}"
+    return Verdict("aggregate", outcome, coverage, limit)
+
+
+def build_verdict_payload(
+    required: Sequence[str], verdicts: Mapping[str, Verdict]
+) -> dict[str, object]:
+    """Build category-qualified output and preserve gaps as explicit verdicts."""
+
+    aggregate = aggregate_verdict(required, verdicts)
+    rendered: dict[str, dict[str, str]] = {}
+    for category in required:
+        verdict = verdicts.get(category)
+        if verdict is None:
+            verdict = Verdict(
+                category,
+                "inconclusive",
+                "No category result was supplied",
+                "Missing required verdict",
+            )
+        elif verdict.category != category:
+            raise ValueError(f"verdict key does not match category: {category}")
+        rendered[category] = verdict.as_dict()
+    return {"verdicts": rendered, "aggregate": aggregate.as_dict()}
+
+
+def _manifest_task_ids(manifest: Mapping[str, object]) -> tuple[str, ...]:
+    tasks = manifest["tasks"]
+    if not isinstance(tasks, list):
+        raise ExecutionContractError("malformed-execution-manifest", "Manifest tasks must be a list")
+    return tuple(
+        item["id"]
+        for item in sorted(tasks, key=lambda value: value["order"])
+        if isinstance(item, Mapping)
+    )
+
+
+@dataclass(frozen=True)
+class _PlanSnapshot:
+    text: str
+    manifest: dict[str, object]
+    task_ids: tuple[str, ...]
+
+
+def _load_plan_snapshot(plan_path: Path) -> _PlanSnapshot:
+    text = plan_path.read_text(encoding="utf-8")
+    manifest = parse_execution_manifest(text)
+    return _PlanSnapshot(
+        text=text,
+        manifest=manifest,
+        task_ids=_manifest_task_ids(manifest),
+    )
+
+
+def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
+    """Parse the strict schema v2 runtime state persisted by the execution gateway."""
+
+    try:
+        mapping = _mapping(payload, "resume state")
+        _exact_fields(mapping, STATE_FIELDS, "resume state")
+    except (TypeError, ValueError) as exc:
+        raise ExecutionContractError("malformed-resume-state", str(exc)) from exc
+    if not _is_int(mapping["schema_version"]) or mapping["schema_version"] != STATE_SCHEMA_VERSION:
+        raise ExecutionContractError(
+            "unsupported-state-schema",
+            f"resume state schema_version must be {STATE_SCHEMA_VERSION}",
+        )
+    status = _string(mapping["status"], "resume state.status")
+    if status not in STATE_STATUSES:
+        raise ExecutionContractError(
+            "unknown-status",
+            f"resume state.status must be one of {sorted(STATE_STATUSES)}",
+        )
+    approval_evidence = _parse_approval_evidence(mapping["approval_evidence"])
+    delivery_verdicts = _parse_delivery_verdicts(mapping["delivery_verdicts"])
+    warnings = _parse_warnings(mapping["warnings"])
+    deviations = _parse_deviations(mapping["deviations"])
+    if status in SUCCESS_STATUSES:
+        aggregate = aggregate_verdict(
+            VERDICT_CATEGORIES,
+            {verdict.category: verdict for verdict in delivery_verdicts},
+        )
+        if aggregate.outcome != "passed":
+            raise ExecutionContractError(
+                "done-with-unpassed-delivery-verdicts",
+                "DONE status requires all five delivery verdicts to be passed",
+            )
+    if status == "DONE" and (warnings or deviations):
+        raise ExecutionContractError(
+            "done-with-warning-records",
+            "DONE status requires empty warnings and deviations",
+        )
+    if status == "DONE_WITH_WARNINGS" and not warnings:
+        raise ExecutionContractError(
+            "warnings-required",
+            "DONE_WITH_WARNINGS status requires at least one typed warning",
+        )
+    if status == "DONE_WITH_WARNINGS" and any(
+        warning["kind"] == "missing-tool-equivalent" for warning in warnings
+    ) and not any(
+        _deviation_class(f"{item['mismatch']} {item['resolution']}")
+        == "missing-tool-equivalent"
+        for item in deviations
+    ):
+        raise ExecutionContractError(
+            "missing-tool-equivalent-deviation",
+            "A missing-tool-equivalent warning requires a matching accepted deviation",
+        )
+    completed = _strings(mapping["completed_task_ids"], "resume state.completed_task_ids")
+    remaining = _strings(mapping["remaining_task_ids"], "resume state.remaining_task_ids")
+    if len(set(completed)) != len(completed) or len(set(remaining)) != len(remaining):
+        raise ExecutionContractError("duplicate-task-id", "resume state task IDs must be unique")
+    if set(completed) & set(remaining):
+        raise ExecutionContractError("task-progress-overlap", "resume state completed and remaining tasks must not overlap")
+    return ResumeState(
+        STATE_SCHEMA_VERSION,
+        status,  # type: ignore[arg-type]
+        _string(mapping["plan"], "resume state.plan"),
+        approval_evidence,
+        delivery_verdicts,
+        completed,
+        remaining,
+        _string(mapping["last_validation"], "resume state.last_validation"),
+        _string(mapping["next_action"], "resume state.next_action"),
+        warnings,
+        deviations,
+    )
+
+
+def _build_status_payload(
+    plan_path: Path,
+    status: str,
+    completed_task_ids: list[str] | tuple[str, ...],
+    remaining_task_ids: list[str] | tuple[str, ...],
+    last_validation: str,
+    next_action: str,
+    approval_source: str,
+    delivery_verdicts: Mapping[str, Verdict],
+    warnings: Sequence[Mapping[str, str]] = (),
+    deviations: Sequence[Mapping[str, str]] = (),
+    repo_root: Path | None = None,
+) -> dict[str, object]:
+    """Build a schema v2 runtime status payload without choosing execution work."""
+
+    manifest = parse_execution_manifest(plan_path.read_text(encoding="utf-8"))
+    semantic_fingerprint = compute_semantic_fingerprint(manifest)
+    root = repo_root or _find_repo_root(plan_path)
+    try:
+        plan_reference = plan_path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError as exc:
+        raise ValueError("plan must be inside the repository root") from exc
+    if approval_source not in APPROVAL_SOURCES:
+        raise ExecutionContractError(
+            "invalid-approval-source",
+            f"approval_source must be one of {sorted(APPROVAL_SOURCES)}",
+        )
+    if set(delivery_verdicts) != set(VERDICT_CATEGORIES):
+        raise ExecutionContractError(
+            "delivery-verdict-categories",
+            "delivery_verdicts must provide exactly the five required categories",
+        )
+    delivery_payload = build_verdict_payload(VERDICT_CATEGORIES, delivery_verdicts)
+    payload: dict[str, object] = {
+        "schema_version": STATE_SCHEMA_VERSION,
+        "status": status,
+        "plan": plan_reference,
+        "approval_evidence": {
+            "source": approval_source,
+            "statement": APPROVAL_STATEMENT,
+            "semantic_fingerprint": semantic_fingerprint,
+        },
+        "delivery_verdicts": list(delivery_payload["verdicts"].values()),
+        "completed_task_ids": list(completed_task_ids),
+        "remaining_task_ids": list(remaining_task_ids),
+        "last_validation": last_validation,
+        "next_action": next_action,
+        "warnings": list(warnings),
+        "deviations": list(deviations),
+    }
+    parse_resume_state(payload)
+    return payload
+
+
+STATUS_FILENAME_RE = re.compile(r"^(?P<base>.+)\.(?P<status>[^.]+)\.yaml$")
+
+
+class _UniqueKeyLoader(yaml.SafeLoader):
+    pass
+
+
+def _construct_unique_mapping(
+    loader: yaml.SafeLoader, node: yaml.MappingNode, deep: bool = False
+) -> dict[object, object]:
+    mapping: dict[object, object] = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise ExecutionContractError(
+                "duplicate-status-field", f"Duplicate YAML field: {key}"
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+_UniqueKeyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _construct_unique_mapping
+)
+
+
+def _load_status_yaml(text: str) -> Mapping[str, object]:
+    try:
+        payload = yaml.load(text, Loader=_UniqueKeyLoader)
+    except yaml.YAMLError as exc:
+        raise ExecutionContractError(
+            "malformed-status-yaml", f"Status YAML is malformed: {exc}"
+        ) from exc
+    return _mapping(payload, "status YAML")
+
+
+def status_sibling_paths(plan_path: Path) -> tuple[Path, ...]:
+    """Return the four canonical YAML status siblings for a retained plan."""
+
+    return tuple(
+        plan_path.with_name(f"{plan_path.stem}.{status}.yaml")
+        for status in ("DONE", "DONE_WITH_WARNINGS", "PARTIAL", "BLOCKED")
+    )
+
+
+def _status_filename(path: Path, plan_path: Path) -> str | None:
+    match = STATUS_FILENAME_RE.fullmatch(path.name)
+    if not match or match.group("base") != plan_path.stem:
+        return None
+    return match.group("status")
+
+
+def parse_status_yaml(payload: Mapping[str, object], source_path: Path) -> ResumeState:
+    """Parse YAML state and bind its status to the uppercase filename."""
+
+    match = STATUS_FILENAME_RE.fullmatch(source_path.name)
+    status_from_filename = match.group("status") if match else None
+    if status_from_filename not in STATE_STATUSES:
+        raise ExecutionContractError(
+            "invalid-status-filename",
+            "Status YAML filename must end in .DONE.yaml, .DONE_WITH_WARNINGS.yaml, .PARTIAL.yaml, or .BLOCKED.yaml: "
+            f"{source_path.name}",
+        )
+    state = parse_resume_state(_mapping(payload, "status YAML"))
+    if state.status != status_from_filename:
+        raise ExecutionContractError(
+            "status-filename-mismatch",
+            f"Status filename {source_path.name} disagrees with YAML status {state.status}",
+        )
+    return state
+
+
+def build_status_yaml(
+    plan_path: Path,
+    status: str,
+    completed_task_ids: Sequence[str],
+    remaining_task_ids: Sequence[str],
+    last_validation: str,
+    next_action: str,
+    *,
+    approval_source: str,
+    delivery_verdicts: Mapping[str, Verdict],
+    warnings: Sequence[Mapping[str, str]] = (),
+    deviations: Sequence[Mapping[str, str]] = (),
+    repo_root: Path | None = None,
+) -> dict[str, object]:
+    """Build a schema v2 runtime status YAML payload without choosing execution work."""
+
+    payload = _build_status_payload(
+        plan_path,
+        status,
+        tuple(completed_task_ids),
+        tuple(remaining_task_ids),
+        last_validation,
+        next_action,
+        approval_source,
+        delivery_verdicts,
+        warnings,
+        deviations,
+        repo_root,
+    )
+    if status not in STATE_STATUSES:
+        raise ExecutionContractError(
+            "unknown-status", f"status must be one of {sorted(STATE_STATUSES)}"
+        )
+    return payload
+
+
+def write_status_yaml(path: Path, payload: Mapping[str, object]) -> None:
+    """Write one validated YAML status sibling through an atomic transition."""
+
+    state = parse_status_yaml(payload, path)
+    serialized = yaml.safe_dump(
+        {
+            "schema_version": state.schema_version,
+            "status": state.status,
+            "plan": state.plan,
+            "approval_evidence": state.approval_evidence.as_dict(),
+            "delivery_verdicts": [
+                verdict.as_dict() for verdict in state.delivery_verdicts
+            ],
+            "completed_task_ids": list(state.completed_task_ids),
+            "remaining_task_ids": list(state.remaining_task_ids),
+            "last_validation": state.last_validation,
+            "next_action": state.next_action,
+            "warnings": list(state.warnings),
+            "deviations": list(state.deviations),
+        },
+        sort_keys=False,
+    )
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(serialized, encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def _status_binding_findings(
+    plan_path: Path,
+    state_path: Path,
+    state: ResumeState,
+    repo_root: Path,
+    snapshot: _PlanSnapshot | None = None,
+) -> list[Finding]:
+    findings: list[Finding] = []
+    if not _plan_reference_matches(plan_path, state_path, state.plan, repo_root):
+        findings.append(
+            Finding("plan-binding-mismatch", f"Status plan does not match: {state.plan}")
+        )
+    try:
+        plan_snapshot = (
+            snapshot if snapshot is not None else _load_plan_snapshot(plan_path)
+        )
+    except (OSError, UnicodeError, ExecutionContractError) as exc:
+        return findings + [Finding("plan-unreadable", str(exc))]
+    current_fingerprint = compute_semantic_fingerprint(plan_snapshot.manifest)
+    if state.approval_evidence.semantic_fingerprint != current_fingerprint:
+        findings.append(
+            Finding(
+                "approval-semantic-mismatch",
+                "Status approval evidence does not match the current Manifest semantics",
+            )
+        )
+    completed = set(state.completed_task_ids)
+    remaining = set(state.remaining_task_ids)
+    expected_task_ids = set(plan_snapshot.task_ids)
+    unknown = (completed | remaining) - expected_task_ids
+    if unknown:
+        findings.append(Finding("unknown-task-id", f"Status contains unknown task IDs: {sorted(unknown)}"))
+    if completed & remaining:
+        findings.append(Finding("task-progress-overlap", "Status completed and remaining tasks overlap"))
+    unknown_deviation_tasks = sorted(
+        set(item["task"] for item in state.deviations) - expected_task_ids
+    )
+    if unknown_deviation_tasks:
+        findings.append(
+            Finding(
+                "unknown-deviation-task",
+                f"Status deviations contain unknown task IDs: {unknown_deviation_tasks}",
+            )
+        )
+    if completed | remaining != expected_task_ids:
+        findings.append(Finding("incomplete-task-progress", "Status must account for every manifest task exactly once"))
+    if state.status in SUCCESS_STATUSES and remaining:
+        findings.append(
+            Finding(
+                "done-with-remaining-tasks",
+                "Successful terminal status must not contain remaining tasks",
+            )
+        )
+    if state.status not in SUCCESS_STATUSES and not remaining:
+        findings.append(Finding("status-progress-mismatch", "A complete task set must use DONE status"))
+    return findings
+
+
+def discover_status(plan_path: Path) -> StatusDiscovery:
+    """Discover exactly one unambiguous YAML status sibling."""
+
+    findings: list[Finding] = []
+    yaml_candidates: list[tuple[Path, str]] = []
+    prefix = f"{plan_path.stem}."
+    try:
+        entries = sorted(plan_path.parent.iterdir(), key=lambda item: item.name)
+    except OSError as exc:
+        return StatusDiscovery(None, None, (Finding("status-directory-unreadable", str(exc)),))
+
+    for entry in entries:
+        if entry.resolve() == plan_path.resolve():
+            continue
+        if not entry.name.startswith(prefix):
+            continue
+        if entry.is_symlink() and not entry.exists():
+            findings.append(Finding("stale-status-sibling", f"Status sibling is a stale symlink: {entry}"))
+            continue
+        if entry.name.endswith(".tmp"):
+            findings.append(Finding("interrupted-status-transition", f"Temporary status transition remains: {entry}"))
+            continue
+        status = _status_filename(entry, plan_path)
+        if status is not None:
+            if status not in STATE_STATUSES:
+                findings.append(Finding("unknown-status", f"Unknown status filename: {entry.name}"))
+            else:
+                yaml_candidates.append((entry, status))
+            continue
+        findings.append(Finding("unknown-status-sibling", f"Unrecognized status sibling: {entry.name}"))
+
+    if len(yaml_candidates) > 1:
+        findings.append(Finding("ambiguous-status-siblings", "More than one YAML status sibling was found"))
+
+    state: ResumeState | None = None
+    selected_path: Path | None = None
+    if len(yaml_candidates) == 1:
+        selected_path = yaml_candidates[0][0]
+        try:
+            state = parse_status_yaml(
+                _load_status_yaml(selected_path.read_text(encoding="utf-8")),
+                selected_path,
+            )
+        except (OSError, UnicodeError, ExecutionContractError, TypeError, ValueError) as exc:
+            findings.append(Finding(getattr(exc, "code", "malformed-status"), str(exc)))
+    return StatusDiscovery(selected_path, state, tuple(findings))
 
 
 def _extract_headings(text: str) -> list[str]:
@@ -611,21 +1866,129 @@ def _extract_section(text: str, heading: str) -> str:
     return "\n".join(collected).strip()
 
 
-def _extract_plan_reference(text: str) -> str | None:
-    for line in _extract_section(text, "Plan").splitlines():
-        value = line.strip().strip("`").strip()
-        if value:
-            return value
-    return None
+def validate_manifest_projection(
+    text: str, manifest: Mapping[str, object]
+) -> list[str]:
+    """Check the one-plan bootstrap projection without reconstructing legacy plans."""
+
+    findings: list[str] = []
+    controls = manifest.get("controls")
+    if not isinstance(controls, Mapping):
+        findings.append("Control Inventory projection does not bind manifest.controls")
+    else:
+        inventory_ids: list[str] = []
+        for line in _extract_section(text, "Control Inventory").splitlines():
+            if not line.strip().startswith("|"):
+                continue
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if (
+                cells
+                and cells[0] not in {"ID", "---"}
+                and re.fullmatch(r"[A-Z][A-Z0-9-]+", cells[0])
+            ):
+                inventory_ids.append(cells[0])
+        if set(inventory_ids) != set(controls):
+            findings.append(
+                "Control Inventory projection drift: IDs do not equal manifest.controls"
+            )
+
+    tasks = manifest.get("tasks")
+    task_ids = [
+        f"T{match.group(1)}"
+        for match in re.finditer(r"(?im)^#{2,6}\s+Task\s+(\d+)\s*:", text)
+    ]
+    manifest_task_ids = [
+        item["id"]
+        for item in sorted(tasks or [], key=lambda item: item.get("order", 0))
+        if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+    ]
+    if task_ids != manifest_task_ids:
+        findings.append(
+            "Task heading projection drift: ordered headings do not equal manifest.tasks"
+        )
+
+    bootstrap = manifest.get("bootstrap")
+    bootstrap_mode = bootstrap.get("mode") if isinstance(bootstrap, Mapping) else None
+    if bootstrap_mode == "explicit-single-plan":
+        try:
+            projected_validations, projected_manual_obligations = _parse_bootstrap_projection(text)
+        except ExecutionContractError as exc:
+            findings.append(f"Execution Contract projection is invalid: {exc}")
+        else:
+            manifest_validations = manifest.get("validations")
+            manifest_by_id = {
+                item["id"]: item
+                for item in manifest_validations or []
+                if isinstance(item, Mapping)
+            }
+            contract_by_id = {item["id"]: item for item in projected_validations}
+            if set(manifest_by_id) != set(contract_by_id):
+                findings.append(
+                    "Execution Contract projection drift: validation IDs do not equal manifest.validations"
+                )
+            else:
+                for validation_id, manifest_item in manifest_by_id.items():
+                    contract_item = contract_by_id[validation_id]
+                    if (
+                        manifest_item["command"] != contract_item["command"]
+                        or tuple(manifest_item["phases"]) != tuple(contract_item["phases"])
+                    ):
+                        findings.append(
+                            f"Execution Contract projection drift for validation {validation_id}"
+                        )
+            manifest_manual = {
+                item["id"]: item
+                for item in manifest.get("manual_obligations", [])
+                if isinstance(item, Mapping)
+            }
+            contract_manual = {item["id"]: item for item in projected_manual_obligations}
+            if set(manifest_manual) != set(contract_manual):
+                findings.append(
+                    "Execution Contract projection drift: manual obligation IDs do not equal manifest.manual_obligations"
+                )
+    elif bootstrap_mode == "manifest-only":
+        if re.search(r"(?m)^## Execution Contract\s*$", text):
+            findings.append(
+                "manifest-only plans must not contain an Execution Contract projection"
+            )
+    else:
+        findings.append("Bootstrap projection mode is invalid or missing")
+
+    authority = manifest.get("authority_boundaries")
+    if not isinstance(authority, Mapping) or authority.get("no_git_mutation") is not True:
+        findings.append("Authority projection drift: no_git_mutation is not true")
+    if isinstance(bootstrap, Mapping):
+        expected_binding = {
+            "controls": "manifest.controls",
+            "tasks": "manifest.tasks",
+            "validations": "manifest.validations",
+            "authority": "manifest.authority_boundaries",
+        }
+        if bootstrap.get("projection_binding") != expected_binding:
+            findings.append("Bootstrap projection binding is conflicting")
+        if bootstrap.get("legacy_only") != "reject":
+            findings.append("Bootstrap must reject legacy-only plans")
+    else:
+        findings.append("Bootstrap projection metadata is missing")
+    return findings
 
 
 def _plan_reference_matches(plan_path: Path, status_path: Path, reference: str, repo_root: Path) -> bool:
     declared = Path(reference)
-    candidates = {declared.resolve()} if declared.is_absolute() else {(status_path.parent / declared).resolve(), (plan_path.parent / declared).resolve(), (repo_root / declared).resolve()}
+    if declared.is_absolute():
+        candidates = {declared.resolve()}
+    else:
+        candidates = {
+            (status_path.parent / declared).resolve(),
+            (plan_path.parent / declared).resolve(),
+            (repo_root / declared).resolve(),
+        }
     return plan_path.resolve() in candidates
 
 
-def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
+def _validate_plan(
+    path: Path, repo_root: Path, snapshot: _PlanSnapshot | None = None
+) -> list[Finding]:
     findings: list[Finding] = []
     if not path.is_file():
         return [Finding("plan-not-found", f"Plan file not found: {path}")]
@@ -634,8 +1997,13 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
         path.resolve().relative_to(retained_dir.resolve())
     except ValueError:
         findings.append(Finding("plan-outside-retained-directory", f"Plan must be under {retained_dir}"))
+    manifest: dict[str, object] | None = None
     try:
-        text = path.read_text()
+        if snapshot is None:
+            text = path.read_text(encoding="utf-8")
+        else:
+            text = snapshot.text
+            manifest = snapshot.manifest
     except (OSError, UnicodeError) as exc:
         return findings + [Finding("plan-unreadable", f"Plan content is unreadable: {exc}")]
     headings = set(_extract_headings(text))
@@ -648,115 +2016,114 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
     for required in REQUIRED_EXECUTION_FIELDS:
         if not re.search(rf"(?im)^\s*(?:[-*]\s+)?(?:\*\*)?{re.escape(required)}(?:\*\*)?\s*:", text):
             findings.append(Finding("missing-execution-field", f"Plan missing required execution field: {required}"))
+    if "Control Inventory" not in headings:
+        findings.append(
+            Finding(
+                "missing-control-inventory",
+                "Current plan missing required heading: Control Inventory",
+            )
+        )
+    global_constraints = _extract_section(text, "Global Constraints")
+    if not re.search(r"(?im)^\s*[-*]\s+.*\bno[- ]git\b.*$", global_constraints):
+        findings.append(
+            Finding(
+                "missing-no-git-constraint",
+                "Current plan missing an explicit no-Git constraint",
+            )
+        )
     if not (TASK_HEADING_RE.search(text) or UNCHECKED_TASK_RE.search(text)):
         findings.append(Finding("missing-task", "Plan must contain at least one task heading"))
-    try:
-        parse_execution_contract(text)
-    except ExecutionContractError as exc:
-        findings.append(Finding(exc.code, str(exc)))
+    if not re.search(r"(?m)^## Execution Manifest\s*$", text):
+        findings.append(
+            Finding(
+                "missing-execution-manifest",
+                "Current plans must contain exactly one ## Execution Manifest",
+            )
+        )
+    else:
+        if snapshot is None:
+            try:
+                manifest = parse_execution_manifest(text)
+            except ExecutionContractError as exc:
+                findings.append(Finding(exc.code, str(exc)))
+        if manifest is not None:
+            for message in validate_manifest_projection(text, manifest):
+                code = (
+                    "obsolete-execution-contract"
+                    if message.startswith("manifest-only plans must not")
+                    else "bootstrap-projection-drift"
+                )
+                findings.append(Finding(code, message))
     return findings
 
 
-def _parse_status_from_filename(path: Path) -> str | None:
-    match = STATUS_FILENAME_RE.match(path.name)
-    return match.group("status") if match else None
+def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
+    return _validate_plan(path, repo_root)
 
 
-def _parse_status_from_content(text: str) -> str | None:
-    for line in text.splitlines():
-        value = line.strip().strip("`")
-        if value in ALLOWED_STATUSES:
-            return value
-    return None
+def validate_state(
+    plan_path: Path, state_path: Path, repo_root: Path | None = None
+) -> list[Finding]:
+    """Validate one YAML status sibling bound to the retained plan."""
 
-
-def _validate_status_evidence(text: str, status: str | None) -> list[Finding]:
-    findings: list[Finding] = []
-    baseline = _extract_section(text, "Baseline Validation")
-    final = _extract_section(text, "Validation")
-    recovery = _extract_section(text, "Recovery Attempts")
-    decision = _extract_section(text, "Closeout Decision")
-    exhaustion = _extract_section(text, "Recovery Exhaustion")
-    classification = _extract_section(text, "Failure Classification")
-    if baseline and final:
-        baseline_commands = set(re.findall(r"`([^`\n]+)`", baseline))
-        final_commands = set(re.findall(r"`([^`\n]+)`", final))
-        if not baseline_commands.intersection(final_commands):
-            findings.append(Finding("validation-delta-mismatch", "Baseline and final validation must include an identical command"))
-    if status in ALLOWED_STATUSES:
-        if not decision:
-            findings.append(Finding("missing-closeout-decision", "Terminal or paused status requires ## Closeout Decision"))
-        if not recovery:
-            findings.append(Finding("missing-recovery-attempts", "Terminal or paused status requires ## Recovery Attempts"))
-    if status in {"BLOCKED", "NEEDS_REVIEW"} and not exhaustion:
-        findings.append(Finding("missing-recovery-exhaustion", f"{status} requires ## Recovery Exhaustion"))
-    if status == "NEEDS_REVIEW":
-        lowered = (decision + "\n" + classification + "\n" + exhaustion).lower()
-        if not any(marker in lowered for marker in ("manual-obligation", "human", "external", "environmental", "recovery-exhausted")):
-            findings.append(Finding("needs-review-without-bound-reason", "NEEDS_REVIEW requires a bound manual, external, or environmental reason"))
-    if status == "BLOCKED":
-        lowered = (decision + "\n" + classification + "\n" + exhaustion).lower()
-        if not any(marker in lowered for marker in ("fatal", "task-local regression", "unsafe")):
-            findings.append(Finding("blocked-without-fatal-condition", "BLOCKED requires an exhausted fatal condition"))
-    if classification and not any(marker in classification.lower() for marker in ("none", "task-local regression", "pre-existing", "unrelated", "external", "environmental", "unknown")):
-        findings.append(Finding("invalid-failure-classification", "Failure Classification must use a contract classification or none"))
-    return findings
-
-
-def validate_status(path: Path) -> list[Finding]:
-    if not path.is_file():
-        return [Finding("status-not-found", f"Status file not found: {path}")]
-    text = path.read_text()
-    findings: list[Finding] = []
-    headings = set(_extract_headings(text))
-    status_file = _parse_status_from_filename(path)
-    status_content = _parse_status_from_content(text)
-    if status_file is None:
-        findings.append(Finding("unknown-status", f"Status filename must use one of {sorted(ALLOWED_STATUSES)}"))
-    elif status_content is not None and status_file != status_content:
-        findings.append(Finding("status-mismatch", f"Filename status {status_file} != content status {status_content}"))
-    for required in REQUIRED_STATUS_HEADINGS:
-        if required not in headings:
-            findings.append(Finding("missing-heading", f"Status missing required heading: {required}"))
-    findings.extend(_validate_status_evidence(text, status_file))
-    return findings
-
-
-def validate_resume(plan_path: Path, status_path: Path, repo_root: Path | None = None) -> list[Finding]:
     effective_root = repo_root or _find_repo_root(plan_path)
-    findings = validate_plan(plan_path, effective_root) + validate_status(status_path)
-    if any(item.severity == "blocking" for item in findings):
-        return findings
-    text = status_path.read_text()
-    declared = _extract_plan_reference(text)
-    if declared is None:
-        findings.append(Finding("missing-plan-binding", "Status must declare the plan path"))
-    elif not _plan_reference_matches(plan_path, status_path, declared, effective_root):
-        findings.append(Finding("plan-binding-mismatch", f"Status plan reference does not match the validated plan: {declared}"))
-    recorded = next((line.strip().strip("`") for line in text.splitlines() if line.strip().strip("`").startswith("sha256:")), None)
-    if recorded is None:
-        findings.append(Finding("missing-fingerprint", "Status must contain a sha256: Plan Fingerprint"))
-    elif recorded != compute_sha256(plan_path):
-        findings.append(Finding("plan-fingerprint-drift", f"Plan changed after approval: recorded {recorded} != computed {compute_sha256(plan_path)}"))
-    return findings
-
-
-def validate_completion(plan_path: Path, status_path: Path, repo_root: Path | None = None) -> list[Finding]:
-    findings = validate_resume(plan_path, status_path, repo_root)
-    if any(item.severity == "blocking" for item in findings):
-        return findings
-    if _parse_status_from_filename(status_path) != "DONE":
-        findings.append(Finding("not-done", "Completion requires DONE status"))
-    remaining = _extract_section(status_path.read_text(), "Remaining").strip().lower()
-    if remaining and remaining not in {"none", "- none"}:
-        findings.append(Finding("remaining-items", "DONE status requires no remaining items"))
-    return findings
+    snapshot: _PlanSnapshot | None = None
+    if plan_path.is_file():
+        try:
+            snapshot = _load_plan_snapshot(plan_path)
+        except (OSError, UnicodeError, ExecutionContractError):
+            pass
+    findings = _validate_plan(plan_path, effective_root, snapshot)
+    if state_path.suffix.lower() != ".yaml":
+        return findings + [
+            Finding(
+                "status-format-required",
+                "Runtime status must use one of the canonical YAML siblings",
+            )
+        ]
+    expected_paths = {path.resolve() for path in status_sibling_paths(plan_path)}
+    if state_path.resolve() not in expected_paths:
+        findings.append(
+            Finding(
+                "state-path-mismatch",
+                f"YAML status must be one of {sorted(str(path) for path in expected_paths)}",
+            )
+        )
+    if not state_path.is_file():
+        return findings + [Finding("state-not-found", f"Resume state not found: {state_path}")]
+    try:
+        state = parse_status_yaml(
+            _load_status_yaml(state_path.read_text(encoding="utf-8")), state_path
+        )
+    except ExecutionContractError as exc:
+        return findings + [Finding(exc.code, str(exc))]
+    except (OSError, UnicodeError, TypeError, ValueError) as exc:
+        return findings + [Finding("malformed-state", str(exc))]
+    return findings + _status_binding_findings(
+        plan_path, state_path, state, effective_root, snapshot
+    )
 
 
 def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
     blocking = [item for item in findings if item.severity == "blocking"]
     notices = [item for item in findings if item.severity == "notice"]
-    return {"status": "passed" if not blocking else "failed", "finding_counts": {"total": len(findings), "blocking": len(blocking), "notice": len(notices)}, "finding_sample": [{"code": item.code, "severity": item.severity} for item in findings[:10]], "next_action": "All checks passed." if not blocking else "Resolve blocking plan execution findings."}
+    return {
+        "status": "passed" if not blocking else "failed",
+        "finding_counts": {
+            "total": len(findings),
+            "blocking": len(blocking),
+            "notice": len(notices),
+        },
+        "finding_sample": [
+            {"code": item.code, "severity": item.severity}
+            for item in findings[:10]
+        ],
+        "next_action": (
+            "All checks passed."
+            if not blocking
+            else "Resolve blocking plan execution findings."
+        ),
+    }
 
 
 def _find_repo_root(start: Path) -> Path:
@@ -770,60 +2137,37 @@ def _format_findings(findings: list[Finding], fmt: str) -> str:
     if fmt == "compact":
         return json.dumps(build_compact_payload(findings))
     if fmt == "json":
-        return json.dumps({"status": "failed" if any(item.severity == "blocking" for item in findings) else "passed", "findings": [item.__dict__ for item in findings]}, indent=2)
-    return "OK: all checks passed." if not findings else "\n".join(f"[{item.severity.upper()}] {item.code}: {item.message}" for item in findings)
+        status = "failed" if any(item.severity == "blocking" for item in findings) else "passed"
+        return json.dumps(
+            {"status": status, "findings": [item.__dict__ for item in findings]},
+            indent=2,
+        )
+    if not findings:
+        return "OK: all checks passed."
+    return "\n".join(
+        f"[{item.severity.upper()}] {item.code}: {item.message}"
+        for item in findings
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Read-only plan execution validator")
+    parser = argparse.ArgumentParser(description="Read-only plan and resume-state validator")
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for name, help_text in (("preflight", "Validate a plan file"), ("status-check", "Validate a status file")):
-        command = subparsers.add_parser(name, help=help_text)
-        command.add_argument("path", type=Path)
-        command.add_argument("--format", choices=("text", "json", "compact"), default="text")
-        if name == "preflight":
-            command.add_argument("--repo-root", type=Path, default=None)
-    for name, help_text in (("resume-check", "Validate resume safety"), ("completion-check", "Validate completion readiness")):
-        command = subparsers.add_parser(name, help=help_text)
-        command.add_argument("plan", type=Path)
-        command.add_argument("status", type=Path)
-        command.add_argument("--repo-root", type=Path, default=None)
-        command.add_argument("--format", choices=("text", "json", "compact"), default="text")
-    closeout = subparsers.add_parser("closeout-check", help="Classify bound closeout evidence")
-    closeout.add_argument("plan", type=Path)
-    closeout.add_argument("evidence", type=Path)
-    closeout.add_argument("--format", choices=("text", "json", "compact"), default="text")
+    preflight = subparsers.add_parser("preflight", help="Validate a retained plan")
+    preflight.add_argument("path", type=Path)
+    preflight.add_argument("--repo-root", type=Path, default=None)
+    preflight.add_argument("--format", choices=("text", "json", "compact"), default="text")
+    state_check = subparsers.add_parser("state-check", help="Validate a YAML status sibling")
+    state_check.add_argument("plan", type=Path)
+    state_check.add_argument("state", type=Path)
+    state_check.add_argument("--repo-root", type=Path, default=None)
+    state_check.add_argument("--format", choices=("text", "json", "compact"), default="text")
     args = parser.parse_args(argv)
-
-    if args.command == "closeout-check":
-        try:
-            repo_root = _find_repo_root(args.plan)
-            plan_findings = validate_plan(args.plan, repo_root)
-            if any(item.severity == "blocking" for item in plan_findings):
-                raise ValueError("plan preflight failed")
-            contract = parse_execution_contract(args.plan.read_text())
-            evidence = parse_closeout_evidence(json.loads(args.evidence.read_text()))
-            if evidence.plan_fingerprint != compute_sha256(args.plan):
-                raise ValueError("plan fingerprint mismatch")
-            decision = classify_closeout(contract, evidence)
-        except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
-            sys.stderr.write(f"Invalid closeout evidence: {exc}\n")
-            return 1
-        if args.format == "compact" or args.format == "json":
-            output = json.dumps(decision.as_dict(), indent=None if args.format == "compact" else 2)
-        else:
-            output = f"Route: {decision.route}\nReason codes: {', '.join(decision.reasons)}\nNext action: {decision.next_action}"
-        sys.stdout.write(output + "\n")
-        return 0
 
     if args.command == "preflight":
         findings = validate_plan(args.path, args.repo_root or _find_repo_root(args.path))
-    elif args.command == "status-check":
-        findings = validate_status(args.path)
-    elif args.command == "resume-check":
-        findings = validate_resume(args.plan, args.status, args.repo_root)
     else:
-        findings = validate_completion(args.plan, args.status, args.repo_root)
+        findings = validate_state(args.plan, args.state, args.repo_root)
     sys.stdout.write(_format_findings(findings, args.format) + "\n")
     return 1 if any(item.severity == "blocking" for item in findings) else 0
 

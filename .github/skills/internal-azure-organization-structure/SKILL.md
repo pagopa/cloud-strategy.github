@@ -9,8 +9,9 @@ Use this workflow for Azure tenant and platform layout decisions.
 
 ## When to use
 
-Use when `/internal-azure` selects a hierarchy, subscription, landing-zone,
-residency, or platform-topology deliverable.
+Arrive here only when /internal-azure selects the organization-structure
+lane: Azure hierarchy, subscriptions, landing zones, residency, or platform
+topology.
 
 ## Workflow
 

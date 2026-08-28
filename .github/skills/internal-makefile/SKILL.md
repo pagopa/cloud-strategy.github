@@ -41,7 +41,7 @@ description: Use when editing or reviewing Makefile or .mk syntax, targets, prer
 Run the bundle-owned static checker with explicit files:
 
 ```bash
-.github/skills/internal-makefile/scripts/check.sh FILE [FILE ...]
+bash scripts/check.sh FILE [FILE ...]
 ```
 
 The checker returns `0` when checks passed within supported scope, `1` for

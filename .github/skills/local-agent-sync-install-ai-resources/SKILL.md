@@ -21,9 +21,13 @@ bundle directly.
 - Root `AGENTS.md` is projected to `~/.agents/AGENTS.md` as a managed copy.
   Optional repository-local rules in `AGENTS.local.md` are not synchronized.
 - Repository agents under `.github/agents/*.agent.md` are discovered
-  automatically except files whose name starts with `local-`.
-- Copilot agents are absolute links back to `.github/agents/`; Codex and
-  OpenCode agents retain their translated copy paths.
+  automatically except files whose name starts with `local-`. Native Codex
+  agents under `.codex/agents/*.toml` are discovered for Codex only. Native
+  OpenCode agents under `.opencode/agents/*.md` are discovered for OpenCode only.
+- Copilot agents are absolute links back to `.github/agents/`. Native Codex
+  TOML agents are absolute links back to `.codex/agents/`; native OpenCode
+  Markdown agents are absolute links back to `.opencode/agents/`. Portable
+  Markdown agents are translated only for Codex and OpenCode copy targets.
 - Home-only skills are unmanaged and preserved. This includes catalog-excluded
   `graphify` and every `local-*` bundle.
 - Reverse synchronization, reconciliation, and copied-skill fallback are
@@ -31,12 +35,13 @@ bundle directly.
 
 ## Commands
 
-Use `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh`.
+Use `scripts/run.sh`.
 
 | Request | Command |
 | --- | --- |
 | Update the global `AGENTS.md` baseline | `sync --targets agents.md` |
 | Default repository-to-home sync | `sync --targets skills` |
+| Sync skills and native runtime agents | `sync --targets skills,copilot,codex` |
 | Dry review | `plan --targets skills` |
 | Explicit materialization | `apply --targets skills` |
 | Drift inspection | `audit --targets skills` |
@@ -49,6 +54,8 @@ compatibility entrypoint.
 When the user calls this skill with an `agents.md` request, `agents.md` means `sync --targets agents.md`.
 Accept `agents-md` as a CLI alias for the same target.
 
+`scripts/run.sh` bootstraps its own environment: on first run it creates a skill-local `.venv` under `scripts/` and installs `requirements.txt` with `pip --require-hashes` behind a recorded requirements hash, re-installing only when that hash changes. `PYTHON_BIN` overrides the default `python3` interpreter. No manual environment setup is required.
+
 ## Operating Contract
 
 - Keep `~/.agents/skills/` a real directory. Never replace the root with a
@@ -59,16 +66,21 @@ Accept `agents-md` as a CLI alias for the same target.
   unmanaged target file.
 - Keep `~/.copilot/agents/` a real directory. Never replace the root with a
   link.
+- Keep `~/.codex/agents/` a real directory. Never replace the root with a
+  link.
 - Create one canonical absolute link for every eligible repository skill.
 - Create one canonical absolute link for every eligible Copilot agent.
-- Migrate a manifest-managed unchanged Copilot copy to its canonical link;
-  block unmanaged or locally modified copies.
+- Create one canonical absolute link for every eligible native Codex TOML
+  agent and every eligible native OpenCode Markdown agent; translate Markdown
+  agents only for Codex and OpenCode copy targets.
+- Migrate a manifest-managed unchanged agent copy to its canonical link; block
+  unmanaged or locally modified copies.
 - A colliding home directory with an eligible repository skill ID is removed
   without backup and replaced by that link.
 - A matching unmanaged link is adopted into the manifest without replacement.
 - A broken link or a link to another checkout blocks the operation.
-- Manifest-v2 stale managed links are unlinked automatically; copied translated
-  agents retain explicit `--prune-managed` safety.
+- Manifest-v2 stale managed links are unlinked automatically; copied agents
+  retain explicit `--prune-managed` safety.
 - Unsupported symlink capability blocks the operation. Never copy a skill as a
   fallback.
 - If the repository checkout moves, rerun sync so links point to the new
@@ -89,7 +101,7 @@ Accept `agents-md` as a CLI alias for the same target.
 ## Reporting
 
 Use `--format compact` for automation. Reports must summarize linked resources,
-unlinked resources, copied translated agents, unchanged resources, and blockers. Do not list
+unlinked resources, copied agents, unchanged resources, and blockers. Do not list
 all unchanged skills. Translate blocker codes into a plain-language next
 action; see `references/error-codes.md`.
 
@@ -107,6 +119,6 @@ action; see `references/error-codes.md`.
 
 - Run focused tests under
   `tests/github/skills/local-agent-sync-install-ai-resources/scripts`.
-- Run `bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
+- Run `bash -n scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
 - Rebuild `.github/INVENTORY.md` with `./.github/scripts/run.sh build_inventory --root .` after bundle changes.
 - Run `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks` after bundle or automation changes.

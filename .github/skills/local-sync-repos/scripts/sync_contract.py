@@ -12,6 +12,7 @@ MANAGED_COPY_PATHS: tuple[str, ...] = (
     ".python-version",
     ".pre-commit-config.yaml",
     ".editorconfig",
+    ".vscode/settings.json",
     ".github/copilot-instructions.md",
     ".github/workflows/_pre-commit.yml",
     ".github/workflows/_pr-title.yml",

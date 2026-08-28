@@ -14,7 +14,7 @@
   Usare per separare Azure Prepayment, overage, adjustment e credit note.
 - [Microsoft: Reservation Transactions REST API](https://learn.microsoft.com/en-us/rest/api/consumption/reservation-transactions/list?view=rest-consumption-2024-08-01)
   Usare per automazione, campi evento e insidia tra `EventDate` e `BillingMonth`.
-- [Dossier locale: trattamento finanziario completo](tmp/research/2026-07-27-azure-reservation-exchange-financial-treatment.md)
+- [Dossier locale: trattamento finanziario completo](tmp/.research/2026-07-27-azure-reservation-exchange-financial-treatment.md)
   Ricerca di supporto aggiornata al 27 luglio 2026, con fatti, inferenze e gap separati.
 
 ## Wisdom (Communities)

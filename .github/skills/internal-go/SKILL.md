@@ -21,7 +21,7 @@ shape, or production readiness becomes the real problem.
 
 ## When not to use
 
-- Deep concurrency design, service architecture, profiling, or production-readiness work; use `antigravity-golang-pro`.
+- Deep concurrency design, service architecture, profiling, or production-readiness work; use /antigravity-golang-pro.
 - Generic YAML, Docker, Terraform, or CI changes that merely invoke Go tooling.
 
 ## Baseline
@@ -36,7 +36,7 @@ shape, or production readiness becomes the real problem.
 
 ## Escalation
 
-Use `antigravity-golang-pro` when goroutine lifecycle, channel design, memory profile, API surface, CLI structure, or production failure modes become the real problem.
+Use /antigravity-golang-pro when goroutine lifecycle, channel design, memory profile, API surface, CLI structure, or production failure modes become the real problem.
 
 ## Validation
 

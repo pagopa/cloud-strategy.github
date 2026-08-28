@@ -1,0 +1,27 @@
+{
+  "model": "comparison-model-2026-08-16",
+  "target_sha256": "sha256:actions-review-target-v1",
+  "review_skill_sha256": "sha256:internal-review-code",
+  "engine_sha256": "sha256:addyosmani-code-review-and-quality",
+  "chat_debug_reference": "sanitized://chat-debug/actions-review-pass",
+  "contract_version": "internal-review-code-actions-eval-v2",
+  "loaded_skills": [
+    "internal-review-code",
+    "addyosmani-code-review-and-quality"
+  ],
+  "conditional_loaded_skills": [
+    "internal-github",
+    "internal-github-actions"
+  ],
+  "matched_finding_ids": [
+    "WORKFLOW_PERMISSIONS",
+    "WORKFLOW_REUSE",
+    "WORKFLOW_CONTEXT",
+    "COMPOSITE_INPUT_OUTPUT",
+    "COMPOSITE_SHELL",
+    "COMPOSITE_COMPATIBILITY",
+    "VERIFICATION_PATH"
+  ],
+  "verdict": "request-changes",
+  "scope_violations": []
+}

@@ -16,10 +16,8 @@ into a structural result with explicit ownership and rollout scope.
 - Delegated administrator placement decisions.
 - StackSets topology or rollout-scope guidance.
 - Network placement or multi-region layout at platform level.
-
-## Domains
-
-AWS Organizations hierarchy · OU design and safe rollout scope · management vs payer responsibilities · account segmentation and purpose · shared services, security, and log-archive account layout · delegated administrator placement · StackSets topology and blast radius · platform-level network topology · multi-account and multi-region structural decisions.
+- Shared-services, security, or log-archive account layout and account-purpose segmentation.
+- Multi-account or multi-region structural decisions.
 
 ## Working model
 

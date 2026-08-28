@@ -15,6 +15,7 @@ if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_ROOT))
 
 from lib.internal_skills import (  # noqa: E402
+    detect_bundle_security_findings,
     detect_internal_skill_findings,
     detect_skill_prose_assertion_findings,
 )
@@ -274,3 +275,176 @@ def test_bare_identifier_and_fenced_examples_are_not_invocations(
     findings = detect_internal_skill_findings(root)
 
     assert "unknown-skill-invocation" not in {finding.code for finding in findings}
+
+
+def test_stale_output_contract_tokens_in_yaml_are_blocking(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    skill = root / ".github/skills/internal-example"
+    (skill / "SKILL.md").write_text(
+        """---
+name: internal-example
+description: Use when exercising validator fixtures.
+---
+
+# Internal Example
+
+Deeper bookkeeping fields go to the caller-owned ledger; they do not appear in
+chat.
+""",
+        encoding="utf-8",
+    )
+    (skill / "agents/openai.yaml").write_text(
+        """interface:
+  display_name: Internal Example
+  short_description: Internal example validator fixture
+  default_prompt: Every finding must retain Critique, Fix owner, and explicit Blocking.
+""",
+        encoding="utf-8",
+    )
+    codes = {finding.code for finding in detect_internal_skill_findings(root)}
+    assert "stale-output-contract" in codes
+
+
+def test_stale_output_contract_exclusion_sentence_is_clean(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    skill = root / ".github/skills/internal-example"
+    (skill / "SKILL.md").write_text(
+        """---
+name: internal-example
+description: Use when exercising validator fixtures.
+---
+
+# Internal Example
+
+Deeper bookkeeping fields go to the caller-owned ledger and never appear in
+chat.
+""",
+        encoding="utf-8",
+    )
+    (skill / "agents/openai.yaml").write_text(
+        """interface:
+  display_name: Internal Example
+  short_description: Internal example validator fixture
+  default_prompt: Deeper fields (Fix owner, Expected verification) go to the ledger and never appear in chat.
+""",
+        encoding="utf-8",
+    )
+    codes = {finding.code for finding in detect_internal_skill_findings(root)}
+    assert "stale-output-contract" not in codes
+
+
+def test_stale_output_contract_checks_paired_agent(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    skill = root / ".github/skills/internal-example"
+    (skill / "SKILL.md").write_text(
+        """---
+name: internal-example
+description: Use when exercising validator fixtures.
+---
+
+# Internal Example
+
+Deeper bookkeeping fields go to the caller-owned ledger; they do not appear in
+chat.
+""",
+        encoding="utf-8",
+    )
+    agents_dir = root / ".github/agents"
+    agents_dir.mkdir(parents=True)
+    (agents_dir / "internal-example.agent.md").write_text(
+        "## Output\n\nEach item must include Critique and explicit Blocking.\n",
+        encoding="utf-8",
+    )
+    findings = detect_internal_skill_findings(root)
+    stale = [f for f in findings if f.code == "stale-output-contract"]
+    assert len(stale) == 1
+    assert stale[0].path == (agents_dir / "internal-example.agent.md").as_posix()
+
+
+def test_non_portable_frontmatter_field_is_blocking(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    skill_md = root / ".github/skills/internal-example/SKILL.md"
+    skill_md.write_text(
+        skill_md.read_text(encoding="utf-8").replace(
+            "description: Use when exercising validator fixtures.",
+            "description: Use when exercising validator fixtures.\nuser-invocable: false",
+        ),
+        encoding="utf-8",
+    )
+
+    findings = detect_internal_skill_findings(root)
+
+    portability = [
+        finding
+        for finding in findings
+        if finding.code == "non-portable-frontmatter-field"
+    ]
+    assert len(portability) == 1
+    assert portability[0].severity == "blocking"
+
+
+def test_nested_metadata_fields_are_portable(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    skill_md = root / ".github/skills/internal-example/SKILL.md"
+    skill_md.write_text(
+        skill_md.read_text(encoding="utf-8").replace(
+            "description: Use when exercising validator fixtures.",
+            "description: Use when exercising validator fixtures.\nmetadata:\n  revision: x",
+        ),
+        encoding="utf-8",
+    )
+
+    assert "non-portable-frontmatter-field" not in {
+        finding.code for finding in detect_internal_skill_findings(root)
+    }
+
+
+def test_invalid_policy_value_is_blocking(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    openai_yaml = root / ".github/skills/internal-example/agents/openai.yaml"
+    openai_yaml.write_text(
+        openai_yaml.read_text(encoding="utf-8")
+        + '\npolicy:\n  allow_implicit_invocation: "yes"\n',
+        encoding="utf-8",
+    )
+
+    findings = detect_internal_skill_findings(root)
+
+    policy = [finding for finding in findings if finding.code == "invalid-policy-value"]
+    assert len(policy) == 1
+    assert policy[0].severity == "blocking"
+
+
+def test_icon_asset_must_exist(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    openai_yaml = root / ".github/skills/internal-example/agents/openai.yaml"
+    openai_yaml.write_text(
+        openai_yaml.read_text(encoding="utf-8").replace(
+            "  short_description: Internal example validator fixture\n",
+            "  short_description: Internal example validator fixture\n"
+            "  icon_small: ./assets/missing.svg\n",
+        ),
+        encoding="utf-8",
+    )
+
+    findings = detect_internal_skill_findings(root)
+
+    missing = [finding for finding in findings if finding.code == "missing-icon-asset"]
+    assert len(missing) == 1
+    assert missing[0].severity == "blocking"
+
+
+def test_script_external_url_is_non_blocking(tmp_path: Path) -> None:
+    root = write_test_repository(tmp_path, "")
+    scripts = root / ".github/skills/internal-example/scripts"
+    scripts.mkdir()
+    script = scripts / "fetch.py"
+    script.write_text("URL = 'https://example.test/api'\n", encoding="utf-8")
+
+    findings = detect_bundle_security_findings(root / ".github/skills/internal-example")
+
+    external = [
+        finding for finding in findings if finding.code == "bundle-script-external-url"
+    ]
+    assert len(external) == 1
+    assert external[0].severity == "non-blocking"

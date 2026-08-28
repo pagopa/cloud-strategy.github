@@ -70,6 +70,130 @@ watchlist: []
     assert manifest.sources[0].advertised_ref == "refs/heads/main"
 
 
+def test_manifest_accepts_optional_asset_invocation_policy(tmp_path: Path) -> None:
+    manifest = load_managed_resources(
+        _write_manifest(
+            tmp_path,
+            f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+watchlist: []
+""",
+        )
+    )
+    policy = manifest.sources[0].assets[0].invocation_policy
+    assert policy is not None
+    assert policy.copilot_disable_model_invocation is True
+    assert policy.codex_allow_implicit_invocation is False
+
+
+def test_manifest_asset_invocation_policy_defaults_to_none(tmp_path: Path) -> None:
+    manifest = load_managed_resources(
+        _write_manifest(
+            tmp_path,
+            f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        )
+    )
+    assert manifest.sources[0].assets[0].invocation_policy is None
+
+
+def test_manifest_rejects_invocation_policy_with_unknown_runtime(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="invocation_policy"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          unknown-runtime:
+            flag: true
+watchlist: []
+""",
+            )
+        )
+
+
+def test_manifest_rejects_invocation_policy_with_unknown_field(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="invocation_policy"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          copilot:
+            not_a_field: true
+watchlist: []
+""",
+            )
+        )
+
+
+def test_manifest_rejects_non_boolean_invocation_policy_field(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="invocation_policy"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          copilot:
+            disable_model_invocation: "yes"
+watchlist: []
+""",
+            )
+        )
+
+
 def test_manifest_rejects_short_ref(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="full lowercase commit object ID"):
         load_managed_resources(
@@ -139,7 +263,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 59
+    assert len(manifest.assets) == 58
     assert len(manifest.watchlist) == 11
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
@@ -317,23 +441,18 @@ def test_live_override_targets_sit_under_managed_assets(repo_root: Path) -> None
         )
 
 
-def test_live_handoff_override_forces_repo_tmp_handoff(repo_root: Path) -> None:
+def test_live_handoff_override_is_owned_by_candidate_normalization(
+    repo_root: Path,
+) -> None:
     overrides_path = (
         repo_root
         / ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
     )
-    bundle_root = repo_root / ".github/skills/local-agent-sync-external-resources"
-
     overrides = load_overrides(overrides_path)
-    handoff = next(
-        override
+    assert all(
+        override.target_path != ".github/skills/mattpocock-handoff/SKILL.md"
         for override in overrides
-        if override.target_path == ".github/skills/mattpocock-handoff/SKILL.md"
     )
-
-    assert handoff.override_id == "mattpocock-handoff-tmp-path"
-    patch_text = (bundle_root / handoff.patch_path).read_text(encoding="utf-8")
-    assert "tmp/handoff/" in patch_text
 
 
 def test_mattpocock_skill_creator_review_keeps_invocation_override(

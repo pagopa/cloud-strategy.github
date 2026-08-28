@@ -1,4 +1,43 @@
 interface:
-  display_name: "Simple Task Internal Gateway"
+  display_name: "internal-gateway-simple-task"
   short_description: "Fast path for concrete repository tasks"
-  default_prompt: "Use /internal-gateway-simple-task for a concrete coding or non-coding task that should finish end-to-end in one bounded run. Start with bounded evidence, local idea ordering, and one compact clarification only when necessary. If the task changes executable or evaluable behavior, load `/internal-tdd` before implementation. Use `/grill-me` only when a missing bounded fact blocks the active lane. Treat ordinary full-gate readiness as internal; stop only when an approval boundary or another named stop condition is present. Keep gate requirements distinct from the actual internal Gate Evidence Ledger. Run `/internal-gateway-critical-master` before non-trivial action. Stop with reason when the work becomes too large, costly, ambiguous, unsafe, or not locally verifiable. Use `/superpowers-verification-before-completion` before positive claims. Emit no more than four content lines and surface risks, blockers, gaps, or user actions only when present. Use --format json for complete diagnostic evidence."
+  default_prompt: >-
+    Use /internal-gateway-simple-task for concrete repository-owned
+    low-to-medium-risk work that can finish in one bounded session. For each
+    concrete non-trivial task, own one canonical Internal Execution Brief with
+    the request/outcome, scope/anti-scope/owner/route,
+    constraints/authority/assumptions/open facts, local evidence/proposed
+    direction/rejected alternative, acceptance/native validation/pass-fail
+    signal, stop conditions/dependencies/handoff, and state/evidence
+    delta/current decisions. Keep same-session briefs in working context;
+    pause/resume may materialize only one uncommitted disposable
+    tmp/briefs/<slug>.md, and promotion transfers authority to
+    /internal-gateway-writing-plans. Supporting skills contribute evidence but
+    do not create competing briefs; /internal-gateway-idea owns
+    conversation-first idea analysis and /internal-gateway-writing-plans owns
+    retained plans. Require explicit
+    authority before live external operations, use a safe local fallback when
+    available, and stop fail-closed otherwise. Close out with one canonical
+    ledger and fresh focused plus broader evidence, without numeric thresholds.
+    Inspect local evidence first, use /grill-me only for one unrecoverable
+    material fact, and run /internal-gateway-critical-master before non-trivial
+    action. Allow one evidence-backed reformulation and re-critique when new
+    evidence changes a rejected plan. Classify prompt or skill-only edits as
+    validation-only under /internal-tdd. Load
+    /addyosmani-code-simplification only for explicit simplification work.
+    After the caller locks value, scope, authority, objective, expected output,
+    acceptance, and validation, it may invoke internal-luna-executor through
+    /internal-subagent-contract with one DelegationBrief v1 and verify the
+    adapter-composed WorkerResult v1 plus caller-owned VerificationReceipt v1;
+    treat unobserved worker validation and budget data as claims. Keep routing,
+    lifecycle, retry choice, independent
+    validation, acceptance, and closeout here; do not branch on caller or model
+    identity. Use one initial attempt, at most one context refill, and at most
+    one corrective retry; repeated progress is stalled and Minor/cosmetic
+    findings never reopen retry. When timeout, interruption, executor
+    unavailability, or missing terminal output prevents a worker payload,
+    record a caller-owned LifecycleRecord and do not fabricate a WorkerResult
+    or VerificationReceipt; local fallback starts a new authorized route. Stop
+    with the exact
+    violated condition, evidence, and required next decision. Use
+    /superpowers-verification-before-completion before positive claims.

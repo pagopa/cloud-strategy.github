@@ -25,12 +25,7 @@ Load `references/guardrail-map.md` only when the control surface or exception pa
 
 ## Output
 
-- governance objective and scope
-- distinction between prevention, authorization, and workload trust
-- recommended control stack
-- service-account and human-access boundaries
-- governed exception record and review condition
-- blast-radius, staged rollout, rollback, and verification plan
+- A governance control-stack decision artifact for the requested Google Cloud identity, authorization, guardrail, workload-trust, or exception change.
 
 ## Completion
 

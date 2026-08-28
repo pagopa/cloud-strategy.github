@@ -1,93 +1,81 @@
 ---
 name: internal-terraform
-description: Use when adding, refactoring, or reviewing Terraform or OpenTofu configuration, including root-level resources, reusable modules, drift-safe changes, and HCL interface design.
+description: Use when Terraform/OpenTofu work is operational, mixed, adoption, state, testing, CI, provider, recovery, or infrastructure diagnosis.
 ---
 
-# Terraform Skill
+# Terraform/OpenTofu Wrapper
 
-## Referenced files
-
-- `references/review-anti-patterns.md`: Terraform review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Terraform-specific defect depth.
+This stable wrapper routes Terraform/OpenTofu requests and collects only the
+bounded context needed to select the appropriate owner.
 
 ## When to use
 
-- Add or modify resources, variables, outputs, data sources in existing configurations.
-- Create a new reusable Terraform module from scratch.
-- Refactor inline resources into a module.
-- Decide whether a change belongs in an existing configuration or warrants a new module.
+Use this wrapper for operational or mixed Terraform/OpenTofu requests that
+require repository-local routing or handoff. Delegate positive language-only
+HCL or typed-configuration fixes directly to `/internal-tf`.
 
-## Feature vs module — when to use which
+## Intent classification and routing
 
-See `references/decision-guide.md` for the full decision flowchart. Quick rule:
+Classify intent before collecting general context. Syntax ownership does not
+decide operational, state, or adoption semantics.
 
-| Situation | Use |
-| --- | --- |
-| Adding resources to an existing root/environment config | Feature (inline) |
-| Logic reused across 2+ root configs or repositories | Module |
-| Complex resource group with its own lifecycle | Module |
-| One-off resource for a single environment | Feature (inline) |
+- Positive language-only signal: HCL expressions, types, variables, outputs,
+  formatting, typed configuration, `.tf`, `.tfvars`, `.tfvars.json`, or
+  import-block syntax and shape only, with no state, provider operation,
+  plan/apply, native test, CI, or cloud behavior. Set `Primary = /internal-tf`
+  and do not preload this wrapper's operational references.
+- Existing-infrastructure adoption, operational import, bulk import, state
+  reconstruction, IaC migration, native tests, module architecture, provider
+  operations, plans, CI-integrated roots, drift, upgrades, recovery, and risk
+  diagnosis remain `Primary = /antonbabenko-terraform-skill` through this
+  wrapper.
+- HCL plus an operational or adoption concern keeps Anton primary through this
+  wrapper. `/internal-tf` may contribute only a separable language finding;
+  operational ownership is not split away from the wrapper.
+- Missing or conflicting identity, ownership, mutation, or recovery facts keep
+  the wrapper primary. Mark the fact unknown, fail closed, and require the
+  applicable safety gates. Do not infer identity or permission.
 
-## Mandatory rules
+### Context collection
 
-- Use `snake_case` for all Terraform identifiers.
-- Add `description` and `type` to every variable.
-- Avoid `default` values in variables for non-module components; pass configurations via `.tfvars`.
-- Avoid using `locals` for hardcoded configuration; use direct values in the code unless they need to be configurable.
-- *Note:* The above two rules on avoiding defaults and restricting locals do not apply to reusable standalone modules.
-- Add `description` to every output.
-- Avoid hardcoded values (IDs, ARNs, subscription IDs, secrets).
-- Apply tags on all taggable resources.
-- Preserve naming and folder conventions of the target repository.
-- For new root configurations without an established competing layout, use the numbered root structure from `references/structure-standard.md`.
-- Treat numbered root files as a logical hierarchy for humans only; actual Terraform ordering must still be expressed in the dependency graph.
-- Do not proactively migrate an existing root only to match the default structure; use the default as the migration target only when migration is explicitly requested.
-- Preserve stable module input/output contracts when modifying existing modules.
-- Keep Terraform formatting and file splits consistent with the target directory; when the repo already separates `providers.tf`, `terraform.tf`, `variables.tf`, or `outputs.tf`, preserve that structure.
+For adoption, collect only facts that affect the selected route: runtime and
+version, changed root or path, desired/live/state evidence, canonical identity
+and ambiguity, ownership disposition, mutation authority, environment
+criticality, immediate risk, evidence mode, and recovery status. Mark unknown
+facts explicitly and stop on ambiguity rather than guessing.
 
-## State and delivery controls
+For other non-language branches, retain only the runtime/version, changed-root
+path, relevant files and providers, execution path, environment criticality,
+and immediate risk needed for the selected owner.
 
-- Prefer remote state with locking and encryption for shared environments; do not normalize team workflows around local shared state files.
-- Treat `terraform import`, `terraform state mv`, and `terraform state rm` as explicit migration steps that must be documented alongside address or module refactors.
-- Review drift before structural changes, especially when renaming resources, changing `for_each` keys, or splitting code into modules.
-- Pin external modules and provider versions intentionally; when changing constraints, state the upgrade or compatibility reason.
-- When the repository validates Terraform with `terraform init -lockfile=readonly`, treat the commented `terraform_providers_lock` block in the repo `.pre-commit-config.yaml` as the canonical lock platform matrix and regenerate `.terraform.lock.hcl` with checksums for every listed platform when providers change or CI reports checksum mismatches.
-- Run policy or compliance gates when the repository or delivery pipeline already depends on them.
-- Stay Terraform/OpenTofu compatible unless the target repository explicitly standardizes on OpenTofu-only features.
+## Conditional local references
 
-## Style Conventions
+- Adoption or existing-resource reconstruction: load
+  `references/existing-infrastructure-adoption.md`.
+- Operational validation, native tests, CI reachability, provider lockfile
+  evidence, state or drift, recovery, or infrastructure diagnosis: load
+  `references/operational-validation.md`.
+- Language-only work loads no wrapper-owned operational reference. Both local
+  references are resolved relative to this skill bundle.
 
-- Use two spaces for indentation and no tabs.
-- Place meta-arguments before normal arguments, keep arguments before nested blocks, and keep lifecycle-style control blocks last.
-- Use descriptive singular `snake_case` identifiers; use `main` only when there is one obvious instance and a more specific name adds no clarity.
-- When `variables.tf` or `outputs.tf` exist as dedicated files, keep entries deterministic and easy to scan, typically alphabetical by identifier.
+This skill provides guidance and routing instructions only. It cannot enforce
+runtime identity, ownership, mutation, or recovery gates; the selected owner
+and native runtime remain authoritative for those behaviors.
 
-## Root configuration standard layout
+### Handoff
 
-- Load `references/structure-standard.md` when creating or reorganizing a root configuration.
-- Use the numbered root layout as the default for new root configurations unless the target repository or folder already has another established structure, keeping `00-*` for init or fundamental data and allocating `10-97` dynamically from upstream prerequisites to downstream branches.
-- Keep environment selection under `env/<account|subscription|project>/` when the root uses the repository default `terraform.sh` runner pattern.
-- Do not apply the numbered root layout to reusable modules.
+Before invoking the selected target, state Primary, Reason (deliverable and
+boundary), Context, and Validation (the narrowest check expected).
 
-## Module standard layout
+### Guardrails
 
-- `main.tf` — resources and data sources
-- `variables.tf` — input variables with `description` and `type`
-- `outputs.tf` — outputs with `description`
-- `versions.tf` — `required_version` and `required_providers` with pinned versions
-- `README.md` — usage example, inputs, outputs
+- User instructions and root repository policy have higher precedence.
+- Preserve `internal-terraform` as the stable entrypoint.
+- Anton is authoritative and read-only for unoverridden Terraform depth.
+- Coordinate an Azure owner only for an independent Azure design or governance decision.
+- Route non-Terraform requests to the actual artifact owner.
+- Retain local guidance only when uniquely repository-specific.
 
-## Templates
-
-Load `references/template-examples.md` when you need a minimal inline feature example or a starter reusable module.
-
-## Common mistakes
-
-Load `references/common-mistakes.md` for the full mistake table.
-
-## Validation
-
-- `terraform fmt -check -recursive`
-- `terraform validate`
-- If `.terraform.lock.hcl` changes or checksum mismatches appear, confirm the lockfile still covers every platform declared in the repository lock matrix.
-- Review `terraform plan` output for unexpected changes
-- For modules: run example/consumer plan review
+This wrapper is a routing surface. `/internal-tf` owns language and HCL; Anton
+owns Terraform domain depth unless a repository-specific rule is uniquely
+justified.

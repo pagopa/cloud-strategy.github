@@ -8,20 +8,6 @@ policy:
     --3way` fallback when upstream text drift is compatible. Stop for review if neither
     path applies cleanly.
 overrides:
-- id: mattpocock-handoff-tmp-path
-  target_path: .github/skills/mattpocock-handoff/SKILL.md
-  source_family: mattpocock/skills
-  lifecycle_mode: post-refresh-patch
-  apply_strategy: git-apply
-  approval: explicit-user-counter-validated
-  reason: Force handoff documents imported from mattpocock/skills to use the
-    repository-local tmp/handoff directory instead of the operating system
-    temporary directory.
-  patch_path: patches/mattpocock-handoff-tmp-path.patch
-  expected_content_hash: 8ccb23424a7bc19ca638da956a2ad7d610517fcd133b41617de28a797a4cd6e9
-  baseline_repo_commit: efa058a
-  validation_note: Stop the refresh if the patch does not apply cleanly; review
-    whether the repository-local handoff path remains the intended contract.
 - id: awesome-copilot-dependabot-description-budget
   target_path: .github/skills/awesome-copilot-dependabot/SKILL.md
   source_family: github/awesome-copilot
@@ -84,7 +70,7 @@ overrides:
     use by internal-skill-creator during the predictability review stage. The
     source-wide normalization owns cross-runtime invocation compatibility.
   patch_path: patches/mattpocock-writing-great-skills-delegated-invocation.patch
-  expected_content_hash: 41d4749ab5b4d903a8242b2e799c52ec405c35a520969bff6a43d6e788fe9254
+  expected_content_hash: 7c285ac1270647ced867cf6d945c2ebf94d3f32794c349ee4a5140d00faf6f6f
   baseline_repo_commit: ed37663cc5fbef691ddfecd080dff42f7e7e350d
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     the delegation contract still matches the intended orchestration order.

@@ -1,6 +1,6 @@
 ---
 name: local-agent-sync-external-resources
-description: Audit, plan, or apply declared external resource refreshes through the staged sync CLI.
+description: Use when preparing, auditing, planning, or applying declared external resource refreshes through the staged, manifest-driven sync CLI.
 ---
 
 # Local Agent Sync External Resources
@@ -9,154 +9,139 @@ description: Audit, plan, or apply declared external resource refreshes through 
 
 This skill owns the manifest-driven CLI that stages, validates, and applies
 declared external resource refreshes safely. The single public entrypoint is
-`scripts/sync_external_resources.py`. Bundle siblings: `references/`,
-`patches/`, `agents/openai.yaml`, `scripts/`.
+`scripts/sync_external_resources.py`. Bundle siblings are `references/`,
+`patches/`, `agents/openai.yaml`, and `scripts/`.
 
-## Managed source inventory
+## Managed Source Inventory
 
-The table below is a quick-reference view of the repositories managed by this
-skill. The canonical source of truth is
-[`references/managed-resources.yaml`](references/managed-resources.yaml); its
-`ref` field is the full commit object ID used by the sync. Open a hash to
-inspect the exact upstream commit.
-
-| Source ID | Repository | Pinned `ref` | Commit date (UTC) | Release/tag |
-| --- | --- | --- | --- | --- |
-| `github-awesome-copilot` | [`github/awesome-copilot`](https://github.com/github/awesome-copilot) | [`aa280f28b1b73f9b6e6917b607eb92127b67b419`](https://github.com/github/awesome-copilot/commit/aa280f28b1b73f9b6e6917b607eb92127b67b419) | 2026-07-24 | not tagged |
-| `obra-superpowers` | [`obra/superpowers`](https://github.com/obra/superpowers) | [`3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9`](https://github.com/obra/superpowers/commit/3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9) | 2026-07-24 | [v6.2.0](https://github.com/obra/superpowers/releases/tag/v6.2.0) |
-| `hashicorp-agent-skills` | [`hashicorp/agent-skills`](https://github.com/hashicorp/agent-skills) | [`8c6573abbd21e8094fab8f538eb5f97db63133fd`](https://github.com/hashicorp/agent-skills/commit/8c6573abbd21e8094fab8f538eb5f97db63133fd) | 2026-07-15 | not tagged |
-| `mattpocock-skills` | [`mattpocock/skills`](https://github.com/mattpocock/skills) | [`ed37663cc5fbef691ddfecd080dff42f7e7e350d`](https://github.com/mattpocock/skills/commit/ed37663cc5fbef691ddfecd080dff42f7e7e350d) | 2026-07-21 | not tagged |
-| `vercel-labs-skills` | [`vercel-labs/skills`](https://github.com/vercel-labs/skills) | [`e173b8c88f2581cfdaa1b6767c6519a08155790e`](https://github.com/vercel-labs/skills/commit/e173b8c88f2581cfdaa1b6767c6519a08155790e) | 2026-07-22 | not tagged |
-| `openai-skills-curated` | [`openai/skills`](https://github.com/openai/skills) | [`49f948faa9258a0c61caceaf225e179651397431`](https://github.com/openai/skills/commit/49f948faa9258a0c61caceaf225e179651397431) | 2026-06-24 | not tagged |
-| `openai-skills-retained-doc` | [`openai/skills`](https://github.com/openai/skills) | [`49f948faa9258a0c61caceaf225e179651397431`](https://github.com/openai/skills/commit/49f948faa9258a0c61caceaf225e179651397431) | 2026-06-24 | not tagged |
-| `sickn33-antigravity` | [`sickn33/antigravity-awesome-skills`](https://github.com/sickn33/antigravity-awesome-skills) | [`e66fc833f2022c3534ba74af835db14c34f9a732`](https://github.com/sickn33/antigravity-awesome-skills/commit/e66fc833f2022c3534ba74af835db14c34f9a732) | 2026-07-24 | [v15.4.0](https://github.com/sickn33/agentic-awesome-skills/releases/tag/v15.4.0) |
-| `addyosmani-agent-skills` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) | [`ff2df4c07e7836a092ed28e1e9b42f4d6009280c`](https://github.com/addyosmani/agent-skills/commit/ff2df4c07e7836a092ed28e1e9b42f4d6009280c) | 2026-07-24 | [0.6.5](https://github.com/addyosmani/agent-skills/releases/tag/0.6.5) |
-| `atlassian-mcp-server` | [`atlassian/atlassian-mcp-server`](https://github.com/atlassian/atlassian-mcp-server) | [`f22e7075136a62baa7c10200a64884f83bf3ebe1`](https://github.com/atlassian/atlassian-mcp-server/commit/f22e7075136a62baa7c10200a64884f83bf3ebe1) | 2026-07-08 | not tagged |
-| `anthropic-skills` | [`anthropics/skills`](https://github.com/anthropics/skills) | [`b29e7cf65e5cb78a5ac33d582270551bc74a14eb`](https://github.com/anthropics/skills/commit/b29e7cf65e5cb78a5ac33d582270551bc74a14eb) | 2026-07-24 | not tagged |
-
-Commit dates are the committer dates in UTC. Release/tag values are shown only
-when an exact tag points to the pinned commit; otherwise the value is
-`not tagged`. The metadata was checked on 2026-08-01.
-
-This catalog is commit-pinned, not release-pinned:
-
-- `ref` is the immutable upstream version identity; tags and branches are not
-  accepted as the source identity.
-- The top-level `version: 1` in the manifest is the manifest schema version,
-  not an upstream release version.
-- Release/tag is informational and never replaces `ref`. The optional
-  `advertised_ref` can provide another human-readable ref when deliberately
-  declared, but it never replaces `ref`.
+The canonical source of truth is
+[`references/managed-resources.yaml`](references/managed-resources.yaml).
+The `ref` field is the full commit object ID and the sole accepted source
+identity. Top-level `version: 1` is the manifest schema version, not an
+upstream release. Release/tag values and `advertised_ref` are informational
+and never replace `ref`. Commit dates and tag metadata are not tracked here;
+read them from the manifest or the upstream commit.
 
 ## Modes
 
-- `prepare`: explicitly fetches pinned Git content into a repository-keyed
-  partial-clone cache and exports only manifest-declared asset paths into
-  verified snapshots under the repository `tmp/` root.
-- `audit`: parse all registries, validate local paths, canonical names, hashes,
-  watchlist shape, and dirty state. Does not fetch or write.
-- `plan`: require an external workspace, automatically run the pinned prepare
-  flow when snapshots are missing, build and validate the complete candidate,
-  then emit the changed-path summary without repository writes.
-- `apply`: perform `plan`, automatically prepare missing snapshots, reject
-  dirty targets unless `--allow-dirty`, generate one patch, run
-  `git apply --check`, apply once, rebuild inventory, and rerun scoped
-  validation.
+- `prepare` fetches pinned Git content into a repository-keyed partial-clone
+  cache and exports manifest-declared paths into verified snapshots.
+- `audit` validates registries, local paths, canonical names, hashes, watchlist
+  shape, and dirty state. It does not fetch or write.
+- `plan` requires an external workspace, prepares missing snapshots, builds and
+  validates the complete candidate, and emits a changed-path summary.
+- `apply` performs `plan`, prepares missing snapshots, rejects dirty targets
+  unless `--allow-dirty`, generates and checks one patch, applies once, rebuilds
+  inventory, and reruns scoped validation.
 
 ## Pinned Content Only
 
 - The manifest full commit SHA is the sole accepted source identity.
 - Only manifest-declared `upstream` paths are materialized.
-- No tags, no submodules, no local branches, no remote-tracking branches.
-- No `git pull`, no argumentless `git fetch`, no `git remote update`.
-- No package managers: `pip`, `uv`, `npm`, `brew`, `yarn`, `pnpm` are forbidden.
+- No tags, submodules, local branches, or remote-tracking branches.
+- No `git pull`, argumentless `git fetch`, or `git remote update`.
+- No package managers (`pip`, `uv`, `npm`, `brew`, `yarn`, `pnpm`) are allowed.
 
 ## Managed Skill Reference Normalization
 
-- A source may set `rewrite_skill_references: true` to rewrite slash commands and
-  backtick skill references from each declared upstream asset basename to its
-  declared `canonical_name` during candidate normalization.
-- Use `skill_reference_aliases` for upstream command names that do not match an
-  asset basename. Keep aliases source-local and point them only at declared
+- A source may set `rewrite_skill_references: true` to rewrite slash commands
+  and backtick skill references from declared upstream basenames to declared
+  `canonical_name` values.
+- `skill_reference_aliases` are source-local and point only at declared
   canonical names.
-- The `mattpocock-skills` source uses the `mattpocock-` canonical prefix for
-  every imported skill. The upstream `/grilling` reference is normalized to
-  the repository-owned `grill-me` through a declared source replacement,
-  not through a source-local alias.
-- References to undeclared skills remain unchanged and must be reported as
-  unresolved dependencies; do not silently import or rewrite them.
+- The `mattpocock-skills` source uses the `mattpocock-` prefix. Upstream
+  `/grilling` is normalized to `grill-me` through a declared source
+  replacement, not an alias.
+- References to undeclared skills remain unchanged and are reported as
+  unresolved dependencies.
 
 ## Managed Skill Frontmatter
 
-- Normalize every managed `SKILL.md` for Codex and GitHub Copilot while
-  preserving its `/skill-name` references.
-- Remove `disable-model-invocation` from skill frontmatter. That field belongs
-  to custom agents and makes the skill invalid for Codex skill discovery.
-- Keep invocation policy in each bundle's `agents/openai.yaml`.
+- Normalize managed `SKILL.md` files for Codex and GitHub Copilot while
+  preserving `/skill-name` references.
+- Remove `disable-model-invocation` by default because it is not standard Codex
+  skill metadata.
+- Apply `invocation_policy` generically per asset. Its fields are
+  `copilot.disable_model_invocation` and `codex.allow_implicit_invocation`;
+  do not hardcode per-asset exceptions.
+- `superpowers-brainstorming` is the declared exception: keep
+  `disable-model-invocation: true` in `SKILL.md` and set
+  `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
+- After refresh, manually verify that no policy-managed skill is implicitly
+  selected in either runtime.
 
 ## Executable Python Normalization
 
 - A source may set `ensure_python_shebangs: true` to prepend
-  `#!/usr/bin/env python3` to executable `.py` files that have no shebang.
-- The Anthropic skills source enables this normalization so refreshed
-  candidates continue to pass the executable-shebang repository check.
+  `#!/usr/bin/env python3` to executable `.py` files without a shebang.
+- The Anthropic source enables this normalization.
 - Preserve existing shebangs, non-executable Python modules, and non-Python
   executables unchanged.
 
 ## Guided Question Contract
 
-- Candidate normalization appends a repository-owned contract to
-  `superpowers-brainstorming` and `grill-me` whenever either canonical skill is
-  managed, regardless of its source or upstream wording.
-- The contract requires numbered bulk question blocks. Every question includes
-  a brief `Recommendation`, `Why`, and `Default if accepted`.
-- The appended contract explicitly overrides upstream one-question-at-a-time
-  pacing. A single remaining blocker is still a numbered one-item block.
-- The append is marker-based and idempotent. Do not replace it with a
-  context-sensitive replay patch.
+- Append a repository-owned contract to `superpowers-brainstorming` and
+  `grill-me` whenever either canonical skill is managed, regardless of source.
+- Require numbered bulk question blocks. Every question includes a brief
+  `Recommendation`, `Why`, and `Default if accepted`.
+- Explicitly override upstream one-question-at-a-time pacing. A single
+  remaining blocker is a numbered one-item block.
+- Use a marker-based idempotent append, never a context-sensitive replay patch.
+
+## Wayfinder Critical Validation And Grilling Contracts
+
+- Append two repository-owned contracts to `mattpocock-wayfinder`.
+- Before artifact creation or update, `internal-gateway-critical-master` must
+  challenge the analysis. Counter-validate every material critique against
+  evidence and constraints, incorporate every supported instruction, and stop
+  when a supported objection remains unresolved.
+- One gate covers one analysis unit and its related content-producing write
+  batch. The required ticket claim is exempt and remains the first coordination
+  action. Rerun the critic only after new evidence or a materially supported
+  revision; never against unchanged evidence.
+- Every Wayfinder Grilling ticket and `grill-me` invocation asks numbered bulk
+  blocks with `Question`, `Recommendation`, `Why`, and `Default if accepted`.
+- Both contracts are canonical-name-scoped, marker-based, idempotent, and never
+  replay patches.
 
 ## Repository-Owned Skill Contracts
 
-- Express additive repository-owned behavior, workspace, and output-path
-  requirements as canonical-name-scoped, marker-based candidate normalizations.
-- These normalizations must replace their own marked block, remain idempotent,
-  and preserve unrelated upstream content when surrounding text changes.
-- Do not use replay patches for this class of managed-skill customization.
-- Reserve replay patches for irreducible edits to upstream-owned lines that
-  cannot be expressed safely as an additive marked contract. Record why a
-  normalization is insufficient before registering such an exception.
+- Express additive behavior, workspace, and output-path requirements as
+  canonical-name-scoped, marker-based candidate normalizations.
+- Each normalization replaces its own marked block, is idempotent, and
+  preserves unrelated upstream content.
+- Matt Pocock handoff output path and PRD-aware non-duplication wording are
+  canonical marked normalizations, not replay-patch ownership.
+- Reserve replay patches for irreducible upstream-line edits. Record why a
+  normalization is insufficient before registering an exception.
+- Register each approved in-place override in
+  `references/imported-asset-overrides.yaml` with a replay patch and expected
+  content hash.
+- Replay runs clean `git apply --check` first, then `--3way --check` only when
+  declared. Stop for review if neither applies.
 
-## Workspace Convention
+## Workspace And Snapshot Flow
 
-- The runtime workspace must be outside this repository.
-- Use an external workspace such as `../cloud-strategy.github-external-refresh`.
-- Keep prepared source snapshots under
-  `<repo-root>/tmp/.cache/external-sync-resources-snapshots/` for normal CLI runs.
-  `--source-root` remains an explicit override for a prepared checkout supplied
-  by an operator or a test.
-- The Git object cache lives under `<workspace>/cache/repositories/`.
-- Each prepared source snapshot under
-  `<repo-root>/tmp/.cache/external-sync-resources-snapshots/<source_id>/` contains
-  `.external-resource-source.tsv` with
-  the exact fields `source_id`, `repository`, `ref`, and `paths_sha256`.
-- Before copying source assets, `plan` and `apply` compare all four fields with
-  the manifest source. A mismatch blocks candidate creation.
-- `ref` is the full manifest commit object ID. `paths_sha256` hashes only the
-  sorted declared upstream path names; it is not a file-content integrity hash.
-- `audit` remains registry and target-state validation and does not consume
-  prepared snapshots.
-
-## Prepare Cold and Warm Flow
-
-- Cold `prepare` fetches each declared source SHA into the partial-clone cache,
-  verifies the commit object, and exports only declared upstream paths into
-  atomic snapshots under
-  `<repo-root>/tmp/.cache/external-sync-resources-snapshots/<source_id>/`.
-- Warm `prepare` finds the pin ref already cached and performs no fetch,
-  reporting `cached` status and zero added cache bytes.
-- `--rebuild-cache` forces a fresh cache rebuild beside the active one,
-  replacing it only after verification. The rebuild reports `cache_status`
-  `rebuilt` only after the fresh cache replaces the active one.
+- Keep the runtime workspace outside this repository, such as
+  `../cloud-strategy.github-external-refresh`.
+- Keep the Git object cache under `<workspace>/cache/repositories/`.
+- Keep prepared snapshots under
+  `<repo-root>/tmp/.cache/external-sync-resources-snapshots/`. `--source-root`
+  is an explicit operator or test override.
+- Each snapshot contains `.external-resource-source.tsv` with exact fields
+  `source_id`, `repository`, `ref`, `paths_sha256`.
+- Before copying, `plan` and `apply` compare all four fields. A mismatch blocks
+  candidate creation. `ref` is the full commit object ID; `paths_sha256` hashes
+  sorted declared upstream path names only.
+- `audit` does not consume snapshots.
+- Cold `prepare` fetches the declared SHA into the partial-clone cache, verifies
+  the commit object, and atomically exports only declared paths.
+- Warm `prepare` reports `cached` with zero added bytes.
+- `--rebuild-cache` builds beside the active cache and reports `rebuilt` only
+  after verified replacement.
+- Missing snapshots trigger pinned `prepare` automatically in `plan` and
+  `apply`, limited to missing metadata or missing upstream paths. Invalid
+  metadata or mismatched attestation remains a blocker.
 
 ## TSV Output
 
@@ -164,68 +149,47 @@ This catalog is commit-pinned, not release-pinned:
 - Header: `record\tkey\tstatus\tvalue`.
 - Record types: `summary`, `source`, `metric`, `change`, `override`,
   `validation`, `blocker`.
-- `metric` and per-source `validation` rows use `key` `<source_id>.<name>`,
-  `status` `ok` or `fail`, and the measured value in `value`.
-- `summary.source_root` identifies the snapshot directory used by the run.
-- `--format text` remains the default for operators.
-- `--format json` retains backward-compatible keys.
+- Metric and per-source validation rows use key `<source_id>.<name>`, status
+  `ok` or `fail`, and the value in `value`.
+- `summary.source_root` names the snapshot directory.
+- `--format text` is the default; `--format json` retains backward-compatible
+  keys.
 
 ## Safety
 
-- Workspace must be outside the repository; the default snapshot root is the
-  repository's disposable `tmp/.cache/external-sync-resources-snapshots/` directory.
-- Dirty managed targets block `apply` unless `--allow-dirty` is supplied.
-- Missing snapshots trigger the declared pinned prepare flow in `plan` and
-  `apply`; invalid or mismatched snapshots stop before candidate creation.
-- Override replay is atomic: if any override fails verification, no candidate
-  changes reach the repository.
+- Dirty managed targets block `apply` unless `--allow-dirty`.
+- Override replay is atomic: any override verification failure means no
+  candidate changes reach the repository.
 - Do not modify repository targets until the complete candidate tree,
   normalizations, overrides, and generated patch pass validation.
 
 ## Workflow
 
-1. Run `audit` to validate the manifest, overrides, and local dirty-state.
-2. Run `plan` with `--workspace`; it prepares missing pinned content
-  automatically and confirms the candidate can be built.
-3. Review the changed-path summary, source metrics, and override replay
-  results.
-4. Run `apply`; it reuses valid snapshots or prepares missing ones before the
-  repository patch.
-
-Automatic preparation is limited to missing source metadata or missing
-upstream paths. Invalid metadata and mismatched attestations remain blockers.
+1. Run `audit` to validate the manifest, overrides, and local dirty state.
+2. Run `plan` with `--workspace` and confirm the candidate can be built.
+3. Review the changed-path summary, metrics, and override replay results.
+4. Run `apply` to produce and apply the validated repository patch.
 
 ## Canonical Commands
 
 ```bash
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py prepare --workspace ../cloud-strategy.github-external-refresh --format tsv
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py audit --format tsv
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py plan --workspace ../cloud-strategy.github-external-refresh --format tsv
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py apply --workspace ../cloud-strategy.github-external-refresh --format tsv
+python3 scripts/sync_external_resources.py prepare --workspace ../cloud-strategy.github-external-refresh --format tsv
+python3 scripts/sync_external_resources.py audit --format tsv
+python3 scripts/sync_external_resources.py plan --workspace ../cloud-strategy.github-external-refresh --format tsv
+python3 scripts/sync_external_resources.py apply --workspace ../cloud-strategy.github-external-refresh --format tsv
 ```
 
 ## Live Network Benchmark (Separate Authorization Required)
 
-Run `prepare` (see `## Canonical Commands`) against the two largest sources
-(`github-awesome-copilot` and `sickn33-antigravity`) with 242 MiB and 318 MiB
-baselines. Require at least 90% reduction in `materialized_bytes`. Run again
-and require `cached` with zero added cache bytes. The command must not alter
-manifest refs or repository targets. Do not run without separate authorization.
-
-## Override Rules
-
-- Do not register a replay patch for an additive repository-owned skill
-  contract; implement a canonical-name-scoped marked normalization instead.
-- Every approved imported in-place override must be registered in
-  `references/imported-asset-overrides.yaml` with a replay patch and expected
-  content hash.
-- Replay uses clean `git apply --check` first, then `--3way --check` only when
-  declared.
-- Stop for review if neither path applies cleanly.
+The two largest sources are `github-awesome-copilot` (242 MiB) and
+`sickn33-antigravity` (318 MiB). Require at least 90% reduction in
+`materialized_bytes`; the second run must report `cached` with zero added cache
+bytes. Do not alter manifest refs or repository targets, and never run without
+separate authorization.
 
 ## Validation
 
-- `python3 -m compileall .github/skills/local-agent-sync-external-resources/scripts`
+- `python3 -m compileall scripts`
 - `python3 -m pytest -q tests/github/skills/local-agent-sync-external-resources/scripts`
 - `python3 .github/scripts/validate_internal_skills.py --skill local-agent-sync-external-resources --strict`
 - `make inventory-build`
@@ -238,9 +202,9 @@ override results, source metrics, validation, and blockers.
 
 ## Anti-Scope
 
-- Do not refresh or modify any imported skill while implementing sync tooling.
+- Do not refresh or modify imported skills while implementing sync tooling.
 - Do not add a plugin system, concurrency, compatibility aliases, legacy
   fallback paths, or a generic sync framework.
 - Do not perform network refreshes outside the declared pinned prepare flow.
-  The live benchmark still requires separate authorization.
-- Do not use package managers or mutable branch updates in any sync mode.
+- The live benchmark requires separate authorization.
+- Do not use mutable branch updates in any sync mode.

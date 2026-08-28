@@ -1,13 +1,13 @@
 ---
 name: internal-excel
-description: Use when any task reads, creates, edits, validates, converts, or mentions an Excel workbook or an XLSX, XLSM, CSV, or TSV file. Load this skill first and keep it active even when formatting, charts, rendered review, or recalculation also require anthropic-xlsx.
+description: Use when any task reads, creates, edits, validates, converts, or mentions an Excel workbook or an XLSX, XLSM, CSV, or TSV file. Use alongside /anthropic-xlsx when rendered fidelity, charts, cached recalculation, or polished presentation are first-class.
 ---
 
 # Internal Excel
 
 ## Referenced skills
 
-- `anthropic-xlsx`: add alongside this skill when rendered fidelity, cached recalculation, charts, or polished workbook presentation are first-class requirements.
+- `anthropic-xlsx`
 
 ## When to use
 
@@ -20,7 +20,7 @@ description: Use when any task reads, creates, edits, validates, converts, or me
 
 ## When to add adjacent skills
 
-- For charts, rendered review, cached recalculation, or polished workbook presentation, keep this skill active and add `anthropic-xlsx`.
+- For charts, rendered review, cached recalculation, or polished workbook presentation, keep this skill active and add /anthropic-xlsx.
 - For single-language implementation work, add the narrower file or runtime owner while this skill retains the spreadsheet integrity contract.
 - For database or warehouse design, add the relevant data-platform owner; keep this skill active only while local CSV, TSV, or Excel artifacts remain in scope.
 
@@ -28,7 +28,7 @@ description: Use when any task reads, creates, edits, validates, converts, or me
 
 - This skill owns data integrity first: headers, types, nulls, duplicates, joins, reconciliation, stable IDs, delimiter detection, encoding, locale-sensitive numeric fields, and row-count preservation.
 - Keep evidence compact for large files: report headers, counts, targeted anomalies, transformation rules, exact validation gaps, and any locale or coercion assumptions that change numeric meaning.
-- Treat `.xlsx` and `.xlsm` as workbook containers first. Stay here for tabular extraction, safe value-level transformation, workbook contract inspection, writer parity checks, and formula-column decisions. Add `anthropic-xlsx` while keeping this skill active when rendered fidelity, cached recalculation, charts, or presentation-preserving delivery is part of the job.
+- Treat `.xlsx` and `.xlsm` as workbook containers first. Stay here for tabular extraction, safe value-level transformation, workbook contract inspection, writer parity checks, and formula-column decisions.
 - Preserve identifier fidelity before coercion: keep leading zeros, long numeric IDs, and day-first date text exact until an explicit schema rule says otherwise.
 - Flag spreadsheet-bound text that could execute as a formula and minimize sensitive-column exposure in samples or logs; apply the safeguards in `references/data-integrity-and-safety.md` when those risks are material.
 - Read `references/tool-selection.md` when choosing between Python `csv`, `pandas`, `openpyxl`, PyArrow, Polars, or DuckDB, or when scale, memory use, file format, or workbook fidelity makes the engine choice non-obvious.
@@ -45,7 +45,7 @@ description: Use when any task reads, creates, edits, validates, converts, or me
 - When a sample workbook or sample tab defines the expected layout, treat that tab as a contract: column order, widths, header style, body style, money style, alert or error row style, and formula columns.
 - Verify that every tab produced by the same writer receives the same contract where applicable, not just the sampled tab.
 - When the user asks for verifiable formulas, keep derived columns as Excel formulas and keep source columns as atomic input values instead of precomputed results.
-- If workbook behavior stays contract-level and formula-level, keep the guidance here. Add `anthropic-xlsx` when visual polish, charts, or recalculated delivery artifacts become primary, without replacing this skill.
+- If workbook behavior stays contract-level and formula-level, keep the guidance here without replacing this skill.
 
 ## Binary Artifacts
 
@@ -61,7 +61,7 @@ description: Use when any task reads, creates, edits, validates, converts, or me
 4. For `.xlsx` or `.xlsm`, inspect metadata and the active workbook contract before broad reads: sheet names, target dimensions, headers, formula counts, style counts, and the relevant writer blocks.
 5. Apply deterministic transformations with explicit schema rules for IDs, dates, currency, and decimal text, and keep a reconciliation path for row counts, keys, duplicates, dropped records, and formula-column intent.
 6. Re-run focused integrity and safety checks after each material transform or workbook-writer change.
-7. Add `anthropic-xlsx` when rendered workbook polish, charts, cached recalculation, or presentation-preserving delivery is required, and keep this skill active as the spreadsheet entry point.
+7. Keep this skill as the spreadsheet entry point.
 
 ## Validation
 

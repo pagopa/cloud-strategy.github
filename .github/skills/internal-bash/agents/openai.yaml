@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Bash and POSIX Shell"
+  display_name: "internal-bash"
   short_description: "Embedded Bash and POSIX shell safety"
   default_prompt: "Use $internal-bash to create, analyze, review, or modify embedded Bash or POSIX sh, sourced helpers, and non-operator shell fragments that need dialect, safety, quoting, parser, or validation guidance."

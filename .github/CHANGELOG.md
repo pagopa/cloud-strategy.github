@@ -8,6 +8,14 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-08-12
+
+- Narrowed `.github/skills/internal-tf/` to language-only structure guidance, moved cross-platform provider lockfile evidence and executable import-safe guards to `.github/skills/internal-terraform/references/operational-validation.md`, and preserved the wrapper as the fail-safe primary for mixed and operational work.
+
+## 2026-08-05
+
+- Breaking Terraform catalog change: narrowed `.github/skills/internal-tf/` to Terraform/OpenTofu language and HCL, converted `.github/skills/internal-terraform/` into the thin Anton wrapper for native tests and all non-language work, retired `.github/skills/ibm-terraform-test/` immediately under the approved exception, and documented the portable-agent boundary for `.github/instructions/**`.
+
 ## 2026-06-14
 
 - Added field-level consumer sync for `.vscode/settings.json` so only `github.copilot.chat.codeGeneration.useInstructionFiles=false` and `chat.instructionsFilesLocations[".github/instructions"]=false` are enforced with JSONC-aware merge semantics, explicit malformed/duplicate-key blockers, and manifest tracking that stays settings-scoped instead of whole-file ownership.

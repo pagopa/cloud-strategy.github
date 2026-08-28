@@ -50,6 +50,19 @@ RAW_SKILL_SOURCE_PATTERN = re.compile(
 )
 LEXICAL_METHODS = frozenset({"find", "startswith", "endswith"})
 STRUCTURAL_PARSERS = frozenset({"load", "safe_load", "loads", "safe_load_all"})
+CHAT_EXCLUSION_MARKERS: tuple[str, ...] = ("appear in chat", "do not emit")
+LEGACY_OUTPUT_FIELD_TOKENS: tuple[str, ...] = (
+    "Critique",
+    "Evidence quality",
+    "Fix owner",
+    "Expected verification",
+    "explicit Blocking",
+    "Start with Assessment",
+)
+PORTABLE_FRONTMATTER_FIELDS = frozenset(
+    {"name", "description", "metadata", "license", "compatibility"}
+)
+EXTERNAL_URL_PATTERN = re.compile(r"https?://\S+")
 
 
 @dataclass(frozen=True)
@@ -464,6 +477,24 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
                 )
             )
 
+        non_portable_fields = sorted(set(frontmatter) - PORTABLE_FRONTMATTER_FIELDS)
+        if non_portable_fields:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="non-portable-frontmatter-field",
+                    path=skill_md.as_posix(),
+                    message=(
+                        "SKILL.md frontmatter contains non-portable top-level fields: "
+                        + ", ".join(non_portable_fields)
+                        + "."
+                    ),
+                    suggestion=(
+                        "Move the field under metadata or into agents/openai.yaml policy."
+                    ),
+                )
+            )
+
     if "## When to use" not in body:
         findings.append(
             Finding(
@@ -476,8 +507,64 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
         )
 
     findings.extend(validate_openai_yaml(skill_dir, skill_name))
+    findings.extend(validate_output_contract_projection(root, skill_dir, skill_name))
     findings.extend(validate_local_references(root, skill_dir))
     findings.extend(validate_token_hygiene(skill_dir, skill_md, body))
+    findings.extend(detect_bundle_security_findings(skill_dir))
+    return findings
+
+
+def _strip_chat_exclusion_sentences(text: str) -> str:
+    normalized = " ".join(text.split())
+    kept = [
+        sentence
+        for sentence in normalized.split(". ")
+        if not any(marker in sentence.lower() for marker in CHAT_EXCLUSION_MARKERS)
+    ]
+    return " ".join(kept)
+
+
+def validate_output_contract_projection(
+    root: Path, skill_dir: Path, skill_name: str
+) -> list[Finding]:
+    findings: list[Finding] = []
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.exists():
+        return findings
+    _, body = split_frontmatter(read_text(skill_md))
+    normalized_body = " ".join(body.split())
+    if not any(
+        marker in normalized_body.lower() for marker in CHAT_EXCLUSION_MARKERS
+    ):
+        return findings
+    surfaces: list[tuple[Path, str]] = [
+        (skill_dir / "agents" / "openai.yaml", "agents/openai.yaml")
+    ]
+    paired_agent = root / ".github" / "agents" / f"{skill_name}.agent.md"
+    if paired_agent.exists():
+        surfaces.append((paired_agent, "paired agent projection"))
+    for path, surface in surfaces:
+        if not path.exists():
+            continue
+        cleaned = _strip_chat_exclusion_sentences(read_text(path))
+        stale = [token for token in LEGACY_OUTPUT_FIELD_TOKENS if token in cleaned]
+        if stale:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="stale-output-contract",
+                    path=path.as_posix(),
+                    message=(
+                        f"{surface} still requires chat-excluded output fields: "
+                        f"{', '.join(stale)}."
+                    ),
+                    suggestion=(
+                        "Update the projection to the current SKILL.md output "
+                        "contract; bookkeeping fields belong to the "
+                        "caller-owned ledger only."
+                    ),
+                )
+            )
     return findings
 
 
@@ -523,6 +610,34 @@ def validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
     display_name = interface.get("display_name")
     short_description = interface.get("short_description")
     default_prompt = interface.get("default_prompt")
+
+    policy = parsed.get("policy")
+    if isinstance(policy, dict) and "allow_implicit_invocation" in policy:
+        if not isinstance(policy["allow_implicit_invocation"], bool):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="invalid-policy-value",
+                    path=openai_yaml.as_posix(),
+                    message="policy.allow_implicit_invocation must be a boolean.",
+                    suggestion="Set policy.allow_implicit_invocation to true or false.",
+                )
+            )
+
+    for icon_field in ("icon_small", "icon_large"):
+        icon_path = interface.get(icon_field)
+        if isinstance(icon_path, str) and icon_path:
+            resolved_icon = skill_dir / icon_path
+            if not resolved_icon.exists():
+                findings.append(
+                    Finding(
+                        severity="blocking",
+                        code="missing-icon-asset",
+                        path=openai_yaml.as_posix(),
+                        message=f"interface.{icon_field} points to a missing asset: {icon_path}.",
+                        suggestion="Add the referenced icon asset to the skill bundle.",
+                    )
+                )
 
     if not isinstance(display_name, str) or not display_name.strip():
         findings.append(
@@ -583,6 +698,29 @@ def validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
             )
         )
 
+    return findings
+
+
+def detect_bundle_security_findings(skill_dir: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    scripts_dir = skill_dir / "scripts"
+    if not scripts_dir.exists():
+        return findings
+    for script_path in sorted(path for path in scripts_dir.rglob("*") if path.is_file()):
+        try:
+            text = read_text(script_path)
+        except (OSError, UnicodeDecodeError):
+            continue
+        if EXTERNAL_URL_PATTERN.search(text):
+            findings.append(
+                Finding(
+                    severity="non-blocking",
+                    code="bundle-script-external-url",
+                    path=script_path.as_posix(),
+                    message="Bundle script contains an external HTTP(S) URL.",
+                    suggestion="Confirm and document the external endpoint.",
+                )
+            )
     return findings
 
 

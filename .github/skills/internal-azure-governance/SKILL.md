@@ -10,8 +10,9 @@ decisions.
 
 ## When to use
 
-Use when `/internal-azure` selects an Azure governance deliverable involving
-RBAC, workload identity, PIM/PAM, Policy, tagging, or exceptions.
+Arrive here only when /internal-azure selects the governance lane: Azure
+authorization, workload identity, privileged access, Policy, guardrails, or
+governed exceptions.
 
 ## Workflow
 
@@ -25,9 +26,7 @@ RBAC, workload identity, PIM/PAM, Policy, tagging, or exceptions.
    control, expiry or review date, and audit evidence.
 5. Stage the rollout with a safe scope, compliance or access checks, rollback
    triggers, and evidence collection.
-6. Apply the completion criteria: scope is explicit, controls are classified,
-   authorization is least-privilege, exceptions are reviewable, and rollout
-   evidence is recorded.
+6. Verify every item in Completion criteria before finishing.
 
 ## Azure governance patterns
 

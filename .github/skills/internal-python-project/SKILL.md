@@ -17,6 +17,10 @@ project baseline directly and does not require another skill.
   behavior whose primary contract is reusable code.
 - Thin CLI or transport adapters whose stable contract remains imported
   project behavior.
+- A CLI or toolkit with a `lib/` folder is judged by its primary contract: when
+  the primary contract is reusable imported behavior, keep it here; when the
+  primary contract is direct execution through multiple entrypoints, route to
+  `/internal-python-script`.
 
 ## When not to use
 

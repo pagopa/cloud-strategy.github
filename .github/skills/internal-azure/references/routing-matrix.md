@@ -26,7 +26,11 @@
 | Restore exercise evidence | `/internal-azure-operations` |
 | Pipeline YAML review | `/internal-azure-devops` |
 | Choosing between landing-zone alternatives | `/internal-azure-strategic` |
-| Concrete Terraform edit | `/internal-terraform` |
+| Terraform operational, mixed, adoption, state, provider, plan/apply, or module decision | `/internal-terraform` |
+| Terraform language-only HCL, `.tf`, `.tfvars`, or `.tfvars.json` edit | `/internal-tf` |
+| Native `.tftest.hcl` or `.tftest.json` test | `/internal-terraform` → `/antonbabenko-terraform-skill` |
+| Terraform module, state, or drift decision | `/internal-terraform` → `/antonbabenko-terraform-skill` |
+| Terraform adoption with missing or ambiguous identity | `/internal-terraform` → `/antonbabenko-terraform-skill` (fail closed) |
 | Concrete Azure Policy definition | `/internal-cloud-policy` |
 | Current SKU price | `/awesome-copilot-azure-pricing` |
 | Generic application code hosted on Azure | No forced Azure specialist; use the application's owner. |
@@ -35,7 +39,7 @@
 
 | Request | Primary route | Adjacent owner | Ordering rule |
 |---|---|---|---|
-| Concrete Terraform edit for Azure resources | `/internal-terraform` | `/internal-azure-organization-structure` or `/internal-azure-governance` | Terraform owns the code edit; add Azure context only when the design decision is independently requested. |
+| Concrete Terraform edit for Azure resources | `/internal-terraform` | `/internal-azure-organization-structure` or `/internal-azure-governance` | The Terraform router classifies the code edit; add Azure context only when the design decision is independently requested. |
 | Concrete Azure Policy definition | `/internal-cloud-policy` | `/internal-azure-governance` | Cloud policy owns the policy artifact; governance supplies the control model only when separately requested. |
 | Azure role selection for a named resource or action | `/awesome-copilot-azure-role-selector` | `/internal-azure-governance` | Role selection owns the role recommendation; governance adds the authorization model when separately requested. |
 | Current Azure SKU price | `/awesome-copilot-azure-pricing` | `/internal-azure-strategic` | Pricing owns current cost data; add strategic framing only when options must be compared. |

@@ -10,6 +10,7 @@ These files are mirrored byte-exact from source to target:
 - `.python-version`
 - `.pre-commit-config.yaml`
 - `.editorconfig`
+- `.vscode/settings.json`
 - `.github/copilot-instructions.md`
 - `.github/workflows/_pre-commit.yml`
 - `.github/workflows/_pr-title.yml`

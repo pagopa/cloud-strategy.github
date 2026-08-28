@@ -11,8 +11,8 @@ description: Use when analyzing GitHub Copilot Chat debug logs or prompt exports
 
 Repository-owned workflow owner for low-token analysis of GitHub Copilot Chat
 debug logs and prompt exports in this repository. Route analysis through the
-canonical `tools/analyze_copilot_debug_log` wrapper instead of recreating parser
-or aggregation logic in ad-hoc scripts or one-off shell pipelines.
+bundle-local `scripts/run.sh` wrapper instead of recreating parser or aggregation
+logic in ad-hoc scripts or one-off shell pipelines.
 
 ## When to use
 
@@ -26,7 +26,7 @@ or aggregation logic in ad-hoc scripts or one-off shell pipelines.
 ## When not to use
 
 - The request is about changing the analyzer implementation itself; edit
-  `tools/analyze_copilot_debug_log/` directly.
+  `scripts/analyze_copilot_debug_log/` directly.
 - The user already asked for a full raw dump and explicitly accepted the extra
   token and context cost.
 - The task cannot be grounded in local debug-log or prompt-export files.
@@ -35,8 +35,8 @@ or aggregation logic in ad-hoc scripts or one-off shell pipelines.
 
 1. Confirm the input kind and path first: `prompt-exports` or `debug-logs`.
 2. Use the canonical wrapper, not ad-hoc parsing:
-   - `bash tools/analyze_copilot_debug_log/run.sh prompt-exports <file>`
-   - `bash tools/analyze_copilot_debug_log/run.sh debug-logs <file> --format markdown`
+  - `bash scripts/run.sh prompt-exports <file>`
+  - `bash scripts/run.sh debug-logs <file> --format markdown`
    - `./.github/scripts/run.sh analyze_copilot_debug_log --help` when the
      wrapper surface is unclear.
 3. Start aggregate-first: file size, prompt or token aggregates, model-call
@@ -67,6 +67,7 @@ or aggregation logic in ad-hoc scripts or one-off shell pipelines.
 
 ## Validation
 
-- `bash tools/analyze_copilot_debug_log/run.sh prompt-exports --help`
-- `bash tools/analyze_copilot_debug_log/run.sh debug-logs --help`
+- `bash scripts/run.sh prompt-exports --help`
+- `bash scripts/run.sh debug-logs --help`
 - `./.github/scripts/run.sh analyze_copilot_debug_log --help`
+- `python3 -m pytest tests/github/skills/local-copilot-log-analyzer/scripts -q`

@@ -1,4 +1,6 @@
+policy:
+  allow_implicit_invocation: false
 interface:
-  display_name: "Internal AWS Governance"
+  display_name: "internal-aws-governance"
   short_description: "AWS IAM, SCP, and guardrail guidance"
   default_prompt: "Use $internal-aws-governance for this routed AWS governance task."

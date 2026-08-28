@@ -1,5 +1,5 @@
 interface:
-  display_name: "Internal Node.js Project"
+  display_name: "internal-nodejs-project"
   short_description: "Node.js application structure and behavior"
   default_prompt: >-
     Use $internal-nodejs-project to create, modify, review, or refactor Node.js

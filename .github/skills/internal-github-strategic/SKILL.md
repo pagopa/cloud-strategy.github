@@ -1,7 +1,6 @@
 ---
 name: internal-github-strategic
 description: Use when /internal-github routes a GitHub platform or operating-model decision that requires option comparison, tradeoff analysis, or multi-lens strategic framing.
-user-invocable: false
 ---
 
 # Internal GitHub Strategic
@@ -48,21 +47,9 @@ decision-note shape will improve the analysis.
 
 ## Adaptive output modes
 
-### Quick answer
-
-Use for a narrow decision with one clearly stronger option. Include the
-recommendation, short rationale, and one material risk or validation need.
-
-### Decision note
-
-Use when two or more realistic options remain. Include the decision statement,
-assumptions, options, recommendation, tradeoffs, and validation needs.
-
-### Deep analysis
-
-Use for broad, ambiguous, high-risk, or explicitly detailed decisions. Include
-context, active lenses, options, recommendation, blast radius, reversibility,
-and evidence needed before implementation.
+Load `references/output-modes.md` when selecting the response depth for a routed
+strategic request; the three modes are quick answer, decision note, and deep
+analysis.
 
 ## Completion criteria
 

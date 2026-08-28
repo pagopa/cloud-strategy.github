@@ -10,7 +10,7 @@ cold-start, and configuration behavior.
 
 ## When to use
 
-- Implementing or reviewing Lambda handlers in Python, Node.js, or TypeScript.
+- Implementing or reviewing Lambda handlers.
 - Designing API Gateway, Function URL, or other HTTP-triggered request/response handling.
 - Designing SQS-triggered batch processing, retry, DLQ, or partial-batch-failure flows.
 - Packaging, dependency, cold-start, VPC, or runtime-configuration choices specific to Lambda.

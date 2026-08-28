@@ -1,4 +1,6 @@
+policy:
+  allow_implicit_invocation: false
 interface:
-  display_name: "Internal AWS Organization Structure"
+  display_name: "internal-aws-organization-structure"
   short_description: "AWS account, OU, and control-plane layout"
   default_prompt: "Use $internal-aws-organization-structure for this routed AWS structure task."

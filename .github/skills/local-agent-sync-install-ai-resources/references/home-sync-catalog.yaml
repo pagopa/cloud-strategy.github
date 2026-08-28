@@ -18,3 +18,47 @@ resources:
       - agents.md
     target_support: See runtime support matrix
     notes: Portable global baseline generated without optional AGENTS.local.md policy.
+  - resource_id: internal-tf
+    source_family: skills
+    source_path: .github/skills/internal-tf
+    include_targets:
+      - codex
+      - copilot
+      - opencode
+    target_support: See runtime support matrix
+    notes: Explicitly sync-managed Terraform configuration skill bundle.
+  - resource_id: internal-luna-executor
+    source_family: agents
+    source_path: .github/agents/internal-luna-executor.agent.md
+    include_targets:
+      - copilot
+    target_support: See runtime support matrix
+    notes: Installs the native Luna executor in ~/.copilot/agents/.
+  - resource_id: internal-luna-executor
+    source_family: agents
+    source_path: .codex/agents/internal-luna-executor.toml
+    include_targets:
+      - codex
+    target_support: See runtime support matrix
+    notes: Installs the native Luna executor in ~/.codex/agents/.
+  - resource_id: internal-gateway-critical-master
+    source_family: agents
+    source_path: .github/agents/internal-gateway-critical-master.agent.md
+    include_targets:
+      - copilot
+    target_support: See runtime support matrix
+    notes: Installs the native critical-challenge agent in ~/.copilot/agents/.
+  - resource_id: internal-gateway-critical-master
+    source_family: agents
+    source_path: .codex/agents/internal-gateway-critical-master.toml
+    include_targets:
+      - codex
+    target_support: See runtime support matrix
+    notes: Installs the native critical-challenge agent in ~/.codex/agents/.
+  - resource_id: internal-gateway-critical-master
+    source_family: agents
+    source_path: .opencode/agents/internal-gateway-critical-master.md
+    include_targets:
+      - opencode
+    target_support: See runtime support matrix
+    notes: Installs the native critical-challenge agent in ~/.config/opencode/agents/ as a canonical link to the repository source.

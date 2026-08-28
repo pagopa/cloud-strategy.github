@@ -4,6 +4,10 @@
   ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
+  "chat.permissions.default": "default",
+  "chat.tools.global.autoApprove": false,
+  "chat.tools.terminal.autoReplyToPrompts": false,
+  "chat.tools.terminal.enableAutoApprove": false,
   "github.copilot.chat.codeGeneration.useInstructionFiles": false,
   "chat.instructionsFilesLocations": {
     ".github/instructions": false

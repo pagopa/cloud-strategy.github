@@ -54,12 +54,12 @@ rows:
     resource_family: agents
     support_level: Documented
     home_path: ~/.codex/agents/
-    direct_copy_possible: false
+    direct_copy_possible: true
     translation_required: true
     include_in_v1: true
     evidence:
       - https://developers.openai.com/codex/agents
-    notes: Requires MD to TOML translation.
+    notes: Native TOML agents use canonical repository links; portable Markdown agents use TOML translation copies.
   - target: copilot
     resource_family: agents
     support_level: Documented
@@ -74,9 +74,9 @@ rows:
     resource_family: agents
     support_level: Documented
     home_path: ~/.config/opencode/agents/
-    direct_copy_possible: false
+    direct_copy_possible: true
     translation_required: true
     include_in_v1: true
     evidence:
       - https://opencode.ai/docs/agents/
-    notes: Requires frontmatter translation (permission object, handoffs to body).
+    notes: Native Markdown agents under .opencode/agents/ use canonical repository links; portable Markdown agents use OpenCode translation copies.

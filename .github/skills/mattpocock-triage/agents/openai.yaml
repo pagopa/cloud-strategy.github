@@ -1,5 +1,3 @@
 interface:
-  display_name: "Triage"
+  display_name: "mattpocock-triage"
   short_description: "Move issues through triage roles"
-policy:
-  allow_implicit_invocation: false

@@ -1,6 +1,8 @@
 ---
 name: internal-review-high-level
 description: Use when a user needs an independent, evidence-first, report-only review of a non-code artifact or change, including AI resources, architectures, mature proposals, documents, policies, plans, specifications, decisions, or processes.
+metadata:
+  revision: 2026-08-17
 ---
 
 # Internal Review High Level
@@ -27,6 +29,9 @@ review is outside this boundary and identify the accepted non-code limit.
 Use this skill when a user wants system-level assurance of a non-code artifact
 or change, including its intent, boundaries, evidence, risk, ownership, or
 decision readiness.
+For an interactive pre-action critical challenge of a plan, proposal, decision,
+or design, use `internal-gateway-critical-master` instead; use this skill for
+independent, report-only assurance.
 
 ## Review frame
 
@@ -57,23 +62,22 @@ verdict terms. Select only questions that can change the verdict.
 
 ## Output
 
-Lead with material findings, then decision-relevant evidence gaps, verdict, and
-residual risk. Omit non-applicable sections instead of emitting empty
-boilerplate.
+Lead with the review-specific verdict, then only the findings and evidence gaps
+that control the decision. Omit non-applicable sections instead of emitting
+boilerplate. Do not copy the reviewed artifact or use a generic cross-skill
+summary layout.
 
-Each material finding contains:
+The report language must always follow the language of the current chat, in
+headings, findings, open questions, and next actions alike. Keep the three
+finding field names stable per language (English: `Problem` / `Suggestion` /
+`Why`; Italian: `Problema` / `Suggerimento` / `Perché`); add a stable
+equivalent when a new language first appears. Use only Latin characters.
 
-- `Evidence`: the observed fact or explicit gap, with a traceable location.
-- `Impact`: the consequence if the concern remains unresolved.
-- `Severity`: consequence-based materiality.
-- `Confidence`: evidence strength, separate from severity.
-- `Recommendation`: the smallest useful report-only follow-up.
-- `Fix owner`: the accountable role or team, when known.
-- `Expected verification`: the check that would confirm resolution.
-
-Keep `NO MATERIAL CONCERNS FOUND` distinct from `INSUFFICIENT EVIDENCE TO
-ASSESS`. A concern without enough support remains an evidence gap and does not
-become a finding.
+Keep `NO MATERIAL CONCERNS FOUND` distinct from `MATERIAL CONCERNS SUPPORTED`
+and `INSUFFICIENT EVIDENCE TO ASSESS`. Use `MATERIAL CONCERNS SUPPORTED` when
+the review is adequately evidenced and at least one material finding is
+supported. A concern without enough support remains an evidence gap and does
+not become a finding.
 
 ## Public projection
 
@@ -81,8 +85,25 @@ Use `🔎` for the review result, `📌` for the reason, `🧪` for evidence or 
 evidence gap, and `👉` for the next decision-relevant follow-up. The verdict
 must be exactly one of `DECISION READY`, `DECISION READY WITH KNOWN RISK`,
 `DECISION BLOCKED`, or `REVIEW INCONCLUSIVE`. Use exactly
-`NO MATERIAL CONCERNS FOUND` or `INSUFFICIENT EVIDENCE TO ASSESS` for the
-evidence outcome. Omit an anchor when it adds no information.
+`NO MATERIAL CONCERNS FOUND`, `MATERIAL CONCERNS SUPPORTED`, or
+`INSUFFICIENT EVIDENCE TO ASSESS` for the evidence outcome. Omit an anchor when
+it adds no information.
+
+Use exactly this compact review-specific order:
+
+1. `# 🛰️ Review High Level: <target>` — fixed title prefix `🛰️ Review High
+   Level` to differentiate this report from the critical-review report,
+   followed by the reviewed target name.
+2. Verdict line — the exact verdict and the exact evidence outcome, followed
+   by a one-sentence reason as a blockquote.
+3. Optional single Mermaid diagram when it clarifies three or more material
+   causal, dependency, ownership, or state relationships (rules below).
+4. `## 📌 Findings` — material findings only, as numbered finding blocks.
+5. `## 🧪 Evidence gaps` — only gaps that can change the verdict.
+6. `## ❓ Open` — only when a material open question remains.
+7. `## 👉 Next` — numbered decision-relevant follow-up.
+
+Load `references/report-layout.md` when composing the report; it defines the finding, evidence-gap, open, next, and Mermaid shapes for the compact review-specific report above.
 
 ## Completion
 

@@ -1,7 +1,6 @@
 ---
 name: internal-github-operations
 description: Use when /internal-github routes a GitHub operational request covering Actions health, runners, audit evidence, reporting, drift, preflight, rollout validation, or post-rollout proof.
-user-invocable: false
 ---
 
 # Internal GitHub Operations

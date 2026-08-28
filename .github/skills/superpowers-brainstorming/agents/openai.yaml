@@ -1,0 +1,5 @@
+interface:
+  display_name: "superpowers-brainstorming"
+  short_description: Explore ideas before implementation
+policy:
+  allow_implicit_invocation: false

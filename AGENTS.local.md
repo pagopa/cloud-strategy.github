@@ -10,6 +10,38 @@
 - Keep standards-repository-only policy separate from the shared baseline.
 - Keep architecture and local context in `docs/` knowledge documents.
 
+## Repository Precedence Extensions
+
+- `AGENTS.md` owns repository-wide precedence, boundaries, and tactical
+  defaults. `.github/INVENTORY.md` owns the exact live GitHub Copilot catalog.
+- `.github/instructions/**` contains platform-native Copilot projections.
+  Portable agents must not load those files manually as portable policy.
+
+## Repository Skill Routing
+
+- Route executable or evaluable behavior changes through `/internal-tdd` before
+  implementation; that skill owns test posture and sequencing.
+- Route GitHub requests through `/internal-github`, which selects the
+  governance, actions, operations, PR, or strategic lane.
+- Route current Copilot or MCP platform documentation needs to
+  `/internal-copilot-docs-research`.
+
+## Agent skills
+
+### Issue tracker
+
+Ordinary issues and PRDs use `tmp/.issues/<feature-slug>`. Wayfinder maps,
+tickets, and analysis assets share `tmp/.wayfinder/<analysis-slug>/`. See
+`docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default canonical triage labels for local issues. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repository uses the single-context domain documentation layout. See `docs/agents/domain.md`.
+
 This file applies only to this standards repository. Do not treat these rules
 as consumer-repository defaults without an explicit sync contract change.
 
@@ -36,6 +68,9 @@ as consumer-repository defaults without an explicit sync contract change.
   instructions, references, examples, fixtures, scripts, and `agents/openai.yaml`
   resolvable from the bundle itself; do not require bundle users to load
   guidance from outside the skill directory.
+- Before completion, run `.github/scripts/validate_skill_change_scope.py`
+  without an allowlist, or with only the exact currently authorized bundle
+  paths.
 
 ## Skill Test Boundaries
 

@@ -26,9 +26,7 @@ multi-lens analysis.
 5. Give a recommendation and explain why it wins under the stated assumptions.
 6. Record material risk, blast radius, and validation needs.
 7. State reversibility and the conditions for staged adoption or rollback.
-8. Apply the completion criteria: the decision, assumptions, active lenses,
-   options, recommendation, risks, reversibility, and validation path are
-   explicit.
+8. Verify every item in Completion criteria before finishing.
 
 ## Proportional output
 
@@ -36,10 +34,9 @@ multi-lens analysis.
 - Use a decision note when two or three viable options require tradeoff review.
 - Use deep analysis for broad, consequential, high-risk, or explicitly detailed
   decisions.
-
-Use current Microsoft documentation when freshness about service support,
-landing-zone guidance, Policy behavior, regional capability, or service limits
-could change the recommendation.
+- Use current Microsoft documentation when freshness about service support,
+  landing-zone guidance, Policy behavior, regional capability, or service limits
+  could change the recommendation.
 
 Load `references/lens-playbook.md` for lens combinations, depth selection, and
 decision-note structure.

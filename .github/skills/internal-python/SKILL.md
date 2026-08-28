@@ -24,7 +24,9 @@ linter-owned diagnostics to the configured tooling.
   runtime, dependencies, tests, or output boundaries.
 - Lightweight reviews or small fixes where direct operator-facing execution
   versus importable application behavior is not yet clear.
-- `.py` changes that need the shared baseline before a narrower owner is chosen.
+- `.py` changes that need the shared baseline before a narrower owner is chosen:
+  `/internal-python-project` for reusable imported behavior and
+  `/internal-python-script` for directly executed scripts.
 
 ## When not to use
 
@@ -40,21 +42,25 @@ linter-owned diagnostics to the configured tooling.
 - Keep reusable logic explicit about its inputs. Put environment-specific and
   operator-tuned values at a configuration or composition boundary rather than
   scattering them through implementation code.
-- Use the repository-declared runtime and declared dependency manager. For
-  pip-managed requirements, preserve exact pins and hashes in the owning lock
-  artifact; use the other manager's canonical frozen or locked validation when
-  applicable.
+- Place a Python test under repository-root `tests/` when it verifies Python
+  behavior or a real observable external contract such as CLI, subprocess,
+  filesystem, protocol, JSON, or wrapper behavior. Reading another
+  technology's source or configuration alone does not establish a Python test
+  boundary.
+- Baseline dependency and output rules are owned by the selected owner.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback
   dependency mirrors.
 - Add focused `pytest` coverage for new or changed behavior and use the nearest
   repository-owned syntax or runtime check for syntax-only changes.
-- Keep human-facing console reporting separate from reusable logging and
-  machine-readable output. Human output belongs at an execution boundary;
-  JSON and other data outputs stay plain and neutral.
 
 ## Validation
 
 - Use the repository wrapper or declared runtime before ambient `python3`.
 - Run the nearest focused `pytest` command for behavior changes.
+- Keep imports minimal and backed by actual usage while writing Python. Before
+  handoff, run the repository's declared static-analysis or lint check against
+  every changed `.py` file. Resolve unused or otherwise dead-import diagnostics
+  by removing the imports; do not suppress them with `noqa` or broaden
+  exclusions.
 - Keep compile and test scope narrow; exclude virtual environments, caches,
   exports, generated outputs, and dependency trees from broad sweeps.

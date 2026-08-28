@@ -1,7 +1,6 @@
 ---
 name: internal-github-pr
 description: Use when /internal-github routes pull-request lifecycle work covering creation, body updates, readiness, reviews, merge, or terminal-state verification.
-user-invocable: false
 ---
 
 # Internal GitHub PR
@@ -13,7 +12,9 @@ fresh validation evidence.
 ## When to use
 
 Use when the requested deliverable is pull-request content, review readiness,
-merge execution, or repository-scoped terminal-state proof.
+merge execution, or repository-scoped terminal-state proof. A technical code
+review remains owned by `/internal-review-code`; use this skill when the PR
+itself is the requested lifecycle or readiness deliverable.
 
 ## PR workflow
 
@@ -25,8 +26,10 @@ merge execution, or repository-scoped terminal-state proof.
    rollback, and validation evidence.
 4. Detect the current PR state and update or create the draft as appropriate.
 5. For readiness, verify checks and qualifying non-author review state from
-   PR-specific evidence; green checks alone are insufficient under required
-   review policy.
+   fresh actual PR evidence; green checks alone are insufficient under
+   required review policy. Technical findings, static diff analysis, or a
+   review verdict are not substitutes for current PR state, checks, review
+   approvals, or terminal verification.
 6. Prefer `gh pr merge --squash` unless the repository standardizes another
    allowed method. Use `--admin` only when policy permits a bypass.
 7. When Actions workflows or action pins are touched, require full-SHA pins

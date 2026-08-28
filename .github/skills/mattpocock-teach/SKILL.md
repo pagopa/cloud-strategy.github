@@ -145,7 +145,7 @@ This repository-owned contract overrides earlier workspace and output-path
 instructions.
 
 - Create or reuse one self-contained workspace at
-  `./tmp/teach/<lesson-name>/`.
+  `./tmp/.teach/<lesson-name>/`.
 - Derive `<lesson-name>` from the learning goal as a stable dash-case slug.
   Reuse it when later sessions continue the same goal.
 - Resolve every generated path against that workspace root. Keep all teaching
@@ -153,3 +153,12 @@ instructions.
 - Do not create teaching resources in the repository root or outside the active
   teaching workspace.
 <!-- local-sync:teach-workspace:end -->
+
+<!-- local-sync:mattpocock-git-autonomy:start -->
+## Local Git-autonomy contract
+
+- Keep completed changes in the working tree for user review.
+- You may stage only changes owned by the current task when staging helps inspect the exact diff.
+- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
+- Keep pre-existing or unrelated user changes out of the index.
+<!-- local-sync:mattpocock-git-autonomy:end -->

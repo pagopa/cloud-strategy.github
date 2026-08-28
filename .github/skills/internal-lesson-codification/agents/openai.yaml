@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Lesson Codification"
+  display_name: "internal-lesson-codification"
   short_description: "Route lessons to canonical owners"
   default_prompt: "Use $internal-lesson-codification before adding or codifying retained lessons so each lesson is routed to the smallest valid owner before LESSONS_LEARNED.md or always-on guidance is considered."

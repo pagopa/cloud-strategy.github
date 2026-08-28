@@ -1,3 +1,0 @@
-# Runtime dependencies for tools/analyze_copilot_debug_log.
-# The analyzer is currently standard-library-only.
-# Add pinned third-party packages here when the tool grows beyond stdlib.

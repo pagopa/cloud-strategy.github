@@ -209,25 +209,31 @@ def discover_skill_resources(
 
 
 def discover_agent_resources(source_root: Path) -> list[dict[str, object]]:
-    agents_root = source_root / ".github" / "agents"
-    if not agents_root.is_dir():
-        return []
-
     resources: list[dict[str, object]] = []
-    for agent_path in sorted(agents_root.glob("*.agent.md")):
-        resource_id = agent_path.name.removesuffix(".agent.md")
-        if resource_id.startswith("local-"):
+    discovery_roots = (
+        (source_root / ".github" / "agents", "*.agent.md", AGENT_TARGETS),
+        (source_root / ".codex" / "agents", "*.toml", ("codex",)),
+        (source_root / ".opencode" / "agents", "*.md", ("opencode",)),
+    )
+    for agents_root, pattern, targets in discovery_roots:
+        if not agents_root.is_dir():
             continue
-        resources.append(
-            {
-                "resource_id": resource_id,
-                "source_family": "agents",
-                "source_path": agent_path.relative_to(source_root).as_posix(),
-                "include_targets": list(AGENT_TARGETS),
-                "target_support": "See runtime support matrix",
-                "notes": "Auto-discovered agent.",
-            }
-        )
+        for agent_path in sorted(agents_root.glob(pattern)):
+            resource_id = (
+                agent_path.name.removesuffix(".agent.md").removesuffix(".toml").removesuffix(".md")
+            )
+            if resource_id.startswith("local-"):
+                continue
+            resources.append(
+                {
+                    "resource_id": resource_id,
+                    "source_family": "agents",
+                    "source_path": agent_path.relative_to(source_root).as_posix(),
+                    "include_targets": list(targets),
+                    "target_support": "See runtime support matrix",
+                    "notes": "Auto-discovered native or portable agent.",
+                }
+            )
     return resources
 
 

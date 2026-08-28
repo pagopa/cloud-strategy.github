@@ -1,5 +1,5 @@
 interface:
-  display_name: "OpenAI Docs"
+  display_name: "openai-docs"
   short_description: "Reference OpenAI docs, Codex self-knowledge, and model migration guidance"
   icon_small: "./assets/openai-small.svg"
   icon_large: "./assets/openai.png"

@@ -1,6 +1,6 @@
 ---
 name: internal-azure
-description: Azure platform entry point that selects the specialist for the user's immediate deliverable.
+description: Use first for every Azure request. Classify the primary deliverable and select the minimum specialist lane for governance, DevOps pipelines, operations, organization structure, or strategic decisions.
 ---
 
 # Internal Azure
@@ -20,9 +20,8 @@ belongs to an Azure family specialist.
 2. Ask one clarifying question only when the answer changes the owner.
 3. Invoke one primary specialist with `/skill-name`. Add another specialist
    only for a second independently owned deliverable.
-4. For strategic selection, use explicit decision framing or tradeoff analysis,
-   not uncertainty alone.
-5. Use the routing matrix for adjacent-owner cases and multi-deliverable order.
+4. Load `references/routing-matrix.md` when lane choice is not obvious,
+   including adjacent-owner cases and multi-deliverable order.
 
 ## Direct specialists
 

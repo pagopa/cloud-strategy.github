@@ -1,4 +1,44 @@
 interface:
-  display_name: "Execute Plans Internal Gateway"
+  display_name: "internal-gateway-execute-plans"
   short_description: "Repository gateway for approved retained-plan execution"
-  default_prompt: "Use /internal-gateway-execute-plans for approved retained-plan execution or resume under tmp/superpowers/plans/. Bind the writer-owned versioned Execution Contract, preserve native validation commands, and record all six executor-owned discovery categories and structured recovery evidence. Continue through safe recovery; request authority while execution remains active. Use closeout-check with both plan and evidence paths as the deterministic route owner. Write one matching status sibling only for DONE, PARTIAL, BLOCKED, or NEEDS_REVIEW, and never mutate Git."
+  default_prompt: >-
+    Use /internal-gateway-execute-plans for approved retained-plan execution or
+    resume under tmp/superpowers/plans/. Bind the writer-owned versioned
+     Execution Manifest v3, explicit approval, control inventory, and native
+    validations. Load references/manifest-v3.md only for Manifest validation
+    or review; require its exact fields, pass_signal names, and task
+    reference integrity before state creation. Execute every task directly
+    in the current session and use /internal-tdd at executable task boundaries.
+    Diagnose failures, repair only clearly implied omissions inside approved
+    targets, preserve independent work around pre-existing failures, and stop
+    for authority, scope, or safety gaps. Do not dispatch subagents, workers,
+    models, or delegated plan execution; internal-luna-executor is metadata
+     only. Use only DONE, DONE_WITH_WARNINGS, PARTIAL, and BLOCKED. Persist one YAML status sibling
+     with schema version 2, hash-free approval_evidence, typed warnings, strict
+     deviations, and all five delivery verdicts; both successful states require
+     every verdict to pass. Older status
+    siblings must be regenerated. Validate it with the loaded bundle's
+    scripts/run.sh state-check. Never mutate Git.
+      Apply the finite per-task corrective retry budget (1 through 5), retain
+      retry state, require distinct in-scope safe recovery with progress, and
+      continue independent tasks around pre-existing failures. Stop for
+      no-progress or authority, scope, and safety barriers with attempted-
+      recovery evidence, inadmissible-alternative reasoning, and one concrete
+      unblock action; never weaken validation or use DONE_WITH_WARNINGS for a
+      technical failure.
+    Before a completion claim, run the plan's final validations,
+     git diff --check, and /superpowers-verification-before-completion. Return
+     the compact four-line projection for DONE, a warning line for
+     DONE_WITH_WARNINGS, and evidence-backed causes/actions for PARTIAL or
+     BLOCKED.
+    Resolve the executor from the loaded physical bundle and use its
+    hash-locked scripts/requirements.txt through scripts/run.sh for both
+    preflight and state-check; never fall back to consumer-relative or
+    home-directory runtime dependencies. Provision a missing runtime only with
+    the explicit scripts/run.sh --bootstrap command; ordinary calls must fail
+    closed instead of installing dependencies. Mechanical preflight rejects .git
+    targets and explicit mutating Git subcommands in manifest commands and
+    obligations; preserve the external permission boundary for other commands.
+    Bootstrap observations use only check/status/next_action with PASS or
+    BLOCKED; delivery observations retain all five qualified verdict categories
+    and never collapse readiness into a validated field.

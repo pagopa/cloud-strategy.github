@@ -1,4 +1,6 @@
+policy:
+  allow_implicit_invocation: true
 interface:
-  display_name: "Internal Azure"
+  display_name: "internal-azure"
   short_description: "Azure platform entry point and deliverable selector"
   default_prompt: "Use $internal-azure to select the right Azure platform specialist for the immediate deliverable."

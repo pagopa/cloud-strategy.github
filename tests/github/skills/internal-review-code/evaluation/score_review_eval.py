@@ -63,6 +63,11 @@ def _validate_schema(manifest: dict[str, Any], run: dict[str, Any]) -> None:
         errors.append(f"run missing fields: {', '.join(missing_run)}")
     if run.get("contract_version") != manifest.get("contract_version"):
         errors.append("manifest and run contract_version differ")
+    if (
+        "required_conditional_loaded_skills" in manifest
+        and "conditional_loaded_skills" not in run
+    ):
+        errors.append("run missing fields: conditional_loaded_skills")
     if errors:
         raise ValueError("; ".join(errors))
 
@@ -76,15 +81,23 @@ def score(manifest: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
     missing = sorted(material - reported)
     recall = (len(material) - len(missing)) / len(material) if material else 1.0
     loaded_exact = run["loaded_skills"] == manifest["required_loaded_skills"]
+    conditional_declared = "required_conditional_loaded_skills" in manifest
+    conditional_exact = (
+        run.get("conditional_loaded_skills")
+        == manifest.get("required_conditional_loaded_skills")
+        if conditional_declared
+        else None
+    )
     false_approval = run["verdict"] == "approve" and bool(material)
     scope_violation_count = len(run["scope_violations"])
     accepted = (
         recall >= manifest["minimum_material_recall"]
         and loaded_exact
+        and (conditional_exact is not False)
         and not false_approval
         and scope_violation_count <= manifest["maximum_scope_violations"]
     )
-    return {
+    result = {
         "contract_version": manifest["contract_version"],
         "material_recall": recall,
         "missing_finding_ids": missing,
@@ -93,6 +106,9 @@ def score(manifest: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
         "scope_violation_count": scope_violation_count,
         "accepted": accepted,
     }
+    if conditional_declared:
+        result["conditional_loaded_skills_exact"] = conditional_exact
+    return result
 
 
 def main(argv: list[str] | None = None) -> int:

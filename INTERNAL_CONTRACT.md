@@ -21,10 +21,11 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Goal: keep `AGENTS.md` as the stable repository entrypoint, orientation document, and cross-surface strategic policy surface.
 - Scope:
   - root `AGENTS.md`
+  - root `AGENTS.local.md`
   - `.github/INVENTORY.md`
 - Expected behavior:
   - root `AGENTS.md` defines the strategic role of the AI configuration system, precedence model, tactical operating defaults, and default language rule
-  - root `AGENTS.md` points to `.github/INVENTORY.md` as the exact live catalog
+  - root `AGENTS.local.md` points to `.github/INVENTORY.md` as the exact live catalog
   - root `AGENTS.md` defines rule placement early so operational procedures do not drift into the always-on entrypoint
   - root `AGENTS.md` may carry compact tactical defaults for mode selection, owner visibility, validation evidence, and root-cause preference
   - root `AGENTS.md` does not carry volatile inventory, file-shape recipes, command playbooks, domain checklists, or long surface-specific procedures
@@ -41,6 +42,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - root `AGENTS.md` may carry the portable shared baseline used as source content for the generated global `~/.agents/AGENTS.md` baseline
   - root `AGENTS.md` may reference optional `AGENTS.local.md` policy that is loaded only when present and remains non-portable by default
   - root `AGENTS.local.md` owns standards-repository-only policy and is not synchronized to home runtimes
+  - root `AGENTS.md` stays portable: it does not name repository-owned skills, repository-specific catalog paths, or repository-specific projection paths, and that routing lives in root `AGENTS.local.md`
   - root `AGENTS.md` may keep compact graph orientation rules in the shared baseline when those rules are globally safe and conditionally worded
   - tests and validators must align to the current on-disk root-policy shape instead of assuming a separate `## Context Routing` section or the absence of root-level graph guidance
 
@@ -48,7 +50,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 
 - Goal: keep policy and live catalog inventory decoupled.
 - Scope:
-  - root `AGENTS.md`
+  - root `AGENTS.local.md`
   - `.github/INVENTORY.md`
 - Expected behavior:
   - exact live asset inventory lives in `.github/INVENTORY.md`
@@ -222,6 +224,19 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
     evaluation cases remain valid evidence
   - repository automation rejects tests that assert raw skill wording
 
+#### `testing-test-placement-follows-behavior-owner`
+
+- Goal: keep test placement aligned with the behavior owner and authoritative runner.
+- Scope:
+  - repository-owned test paths, fixtures, runners, and CI references
+  - native, language-owned, and cross-boundary tests
+- Expected behavior:
+  - native tests remain in the layout owned by their tool, framework, module, or infrastructure root;
+  - repository-root `tests/` is used for Python behavior tests and real external-boundary tests, not as a universal native-test container;
+  - fixture, runner, and CI ownership follows the component that consumes them;
+  - functional keywords alone do not determine placement;
+  - duplicate, obsolete, or replacement decisions retain evidence of behavior and authoritative coverage.
+
 ### Naming And Operating Model
 
 #### `resource-governance-uses-supported-origin-naming`
@@ -286,7 +301,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea`
   - unclear target state and multiple credible paths are explicit planning triggers
   - `internal-gateway-codebase-improvement` is a manual-only specialist gateway outside the canonical gateway core; it must not become an implicit fallback, peer-dispatch target, or replacement for an existing gateway owner
-  - critical challenge can return reformulation, simple, execute, review, continue-critical, or accept-with-risk outcomes
+  - critical challenge keeps its owner-defined outcomes explicit: accepted, revise-design, reopen-analysis, or needs-clarification
   - core-skill and support-selection contracts remain explicit where the skill behavior depends on them
 
 ### Repository Workflow

@@ -5,10 +5,6 @@ description: Use when a `.github/` customization change depends on current GitHu
 
 # Internal Copilot Docs Research
 
-## Referenced skills
-
-- None.
-
 Use this skill when a repository customization decision depends on current GitHub Copilot behavior rather than repo-local convention alone.
 
 ## When to use
@@ -16,21 +12,7 @@ Use this skill when a repository customization decision depends on current GitHu
 - A `.github/` customization change depends on current GitHub Copilot platform behavior or MCP support.
 - The local repository contract is not enough to answer a frontmatter, tool-contract, prompt-file, or environment-support question.
 - Official GitHub documentation must be checked before editing a repository-owned customization asset.
-
-## Purpose
-
-This skill standardizes how to research GitHub Copilot platform behavior before changing repository-owned customization assets.
-
-It is especially useful when the question touches:
-
-- repository custom instructions
-- path-specific instructions
-- agent skills
-- custom agents
-- custom-agent frontmatter fields and environment support
-- custom-agent tool aliases and MCP namespacing
-- MCP support or MCP server behavior
-- environment-specific feature support across GitHub, IDEs, and Copilot CLI
+- The question touches repository custom instructions, path-specific instructions, agent skills, custom agents, custom-agent frontmatter fields, tool aliases, MCP namespacing, MCP server behavior, or environment-specific feature support across GitHub, IDEs, and Copilot CLI.
 
 ## Core repository inputs
 

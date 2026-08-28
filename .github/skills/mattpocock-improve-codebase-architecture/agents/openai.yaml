@@ -1,5 +1,3 @@
 interface:
-  display_name: "Improve Codebase Architecture"
+  display_name: "mattpocock-improve-codebase-architecture"
   short_description: "Find and grill architecture improvements"
-policy:
-  allow_implicit_invocation: false

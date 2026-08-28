@@ -11,13 +11,9 @@ rollout validation, recovery proof, reporting, and audit evidence.
 ## When to use
 
 - Operational readiness guidance after a design choice.
-- Monitoring, logging, backup, restore, or DR validation guidance.
+- Monitoring, observability, logging, CloudTrail, Config, backup, restore, or DR validation guidance.
 - Preflight or post-rollout validation patterns.
-- Reporting, export, or audit-evidence guidance.
-
-## Domains
-
-Monitoring and observability · CloudTrail, Config, and audit evidence · backup and restore · DR validation and recovery evidence · preflight checks · post-rollout validation · export and reporting · operational proof that a governance or structure change behaved.
+- Reporting, export, audit-evidence, or operational-proof guidance for a governance or structure change.
 
 ## Core rules
 

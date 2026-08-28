@@ -1,14 +1,88 @@
 interface:
-  display_name: "Writing Plans Internal Gateway"
+  display_name: "internal-gateway-writing-plans"
   short_description: "Approved implementation-plan writing"
   default_prompt: >-
     Use /internal-gateway-writing-plans after approval to capture the target,
     anti-scope, nearest owner, validation path, stop conditions, and observable
-    acceptance. Load /superpowers-writing-plans to produce one reviewable plan
-    under tmp/superpowers/plans/ with ordered tasks, concrete targets, focused
-    validation, and a versioned ## Execution Contract declaring native commands,
-    equivalence policy, manual obligations, and authority boundaries. Do not
-    predict runtime candidates. Run the executor-owned preflight and revise
-    until it has zero blocking findings. Perform human review, report the plan
-    path, name /internal-gateway-execute-plans as next owner, and wait for
-    explicit execution approval. Observe the No-Commit Rule: no Git mutations.
+    acceptance. A user-accepted Consolidated Analysis Spec supplied by
+    /internal-gateway-idea permits writing only when the user explicitly
+    requests it; direct invocation requires explicit user approval, and neither
+    path permits execution or status creation. Build
+    a control inventory that classifies every task,
+    acceptance criterion, and declared obligation exactly once; map local and
+    runtime controls to required validations and external, authority, or human
+    controls to explicit contract boundaries. Treat genuine human judgment and
+    unavailable external evidence without an observed material failure as
+    non-blocking follow-up after successful execution; they do not block DONE.
+    Use only imported plan-structure mechanics from /superpowers-writing-plans
+    to define exactly one parent-supplied retained plan path under
+    tmp/superpowers/plans/ with ordered tasks,
+    concrete targets, focused validation, a traceable ## Control Inventory,
+     and a normative ## Execution Manifest v3 declaring targets, controls,
+    native commands, manual obligations, authority boundaries, retry posture,
+    approval metadata, bootstrap metadata, and handoff. Load the bundle-local
+    references/manifest-v3.md only for Manifest authoring or review; use its
+    exact top-level and nested fields, use validations[].pass_signal, and make every task reference
+    resolve to an existing manifest ID. New writer output uses
+    bootstrap.mode: manifest-only and emits no legacy ## Execution Contract;
+    the current migration plan is the sole exact compatibility projection.
+    Require
+    posture classification through /internal-tdd for executable or evaluable
+    tasks; require red-first evidence only for mandatory-test-first and retain
+    focused and broad validation for feature-first completion. Do not impose a
+    universal test language or layout.
+    Require an explicit - No Git mutation. bullet in ## Global Constraints.
+    Do not predict runtime candidates or weaken a requirement into a manual
+    attestation. Resolve the loaded executor bundle and run its scripts/run.sh
+    preflight as the sole mechanical validator. After eligibility, the control
+    inventory, plan structure, locked decisions, and acceptance are complete,
+    default to local authoring with delegation.mode: none, worker:
+    primary-owner, and result: not_applicable, without a delegation brief,
+    worker result, receipt, or retrospective worker claim. Delegate only when
+    a caller-owned value gate proves one autonomous, bounded, verifiable
+    evidence package is materially more useful than a local operation and can
+    remain off the critical path; keep final synthesis parent-owned. Model or
+    provider identity alone is not a routing reason. If an explicitly selected
+    worker is unavailable, record a caller-owned LifecycleRecord and stop as
+    blocked; continue locally only after explicit caller authorization, using a
+    new local route with delegation.mode: none and worker: primary-owner and no
+    synthetic worker artifacts. Before any worker invocation, materialize the
+    exact retained-plan skeleton and output path with the final Manifest tuple,
+    resolve the loaded physical executor bundle, and run its scripts/run.sh
+    preflight against the skeleton. A nonzero result or blocking
+    delegation-not-supported finding prevents dispatch; run the same physical
+    preflight against final bytes before acceptance and handoff. Current
+    Manifest v3 accepts only delegation.mode none, worker primary-owner, and
+    result not_applicable; never ask a worker to emit a delegated Manifest
+    tuple. Before delegation, fix the objective, value
+    gate, bounded evidence, constraints, exact retained-plan path, output,
+    acceptance, validation, and budgets. Bind that path as write scope and
+    expected output, record worker: internal-luna-executor, and verify the
+    adapter-composed WorkerResult v1 plus caller-owned VerificationReceipt v1.
+    Material edits invalidate the result and receipt; return material
+    corrections through one new evidence-bound brief under the retry contract
+    instead of silently transferring authorship to the parent. If the caller
+    explicitly authorizes local continuation, start a fresh local route with
+    delegation.mode none, worker primary-owner, and no inherited worker
+    artifacts. The parent retains routing, authority, lifecycle,
+    retry choice, independent validation, semantic review, final preflight,
+    final acceptance, handoff, and the no-Git-mutation boundary. Before critic output
+    can expand scope,
+    classify every finding exactly once as blocking-now, acceptance-required,
+    follow-up, separate-design, or rejected-with-reason; untraceable findings
+    are separate-design. Producer readiness is writer-owned and structural,
+    while retained-plan mechanical preflight remains executor-owned. The
+    executor status sibling records externally computed semantic approval evidence, typed
+     warnings/deviations, and all five delivery verdict categories.
+     explicitly legacy/imported material requires reconstruction and refreshed
+     v3 approval. Probe every validations[].command before handoff with command
+     -v or a native path check, distinguish command-not-found from validation
+     failure, and handle exit 127 as a missing-tool condition. Perform human
+    review, then use the writer projection: Plan, Scope, the five distinct
+    evidence verdicts, Risk, and one Next action. Do not copy the manifest or
+    tasks into chat. Name /internal-gateway-execute-plans as the only next
+    owner after explicit execution approval. Observe the No-Commit Rule: no Git
+    mutations.
+    Producer readiness remains writer-owned and structural; writer compatibility
+    checks must not import executor-private code, while retained-plan mechanical
+    preflight remains executor-owned.

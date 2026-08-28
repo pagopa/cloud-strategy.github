@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "delegation_id": "creator-plan-draft",
+  "status": "completed",
+  "value_delivered": true,
+  "summary": "The bounded creator draft was written at the declared path for parent review.",
+  "artifacts": [
+    {
+      "path": ".github/skills/internal-skill-creator/fixtures/worker-output.md",
+      "kind": "draft"
+    }
+  ],
+  "evidence": [
+    {
+      "acceptance_id": "A1",
+      "ref": "tests/github/skills/internal-skill-creator/test_delegation_fixtures.py::test_valid_creator_result_binds_artifact_acceptance_and_progress",
+      "outcome": "pass"
+    }
+  ],
+  "non_blocking_findings": [],
+  "remaining": [],
+  "retry": {
+    "recommended": false,
+    "reason": "The declared artifact and acceptance evidence are complete.",
+    "required_new_input": null
+  }
+}

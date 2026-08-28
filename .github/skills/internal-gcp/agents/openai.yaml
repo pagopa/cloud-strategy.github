@@ -1,4 +1,6 @@
+policy:
+  allow_implicit_invocation: true
 interface:
-  display_name: "Internal GCP"
+  display_name: "internal-gcp"
   short_description: "Official and default GCP entry point"
   default_prompt: "Use $internal-gcp as the official and default entry point for any Google Cloud request; select and invoke the specialist that owns the primary deliverable."

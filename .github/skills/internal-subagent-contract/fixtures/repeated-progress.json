@@ -1,0 +1,32 @@
+{
+  "previous": {
+    "status": "partial",
+    "artifacts": [],
+    "evidence": [
+      {
+        "acceptance_id": "A1",
+        "ref": "tests/protocol.py",
+        "outcome": "not_run"
+      }
+    ],
+    "remaining": ["Run the caller-owned acceptance check."],
+    "retry": {
+      "required_new_input": "caller acceptance output"
+    }
+  },
+  "current": {
+    "status": "partial",
+    "artifacts": [],
+    "evidence": [
+      {
+        "acceptance_id": "A1",
+        "ref": "tests/protocol.py",
+        "outcome": "not_run"
+      }
+    ],
+    "remaining": ["Run the caller-owned acceptance check."],
+    "retry": {
+      "required_new_input": "caller acceptance output"
+    }
+  }
+}

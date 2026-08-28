@@ -65,7 +65,7 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 | `shellcheck` on `.github/scripts/` | Automated | pre-commit + CI |
 | Secret placeholder avoidance in examples/generated artifacts | Partial | pre-commit hooks + review |
 | OIDC over long-lived secrets | Manual review | `internal-github-actions` |
-| IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-review-code` + `internal-terraform` |
+| IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-review-code` + `antonbabenko-terraform-skill` |
 | Supply chain hardening | Manual review | `internal-github-actions` + `internal-review-code` |
 | Branch protection for `.github/**` | Manual review | repository settings requiring `_github-catalog-validation` |
 | Read-only reviewer agents | Manual review | agent review |

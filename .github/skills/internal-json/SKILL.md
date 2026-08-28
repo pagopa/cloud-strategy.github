@@ -34,7 +34,7 @@ description: Use when editing or reviewing strict JSON grammar, encoding, duplic
 Run the bundle-owned checker with explicit files:
 
 ```bash
-python3 .github/skills/internal-json/scripts/check.py FILE [FILE ...]
+python3 scripts/check.py FILE [FILE ...]
 ```
 
 The checker returns `0` when checks passed within supported scope, `1` for

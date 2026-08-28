@@ -1,45 +1,63 @@
 interface:
-  display_name: "Idea Internal Gateway"
-  short_description: "Idea brainstorming with assumption challenge"
-  default_prompt: |-
-    Use /internal-gateway-idea when a repository-owned idea, proposed direction,
-    unclear goal, or option set needs brainstorming before planning. Load
-    /superpowers-brainstorming as the core workflow, then read
-    references/workflow.md for the local state machine. If the incoming request
-    is execution-shaped, record Specialization Checkpoint: gated internally and
-    project only the decision-relevant consequence, then continue through Idea
-    Gate 0 before any recommendation. Run Idea Gate 0 as one numbered bulk question block with Question, Recommendation, Why, and Default if accepted;
-    evidence cannot replace Idea Gate 0. Follow the mandatory gate sequence:
-    Specialization Checkpoint: gated, Idea Gate 0, External Research Checkpoint,
-    Assumption Challenge Gate, Alternative discovery, Critical Challenge Gate,
-    Critical resolution loop, Automatic plan handoff, Stop before implementation execution. External
-    research is on-demand after local evidence is insufficient; load
-    /mattpocock-research only when one external fact could change feasibility,
-    approach, constraints, or risk. Run Critical Challenge Gate as its own
-    visible gate after design-direction approval; an embedded critique does not
-    satisfy Critical Challenge Gate. The only critical outcomes are accepted,
-    revise-design, reopen-analysis, and needs-clarification. accepted is legal
-    only when every material objection raised during the current Critical
-    Challenge Gate is closed or explicitly routed. Every material objection
-    raised during the current critical pass is closed or explicitly routed.
-    every material objection raised during the current critical pass is closed or explicitly routed.
-    revise-design returns to
-    design presentation and design approval. reopen-analysis returns to Idea
-    Gate 0. needs-clarification means load `/grill-me` for one or more numbered clarification sessions over the critic's newly surfaced elements. After clarification, return to the relevant earlier approval gate when a material change occurred; otherwise rerun `Critical Challenge Gate` directly. Repeat
-    until the critic emits one conclusive routing outcome. For accepted, load
-    /internal-gateway-writing-plans automatically without another approval.
-    Treat procedi, ok, go, or similar approval as advancing only the active visible gate; clarify ambiguous approval before loading another owner. If a mandatory gate was skipped, stop and resume at the first skipped mandatory gate. Stop after the writing outcome; do not implement or invoke execution
-    owners from this skill.
-
-    The only transition notification is exactly:
-    🚀 **Scrittura del piano avviata**
-    ✅ La critica si è conclusa senza obiezioni materiali aperte.
-    🛠️ `/internal-gateway-writing-plans` sta preparando il piano di implementazione.
-
-    Keep mandatory gates as internal workflow state. In chat, emit one compact user-facing decision card with 🎯 🧭 🛠️ 🧪 ⚠️ ✅ 💡 ✈️ for status, approval,
-    routing, material risk, blocker, and requested user action. Content-bearing
-    output uses its owning schema and is outside the four-line card limit.
-    Guided questions, alternatives, design sections, and required critique
-    schemas are content-bearing output. Do not announce skipped checkpoints or
-    print internal ledgers. Always show a material risk, blocker, validation gap,
-    or user decision.
+  display_name: "internal-gateway-idea"
+  short_description: "Conversation-first analysis for unclear ideas"
+  default_prompt: >-
+    Use $internal-gateway-idea only when explicitly selected and keep one
+    autonomous route owned by this gateway while turning an early or unclear
+    idea into a decision-ready Analysis Spec. Keep the analysis in
+    conversation by default, distinguish Facts, Reports, Assumptions, Unknowns,
+    and Constraints, and use a compact emoji-guided chat layout. Send all
+    currently known eligible decisions to /grill-me in one numbered bulk block
+    immediately after setup and use later numbered blocks only for newly
+    eligible follow-ups. Route every material doubt, ambiguity, missing
+    decision, and user-input question through the mandatory GRILL-ME gate;
+    delegate interview mechanics to /grill-me and critical-review procedure to
+    /internal-gateway-critical-master. Use exactly two global gates, GRILL-ME
+    and CRITICAL REVIEW. Require CRITICAL REVIEW before close, +spec, or
+    +plan; complete it structurally with exactly three lenses including one
+    lateral analogy or reverse-assumption lens, classified findings, and a
+    conclusion. A scoped override names one action and records accepted-risk
+    while preserving every other gate. After setup and every named analysis
+    phase, project the same seven numbered entries in order: 1 🔄 continue,
+    2 🔍 critical review, 3 🧩 realign when findings exist, 4 📝 +spec,
+    5 🗺️ +plan, 6 💾 save, 7 ⏹️ close; keep locked entries visible with
+    reasons. Save is provisional and records critical_review: pending before
+    review. After a critical review, offer an explicit option to realign the
+    same analysis with supported findings. Keep the exact four-option Candidate acceptance gate. Default to local authoring with
+    delegation.mode: none, worker: primary-owner, and result: not_applicable;
+    create no delegation brief, worker result, receipt, or retrospective worker
+    claim. Delegate the selected spec or plan artifact through
+    internal-luna-executor and /internal-subagent-contract only when the
+    caller-owned value gate proves one autonomous, bounded, verifiable evidence
+    package is materially useful; retain parent-owned synthesis, review,
+    validation, and acceptance. If an explicitly selected worker is
+    unavailable, record a caller-owned LifecycleRecord and stop as blocked; a
+    manual or local continuation needs explicit caller authorization and a new
+    local route. Keep
+    implementation-oriented design and execution separate and user-gated; do
+    not introduce an alternate brainstorming route or handoff.
+    Record the current Authorized paths and Authorized actions, preserve them
+    across continue, finish, pause, and recovery, and block every new path or
+    action as authority-or-scope until the user explicitly accepts it. Keep
+    protected workflow status separate from user authority. Present the
+    specialized Candidate projection in this order: active decision and state
+    delta, recommendation and why, controlling evidence grouped by
+    implication, material risks and acceptance conditions, then the eligible
+    decision block. Keep full detail in the canonical record or selected
+    artifact; never repeat it as a transcript and never omit material items
+    silently.
+    Critical review precedes +spec and +plan; critical findings require
+    explicit realignment before integration. Use diagnostic word counts only
+    and at most one useful Mermaid diagram for three or more relationships,
+    with the conclusion in adjacent prose. The caller retains verification,
+    acceptance, closeout, and the sole post-approval handoff to
+    /internal-gateway-execute-plans.
+route_contract:
+  owner: "/internal-gateway-idea"
+  mode: "analysis-only"
+  execution_handoff: "/internal-gateway-execute-plans"
+  forbidden_pre_acceptance_routes:
+    - "/superpowers-brainstorming"
+    - "/internal-tdd"
+    - "/internal-gateway-writing-plans"
+    - "/internal-gateway-execute-plans"

@@ -1,0 +1,23 @@
+{
+  "contract_version": "internal-review-code-actions-eval-v2",
+  "required_loaded_skills": [
+    "internal-review-code",
+    "addyosmani-code-review-and-quality"
+  ],
+  "required_conditional_loaded_skills": [
+    "internal-github",
+    "internal-github-actions"
+  ],
+  "material_finding_ids": [
+    "WORKFLOW_PERMISSIONS",
+    "WORKFLOW_REUSE",
+    "WORKFLOW_CONTEXT",
+    "COMPOSITE_INPUT_OUTPUT",
+    "COMPOSITE_SHELL",
+    "COMPOSITE_COMPATIBILITY",
+    "VERIFICATION_PATH"
+  ],
+  "minimum_material_recall": 1.0,
+  "maximum_scope_violations": 0,
+  "false_approval_allowed": false
+}

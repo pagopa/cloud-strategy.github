@@ -1,39 +1,33 @@
-# Issue tracker: GitHub
+# Issue tracker: Local Markdown
 
-Issues and PRDs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
+Ordinary issues and specs (you may know a spec as a PRD) for this repo live as
+Markdown files in `tmp/.issues/`. Wayfinder efforts use the self-contained
+workspace described below.
 
 ## Conventions
 
-- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
-- **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
-- **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
-- **Comment on an issue**: `gh issue comment <number> --body "..."`
-- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
-- **Close**: `gh issue close <number> --comment "..."`
-
-Infer the repo from `git remote -v` — `gh` does this automatically when run inside a clone.
-
-## Pull requests as a triage surface
-
-**PRs as a request surface: no.**
-
-When set to `yes`, PRs run through the same labels and states as issues, using the `gh pr` equivalents.
+- One feature per directory: `tmp/.issues/<feature-slug>/`
+- The spec is `tmp/.issues/<feature-slug>/spec.md`
+- Implementation issues are one file per ticket at `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
+- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
+- Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
 ## When a skill says "publish to the issue tracker"
 
-Create a GitHub issue.
+Create a new file under `tmp/.issues/<feature-slug>/` (creating the directory if needed).
 
 ## When a skill says "fetch the relevant ticket"
 
-Run `gh issue view <number> --comments`.
+Read the file at the referenced path. The user will normally pass the path or the issue number directly.
 
 ## Wayfinding operations
 
-Used by `/mattpocock-wayfinder`. The map is a single issue with child issues as tickets.
+Used by `/mattpocock-wayfinder`. The **map** is a file with one **child** file per ticket.
 
-- **Map**: a single issue labelled `wayfinder:map`, holding the Notes, Decisions-so-far, and Fog body.
-- **Child ticket**: an issue linked to the map as a GitHub sub-issue. Where sub-issues are unavailable, use a task list and add `Part of #<map>` to the child.
-- **Blocking**: use GitHub’s native issue dependencies. Where unavailable, add a `Blocked by: #<n>` line.
-- **Frontier query**: list the map’s open, unassigned, unblocked children; first in map order wins.
-- **Claim**: `gh issue edit <n> --add-assignee @me`.
-- **Resolve**: comment on and close the issue, then update the map’s Decisions-so-far.
+- **Workspace**: `tmp/.wayfinder/<effort>/` — the self-contained analysis unit.
+- **Map**: `tmp/.wayfinder/<effort>/map.md` — the Notes / Decisions-so-far / Fog body.
+- **Child ticket**: `tmp/.wayfinder/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
+- **Blocking**: a `Blocked by: NN, NN` line near the top. A ticket is unblocked when every file it lists is `resolved`.
+- **Frontier**: scan `tmp/.wayfinder/<effort>/issues/` for files that are open, unblocked, and unclaimed; first by number wins.
+- **Claim**: set `Status: claimed` and save before any work.
+- **Resolve**: append the answer under an `## Answer` heading, set `Status: resolved`, then append a context pointer (gist + link) to the map’s Decisions-so-far in `map.md`.

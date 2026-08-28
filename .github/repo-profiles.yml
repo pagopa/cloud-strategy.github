@@ -32,7 +32,6 @@ profiles:
       - skills/internal-json/SKILL.md
       - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
-      - skills/internal-github-action-composite/SKILL.md
 
   backend-java:
     description: Java service repositories.
@@ -41,7 +40,6 @@ profiles:
       - skills/internal-java-project/SKILL.md
       - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
-      - skills/internal-github-action-composite/SKILL.md
       - skills/internal-markdown/SKILL.md
 
   backend-java-spring:
@@ -52,7 +50,6 @@ profiles:
       - skills/internal-java-spring-boot-development/SKILL.md
       - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
-      - skills/internal-github-action-composite/SKILL.md
       - skills/internal-markdown/SKILL.md
 
   backend-nodejs:
@@ -62,7 +59,6 @@ profiles:
       - skills/internal-nodejs-project/SKILL.md
       - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
-      - skills/internal-github-action-composite/SKILL.md
       - skills/internal-markdown/SKILL.md
 
   backend-python:
@@ -72,7 +68,6 @@ profiles:
       - skills/internal-python-project/SKILL.md
       - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
-      - skills/internal-github-action-composite/SKILL.md
       - skills/internal-markdown/SKILL.md
 
   document-heavy:
@@ -89,9 +84,9 @@ profiles:
     description: Infrastructure repositories with Terraform as primary language.
     recommended_skills:
       - skills/internal-terraform/SKILL.md
+      - skills/internal-tf/SKILL.md
       - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
-      - skills/internal-github-action-composite/SKILL.md
       - skills/internal-yaml/SKILL.md
       - skills/internal-cloud-policy/SKILL.md
 
@@ -99,6 +94,7 @@ profiles:
     description: Azure platform, landing-zone, or governance repositories that need cost-aware guidance.
     recommended_skills:
       - skills/internal-terraform/SKILL.md
+      - skills/internal-tf/SKILL.md
       - skills/internal-yaml/SKILL.md
       - skills/internal-markdown/SKILL.md
       - skills/internal-azure/SKILL.md
@@ -118,5 +114,5 @@ profiles:
       - skills/internal-nodejs-project/SKILL.md
       - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
-      - skills/internal-github-action-composite/SKILL.md
       - skills/internal-terraform/SKILL.md
+      - skills/internal-tf/SKILL.md

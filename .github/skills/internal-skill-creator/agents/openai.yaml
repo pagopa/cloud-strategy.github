@@ -1,4 +1,7 @@
 interface:
-  display_name: "Internal Skill Creator"
+  display_name: "internal-skill-creator"
   short_description: "Create and revise repository-owned skills"
-  default_prompt: "Use $internal-skill-creator to create, revise, replace, or retire a repository-owned skill. Apply /mattpocock-writing-great-skills as the core method, prefix cross-skill invocations with `/`, run proportional evaluation, then complete repository closure."
+  brand_color: "#0E7490"
+  icon_small: "./assets/icon-small.svg"
+  icon_large: "./assets/icon.svg"
+  default_prompt: "Use $internal-skill-creator to create, revise, replace, or retire a repository-owned skill. Apply /mattpocock-writing-great-skills, prefix cross-skill invocations with `/`, and keep always-loaded surfaces cache-stable and within progressive-disclosure budgets per references/cache-and-token-efficiency.md. Delegate only after the objective, value gate, bounded evidence, constraints, exact write scope, output, acceptance, validation, and budget are fixed; use `read`, `plan`, or `write` only for bounded creator classes. Keep trivial, unresolved, incomplete, unverifiable, and competing-owner work local or blocked. Retain trigger, boundary, policy, scope, retry, independent validation, acceptance, semantic review, and closeout; verify one bound WorkerResult v1, default to one attempt, and retry only with new evidence plus a concrete correction target. When timeout, interruption, executor unavailability, or missing terminal output prevents a worker payload, record a caller-owned LifecycleRecord and create neither a synthetic WorkerResult nor a receipt."

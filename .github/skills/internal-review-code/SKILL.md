@@ -12,6 +12,39 @@ engine. The core owns review reasoning and severity. This wrapper owns the publi
 repository preflight, target boundaries, escalation rules, and final validation. It must not restate the engine's review axes,
 procedure, approval standard, or finding categories.
 
+## GitHub routing and conditional domain contributors
+
+When the read-only target includes `.github/workflows/**` or
+`.github/actions/**/action.y*ml`, invoke `/internal-github` with the minimal
+envelope defined in
+[the contributor protocol](references/actions-contributor-protocol.md). The
+gateway selects `/internal-github-actions` as the single domain contributor.
+Keep workflow and composite-action observations scoped to the changed
+surfaces; unrelated code invokes neither contributor. Do not invoke the
+specialist directly.
+
+For a separate non-review GitHub follow-up, invoke `/internal-github` with the
+same envelope and the follow-up as `deliverable`. Keep that follow-up
+report-only and separate from this review's verdict. The gateway owns
+destination selection and parent exclusion; the wrapper does not add a second
+routing table.
+
+Contributors are bounded observers inside this review flow. They may return
+domain observations, changed contract surfaces, execution-chain probes,
+applicable validations, compatibility risks, and evidence gaps. The wrapper
+passes those observations into the one Addy review and retains ownership of
+target preflight, provenance, differential sequence, coverage counter-analysis,
+severity projection, and the exact public verdicts. Contributors do not emit a
+verdict, severity, approval, merge decision, remediation plan, or replacement
+review procedure.
+
+For workflow and composite targets, inspect linked static evidence from the
+event through the workflow, reusable workflow or job permissions/environment,
+composite action, repository script, artifact, or external-system boundary
+when those links are present. Static review does not establish live runner
+health or runtime behavior; route that evidence to the appropriate operations
+owner and record the gap.
+
 ## When to use
 
 Use when reviewing a code-focused branch, pull request, work-in-progress diff,
@@ -62,8 +95,7 @@ proposed, but no separate simplification runtime is loaded.
 - Read the spec, task, and tests before implementation when those sources
   exist. Review only the requested code surface and immediate evidence.
 - During the review pass, do not edit files, apply fixes, or author plans.
-- Keep the review pass report-only. Planning or remediation requires a
-  separate explicit request and remains outside the current review.
+- Report-only: no fixes; see boundary above.
 
 ## Completion criteria
 
@@ -105,7 +137,8 @@ Use `IMPORTANT` for a correction or follow-up that does not independently
 block merge. It is not a third undefined severity scale.
 
 This mapping depends on the imported engine's categories; after an engine
-refresh, rerun the review-engine contract before relying on this projection.
+refresh, run `python3 scripts/check_engine_contract.py` from this bundle and
+treat any reported drift as `REVIEW BLOCKED` until the mapping is realigned.
 
 Keep internal review details hidden unless they alter the verdict. State that
 no changes were applied. For request-changes results, invite the user to

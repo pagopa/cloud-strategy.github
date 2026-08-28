@@ -1,4 +1,4 @@
 interface:
-  display_name: "Local Copilot Log Analyzer"
+  display_name: "local-copilot-log-analyzer"
   short_description: "Analyze Copilot debug logs and prompt exports with bounded, aggregate-first output"
-  default_prompt: "Use $local-copilot-log-analyzer to analyze GitHub Copilot Chat debug logs or prompt exports in this repository. Route to the canonical tools/analyze_copilot_debug_log wrapper, which accepts direct .jsonl paths, start aggregate-first, report cache-read, uncached-input, output, and AIU separately when present, treat gross cumulative input as context volume rather than realized savings, require before/after evidence or label optimization as an upper bound, prefer bounded markdown or json output, and keep raw bodies excluded unless they are the missing evidence."
+  default_prompt: "Use $local-copilot-log-analyzer to analyze GitHub Copilot Chat debug logs or prompt exports in this repository. Route to the bundle-local scripts/run.sh wrapper, which accepts direct .jsonl paths, start aggregate-first, report cache-read, uncached-input, output, and AIU separately when present, treat gross cumulative input as context volume rather than realized savings, require before/after evidence or label optimization as an upper bound, prefer bounded markdown or json output, and keep raw bodies excluded unless they are the missing evidence."

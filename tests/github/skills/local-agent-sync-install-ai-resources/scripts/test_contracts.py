@@ -16,8 +16,13 @@ REPO_ROOT = next(
 SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
-from agent_translation import target_extension, translate_agent_for_target  # noqa: E402
+from agent_translation import (  # noqa: E402
+    parse_frontmatter_and_body,
+    target_extension,
+    translate_agent_for_target,
+)
 from home_sync_contract import (  # noqa: E402
+    discover_agent_resources,
     load_home_sync_catalog,
     load_home_sync_policy,
 )
@@ -67,13 +72,18 @@ def test_install_payload_reports_linked_and_unlinked_without_bisync() -> None:
     assert "bisync" not in compact
 
 
-def test_live_catalog_discovers_all_non_local_agents_for_copilot() -> None:
+def test_live_catalog_discovers_legacy_agents_for_all_runtimes() -> None:
     resources = load_home_sync_catalog(REPO_ROOT)
 
     expected_paths = {
         path.relative_to(REPO_ROOT).as_posix()
         for path in (REPO_ROOT / ".github/agents").glob("*.agent.md")
         if not path.name.startswith("local-")
+        and path.name
+        not in {
+            "internal-luna-executor.agent.md",
+            "internal-gateway-critical-master.agent.md",
+        }
     }
     agent_resources = {
         resource.source_path
@@ -81,16 +91,68 @@ def test_live_catalog_discovers_all_non_local_agents_for_copilot() -> None:
         if resource.source_family == "agents"
     }
 
-    assert agent_resources == expected_paths
+    assert expected_paths.issubset(agent_resources)
     assert all(
         resource.include_targets == ("codex", "copilot", "opencode")
         for resource in resources
-        if resource.source_family == "agents"
+        if resource.source_family == "agents" and resource.source_path in expected_paths
     )
     assert not any(
         resource.source_path.endswith("local-sync-external-resources.agent.md")
         for resource in resources
     )
+
+
+def test_live_catalog_scopes_native_paired_agents_to_owning_runtimes() -> None:
+    resources = {
+        resource.source_path: resource
+        for resource in load_home_sync_catalog(REPO_ROOT)
+        if resource.source_family == "agents"
+    }
+
+    assert resources[
+        ".github/agents/internal-luna-executor.agent.md"
+    ].include_targets == ("copilot",)
+    assert resources[".codex/agents/internal-luna-executor.toml"].include_targets == (
+        "codex",
+    )
+    assert resources[
+        ".codex/agents/internal-gateway-critical-master.toml"
+    ].include_targets == ("codex",)
+    assert resources[
+        ".github/agents/internal-gateway-critical-master.agent.md"
+    ].include_targets == ("copilot",)
+    assert resources[
+        ".opencode/agents/internal-gateway-critical-master.md"
+    ].include_targets == ("opencode",)
+
+
+def test_agent_discovery_finds_native_codex_agents_only_for_codex(
+    tmp_path: Path,
+) -> None:
+    copilot_root = tmp_path / ".github/agents"
+    copilot_root.mkdir(parents=True)
+    (copilot_root / "review.agent.md").write_text(
+        "---\nname: review\n---\n", encoding="utf-8"
+    )
+    codex_root = tmp_path / ".codex/agents"
+    codex_root.mkdir(parents=True)
+    (codex_root / "native.toml").write_text('name = "native"\n', encoding="utf-8")
+    opencode_root = tmp_path / ".opencode/agents"
+    opencode_root.mkdir(parents=True)
+    (opencode_root / "native.md").write_text(
+        "---\ndescription: native opencode\n---\n", encoding="utf-8"
+    )
+
+    resources = discover_agent_resources(tmp_path)
+
+    assert {
+        resource["source_path"]: resource["include_targets"] for resource in resources
+    } == {
+        ".github/agents/review.agent.md": ["codex", "copilot", "opencode"],
+        ".codex/agents/native.toml": ["codex"],
+        ".opencode/agents/native.md": ["opencode"],
+    }
 
 
 def test_agent_discovery_excludes_local_agents_and_keeps_runtime_targets(
@@ -232,6 +294,15 @@ def test_valid_v2_manifest_rows_load_unchanged(tmp_path: Path) -> None:
             "target_path": (tmp_path / "home/.codex/agents/review.toml").as_posix(),
         },
         {
+            "target": "codex",
+            "resource_family": "agents",
+            "source_path": ".codex/agents/native.toml",
+            "materialization": "symlink",
+            "link_target": (tmp_path / ".codex/agents/native.toml").as_posix(),
+            "content_hash": None,
+            "target_path": (tmp_path / "home/.codex/agents/native.toml").as_posix(),
+        },
+        {
             "target": "copilot",
             "resource_family": "agents",
             "materialization": "symlink",
@@ -281,6 +352,18 @@ def test_manifest_serialization_emits_v2_link_and_copy_rows(tmp_path: Path) -> N
         content_hash="content-agent",
         last_action="copy",
     )
+    native_agent = ManagedResource(
+        target="codex",
+        resource_id="native",
+        resource_family="agents",
+        source_path=".codex/agents/native.toml",
+        target_path=str(tmp_path / "home/.codex/agents/native.toml"),
+        source_hash="source-native",
+        materialization="symlink",
+        link_target=str(tmp_path / ".codex/agents/native.toml"),
+        content_hash=None,
+        last_action="link",
+    )
     plan = HomeSyncPlan(
         source_root=tmp_path,
         home_root=tmp_path / "home",
@@ -289,9 +372,9 @@ def test_manifest_serialization_emits_v2_link_and_copy_rows(tmp_path: Path) -> N
         selected_targets=("skills", "codex"),
         retired_targets=(),
         source_revision=None,
-        source_resources_considered=2,
+        source_resources_considered=3,
         operations=(),
-        desired_resources=(skill, agent),
+        desired_resources=(skill, agent, native_agent),
         missing_dirs=(),
         unsupported_families_by_target={},
         residual_drift=(),
@@ -300,7 +383,11 @@ def test_manifest_serialization_emits_v2_link_and_copy_rows(tmp_path: Path) -> N
     payload = build_manifest_payload(plan)
 
     assert payload["schema_version"] == 2
-    assert payload["managed_resources"] == [skill.to_dict(), agent.to_dict()]
+    assert payload["managed_resources"] == [
+        skill.to_dict(),
+        agent.to_dict(),
+        native_agent.to_dict(),
+    ]
 
 
 def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -> None:
@@ -330,6 +417,84 @@ def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -
     assert "Main body instructions." in payload["developer_instructions"]
     assert "## Handoffs" in payload["developer_instructions"]
     assert "review-specialist" in payload["developer_instructions"]
+
+
+def test_translate_critical_master_for_opencode_does_not_pin_model() -> None:
+    source_path = REPO_ROOT / ".github/agents/internal-gateway-critical-master.agent.md"
+
+    translated = translate_agent_for_target(source_path, "opencode")
+    frontmatter, _ = parse_frontmatter_and_body(translated)
+
+    assert frontmatter["mode"] == "subagent"
+    assert "model" not in frontmatter
+    assert "model_reasoning_effort" not in frontmatter
+
+
+def test_translate_agent_for_codex_projects_sidecar_overrides(
+    tmp_path: Path,
+) -> None:
+    source_path = tmp_path / "low-cost.agent.md"
+    source_path.write_text(
+        textwrap.dedent(
+            """\
+            ---
+            name: internal-low-cost-agent
+            description: Bounded token-intensive worker.
+            model: GPT-5.6 Luna
+            user-invocable: false
+            tools: [read, search, web, edit, execute]
+            ---
+            Follow the complete parent task packet.
+            """
+        ),
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "low-cost.agent-config.yaml"
+    config_path.write_text(
+        textwrap.dedent(
+            """\
+            codex:
+              model: gpt-5.6-luna
+              model_reasoning_effort: high
+              sandbox_mode: workspace-write
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    translated = translate_agent_for_target(source_path, "codex", config_path)
+    payload = tomllib.loads(translated)
+
+    assert payload["name"] == "internal-low-cost-agent"
+    assert payload["description"] == "Bounded token-intensive worker."
+    assert payload["model"] == "gpt-5.6-luna"
+    assert payload["model_reasoning_effort"] == "high"
+    assert payload["sandbox_mode"] == "workspace-write"
+    assert (
+        payload["developer_instructions"] == "Follow the complete parent task packet."
+    )
+    assert "GPT-5.6 Luna" not in translated
+
+
+def test_translate_agent_for_codex_rejects_unsupported_sidecar_override(
+    tmp_path: Path,
+) -> None:
+    source_path = tmp_path / "low-cost.agent.md"
+    source_path.write_text(
+        "---\nname: internal-low-cost-agent\n---\nWorker body.\n",
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "low-cost.agent-config.yaml"
+    config_path.write_text(
+        "codex:\n  unsupported_key: value\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=r"unsupported Codex agent override.*unsupported_key",
+    ):
+        translate_agent_for_target(source_path, "codex", config_path)
 
 
 def test_load_home_sync_catalog_autodiscovers_skills_and_honors_policy(

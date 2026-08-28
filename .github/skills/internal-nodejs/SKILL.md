@@ -22,7 +22,9 @@ description: Use when reviewing localized JavaScript or TypeScript changes, chan
 ## When not to use
 
 - Do not use for application-wide changes spanning services, APIs, handlers,
-  modules, adapters, or tests across multiple application boundaries.
+  modules, adapters, or tests across multiple application boundaries. Route
+  application/service structure, adapters, and cross-module behavior to
+  /internal-nodejs-project.
 - Route frontend design, generic JSON, Docker, workflows, and infrastructure
   to their domain owners.
 

@@ -111,7 +111,7 @@ User invokes with a loose idea.
 2. **Map the frontier.** Grill again, **breadth-first** this time: fan out across the whole space rather than deep on any one thread, surfacing the open decisions and the first steps takeable now. **If this surfaces no fog** — the way to the destination is already clear, the whole journey small enough for one session — you don't need a map. Stop and ask the user how they'd like to proceed.
 3. **Create the map** (label `wayfinder:map`): Destination and Notes filled in, Decisions-so-far empty, the fog sketched into **Not yet specified**.
 4. **Create the tickets you can specify now** as child issues of the map — then wire blocking edges in a **second pass** (issues need ids before they can reference each other). Wiring sorts them into the frontier and the blocked; everything you can't yet specify stays in the fog — the **Not yet specified** section.
-5. **Fire the research subagents.** For each `research` ticket you just created, spin up a `/mattpocock-research` subagent to resolve it in parallel, capturing its findings on a throwaway `research/<name>` branch with a context pointer from the ticket.
+5. **Fire the research subagents.** For each `research` ticket you just created, spin up a `/mattpocock-research` subagent to resolve it in parallel, keeping findings in the caller-owned Wayfinder workspace with a context pointer from the ticket.
 6. Stop — charting is one session's work; it hand-resolves nothing.
 
 ### Work through the map
@@ -125,3 +125,84 @@ User invokes with a map (URL or number). A ticket is **optional** — without on
 5. Add newly-surfaced tickets (create-then-wire); graduate any fog the answer has made specifiable, clearing each graduated patch from **Not yet specified** so it lives only as its new ticket. If the answer reveals a ticket — this one or another — sits beyond the destination, **rule it out of scope** rather than resolving it on the route. If the decision invalidates other parts of the map, update or delete those tickets.
 
 The user may run unblocked tickets in parallel, so expect other sessions to be editing the tracker concurrently.
+
+<!-- local-sync:wayfinder-workspace:start -->
+## Local Wayfinder workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Keep each Wayfinder analysis unit under `tmp/.wayfinder/<analysis-slug>/`.
+- Keep its map at `tmp/.wayfinder/<analysis-slug>/map.md` and its child tickets
+  under `tmp/.wayfinder/<analysis-slug>/issues/`.
+- Keep analysis, research findings, prototypes, and supporting assets inside the
+  same active Wayfinder workspace.
+<!-- local-sync:wayfinder-workspace:end -->
+
+<!-- local-sync:wayfinder-critical-validation:start -->
+## Local critical-validation contract
+
+Apply one critical-validation gate to one analysis unit. One analysis unit is a
+charting batch, one claimed ticket's resolution batch, or a proposal batch for
+a research or prototype artifact. The gate covers the entire batch of
+content-producing writes derived from unchanged analysis; do not rerun it before
+each artifact in that batch.
+
+The required ticket claim remains the first coordination action and is exempt
+from this gate because it reserves work without publishing analysis or decision
+content.
+
+1. Form the analysis and proposed decisions as internal working state.
+2. Invoke `/internal-gateway-critical-master` once to challenge that analysis.
+3. Counter-validate every material critique against the destination, repository
+   evidence, explicit constraints, success criteria, and anti-scope. Do not
+   accept an unsupported or conflicting instruction merely because the critic
+   proposed it.
+4. Update the analysis by following every supported instruction from the critic.
+   Record rejected instructions and their evidence internally.
+5. If a supported material objection remains unresolved, stop the artifact
+   batch. Do not rerun the critic against unchanged evidence; first obtain new
+   evidence or make a materially supported revision.
+6. Run another critical challenge only when new evidence or that supported
+   revision changes a material claim. Once supported objections are resolved or
+   recorded as an explicit accepted risk, create the whole related artifact
+   batch without another gate while the analysis remains unchanged.
+
+Place the gate at these lifecycle boundaries:
+
+- While charting, run it after naming the destination and mapping the frontier,
+  immediately before creating the map and its ticket batch.
+- While working a map, claim the ticket first. Run the gate after resolving the
+  ticket in working state and before the resolution comment, closure,
+  Decisions-so-far update, or newly surfaced ticket batch.
+- Before producing a research or prototype artifact, challenge its proposal as
+  one unit. Treat the resulting findings or human reaction as new evidence that
+  requires a fresh gate only before a later decision-artifact batch.
+<!-- local-sync:wayfinder-critical-validation:end -->
+
+<!-- local-sync:wayfinder-grilling:start -->
+## Local Wayfinder grilling contract
+
+This contract applies to every Grilling ticket and every `/grill-me` or
+upstream `/grilling` invocation made while charting or working a map. It
+overrides any earlier one-question-at-a-time instruction.
+
+- Ask all currently known questions together in one numbered bulk block,
+  ordered by decision dependency.
+- For every numbered question, include `Question`, `Recommendation`, `Why`, and
+  `Default if accepted`.
+- Make `Recommendation` the suggested answer and `Why` the concrete reason for
+  that suggestion. Treat the default as accepted unless the user overrides it.
+- Put newly discovered or unresolved follow-up questions together in another
+  numbered bulk block. If only one blocking question remains, use a numbered
+  one-item block.
+<!-- local-sync:wayfinder-grilling:end -->
+
+<!-- local-sync:mattpocock-git-autonomy:start -->
+## Local Git-autonomy contract
+
+- Keep completed changes in the working tree for user review.
+- You may stage only changes owned by the current task when staging helps inspect the exact diff.
+- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
+- Keep pre-existing or unrelated user changes out of the index.
+<!-- local-sync:mattpocock-git-autonomy:end -->

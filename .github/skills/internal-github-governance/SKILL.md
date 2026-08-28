@@ -1,7 +1,6 @@
 ---
 name: internal-github-governance
 description: Use when /internal-github routes a GitHub governance decision covering rulesets, permissions, Apps, Actions permissions, OIDC trust, secrets, environments, CODEOWNERS, or Copilot policy.
-user-invocable: false
 ---
 
 # Internal GitHub Governance

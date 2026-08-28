@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Terraform"
-  short_description: "Help with Internal Terraform tasks"
-  default_prompt: "Use $internal-terraform for this task and follow the repository-owned workflow in the skill."
+  display_name: "internal-terraform"
+  short_description: "Route operational and mixed Terraform/OpenTofu work safely"
+  default_prompt: "Use $internal-terraform as the stable Terraform/OpenTofu wrapper for operational, mixed, adoption, state, native test, CI, provider, recovery, and infrastructure-diagnosis requests. Route only positive language-only HCL or .tfvars.json work to $internal-tf; keep the wrapper primary for mixed or ambiguous requests and load bundle-relative adoption or operational references conditionally. This is guidance, not runtime enforcement."

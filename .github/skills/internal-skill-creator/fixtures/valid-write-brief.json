@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "delegation_id": "creator-write-artifact",
+  "mode": "write",
+  "objective": "Produce one bounded implementation artifact at the exact declared path from fixed inputs and checks.",
+  "value_gate": {
+    "autonomous": true,
+    "verifiable": true,
+    "leverage": "The worker can produce one constrained artifact from fixed evidence while independent validation remains with the parent."
+  },
+  "evidence": [
+    {
+      "ref": ".github/skills/internal-skill-creator/SKILL.md",
+      "purpose": "Fixed creator boundary for the artifact."
+    },
+    {
+      "ref": ".github/skills/internal-skill-creator/agents/openai.yaml",
+      "purpose": "Fixed creator interface metadata."
+    }
+  ],
+  "constraints": [
+    "Write only the one exact artifact declared in write_scope.",
+    "Do not invoke another agent or modify any directory-wide scope.",
+    "Do not make policy, authority, acceptance, or retry decisions for the parent."
+  ],
+  "write_scope": [
+    ".github/skills/internal-skill-creator/fixtures/worker-output.md"
+  ],
+  "expected_output": {
+    "kind": "artifact",
+    "path": ".github/skills/internal-skill-creator/fixtures/worker-output.md",
+    "format": "markdown"
+  },
+  "acceptance": [
+    {
+      "id": "A1",
+      "observable": "The one declared artifact is present and independently checkable by the parent."
+    }
+  ],
+  "validation": [
+    {
+      "id": "V1",
+      "owner": "caller",
+      "command": "python3 -m pytest -q tests/github/skills/internal-skill-creator",
+      "pass_signal": "exit-code-0"
+    }
+  ],
+  "budgets": {
+    "attempts": 1,
+    "context_refills": 0
+  },
+  "result_path": "tmp/.handoff/internal-skill-creator-write.result.json",
+  "cache": {
+    "prefix_version": "internal-subagent-contract/v1",
+    "key_class": "worker-role"
+  }
+}

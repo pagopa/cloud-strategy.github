@@ -1,4 +1,6 @@
+policy:
+  allow_implicit_invocation: false
 interface:
-  display_name: "Internal GCP Governance"
+  display_name: "internal-gcp-governance"
   short_description: "GCP IAM, Org Policy, and guardrail guidance"
   default_prompt: "Use $internal-gcp-governance when $internal-gcp selects governance for GCP IAM, workload identity, service-account, Org Policy, guardrail, or exception decisions."

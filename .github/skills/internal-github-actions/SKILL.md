@@ -1,13 +1,14 @@
 ---
 name: internal-github-actions
-description: Use when /internal-github routes GitHub Actions workflow authoring or debugging under `.github/workflows/`, including `workflow_call` and reuse-pattern selection.
-user-invocable: false
+description: "Use when /internal-github routes GitHub Actions workflow, reusable-workflow, or composite-action work under `.github/workflows/` and `.github/actions/**/action.yml` or `action.yaml`."
 ---
 
 # GitHub Actions Skill
 
-Own GitHub Actions workflow behavior under `.github/workflows/`, including
-workflow authoring, debugging, `workflow_call`, and reuse-pattern selection.
+Own GitHub Actions behavior under `.github/workflows/` and
+`.github/actions/**/action.yml` or `action.yaml`, including workflow authoring,
+debugging, `workflow_call`, reuse-pattern selection, and composite-action
+contracts.
 
 ## When to use
 
@@ -15,6 +16,9 @@ workflow authoring, debugging, `workflow_call`, and reuse-pattern selection.
 - Add CI/CD jobs for build, test, lint, release, or deployment.
 - Decide whether repeated logic stays inline, moves to a script, becomes a
   reusable workflow, or becomes a composite action.
+- Create or modify a composite `action.yml` or `action.yaml`.
+- Preserve compatibility while changing composite-action inputs or outputs.
+- Document or test a composite action.
 
 ## Workflow authoring rules
 
@@ -32,6 +36,22 @@ workflow authoring, debugging, `workflow_call`, and reuse-pattern selection.
 - Manual `release-please` tests on non-production branches must pass
   `skip-github-release: true`.
 
+## Composite-action authoring rules
+
+Input validation is the first contract step; validate required values before
+the action performs its main logic.
+
+- Pass expression inputs through `env:` instead of interpolating them directly
+  in `run:`.
+- Keep `shell: bash` explicit on every composite step.
+- Start shell blocks with `set -euo pipefail`.
+- Validate required inputs before the main logic and fail clearly.
+- Forward caller-visible values through `outputs:` mapped from `$GITHUB_OUTPUT`.
+- Use `$GITHUB_ENV` only for step-to-step state inside the action.
+- Extract long shell logic into a dedicated script early.
+- Preserve backward compatibility for existing inputs and outputs, or treat a
+  breaking contract as a versioning event.
+
 ## Reuse-pattern selection
 
 | Situation | Pattern |
@@ -45,6 +65,10 @@ Choose by the unit of reuse: jobs and their runners, permissions, or
 concurrency belong in a reusable workflow; steps and caller-visible outputs
 belong in a composite action; thin orchestration around language-specific
 commands belongs in a script.
+
+## Conditional review contributor
+
+Load [conditional review contributor](references/conditional-review-contributor.md) when participating in a routed review.
 
 ## Reference map
 
@@ -62,13 +86,30 @@ commands belongs in a script.
   reuse patterns remain plausible.
 - Load [security hardening checklist](references/security-hardening-checklist.md)
   for deployment, secrets, self-hosted runners, or untrusted events.
+- Load [minimal composite template](references/minimal-template.md) for the
+  smallest safe starter `action.yml`.
+- Load [multi-step composite template](references/multi-step-template.md) when
+  the action shares state and exposes caller-visible outputs.
+- Load [output forwarding pattern](references/output-forwarding-pattern.md)
+  when a step result becomes an action output.
+- Load [composite testing pattern](references/testing-pattern.md) for smoke,
+  failure-path, and contract checks.
+- Load [action README template](references/action-readme-template.md) for
+  inputs, outputs, side effects, and usage documentation.
+- Load [composite versioning strategy](references/versioning-strategy.md) for
+  published or compatibility-sensitive actions.
 
 ## Completion criteria
 
-- Workflow behavior and `workflow_call` contracts are valid.
+- Workflow behavior, `workflow_call` contracts, and composite-action
+  `action.yml` contracts are valid.
 - The reuse-pattern selection is explicit and matches the unit of reuse.
 - OIDC, least privilege, full-SHA pins, input validation, and release safety
   are addressed when relevant.
+- Composite inputs and outputs are explicit, safely forwarded, and documented
+  when relevant.
+- Explicit Bash, strict mode, compatibility, smoke, and failure-path checks
+  are addressed for composite actions.
 - Context availability and focused validation are checked.
 
 ## Validation
@@ -81,3 +122,7 @@ commands belongs in a script.
   least privilege matters.
 - Verify every third-party `uses:` line references a full SHA.
 - Verify every referenced local guide resolves before completion.
+- Verify composite expressions use safe environment forwarding and every
+  composite shell step declares Bash and strict mode.
+- Verify caller-visible composite outputs are mapped from `$GITHUB_OUTPUT` and
+  documented.

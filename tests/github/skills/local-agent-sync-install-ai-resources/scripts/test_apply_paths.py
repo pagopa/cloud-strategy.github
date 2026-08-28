@@ -568,6 +568,157 @@ rows:
     )
 
 
+def test_codex_native_agent_is_symlinked_without_translation(
+    tmp_path: Path, capsys
+) -> None:
+    refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
+    refs.mkdir(parents=True)
+    (refs / "home-sync-catalog.yaml").write_text(
+        """version: 1
+defaults:
+  include_internal_skills: false
+  include_local_skills: false
+  include_unlisted_skills: false
+  unmanaged_existing_skills_policy: repo-wins
+  excluded_skills: []
+  skill_targets: []
+resources:
+  - resource_id: native-agent
+    source_family: agents
+    source_path: .codex/agents/native-agent.toml
+    include_targets: [codex]
+    target_support: documented
+    notes: native Codex agent
+""",
+        encoding="utf-8",
+    )
+    (refs / "runtime-support-matrix.yaml").write_text(
+        """version: 1
+rows:
+  - target: codex
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.codex/agents/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence: []
+    notes: native Codex agent
+""",
+        encoding="utf-8",
+    )
+    source = tmp_path / ".codex/agents/native-agent.toml"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        'name = "native-agent"\nmodel = "gpt-5.6-luna"\n', encoding="utf-8"
+    )
+
+    home = tmp_path / "home"
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "codex",
+                    "--create-missing-dirs",
+                ]
+            )
+        )
+        == 0
+    )
+    capsys.readouterr()
+
+    target = home / ".codex/agents/native-agent.toml"
+    assert target.is_symlink()
+    assert target.resolve() == source.resolve()
+    source.write_text(
+        'name = "native-agent"\nmodel = "gpt-5.6-luna-updated"\n',
+        encoding="utf-8",
+    )
+    assert target.read_text(encoding="utf-8") == source.read_text(encoding="utf-8")
+
+
+def test_opencode_native_agent_is_symlinked_without_translation(
+    tmp_path: Path, capsys
+) -> None:
+    refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
+    refs.mkdir(parents=True)
+    (refs / "home-sync-catalog.yaml").write_text(
+        """version: 1
+defaults:
+  include_internal_skills: false
+  include_local_skills: false
+  include_unlisted_skills: false
+  unmanaged_existing_skills_policy: repo-wins
+  excluded_skills: []
+  skill_targets: []
+resources:
+  - resource_id: native-agent
+    source_family: agents
+    source_path: .opencode/agents/native-agent.md
+    include_targets: [opencode]
+    target_support: documented
+    notes: native OpenCode agent
+""",
+        encoding="utf-8",
+    )
+    (refs / "runtime-support-matrix.yaml").write_text(
+        """version: 1
+rows:
+  - target: opencode
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.config/opencode/agents/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence: []
+    notes: native OpenCode agent
+""",
+        encoding="utf-8",
+    )
+    source = tmp_path / ".opencode/agents/native-agent.md"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        "---\ndescription: native opencode\nmode: subagent\n---\nNative body.\n",
+        encoding="utf-8",
+    )
+
+    home = tmp_path / "home"
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "opencode",
+                    "--create-missing-dirs",
+                ]
+            )
+        )
+        == 0
+    )
+    capsys.readouterr()
+
+    target = home / ".config/opencode/agents/native-agent.md"
+    assert target.is_symlink()
+    assert target.resolve() == source.resolve()
+    source.write_text(
+        "---\ndescription: native opencode\nmode: subagent\n---\nUpdated body.\n",
+        encoding="utf-8",
+    )
+    assert target.read_text(encoding="utf-8") == source.read_text(encoding="utf-8")
+
+
 def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
     tmp_path: Path,
 ) -> None:
@@ -590,6 +741,47 @@ def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
     add_materialization_operation(
         operations,
         target="copilot",
+        target_path=target,
+        source_path=source,
+        resource=resource,
+        source_hash="source-hash",
+        manifest_index={
+            target.as_posix(): {
+                "materialization": "copy",
+                "content_hash": hash_resource(target),
+            }
+        },
+        changed_only=False,
+        policy=_repo_wins_policy(),
+    )
+
+    assert [(operation.action, operation.code) for operation in operations] == [
+        ("link", None)
+    ]
+
+
+def test_manifest_managed_codex_copy_migrates_to_link_when_unchanged(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / ".codex/agents/native-agent.toml"
+    source.parent.mkdir(parents=True)
+    source.write_text('name = "native-agent"\n', encoding="utf-8")
+    target = tmp_path / "home/.codex/agents/native-agent.toml"
+    target.parent.mkdir(parents=True)
+    target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+    resource = CatalogResource(
+        resource_id="native-agent",
+        source_family="agents",
+        source_path=".codex/agents/native-agent.toml",
+        include_targets=("codex",),
+        target_support="documented",
+        notes="native Codex agent",
+    )
+    operations: list[HomeSyncOperation] = []
+
+    add_materialization_operation(
+        operations,
+        target="codex",
         target_path=target,
         source_path=source,
         resource=resource,

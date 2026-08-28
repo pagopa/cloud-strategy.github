@@ -45,6 +45,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`
 - `.github/skills/antigravity-kubernetes-architect/SKILL.md`
 - `.github/skills/antigravity-network-engineer/SKILL.md`
+- `.github/skills/antonbabenko-terraform-skill/SKILL.md`
 - `.github/skills/awesome-copilot-agentic-eval/SKILL.md`
 - `.github/skills/awesome-copilot-azure-devops-cli/SKILL.md`
 - `.github/skills/awesome-copilot-azure-pricing/SKILL.md`
@@ -91,7 +92,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-gcp-organization-structure/SKILL.md`
 - `.github/skills/internal-gcp-strategic/SKILL.md`
 - `.github/skills/internal-gcp/SKILL.md`
-- `.github/skills/internal-github-action-composite/SKILL.md`
 - `.github/skills/internal-github-actions/SKILL.md`
 - `.github/skills/internal-github-governance/SKILL.md`
 - `.github/skills/internal-github-operations/SKILL.md`
@@ -108,6 +108,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-lesson-codification/SKILL.md`
 - `.github/skills/internal-makefile/SKILL.md`
 - `.github/skills/internal-markdown/SKILL.md`
+- `.github/skills/internal-markitdown/SKILL.md`
+- `.github/skills/internal-mermaid/SKILL.md`
 - `.github/skills/internal-nodejs-project/SKILL.md`
 - `.github/skills/internal-nodejs/SKILL.md`
 - `.github/skills/internal-oop-design-patterns/SKILL.md`
@@ -118,8 +120,11 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-review-code/SKILL.md`
 - `.github/skills/internal-review-high-level/SKILL.md`
 - `.github/skills/internal-skill-creator/SKILL.md`
+- `.github/skills/internal-subagent-contract/SKILL.md`
 - `.github/skills/internal-tdd/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
+- `.github/skills/internal-tf/SKILL.md`
+- `.github/skills/internal-wayfinder-report/SKILL.md`
 - `.github/skills/internal-yaml/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
@@ -158,8 +163,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/superpowers-using-superpowers/SKILL.md`
 - `.github/skills/superpowers-verification-before-completion/SKILL.md`
 - `.github/skills/superpowers-writing-plans/SKILL.md`
-- `.github/skills/terraform-terraform-search-import/SKILL.md`
-- `.github/skills/terraform-terraform-test/SKILL.md`
 - `.github/skills/vercel-find-skills/SKILL.md`
 
 ### Support-only imported document skills
@@ -193,6 +196,8 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Agents
 
+- `.github/agents/internal-gateway-critical-master.agent.md`
+- `.github/agents/internal-luna-executor.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
 - `.github/agents/local-sync-repos.agent.md`

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "delegation_id": "creator-incomplete",
+  "mode": "plan",
+  "objective": "Attempt a creator draft without complete caller checks.",
+  "value_gate": {
+    "autonomous": true,
+    "verifiable": true,
+    "leverage": "The task is presented as bounded but its caller checks are incomplete."
+  },
+  "evidence": [
+    {
+      "ref": ".github/skills/internal-skill-creator/SKILL.md",
+      "purpose": "Creator boundary context."
+    }
+  ],
+  "constraints": [
+    "Do not exceed the declared artifact scope."
+  ],
+  "write_scope": [
+    ".github/skills/internal-skill-creator/fixtures/worker-output.md"
+  ],
+  "expected_output": {
+    "kind": "artifact",
+    "path": ".github/skills/internal-skill-creator/fixtures/worker-output.md",
+    "format": "markdown"
+  },
+  "acceptance": [],
+  "validation": [],
+  "budgets": {
+    "attempts": 1,
+    "context_refills": 0
+  },
+  "result_path": "tmp/.handoff/internal-skill-creator-incomplete.result.json",
+  "cache": {
+    "prefix_version": "internal-subagent-contract/v1",
+    "key_class": "worker-role"
+  }
+}

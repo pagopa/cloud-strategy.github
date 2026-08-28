@@ -27,3 +27,29 @@ scope violations.
 
 Pytest validates only fixture and scorer behavior. It does not validate review
 recall, runtime skill loading, or a model's report quality.
+
+## Conditional GitHub Actions scenario
+
+The `fixtures/actions-review-target/` scenario preserves the generic exact-two
+contract and adds an optional `required_conditional_loaded_skills` manifest
+field. When present, the sanitized run must provide the ordered
+`conditional_loaded_skills` list exactly. The merged Actions scenario expects
+the wrapper and Addy engine plus the ordered gateway and
+`internal-github-actions` contributor identities for workflow and
+composite-action surfaces, and records
+workflow-to-composite-to-script observations through explicit finding IDs.
+
+The scorer checks only structured run fields: contributor identity, finding
+recall, verdict, and scope violations. It does not parse report prose, prove
+runtime routing, or infer runner health from fixture evidence; these loaded
+identities are a proxy, not proof of runtime routing or runner health, and it
+does not establish model report quality.
+Runtime capture, when available, should record the model identity, target and
+source fingerprints, loaded identities, finding IDs, verdict, scope
+violations, and a sanitized debug reference. If capture is unavailable, retain
+the local scenario result and record the limitation as a follow-up.
+
+Native `.github/instructions/` files remain consumer projections with their
+own path-specific application metadata. They are inspected as evidence only;
+they are not portable contributor sources. Cloud-agent coverage is outside
+this scenario.

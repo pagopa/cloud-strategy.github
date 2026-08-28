@@ -10,9 +10,6 @@ router owns composition; it supplies no AWS domain answer of its own.
 
 ## When to use
 
-Use this skill first for every AWS request, including scoped, ambiguous, and
-multi-deliverable requests.
-
 ## Destinations
 
 | Primary deliverable | Invoke |

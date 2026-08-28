@@ -1,0 +1,3 @@
+# Runtime dependencies for the local Copilot log analyzer.
+# The analyzer is currently standard-library-only.
+# Add pinned third-party packages here when the tool grows beyond stdlib.

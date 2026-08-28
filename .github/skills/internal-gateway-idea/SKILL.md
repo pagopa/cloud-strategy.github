@@ -1,257 +1,390 @@
 ---
 name: internal-gateway-idea
-description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, critical resolution, and an automatic handoff to implementation planning.
+description: Use when the user explicitly selects a conversation-first workflow to turn an early or unclear idea into a decision-ready analysis before any plan is requested.
 ---
 
 # Internal Gateway Idea
 
-## Referenced skills
-
-- `/superpowers-brainstorming`: core idea-to-design workflow before the local critical-resolution override.
-- `/grill-me`: repeatable clarification sessions for material points the critic cannot resolve unanimously.
-- `/internal-gateway-writing-plans`: implementation-plan writing immediately after the critic emits `accepted`.
-- `/mattpocock-research`: on-demand owner for decision-relevant external research after local evidence is exhausted; this reference does not preload the skill.
-
-## Local references
-
-- `references/workflow.md`: authoritative state machine, Mermaid workflow,
-  approval rules, and routing stability for this bundle.
-- Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `tsv`/`csv` only for large flat tables; data on stdout, diagnostics on stderr; keep output bounded.
-
-Lightweight repository-owned wrapper for idea shaping. Use `/superpowers-brainstorming` as the core workflow and add the local gates below. Loading `/superpowers-brainstorming` is an intentional, globally-resolvable exception to the bundle self-containment rule. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.
-
 ## When to use
 
-- A repository-owned request starts as an idea, option set, proposed direction, or unclear goal.
-- The user asks to brainstorm, shape, challenge, or decide before implementation.
-- The work needs a validated design direction before implementation planning.
+Use this skill only when the user explicitly selects it. Turn an early,
+unclear, or anchored idea into a decision-ready analysis while keeping the
+working material in the conversation by default. Do not infer invocation from
+an idea-shaped request.
 
-## Core contract
+## Analysis unit lock
 
-- Follow the mandatory gate sequence: `Specialization Checkpoint: gated`, `Idea Gate 0`, `External Research Checkpoint`, `Assumption Challenge Gate`, `Alternative discovery`, `Critical Challenge Gate`, `Critical resolution loop`, `Automatic plan handoff`, `Stop before implementation execution`.
-- Load `/superpowers-brainstorming` as the core workflow.
-- Read `references/workflow.md` before presenting the final design direction.
-- Keep the `/superpowers-brainstorming` hard gate: no implementation action before the user approves the design.
-- Treat approval as gate-local. `procedi`, `ok`, `go`, or similar approval advances only the active visible gate.
-- If approval wording is ambiguous, ask whether it means design approval, critical review, or implementation execution.
-- After the bounded evidence pass, run `Idea Gate 0` as one numbered bulk question block; evidence cannot replace Idea Gate 0.
-- Do not proceed to `External Research Checkpoint`, assumption challenge,
-  alternative discovery, design direction, critical resolution, or plan writing
-  until `Idea Gate 0` is accepted or the user explicitly overrides its defaults.
-- Run `Critical Challenge Gate` as its own visible gate after the user approves the design direction and before plan writing; an embedded critique does not satisfy Critical Challenge Gate.
-- The only critical outcomes are `accepted`, `revise-design`, `reopen-analysis`, and `needs-clarification`.
-- `accepted` is legal only when every material objection raised during the current `Critical Challenge Gate` is closed or explicitly routed; continue to `Automatic plan handoff`.
-- Every material objection raised during the current critical pass is closed or explicitly routed before `accepted`.
-- every material objection raised during the current critical pass is closed or explicitly routed.
-- `revise-design` returns to design presentation and approval, then reruns `Critical Challenge Gate`.
-- `reopen-analysis` returns to `Idea Gate 0` so the assumption, scope decision, or alternative can be reconsidered.
-- `needs-clarification` means load `/grill-me` for one or more numbered clarification sessions over the critic's newly surfaced elements.
-- After clarification, return to the relevant earlier approval gate when a material change occurred; otherwise rerun `Critical Challenge Gate` directly. Repeat until the critic emits one conclusive routing outcome.
-- If any mandatory gate was skipped, stop, name the missed gate, mark any downstream artifact as draft-only, and resume at the first skipped mandatory gate.
-- Use this skill only to add repository-owned idea gates, not to fork the core brainstorming process.
-- Keep collaborative questioning inside the core brainstorming workflow.
-- Load `/internal-gateway-writing-plans` automatically after `accepted`; no additional artifact-choice or plan-writing approval is required.
-- Stop after the delegated writing outcome. Do not implement, invoke execution owners, or run execution commands from this skill.
+At the start of each analysis unit, record:
 
-## User-facing communication
+- `Subject`: one canonical subject for the analysis and any optional critical review;
+- `Decision focus`: the decision the analysis must make possible;
+- `Mode`: the current analysis mode;
+- `Desired artifact`: none or the one Markdown artifact the user explicitly requests;
+- `Implementation permission`: whether a later design, planning, or execution action has been explicitly requested.
 
-Keep mandatory gates, research decisions, assumption checks, approval state,
-and recovery state as internal workflow state. Project only decision-relevant
-information into chat through one compact user-facing decision card for status,
-approval, routing, material risk, blocker, and requested user action.
+The latest explicit subject or mode instruction wins. On a `subject-change` or
+`mode-change`, park the prior unit with its capsule, start the new unit, and do
+not silently reuse open decisions. In `analysis-only` mode, do not invoke
+`/superpowers-brainstorming`, `/internal-tdd`,
+`/internal-gateway-writing-plans`, or `/internal-gateway-execute-plans` before
+the user explicitly selects a `+spec` or `+plan` Candidate acceptance action.
+A `+spec` action authorizes only the selected spec artifact; a `+plan` action
+authorizes only the selected plan-authoring handoff. Neither action authorizes
+implementation or execution.
 
-Use at most four content lines:
+## Autonomous route contract
 
-- `🧭` names one unresolved decision.
-- `✅` gives the recommendation or result.
-- `💡` gives one short reason when it changes the decision.
-- `✈️` states the exact user action and what acceptance advances.
+This gateway owns one explicit, conversation-first route. Its owner is
+`/internal-gateway-idea` and its default mode is `analysis-only`. The gateway
+owns the analysis unit, evidence classification, decision eligibility,
+recovery record, Candidate lifecycle, critical-review gate, finding
+disposition, artifact selection, and authority envelope. A bounded interview
+utility or critical-review procedure may provide its own mechanics, but
+neither may replace this gateway's lifecycle, state, authority, acceptance, or
+handoff decisions.
 
-Use `🎯` for a goal, `🛠️` for a proposed change, `🧪` for validation, and
-`⚠️` for a material risk or blocker when one of those facts is the decision.
+Before the user explicitly accepts a Candidate with `+spec` or `+plan`, do not
+route to implementation-oriented design, TDD, plan authoring, or execution.
+After `+plan` acceptance, the caller owns the separate plan-authoring handoff;
+after explicit execution approval, `/internal-gateway-execute-plans` is the
+sole execution handoff. The public `route_contract` projection must remain
+aligned with these boundaries and may not introduce an alternate dependency,
+route, invocation, or handoff.
 
-Content-bearing output uses its owning schema and is outside the four-line
-card limit. Guided questions, alternatives, design sections, and required
-critique schemas are content-bearing output.
+## Global gates
 
-Do not announce skipped checkpoints. Do not print the internal gate ledger,
-bounded-evidence notes, anti-scope inventory, research checkpoint, or routing
-bookkeeping unless the user asks for details or one item blocks progress.
-Match the user's language.
+This lifecycle has exactly two global gate types: `GRILL-ME` and `CRITICAL
+REVIEW`. Recommendation, `save`, realignment, status, recovery, and the
+four-option acceptance choice are actions or projections, not additional gate
+types.
 
-## Bounded context pass
+`GRILL-ME` is mandatory immediately after setup. Route every material doubt,
+ambiguity, missing decision, or user-input question through `/grill-me`; do not
+ask a material question in an ad-hoc route. A later round is allowed only when
+new material decisions become eligible. Do not invent a repeat round for a
+trivial or already-covered question, and do not impose a fixed question cap.
+Record the gate event, the eligible decision IDs, and the question IDs in the
+canonical recovery record. Interview mechanics and concrete phrasing remain
+owned by `/grill-me`.
 
-Before asking the first question block:
+`CRITICAL REVIEW` is required before `close`, `+spec`, or `+plan`. The gateway
+records completion as a structural review record, while review procedure and
+report mechanics remain owned by `/internal-gateway-critical-master`. A review
+is complete only when its record contains exactly three lenses, including one
+lateral lens of type `analogy` or `reverse-assumption`, every finding has one
+classification, and a non-empty conclusion is recorded. Use the approved
+finding classes `blocking-now`, `acceptance-required`, `follow-up`,
+`separate-design`, and `rejected-with-reason`.
 
-- Identify the target, nearest owner, and likely validation path from the smallest useful repository evidence.
-- For large files, generated output, logs, or tabular artifacts, inspect aggregate facts first: path, size, headers, counts, anomalies, and targeted slices.
-- If platform semantics control feasibility or ownership, verify those semantics before converging.
-- Separate original user intent from emerged requirements. Do not rewrite later constraints as the original request.
+An override must be explicit, name exactly one action, and record that action
+as `accepted-risk`. It may bypass only the named action. Preserve every other
+gate and authority boundary; an override never becomes a global bypass.
+Findings require explicit disposition as `integrate`, `reject`,
+`accept-risk`, or `route`; never integrate them automatically.
 
-## State machine
+## Canonical recovery record
 
-Follow `references/workflow.md` in this order:
+Maintain exactly one canonical recovery record for the active analysis unit.
+The pause view, continuation input, compaction handoff, and any artifact
+replay are projections of this record; they are not additional recovery
+records or transcripts. The record must contain these projections together:
 
-1. `Bounded evidence pass`
-2. `Specialization Checkpoint: gated` when the incoming ask is execution-shaped.
-3. `Idea Gate 0`
-4. `External Research Checkpoint`
-5. `Assumption Challenge Gate`
-6. `Alternative discovery`
-7. `Present design direction`
-8. `Critical Challenge Gate`
-9. `Critical resolution loop`
-10. `Automatic plan handoff`
-11. `Stop before implementation execution`
+- `unit_lock`: `Subject`, `Mode`, `Decision focus`, `Desired artifact`, and
+  `Implementation permission`;
+- `state_capsule`: accepted, rejected, deferred, and accepted-risk decision
+  IDs; eligible-now IDs; blocked-later IDs with prerequisites; evidence
+  anchors; and the next action;
+- `decision_ledger`: each stable `Decision ID`, state, basis, reopen condition,
+  and dependencies;
+- `authority_envelope`: the exact `Authorized paths` and `Authorized actions`,
+  plus the unchanged continuation boundary;
+- `communication_projection`: material deltas, outcome, up to three
+  controlling evidence items, principal risk, active choice, blockers,
+  unknowns, acceptance conditions, residual risks, and diagnostic word count.
 
-If a later step happened before an earlier mandatory gate, use `Skipped-gate
-recovery`: stop the current lane, identify the first skipped mandatory gate,
-and resume there before producing or revising a retained artifact.
+Before continuation, promotion, artifact authoring, or recovery, verify that
+all five projections are present and agree on the same subject and decision
+IDs. If any projection is missing, contradictory, or cannot be reconstructed,
+fail closed: mark affected decisions `open`, preserve the last valid record,
+do not treat the recommendation as resolved, and do not add an authority path,
+action, artifact, route, or handoff to repair the gap.
 
-Do not skip from evidence or design approval to implementation. The only
-post-brainstorming owner this skill may load is
-`/internal-gateway-writing-plans`, automatically after the critic emits
-`accepted`.
+## Mutation authority envelope
 
-## Idea Gate 0
+Record two explicit sets for each unit: `Authorized paths` and `Authorized
+actions`; an absent item is not authorized. The default is analysis-only:
+reads, evidence recovery, non-mutating checks, and disposable temporary output
+do not expand the grant, and writes are limited to the one explicitly selected
+artifact path. This gateway has no standing grant for implementation, planning,
+execution, or unrelated paths.
 
-Run this gate after bounded evidence and before any challenge or alternative
-recommendation.
+`continue`, `finish`, pause, compaction, and recovery preserve both sets and
+may not add a path or action. Protected workflow status is separate from user
+authority and cannot authorize a mutation. A requested item outside the sets is
+blocked with outcome `authority-or-scope` until the user explicitly accepts the
+scope delta; continuity, a resumed capsule, and a status marker are not
+acceptance. `AUTH-03` depends on preserved `AUTH-01` authority.
 
-Render all currently known unresolved questions in one numbered bulk question
-block. Each question must include:
+Copy the authority envelope unchanged into every continuation and recovery
+projection. A status marker, resumed capsule, or recovered decision does not
+grant mutation authority.
 
-- `Question:` the unresolved decision.
-- `Recommendation:` the evidence-based default.
-- `Why:` one evidence-based sentence.
-- `Default if accepted:` the concrete consequence of acceptance.
+## Ownership boundary
 
-Capture the question, recommendation, reason, and accepted default internally.
-Evidence-based defaults require explicit acceptance. Questions should focus
-only on decisions repository evidence cannot safely answer: intent, accepted
-defaults, constraints, success criteria, validation path, and anti-scope. A
-bounded evidence pass may prepare recommended defaults, but evidence cannot
-replace Idea Gate 0.
+This gateway owns the analysis lifecycle, evidence discipline, option
+comparison, recommendation, decision state, and one canonical Analysis Spec.
+It does not own:
 
-## External Research Checkpoint
+- interview mechanics or question formatting, which belong to `/grill-me`;
+- critical-review procedure or report shape, which belong to
+  `/internal-gateway-critical-master`;
+- implementation-oriented design and design-spec writing, which require a
+  separate explicit user-selected route;
+- implementation planning or execution.
 
-Run this checkpoint after `Idea Gate 0` is accepted and before `Assumption
-Challenge Gate`. Local evidence remains the default.
+## Evidence posture
 
-Skip external research unless all of these are true:
+Begin by naming the decision the analysis should make possible. Keep the depth
+proportional to the uncertainty and the user's desired outcome. Recover facts
+from named local evidence before asking for them. Classify working material as
+`Facts`, `Reports`, `Assumptions`, `Unknowns`, or `Constraints`, and preserve
+those labels through every revision. A report's recommendation remains an
+option until the user resolves the decision.
 
-- the unresolved question is owned by an external primary source;
-- local evidence is insufficient;
-- the answer could change feasibility, approach, constraints, or risk.
+## Decision ledger and eligibility
 
-When all conditions hold:
+Give every material decision a stable `Decision ID`. The compact ledger stores
+only:
 
-1. Define one bounded research question.
-2. load `/mattpocock-research` on-demand and write one Markdown report under
-   `tmp/research/YYYY-MM-DD-<slug>.md`.
-3. Bring only the report path and decision-relevant conclusions back into the
-   brainstorming flow.
-4. Continue to `Assumption Challenge Gate`, or return to `Idea Gate 0` when the
-   evidence changes an accepted constraint or default.
+- `Decision ID`;
+- decision or constraint;
+- status;
+- basis;
+- reopen condition;
+- dependencies.
 
-`internal-gateway-idea` owns when research is warranted.
-`/mattpocock-research` owns how the research is performed. Do not copy its
-research procedure here, and do not start a second research pass automatically.
+Use these decision states:
 
-Validation must keep this checkpoint on-demand, bounded to one question and one
-report, preceded by local evidence, and routed to `tmp/research/`.
+- `eligible-now`: an open decision with no unresolved prerequisite;
+- `blocked-later`: a decision whose prerequisite is still unresolved;
+- `deferred`: visibly postponed by the user or by an explicit evidence limit;
+- `resolved-from-evidence`: settled by sufficient local evidence;
+- `accepted`: explicitly accepted by the user;
+- `accepted-risk`: explicitly retained as a known risk;
+- `rejected`: rejected by evidence, the user, or a supported comparison.
 
-## Assumption Challenge Gate
+Use `open` only as a visible recovery marker when a decision cannot be
+reconstructed; it is not a hidden substitute for a normal terminal state.
+Root decisions have no unresolved prerequisites. Dependent decisions remain
+`blocked-later` until their prerequisites resolve. Before asking, recover local
+evidence and move any fact that is already sufficient to
+`resolved-from-evidence`.
 
-Run this gate before finalizing the design direction.
+When several roots are open, prioritize authority or scope blockers, then
+dependency impact, recommendation impact, material risk, and finally
+non-blocking preference. This is a priority heuristic, not a fixed question
+count or a normative multi-branch scheduler. Collect every currently known
+material `eligible-now` decision for the current round and map each numbered
+question to exactly one such decision. Do not split that set into one-question
+turns. If the set contains only one decision, still send it as a numbered
+one-item block. Reopen a decision only when new evidence, an explicit user
+change, or a supported critical finding matches its declared reopen condition.
 
-Test whether the user's proposed direction is actually necessary:
+## State capsule
 
-- What problem is the proposal trying to solve?
-- What would we do if the named target, path, skill, tool, or implementation idea did not exist?
-- Which assumption would make the proposed direction wrong if false?
-- Is there a smaller reversible move that preserves most of the value?
-- Is there a non-obvious alternative that avoids the proposed change entirely?
+Maintain one compact state capsule with exactly:
 
-The output must include:
+`Subject`; `Mode` and decision focus; accepted, rejected, deferred, and
+accepted-risk IDs; eligible-now IDs; blocked-later IDs with prerequisites;
+evidence anchors; and next action.
 
-1. `Original direction:` one sentence.
-2. `Hidden assumption:` one sentence.
-3. `Alternative path:` one sentence.
-4. `Why not chosen:` one sentence, or `Chosen instead:` when the alternative is better.
+Update the ledger and capsule before and after `/grill-me`, on pause, context
+compaction, `subject-change`, or `mode-change`, and before presenting a
+Candidate. During ordinary turns, show only state deltas and the current
+decision block. If reconstruction fails, mark affected decisions `open`
+visibly and recover them before treating them as resolved.
 
-If the alternative path is better, return to the relevant brainstorming branch instead of forcing the original proposal through refinement.
+## Workflow
 
-## Alternative discovery
+Work through these branches in order. Reopen only a branch changed by new
+evidence, a user decision, or a supported critical finding.
 
-Before presenting the final design, propose 2-3 approaches. Lead with the recommended approach.
+1. **Orient.** Set the analysis unit lock. Name the desired outcome, audience,
+   time horizon, success criteria, scope, and anti-scope.
+2. **Map the fog.** Separate the five evidence classes. Identify decision-
+   changing unknowns, the evidence that could resolve them, and the constraints
+   that must remain true.
+3. **Resolve evidence and roots.** Build the ledger, mark roots and
+   dependents, recover sufficient facts, and collect the current set of
+   `eligible-now` decisions using the priority heuristic.
+4. **Challenge the anchor.** Always challenge one actor, mechanism, constraint,
+   or causal assumption internally. Show alternatives only when that challenge
+   yields at least two materially credible mechanisms supported by evidence. If
+   evidence and accepted constraints determine one feasible direction, converge
+   directly. Record a credible rejected alternative whenever one exists.
+5. **Route unresolved decisions.** When one or more eligible user decisions
+   remain, invoke `/grill-me` once for the current round with exactly one of
+   these packets per decision, in one numbered bulk question block:
 
-Each approach must include:
+   - `Decision ID`;
+   - `Open decision`;
+   - `Material impact`;
+   - `Evidence checked`;
+   - `Remaining gap`;
+   - `Prerequisites`.
 
-- `Approach:` short name.
-- `Best when:` one sentence.
-- `Tradeoff:` one sentence.
+   `/grill-me` owns concrete phrasing, recommendations, defaults, ordering,
+   follow-ups, and the resolved summary. Do not duplicate its interview
+   contract. Keep every decision open until its returned resolved summary is
+   available; accept a default only when that summary explicitly returns it.
+   Later decisions that become eligible are collected into a subsequent
+   numbered block, including a numbered one-item block when only one remains.
+6. **Converge.** Compare options against the desired outcome, success criteria,
+   evidence quality, constraints, and anti-scope. Recommend one direction and
+   record why credible alternatives were rejected.
+7. **Stress-test.** Record material risks, dependencies, disconfirming signals,
+   deferred questions, accepted risks, and the evidence that would change the
+   recommendation.
+8. **Present the Candidate.** Do so only when every material assumption is
+   resolved, visibly deferred, or explicitly accepted as risk, and the
+   recommendation is traceable to accepted decisions and labeled evidence.
 
-The recommendation must explain why the chosen approach beats the strongest rejected option.
+### Post-Candidate menu and gate
 
-## Critical Challenge Gate
+After setup and after every named analysis phase, present the same seven
+numbered semantic entries in the same positions. Keep locked entries visible
+and give a short reason; do not remove, renumber, or silently unlock an entry:
 
-Before moving to an implementation plan:
+1. `🔄 continue`
+2. `🔍 critical review`
+3. `🧩 realign when findings exist`
+4. `📝 +spec`
+5. `🗺️ +plan`
+6. `💾 save`
+7. `⏹️ close`
 
-- Challenge the chosen direction with first principles, opportunity cost, or reverse-assumption reasoning.
-- Name the strongest objection.
-- Close or explicitly route every material objection raised during the current critical pass.
+Before `CRITICAL REVIEW` completes, lock `+spec`, `+plan`, and `close` with
+the reason `critical review is pending`. Lock `realign` when no findings
+exist. Keep `continue`, `save`, and the applicable gate action visible. After
+review, retain all seven positions and explain any remaining lock, including
+an explicit finding disposition requirement. The post-setup menu does not
+replace the mandatory `GRILL-ME` gate.
 
-Use this visible shape:
+Critical review must complete before `+spec`, `+plan`, or `close` is
+available, except for one explicit named-action override recorded as
+`accepted-risk`. Findings never integrate automatically; require explicit
+choice to incorporate, reject with evidence, accept as residual risk, or
+route each material finding. No menu action grants implementation or
+execution, and `continue`, `finish`, `save`, and `close` preserve the
+authority envelope.
 
-1. `Challenge:` the strongest objection.
-2. `Resolution:` accepted, revise-design, reopen-analysis, or needs-clarification.
-3. `Reason:` one evidence-based sentence.
+`save` is a non-promoting checkpoint and remains available before or after
+critical review. A pre-review save must record `critical_review: pending` in
+the one canonical recovery/artifact projection. Save never makes `+spec` or
+`+plan` available, closes a finding, authorizes implementation or execution,
+or creates a second artifact.
 
-`accepted` is legal only when every material objection raised during the current `Critical Challenge Gate` is closed or explicitly routed.
+Completion criterion: the recommendation is traceable to resolved decisions and labeled evidence, every material uncertainty is resolved/deferred/accepted as visible risk, and the latest state capsule is current.
 
-Keep this gate inside the local idea wrapper and the core brainstorming workflow.
+## Chat layout
 
-## Critical resolution loop
+Use one compact Candidate projection, not a transcript or a second report.
+Present these sections in this order when they contain information:
 
-- `accepted` continues to `Automatic plan handoff`.
-- `revise-design` returns to design presentation and approval before another critical pass.
-- `reopen-analysis` returns to `Idea Gate 0`.
-- `needs-clarification` loads `/grill-me` and runs one or more numbered clarification sessions over the critic's newly surfaced elements.
+1. `### 🧭 Decision` — the active decision, current state delta, and the
+  choice required from the user.
+2. `### ✅ Recommendation` — the current direction and why it satisfies the
+  accepted outcome and constraints.
+3. `### 🔎 Evidence` — only evidence that controls this decision, grouped by
+  implication instead of repeating the investigation.
+4. `### ⚠️ Risks` — blockers, unknowns, acceptance conditions, and residual
+  risks that could change the recommendation.
+5. `### ❓ Decisions needed` — one numbered block for eligible decisions, or
+  omit it when none remain.
 
-After `/grill-me`, return to the relevant earlier approval gate when a material change occurred; otherwise rerun `Critical Challenge Gate` directly. Repeat until the critic emits one conclusive routing outcome.
+Keep the seven gateway menu entries in their required positions, each as one
+compact line with its lock reason. Do not repeat the Candidate Analysis Spec,
+critical report, ledger, or recovery record in chat. The canonical record and
+selected artifact retain full detail; chat must still name every material item
+in the sections above or state that it is retained there. A recommendation is
+not acceptance.
 
-## Automatic plan handoff
+Use at most one Mermaid diagram only when it clarifies three or more decision,
+dependency, ownership, or option relationships. Put the conclusion in adjacent
+prose and keep simple decisions prose-only. Diagnostic word counts never
+authorize dropping a blocker, unknown, acceptance condition, or residual risk.
+Keep the stable Analysis Spec field names unchanged.
 
-For `accepted`, start implementation-plan writing immediately by loading
-`/internal-gateway-writing-plans`. The transition notification is exactly:
+## Candidate Analysis Spec
 
-```text
-🚀 **Scrittura del piano avviata**
-✅ La critica si è conclusa senza obiezioni materiali aperte.
-🛠️ `/internal-gateway-writing-plans` sta preparando il piano di implementazione.
-```
+Use one canonical subject for the analysis and any optional critical review.
+The Candidate Analysis Spec contains `Decision focus`; `Desired outcome` and
+`Success criteria`; `Scope` and `Anti-scope`; `Facts`, `Reports`, `Assumptions`,
+`Unknowns`, and `Constraints`; `Resolved decisions`; `Options` with contrasting
+mechanisms; `Recommendation`; `Rejected alternatives` and evidence-based
+reasons; `Risks` and `Disconfirming signals`; `Deferred questions`; and
+`Specific critical focus`.
 
-This is the only transition notification. The subsequently produced
-implementation plan remains normal content-bearing output. Do not ask for
-another approval or write a retained spec.
+Present the Candidate before opening acceptance. The user may explicitly ask
+to continue the analysis or invoke `/internal-gateway-critical-master` instead
+of accepting. When asking for acceptance, show exactly this numbered gate and
+do not treat a displayed recommendation as acceptance:
 
-This automatic handoff authorizes plan writing only. It does not authorize
-implementation execution.
+1. `✅ Accept as the Consolidated Analysis Spec + spec`
+2. `✅ Accept as the Consolidated Analysis Spec + plan`
+3. `💾 Save the analysis`
+4. `⏹️ Close without a file or plan`
 
-## Validation
+After completed critical review, promote the Candidate Analysis Spec to the
+Consolidated Analysis Spec only after the user explicitly chooses option 1 or
+2. Option 1 authorizes only authoring the consolidated analysis spec artifact;
+option 2 authorizes only the implementation-plan authoring handoff. Neither
+option authorizes implementation or execution. Options 3 and 4 do not promote
+the Candidate. The Candidate remains the Candidate until review is complete
+and option 1 or 2 is explicitly selected.
 
-- The skill read `references/workflow.md` before finalizing the design direction.
-- The skill used `Specialization Checkpoint: gated` for execution-shaped requests.
-- The skill loaded `/superpowers-brainstorming` as core instead of copying its workflow.
-- The skill challenged the user's initial assumption, not only corrected the proposed solution.
-- The skill presented 2-3 approaches and explained why the recommendation beat the strongest rejected option.
-- The skill used `Critical Challenge Gate` before plan writing.
-- Every material objection raised during the current critical pass was closed or explicitly routed before `accepted`.
-- A `needs-clarification` result ran one or more `/grill-me` sessions over the critic's newly surfaced elements and returned to the relevant earlier approval gate after a material change or reran the critic otherwise.
-- An `accepted` result started implementation-plan writing immediately and emitted only the exact transition notification.
-- The skill treated ambiguous approval words as gate-local and clarified the active gate when needed.
-- The skill kept collaborative questioning inside the core brainstorming workflow.
-- The skill loaded `/internal-gateway-writing-plans` only for implementation-plan writing after `accepted`.
-- The skill stopped after `/internal-gateway-writing-plans` produced a writing outcome.
-- The Mermaid workflow and runtime prompt contain the same mandatory gate names.
+### Artifact authoring after acceptance
+
+After the user selects `+ spec` or `+ plan`, load and apply
+[`references/artifact-authoring.md`](references/artifact-authoring.md). It owns
+the conditional Luna route, the bounded delegation admission, and the retained
+owner responsibilities for the selected artifact. Neither route starts
+implementation or execution.
+
+## Critical review procedure
+
+The `CRITICAL REVIEW` gate is mandatory before close or promotion. Invoke
+`/internal-gateway-critical-master` for its procedure when the review route is
+selected or required by this lifecycle. Pass the Candidate Analysis Spec as
+the canonical subject, its `Specific critical focus`, and earlier conversation
+only as supporting evidence. The critical owner supplies its intake, lenses,
+procedure, findings, and report; this gateway records only the structural
+completion predicate and keeps ownership of lifecycle and authority.
+
+While a blocking finding or a material unresolved finding remains, offer only
+the applicable examination, realignment, or additional-review actions. When
+no blocking finding remains and acceptance is available, show exactly the same
+four-option acceptance gate:
+
+1. `✅ Accept as the Consolidated Analysis Spec + spec`
+2. `✅ Accept as the Consolidated Analysis Spec + plan`
+3. `💾 Save the analysis`
+4. `⏹️ Close without a file or plan`
+
+Do not realign automatically. Require the user's explicit numbered choice
+before integrating critical findings. When the user selects realignment, treat
+the critical report as new evidence: incorporate supported findings, reject
+conflicting suggestions with evidence, return unresolved user decisions to
+`/grill-me`, and reopen the affected analysis branch. Update the same canonical
+state and spec. It becomes the Consolidated Analysis Spec only when every
+material finding has been incorporated, rejected with evidence, accepted as
+residual risk, or routed to a resolvable branch, and the user explicitly
+selects acceptance option 1 or 2. The selected artifact then follows
+`references/artifact-authoring.md`. Do not realign or accept automatically.
+
+## Pause and persistence
+
+Conversation-only analysis remains the default. On pause, save, cross-chat
+continuation, or accepted artifact creation, load and apply
+[`references/persistence.md`](references/persistence.md). It owns the resume
+projection, single-artifact rule, default path, and post-acceptance handoff.

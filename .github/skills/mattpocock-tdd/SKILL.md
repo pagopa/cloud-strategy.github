@@ -34,3 +34,12 @@ Ask: "What's the public interface, and which seams should we test?"
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One seam, one test, one minimal implementation per cycle.
 - **Refactoring is not part of the loop.** It belongs to the review stage (see the `mattpocock-code-review` skill), not the red → green implementation cycle.
+
+<!-- local-sync:mattpocock-git-autonomy:start -->
+## Local Git-autonomy contract
+
+- Keep completed changes in the working tree for user review.
+- You may stage only changes owned by the current task when staging helps inspect the exact diff.
+- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
+- Keep pre-existing or unrelated user changes out of the index.
+<!-- local-sync:mattpocock-git-autonomy:end -->
