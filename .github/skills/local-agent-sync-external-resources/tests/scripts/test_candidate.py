@@ -141,10 +141,6 @@ def _mattpocock_resources() -> ManagedResources:
             upstream="skills/productivity/grill-me",
             local=".github/skills/grill-me",
             canonical_name="grill-me",
-            invocation_policy=InvocationPolicy(
-                copilot_disable_model_invocation=True,
-                codex_allow_implicit_invocation=False,
-            ),
         ),
         ManagedAsset(
             source="mattpocock-skills",
@@ -951,6 +947,7 @@ def test_normalization_preserves_grill_me_wrapper_and_grilling_engine(
     engine_content = engine.read_text(encoding="utf-8")
     assert wrapper_content.count("/grilling") == 1
     assert "/grill-me" not in wrapper_content
+    assert "disable-model-invocation" not in wrapper_content
     assert "local-sync:guided-questions" not in wrapper_content
     assert "local-sync:mattpocock-git-autonomy" not in wrapper_content
     assert "local-sync:mattpocock-git-autonomy" not in engine_content

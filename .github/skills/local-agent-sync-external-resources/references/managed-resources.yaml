@@ -202,11 +202,6 @@ sources:
       - upstream: skills/productivity/grill-me
         local: .github/skills/grill-me
         canonical_name: grill-me
-        invocation_policy:
-          copilot:
-            disable_model_invocation: true
-          codex:
-            allow_implicit_invocation: false
       - upstream: skills/productivity/grilling
         local: .github/skills/grilling
         canonical_name: grilling

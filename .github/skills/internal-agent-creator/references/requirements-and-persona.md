@@ -16,9 +16,9 @@ Resolve only the inputs that materially change the agent contract:
 - role-specific output and validation expectations
 
 Inspect repository evidence before asking the user for facts that are already
-available. Ask one focused question at a time when an unresolved choice would
-materially change the result. Do not force an interview when the request and
-local contract already make the answer deterministic.
+available. Route an unresolved choice that would materially change the result
+through `/grill-me` rather than an ad-hoc question. Do not force an interview
+when the request and local contract already make the answer deterministic.
 
 End the gate with one sentence that states the target role, its main boundary,
 and the observable result it must produce.

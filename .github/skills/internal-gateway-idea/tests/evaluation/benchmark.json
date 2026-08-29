@@ -37,7 +37,6 @@
     "C-05": {"requires_explicit_critical_choice": true, "requires_transcript_free_replay": true}
   },
   "analysis_only_forbidden_routes": [
-    "/superpowers-brainstorming",
     "/internal-tdd",
     "/internal-gateway-writing-plans",
     "/internal-gateway-execute-plans"

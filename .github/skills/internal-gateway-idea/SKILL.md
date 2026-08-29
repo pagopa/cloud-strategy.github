@@ -25,8 +25,8 @@ At the start of each analysis unit, record:
 The latest explicit subject or mode instruction wins. On a `subject-change` or
 `mode-change`, park the prior unit with its capsule, start the new unit, and do
 not silently reuse open decisions. In `analysis-only` mode, do not invoke
-`/superpowers-brainstorming`, `/internal-tdd`,
-`/internal-gateway-writing-plans`, or `/internal-gateway-execute-plans` before
+`/internal-tdd`, `/internal-gateway-writing-plans`, or
+`/internal-gateway-execute-plans` before
 the user explicitly selects a `+spec` or `+plan` Candidate acceptance action.
 A `+spec` action authorizes only the selected spec artifact; a `+plan` action
 authorizes only the selected plan-authoring handoff. Neither action authorizes

@@ -1136,7 +1136,6 @@ def test_public_wrapper_declares_the_canonical_route_contract() -> None:
         "mode": "analysis-only",
         "execution_handoff": "/internal-gateway-execute-plans",
         "forbidden_pre_acceptance_routes": [
-            "/superpowers-brainstorming",
             "/internal-tdd",
             "/internal-gateway-writing-plans",
             "/internal-gateway-execute-plans",

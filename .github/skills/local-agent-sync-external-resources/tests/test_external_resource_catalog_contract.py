@@ -107,6 +107,31 @@ def test_catalog_check_rejects_residual_managed_upstream_name(
     )
 
 
+def test_grill_me_is_model_invocable_in_both_runtimes() -> None:
+    bundle = REPO_ROOT / ".github/skills/grill-me"
+    frontmatter = yaml.safe_load(
+        (bundle / "SKILL.md").read_text(encoding="utf-8").split("---", 2)[1]
+    )
+    metadata = yaml.safe_load((bundle / "agents/openai.yaml").read_text(encoding="utf-8"))
+    manifest = yaml.safe_load(
+        (
+            REPO_ROOT
+            / ".github/skills/local-agent-sync-external-resources"
+            / "references/managed-resources.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    asset = next(
+        asset
+        for source in manifest["sources"].values()
+        for asset in source.get("assets", ())
+        if asset.get("canonical_name") == "grill-me"
+    )
+
+    assert "disable-model-invocation" not in frontmatter
+    assert "policy" not in metadata
+    assert "invocation_policy" not in asset
+
+
 def test_internal_grill_me_is_an_explicit_only_legacy_bundle() -> None:
     bundle = REPO_ROOT / ".github/skills/internal-grill-me"
     skill_path = bundle / "SKILL.md"
