@@ -474,3 +474,27 @@ def test_script_external_url_is_non_blocking(tmp_path: Path) -> None:
     ]
     assert len(external) == 1
     assert external[0].severity == "non-blocking"
+
+
+def test_missing_reference_path_in_openai_metadata_is_blocking(
+    tmp_path: Path,
+) -> None:
+    root = write_test_repository(tmp_path, "")
+    openai_yaml = root / ".github/skills/internal-example/agents/openai.yaml"
+    openai_yaml.write_text(
+        openai_yaml.read_text(encoding="utf-8").replace(
+            "default_prompt: Use /internal-example for this fixture.",
+            "default_prompt: Use /internal-example and read"
+            " `references/missing.md` first.",
+        ),
+        encoding="utf-8",
+    )
+
+    findings = detect_internal_skill_findings(root)
+
+    missing = [
+        finding for finding in findings if finding.code == "missing-local-reference"
+    ]
+    assert len(missing) == 1
+    assert missing[0].severity == "blocking"
+    assert missing[0].path == openai_yaml.as_posix()

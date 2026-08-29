@@ -822,6 +822,9 @@ def validate_local_references(root: Path, skill_dir: Path) -> list[Finding]:
         if (skill_dir / "references").exists()
         else [skill_dir / "SKILL.md"]
     )
+    openai_yaml = skill_dir / "agents" / "openai.yaml"
+    if openai_yaml.exists():
+        markdown_files.append(openai_yaml)
 
     seen: set[tuple[str, str]] = set()
     for markdown_file in markdown_files:

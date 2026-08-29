@@ -26,8 +26,9 @@ A competing-owner request stays with its owner; a Copilot agent under
 `.github/agents/` routes to `/internal-agent-creator`.
 
 Use one worker, one brief, and one result. Default to one attempt. A corrective
-retry requires new evidence or a concrete correction target. Cosmetic,
-punctuation, prose-only, and semantic disagreement do not reopen the worker.
+retry requires new evidence and a concrete correction target, and it must carry
+a changed brief. Cosmetic, punctuation, prose-only, and semantic disagreement do
+not reopen the worker.
 Direct worker writes are limited to one exact declared artifact; the parent
 reviews and accepts it. The worker never edits the creator contract, inventory,
 approval records, protected bundles, or broad directories.
@@ -52,8 +53,9 @@ v1; unobserved worker validation and budget data remain claims or unavailable
 evidence. When timeout, interruption, executor unavailability, or missing
 terminal output prevents a worker payload, the caller records a
 `LifecycleRecord` and creates neither a synthetic `WorkerResult` nor a
-`VerificationReceipt`. Trigger, boundary, policy, scope, retry choice, and
-subjective authoring decisions remain with the parent.
+`VerificationReceipt`. Trigger, boundary, policy, scope, retry choice,
+independent validation, acceptance, semantic review, closeout, and subjective
+authoring decisions remain with the parent.
 
 ## Lifecycle and retirement
 

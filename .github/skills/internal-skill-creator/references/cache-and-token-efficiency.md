@@ -21,10 +21,10 @@ provider breakpoints; the runtime does.
 
 - Keep every always-loaded surface byte-stable: description, frontmatter
   serialization, section order, projection order, and reference link order.
-- Prohibit volatile content in `SKILL.md`, frontmatter, descriptions, and
-  references: timestamps, session or request IDs, generated counts, run
-  telemetry, and dates. Route volatile facts to on-demand content or the
-  conversation, never to a cached prefix.
+- Prohibit volatile content in every cached surface: `SKILL.md`, frontmatter,
+  and descriptions. Timestamps, session or request IDs, generated counts, run
+  telemetry, and dates belong in on-demand references or in the conversation,
+  never in a cached prefix.
 - Order content stable-to-volatile inside every file: durable rules first,
   session-specific guidance last. A volatile sentence at the top of a body
   costs the whole prefix; at the end it costs nothing behind the breakpoint.
@@ -72,11 +72,11 @@ prefix still wins twice: lower per-turn input cost and smaller cache writes.
   OpenAI prompt caching and Anthropic prompt caching documentation.
 - Metadata-always-loaded, body-on-activation, budgets, scripts-over-prose:
   Anthropic Agent Skills overview and authoring best practices.
-- Production migration numbers (GPT-5.6 Build Hour, Ploy case study):
-  append-only on-demand tool loading cut tool-schema tokens 45% and cost 33%;
-  cross-chat breakpoints on system prompt and tools cut first-message cost
-  89% and overall spend 5%; batched tool calls with multi-action tools cut
-  cost 14% at equal pass rate; compaction cut input tokens 82%; slimmed tool
-  output cut web-tool response size 70%; moving deterministic work out of the
-  model cut token spend 54%. Volatile data placed at the prompt start was the
-  recurring cache-breaking failure.
+- Vendor-reported production migrations (GPT-5.6 Build Hour, Ploy case study)
+  report the same direction of effect: append-only on-demand tool loading,
+  cross-chat breakpoints on the system prompt and tools, batched multi-action
+  tool calls, compaction, slimmed tool output, and moving deterministic work
+  out of the model each cut cost at equal pass rate, and volatile data placed
+  at the prompt start was the recurring cache-breaking failure. These figures
+  have no repository-local reproduction; treat the direction as guidance and
+  the magnitudes as unverified.

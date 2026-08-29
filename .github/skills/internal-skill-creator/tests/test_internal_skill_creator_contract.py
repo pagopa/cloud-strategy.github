@@ -34,3 +34,4 @@ def test_bundle_contains_declared_local_siblings() -> None:
     assert (BUNDLE_ROOT / "SKILL.md").is_file()
     assert (BUNDLE_ROOT / "agents/openai.yaml").is_file()
     assert (BUNDLE_ROOT / "references/authoring-and-evaluation.md").is_file()
+    assert (BUNDLE_ROOT / "references/cache-and-token-efficiency.md").is_file()
