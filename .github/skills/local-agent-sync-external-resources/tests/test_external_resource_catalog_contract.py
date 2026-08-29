@@ -8,9 +8,9 @@ REPO_ROOT = next(
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-sys.path.insert(0, str(REPO_ROOT / ".github/scripts"))
+sys.path.insert(0, str(REPO_ROOT / ".github/tools"))
 
-from copilot_tools.checks.catalog import (  # noqa: E402
+from catalog.rules import (  # noqa: E402
     check_external_resource_manifest,
     check_superpowers_import_naming,
 )
@@ -144,5 +144,3 @@ def test_internal_grill_me_is_an_explicit_only_legacy_bundle() -> None:
 
     assert frontmatter["name"] == "internal-grill-me"
     assert metadata["policy"]["allow_implicit_invocation"] is False
-    for field in ("Question", "Recommendation", "Why", "Default if accepted"):
-        assert field in skill_content

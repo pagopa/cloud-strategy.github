@@ -153,42 +153,7 @@ option until the user resolves the decision.
 
 ## Decision ledger and eligibility
 
-Give every material decision a stable `Decision ID`. The compact ledger stores
-only:
-
-- `Decision ID`;
-- decision or constraint;
-- status;
-- basis;
-- reopen condition;
-- dependencies.
-
-Use these decision states:
-
-- `eligible-now`: an open decision with no unresolved prerequisite;
-- `blocked-later`: a decision whose prerequisite is still unresolved;
-- `deferred`: visibly postponed by the user or by an explicit evidence limit;
-- `resolved-from-evidence`: settled by sufficient local evidence;
-- `accepted`: explicitly accepted by the user;
-- `accepted-risk`: explicitly retained as a known risk;
-- `rejected`: rejected by evidence, the user, or a supported comparison.
-
-Use `open` only as a visible recovery marker when a decision cannot be
-reconstructed; it is not a hidden substitute for a normal terminal state.
-Root decisions have no unresolved prerequisites. Dependent decisions remain
-`blocked-later` until their prerequisites resolve. Before asking, recover local
-evidence and move any fact that is already sufficient to
-`resolved-from-evidence`.
-
-When several roots are open, prioritize authority or scope blockers, then
-dependency impact, recommendation impact, material risk, and finally
-non-blocking preference. This is a priority heuristic, not a fixed question
-count or a normative multi-branch scheduler. Collect every currently known
-material `eligible-now` decision for the current round and map each numbered
-question to exactly one such decision. Do not split that set into one-question
-turns. If the set contains only one decision, still send it as a numbered
-one-item block. Reopen a decision only when new evidence, an explicit user
-change, or a supported critical finding matches its declared reopen condition.
+Load [`references/decision-ledger.md`](references/decision-ledger.md) before building or updating the ledger; it owns states, priority, batching, and reopen rules.
 
 ## State capsule
 
@@ -288,103 +253,26 @@ Completion criterion: the recommendation is traceable to resolved decisions and 
 
 ## Chat layout
 
-Use one compact Candidate projection, not a transcript or a second report.
-Present these sections in this order when they contain information:
-
-1. `### 🧭 Decision` — the active decision, current state delta, and the
-  choice required from the user.
-2. `### ✅ Recommendation` — the current direction and why it satisfies the
-  accepted outcome and constraints.
-3. `### 🔎 Evidence` — only evidence that controls this decision, grouped by
-  implication instead of repeating the investigation.
-4. `### ⚠️ Risks` — blockers, unknowns, acceptance conditions, and residual
-  risks that could change the recommendation.
-5. `### ❓ Decisions needed` — one numbered block for eligible decisions, or
-  omit it when none remain.
-
-Keep the seven gateway menu entries in their required positions, each as one
-compact line with its lock reason. Do not repeat the Candidate Analysis Spec,
-critical report, ledger, or recovery record in chat. The canonical record and
-selected artifact retain full detail; chat must still name every material item
-in the sections above or state that it is retained there. A recommendation is
-not acceptance.
-
-Use at most one Mermaid diagram only when it clarifies three or more decision,
-dependency, ownership, or option relationships. Put the conclusion in adjacent
-prose and keep simple decisions prose-only. Diagnostic word counts never
-authorize dropping a blocker, unknown, acceptance condition, or residual risk.
-Keep the stable Analysis Spec field names unchanged.
+Before presenting a Candidate, opening acceptance, running critical review,
+authoring an accepted artifact, or persisting state, load
+[`references/candidate-and-persistence.md`](references/candidate-and-persistence.md).
+It owns the compact chat projection, stable Analysis Spec fields, acceptance
+gate, review integration, artifact handoff, and persistence route.
 
 ## Candidate Analysis Spec
 
-Use one canonical subject for the analysis and any optional critical review.
-The Candidate Analysis Spec contains `Decision focus`; `Desired outcome` and
-`Success criteria`; `Scope` and `Anti-scope`; `Facts`, `Reports`, `Assumptions`,
-`Unknowns`, and `Constraints`; `Resolved decisions`; `Options` with contrasting
-mechanisms; `Recommendation`; `Rejected alternatives` and evidence-based
-reasons; `Risks` and `Disconfirming signals`; `Deferred questions`; and
-`Specific critical focus`.
-
-Present the Candidate before opening acceptance. The user may explicitly ask
-to continue the analysis or invoke `/internal-gateway-critical-master` instead
-of accepting. When asking for acceptance, show exactly this numbered gate and
-do not treat a displayed recommendation as acceptance:
-
-1. `✅ Accept as the Consolidated Analysis Spec + spec`
-2. `✅ Accept as the Consolidated Analysis Spec + plan`
-3. `💾 Save the analysis`
-4. `⏹️ Close without a file or plan`
-
-After completed critical review, promote the Candidate Analysis Spec to the
-Consolidated Analysis Spec only after the user explicitly chooses option 1 or
-2. Option 1 authorizes only authoring the consolidated analysis spec artifact;
-option 2 authorizes only the implementation-plan authoring handoff. Neither
-option authorizes implementation or execution. Options 3 and 4 do not promote
-the Candidate. The Candidate remains the Candidate until review is complete
-and option 1 or 2 is explicitly selected.
-
-### Artifact authoring after acceptance
-
-After the user selects `+ spec` or `+ plan`, load and apply
-[`references/artifact-authoring.md`](references/artifact-authoring.md). It owns
-the conditional Luna route, the bounded delegation admission, and the retained
-owner responsibilities for the selected artifact. Neither route starts
-implementation or execution.
+Use the field set and promotion rules in
+`references/candidate-and-persistence.md`; the Candidate remains unaccepted
+until critical review and an explicit promotion choice complete.
 
 ## Critical review procedure
 
-The `CRITICAL REVIEW` gate is mandatory before close or promotion. Invoke
-`/internal-gateway-critical-master` for its procedure when the review route is
-selected or required by this lifecycle. Pass the Candidate Analysis Spec as
-the canonical subject, its `Specific critical focus`, and earlier conversation
-only as supporting evidence. The critical owner supplies its intake, lenses,
-procedure, findings, and report; this gateway records only the structural
-completion predicate and keeps ownership of lifecycle and authority.
-
-While a blocking finding or a material unresolved finding remains, offer only
-the applicable examination, realignment, or additional-review actions. When
-no blocking finding remains and acceptance is available, show exactly the same
-four-option acceptance gate:
-
-1. `✅ Accept as the Consolidated Analysis Spec + spec`
-2. `✅ Accept as the Consolidated Analysis Spec + plan`
-3. `💾 Save the analysis`
-4. `⏹️ Close without a file or plan`
-
-Do not realign automatically. Require the user's explicit numbered choice
-before integrating critical findings. When the user selects realignment, treat
-the critical report as new evidence: incorporate supported findings, reject
-conflicting suggestions with evidence, return unresolved user decisions to
-`/grill-me`, and reopen the affected analysis branch. Update the same canonical
-state and spec. It becomes the Consolidated Analysis Spec only when every
-material finding has been incorporated, rejected with evidence, accepted as
-residual risk, or routed to a resolvable branch, and the user explicitly
-selects acceptance option 1 or 2. The selected artifact then follows
-`references/artifact-authoring.md`. Do not realign or accept automatically.
+Invoke `/internal-gateway-critical-master` with the Candidate as canonical
+subject. Apply the disposition and realignment rules in
+`references/candidate-and-persistence.md`; this gateway retains lifecycle and
+authority ownership.
 
 ## Pause and persistence
 
-Conversation-only analysis remains the default. On pause, save, cross-chat
-continuation, or accepted artifact creation, load and apply
-[`references/persistence.md`](references/persistence.md). It owns the resume
-projection, single-artifact rule, default path, and post-acceptance handoff.
+Use the persistence route in `references/candidate-and-persistence.md` for
+pause, save, cross-chat continuation, or accepted artifact creation.

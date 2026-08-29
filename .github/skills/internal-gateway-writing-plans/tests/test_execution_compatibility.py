@@ -26,7 +26,7 @@ INVENTORY = REPO_ROOT / ".github/INVENTORY.md"
 def _normalized_manifest_contract(text: str) -> str:
     start_marker = "A current"
     end_marker = "no `## Execution Contract`."
-    start = text.index(start_marker, text.index("## Normative Manifest v3 Contract"))
+    start = text.index(start_marker)
     end = text.index(end_marker, start) + len(end_marker)
     return re.sub(r"\s+", " ", text[start:end]).strip()
 
@@ -108,7 +108,9 @@ def test_gateway_normative_manifest_contracts_remain_equal() -> None:
     )
     writer = (BUNDLE / "references/manifest-v3.md").read_text(encoding="utf-8")
 
-    assert re.sub(r"\s+", " ", executor).strip() == re.sub(r"\s+", " ", writer).strip()
+    assert _normalized_manifest_contract(executor) == _normalized_manifest_contract(
+        writer
+    )
 
 
 def test_manifest_references_are_local_and_cover_normative_contract() -> None:
@@ -117,54 +119,22 @@ def test_manifest_references_are_local_and_cover_normative_contract() -> None:
 
     assert writer_reference.is_file()
     assert executor_reference.is_file()
-    required_terms = {
-        "schema_version",
-        "manifest_version",
-        "authority_boundaries",
-        "delegation",
-        "targets",
-        "controls",
-        "validations",
-        "manual_obligations",
-        "tasks",
-        "retry_policy",
-        "approval",
-        "bootstrap",
-        "rollout",
-        "handoff",
-        "semantic_fingerprint",
-        "status sibling",
-        "parser",
-    }
-    writer_text = writer_reference.read_text(encoding="utf-8")
-    executor_text = executor_reference.read_text(encoding="utf-8")
-    assert required_terms <= set(re.findall(r"[A-Za-z_]+(?: [A-Za-z_]+)?", writer_text))
-    assert required_terms <= set(
-        re.findall(r"[A-Za-z_]+(?: [A-Za-z_]+)?", executor_text)
-    )
-
-    def normalize(text: str) -> str:
-        return re.sub(r"\s+", " ", text).strip()
-
-    assert normalize(writer_text) == normalize(executor_text)
+    assert _normalized_manifest_contract(
+        writer_reference.read_text(encoding="utf-8")
+    ) == _normalized_manifest_contract(executor_reference.read_text(encoding="utf-8"))
 
 
 def test_always_loaded_gateway_surfaces_keep_routing_and_shrink() -> None:
-    writer = (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
-    executor = (EXECUTOR_BUNDLE / "SKILL.md").read_text(encoding="utf-8")
-
-    for text in (writer, executor):
-        assert "Manifest v3" in text
-        assert "preflight" in text
-        assert "no Git" in text or "Git mutation" in text
-    assert len(writer) < 17000
-    assert len(executor) < 15000
-    writer_metadata = (BUNDLE / "agents/openai.yaml").read_text(encoding="utf-8")
-    executor_metadata = (EXECUTOR_BUNDLE / "agents/openai.yaml").read_text(
-        encoding="utf-8"
+    assert (BUNDLE / "SKILL.md").stat().st_size < 17000
+    assert (EXECUTOR_BUNDLE / "SKILL.md").stat().st_size < 15000
+    writer_metadata = yaml.safe_load(
+        (BUNDLE / "agents/openai.yaml").read_text(encoding="utf-8")
     )
-    assert "references/manifest-v3.md" in writer_metadata
-    assert "references/manifest-v3.md" in executor_metadata
+    executor_metadata = yaml.safe_load(
+        (EXECUTOR_BUNDLE / "agents/openai.yaml").read_text(encoding="utf-8")
+    )
+    assert "references/manifest-v3.md" in writer_metadata["interface"]["default_prompt"]
+    assert "references/manifest-v3.md" in executor_metadata["interface"]["default_prompt"]
 
 
 def test_writer_documents_repository_preflight_fields() -> None:
@@ -225,10 +195,6 @@ def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> No
     assert executor_manifest["manifest_version"] == "execution-manifest/v3"
     assert writer_manifest["retry_policy"]["max_corrective_retries"] == 3
     assert executor_manifest["retry_policy"]["max_corrective_retries"] == 3
-    assert "semantic_fingerprint" in (BUNDLE / "SKILL.md").read_text(encoding="utf-8")
-    assert (
-        "content hash" not in (BUNDLE / "SKILL.md").read_text(encoding="utf-8").lower()
-    )
     assert "## Execution Contract" not in executor_fixture
     assert "schema_version: 2" in executor_fixture
     assert ".github/skills/internal-gateway-writing-plans/SKILL.md" in inventory

@@ -35,10 +35,12 @@ logic in ad-hoc scripts or one-off shell pipelines.
 
 1. Confirm the input kind and path first: `prompt-exports` or `debug-logs`.
 2. Use the canonical wrapper, not ad-hoc parsing:
-  - `bash scripts/run.sh prompt-exports <file>`
-  - `bash scripts/run.sh debug-logs <file> --format markdown`
-   - `./.github/scripts/run.sh analyze_copilot_debug_log --help` when the
-     wrapper surface is unclear.
+
+    - `bash scripts/run.sh prompt-exports <file>`
+    - `bash scripts/run.sh debug-logs <file> --format markdown`
+    - `./.github/tools/run.sh analyze_copilot_debug_log --help` when the
+      wrapper surface is unclear.
+
 3. Start aggregate-first: file size, prompt or token aggregates, model-call
    counts, tool-span counts, result-size summaries, and the smallest targeted
    slices that can prove or disprove the current hypothesis.
@@ -69,5 +71,5 @@ logic in ad-hoc scripts or one-off shell pipelines.
 
 - `bash scripts/run.sh prompt-exports --help`
 - `bash scripts/run.sh debug-logs --help`
-- `./.github/scripts/run.sh analyze_copilot_debug_log --help`
+- `./.github/tools/run.sh analyze_copilot_debug_log --help`
 - `python3 -m pytest .github/skills/local-copilot-log-analyzer/tests/scripts -q`

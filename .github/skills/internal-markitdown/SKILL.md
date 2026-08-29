@@ -57,5 +57,3 @@ Two installs coexist; name the install target before debugging.
 
 - Confirm the output file exists and contains the expected section anchors
   (for YouTube: `### Transcript`).
-- Run `python3 .github/scripts/validate-internal-skills.py --skill internal-markitdown --strict`
-  after editing this bundle.

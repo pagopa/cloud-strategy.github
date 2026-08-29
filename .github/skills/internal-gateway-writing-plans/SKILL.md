@@ -181,37 +181,10 @@ the diagram is supplementary, never a replacement for them.
 
 ## Command Portability
 
-- Write every baseline, focused, and final validation command in directly
-  executable native form. The command recorded in the plan is the
-  authoritative command and evidence label.
-- Do not make `graphify` or another optional accelerator a prerequisite or
-  command prefix unless the task's actual subject is that tool.
-- Executor-side optimization may accelerate an invocation, but must not alter
-  the recorded authoritative command or its validation meaning.
-- Before handoff, run an existence probe for every `validations[].command`.
-  Probe the executable or path with `command -v` or the native path check before
-  running the validation. Distinguish command-not-found from a validation
-  failure. Exit 127 is a missing-tool condition: record an unambiguous native
-  equivalent and its deviation, or retain the residual obligation and stop.
-- Order tasks so non-blocking discovery and availability checks come first,
-  implementation work stays in the middle, and environment-dependent
-  verification runs after implementation.
-
-The executor owns the single mechanical plan validator. Do not add a
-writer-local validator, a second implementation-plan writing lifecycle, or a
-duplicate parser contract. The executor validates one normative Execution
-Manifest v3. There is no legacy manifest parser compatibility mode. A legacy `## Execution Contract`
-is never a standalone plan schema and requires writer-side regeneration.
-Before handoff, the parent gateway MUST resolve the executor's loaded physical
-bundle and run its `scripts/run.sh preflight` independently against the written
-current plan, then confirm zero blocking findings. The command is:
-`bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`.
-Explicitly
-`legacy/imported` material is the only reconstruction path; it is not a current
-plan exemption and requires refreshed approval as Manifest v3. Plans
-without the versioned manifest are not actionable. Do not leave an automatable
-obligation as narrative-only evidence or downgrade it to a manual obligation
-to make preflight or closeout pass.
+Before writing validation commands or handing off a plan, load
+[`references/command-portability.md`](references/command-portability.md). It
+owns native command form, availability probes, missing-tool handling, task
+ordering, and the executor preflight boundary.
 
 ## Manifest Contract Loading
 

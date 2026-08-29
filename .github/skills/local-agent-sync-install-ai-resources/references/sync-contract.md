@@ -119,4 +119,4 @@ unchanged skills rather than enumerating them. Translate every blocker using
 - Python CLI: `scripts/sync_home_ai_resources.py`
 - Planning and apply implementation: `scripts/home_syncing.py`
 - Contract loader: `scripts/home_sync_contract.py`
-- Repository dispatcher: `.github/scripts/run.sh sync_home_ai_resources ...`
+- Repository dispatcher: `.github/tools/run.sh sync_home_ai_resources ...`

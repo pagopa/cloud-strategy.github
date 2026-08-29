@@ -1,8 +1,8 @@
 # Manifest v3 Reference
 
-This bundle-local reference is loaded only for Execution Manifest authoring or
-review. The executor parser and `scripts/run.sh preflight` remain the sole
-mechanical authority.
+This writer-local reference is loaded for Execution Manifest authoring and
+producer review. The executor parser and `scripts/run.sh preflight` remain the
+sole mechanical authority.
 
 ## Top-Level Contract
 

@@ -48,7 +48,7 @@ Use `scripts/run.sh`.
 | Readiness check | `doctor --targets skills` |
 
 `dry-run` is an alias for `plan`. The repository dispatcher
-`./.github/scripts/run.sh sync_home_ai_resources ...` remains a delegating
+`./.github/tools/run.sh sync_home_ai_resources ...` remains a delegating
 compatibility entrypoint.
 
 When the user calls this skill with an `agents.md` request, `agents.md` means `sync --targets agents.md`.
@@ -119,6 +119,6 @@ action; see `references/error-codes.md`.
 
 - Run focused tests under
   `.github/skills/local-agent-sync-install-ai-resources/tests/scripts`.
-- Run `bash -n scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
-- Rebuild `.github/INVENTORY.md` with `./.github/scripts/run.sh build-inventory --root .` after bundle changes.
-- Run `./.github/scripts/run.sh validate-catalog --root . --include-token-risks` after bundle or automation changes.
+- Run `bash -n scripts/run.sh .github/tools/run.sh` after shell entrypoint changes.
+- Rebuild `.github/INVENTORY.md` with `./.github/tools/run.sh build-inventory --root .` after bundle changes.
+- Run `./.github/tools/run.sh validate-catalog --root . --include-token-risks` after bundle or automation changes.

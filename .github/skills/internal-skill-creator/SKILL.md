@@ -117,7 +117,9 @@ and completion status are explicit.
    a paired `.github/agents/<name>.agent.md` exists, its Output section. A
    projection must not require output fields or sections that SKILL.md
    excludes from chat.
-2. Run `python3 .github/scripts/validate-internal-skills.py --skill <name> --strict`.
+2. Validate the revised bundle from the bundle itself: parse `SKILL.md`
+   frontmatter, confirm declared siblings exist, and run any bundle-local
+   tests. Do not require a host-repository catalog dispatcher.
 3. Check routing fallout in nearby skills and agents.
 4. For replacement or retirement work, remove hollow references and obsolete
    entrypoints. For any material revision, record before/after line, word, and

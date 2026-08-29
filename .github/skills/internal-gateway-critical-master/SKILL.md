@@ -197,63 +197,9 @@ line, a finding, and `Next`.
 
 ### Finding block shape
 
-Each finding is one compact block:
-
-```markdown
-**N. <dot> <short title>** — <classification> · <severity>/<confidence>
-
-- **<Problem>:** what is wrong, one to two sentences, concrete.
-- **<Suggestion>:** the smallest change that fixes it, one to two sentences.
-- **<Why>:** why it matters, one to two sentences.
-```
-
-Rules:
-
-- Severity dots are stable: 🔴 high, 🟡 medium, 🟢 low.
-- Each of the three fields must be understandable without rereading the
-  investigation: name the file, decision, or mechanism involved; never a
-  cryptic ID alone.
-- A defense of the subject is not a finding. Do not record it as one;
-  defenses belong in the subject's own rationale.
-- Deeper bookkeeping fields (`Fix owner`, `Expected verification`) go to the
-  caller-owned ledger when one exists; they do not appear in chat.
-
-### Residuals shape
-
-Each residual risk is a bold name followed by an explanation of what stays
-open and why it matters. A bare name or one-word entry is invalid. A deferral
-is acceptable to report only with its consequence stated.
-
-### Open shape
-
-Each open question is numbered and stated in plain language. When the answer
-is a choice, list lettered options with their consequence (for example `A)`
-keep the current owner, `B)` propose a separate design), then add one
-suggested option marked with `💡` together with a one-sentence reason. Omit
-the section when nothing material is open.
-
-### Next shape
-
-Number each action, make it concrete, and reference the finding or residual it
-closes. One action per step; no vague instructions such as "improve the spec".
-
-### Mermaid rules
-
-Use at most one diagram, and only when it clarifies three or more material
-causal, dependency, ownership, or state relationships. Use a top-down
-flowchart with:
-
-- one node per finding or effect, anchored as `Finding N` or by its short
-  name;
-- short self-explanatory phrases of two to four `\n`-broken lines, not bare
-  IDs;
-- an emoji prefix per node and semantic fills: red for the problem, amber for
-  decision-level effects, yellow for recommendation-level effects;
-- the controlling conclusion in adjacent prose; the diagram is never the sole
-  carrier of evidence.
-
-Do not emit an unrelated card, machine-only object, preamble, or internal
-working notes.
+Before rendering a report, load
+[`references/report-formats.md`](references/report-formats.md). It owns the
+finding, residual, open-question, next-action, Mermaid, and no-context shapes.
 
 ### Delta passes
 
@@ -264,14 +210,5 @@ scope only when it changes interpretation.
 
 ## No-context failure
 
-When no subject or evidence can be recovered, emit only:
-
-```markdown
-# Critical Analysis
-
-## Status
-Failure: no analysable context was available.
-
-## Required Context
-Provide a subject, decision, proposal, design, document, or evidence to critique.
-```
+Use the exact no-context projection in `references/report-formats.md` when no
+subject or evidence can be recovered.
