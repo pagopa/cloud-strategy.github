@@ -2,9 +2,17 @@
 #
 # Purpose: Bootstrap the local Python environment and run a Copilot maintenance tool.
 # Usage examples:
-#   ./.github/scripts/run.sh build_inventory --root .
+#   ./.github/scripts/run.sh build-inventory --root .
 
 set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+VENV_DIR="$SCRIPT_DIR/.venv"
+PYTHON_BIN="${PYTHON_BIN:-}"
+PYTHON_VERSION_FILE="$REPO_ROOT/.python-version"
+REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
+REQUIREMENTS_HASH_FILE="$VENV_DIR/.requirements.sha256"
 
 log_info() {
     printf 'ℹ️  %s\n' "$*"
@@ -30,17 +38,18 @@ usage() {
 Usage:
   ./.github/scripts/run.sh <tool> [tool-args...]
 
-Tools:
-    github_catalog_validation
+Local tools:
+    validate-github-catalog
+    benchmark-skill-tokens
+    build-inventory
+    validate-catalog
+    detect-token-risks
+    validate-internal-skills
+    validate-skill-change-scope
+
+Delegated tools:
     analyze_copilot_debug_log
-    benchmark_skill_tokens
-    build_inventory
-    check_catalog_consistency
-    audit_copilot_catalog
-    detect_token_risks
     sync_home_ai_resources
-    validate_internal_skills
-    validate_skill_change_scope
 EOF
 }
 
@@ -114,35 +123,32 @@ verify_venv_version() {
 resolve_script() {
     local tool_name="$1"
     case "$tool_name" in
-        github_catalog_validation|github_catalog_validation.py)
-            printf '%s\n' "$SCRIPT_DIR/github_catalog_validation.py"
+        validate-github-catalog|validate-github-catalog.py|validate-github-catalog.sh)
+            printf '%s\n' "$SCRIPT_DIR/validate-github-catalog.py"
             ;;
         analyze_copilot_debug_log|analyze_copilot_debug_log.sh)
             printf '%s\n' "$REPO_ROOT/.github/skills/local-copilot-log-analyzer/scripts/run.sh"
             ;;
-        benchmark_skill_tokens|benchmark_skill_tokens.py)
-            printf '%s\n' "$SCRIPT_DIR/benchmark_skill_tokens.py"
+        benchmark-skill-tokens|benchmark-skill-tokens.py|benchmark-skill-tokens.sh)
+            printf '%s\n' "$SCRIPT_DIR/benchmark-skill-tokens.py"
             ;;
-        build_inventory|build_inventory.py)
-            printf '%s\n' "$SCRIPT_DIR/build_inventory.py"
+        build-inventory|build-inventory.py|build-inventory.sh)
+            printf '%s\n' "$SCRIPT_DIR/build-inventory.py"
             ;;
-        check_catalog_consistency|check_catalog_consistency.py)
-            printf '%s\n' "$SCRIPT_DIR/check_catalog_consistency.py"
+        validate-catalog|validate-catalog.py|validate-catalog.sh)
+            printf '%s\n' "$SCRIPT_DIR/validate-catalog.py"
             ;;
-        audit_copilot_catalog|audit_copilot_catalog.py)
-            printf '%s\n' "$SCRIPT_DIR/audit_copilot_catalog.py"
-            ;;
-        detect_token_risks|detect_token_risks.py)
-            printf '%s\n' "$SCRIPT_DIR/detect_token_risks.py"
+        detect-token-risks|detect-token-risks.py|detect-token-risks.sh)
+            printf '%s\n' "$SCRIPT_DIR/detect-token-risks.py"
             ;;
         sync_home_ai_resources|sync_home_ai_resources.py)
             printf '%s\n' "$REPO_ROOT/.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
             ;;
-        validate_internal_skills|validate_internal_skills.py)
-            printf '%s\n' "$SCRIPT_DIR/validate_internal_skills.py"
+        validate-internal-skills|validate-internal-skills.py|validate-internal-skills.sh)
+            printf '%s\n' "$SCRIPT_DIR/validate-internal-skills.py"
             ;;
-        validate_skill_change_scope|validate_skill_change_scope.py)
-            printf '%s\n' "$SCRIPT_DIR/validate_skill_change_scope.py"
+        validate-skill-change-scope|validate-skill-change-scope.py|validate-skill-change-scope.sh)
+            printf '%s\n' "$SCRIPT_DIR/validate-skill-change-scope.py"
             ;;
         *)
             return 1
@@ -189,11 +195,6 @@ main() {
         exit 1
     fi
 
-    if [[ "$tool_name" == "analyze_copilot_debug_log" || "$tool_name" == "analyze_copilot_debug_log.sh" ]]; then
-        shift
-        exec bash "$REPO_ROOT/.github/skills/local-copilot-log-analyzer/scripts/run.sh" "$@"
-    fi
-
     script_path="$(resolve_script "$tool_name")" || {
         log_error "Unknown tool: $tool_name"
         usage
@@ -213,14 +214,6 @@ main() {
     install_dependencies
     exec "$VENV_DIR/bin/python" "$script_path" "$@"
 }
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-VENV_DIR="$SCRIPT_DIR/.venv"
-PYTHON_BIN="${PYTHON_BIN:-}"
-PYTHON_VERSION_FILE="$REPO_ROOT/.python-version"
-REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
-REQUIREMENTS_HASH_FILE="$VENV_DIR/.requirements.sha256"
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     main "$@"

@@ -30,7 +30,7 @@ For skill bundles, treat `references/`, `scripts/`, `assets/`, and `agents/opena
 - Detect sync workflows that skip or fail to report governance review for `.github/copilot-instructions.md` and root `AGENTS.md`.
 - Detect naming violations and stale inventory references.
 - Detect governance files that still describe removed, renamed, or retired assets.
-- Detect catalog retirements or remaps that were not propagated in the same change to the supported consistency entrypoint `./.github/scripts/run.sh check_catalog_consistency`.
+- Detect catalog retirements or remaps that were not propagated in the same change to the supported consistency entrypoint `./.github/scripts/run.sh validate-catalog`.
 - Detect token-risk claims that rely on assumed runtime loading behavior instead of observable repository signals such as description length, exact trigger collisions, or repo-profile coverage.
 
 ## Audit Order
@@ -50,7 +50,7 @@ Before classifying a cleanup as high-evidence, verify the candidate paths exist 
 
 ## Completion criteria
 
-An audit is complete only when every catalog area in scope has been audited, each finding is recorded with its asset path, and `./.github/scripts/run.sh check_catalog_consistency` has been invoked.
+An audit is complete only when every catalog area in scope has been audited, each finding is recorded with its asset path, and `./.github/scripts/run.sh validate-catalog` has been invoked.
 
 Load `references/audit-checklist.md` when you need the detailed issue taxonomy, flagging criteria, or example findings.
 

@@ -24,6 +24,7 @@ env/
 !.opencode/agents/
 .github/scripts/lib/graphify-out/*
 .github/scripts/graphify-out/*
+.github/scripts/copilot_tools/graphify-out/*
 tmp/
 tmp/superpowers/specs/
 .superpowers

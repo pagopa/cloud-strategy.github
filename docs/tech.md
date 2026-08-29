@@ -19,7 +19,7 @@ repository.
 | Category | Observed tooling |
 | --- | --- |
 | Sync logic | `.github/skills/local-sync-repos/scripts/sync_repos.py`, `.github/skills/local-sync-repos/scripts/sync_contract.py` |
-| Catalog generation | `.github/scripts/build_inventory.py`, inventory helpers in `.github/scripts/lib/`, and `./.github/scripts/run.sh build_inventory` |
+| Catalog generation | `.github/scripts/build-inventory.py`, inventory helpers in `.github/scripts/lib/`, and `./.github/scripts/run.sh build-inventory` |
 | Contract checks | `pytest` tests under `tests/` and `.github/skills/*/tests/`, plus validator subcommands through `run.sh` |
 | Linting and policy checks | Make targets such as `docs-lint`, `token-risks`, and catalog checks |
 

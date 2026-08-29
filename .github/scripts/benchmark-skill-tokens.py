@@ -71,7 +71,9 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": ["references/operational-validation.md"],
-        "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+        "forbidden_local_references": [
+            "references/existing-infrastructure-adoption.md"
+        ],
     },
     {
         "scenario": "state-or-drift",
@@ -79,7 +81,9 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": ["references/operational-validation.md"],
-        "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+        "forbidden_local_references": [
+            "references/existing-infrastructure-adoption.md"
+        ],
     },
     {
         "scenario": "module-architecture",
@@ -98,7 +102,9 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": ["references/operational-validation.md"],
-        "forbidden_local_references": ["references/existing-infrastructure-adoption.md"],
+        "forbidden_local_references": [
+            "references/existing-infrastructure-adoption.md"
+        ],
     },
     {
         "scenario": "ambiguous-adoption-identity",
@@ -175,15 +181,17 @@ def build_scenario_report(root: Path) -> list[dict[str, Any]]:
 
         scenario_proxy = skill_tokens + chain_tokens
 
-        reports.append({
-            "scenario": scenario_name,
-            "expected_owner": expected_owner,
-            "skill_tokens": skill_tokens,
-            "bundle_tokens": bundle_tokens,
-            "chain_tokens": chain_tokens,
-            "scenario_proxy": scenario_proxy,
-            "chain_risks": chain_risks,
-        })
+        reports.append(
+            {
+                "scenario": scenario_name,
+                "expected_owner": expected_owner,
+                "skill_tokens": skill_tokens,
+                "bundle_tokens": bundle_tokens,
+                "chain_tokens": chain_tokens,
+                "scenario_proxy": scenario_proxy,
+                "chain_risks": chain_risks,
+            }
+        )
     return reports
 
 
@@ -226,9 +234,7 @@ def build_terraform_scenario_report(root: Path) -> list[dict[str, Any]]:
                 "primary_owner": primary_owner,
                 "delegated_owner": delegated_owner,
                 "delegated_core_owner": delegated_core_owner,
-                "loaded_local_references": list(
-                    scenario["loaded_local_references"]
-                ),
+                "loaded_local_references": list(scenario["loaded_local_references"]),
                 "forbidden_local_references": list(
                     scenario["forbidden_local_references"]
                 ),
@@ -252,7 +258,9 @@ GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
     "Direct execute": [GATEWAY_SKILL, "internal-gateway-simple-task"],
     "Define Gate 0": [GATEWAY_SKILL, "grill-me"],
     "Define idea and critical": [
-        GATEWAY_SKILL, "grill-me", "internal-gateway-critical-master",
+        GATEWAY_SKILL,
+        "grill-me",
+        "internal-gateway-critical-master",
     ],
     "Plan handoff": [GATEWAY_SKILL, "internal-gateway-writing-plans"],
     "Approved apply-plan": [GATEWAY_SKILL, "internal-gateway-execute-plans"],
@@ -267,7 +275,8 @@ IDEA_GATEWAY_SCENARIOS: dict[str, list[str]] = {
     "Idea core entry": [IDEA_GATEWAY_SKILL],
     "Interview support": [IDEA_GATEWAY_SKILL, "grill-me"],
     "Mandatory critical pass": [
-        IDEA_GATEWAY_SKILL, "internal-gateway-critical-master",
+        IDEA_GATEWAY_SKILL,
+        "internal-gateway-critical-master",
     ],
     "Visible handoff": [IDEA_GATEWAY_SKILL],
 }
@@ -276,13 +285,21 @@ GATEWAY_OUTPUT_FIELD_SCENARIOS: dict[str, list[str]] = {
     "Terminal direct execute": ["result", "evidence", "risk"],
     "Define checkpoint": ["gate", "brief", "validation", "risk", "checkpoint"],
     "Plan checkpoint": ["decision", "validation", "risk", "checkpoint"],
-    "Non-terminal apply-plan stop": ["state", "continuation", "user_action", "evidence", "next_step"],
+    "Non-terminal apply-plan stop": [
+        "state",
+        "continuation",
+        "user_action",
+        "evidence",
+        "next_step",
+    ],
     "Review verdict": ["finding", "confidence", "evidence_gap", "risk", "route"],
 }
 
 
 def build_gateway_report(root: Path) -> dict[str, Any]:
-    core_bytes = len((root / ".github" / "skills" / GATEWAY_SKILL / "SKILL.md").read_bytes())
+    core_bytes = len(
+        (root / ".github" / "skills" / GATEWAY_SKILL / "SKILL.md").read_bytes()
+    )
     bundle_dir = root / ".github" / "skills" / GATEWAY_SKILL
     bundle_bytes = sum(
         len(p.read_bytes()) for p in bundle_dir.rglob("*") if p.is_file()
@@ -296,28 +313,35 @@ def build_gateway_report(root: Path) -> dict[str, Any]:
             skill_path = root / ".github" / "skills" / skill_name / "SKILL.md"
             if skill_path.exists():
                 total_bytes += len(skill_path.read_bytes())
-        context_scenarios.append({
-            "scenario": name,
-            "required_skills": deduped,
-            "bytes": total_bytes,
-            "estimated_tokens": (total_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
-        })
+        context_scenarios.append(
+            {
+                "scenario": name,
+                "required_skills": deduped,
+                "bytes": total_bytes,
+                "estimated_tokens": (total_bytes + ESTIMATED_TOKEN_BYTES - 1)
+                // ESTIMATED_TOKEN_BYTES,
+            }
+        )
 
     output_scenarios: list[dict[str, Any]] = []
     for name, fields in GATEWAY_OUTPUT_FIELD_SCENARIOS.items():
         field_bytes = sum(len(f.encode("utf-8")) for f in fields)
-        output_scenarios.append({
-            "scenario": name,
-            "fields": fields,
-            "field_count": len(fields),
-            "field_bytes": field_bytes,
-        })
+        output_scenarios.append(
+            {
+                "scenario": name,
+                "fields": fields,
+                "field_count": len(fields),
+                "field_bytes": field_bytes,
+            }
+        )
 
     return {
         "core_bytes": core_bytes,
-        "core_estimated_tokens": (core_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        "core_estimated_tokens": (core_bytes + ESTIMATED_TOKEN_BYTES - 1)
+        // ESTIMATED_TOKEN_BYTES,
         "bundle_bytes": bundle_bytes,
-        "bundle_estimated_tokens": (bundle_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        "bundle_estimated_tokens": (bundle_bytes + ESTIMATED_TOKEN_BYTES - 1)
+        // ESTIMATED_TOKEN_BYTES,
         "required_context_scenarios": context_scenarios,
         "output_field_scenarios": output_scenarios,
     }
@@ -327,9 +351,11 @@ def build_idea_gateway_report(root: Path) -> dict[str, Any]:
     core_path = root / ".github" / "skills" / IDEA_GATEWAY_SKILL / "SKILL.md"
     core_bytes = len(core_path.read_bytes()) if core_path.exists() else 0
     bundle_dir = root / ".github" / "skills" / IDEA_GATEWAY_SKILL
-    bundle_bytes = sum(
-        len(p.read_bytes()) for p in bundle_dir.rglob("*") if p.is_file()
-    ) if bundle_dir.exists() else 0
+    bundle_bytes = (
+        sum(len(p.read_bytes()) for p in bundle_dir.rglob("*") if p.is_file())
+        if bundle_dir.exists()
+        else 0
+    )
 
     context_scenarios: list[dict[str, Any]] = []
     for name, skills in IDEA_GATEWAY_SCENARIOS.items():
@@ -339,18 +365,23 @@ def build_idea_gateway_report(root: Path) -> dict[str, Any]:
             skill_path = root / ".github" / "skills" / skill_name / "SKILL.md"
             if skill_path.exists():
                 total_bytes += len(skill_path.read_bytes())
-        context_scenarios.append({
-            "scenario": name,
-            "required_skills": deduped,
-            "bytes": total_bytes,
-            "estimated_tokens": (total_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
-        })
+        context_scenarios.append(
+            {
+                "scenario": name,
+                "required_skills": deduped,
+                "bytes": total_bytes,
+                "estimated_tokens": (total_bytes + ESTIMATED_TOKEN_BYTES - 1)
+                // ESTIMATED_TOKEN_BYTES,
+            }
+        )
 
     return {
         "core_bytes": core_bytes,
-        "core_estimated_tokens": (core_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        "core_estimated_tokens": (core_bytes + ESTIMATED_TOKEN_BYTES - 1)
+        // ESTIMATED_TOKEN_BYTES,
         "bundle_bytes": bundle_bytes,
-        "bundle_estimated_tokens": (bundle_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        "bundle_estimated_tokens": (bundle_bytes + ESTIMATED_TOKEN_BYTES - 1)
+        // ESTIMATED_TOKEN_BYTES,
         "context_scenarios": context_scenarios,
     }
 
@@ -376,12 +407,16 @@ def build_description_report(root: Path) -> list[dict[str, Any]]:
         desc_chars = len(description)
         desc_tokens = (desc_chars + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES
 
-        reports.append({
-            "skill": skill_name,
-            "description_chars": desc_chars,
-            "description_tokens": desc_tokens,
-            "description": description[:100] + "..." if len(description) > 100 else description,
-        })
+        reports.append(
+            {
+                "skill": skill_name,
+                "description_chars": desc_chars,
+                "description_tokens": desc_tokens,
+                "description": description[:100] + "..."
+                if len(description) > 100
+                else description,
+            }
+        )
     return reports
 
 
@@ -423,7 +458,9 @@ def main(argv: list[str] | None = None) -> int:
         "summary": {
             "total_scenarios": len(scenario_reports) + len(terraform_scenario_reports),
             "total_skills_measured": len(description_reports),
-            "highest_description_tokens": description_reports[0]["description_tokens"] if description_reports else 0,
+            "highest_description_tokens": description_reports[0]["description_tokens"]
+            if description_reports
+            else 0,
             "highest_scenario_proxy": max(
                 [
                     *(r["scenario_proxy"] for r in scenario_reports),

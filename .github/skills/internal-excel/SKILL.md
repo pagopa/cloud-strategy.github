@@ -69,5 +69,5 @@ description: Use when any task reads, creates, edits, validates, converts, or me
 - Run the smallest deterministic check that proves the transform: row counts, schema diff, duplicate-key scan, delimiter or encoding confirmation, locale-sensitive numeric confirmation, join cardinality, or a reconciliation sample.
 - For large files, validation output must stay compact: full-file checks should produce aggregate evidence, anomaly counts, sampled examples only when needed, and paths to generated reports instead of inline dumps.
 - When data may return to spreadsheet tools, verify formula-injection handling and avoid exposing raw sensitive values in samples or validation output.
-- Run `python3 ./.github/scripts/validate_internal_skills.py --skill internal-excel --strict` after editing this skill bundle.
+- Run `python3 ./.github/scripts/validate-internal-skills.py --skill internal-excel --strict` after editing this skill bundle.
 - Run the closest inventory consistency check when registering or renaming the skill.

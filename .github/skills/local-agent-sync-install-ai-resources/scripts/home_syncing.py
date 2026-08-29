@@ -29,9 +29,9 @@ from home_sync_contract import (
     runtime_skill_root,
     state_root_for_home,
 )
-from lib.sync_exclusions import (
-    IGNORED_SYNC_PARTS,
-    IGNORED_SYNC_SUFFIXES,
+from copilot_tools.core.sync_exclusions import (
+    RUNTIME_SYNC_IGNORED_PARTS as IGNORED_SYNC_PARTS,
+    RUNTIME_SYNC_IGNORED_SUFFIXES as IGNORED_SYNC_SUFFIXES,
     should_ignore_sync_path as _shared_should_ignore_sync_path,
     sync_copytree_ignore,
 )

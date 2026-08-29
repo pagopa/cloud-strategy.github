@@ -180,12 +180,24 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Scripts
 
-- `.github/scripts/audit_copilot_catalog.py`
-- `.github/scripts/benchmark_skill_tokens.py`
-- `.github/scripts/build_inventory.py`
-- `.github/scripts/check_catalog_consistency.py`
-- `.github/scripts/detect_token_risks.py`
-- `.github/scripts/github_catalog_validation.py`
+- `.github/scripts/benchmark-skill-tokens.py`
+- `.github/scripts/build-inventory.py`
+- `.github/scripts/copilot_tools/checks/catalog.py`
+- `.github/scripts/copilot_tools/checks/internal_skills.py`
+- `.github/scripts/copilot_tools/checks/skill_change_scope.py`
+- `.github/scripts/copilot_tools/checks/token_risks.py`
+- `.github/scripts/copilot_tools/cli.py`
+- `.github/scripts/copilot_tools/core/constants.py`
+- `.github/scripts/copilot_tools/core/files.py`
+- `.github/scripts/copilot_tools/core/findings.py`
+- `.github/scripts/copilot_tools/core/fingerprinting.py`
+- `.github/scripts/copilot_tools/core/markdown.py`
+- `.github/scripts/copilot_tools/core/output.py`
+- `.github/scripts/copilot_tools/core/paths.py`
+- `.github/scripts/copilot_tools/core/repo_paths.py`
+- `.github/scripts/copilot_tools/core/sync_exclusions.py`
+- `.github/scripts/copilot_tools/inventory.py`
+- `.github/scripts/detect-token-risks.py`
 - `.github/scripts/graphify-file-change-hook.sh`
 - `.github/scripts/install-graphify-hooks.sh`
 - `.github/scripts/lib/catalog_checks.py`
@@ -193,15 +205,16 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/scripts/lib/fingerprinting.py`
 - `.github/scripts/lib/internal_skills.py`
 - `.github/scripts/lib/inventory.py`
-- `.github/scripts/lib/jsonc.py`
 - `.github/scripts/lib/repo_paths.py`
 - `.github/scripts/lib/shared.py`
 - `.github/scripts/lib/skill_change_scope.py`
 - `.github/scripts/lib/sync_exclusions.py`
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
-- `.github/scripts/validate_internal_skills.py`
-- `.github/scripts/validate_skill_change_scope.py`
+- `.github/scripts/validate-catalog.py`
+- `.github/scripts/validate-github-catalog.py`
+- `.github/scripts/validate-internal-skills.py`
+- `.github/scripts/validate-skill-change-scope.py`
 
 ## Agents
 

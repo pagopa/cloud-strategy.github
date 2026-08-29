@@ -26,5 +26,5 @@ def test_makefile_does_not_reference_skill_runtime_scripts() -> None:
 def test_github_catalog_validation_uses_the_repository_script_runner() -> None:
     makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
 
-    assert "$(SCRIPTS_RUNNER) github_catalog_validation" in makefile
-    assert "./github_catalog_validation.sh" not in makefile
+    assert "$(SCRIPTS_RUNNER) validate-github-catalog" in makefile
+    assert "./validate-github-catalog.sh" not in makefile

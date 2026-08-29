@@ -38,7 +38,7 @@ Out of scope:
 | Knowledge docs | `docs/` | Descriptive repository context, architecture, tech, and structure. |
 | Skills and agents | `.github/skills/`, `.github/agents/` | Reusable guidance plus route wrappers and command centers. |
 | Prompts and templates | `.github/prompts/`, `.github/templates/` | Targeted creators and consumer scaffold sources. |
-| Sync engine | `.github/scripts/lib/syncing.py` | Plan/apply logic for source-managed alignment and safe preservation. |
+| Sync engine | `.github/skills/local-agent-sync-install-ai-resources/scripts/home_syncing.py` | Plan/apply logic for source-managed alignment and safe preservation. |
 | Validation layer | `tests/`, `Makefile`, `.github/scripts/` | Contract and regression checks for governance and sync behavior. |
 
 ## Key Flow

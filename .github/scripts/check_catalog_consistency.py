@@ -4,6 +4,10 @@
 Usage examples:
   python3 ./.github/scripts/check_catalog_consistency.py --root .
   python3 ./.github/scripts/check_catalog_consistency.py --root . --include-token-risks --strict
+    python3 ./.github/scripts/check_catalog_consistency.py --root . --deep
+
+Deep mode preserves the audit command's JSON and exit-code contract. Its text
+renderer is per finding, and its compact output uses the validator next action.
 """
 
 from __future__ import annotations
@@ -12,11 +16,14 @@ import argparse
 from collections import Counter
 from pathlib import Path
 
-from lib.catalog_checks import run_consistency_checks
-from lib.cli_runner import run_finding_cli, should_fail
-from lib.shared import (
-    Finding,
+from copilot_tools.cli import (
     find_repo_root,
+    run_catalog_checks,
+    run_finding_cli,
+    should_fail,
+)
+from copilot_tools.core.findings import Finding
+from copilot_tools.core.output import (
     log_error,
     log_success,
     log_warn,
@@ -24,11 +31,34 @@ from lib.shared import (
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run structural consistency checks for the Copilot catalog.")
-    parser.add_argument("--root", default=".", help="Repository root or any path inside it.")
-    parser.add_argument("--include-token-risks", action="store_true", help="Include token-risk heuristics in the result.")
-    parser.add_argument("--strict", action="store_true", help="Fail on any finding, not only blocking findings.")
-    parser.add_argument("--format", choices=["text", "json", "compact"], default="text", help="Output format.")
+    parser = argparse.ArgumentParser(
+        description="Run structural consistency checks for the Copilot catalog."
+    )
+    parser.add_argument(
+        "--root", default=".", help="Repository root or any path inside it."
+    )
+    parser.add_argument(
+        "--include-token-risks",
+        action="store_true",
+        help="Include token-risk heuristics in the result.",
+    )
+    parser.add_argument(
+        "--deep",
+        dest="include_token_risks",
+        action="store_true",
+        help="Include the deep token-risk audit in the result.",
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail on any finding, not only blocking findings.",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
+    )
     return parser.parse_args()
 
 
@@ -36,7 +66,7 @@ def main() -> int:
     args = parse_args()
     root = find_repo_root(Path(args.root))
     findings = run_finding_cli(
-        detect_fn=lambda: run_consistency_checks(
+        detect_fn=lambda: run_catalog_checks(
             root, include_token_risks=args.include_token_risks
         ),
         format_name=args.format,

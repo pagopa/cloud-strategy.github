@@ -55,7 +55,7 @@ as consumer-repository defaults without an explicit sync contract change.
 ## Standards Repository Validation
 
 - Run `make token-risks` or
-  `python3 ./.github/scripts/detect_token_risks.py --root .` after changes that
+  `python3 ./.github/scripts/detect-token-risks.py --root .` after changes that
   affect root policy or major AI assets in this repository.
 
 ## Standards Repository Locality
@@ -68,7 +68,7 @@ as consumer-repository defaults without an explicit sync contract change.
   instructions, references, examples, fixtures, scripts, and `agents/openai.yaml`
   resolvable from the bundle itself; do not require bundle users to load
   guidance from outside the skill directory.
-- Before completion, run `.github/scripts/validate_skill_change_scope.py`
+- Before completion, run `.github/scripts/validate-skill-change-scope.py`
   without an allowlist, or with only the exact currently authorized bundle
   paths.
 

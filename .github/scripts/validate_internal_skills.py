@@ -13,9 +13,10 @@ import argparse
 from collections import Counter
 from pathlib import Path
 
-from lib.cli_runner import run_finding_cli, should_fail
-from lib.internal_skills import detect_internal_skill_findings
-from lib.shared import Finding, find_repo_root, log_success, log_warn
+from copilot_tools.checks.internal_skills import detect_internal_skill_findings
+from copilot_tools.cli import find_repo_root, run_finding_cli, should_fail
+from copilot_tools.core.findings import Finding
+from copilot_tools.core.output import log_success, log_warn
 
 
 def parse_args() -> argparse.Namespace:
@@ -25,15 +26,26 @@ def parse_args() -> argparse.Namespace:
             "and repository-wide skill-test boundaries."
         )
     )
-    parser.add_argument("--root", default=".", help="Repository root or any path inside it.")
+    parser.add_argument(
+        "--root", default=".", help="Repository root or any path inside it."
+    )
     parser.add_argument(
         "--skill",
         action="append",
         default=[],
         help="Validate only the selected internal skill folder name. Repeatable.",
     )
-    parser.add_argument("--strict", action="store_true", help="Return a non-zero exit code when any finding is reported.")
-    parser.add_argument("--format", choices=["text", "json", "compact"], default="text", help="Output format.")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return a non-zero exit code when any finding is reported.",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
+    )
     return parser.parse_args()
 
 

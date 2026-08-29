@@ -10,7 +10,7 @@ REPO_ROOT = next(
 )
 sys.path.insert(0, str(REPO_ROOT / ".github/scripts"))
 
-from lib.catalog_checks import (  # noqa: E402
+from copilot_tools.checks.catalog import (  # noqa: E402
     check_external_resource_manifest,
     check_superpowers_import_naming,
 )

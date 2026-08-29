@@ -11,21 +11,29 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from lib.inventory import build_inventory_markdown, write_inventory
-from lib.shared import (
-    INVENTORY_PATH,
-    find_repo_root,
+from copilot_tools.cli import find_repo_root
+from copilot_tools.core.constants import INVENTORY_PATH
+from copilot_tools.core.files import read_text
+from copilot_tools.core.output import (
     log_error,
     log_info,
     log_success,
-    read_text,
 )
+from copilot_tools.inventory import build_inventory_markdown, write_inventory
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Rebuild or verify .github/INVENTORY.md.")
-    parser.add_argument("--root", default=".", help="Repository root or any path inside it.")
-    parser.add_argument("--check", action="store_true", help="Check whether the inventory is already up to date.")
+    parser = argparse.ArgumentParser(
+        description="Rebuild or verify .github/INVENTORY.md."
+    )
+    parser.add_argument(
+        "--root", default=".", help="Repository root or any path inside it."
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Check whether the inventory is already up to date.",
+    )
     return parser.parse_args()
 
 

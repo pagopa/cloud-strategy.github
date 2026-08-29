@@ -1,34 +1,14 @@
-"""Shared sync exclusion rules for runtime artifacts."""
+"""Compatibility exports for the pre-package sync-exclusion API."""
 
-from __future__ import annotations
+# Re-exported names preserve the legacy import surface.
+# ruff: noqa: F401
 
-from pathlib import Path
+from copilot_tools.core.sync_exclusions import (
+    RUNTIME_SYNC_IGNORED_PARTS,
+    RUNTIME_SYNC_IGNORED_SUFFIXES,
+    should_ignore_sync_path,
+    sync_copytree_ignore,
+)
 
-IGNORED_SYNC_PARTS: frozenset[str] = frozenset({
-    ".venv",
-    "__pycache__",
-    ".pytest_cache",
-})
-
-IGNORED_SYNC_SUFFIXES: frozenset[str] = frozenset({
-    ".pyc",
-    ".pyo",
-})
-
-
-def should_ignore_sync_path(path: Path) -> bool:
-    parts = path.parts
-    if any(part in IGNORED_SYNC_PARTS for part in parts):
-        return True
-    if path.suffix in IGNORED_SYNC_SUFFIXES:
-        return True
-    return False
-
-
-def sync_copytree_ignore(directory: str, names: list[str]) -> set[str]:
-    ignored: set[str] = set()
-    for name in names:
-        candidate = Path(directory) / name
-        if should_ignore_sync_path(candidate):
-            ignored.add(name)
-    return ignored
+IGNORED_SYNC_PARTS = RUNTIME_SYNC_IGNORED_PARTS
+IGNORED_SYNC_SUFFIXES = RUNTIME_SYNC_IGNORED_SUFFIXES

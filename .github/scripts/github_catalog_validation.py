@@ -13,8 +13,8 @@ import argparse
 import subprocess
 from pathlib import Path
 
-from lib.shared import (
-    find_repo_root,
+from copilot_tools.cli import find_repo_root
+from copilot_tools.core.output import (
     log_error,
     log_info,
     log_success,
@@ -124,8 +124,12 @@ def emit_compact_summary(
     exit_code: int,
     output_format: str,
 ) -> None:
-    failed_required = [item for item in results if item["returncode"] != 0 and not item["optional"]]
-    warned_optional = [item for item in results if item["returncode"] != 0 and item["optional"]]
+    failed_required = [
+        item for item in results if item["returncode"] != 0 and not item["optional"]
+    ]
+    warned_optional = [
+        item for item in results if item["returncode"] != 0 and item["optional"]
+    ]
     payload = {
         "mode": "github-catalog-validation",
         "status": "ok" if exit_code == 0 else "failed",
@@ -172,7 +176,11 @@ def main() -> int:
     output_format = getattr(args, "format", "text")
     log_file = None
     if output_format in {"json", "compact"}:
-        log_file = Path(args.log_file) if args.log_file else root / "tmp/github-catalog-validation.latest.log"
+        log_file = (
+            Path(args.log_file)
+            if args.log_file
+            else root / "tmp/github-catalog-validation.latest.log"
+        )
         if log_file.exists():
             log_file.unlink()
 

@@ -75,7 +75,9 @@ def test_contract():
 
 
 def test_skill_local_wording_assertion_is_blocking(tmp_path: Path) -> None:
-    root = write_test_repository(tmp_path, "def test_root_fixture():\n    assert True\n")
+    root = write_test_repository(
+        tmp_path, "def test_root_fixture():\n    assert True\n"
+    )
     skill_tests = root / ".github/skills/internal-example/tests"
     skill_tests.mkdir()
     source_path = skill_tests / "test_contract.py"

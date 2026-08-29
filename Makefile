@@ -4,11 +4,11 @@ PYTHON_MAJOR_MINOR := $(strip $(shell printf '%s' "$(PYTHON_VERSION)" | awk -F. 
 PYTHON ?= $(if $(PYTHON_MAJOR_MINOR),python$(PYTHON_MAJOR_MINOR),python3)
 SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh)
 SKILL_TEST_PATHS := $(wildcard .github/skills/*/tests)
-PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests $(SKILL_TEST_PATHS)
+PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib .github/scripts/copilot_tools tests $(SKILL_TEST_PATHS)
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
 RUFF := $(if $(wildcard $(SCRIPTS_VENV)/bin/ruff),$(SCRIPTS_VENV)/bin/ruff,ruff)
-CATALOG_FAST_TESTS := tests/github/scripts/lib/test_inventory.py tests/github/scripts/lib/test_repo_paths.py tests/github/scripts/test_install_graphify_hooks.py tests/github/scripts/test_run_sh_dispatch.py tests/test_repository_test_layout_contract.py
+CATALOG_FAST_TESTS := .github/scripts/tests/lib/test_inventory.py .github/scripts/tests/lib/test_repo_paths.py .github/scripts/tests/test_install_graphify_hooks.py .github/scripts/tests/test_run_sh_dispatch.py tests/test_repository_test_layout_contract.py
 CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.22.1
 MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
@@ -23,7 +23,7 @@ python-version-check:
 	@$(PYTHON) -c 'import pathlib, sys; required = pathlib.Path("$(PYTHON_VERSION_FILE)").read_text().strip(); expected = ".".join(required.split(".")[:2]); actual = f"{sys.version_info.major}.{sys.version_info.minor}"; raise SystemExit(0 if actual == expected else f"Expected $(PYTHON) to resolve to Python {expected} from $(PYTHON_VERSION_FILE) ({required}), got {actual}.")'
 
 scripts-bootstrap: python-version-check
-	@$(SCRIPTS_RUNNER) build_inventory --help >/dev/null
+	@$(SCRIPTS_RUNNER) build-inventory --help >/dev/null
 
 lint: python-version-check docs-lint
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
@@ -37,39 +37,39 @@ catalog-lint: python-version-check
 	$(RUFF) check .github/scripts tools tests $(SKILL_TEST_PATHS)
 
 catalog-fast-check: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) build_inventory --root . --check
-	@$(SCRIPTS_RUNNER) check_catalog_consistency --root .
-	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
+	@$(SCRIPTS_RUNNER) build-inventory --root . --check
+	@$(SCRIPTS_RUNNER) validate-catalog --root .
+	@$(SCRIPTS_RUNNER) validate-internal-skills --root . --strict
 	@$(SCRIPTS_VENV)/bin/python -m pytest -q $(CATALOG_FAST_TESTS)
 	@if [ "$(CATALOG_FAST_INCLUDE_TOKEN_RISKS)" = "1" ]; then \
-		$(SCRIPTS_RUNNER) detect_token_risks --root .; \
+		$(SCRIPTS_RUNNER) detect-token-risks --root .; \
 	else \
 		printf '%s\n' 'Skipping token-risks; set CATALOG_FAST_INCLUDE_TOKEN_RISKS=1 for always-on or shared-contract changes.'; \
 	fi
 
 github-catalog-validation: python-version-check
-	@$(SCRIPTS_RUNNER) github_catalog_validation --root .
+	@$(SCRIPTS_RUNNER) validate-github-catalog --root .
 
 test: scripts-bootstrap
 	@$(SCRIPTS_VENV)/bin/python -m pytest -q
 
 catalog-check: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) check_catalog_consistency --root . --include-token-risks
+	@$(SCRIPTS_RUNNER) validate-catalog --root . --include-token-risks
 
 catalog-audit: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) audit_copilot_catalog --root .
+	@$(SCRIPTS_RUNNER) validate-catalog --root . --deep
 
 inventory-build: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) build_inventory --root .
+	@$(SCRIPTS_RUNNER) build-inventory --root .
 
 token-risks: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) detect_token_risks --root .
+	@$(SCRIPTS_RUNNER) detect-token-risks --root .
 
 skill-lint: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
+	@$(SCRIPTS_RUNNER) validate-internal-skills --root . --strict
 
 skill-change-scope: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) validate_skill_change_scope --root .
+	@$(SCRIPTS_RUNNER) validate-skill-change-scope --root .
 
 docs-lint:
 	@if command -v npx >/dev/null 2>&1; then \

@@ -11,16 +11,27 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from lib.cli_runner import run_finding_cli, should_fail
-from lib.shared import Finding, find_repo_root, log_warn
-from lib.token_risks import detect_token_risks
+from copilot_tools.checks.token_risks import detect_token_risks
+from copilot_tools.cli import find_repo_root, run_finding_cli, should_fail
+from copilot_tools.core.findings import Finding
+from copilot_tools.core.output import log_warn
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Detect token efficiency risks in Copilot governance assets.")
-    parser.add_argument("--root", default=".", help="Repository root or any path inside it.")
-    parser.add_argument("--strict", action="store_true", help="Return a non-zero exit code when any finding is reported.")
-    parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
+    parser = argparse.ArgumentParser(
+        description="Detect token efficiency risks in Copilot governance assets."
+    )
+    parser.add_argument(
+        "--root", default=".", help="Repository root or any path inside it."
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return a non-zero exit code when any finding is reported.",
+    )
+    parser.add_argument(
+        "--format", choices=["text", "json"], default="text", help="Output format."
+    )
     return parser.parse_args()
 
 

@@ -12,15 +12,29 @@ import argparse
 from collections import Counter
 from pathlib import Path
 
-from lib.catalog_checks import run_consistency_checks
-from lib.cli_runner import has_severity, run_finding_cli
-from lib.shared import Finding, find_repo_root, log_info
+from copilot_tools.cli import (
+    find_repo_root,
+    has_severity,
+    run_catalog_checks,
+    run_finding_cli,
+)
+from copilot_tools.core.findings import Finding
+from copilot_tools.core.output import log_info
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run a governance-focused audit of the Copilot catalog.")
-    parser.add_argument("--root", default=".", help="Repository root or any path inside it.")
-    parser.add_argument("--format", choices=["text", "json", "compact"], default="text", help="Output format.")
+    parser = argparse.ArgumentParser(
+        description="Run a governance-focused audit of the Copilot catalog."
+    )
+    parser.add_argument(
+        "--root", default=".", help="Repository root or any path inside it."
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
+    )
     return parser.parse_args()
 
 
@@ -28,7 +42,7 @@ def main() -> int:
     args = parse_args()
     root = find_repo_root(Path(args.root))
     findings = run_finding_cli(
-        detect_fn=lambda: run_consistency_checks(root, include_token_risks=True),
+        detect_fn=lambda: run_catalog_checks(root, include_token_risks=True),
         format_name=args.format,
         render_text=render_text,
         compact_builder=build_compact_payload,
