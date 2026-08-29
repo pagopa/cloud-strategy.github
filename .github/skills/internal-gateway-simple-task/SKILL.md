@@ -8,6 +8,25 @@ description: Use when a concrete repository-owned low-to-medium-risk task can fi
 Use this skill as the short, linear route for concrete repository work. It owns
 scope selection, bounded execution, repair, validation, and the final report.
 
+## Referenced skills
+
+This section is an audit index, not a preload bundle. Load each owner only when
+the condition below is proved by local evidence.
+
+- `/grill-me`: bounded interview when a material fact cannot be recovered from
+  the repository. It is a wrapper that delegates to `/grilling`; load both and
+  use that round format.
+- `/internal-gateway-critical-master`: three-lens challenge before non-trivial
+  action.
+- `/internal-tdd`: posture selection for executable or evaluable behavior.
+- `/internal-subagent-contract`: brief and receipt shapes for conditional
+  `internal-luna-executor` delegation.
+- `/superpowers-verification-before-completion`: required before any completion,
+  passing, fixed, or no-gap claim.
+- `/addyosmani-code-simplification`: explicit simplification work only.
+- `/internal-gateway-idea` and `/internal-gateway-writing-plans`: handoff owners
+  when this route stops or the work is promoted.
+
 ## Internal Execution Brief
 
 For every concrete non-trivial task, this gateway owns one canonical Internal
@@ -75,10 +94,14 @@ stop with the exact boundary and required decision.
 2. Record the original request, emerged requirements, actual problem, proposed
    direction, hidden assumption, smaller move, alternative path, validation
    signal, and stop signal before choosing a route.
-3. Recover missing facts from the repository before asking anyone. Use one
-   bounded `/grill-me` block only when one unrecoverable material fact blocks
-   the active route. If the answer creates a dependent clarification or changes
-   scope, stop and request the required decision.
+3. Recover missing facts from the repository before asking anyone. When a
+   material fact still blocks the active route and no local evidence settles
+   it, invoke `/grill-me` instead of asking an ad-hoc question. `/grill-me`
+   delegates to `/grilling`, so load both and follow its round format. Ask the
+   whole currently answerable frontier in one round, keep the interview bounded
+   to the facts that unblock this route, and leave dependent questions for a
+   later round. Stop and request the required decision when an answer changes
+   scope, ownership, or an approval boundary.
 
 ## Route decision
 
