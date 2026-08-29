@@ -39,8 +39,12 @@ authored, generated, temporary, or consumer-facing.
 
 - Keep repository-owned reusable guidance under `.github/skills/`.
 - Keep route wrappers and command centers under `.github/agents/`.
-- Keep script logic and its focused tests under `.github/scripts/`; keep
-  repository-wide contract tests under `tests/`.
+- Keep dependency-free standalone operator entrypoints under `.github/scripts/`
+  and use kebab-case file names. Keep dependency-managed automation under
+  `.github/tools/<function>/`, using import-safe functional directory names.
+- Keep cross-boundary tests for standalone scripts under `tests/github/scripts/`
+  and mirror tool tests under `tests/github/tools/<function>/`. Keep
+  repository-wide contract tests directly under `tests/`.
 - Keep retained plans under `tmp/superpowers/` and out of `docs/`.
 
 ## Unknown / To Verify

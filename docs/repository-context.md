@@ -29,9 +29,8 @@ and source-side sync tooling.
 ## Capabilities
 
 - Skill and agent governance under `.github/skills/` and `.github/agents/`.
-- Catalog generation and validation from `.github/scripts/`, with focused
-  script tests under `.github/scripts/tests/` and repository-wide contracts
-  under `tests/`.
+- Catalog generation and validation through `.github/tools/run.sh`, backed by
+  functional tool areas with mirrored tests under `tests/github/tools/`.
 - Sync contract support through source templates and sync automation.
 - Retained-plan and retained-learning governance through owned workflows.
 
