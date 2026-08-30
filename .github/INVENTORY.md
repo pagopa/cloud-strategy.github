@@ -100,7 +100,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-github/SKILL.md`
 - `.github/skills/internal-go/SKILL.md`
-- `.github/skills/internal-grill-me/SKILL.md`
 - `.github/skills/internal-java-project/SKILL.md`
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`
 - `.github/skills/internal-java/SKILL.md`

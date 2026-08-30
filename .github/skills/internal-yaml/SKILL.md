@@ -1,6 +1,6 @@
 ---
 name: internal-yaml
-description: Use when editing or reviewing YAML or YML syntax, encoding, parser safety, or format-owner routing.
+description: Use when editing or reviewing YAML or YML syntax, indentation, duplicate mapping keys, encoding, anchors, or parser safety. Route JSON grammar to /internal-json, Markdown structure to /internal-markdown, and Makefile syntax to /internal-makefile.
 ---
 
 # Internal YAML

@@ -76,8 +76,8 @@ read them from the manifest or the upstream commit.
 - Apply `invocation_policy` generically per asset. Its fields are
   `copilot.disable_model_invocation` and `codex.allow_implicit_invocation`;
   do not hardcode per-asset exceptions.
-- The Matt source declares 13 upstream user-invoked skills explicitly and
-  leaves the other 12 model-invoked skills unrestricted. Keep `grill-me`
+- The Matt source declares 12 upstream user-invoked skills explicitly and
+  leaves the other 13 model-invoked skills unrestricted. Keep `grill-me`
   model-invocable so skills that must interview the user can load it.
   Preserve this split in both runtimes.
 - `superpowers-brainstorming` remains an independently declared exception:

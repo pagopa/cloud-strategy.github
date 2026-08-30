@@ -30,23 +30,19 @@ TRIGGER_FIRST_PREFIXES = (
     "Use when",
     "Use only when",
     "Use first when",
+    "Use first for",
     "Use this",
     "Use before",
     "When ",
-)
-ROUTER_SKILL_NAMES = frozenset(
-    {
-        "internal-azure",
-        "internal-aws",
-        "internal-gcp",
-        "internal-github",
-    }
 )
 ALLOWED_VIRTUAL_PATHS = {
     ".github/copilot-sync.manifest.json",
 }
 ALLOWED_VIRTUAL_PREFIXES = ("tmp/",)
 SKILL_INVOCATION_PATTERN = re.compile(r"(?<![\w-])/(internal|local)-[a-z0-9][a-z0-9-]*")
+DOLLAR_SKILL_INVOCATION_PATTERN = re.compile(
+    r"(?<![\w-])\$(internal|local)-[a-z0-9][a-z0-9-]*"
+)
 RAW_SKILL_SOURCE_PATTERN = re.compile(
     r"(?:^|/)\.github/skills/(?:internal|local)-[^/]+/"
     r"(?:SKILL\.md|references/.+\.md|agents/openai\.yaml)$"
@@ -64,6 +60,20 @@ LEGACY_OUTPUT_FIELD_TOKENS: tuple[str, ...] = (
 )
 PORTABLE_FRONTMATTER_FIELDS = frozenset(
     {"name", "description", "metadata", "license", "compatibility"}
+)
+INVOCATION_SUGGESTIONS = {
+    "unknown-skill-invocation": (
+        "Invoke an existing repository-owned skill or keep the identifier non-operational."
+    ),
+    "cross-skill-dollar-invocation": (
+        "Use /<skill-name> for a cross-skill invocation and keep $<skill-name> "
+        "for the bundle's own entrypoint."
+    ),
+}
+# Interface text that names no deliverable and survives a copy-paste bundle scaffold.
+PLACEHOLDER_INTERFACE_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"^help with .+ tasks\.?$", re.IGNORECASE),
+    re.compile(r"for this task and follow the repository-owned workflow", re.IGNORECASE),
 )
 EXTERNAL_URL_PATTERN = re.compile(r"https?://\S+")
 
@@ -374,11 +384,15 @@ def _all_skill_dirs(repo_root: Path) -> dict[str, Path]:
 
 
 def _named_skill_invocation_pattern(names: Iterable[str]) -> re.Pattern[str] | None:
+    return _named_sigil_pattern(names, "/")
+
+
+def _named_sigil_pattern(names: Iterable[str], sigil: str) -> re.Pattern[str] | None:
     ordered = sorted(names, key=len, reverse=True)
     if not ordered:
         return None
     alternatives = "|".join(re.escape(name) for name in ordered)
-    return re.compile(rf"(?<![\w-])/({alternatives})(?![\w-])")
+    return re.compile(rf"(?<![\w-]){re.escape(sigil)}({alternatives})(?![\w-])")
 
 
 def detect_skill_invocation_findings(
@@ -389,6 +403,7 @@ def detect_skill_invocation_findings(
     repo_owned_skills = _repo_owned_skill_dirs(repo_root)
     known_skills = _all_skill_dirs(repo_root)
     named_pattern = _named_skill_invocation_pattern(known_skills)
+    dollar_pattern = _named_sigil_pattern(known_skills, "$")
     findings: list[Finding] = []
     seen: set[tuple[str, str, str]] = set()
 
@@ -397,10 +412,8 @@ def detect_skill_invocation_findings(
         if key in seen:
             return
         seen.add(key)
-        suggestion = (
-            "Invoke an existing repository-owned skill or keep the identifier non-operational."
-            if code == "unknown-skill-invocation"
-            else "Keep called skills model-invocable or remove the operational invocation."
+        suggestion = INVOCATION_SUGGESTIONS.get(
+            code, "Keep called skills model-invocable or remove the operational invocation."
         )
         findings.append(
             Finding(
@@ -429,8 +442,29 @@ def detect_skill_invocation_findings(
                     "unknown-skill-invocation",
                     f"Operational skill invocation targets missing skill '{target_name}'.",
                 )
+            for match in DOLLAR_SKILL_INVOCATION_PATTERN.finditer(text):
+                target_name = f"{match.group(1)}-{match.group(0).split('-', 1)[1]}"
+                if target_name in repo_owned_skills:
+                    continue
+                _record(
+                    source_path,
+                    target_name,
+                    "unknown-skill-invocation",
+                    f"Operational skill invocation targets missing skill '{target_name}'.",
+                )
             if named_pattern is None:
                 continue
+            if dollar_pattern is not None:
+                for match in dollar_pattern.finditer(text):
+                    target_name = match.group(1)
+                    if target_name == skill_dir.name:
+                        continue
+                    _record(
+                        source_path,
+                        target_name,
+                        "cross-skill-dollar-invocation",
+                        f"Cross-skill reference to '{target_name}' uses the $ entrypoint sigil.",
+                    )
             for match in named_pattern.finditer(text):
                 target_name = match.group(1)
                 if target_name == skill_dir.name:
@@ -547,10 +581,7 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
                     suggestion="Add a clear description that states what the skill does and when to use it.",
                 )
             )
-        elif (
-            skill_name not in ROUTER_SKILL_NAMES
-            and not description.strip().startswith(TRIGGER_FIRST_PREFIXES)
-        ):
+        elif not description.strip().startswith(TRIGGER_FIRST_PREFIXES):
             findings.append(
                 Finding(
                     severity="blocking",
@@ -648,6 +679,11 @@ def validate_output_contract_projection(
                 )
             )
     return findings
+
+
+def _is_placeholder_interface_text(value: str) -> bool:
+    candidate = value.strip()
+    return any(pattern.search(candidate) for pattern in PLACEHOLDER_INTERFACE_PATTERNS)
 
 
 def validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
@@ -757,6 +793,26 @@ def validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
                     f"{SHORT_DESCRIPTION_MIN} and {SHORT_DESCRIPTION_MAX} characters."
                 ),
                 suggestion="Shorten or expand the description to fit the UI constraint.",
+            )
+        )
+
+    interface_texts = (
+        ("short_description", short_description),
+        ("default_prompt", default_prompt),
+    )
+    for field_name, value in interface_texts:
+        if not isinstance(value, str) or not _is_placeholder_interface_text(value):
+            continue
+        findings.append(
+            Finding(
+                severity="blocking",
+                code="placeholder-interface-text",
+                path=openai_yaml.as_posix(),
+                message=f"interface.{field_name} still carries scaffold placeholder text.",
+                suggestion=(
+                    "Derive the text from the skill description so it names the "
+                    "real trigger and deliverable."
+                ),
             )
         )
 

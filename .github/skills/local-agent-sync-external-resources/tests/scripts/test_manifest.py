@@ -59,7 +59,6 @@ _MATTPOCOCK_USER_INVOKED = {
     "handoff",
     "implement",
     "improve-codebase-architecture",
-    "setup-matt-pocock-skills",
     "teach",
     "to-questionnaire",
     "to-spec",
@@ -366,7 +365,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
     inventory = (repo_root / ".github/INVENTORY.md").read_text(encoding="utf-8")
     for canonical_name in expected_canonical_names:
         assert f".github/skills/{canonical_name}/SKILL.md" in inventory
-    assert ".github/skills/internal-grill-me/SKILL.md" in inventory
+    assert ".github/skills/internal-grill-me/SKILL.md" not in inventory
     assert "mattpocock-writing-great-skills" not in inventory
     assert {
         (source.repository, asset.upstream, asset.local, asset.canonical_name)

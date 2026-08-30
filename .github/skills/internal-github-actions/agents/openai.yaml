@@ -1,6 +1,6 @@
 interface:
   display_name: "internal-github-actions"
   short_description: "GitHub Actions workflow and composite authoring"
-  default_prompt: "Use /internal-github to route GitHub Actions workflow, reusable-workflow, or composite-action work to /internal-github-actions."
+  default_prompt: "Use /internal-github to route GitHub Actions workflow, reusable-workflow, or composite-action work to $internal-github-actions."
 policy:
   allow_implicit_invocation: false

@@ -1,6 +1,6 @@
 ---
 name: internal-bash-script
-description: Use when creating, reviewing, or modifying standalone Bash or POSIX `sh` scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints.
+description: Use when creating, reviewing, or modifying standalone Bash or POSIX `sh` scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints. Route embedded shell fragments and sourced helpers inside another program to /internal-bash.
 ---
 
 # Internal Bash Script

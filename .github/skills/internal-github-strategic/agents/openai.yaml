@@ -1,6 +1,6 @@
 interface:
   display_name: "internal-github-strategic"
   short_description: "GitHub strategic decision framing"
-  default_prompt: "Use /internal-github to route this request to /internal-github-strategic."
+  default_prompt: "Use /internal-github to route this request to $internal-github-strategic."
 policy:
   allow_implicit_invocation: false

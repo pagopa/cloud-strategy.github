@@ -156,11 +156,6 @@ sources:
       - upstream: skills/engineering/setup-matt-pocock-skills
         local: .github/skills/mattpocock-setup-matt-pocock-skills
         canonical_name: mattpocock-setup-matt-pocock-skills
-        invocation_policy:
-          copilot:
-            disable_model_invocation: true
-          codex:
-            allow_implicit_invocation: false
       - upstream: skills/engineering/tdd
         local: .github/skills/mattpocock-tdd
         canonical_name: mattpocock-tdd

@@ -132,15 +132,9 @@ def test_grill_me_is_model_invocable_in_both_runtimes() -> None:
     assert "invocation_policy" not in asset
 
 
-def test_internal_grill_me_is_an_explicit_only_legacy_bundle() -> None:
+def test_internal_grill_me_is_retired() -> None:
     bundle = REPO_ROOT / ".github/skills/internal-grill-me"
-    skill_path = bundle / "SKILL.md"
-    assert skill_path.exists(), "the explicit legacy bundle must exist"
-    skill_content = skill_path.read_text(encoding="utf-8")
-    frontmatter = yaml.safe_load(skill_content.split("---", 2)[1])
-    metadata = yaml.safe_load(
-        (bundle / "agents/openai.yaml").read_text(encoding="utf-8")
-    )
+    inventory = (REPO_ROOT / ".github/INVENTORY.md").read_text(encoding="utf-8")
 
-    assert frontmatter["name"] == "internal-grill-me"
-    assert metadata["policy"]["allow_implicit_invocation"] is False
+    assert not bundle.exists(), "the legacy bulk-interview bundle must stay retired"
+    assert "internal-grill-me" not in inventory

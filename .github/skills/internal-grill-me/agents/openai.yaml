@@ -1,6 +1,0 @@
-interface:
-  display_name: "Internal Grill Me"
-  short_description: "Explicit legacy bulk interview contract"
-  default_prompt: "Use $internal-grill-me to run the explicit legacy bulk interview contract."
-policy:
-  allow_implicit_invocation: false

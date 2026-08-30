@@ -1,6 +1,6 @@
 ---
 name: internal-markitdown
-description: Use when converting any file, URL, or YouTube video to Markdown with markitdown, when a YouTube transcript is requested, or when markitdown extras or plugins are mentioned.
+description: Use when converting any file, URL, or YouTube video to Markdown with markitdown, when a YouTube transcript is requested, or when markitdown extras or plugins are mentioned. Route Markdown structure, fence, or link review to /internal-markdown, and workbook or tabular data integrity to /internal-excel.
 ---
 
 # Internal Markitdown

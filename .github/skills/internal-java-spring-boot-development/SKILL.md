@@ -1,6 +1,6 @@
 ---
 name: internal-java-spring-boot-development
-description: Use when Spring Boot-specific framework or runtime semantics determine correctness, including parent, plugin, BOM, starter, auto-configuration, bean wiring, configuration binding, HTTP or data adapters, scheduling, transactions, test contexts, service connections, or virtual-thread enablement. Do not use for ordinary Java source work, generic Maven/Gradle metadata, or framework-neutral application and library design.
+description: Use when Spring Boot-specific framework or runtime semantics determine correctness, including parent, plugin, BOM, starter, auto-configuration, bean wiring, configuration binding, HTTP or data adapters, scheduling, transactions, test contexts, service connections, or virtual-thread enablement. Route ordinary Java source work and generic Maven/Gradle metadata to /internal-java, and framework-neutral application or library design to /internal-java-project.
 ---
 
 # Internal Spring Boot Development

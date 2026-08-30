@@ -1,4 +1,4 @@
 interface:
   display_name: "internal-debugging"
-  short_description: "Root-cause debugging for repository failures"
-  default_prompt: "Use $internal-debugging to diagnose this failure from a reproducible feedback loop."
+  short_description: "Repository-owned root-cause failure diagnosis"
+  default_prompt: "Use $internal-debugging as the repository-owned owner for root-cause diagnosis of bug, test, build, validator, sync, workflow, and catalog-drift failures; build a reproducible feedback loop before changing behavior, escalate to /superpowers-systematic-debugging only for hard or flaky failures, and route measured slowness to /internal-performance-optimization."

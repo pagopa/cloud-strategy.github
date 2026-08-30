@@ -1,6 +1,6 @@
 ---
 name: internal-debugging
-description: Use when a bug, test failure, build failure, validator drift, sync failure, or unexpected behavior needs a reproducible root-cause diagnosis before a fix.
+description: Use when a bug, test, build, validator, sync, workflow, or catalog-drift failure needs a reproducible root-cause diagnosis before a fix. This skill is the repository-owned diagnosis owner; escalate to /superpowers-systematic-debugging only for hard or flaky failures, and route measured slowness or throughput to /internal-performance-optimization.
 ---
 
 # Internal Debugging

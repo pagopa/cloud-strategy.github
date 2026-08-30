@@ -1,6 +1,6 @@
 ---
 name: internal-tf
-description: Use when Terraform/OpenTofu language-only HCL is the immediate concern.
+description: Use when Terraform/OpenTofu language-only HCL is the immediate concern. Route module architecture, state, plan or apply, provider operation, native `.tftest.hcl` tests, CI, scans, upgrades, and risk diagnosis to /internal-terraform.
 ---
 
 # Terraform/OpenTofu Language

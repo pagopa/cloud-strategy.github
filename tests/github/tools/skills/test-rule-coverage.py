@@ -270,6 +270,43 @@ def _default_prompt_skill_mention(root: Path) -> list[Finding]:
     return _openai_only_case(root, default_prompt="Use the validator fixture.")
 
 
+def _placeholder_short_description(root: Path) -> list[Finding]:
+    return _openai_only_case(root, short_description="Help with Internal Example tasks")
+
+
+def _placeholder_default_prompt(root: Path) -> list[Finding]:
+    return _openai_only_case(
+        root,
+        default_prompt=(
+            "Use /internal-example for this task and follow the "
+            "repository-owned workflow in the skill."
+        ),
+    )
+
+
+def _cross_skill_dollar_invocation(root: Path) -> list[Finding]:
+    source_dir = _write_valid_skill(root)
+    _write(
+        root / ".github/skills/internal-other",
+        "SKILL.md",
+        _skill_text(
+            name="internal-other",
+            description="Use when testing cross-skill invocation fixtures.",
+        ),
+    )
+    _write(
+        source_dir,
+        "agents/openai.yaml",
+        _openai_yaml(
+            default_prompt=(
+                "Use /internal-example for this fixture, then apply "
+                "$internal-other for the rest."
+            )
+        ),
+    )
+    return detect_skill_invocation_findings(root)
+
+
 SKILL_RULE_CASES: list[tuple[str, RuleCase]] = [
     ("skill-prose-lexical-assertion", _skill_prose_assertion),
     ("unknown-skill-invocation", _unknown_invocation),
@@ -307,6 +344,8 @@ SKILL_RULE_CASES: list[tuple[str, RuleCase]] = [
     ("short-description-length", _short_description_length),
     ("missing-default-prompt", _missing_default_prompt),
     ("default-prompt-skill-mention", _default_prompt_skill_mention),
+    ("placeholder-interface-text", _placeholder_short_description),
+    ("cross-skill-dollar-invocation", _cross_skill_dollar_invocation),
     ("bundle-script-external-url", _bundle_external_url),
     ("cross-skill-file-reference", _cross_skill_reference),
     ("missing-local-reference", _missing_local_reference),
@@ -351,10 +390,79 @@ def test_invocation_scan_ignores_non_skill_path_segments(tmp_path: Path) -> None
     assert findings == []
 
 
+def test_router_phrasing_is_accepted_as_a_trigger_prefix(tmp_path: Path) -> None:
+    findings = _validate_skill(
+        tmp_path,
+        description=(
+            "Use first for every request in this domain. Classify the primary "
+            "deliverable and invoke the minimum specialist lane."
+        ),
+    )
+
+    assert [
+        finding for finding in findings if finding.code == "description-not-trigger-first"
+    ] == []
+
+
+def test_trigger_first_check_has_no_per_name_exemption(tmp_path: Path) -> None:
+    skill_dir = tmp_path / ".github/skills/internal-aws"
+    _write(
+        skill_dir,
+        "SKILL.md",
+        _skill_text(
+            name="internal-aws",
+            description="A router description without a trigger prefix.",
+        ),
+    )
+    _write(skill_dir, "agents/openai.yaml", _openai_yaml(name="internal-aws"))
+
+    findings = validate_internal_skill(tmp_path, skill_dir)
+
+    assert "description-not-trigger-first" in {finding.code for finding in findings}
+
+
 def test_skill_rule_case_inventory_is_explicit() -> None:
     codes = [code for code, _ in SKILL_RULE_CASES]
     assert len(codes) == len(set(codes))
-    assert len(codes) == 27
+    assert len(codes) == 29
+
+
+def test_placeholder_rule_also_covers_the_default_prompt_template(
+    tmp_path: Path,
+) -> None:
+    findings = _placeholder_default_prompt(tmp_path)
+
+    assert "placeholder-interface-text" in {finding.code for finding in findings}
+
+
+def test_dollar_invocation_scan_allows_the_bundle_own_entrypoint(
+    tmp_path: Path,
+) -> None:
+    skill_dir = _write_valid_skill(tmp_path)
+    _write(
+        skill_dir,
+        "agents/openai.yaml",
+        _openai_yaml(default_prompt="Use $internal-example for this fixture."),
+    )
+
+    findings = detect_skill_invocation_findings(tmp_path)
+
+    assert findings == []
+
+
+def test_dollar_invocation_scan_rejects_missing_repo_owned_skill(
+    tmp_path: Path,
+) -> None:
+    skill_dir = _write_valid_skill(tmp_path)
+    _write(
+        skill_dir,
+        "SKILL.md",
+        _skill_text() + "Load $internal-retired before execution.\n",
+    )
+
+    findings = detect_skill_invocation_findings(tmp_path)
+
+    assert "unknown-skill-invocation" in {finding.code for finding in findings}
 
 
 @pytest.mark.parametrize(
