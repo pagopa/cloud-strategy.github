@@ -7,7 +7,7 @@ description: Use when planning, auditing, or applying repository-owned AI resour
 
 ## Referenced skills
 
-- None.
+- internal-knowledge
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 The repository is the only source of truth for managed resources. Home is a
