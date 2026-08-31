@@ -4,7 +4,7 @@ Upstream Source: https://github.com/adr/madr
 License: CC0-1.0 (Creative Commons Zero v1.0 Universal)
 -->
 
-# [short title of solved problem and decided option]
+# ADR-NNNN: [short title of solved problem and decided option]
 
 * Status: [draft | proposed | rejected | accepted | deprecated | superseded by ADR-NNNN]
 * Date: [YYYY-MM-DD when the decision was last updated]

@@ -2,29 +2,17 @@
 
 ## Should trigger
 
-### Check and create documentation setup
-
-**Prompt:** "Check whether this repository's documentation setup is correct and create the missing structure."
-
-**Expected:** Run `audit`, use `references/documentation-setup.md` for missing structure, run `bootstrap` when the knowledge map is absent, and finish with `audit`.
-
-### Audit ADR and README coverage
-
-**Prompt:** "Audit our ADR numbering and find component READMEs that are not registered."
-
-**Expected:** Select report-only `audit`; do not repair findings.
-
-### Update approved targets
-
-**Prompt:** "Add `docs/guide.md` to the knowledge map." <!-- knowledge-refs: ignore -->
-
-**Expected:** Select `update --target docs/guide.md` and modify only the map.
-
-### Refresh explicit README targets
+### Refresh README directories
 
 **Prompt:** "Refresh the README files for `src/service-a` and `src/service-b` from repository evidence." <!-- knowledge-refs: ignore -->
 
-**Expected:** Load `references/readme-maintenance.md` and treat the two targets as the complete README-authoring allowlist. After a successful batch, perform any required knowledge-map registration as a separate bounded operation.
+**Expected:** Load `references/readme-maintenance.md`, normalize the directories to their README destinations, and treat those destinations as the complete write allowlist.
+
+### Refresh an explicit README path
+
+**Prompt:** "Refresh `src/service-a/README.md`; it may already be current." <!-- knowledge-refs: ignore -->
+
+**Expected:** Accept the explicit README path, validate its evidence, and leave a byte-equivalent file untouched when it is already current.
 
 ### Refresh a cloud account README
 
@@ -44,12 +32,6 @@
 
 **Expected:** Stop before analysis and ask for the target repository; do not guess a root or write either architecture document.
 
-### Leave a current README unchanged
-
-**Prompt:** "Refresh `src/service-a/README.md`; it may already be current." <!-- knowledge-refs: ignore -->
-
-**Expected:** Validate the evidence and leave a byte-equivalent README untouched, reporting it as unchanged.
-
 ### Reject an unsafe README target batch
 
 **Prompt:** "Refresh `src/service-a` and `../../outside`." <!-- knowledge-refs: ignore -->
@@ -61,12 +43,6 @@
 **Prompt:** "Refresh this Terraform module README without changing its generated inputs and outputs block."
 
 **Expected:** Preserve the existing generated block byte-for-byte; report a conflict instead of regenerating or rewriting it.
-
-### CI routing for documentation assets
-
-**Prompt:** "Check whether the knowledge-check action and documentation analysis workflow exist, then tell me who should change them."
-
-**Expected:** Run report-only `audit`, load `references/ci-assets.md`, report presence or absence of the two CI assets, and delegate YAML or runner changes. Do not author GitHub Actions YAML.
 
 ### Record an architectural decision
 
@@ -82,17 +58,23 @@
 
 ## Should not trigger
 
-### Harden a knowledge-check workflow by rewriting YAML
-
-**Prompt:** "Rewrite `.github/workflows/_knowledge-docs-analysis.yml` from this skill so the knowledge check is stricter."
-
-**Expected:** Do not author GitHub Actions YAML. Load `references/ci-assets.md` only to name the assets and delegated owners, then stop.
-
 ### Ordinary documentation edit
 
 **Prompt:** "Correct the spelling in this README paragraph."
 
-**Expected:** Use ordinary Markdown editing because no README refresh, architecture contract, ADR, knowledge structure, map, or coverage work is requested.
+**Expected:** Route to `/internal-markdown`; no material README refresh is requested.
+
+### Documentation governance
+
+**Prompt:** "Create a documentation map and enforce README coverage in CI."
+
+**Expected:** Do not invoke this skill. Route the map and CI work to their nearest implementation owners.
+
+### Architecture analysis without authoring
+
+**Prompt:** "Explain how the current components depend on each other."
+
+**Expected:** Do not invoke this skill unless the user also asks to create or refresh `docs/architecture.md`.
 
 ### Application implementation
 
@@ -102,4 +84,4 @@
 
 ## Baseline
 
-On a repository with `README.md` and `docs/guide.md` tracked, `bootstrap` includes both paths and writes only `docs/knowledge-map.yaml`. README and architecture authoring use only the selected target files. ADR authoring follows the local contract and never rewrites an accepted body. On an empty repository, `audit` reports missing structure without writing. `update --all` returns candidates without writing, and a direct update of `AGENTS.md` is blocked. <!-- knowledge-refs: ignore -->
+Without this skill, an agent may broaden a README refresh beyond the requested targets, overstate architecture from weak evidence, or rewrite an accepted ADR. With this skill, README and architecture authoring remain target-bounded and evidence-based, while ADR authoring follows the local contract and supersedes changed accepted decisions.

@@ -25,4 +25,4 @@ Create a new ADR with the local heading, metadata, section order, status vocabul
 
 ## Validation and Completion
 
-Validate filename and heading identity, metadata, required sections and order, links, unique accepted numbering, supersession symmetry, Markdown, and repository-specific checks. Register a new ADR in `docs/knowledge-map.yaml` when the map tracks individual ADRs. Report the created or changed records, decision status, supersession changes, and validation performed.
+Validate filename and heading identity, metadata, required sections and order, links, unique accepted numbering, supersession symmetry, Markdown, and repository-specific checks. Report the created or changed records, decision status, supersession changes, and validation performed.
