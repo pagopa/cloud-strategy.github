@@ -91,7 +91,7 @@ A directory is a significant component when it is tracked by version control **a
 
 Always excluded, without further analysis: paths ignored by version control; vendored, cached, or generated trees; directories that only contain other directories; directories holding a single file already documented by their parent; and test fixtures.
 
-Discovery proposes; it never authorizes. Every discovered directory is either a planned target or an entry in the exclusion ledger with a one-line reason. Silent omission is a defect.
+Discovery proposes; it never authorizes. Every discovered directory, and every row of the evidence table in [knowledge topology](knowledge-topology.md), is either a planned target or an entry in the exclusion ledger with a one-line reason. Silent omission is a defect.
 
 ## Write allowlist
 
@@ -99,6 +99,7 @@ Discovery proposes; it never authorizes. Every discovered directory is either a 
 - In `refresh` and `bootstrap`, the allowlist is exactly the approved plan. Approval is what authorizes a write, not discovery.
 - The allowlist never grows after approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
 - Repository governance and contribution files are evidence, never targets. Read them, cite them, place them in the reading order, and leave them untouched.
+- A path is generated or externally synchronized only when its own generator or manifest lists that path. A directory pattern is not evidence of ownership: read the entries, because a manifest covering a tree normally enumerates exact paths, and excluding a repository-owned document as managed drops it from the plan without anyone noticing.
 - The layout root document is the single exception in `targeted`: the skill may add or update the row describing an authored target, and nothing else in that file. When no root document exists, `targeted` does not create one; it reports the absence.
 
 ## Unchanged predicate
@@ -136,7 +137,9 @@ The plan is negotiable line by line. Removing a row moves it to the exclusion le
 
 Order the plan by reader value: the layout root document first, then the components a reader must understand to use the repository, then the remainder.
 
-Write at most one wave per invocation, and at most ten authored documents in a wave. A wave must leave the repository coherent on its own: never publish a document whose links point at artifacts a later wave would create. Report the remaining waves so the next invocation resumes without rediscovery.
+Write at most one wave per invocation, and at most ten authored documents in a wave. The ceiling is not a target: when the evidence supports more documents than the wave carries, the plan names what limits it, whether coherence, the ceiling itself, or a user decision. A wave must leave the repository coherent on its own: never publish a document whose links point at artifacts a later wave would create. Report the remaining waves so the next invocation resumes without rediscovery.
+
+A wave partitions documents, never the obligations of an authoring reference. Every rule that reference states for a document, including its sections, its links, and its diagram disposition, is satisfied when that document is written. Treating one obligation as its own later wave leaves every document already published incomplete, and the defect survives review because each wave looked finished on its own.
 
 ## Enforcement gap
 
@@ -147,5 +150,7 @@ This block is a report, not a change. Never create or modify workflows, actions,
 ## Completion report
 
 Report every target exactly once as `created`, `refreshed`, `unchanged`, `excluded`, or `failed`. Include the evidence used, the validators run and their scope, the exclusion ledger, the enforcement gap, unresolved conflicts, and the next wave.
+
+State what each validator actually covered as counts, not as a verdict. A check that resolved nothing also reports no failures, so a bare pass is compatible with having checked nothing; the counts are what separate the two.
 
 A local validator proves only the paths it actually covered. Do not present it as proof of the whole plan.

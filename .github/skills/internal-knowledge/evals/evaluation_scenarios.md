@@ -92,6 +92,42 @@
 
 **Expected:** Create a domain only where the boundary signals are evidenced. Record the rejected directories in the exclusion ledger, never scaffold empty documentation-mode directories, and state that no relationship is evidenced rather than inventing one between contexts.
 
+### Promote a domain the evidence supports
+
+**Prompt:** "Bootstrap the knowledge layout for this repository." One area owns a separate infrastructure root, a separate composite action, and a different audience, and every other area depends on it directionally.
+
+**Expected:** Count the promotion signals and promote the area, because two or more are evidenced. Select the layout for two or more domains and record the domain set as an ADR. Relative size is not a signal: keeping the narrower layout requires the user's explicit decision carried as the ledger reason, never the agent's own judgement that the smaller area is too small to matter.
+
+### Discover a standard and a principle during bootstrap
+
+**Prompt:** "Align the knowledge in this repository." Every workflow pins its actions to a commit SHA with a version comment and no check enforces it, and two accepted ADRs decide by the same criterion.
+
+**Expected:** Account for every row of the evidence-to-artifact table. Plan `docs/standards/<name>.md` for the repeated convention that no check enforces, and `docs/engineering-principles.md` for the criterion visible in two independent decisions, citing the paths that evidence each. Leaving those rows out of the plan is a silent omission, not restraint.
+
+### Author a component README with a diagram
+
+**Prompt:** "Bootstrap the knowledge layout; several components have no README."
+
+**Expected:** Load `references/readme-maintenance.md` before drafting the plan, and plan one README per significant component the parent does not already document completely. Use Mermaid where at least three material relationships are evidenced, with `accTitle`, `accDescr`, and adjacent prose, and record `omitted-with-reason` where a diagram is not warranted.
+
+### Justify a wave below the ceiling
+
+**Prompt:** "Bootstrap the knowledge layout." The evidence supports more documents than one wave carries.
+
+**Expected:** Name what limits the wave, whether coherence, the ten-document ceiling, or a user decision, and report what the next wave resumes. A wave far below the ceiling with no stated limit is under-delivery rather than restraint.
+
+### Resolve the diagram disposition of every authored README
+
+**Prompt:** "Bootstrap the knowledge layout." Three components evidence at least three material relationships each; the remaining nine do not.
+
+**Expected:** Resolve the disposition in every authored README as the document is written, never as a later wave: a diagram where the threshold is met, and the fixed `No diagram is provided` sentence with its reason everywhere else, linking to the document that already draws the relationship instead of redrawing it. Verify each diagram by rendering or offline parsing before writing. A repository where some READMEs carry neither outcome is incomplete even when every wave reported success.
+
+### Check ownership before excluding a managed path
+
+**Prompt:** "Refresh the repository documentation." A synchronization manifest manages a tree that also contains a repository-owned README.
+
+**Expected:** Read the manifest entries and confirm whether that exact path is listed. Exclude it only when the manifest claims it, and plan it as a target otherwise. Inferring ownership from the directory pattern drops a repository-owned document from the plan without an entry in the exclusion ledger.
+
 ### Distrust a declaration that names nothing
 
 **Prompt:** "Align the knowledge in this repository." The agent-facing guide asserts a single-context layout but names no existing artifact, while the repository evidences four domains.
