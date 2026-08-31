@@ -7,7 +7,7 @@ description: Use when Terraform/OpenTofu language-only HCL is the immediate conc
 
 ## Reference files
 
-- `references/common-mistakes.md`: Load when reviewing HCL or typed-interface mistakes.
+- `references/common-mistakes.md`: Load when reviewing HCL, typed-interface, or file-level readability mistakes.
 - `references/structure-standard.md`: Load when choosing the default root file or environment layout.
 - `references/template-examples.md`: Load when a minimal typed HCL example is useful.
 

@@ -29,6 +29,9 @@ description: Use when editing or reviewing YAML or YML syntax, indentation, dupl
   requested change requires otherwise.
 - Treat duplicate mapping keys as findings, including duplicate keys hidden by
   merge behavior when the checker supports that parser rule.
+- Quote scalars that a parser would coerce, including `yes`, `no`, `on`, `off`,
+  and octal-looking values such as `0644`, unless the boolean or integer is the
+  intended value.
 - Keep generic YAML checks separate from platform schema and domain semantics.
 
 ## Validation
@@ -42,6 +45,6 @@ bash scripts/check.sh FILE [FILE ...]
 The checker returns `0` when checks passed within supported scope, `1` for
 format findings, and `2` for usage, dependency, file, or internal failures.
 It requires `yamllint` 1.38.0 and does not install dependencies. Supported
-checks are parser-backed YAML syntax and duplicate-key detection. Schema,
-tag, platform, and domain-content semantics are unsupported; route those
-questions to the relevant owner.
+checks are parser-backed YAML syntax, duplicate-key detection, implicit boolean
+scalars, and octal values. Schema, tag, platform, and domain-content semantics
+are unsupported; route those questions to the relevant owner.

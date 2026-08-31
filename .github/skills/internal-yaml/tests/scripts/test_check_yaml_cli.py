@@ -9,7 +9,28 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 CHECKER = REPO_ROOT / ".github/skills/internal-yaml/scripts/check.sh"
-VALID_FIXTURE = ".github/skills/internal-yaml/fixtures/valid/pre-commit-like.yaml"
+FIXTURES_DIR = ".github/skills/internal-yaml/fixtures"
+VALID_FIXTURE = f"{FIXTURES_DIR}/valid/pre-commit-like.yaml"
+REQUIRED_VERSION = "yamllint 1.38.0"
+
+
+def _fixture_names(kind: str) -> list[str]:
+    return sorted(path.name for path in (REPO_ROOT / FIXTURES_DIR / kind).glob("*.yaml"))
+
+
+def _has_pinned_yamllint() -> bool:
+    try:
+        result = subprocess.run(
+            ["yamllint", "--version"], text=True, capture_output=True, check=False
+        )
+    except OSError:
+        return False
+    return result.stdout.strip() == REQUIRED_VERSION
+
+
+requires_pinned_yamllint = pytest.mark.skipif(
+    not _has_pinned_yamllint(), reason=f"requires {REQUIRED_VERSION} on PATH"
+)
 
 
 @pytest.fixture
@@ -28,7 +49,7 @@ if [[ "${FAKE_YAMLLINT_EXIT:-0}" != "0" ]]; then
   printf '%s\\n' "fixture finding" >&2
   exit "$FAKE_YAMLLINT_EXIT"
 fi
-if [[ " $* " == *duplicate-key.yaml* || " $* " == *syntax.yaml* ]]; then
+if [[ " $* " == *fixtures/invalid/* ]]; then
   exit 1
 fi
 exit 0
@@ -126,3 +147,19 @@ def test_self_test_runs_bundled_fixtures(fake_yamllint: Path) -> None:
 
     assert result.returncode == 0
     assert "self-test" in result.stdout.lower()
+
+
+@requires_pinned_yamllint
+@pytest.mark.parametrize("fixture", _fixture_names("invalid"))
+def test_invalid_fixture_is_reported_as_a_format_finding(fixture: str) -> None:
+    result = run_checker(f"{FIXTURES_DIR}/invalid/{fixture}")
+
+    assert result.returncode == 1, result.stdout + result.stderr
+
+
+@requires_pinned_yamllint
+@pytest.mark.parametrize("fixture", _fixture_names("valid"))
+def test_valid_fixture_passes_the_configured_rules(fixture: str) -> None:
+    result = run_checker(f"{FIXTURES_DIR}/valid/{fixture}")
+
+    assert result.returncode == 0, result.stdout + result.stderr
