@@ -16,6 +16,7 @@ AUTHORING_REFERENCES = {
     "references/knowledge-topology.md",
     "references/madr-minimal.md",
     "references/readme-maintenance.md",
+    "references/standards-maintenance.md",
 }
 
 

@@ -17,7 +17,7 @@ Use this reference to decide **what the skill may touch** before any drafting st
 
 ## Mode resolution
 
-Resolve exactly one mode before reading evidence, and state the mode and the signal that selected it in the plan.
+Resolve one provisional mode from the request signals before reading evidence, then run the layout check. State the final mode and the signal that selected it in the plan.
 
 | Mode | Selecting signal | Write allowlist |
 | --- | --- | --- |
@@ -27,6 +27,8 @@ Resolve exactly one mode before reading evidence, and state the mode and the sig
 | `bootstrap` | No explicit targets, and the declared layout is absent, incomplete, or contradicted by what exists on disk. | The approved plan: the layout root document, the derived topology, and component documents. |
 
 Apply the signals in order and stop at the first match. When two modes remain defensible after the check, do not guess: state both readings and ask which one applies.
+
+The layout check runs in `refresh` and in a provisional `bootstrap`, never in `help` or `targeted`. Derive the evidenced domain set, compare it with the declared layout, and escalate `refresh` to `bootstrap` when the two disagree. The check only escalates: it never returns `bootstrap` to `refresh`, and it never widens `targeted`.
 
 `targeted` never widens into `refresh`. A request naming three directories stays at three directories even when the repository clearly needs more; report the wider gap instead of acting on it.
 
@@ -51,24 +53,32 @@ Never start the work the answer describes. `help` ends with the proposed prompt;
 
 ## Layout declaration and drift
 
-The repository declares its own knowledge layout. The skill reads that declaration and never substitutes a central preference for it.
+A declaration states intent; the repository states fact. Read the declaration, and never accept it as proof that the layout is correct.
 
 Read the declaration from these sources, in precedence order:
 
 1. An explicit instruction in the current request.
-2. A repository agent-facing documentation guide, such as `docs/agents/domain.md`, when present.
-3. The root knowledge documents that actually exist on disk.
-4. Nothing declared: the plan proposes a layout with its evidence and asks for approval.
+2. An accepted ADR recording the domain set.
+3. A repository agent-facing documentation guide, such as `docs/agents/domain.md`, when present.
+4. The root knowledge documents that actually exist on disk.
+5. Nothing declared: the plan proposes a layout with its evidence and asks for approval.
+
+A declaration carries weight only for the artifacts it names and that exist. A statement asserting a layout without naming a single verifiable path is a hint, not a declaration: record it as evidence of intent and derive the layout from the repository.
 
 Compare the declaration against reality and classify the result:
 
-- `realized`: every artifact the declaration names exists and no competing root document exists.
+- `realized`: every artifact the declaration names exists, no competing root document exists, and the evidenced domain set matches the declared one.
 - `unrealized`: the declaration names an artifact that does not exist.
 - `contradicted`: the artifacts on disk implement a different layout than the one declared.
+- `understated`: the declared layout is realized, but the evidence supports a richer one, such as a single context declared where two or more domains are evidenced.
 
-`unrealized` and `contradicted` both select `bootstrap`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail.
+All three drift states select `bootstrap`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail.
+
+In `bootstrap` the declared layout is never inherited. Derive the domain set from evidence, present the declaration as a proposal to confirm, and carry both readings in the plan when they differ.
 
 Changing a declaration is a documentation change like any other. It enters the plan, appears in the allowlist, and is written only after approval. Never update a declaration silently, and never leave a declaration pointing at a document the plan does not create.
+
+A repeated `understated` finding is a decision waiting to be recorded, not a report to reissue. When the user keeps the narrower layout, propose an ADR that records the domain set with its evidence; that record then answers the question for every later invocation.
 
 ## Significant components
 
@@ -111,8 +121,9 @@ When the predicate holds, report the target as `unchanged` and do not write it. 
 
 The plan states, briefly:
 
-- the resolved mode and its selecting signal;
-- the layout, its declaration source, and any drift;
+- the resolved mode, its selecting signal, and the result of the layout check;
+- the layout, its declaration source, the evidenced domain set, and any drift;
+- whether the external context-format skill is available, whenever the plan includes a context document;
 - one row per planned target with its path, its state under the unchanged predicate, and the reason it is included;
 - the exclusion ledger;
 - artifacts to be created that do not exist yet;

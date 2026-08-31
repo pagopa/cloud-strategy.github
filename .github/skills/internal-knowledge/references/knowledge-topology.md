@@ -9,35 +9,39 @@ Load it in `bootstrap`. Load it in `refresh` only when the plan introduces an ar
 - [Supported layouts](#supported-layouts)
 - [Layout migration](#layout-migration)
 - [Evidence to artifact](#evidence-to-artifact)
-- [Root document contract](#root-document-contract)
-- [Points of contact](#points-of-contact)
+- [Context documents](#context-documents)
+- [Relationships](#relationships)
 - [Domain levels](#domain-levels)
-- [Context document](#context-document)
 - [Rules document](#rules-document)
 - [Documentation modes](#documentation-modes)
 - [Anti-scope](#anti-scope)
 
 ## Supported layouts
 
-Two layouts are supported. The repository declares which one applies; this reference never picks one on the repository's behalf.
+Every repository has at least one knowledge domain. The evidenced domain count selects the layout; a declaration proposes a layout and never overrides the evidence.
 
-| Layout | Root document | Domain documents | Use when |
-| --- | --- | --- | --- |
-| Single context | Root `CONTEXT.md` | None | One vocabulary covers the whole repository and no internal boundary changes the meaning of a term. |
-| Multi context | Root `CONTEXT-MAP.md` | `docs/domain/<slug>/CONTEXT.md`, optionally `RULES.md` | Two or more areas own distinct vocabularies, state, or lifecycles. |
+| Domains evidenced | Root document | Domain documents |
+| --- | --- | --- |
+| One | Root `CONTEXT.md` | `docs/domain/<slug>/RULES.md` when normative rules exist |
+| Two or more | Root `CONTEXT-MAP.md` | `docs/domain/<slug>/CONTEXT.md`, plus `RULES.md` when normative rules exist |
 
-Both layouts keep decisions under `docs/adr/` and the system view in `docs/architecture.md`.
+Domain documents always live under `docs/domain/<slug>/`. Never co-locate them with the code of a directory: a domain may span several directories or own none at all, and a path that holds only part of a domain misrepresents the boundary.
+
+Both layouts keep decisions under `docs/adr/`, the system view in `docs/architecture.md`, and the domain set recorded as an ADR.
 
 ## Layout migration
 
 When the approved plan moves a repository from one layout to the other, the migration is one coherent unit:
 
-1. Create the new root document with the content the old one carried.
-2. Update the layout declaration so it names the new root document.
-3. Update every reference to the previous root document.
-4. Remove the previous root document only when the plan says so and nothing still points at it.
+1. Record the new domain set as an ADR, with the evidence that selected it.
+2. Create the new root document with the content the old one carried.
+3. Update the layout declaration so it names the new root document and that ADR.
+4. Update every reference to the previous root document.
+5. Remove the previous root document only when the plan says so and nothing still points at it.
 
-Never publish a layout change that leaves a declaration, a reading order, or a link pointing at a document that does not exist. If the wave limit prevents completing all four steps, do not start the migration in this invocation.
+Never publish a layout change that leaves a declaration, a reading order, or a link pointing at a document that does not exist. If the wave limit prevents completing all five steps, do not start the migration in this invocation.
+
+Once an accepted ADR records the domain set, the layout changes only through a superseding decision. Re-derivation may report that the evidence has moved; it never migrates the layout on its own.
 
 ## Evidence to artifact
 
@@ -46,35 +50,50 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 | Evidence | Artifact | Do not create when |
 | --- | --- | --- |
 | A significant component | A README in that component | The parent already documents it completely. |
-| Terms whose meaning is repository-specific | The root document's vocabulary section, or a context document | The terms are general technology vocabulary. |
+| Terms whose meaning is repository-specific | The root `CONTEXT.md`, or `docs/domain/<slug>/CONTEXT.md` when two or more domains are evidenced | The terms are general technology vocabulary. |
 | Two or more areas with distinct vocabulary, state, or lifecycle | `docs/domain/<slug>/` per area | Only one area is evidenced; keep the vocabulary in the root document. |
-| Normative rules already stated in a validator, workflow, decision, or document | `RULES.md` in the owning area | No rule exists yet. Never invent a rule to fill the file. |
+| Normative rules already stated in a validator, workflow, decision, or document | `docs/domain/<slug>/RULES.md` | No rule exists yet. Never invent a rule to fill the file. |
 | A decision that is costly to reverse and surprising without context | An ADR | The decision is routine or already recorded. |
+| The domain set that selects the layout | An ADR recording it with its evidence | An accepted ADR already records the same set. |
+| Existing ADRs with no stated local format | `docs/adr/README.md` | The repository already states its ADR contract where the ADR author reads it. |
 | Components, boundaries, and flows across the repository | `docs/architecture.md` | The repository has a single component fully covered by its README. |
+| Relationships that cross the repository boundary | Sections 6 and 7 of `docs/architecture.md` | No dependency leaves the repository. |
+| A convention repeated across the repository with no automated check | `docs/standards/<name>.md` | The convention is already enforced; enforcement makes it a rule, not a standard. |
+| Recurring criteria that decide between alternatives | `docs/engineering-principles.md` | Only one occurrence is evidenced. |
+| An evidenced chain from a declaration to its effect | `docs/guides/<name>.md` | A component README already covers the chain. |
 
-## Root document contract
+Author the last three artifacts with [standards maintenance](standards-maintenance.md).
 
-A single-context root `CONTEXT.md` contains, in order: purpose and boundary of the repository; the vocabulary as one term per subsection with its evidence path; the reading order; and a decisions index.
+## Context documents
 
-A multi-context root `CONTEXT-MAP.md` contains, in order:
+`CONTEXT.md` and `CONTEXT-MAP.md` belong to the external context format. Draft them with `/mattpocock-domain-modeling` and follow that format exactly.
 
-1. **Context ownership** — one row per context with its glossary, its rules, its owner, and its boundary.
-2. **Components** — one row per significant component with its path, its responsibility, the document that describes it, and its state boundary.
-3. **Points of contact** — how the contexts meet, recorded as-is.
-4. **Reading order** — the numbered path a new reader or agent follows.
-5. **Decisions index** — the ADRs that constrain the map.
+Never add a section the external format does not define, and never relocate one it does. A context document is a glossary; content that does not fit it belongs to another artifact:
 
-Omit a section only when it would be empty and say so in the report. Do not add sections that carry no evidenced content.
+| Content | Owner |
+| --- | --- |
+| Component paths and responsibilities | Section 5 of `docs/architecture.md` |
+| Reading order for a human | The root `README.md` |
+| Reading order for an agent | `docs/agents/domain.md` |
+| Decisions index | `docs/adr/README.md` |
+| Rules and invariants | `docs/domain/<slug>/RULES.md` |
 
-## Points of contact
+When the external skill is unavailable, author the artifacts this skill owns, report the vocabulary layer as a gap, and state the unavailability in the plan before approval. Never substitute a local format for the missing one.
 
-A map that names contexts without describing how they meet is incomplete. Describe each contact as it is today, not as it should become.
+## Relationships
 
-Use only neutral relationship vocabulary: `upstream`, `downstream`, `mutually dependent`, or `free`. Name the concept that crosses the boundary and the direction it travels.
+Relationships are recorded at two levels, and the same pair is never described at both.
 
-Use a named integration pattern only when the repository has already decided and recorded it. Never infer a pattern from code shape.
+| Level | Where | What it records |
+| --- | --- | --- |
+| Between domains | The relationships section of the context map | The concept that crosses the boundary and the direction it travels |
+| Between components, and toward systems outside the repository | Sections 6 and 7 of `docs/architecture.md` | The dependency, its status, and its evidence path |
 
-When no contact is evidenced, write `none evidenced` and stop. That is a valid, informative result; an invented relationship is not.
+With a single domain there is no domain-to-domain relationship. The boundary the repository actually has is the one toward the outside, and it belongs to `docs/architecture.md`.
+
+Describe each relationship as it is today, not as it should become. Use a named integration pattern only when the repository has already decided and recorded it; never infer a pattern from code shape. When no relationship is evidenced, record `none evidenced` and stop: an invented relationship is worse than an acknowledged absence.
+
+In `docs/architecture.md`, keep the direction vocabulary neutral: `upstream`, `downstream`, `mutually dependent`, or `free`.
 
 ## Domain levels
 
@@ -88,25 +107,7 @@ Promote an area to its own domain only when at least two of these signals are ev
 
 Name domains in the vocabulary the repository already uses. A domain name that appears nowhere in the repository is a sign the boundary is invented.
 
-## Context document
-
-```markdown
-# <Name> Context
-
-## Scope
-
-<What this context owns and what it deliberately does not own.>
-
-## Terms
-
-### <Term>
-
-<Definition in repository vocabulary, with the path that evidences it.>
-
-## Relationships
-
-- <Direction and concept exchanged with each neighbouring context.>
-```
+A domain needs no directory of its own. When its evidence is spread across configuration, validators, and reports that share one vocabulary, the boundary is still real; record the evidence paths instead of forcing a home for it.
 
 ## Rules document
 

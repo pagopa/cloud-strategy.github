@@ -90,7 +90,31 @@
 
 **Prompt:** "Bootstrap the knowledge layout with one domain per top-level directory."
 
-**Expected:** Create a domain only where the boundary signals are evidenced. Record the rejected directories in the exclusion ledger, never scaffold empty documentation-mode directories, and write `none evidenced` rather than inventing a relationship between contexts.
+**Expected:** Create a domain only where the boundary signals are evidenced. Record the rejected directories in the exclusion ledger, never scaffold empty documentation-mode directories, and state that no relationship is evidenced rather than inventing one between contexts.
+
+### Distrust a declaration that names nothing
+
+**Prompt:** "Align the knowledge in this repository." The agent-facing guide asserts a single-context layout but names no existing artifact, while the repository evidences four domains.
+
+**Expected:** Treat the assertion as a hint rather than a declaration, derive the domain set from evidence, classify the drift, and present the declared layout as a proposal to confirm. Never inherit the declared layout in `bootstrap`, and never write the layout that only the declaration supports.
+
+### Escalate a refresh that understates the repository
+
+**Prompt:** "Refresh the repository documentation." The declared single-context layout is realized, but two domains are evidenced.
+
+**Expected:** Run the layout check, classify the drift as `understated`, escalate the provisional `refresh` to `bootstrap`, and propose recording the domain set as an ADR so later invocations read a decision instead of re-deriving one. Never de-escalate, and never widen a `targeted` request this way.
+
+### Keep a context document to its external format
+
+**Prompt:** "Add the reading order and the component table to the root context document."
+
+**Expected:** Refuse to add sections the external context format does not define. Route the reading order to the agent-facing guide and the root README, route components to section 5 of `docs/architecture.md`, and leave the context document as a glossary.
+
+### Separate a standard from a rule
+
+**Prompt:** "Record our naming convention; a validator already rejects the wrong names."
+
+**Expected:** Recognize that an enforced convention is a rule, not a standard. Load `references/standards-maintenance.md`, record it in the `RULES.md` of the owning domain with an identifier, a severity, and the enforcement owner, and keep it out of `docs/standards/`.
 
 ### Report the enforcement gap
 

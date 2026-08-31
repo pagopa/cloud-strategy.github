@@ -6,11 +6,15 @@ Use this reference when the user asks to record, revise, accept, supersede, or o
 
 Invoke `/mattpocock-domain-modeling` when the decision still needs domain terminology, alternatives, trade-offs, or boundaries clarified. Use its ADR gate: record the decision only when it is costly to reverse, surprising without context, and the result of a real trade-off. Skip that invocation for mechanical status changes or when the user has already supplied a settled decision and rationale.
 
+The knowledge layout is itself a decision. When a plan establishes or changes the domain set, record that set and the evidence that selected it as an ADR, so later invocations read a decision instead of re-deriving one.
+
 The imported skill informs the decision. This skill retains ownership of repository paths, local format, write scope, status transitions, and validation.
 
 ## Local Contract
 
 Read the nearest `docs/adr/README.md` before writing and treat it as authoritative. Use [minimal MADR](madr-minimal.md) only when no local contract exists.
+
+When ADRs already exist and no local contract is stated anywhere the author would read it, create `docs/adr/README.md` from the format those records already share: the index, the naming rule, the section order they use, the status vocabulary, and the supersession rule. Describe the practice the repository has; never impose a format the existing records do not follow.
 
 Choose the ADR directory for the affected architectural scope. Use a root ADR directory for repository-wide decisions and a context-local ADR directory only when existing context documentation establishes one. Scan that directory for the highest number and create the next `NNNN-<slug>.md`; never reuse a number for another accepted decision.
 
