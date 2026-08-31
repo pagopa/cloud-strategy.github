@@ -56,6 +56,48 @@
 
 **Expected:** Preserve the accepted body, create a new superseding ADR, and change only the old ADR status when the local contract permits it.
 
+### Guide an unclear request
+
+**Prompt:** "help I want the docs in this repo to make sense to a new joiner"
+
+**Expected:** Resolve `help`, write nothing, and answer with the understood intent, the mode the request would resolve to, the destinations at stake, and one copyable prompt to run. When more than one reading is defensible, offer at most three candidates and ask which applies; never start the work.
+
+### Align repository knowledge from scratch
+
+**Prompt:** "Align the knowledge in `docs` and update all the READMEs in this repository."
+
+**Expected:** Resolve `bootstrap` when the declared layout is absent, incomplete, or contradicted. Load `references/knowledge-scope.md` and `references/knowledge-topology.md`, discover significant components, and present a preflight plan with the exclusion ledger, the resulting topology, one Mermaid diagram, and the current wave. Write nothing before approval.
+
+### Refresh after a new component appears
+
+**Prompt:** "Refresh the repository documentation; we added a new service last month."
+
+**Expected:** Resolve `refresh` because the declared layout is already realized. Include existing documents and the missing README for the new significant component, load `references/knowledge-topology.md` only for that new artifact, and leave already-correct documents untouched.
+
+### Keep a targeted request narrow
+
+**Prompt:** "Refresh `src/service-a/README.md`." <!-- knowledge-refs: ignore -->
+
+**Expected:** Resolve `targeted`, write only that destination, and skip the preflight gate. Report any wider documentation gap instead of authoring it, and do not create a root context document that does not already exist.
+
+### Leave a current repository unchanged
+
+**Prompt:** "Align the repository knowledge again." Run immediately after an accepted alignment.
+
+**Expected:** Evaluate the unchanged predicate for every planned target, report them as `unchanged`, and write zero files. Rewriting for style alone is a defect.
+
+### Refuse an unevidenced domain
+
+**Prompt:** "Bootstrap the knowledge layout with one domain per top-level directory."
+
+**Expected:** Create a domain only where the boundary signals are evidenced. Record the rejected directories in the exclusion ledger, never scaffold empty documentation-mode directories, and write `none evidenced` rather than inventing a relationship between contexts.
+
+### Report the enforcement gap
+
+**Prompt:** "Align the repository knowledge and make sure it stays correct."
+
+**Expected:** Author the documents, then report which properties would need a check, which existing owner would host it, and what breaks first without it. Do not create or modify a workflow, action, validator, or coverage manifest.
+
 ## Should not trigger
 
 ### Ordinary documentation edit
@@ -64,11 +106,11 @@
 
 **Expected:** Route to `/internal-markdown`; no material README refresh is requested.
 
-### Documentation governance
+### Documentation enforcement
 
-**Prompt:** "Create a documentation map and enforce README coverage in CI."
+**Prompt:** "Enforce README coverage in CI and add a documentation check to the merge gate."
 
-**Expected:** Do not invoke this skill. Route the map and CI work to their nearest implementation owners.
+**Expected:** Do not invoke this skill. Authoring documents is in scope, but installing or modifying a workflow, action, validator, or coverage manifest is not; route the check to its implementation owner.
 
 ### Architecture analysis without authoring
 

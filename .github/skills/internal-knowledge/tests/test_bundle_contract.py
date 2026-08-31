@@ -7,12 +7,13 @@ from pathlib import Path
 
 import yaml
 
-
 BUNDLE_ROOT = Path(__file__).resolve().parent.parent
 SKILL_PATH = BUNDLE_ROOT / "SKILL.md"
 AUTHORING_REFERENCES = {
     "references/adr-maintenance.md",
     "references/architecture-maintenance.md",
+    "references/knowledge-scope.md",
+    "references/knowledge-topology.md",
     "references/madr-minimal.md",
     "references/readme-maintenance.md",
 }
@@ -71,3 +72,43 @@ def test_readme_reference_keeps_omission_reporting_discipline() -> None:
 
     assert reference.count("omitted-with-reason") == 3
     assert "omit it silently" not in reference
+
+
+def test_skill_resolves_one_mode_before_writing() -> None:
+    skill_text = SKILL_PATH.read_text(encoding="utf-8")
+
+    for mode in ("`help`", "`targeted`", "`refresh`", "`bootstrap`"):
+        assert mode in skill_text
+    assert "never installs a check" in skill_text
+    assert "enforcement gap" in skill_text
+
+
+def test_scope_reference_keeps_write_gates_mechanical() -> None:
+    reference = (BUNDLE_ROOT / "references" / "knowledge-scope.md").read_text(
+        encoding="utf-8"
+    )
+
+    for section in (
+        "## Mode resolution",
+        "## Help mode",
+        "## Layout declaration and drift",
+        "## Write allowlist",
+        "## Unchanged predicate",
+        "## Preflight plan",
+        "## Waves",
+        "## Enforcement gap",
+    ):
+        assert section in reference
+    assert "at most ten authored documents" in reference
+    assert "`help` ends with the proposed prompt" in reference
+
+
+def test_topology_reference_keeps_documentation_mode_anti_scope() -> None:
+    reference = (BUNDLE_ROOT / "references" / "knowledge-topology.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "Never create empty mode directories" in reference
+    assert "Never add a documentation-mode field" in reference
+    assert "Never propose a check that enforces documentation modes" in reference
+    assert "none evidenced" in reference
