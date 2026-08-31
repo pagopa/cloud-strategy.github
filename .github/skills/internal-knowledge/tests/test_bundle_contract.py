@@ -62,3 +62,12 @@ def test_bundle_includes_concrete_evaluation_scenarios() -> None:
     scenarios = BUNDLE_ROOT / "evals" / "evaluation_scenarios.md"
 
     assert scenarios.is_file()
+
+
+def test_readme_reference_keeps_omission_reporting_discipline() -> None:
+    reference = (BUNDLE_ROOT / "references" / "readme-maintenance.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert reference.count("omitted-with-reason") == 3
+    assert "omit it silently" not in reference
