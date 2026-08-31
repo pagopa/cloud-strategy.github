@@ -70,6 +70,10 @@ only for an explicit POSIX.1-2024 baseline.
 - Prefer the repository's existing Bash harness. Cover parser decisions,
   guards, dry-run behavior, command construction, and rerun safety at their
   stable boundary.
+- When the script is documented for direct invocation, that invocation is the
+  stable boundary. Reaching the code through an interpreter tests a different
+  boundary and leaves the executable bit, the shebang, and `PATH` resolution
+  unverified: `bash ./tool.sh` passes where `./tool.sh` fails.
 - When no harness can exercise the behavior before editing, record a pre-code testability exception and the alternate validation path. Use syntax, lint,
   and a safe non-mutating invocation as evidence; do not represent later
   regression coverage as test-first work.
