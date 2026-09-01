@@ -66,13 +66,13 @@
 
 **Prompt:** "Align the knowledge in `docs` and update all the READMEs in this repository."
 
-**Expected:** Resolve `bootstrap` when the declared layout is absent, incomplete, or contradicted. Load `references/knowledge-scope.md` and `references/knowledge-topology.md`, discover significant components, and present a preflight plan with the exclusion ledger, the resulting topology, one Mermaid diagram, and the current wave. Write nothing before approval.
+**Expected:** Resolve `setup` when the declared layout is absent, incomplete, or contradicted. Load `references/knowledge-scope.md` and `references/knowledge-topology.md`, discover significant components, and present a preflight plan with the exclusion ledger, the resulting topology, one Mermaid diagram, and the current wave. Write nothing before approval.
 
 ### Refresh after a new component appears
 
 **Prompt:** "Refresh the repository documentation; we added a new service last month."
 
-**Expected:** Resolve `refresh` because the declared layout is already realized. Include existing documents and the missing README for the new significant component, load `references/knowledge-topology.md` only for that new artifact, and leave already-correct documents untouched.
+**Expected:** Resolve `sync` because the declared layout is already realized. Include existing documents and the missing README for the new significant component, load `references/knowledge-topology.md` only for that new artifact, and leave already-correct documents untouched.
 
 ### Keep a targeted request narrow
 
@@ -98,7 +98,7 @@
 
 **Expected:** Count the promotion signals and promote the area, because two or more are evidenced. Select the layout for two or more domains and record the domain set as an ADR. Relative size is not a signal: keeping the narrower layout requires the user's explicit decision carried as the ledger reason, never the agent's own judgement that the smaller area is too small to matter.
 
-### Discover a standard and a principle during bootstrap
+### Discover a standard and a principle during setup
 
 **Prompt:** "Align the knowledge in this repository." Every workflow pins its actions to a commit SHA with a version comment and no check enforces it, and two accepted ADRs decide by the same criterion.
 
@@ -132,13 +132,13 @@
 
 **Prompt:** "Align the knowledge in this repository." The agent-facing guide asserts a single-context layout but names no existing artifact, while the repository evidences four domains.
 
-**Expected:** Treat the assertion as a hint rather than a declaration, derive the domain set from evidence, classify the drift, and present the declared layout as a proposal to confirm. Never inherit the declared layout in `bootstrap`, and never write the layout that only the declaration supports.
+**Expected:** Treat the assertion as a hint rather than a declaration, derive the domain set from evidence, classify the drift, and present the declared layout as a proposal to confirm. Never inherit the declared layout in `setup`, and never write the layout that only the declaration supports.
 
-### Escalate a refresh that understates the repository
+### Escalate a sync that understates the repository
 
 **Prompt:** "Refresh the repository documentation." The declared single-context layout is realized, but two domains are evidenced.
 
-**Expected:** Run the layout check, classify the drift as `understated`, escalate the provisional `refresh` to `bootstrap`, and propose recording the domain set as an ADR so later invocations read a decision instead of re-deriving one. Never de-escalate, and never widen a `targeted` request this way.
+**Expected:** Run the layout check, classify the drift as `understated`, escalate the provisional `sync` to `setup`, and propose recording the domain set as an ADR so later invocations read a decision instead of re-deriving one. Never de-escalate, and never widen a `targeted` request this way.
 
 ### Keep a context document to its external format
 
@@ -157,6 +157,36 @@
 **Prompt:** "Align the repository knowledge and make sure it stays correct."
 
 **Expected:** Author the documents, then report which properties would need a check, which existing owner would host it, and what breaks first without it. Do not create or modify a workflow, action, validator, or coverage manifest.
+
+### Update only the docs bucket
+
+**Prompt:** "Sync only the docs; leave the READMEs alone."
+
+**Expected:** Resolve `sync` with the docs bucket: everything under `docs/` plus the root context document, except README files. Improve existing targets, fill the closed derived-gap list, and send every README row to the exclusion ledger with the reason `outside the requested bucket`, elevating material gaps such as a missing `RULES.md` for an evidenced domain in the completion report.
+
+### Update only the README bucket
+
+**Prompt:** "Set up the READMEs for every component; do not touch the other documentation."
+
+**Expected:** Resolve `setup` with the readme bucket. Plan one README per significant component the parent does not already document completely, touch the layout root only to add or update the rows describing those targets, and report the rest of the unrealized layout as the named follow-up block with a copyable `setup` prompt instead of writing it.
+
+### Stop when sync means the sync contract
+
+**Prompt:** "Sync the docs with the source manifest; it manages copies and applies blockers."
+
+**Expected:** Recognize the request as a sync contract over managed copies, not document alignment. Stop and ask which run applies before resolving a mode; never reconcile managed-copy state in this skill.
+
+### Re-run setup when drift reappears
+
+**Prompt:** "Run setup again." Run after an accepted setup once new evidence contradicts the recorded domain set.
+
+**Expected:** Resolve `setup` from the drift signal, not because the layout is missing. The mode is not a first-use operation: it runs whenever the layout check detects drift, never de-escalates to `sync` mid-run, and inherits a requested bucket.
+
+### Map the old mode vocabulary to the new one
+
+**Prompt:** "Refresh the repository documentation; bootstrap whatever is missing."
+
+**Expected:** Treat `refresh` as `sync` and `bootstrap` as `setup` when mapping user vocabulary to modes, resolve exactly one mode from the layout check, and state the resolved mode and the signal that selected it in the plan. Old vocabulary in a request never selects a nonexistent mode.
 
 ## Should not trigger
 

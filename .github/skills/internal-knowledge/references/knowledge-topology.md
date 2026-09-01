@@ -2,7 +2,7 @@
 
 Use this reference when the plan creates or changes the shape of a repository's documentation: which documents exist, where they live, and what each one must contain. [Knowledge scope](knowledge-scope.md) decides what may be touched; this reference decides what the touched documents are.
 
-Load it in `bootstrap`. Load it in `refresh` only when the plan introduces an artifact that does not exist yet, such as the first document for a newly discovered component or domain.
+Load it in `setup`. Load it in `sync` only when the plan introduces an artifact that does not exist yet, such as the first document for a newly discovered component or domain.
 
 ## Contents
 

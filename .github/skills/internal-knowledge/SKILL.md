@@ -10,7 +10,7 @@ Create durable repository documentation from bounded, on-disk evidence.
 ## When to use
 
 - Asking what this skill would do before committing to it, with `/internal-knowledge help <goal>`.
-- Aligning or bootstrapping a repository's knowledge documents when the declared layout is missing, incomplete, or contradicted by what exists on disk.
+- Aligning or setting up a repository's knowledge documents when the declared layout is missing, incomplete, or contradicted by what exists on disk.
 - Refreshing README files across a repository, including the missing README of a significant component.
 - Creating or refreshing a root context document, `docs/architecture.md`, or a domain context and rules document.
 - Recording an engineering standard, principle, or guide the repository already practises.
@@ -24,8 +24,8 @@ Create durable repository documentation from bounded, on-disk evidence.
 
 ## Workflow
 
-1. Resolve one repository root, then resolve exactly one mode with [knowledge scope](references/knowledge-scope.md): `help` when the request opens with `help` or asks what this skill can do, `targeted` for explicit user destinations, `refresh` when the declared knowledge layout is already realized, `bootstrap` when that layout is absent, incomplete, or contradicted by the repository. `help` answers with the intent, the mode, the destinations at stake, and the prompt to run, then stops without writing.
-2. In `refresh` and `bootstrap`, discover targets and derive the document set with [knowledge topology](references/knowledge-topology.md), accounting for every row of its evidence table. Load the authoring reference of each artifact type in that set before drafting the plan: the plan promises what those references require, and the allowlist never grows after approval. Present the preflight plan with every element [knowledge scope](references/knowledge-scope.md) requires, including its Mermaid topology diagram, and obtain approval; approval is what authorizes the write allowlist. In `targeted`, skip the gate and use only the supplied destinations.
+1. Resolve one repository root, then resolve exactly one mode with [knowledge scope](references/knowledge-scope.md): `help` when the request opens with `help` or asks what this skill can do, `targeted` for explicit user destinations, `sync` when the declared knowledge layout is already realized, `setup` when that layout is absent, incomplete, or contradicted by the repository. A request may also name a bucket — `only the READMEs` or `only the docs` — that filters the derived set without replacing the layout check. `help` answers with the intent, the mode, the destinations at stake, and the prompt to run, then stops without writing.
+2. In `sync` and `setup`, discover targets and derive the document set with [knowledge topology](references/knowledge-topology.md), accounting for every row of its evidence table. Load the authoring reference of each artifact type in that set before drafting the plan: the plan promises what those references require, and the allowlist never grows after approval. Present the preflight plan with every element [knowledge scope](references/knowledge-scope.md) requires, including its Mermaid topology diagram, and obtain approval; approval is what authorizes the write allowlist. In `targeted`, skip the gate and use only the supplied destinations.
 3. Read applicable repository instructions, existing target content, and only the evidence needed to support material claims.
 4. Draft each authorized target with its authoring reference:
    - README files with [README maintenance](references/readme-maintenance.md);
@@ -42,7 +42,7 @@ Create durable repository documentation from bounded, on-disk evidence.
 - `CONTEXT.md` and `CONTEXT-MAP.md` follow an external context format. Never add a section that format does not define; content that does not fit belongs to another artifact. When the external skill is unavailable, author the rest and report the vocabulary layer as a gap.
 - A declaration states intent, not fact. Never let a declared layout override the domain set the repository evidences.
 - The repository declares its own knowledge layout. Read that declaration; never substitute a central preference for it, and change it only inside an approved plan.
-- `targeted` never widens into a repository-wide refresh. Report the wider gap instead of acting on it.
+- `targeted` never widens into a repository-wide sync. Report the wider gap instead of acting on it.
 - Write only destinations the approved plan or the explicit request authorizes. Evidence discovered while drafting produces a reported gap, never an unplanned write.
 - Preserve accepted ADR bodies; use the supersession flow for a changed accepted decision.
 - Preserve existing generated blocks and repository-owned documentation markers byte-for-byte. Never introduce a new marker, profile mechanism, or coverage manifest.

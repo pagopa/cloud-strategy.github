@@ -99,8 +99,9 @@ def test_readme_reference_guards_generated_block_interaction() -> None:
 def test_skill_resolves_one_mode_before_writing() -> None:
     skill_text = SKILL_PATH.read_text(encoding="utf-8")
 
-    for mode in ("`help`", "`targeted`", "`refresh`", "`bootstrap`"):
+    for mode in ("`help`", "`targeted`", "`sync`", "`setup`"):
         assert mode in skill_text
+    assert "bucket" in skill_text
     assert "never installs a check" in skill_text
     assert "enforcement gap" in skill_text
 
@@ -144,6 +145,21 @@ def test_topology_binds_the_promotion_threshold() -> None:
     assert "two signals make promotion the default" in reference
     assert "Relative size is not a signal" in reference
     assert "The plan accounts for every row" in reference
+
+
+def test_scope_defines_the_bucket_mechanism() -> None:
+    reference = (BUNDLE_ROOT / "references" / "knowledge-scope.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "## Buckets" in reference
+    assert "classified by file name" in reference
+    assert "outside the requested bucket" in reference
+    assert "is not a sync contract over managed copies" in reference
+    assert "escalation inherits the requested bucket" in reference
+    assert "never starts a layout migration" in reference
+    assert "not only on first use" in reference
+    assert "is shape and escalates" in reference
 
 
 def test_scope_extends_omission_discipline_beyond_directories() -> None:
@@ -199,10 +215,15 @@ def test_evals_cover_under_delivery_branches() -> None:
 
     for heading in (
         "### Promote a domain the evidence supports",
-        "### Discover a standard and a principle during bootstrap",
+        "### Discover a standard and a principle during setup",
         "### Author a component README with a diagram",
         "### Justify a wave below the ceiling",
         "### Resolve the diagram disposition of every authored README",
         "### Check ownership before excluding a managed path",
+        "### Update only the docs bucket",
+        "### Update only the README bucket",
+        "### Stop when sync means the sync contract",
+        "### Re-run setup when drift reappears",
+        "### Map the old mode vocabulary to the new one",
     ):
         assert heading in scenarios

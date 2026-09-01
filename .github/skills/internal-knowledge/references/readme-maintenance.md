@@ -4,10 +4,10 @@ Use this reference to create or refresh README files for repository-relative dir
 
 ## Scope
 
-1. Accept repository-relative directories such as `.` or `src/service-a`, and explicit paths named `README.md` such as `README.md` or `src/service-a/README.md`. Normalize directories to `<target>/README.md`; the normalized destinations form the complete README-authoring allowlist. In `refresh` and `bootstrap`, those destinations come from the approved plan and form the same closed allowlist.
+1. Accept repository-relative directories such as `.` or `src/service-a`, and explicit paths named `README.md` such as `README.md` or `src/service-a/README.md`. Normalize directories to `<target>/README.md`; the normalized destinations form the complete README-authoring allowlist. In `sync` and `setup`, those destinations come from the approved plan and form the same closed allowlist.
 2. Reject absolute paths, traversal, globs, duplicate normalized destinations, escaping symlinks, missing parent directories, and unusable README destinations. If any target fails, stop before writing any target. Report a preflight table with `input`, `resolved target`, `README destination`, and `resolved / failed`.
 3. Read each existing README and capture its current state before drafting. Recheck it immediately before writing and stop on concurrent changes.
-4. Read outside a target only for bounded evidence. Never expand the write allowlist while drafting: in `targeted` it is the supplied set, and in `refresh` and `bootstrap` it is the approved plan. A component or manifest entry discovered after approval produces a reported gap, not a write.
+4. Read outside a target only for bounded evidence. Never expand the write allowlist while drafting: in `targeted` it is the supplied set, and in `sync` and `setup` it is the approved plan. A component or manifest entry discovered after approval produces a reported gap, not a write.
 5. When the repository serves a profile README from `.github/README.md`, treat it as the displayed entry point and the root `README.md` as the in-repository entry point. State which is which, and stop before writing when the two contradict each other.
 
 ## Evidence and Content

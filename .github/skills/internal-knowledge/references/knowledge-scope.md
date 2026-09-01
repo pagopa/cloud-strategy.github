@@ -5,6 +5,7 @@ Use this reference to decide **what the skill may touch** before any drafting st
 ## Contents
 
 - [Mode resolution](#mode-resolution)
+- [Buckets](#buckets)
 - [Help mode](#help-mode)
 - [Layout declaration and drift](#layout-declaration-and-drift)
 - [Significant components](#significant-components)
@@ -23,14 +24,16 @@ Resolve one provisional mode from the request signals before reading evidence, t
 | --- | --- | --- |
 | `help` | The request opens with `help`, or asks what this skill can do, which mode applies, or how to phrase the real request. | None. Read-only. |
 | `targeted` | The user names explicit paths, directories, or a single document. | Only those normalized destinations. |
-| `refresh` | No explicit targets, and the repository already realizes its declared knowledge layout. | The approved plan: existing documents plus missing documents for significant components. |
-| `bootstrap` | No explicit targets, and the declared layout is absent, incomplete, or contradicted by what exists on disk. | The approved plan: the layout root document, the derived topology, and component documents. |
+| `sync` | No explicit targets, and the repository already realizes its declared knowledge layout. | The approved plan intersected with the requested bucket: existing documents plus missing documents on the closed derived-gap list. |
+| `setup` | No explicit targets, and the declared layout is absent, incomplete, or contradicted by what exists on disk. | The approved plan intersected with the requested bucket: the layout and component documents the bucket admits. |
 
 Apply the signals in order and stop at the first match. When two modes remain defensible after the check, do not guess: state both readings and ask which one applies.
 
-The layout check runs in `refresh` and in a provisional `bootstrap`, never in `help` or `targeted`. Derive the evidenced domain set, compare it with the declared layout, and escalate `refresh` to `bootstrap` when the two disagree. The check only escalates: it never returns `bootstrap` to `refresh`, and it never widens `targeted`.
+`sync` aligns documents to repository evidence and is not a sync contract over managed copies. When the request is about managed-copy state, blockers, or apply flows, stop and ask which run applies before resolving a mode.
 
-`targeted` never widens into `refresh`. A request naming three directories stays at three directories even when the repository clearly needs more; report the wider gap instead of acting on it.
+The layout check runs in `sync` and in a provisional `setup`, never in `help` or `targeted`. Derive the evidenced domain set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
+
+`targeted` never widens into `sync`. A request naming three directories stays at three directories even when the repository clearly needs more; report the wider gap instead of acting on it.
 
 ## Help mode
 
@@ -72,13 +75,25 @@ Compare the declaration against reality and classify the result:
 - `contradicted`: the artifacts on disk implement a different layout than the one declared.
 - `understated`: the declared layout is realized, but the evidence supports a richer one, such as a single context declared where two or more domains are evidenced.
 
-All three drift states select `bootstrap`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail.
+All three drift states select `setup`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail. `setup` runs whenever the layout check detects drift, not only on first use: the name describes the work, not the schedule.
 
-In `bootstrap` the declared layout is never inherited. Derive the domain set from evidence, present the declaration as a proposal to confirm, and carry both readings in the plan when they differ.
+In `setup` the declared layout is never inherited. Derive the domain set from evidence, present the declaration as a proposal to confirm, and carry both readings in the plan when they differ.
 
 Changing a declaration is a documentation change like any other. It enters the plan, appears in the allowlist, and is written only after approval. Never update a declaration silently, and never leave a declaration pointing at a document the plan does not create.
 
 A repeated `understated` finding is a decision waiting to be recorded, not a report to reissue. When the user keeps the narrower layout, propose an ADR that records the domain set with its evidence; that record then answers the question for every later invocation.
+
+## Buckets
+
+A request may name a bucket: `only the READMEs` or `only the docs`. The bucket filters the derived document set in `sync` and `setup`; it never replaces the layout check, the plan gate, or the waves.
+
+The readme bucket is classified by file name: every `README.md` anywhere in the repository belongs to it. The docs bucket holds everything under `docs/` plus the root `CONTEXT.md` or `CONTEXT-MAP.md`, except README files.
+
+Bucket membership never overrides the always-excluded paths, the ownership evidence, or the two entry points rule: each excluded member lands in the exclusion ledger with its reason, exactly like any other excluded target.
+
+The derived gaps `sync` fills inside a bucket are a closed list: a component README, `RULES.md`, `docs/adr/README.md`, and the root `README.md`. Every other missing artifact, including `docs/architecture.md` and the layout root document, is shape and escalates.
+
+When the mechanical classification contradicts a plausible reading of the request, the plan declares the mismatch before approval instead of guessing: an intent that says "the documentation" while the bucket excludes `docs/README.md` is a plan note, not a silent exclusion.
 
 ## Significant components
 
@@ -96,7 +111,8 @@ Discovery proposes; it never authorizes. Every discovered directory, and every r
 ## Write allowlist
 
 - In `targeted`, the allowlist is the normalized set of user-supplied destinations.
-- In `refresh` and `bootstrap`, the allowlist is exactly the approved plan. Approval is what authorizes a write, not discovery.
+- In `sync` and `setup`, the allowlist is exactly the approved plan intersected with the requested bucket. Approval is what authorizes a write, not discovery.
+- A row outside the requested bucket is reported as excluded with the reason `outside the requested bucket`; it never produces an unplanned write.
 - The allowlist never grows after approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
 - Repository governance and contribution files are evidence, never targets. Read them, cite them, place them in the reading order, and leave them untouched.
 - A path is generated or externally synchronized only when its own generator or manifest lists that path. A directory pattern is not evidence of ownership: read the entries, because a manifest covering a tree normally enumerates exact paths, and excluding a repository-owned document as managed drops it from the plan without anyone noticing.
@@ -118,7 +134,7 @@ When the predicate holds, report the target as `unchanged` and do not write it. 
 
 ## Preflight plan
 
-`refresh` and `bootstrap` must present a plan and obtain approval before the first write. `targeted` does not use this gate.
+`sync` and `setup` must present a plan and obtain approval before the first write. `targeted` does not use this gate.
 
 The plan states, briefly:
 
@@ -128,6 +144,8 @@ The plan states, briefly:
 - one row per planned target with its path, its state under the unchanged predicate, and the reason it is included;
 - the exclusion ledger;
 - artifacts to be created that do not exist yet;
+- the requested bucket, the intent-to-bucket reading, and any mismatch the classification produces;
+- out-of-bucket shape drift as a named follow-up block with a copyable `setup` prompt, when the drift is outside the bucket;
 - the current wave and what remains for later waves;
 - one Mermaid diagram of the resulting topology.
 
@@ -150,6 +168,8 @@ This block is a report, not a change. Never create or modify workflows, actions,
 ## Completion report
 
 Report every target exactly once as `created`, `refreshed`, `unchanged`, `excluded`, or `failed`. Include the evidence used, the validators run and their scope, the exclusion ledger, the enforcement gap, unresolved conflicts, and the next wave.
+
+When a bucket excludes material gaps, such as a missing `RULES.md` for an evidenced domain, elevate them above the ledger boilerplate: name each one with its evidence and the follow-up that would author it.
 
 State what each validator actually covered as counts, not as a verdict. A check that resolved nothing also reports no failures, so a bare pass is compatible with having checked nothing; the counts are what separate the two.
 
