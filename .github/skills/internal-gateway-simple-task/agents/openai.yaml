@@ -20,8 +20,8 @@ interface:
     available, and stop fail-closed otherwise. Close out with one canonical
     ledger and fresh focused plus broader evidence, without numeric thresholds.
     Inspect local evidence first; when a material fact cannot be recovered
-    locally, run a bounded /grill-me interview, which delegates to /grilling,
-    and keep it to the facts that unblock the route. Run
+    locally, run a bounded /grill-me interview and keep it to the facts that
+    unblock the route. Run
     /internal-gateway-critical-master before non-trivial
     action. Allow one evidence-backed reformulation and re-critique when new
     evidence changes a rejected plan. Downgrade non-trivial to trivial only

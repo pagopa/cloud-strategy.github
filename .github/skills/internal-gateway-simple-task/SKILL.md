@@ -14,8 +14,7 @@ This section is an audit index, not a preload bundle. Load each owner only when
 the condition below is proved by local evidence.
 
 - `/grill-me`: bounded interview when a material fact cannot be recovered from
-  the repository. It is a wrapper that delegates to `/grilling`; load both and
-  use that round format.
+  the repository. It is the self-contained canonical interview entrypoint.
 - `/internal-gateway-critical-master`: three-lens challenge before non-trivial
   action.
 - `/internal-tdd`: posture selection for executable or evaluable behavior.
@@ -96,12 +95,11 @@ stop with the exact boundary and required decision.
    signal, and stop signal before choosing a route.
 3. Recover missing facts from the repository before asking anyone. When a
    material fact still blocks the active route and no local evidence settles
-   it, invoke `/grill-me` instead of asking an ad-hoc question. `/grill-me`
-   delegates to `/grilling`, so load both and follow its round format. Ask the
-   whole currently answerable frontier in one round, keep the interview bounded
-   to the facts that unblock this route, and leave dependent questions for a
-   later round. Stop and request the required decision when an answer changes
-   scope, ownership, or an approval boundary.
+   it, invoke `/grill-me` instead of asking an ad-hoc question. Ask the whole
+   currently answerable frontier in one round, keep the interview bounded to
+   the facts that unblock this route, and leave dependent questions for a later
+   round. Stop and request the required decision when an answer changes scope,
+   ownership, or an approval boundary.
 
 ## Route decision
 
