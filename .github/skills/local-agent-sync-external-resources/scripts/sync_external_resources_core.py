@@ -614,6 +614,12 @@ policy:
   allow_implicit_invocation: {allow_implicit_invocation}
 """
 _MATTPOCOCK_SOURCE = "mattpocock-skills"
+_MATTPOCOCK_GRILL_ME_SKILL = "grill-me"
+_MATTPOCOCK_GRILLING_SKILL = "grilling"
+_MATTPOCOCK_GRILLING_MERGE_FILES = frozenset(
+    {"SKILL.md", "agents/openai.yaml"}
+)
+_MATTPOCOCK_GRILLING_ALIAS_BODY = "Run a `/grill-me` session.\n"
 _MATTPOCOCK_RETAINED_PATHS = {
     ("mattpocock-handoff", "SKILL.md"): (("tmp/handoff/", "tmp/.handoff/"),),
     ("mattpocock-teach", "SKILL.md"): (("./tmp/teach/", "./tmp/.teach/"),),
@@ -821,6 +827,84 @@ def _redirect_mattpocock_grilling_consumers(
         else match.group(0),
         content,
     )
+
+
+def _merge_mattpocock_grilling_into_grill_me(
+    resources: ManagedResources,
+    candidate: Path,
+) -> tuple[str, ...]:
+    matt_assets = {
+        asset.canonical_name: asset
+        for asset in resources.assets
+        if asset.source == _MATTPOCOCK_SOURCE
+    }
+    wrapper_asset = matt_assets.get(_MATTPOCOCK_GRILL_ME_SKILL)
+    engine_asset = matt_assets.get(_MATTPOCOCK_GRILLING_SKILL)
+    if wrapper_asset is None and engine_asset is None:
+        return ()
+    if wrapper_asset is None or engine_asset is None:
+        raise ValueError(
+            "grill-me and grilling must both be declared for Matt skill composition."
+        )
+
+    wrapper_path = candidate / wrapper_asset.local / "SKILL.md"
+    engine_dir = candidate / engine_asset.local
+    engine_path = engine_dir / "SKILL.md"
+    if not wrapper_path.exists() and not engine_path.exists():
+        return ()
+    if not wrapper_path.is_file():
+        raise ValueError("grill-me SKILL.md is required for Matt skill composition.")
+    if not engine_path.is_file():
+        raise ValueError("grilling SKILL.md is required for Matt skill composition.")
+
+    bundled_resources = {
+        path.relative_to(engine_dir).as_posix()
+        for path in engine_dir.rglob("*")
+        if path.is_file()
+    }
+    unsupported_resources = sorted(
+        bundled_resources - _MATTPOCOCK_GRILLING_MERGE_FILES
+    )
+    if unsupported_resources:
+        raise ValueError(
+            "grilling has unsupported bundled resources for grill-me composition: "
+            + ", ".join(unsupported_resources)
+        )
+
+    wrapper_content = wrapper_path.read_text(encoding="utf-8")
+    engine_content = engine_path.read_text(encoding="utf-8")
+    wrapper_frontmatter = _SKILL_FRONTMATTER_BLOCK_RE.match(wrapper_content)
+    engine_frontmatter = _SKILL_FRONTMATTER_BLOCK_RE.match(engine_content)
+    if wrapper_frontmatter is None:
+        raise ValueError("grill-me SKILL.md must contain YAML frontmatter.")
+    if engine_frontmatter is None:
+        raise ValueError("grilling SKILL.md must contain YAML frontmatter.")
+
+    engine_body = engine_content[engine_frontmatter.end() :]
+    if not engine_body.strip():
+        raise ValueError("grilling SKILL.md must contain a non-empty body.")
+    wrapper_body = wrapper_content[wrapper_frontmatter.end() :]
+    if engine_body == _MATTPOCOCK_GRILLING_ALIAS_BODY:
+        if not wrapper_body.strip() or "/grilling" in wrapper_body:
+            raise ValueError(
+                "grilling cannot be reduced to an alias before grill-me composition."
+            )
+        return ()
+
+    merged_content = wrapper_content[: wrapper_frontmatter.end()] + engine_body
+    aliased_engine_content = (
+        engine_content[: engine_frontmatter.end()]
+        + _MATTPOCOCK_GRILLING_ALIAS_BODY
+    )
+    changed: list[str] = []
+
+    if merged_content != wrapper_content:
+        wrapper_path.write_text(merged_content, encoding="utf-8")
+        changed.append(wrapper_path.relative_to(candidate).as_posix())
+    if aliased_engine_content != engine_content:
+        engine_path.write_text(aliased_engine_content, encoding="utf-8")
+        changed.append(engine_path.relative_to(candidate).as_posix())
+    return tuple(changed)
 
 
 def _enforce_mattpocock_research_workspace_contract(content: str) -> str:
@@ -1085,6 +1169,12 @@ def normalize_candidate(
                 metadata_path.parent.mkdir(parents=True, exist_ok=True)
                 metadata_path.write_text(metadata, encoding="utf-8")
                 changed.append(metadata_path.relative_to(candidate).as_posix())
+
+    for merged_path in _merge_mattpocock_grilling_into_grill_me(
+        resources, candidate
+    ):
+        if merged_path not in changed:
+            changed.append(merged_path)
 
     return tuple(sorted(changed))
 

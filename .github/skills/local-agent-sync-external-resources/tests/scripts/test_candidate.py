@@ -147,6 +147,10 @@ def _mattpocock_resources() -> ManagedResources:
             upstream="skills/productivity/grilling",
             local=".github/skills/grilling",
             canonical_name="grilling",
+            invocation_policy=InvocationPolicy(
+                copilot_disable_model_invocation=True,
+                codex_allow_implicit_invocation=False,
+            ),
         ),
     )
     source = ManagedSource(
@@ -920,7 +924,7 @@ def test_normalization_rewrites_declared_mattpocock_skill_references(
     assert "/unmanaged" in content
 
 
-def test_normalization_preserves_grill_me_wrapper_and_grilling_engine(
+def test_normalization_builds_self_contained_grill_me_from_grilling(
     tmp_path: Path,
 ) -> None:
     candidate = tmp_path / "candidate"
@@ -929,7 +933,9 @@ def test_normalization_preserves_grill_me_wrapper_and_grilling_engine(
     wrapper.parent.mkdir(parents=True)
     engine.parent.mkdir(parents=True)
     wrapper.write_text(
-        "---\nname: grill-me\ndisable-model-invocation: true\n---\n"
+        "---\nname: grill-me\n"
+        "description: Public interview entrypoint.\n"
+        "disable-model-invocation: true\n---\n"
         'Call the Skill tool with "grilling" and then use `/grilling`.\n',
         encoding="utf-8",
     )
@@ -945,15 +951,63 @@ def test_normalization_preserves_grill_me_wrapper_and_grilling_engine(
     assert second_changed == ()
     wrapper_content = wrapper.read_text(encoding="utf-8")
     engine_content = engine.read_text(encoding="utf-8")
-    assert wrapper_content.count("/grilling") == 1
+    assert wrapper_content == (
+        "---\nname: grill-me\n"
+        "description: Public interview entrypoint.\n"
+        "---\n"
+        "Interview the user without legacy bulk fields.\n"
+    )
     assert "/grill-me" not in wrapper_content
     assert "disable-model-invocation" not in wrapper_content
+    assert "/grilling" not in wrapper_content
+    assert "disable-model-invocation: true" in engine_content
+    assert engine_content.endswith("Run a `/grill-me` session.\n")
+    assert "Interview the user without legacy bulk fields." not in engine_content
+    engine_metadata = yaml.safe_load(
+        (engine.parent / "agents/openai.yaml").read_text(encoding="utf-8")
+    )
+    assert engine_metadata["policy"]["allow_implicit_invocation"] is False
     assert "local-sync:guided-questions" not in wrapper_content
     assert "local-sync:mattpocock-git-autonomy" not in wrapper_content
     assert "local-sync:mattpocock-git-autonomy" not in engine_content
     for legacy_field in ("Recommendation", "Why", "Default if accepted"):
         assert legacy_field not in wrapper_content
         assert legacy_field not in engine_content
+
+
+def test_normalization_rejects_missing_grilling_engine(tmp_path: Path) -> None:
+    candidate = tmp_path / "candidate"
+    wrapper = candidate / ".github/skills/grill-me/SKILL.md"
+    wrapper.parent.mkdir(parents=True)
+    wrapper.write_text(
+        "---\nname: grill-me\ndescription: Public interview entrypoint.\n---\n"
+        "Run a `/grilling` session.\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="grilling SKILL.md is required"):
+        normalize_candidate(_mattpocock_resources(), candidate)
+
+
+def test_normalization_rejects_unmerged_grilling_resources(tmp_path: Path) -> None:
+    candidate = tmp_path / "candidate"
+    wrapper = candidate / ".github/skills/grill-me/SKILL.md"
+    engine = candidate / ".github/skills/grilling/SKILL.md"
+    wrapper.parent.mkdir(parents=True)
+    engine.parent.mkdir(parents=True)
+    wrapper.write_text(
+        "---\nname: grill-me\ndescription: Public interview entrypoint.\n---\n"
+        "Run a `/grilling` session.\n",
+        encoding="utf-8",
+    )
+    engine.write_text(
+        "---\nname: grilling\n---\nInterview the user.\n",
+        encoding="utf-8",
+    )
+    (engine.parent / "examples.md").write_text("Example.\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unsupported bundled resources.*examples.md"):
+        normalize_candidate(_mattpocock_resources(), candidate)
 
 
 def test_normalization_removes_unsupported_invocation_field_from_all_mattpocock_skills(

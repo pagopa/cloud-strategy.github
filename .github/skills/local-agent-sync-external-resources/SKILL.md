@@ -61,9 +61,11 @@ read them from the manifest or the upstream commit.
   `grilling` unprefixed; prefix the other 23 canonical names with
   `mattpocock-`.
 - Redirect Matt consumer references from `/grilling` to `/grill-me` only after
-  canonical reference rewriting. Exclude the canonical `grill-me` wrapper and
-  `grilling` engine so the wrapper continues to call its engine without
-  recursion.
+  canonical reference rewriting. Build the canonical `grill-me` skill with its
+  own frontmatter and metadata plus the `grilling` body, so the interview needs
+  no second skill invocation. Keep `grilling` as the declared upstream engine
+  but publish it as a user-invoked alias back to `/grill-me`; fail candidate
+  creation if the engine adds resources that are not merged.
 - References to undeclared skills remain unchanged and are reported as
   unresolved dependencies.
 
@@ -76,9 +78,10 @@ read them from the manifest or the upstream commit.
 - Apply `invocation_policy` generically per asset. Its fields are
   `copilot.disable_model_invocation` and `codex.allow_implicit_invocation`;
   do not hardcode per-asset exceptions.
-- The Matt source declares 12 upstream user-invoked skills explicitly and
-  leaves the other 13 model-invoked skills unrestricted. Keep `grill-me`
-  model-invocable so skills that must interview the user can load it.
+- The Matt source declares 13 upstream user-invoked skills explicitly and
+  leaves the other 12 model-invoked skills unrestricted. Keep `grill-me`
+  model-invocable and make `grilling` user-invoked, so skills that must
+  interview the user load the self-contained canonical entrypoint.
   Preserve this split in both runtimes.
 - `superpowers-brainstorming` remains an independently declared exception:
   keep `disable-model-invocation: true` in `SKILL.md` and set

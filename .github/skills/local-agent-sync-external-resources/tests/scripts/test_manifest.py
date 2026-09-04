@@ -56,6 +56,7 @@ _MATTPOCOCK_PRODUCTIVITY_SKILLS = {
 _MATTPOCOCK_USER_INVOKED = {
     "ask-matt",
     "grill-with-docs",
+    "grilling",
     "handoff",
     "implement",
     "improve-codebase-architecture",
