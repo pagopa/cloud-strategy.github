@@ -5,9 +5,13 @@ interface:
     Use /internal-gateway-writing-plans after approval to capture the target,
     anti-scope, nearest owner, validation path, stop conditions, and observable
     acceptance. A user-accepted Consolidated Analysis Spec supplied by
-    /internal-gateway-idea permits writing only when the user explicitly
-    requests it; direct invocation requires explicit user approval, and neither
-    path permits execution or status creation. Build
+    /internal-gateway-idea with plan_authoring_ready true, combined with the
+    user's later explicit +plan selection, supplies source readiness and the
+    current plan-writing request; continue without another discovery or
+    approval round and do not treat implementation_permission false as a
+    plan-authoring block. Direct
+    invocation still requires explicit user approval, and neither path permits
+    execution or status creation. Build
     a control inventory that classifies every task,
     acceptance criterion, and declared obligation exactly once; map local and
     runtime controls to required validations and external, authority, or human

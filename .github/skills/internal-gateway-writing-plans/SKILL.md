@@ -35,6 +35,14 @@ description: Use when repository-owned work needs an approved implementation pla
   equivalent direct input is eligible only when all of those conditions are
   present. Producer identity does not substitute for any condition. Neither
   path authorizes plan execution, status creation, or Git mutation.
+  A verified retained spec from `/internal-gateway-idea` with
+  `plan_authoring_ready: true`, combined with the user's later explicit
+  `+plan` selection, satisfies source readiness and the current plan-writing
+  request. Continue without another discovery or approval round.
+  `implementation_permission: false` is expected because plan authoring is not
+  implementation; it must not block writing eligibility. The handoff still
+  needs the target, anti-scope, decisions, risks, acceptance, validation, and
+  authority facts required above.
 1. Capture the target, anti-scope, nearest owner, validation path, stop
    conditions, and observable acceptance. Build a control inventory before
    delegation: classify every task, acceptance criterion, and declared
