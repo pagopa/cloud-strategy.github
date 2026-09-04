@@ -33,8 +33,11 @@ interface:
     validation, and acceptance. If an explicitly selected worker is
     unavailable, record a caller-owned LifecycleRecord and stop as blocked; a
     manual or local continuation needs explicit caller authorization and a new
-    local route. Keep
-    implementation-oriented design and execution separate and user-gated; do
+    local route. Mark a verified +spec artifact plan_authoring_ready true, keep
+    the old menu, and wait for a later explicit +plan selection before routing
+    to /internal-gateway-writing-plans. Do not treat Implementation permission
+    false as a plan-authoring block. Keep implementation-oriented design and
+    execution separate and user-gated; do
     not introduce an alternate brainstorming route or handoff.
     Record the current Authorized paths and Authorized actions, preserve them
     across continue, finish, pause, and recovery, and block every new path or

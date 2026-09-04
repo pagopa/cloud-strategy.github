@@ -31,8 +31,10 @@ Present the Candidate before acceptance. After critical review, show exactly:
 4. `⏹️ Close without a file or plan`
 
 Only options 1 and 2 promote the Candidate. Option 1 authorizes only the
-consolidated spec artifact; option 2 authorizes only the plan-authoring handoff.
-Neither authorizes implementation or execution.
+consolidated spec artifact and records `plan_authoring_ready: true` after
+verification. Option 2 authorizes only the plan-authoring handoff, either from
+the Candidate or a retained plan-ready spec. `Implementation permission: false`
+does not block option 2. Neither option authorizes implementation or execution.
 
 ## Artifact Authoring
 

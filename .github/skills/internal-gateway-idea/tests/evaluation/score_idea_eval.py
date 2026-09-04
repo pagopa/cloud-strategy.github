@@ -144,6 +144,7 @@ FINDING_FIELDS = (
     "gate_override_violation_cases",
     "menu_projection_violation_cases",
     "provisional_save_violation_cases",
+    "spec_plan_readiness_violation_cases",
 )
 
 
@@ -308,6 +309,10 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
     _require_string_list(
         lifecycle.get("promotion_options"),
         "manifest.lifecycle_workflow.promotion_options",
+    )
+    _require_string(
+        lifecycle.get("spec_artifact_readiness_field"),
+        "manifest.lifecycle_workflow.spec_artifact_readiness_field",
     )
     _require_string_list(
         lifecycle.get("allowed_dispositions"),
@@ -1561,6 +1566,31 @@ def _score_observation(
             findings["lifecycle_order_violation_cases"].add(case_id)
         if replays and saves and _event_index(replays[0]) <= _event_index(saves[0]):
             findings["lifecycle_order_violation_cases"].add(case_id)
+
+        if accepted is not None and accepted.get("choice") == "+spec":
+            spec_artifact = next(
+                (
+                    event
+                    for event in artifacts
+                    if event.get("event") == "spec-authored"
+                    and event.get("artifact_id") == accepted.get("artifact_id")
+                ),
+                None,
+            )
+            plan_handoffs = [
+                event
+                for event in observation["route_events"]  # type: ignore[union-attr]
+                if event.get("event") == "plan-authoring-handoff"
+                and event.get("trigger") == "+spec"
+            ]
+            readiness_field = str(lifecycle["spec_artifact_readiness_field"])
+            if (
+                spec_artifact is None
+                or spec_artifact.get(readiness_field) is not True
+                or _event_index(spec_artifact) <= _event_index(accepted)
+                or plan_handoffs
+            ):
+                findings["spec_plan_readiness_violation_cases"].add(case_id)
 
     protected = manifest["protected_workflow"]  # type: ignore[index]
     for field in ("question_cap", "max_questions", "fixed_question_cap"):

@@ -58,6 +58,7 @@
     "critical_finding_event": "critical-finding",
     "disposition_event": "critical-disposition",
     "promotion_options": ["+spec", "+plan"],
+    "spec_artifact_readiness_field": "plan_authoring_ready",
     "allowed_dispositions": ["integrate", "reject", "accept-risk", "route"],
     "finding_classifications": ["blocking-now", "acceptance-required", "follow-up", "separate-design", "rejected-with-reason"]
   },

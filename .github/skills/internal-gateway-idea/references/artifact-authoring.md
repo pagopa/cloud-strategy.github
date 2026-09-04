@@ -34,6 +34,11 @@ validation, and final acceptance. When delegation is used, it independently
 verifies the worker result before acceptance. The result remains one canonical
 analysis artifact; do not create a parallel transcript or critical report.
 
+After verifying the spec, record `plan_authoring_ready: true` in its canonical
+recovery projection. Do not invoke `/internal-gateway-writing-plans` until the
+user later selects `+ plan`. Keep `Implementation permission` separate: a
+`false` value prevents implementation or execution, not plan authoring.
+
 ## Consolidated Analysis Spec + plan
 
 Route to `/internal-gateway-writing-plans` for plan eligibility, structure,
@@ -45,8 +50,10 @@ one bounded delegated evidence package. A delegated plan authoring route uses
 bounded `DelegationBrief`; final synthesis remains parent-owned.
 
 The user's explicit `+ plan` selection supplies the caller-owned route choice
-for this handoff. It does not override plan eligibility, review, validation, or
-safety boundaries.
+for this handoff. A retained spec with `plan_authoring_ready: true` satisfies
+the source-readiness requirement without another discovery or approval round.
+The selection does not override plan eligibility, review, validation, or safety
+boundaries.
 
 The plan owner retains final acceptance and the no-Git-mutation boundary. This
 gateway does not own implementation design or plan structure and must not start

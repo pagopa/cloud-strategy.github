@@ -20,7 +20,10 @@ At the start of each analysis unit, record:
 - `Decision focus`: the decision the analysis must make possible;
 - `Mode`: the current analysis mode;
 - `Desired artifact`: none or the one Markdown artifact the user explicitly requests;
-- `Implementation permission`: whether a later design, planning, or execution action has been explicitly requested.
+- `Implementation permission`: whether later implementation or execution has
+  been explicitly requested;
+- `Plan authoring readiness`: whether a retained spec is complete enough for a
+  later explicit `+plan` selection.
 
 The latest explicit subject or mode instruction wins. On a `subject-change` or
 `mode-change`, park the prior unit with its capsule, start the new unit, and do
@@ -28,9 +31,11 @@ not silently reuse open decisions. In `analysis-only` mode, do not invoke
 `/internal-tdd`, `/internal-gateway-writing-plans`, or
 `/internal-gateway-execute-plans` before
 the user explicitly selects a `+spec` or `+plan` Candidate acceptance action.
-A `+spec` action authorizes only the selected spec artifact; a `+plan` action
-authorizes only the selected plan-authoring handoff. Neither action authorizes
-implementation or execution.
+A `+spec` action authorizes only the selected spec artifact and records it as
+`plan_authoring_ready: true` after verification. A later `+plan` action
+authorizes only the plan-authoring handoff. `Implementation permission: false`
+does not block plan authoring because neither action authorizes implementation
+or execution.
 
 ## Autonomous route contract
 

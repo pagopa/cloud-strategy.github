@@ -773,6 +773,7 @@ def passing_run() -> dict[str, object]:
                         "event": "candidate-accepted",
                         "event_index": 10,
                         "explicit": True,
+                        "choice": "+spec",
                         "artifact_id": "C05-analysis",
                     },
                     {
@@ -785,6 +786,13 @@ def passing_run() -> dict[str, object]:
                         "event": "critical-findings-integrated",
                         "event_index": 12,
                         "artifact_id": "C05-analysis",
+                    },
+                    {
+                        "event": "spec-authored",
+                        "event_index": 13,
+                        "artifact_id": "C05-analysis",
+                        "path": "tmp/superpowers/specs/c05-analysis.md",
+                        "plan_authoring_ready": True,
                     },
                     {
                         "event": "planning-replay",
@@ -988,6 +996,7 @@ def test_manifest_declares_cases_records_limits_and_forbidden_verdicts() -> None
     lifecycle = manifest["lifecycle_workflow"]
     assert lifecycle["disposition_event"] == "critical-disposition"
     assert lifecycle["promotion_options"] == ["+spec", "+plan"]
+    assert lifecycle["spec_artifact_readiness_field"] == "plan_authoring_ready"
     assert lifecycle["allowed_dispositions"] == [
         "integrate",
         "reject",
@@ -1150,6 +1159,36 @@ def test_promotion_requires_disposition_and_save_stays_non_promoting() -> None:
 
     assert result["critical_disposition_violation_cases"] == []
     assert result["save_semantics_violation_cases"] == []
+
+
+def test_spec_acceptance_retains_plan_ready_artifact_without_immediate_handoff() -> (
+    None
+):
+    scorer = load_scorer()
+
+    complete = passing_run()
+    complete_result = scorer.score(load_manifest(), complete)
+    assert complete["observations"][4]["recovery_records"][0]["unit_lock"][
+        "implementation_permission"
+    ] is False
+    assert complete_result["accepted"] is True
+    assert complete_result["spec_plan_readiness_violation_cases"] == []
+    assert not any(
+        event.get("event") == "plan-authoring-handoff"
+        for event in complete["observations"][4]["route_events"]
+    )
+
+    blocked_spec = copy.deepcopy(complete)
+    c05 = blocked_spec["observations"][4]
+    spec_artifact = next(
+        event
+        for event in c05["artifact_events"]
+        if event.get("event") == "spec-authored"
+    )
+    spec_artifact["plan_authoring_ready"] = False
+    blocked_result = scorer.score(load_manifest(), blocked_spec)
+    assert blocked_result["accepted"] is False
+    assert blocked_result["spec_plan_readiness_violation_cases"] == ["C-05"]
 
 
 def test_synthetic_records_keep_controlled_runtime_readiness_unavailable() -> None:
