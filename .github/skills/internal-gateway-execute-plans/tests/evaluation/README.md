@@ -45,3 +45,6 @@ rejected, and `2` means the input schema is invalid. A populated run record is
 runtime evidence captured and sanitized by a human; unit tests can verify the
 scorer and fixture shape but cannot manufacture evidence that the executor
 actually followed the loop.
+
+No diagram is provided because this README describes benchmark branches and
+structured observation fields rather than a component or data-flow relationship.

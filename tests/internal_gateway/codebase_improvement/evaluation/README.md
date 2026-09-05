@@ -53,3 +53,6 @@ Exit `0` means accepted, `1` means the structured run was scored and rejected,
 and `2` means a file or schema error. Pytest validates scorer behavior and
 fixture shape. Only a controlled runtime run supplies behavioral evidence for
 the gateway itself.
+
+No diagram is provided because this README records a sanitized evaluation
+schema and review sequence rather than a component or data-flow relationship.

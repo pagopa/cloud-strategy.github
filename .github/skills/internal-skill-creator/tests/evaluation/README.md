@@ -14,3 +14,12 @@ Human review outcome: the positive and near-miss classifications are accepted
 against the revised contract. Runtime routing evidence remains unavailable and
 is an explicit residual gap.
 Review status: accepted with a runtime evidence gap.
+
+No diagram is provided because this README records review cases and evidence
+limits rather than a component or data-flow relationship.
+
+## Validation
+
+Validation is review-only: compare each case with `cases.md` and the creator
+matrix, then retain the explicit runtime-evidence gap because this repository
+does not provide an executable skill resolver for the evaluation.

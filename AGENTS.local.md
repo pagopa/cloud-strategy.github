@@ -40,7 +40,8 @@ Use the default canonical triage labels for local issues. See `docs/agents/triag
 
 ### Domain docs
 
-This repository uses the single-context domain documentation layout. See `docs/agents/domain.md`.
+This repository uses the multi-context domain documentation layout recorded in
+`CONTEXT-MAP.md`. See `docs/agents/domain.md`.
 
 This file applies only to this standards repository. Do not treat these rules
 as consumer-repository defaults without an explicit sync contract change.

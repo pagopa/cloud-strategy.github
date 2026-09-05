@@ -53,3 +53,6 @@ Native `.github/instructions/` files remain consumer projections with their
 own path-specific application metadata. They are inspected as evidence only;
 they are not portable contributor sources. Cloud-agent coverage is outside
 this scenario.
+
+No diagram is provided because this README defines capture steps and scorer
+fields rather than a component or data-flow relationship.
