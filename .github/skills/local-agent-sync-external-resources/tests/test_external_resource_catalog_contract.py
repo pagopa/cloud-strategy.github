@@ -109,8 +109,9 @@ def test_catalog_check_rejects_residual_managed_upstream_name(
 
 def test_grill_me_is_model_invocable_in_both_runtimes() -> None:
     bundle = REPO_ROOT / ".github/skills/grill-me"
+    skill_text = (bundle / "SKILL.md").read_text(encoding="utf-8")
     frontmatter = yaml.safe_load(
-        (bundle / "SKILL.md").read_text(encoding="utf-8").split("---", 2)[1]
+        skill_text.split("---", 2)[1]
     )
     metadata = yaml.safe_load((bundle / "agents/openai.yaml").read_text(encoding="utf-8"))
     manifest = yaml.safe_load(
@@ -130,6 +131,12 @@ def test_grill_me_is_model_invocable_in_both_runtimes() -> None:
     assert "disable-model-invocation" not in frontmatter
     assert "policy" not in metadata
     assert "invocation_policy" not in asset
+    assert skill_text.count(
+        "<!-- local-sync:grill-me-scope-convergence:start -->"
+    ) == 1
+    assert skill_text.count(
+        "<!-- local-sync:grill-me-scope-convergence:end -->"
+    ) == 1
 
 
 def test_internal_grill_me_is_retired() -> None:

@@ -122,6 +122,9 @@ read them from the manifest or the upstream commit.
   validation.
 - Do not add Git-autonomy, Wayfinder workspace, Wayfinder critical-validation,
   Wayfinder grilling, or `grill-me` guided-question contracts to Matt imports.
+- After composition, apply one marker-based scope-and-convergence guardrail to
+  canonical `grill-me`; preserve the imported body, rounds, frontier,
+  formatting, and invocation policy.
 - Reserve replay patches for irreducible upstream-line edits. Record why a
   normalization is insufficient before registering an exception.
 - Register each approved in-place override in

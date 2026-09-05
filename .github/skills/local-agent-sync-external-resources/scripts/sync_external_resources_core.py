@@ -620,6 +620,43 @@ _MATTPOCOCK_GRILLING_MERGE_FILES = frozenset(
     {"SKILL.md", "agents/openai.yaml"}
 )
 _MATTPOCOCK_GRILLING_ALIAS_BODY = "Run a `/grill-me` session.\n"
+_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START = (
+    "<!-- local-sync:grill-me-scope-convergence:start -->"
+)
+_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END = (
+    "<!-- local-sync:grill-me-scope-convergence:end -->"
+)
+_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_RE = re.compile(
+    re.escape(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START)
+    + r".*?"
+    + re.escape(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END),
+    re.DOTALL,
+)
+_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_CONTRACT = f"""\
+{_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START}
+## Scope and convergence guardrail
+
+Narrow tree expansion without replacing the existing rounds, frontier traversal,
+fact recovery, or final user-confirmation mechanics.
+
+- Establish an interview envelope from caller context and the user's request:
+  subject, desired outcome, scope, anti-scope, and requested level of detail.
+- Infer the envelope when it is already clear. Ask for clarification only when
+  an ambiguity would materially change the interview.
+- Before every later round, admit a candidate question only when it maps to an
+  unresolved user decision with settled prerequisites and its answer could
+  materially change the outcome, recommendation, acceptance criteria, or a
+  material risk inside the envelope.
+- Prune duplicate, cosmetic, speculative, premature implementation, and
+  adjacent-improvement branches.
+- Treat each answer as input to the existing decisions, not implicit permission
+  to broaden the subject. Park useful out-of-scope items until the user
+  explicitly accepts a scope change.
+- Treat the frontier as empty when no material in-scope decision remains, even
+  when conceivable downstream questions exist.
+- Interpret “every branch” as every material, decision-relevant branch inside
+  the agreed interview envelope.
+{_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END}"""
 _MATTPOCOCK_RETAINED_PATHS = {
     ("mattpocock-handoff", "SKILL.md"): (("tmp/handoff/", "tmp/.handoff/"),),
     ("mattpocock-teach", "SKILL.md"): (("./tmp/teach/", "./tmp/.teach/"),),
@@ -889,9 +926,18 @@ def _merge_mattpocock_grilling_into_grill_me(
             raise ValueError(
                 "grilling cannot be reduced to an alias before grill-me composition."
             )
+        normalized_wrapper = _enforce_mattpocock_grill_me_scope_convergence_contract(
+            wrapper_content
+        )
+        if normalized_wrapper != wrapper_content:
+            wrapper_path.write_text(normalized_wrapper, encoding="utf-8")
+            return (wrapper_path.relative_to(candidate).as_posix(),)
         return ()
 
     merged_content = wrapper_content[: wrapper_frontmatter.end()] + engine_body
+    merged_content = _enforce_mattpocock_grill_me_scope_convergence_contract(
+        merged_content
+    )
     aliased_engine_content = (
         engine_content[: engine_frontmatter.end()]
         + _MATTPOCOCK_GRILLING_ALIAS_BODY
@@ -905,6 +951,16 @@ def _merge_mattpocock_grilling_into_grill_me(
         engine_path.write_text(aliased_engine_content, encoding="utf-8")
         changed.append(engine_path.relative_to(candidate).as_posix())
     return tuple(changed)
+
+
+def _enforce_mattpocock_grill_me_scope_convergence_contract(
+    content: str,
+) -> str:
+    return _enforce_marked_contract(
+        content,
+        _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_RE,
+        _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_CONTRACT,
+    )
 
 
 def _enforce_mattpocock_research_workspace_contract(content: str) -> str:

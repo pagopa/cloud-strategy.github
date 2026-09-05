@@ -951,12 +951,11 @@ def test_normalization_builds_self_contained_grill_me_from_grilling(
     assert second_changed == ()
     wrapper_content = wrapper.read_text(encoding="utf-8")
     engine_content = engine.read_text(encoding="utf-8")
-    assert wrapper_content == (
-        "---\nname: grill-me\n"
-        "description: Public interview entrypoint.\n"
-        "---\n"
-        "Interview the user without legacy bulk fields.\n"
-    )
+    assert "Interview the user without legacy bulk fields.\n" in wrapper_content
+    scope_start = "<!-- local-sync:grill-me-scope-convergence:start -->"
+    scope_end = "<!-- local-sync:grill-me-scope-convergence:end -->"
+    assert wrapper_content.count(scope_start) == 1
+    assert wrapper_content.count(scope_end) == 1
     assert "/grill-me" not in wrapper_content
     assert "disable-model-invocation" not in wrapper_content
     assert "/grilling" not in wrapper_content
@@ -973,6 +972,60 @@ def test_normalization_builds_self_contained_grill_me_from_grilling(
     for legacy_field in ("Recommendation", "Why", "Default if accepted"):
         assert legacy_field not in wrapper_content
         assert legacy_field not in engine_content
+
+
+def test_normalization_restores_grill_me_scope_guardrail_when_engine_is_already_alias(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    wrapper = candidate / ".github/skills/grill-me/SKILL.md"
+    engine = candidate / ".github/skills/grilling/SKILL.md"
+    engine_metadata = candidate / ".github/skills/grilling/agents/openai.yaml"
+    wrapper.parent.mkdir(parents=True)
+    engine.parent.mkdir(parents=True)
+    engine_metadata.parent.mkdir(parents=True)
+    wrapper.write_text(
+        "---\nname: grill-me\n---\n"
+        "Imported grill-me body remains.\n",
+        encoding="utf-8",
+    )
+    engine.write_text(
+        "---\n"
+        "disable-model-invocation: true\n"
+        "name: grilling\n"
+        "---\n"
+        "Run a `/grill-me` session.\n",
+        encoding="utf-8",
+    )
+    engine_metadata.write_text(
+        "interface:\n"
+        "  display_name: Grilling\n"
+        "  short_description: Grilling\n"
+        "policy:\n"
+        "  allow_implicit_invocation: false\n",
+        encoding="utf-8",
+    )
+
+    first_changed = normalize_candidate(_mattpocock_resources(), candidate)
+    second_changed = normalize_candidate(_mattpocock_resources(), candidate)
+
+    assert first_changed == (".github/skills/grill-me/SKILL.md",)
+    assert second_changed == ()
+    wrapper_content = wrapper.read_text(encoding="utf-8")
+    assert "Imported grill-me body remains.\n" in wrapper_content
+    assert wrapper_content.count(
+        "<!-- local-sync:grill-me-scope-convergence:start -->"
+    ) == 1
+    assert wrapper_content.count(
+        "<!-- local-sync:grill-me-scope-convergence:end -->"
+    ) == 1
+    assert engine.read_text(encoding="utf-8") == (
+        "---\n"
+        "disable-model-invocation: true\n"
+        "name: grilling\n"
+        "---\n"
+        "Run a `/grill-me` session.\n"
+    )
 
 
 def test_normalization_rejects_missing_grilling_engine(tmp_path: Path) -> None:
