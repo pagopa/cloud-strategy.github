@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 import yaml
 
 REPO_ROOT = next(
@@ -142,7 +143,13 @@ def test_writer_documents_repository_preflight_fields() -> None:
     headings = {
         line.lstrip("#").strip() for line in text.splitlines() if line.startswith("#")
     }
-    preflight = text.split("## Repository Preflight", 1)[1].split("## ", 1)[0]
+    lines = text.splitlines()
+    start = next(
+        index for index, line in enumerate(lines) if line.strip() == "## Repository Preflight"
+    )
+    tail = lines[start + 1 :]
+    end = next((index for index, line in enumerate(tail) if line.startswith("#")), len(tail))
+    preflight = "\n".join(tail[:end])
     fields = {
         line.split(":", 1)[0].strip(" -*")
         for line in preflight.splitlines()
@@ -290,3 +297,134 @@ def test_executor_blocks_unsupported_delegated_manifest_tuple(tmp_path: Path) ->
     assert any(
         finding["code"] == "delegation-not-supported" for finding in payload["findings"]
     )
+
+
+def _rewrite_manifest(text: str, mutate) -> str:
+    match = re.search(
+        r"(?ms)^## Execution Manifest\s*\n\s*```json\s*\n(.*?)\n```\s*$",
+        text,
+    )
+    assert match
+    manifest = json.loads(match.group(1))
+    mutate(manifest)
+    return text[: match.start(1)] + json.dumps(manifest, indent=2) + text[match.end(1) :]
+
+
+PAST_FAILURE_MODES = (
+    (
+        "manifest-heading-suffix",
+        lambda text: text.replace(
+            "## Execution Manifest", "## Execution Manifest v3", 1
+        ),
+        "missing-execution-manifest",
+    ),
+    (
+        "controls-serialized-as-array",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest.update(
+                controls=[
+                    {
+                        "class": "automatable-local",
+                        "owner": "executor preflight",
+                        "binding": ["T1"],
+                    }
+                ]
+            ),
+        ),
+        "malformed-execution-manifest",
+    ),
+    (
+        "missing-manifest-identity-fields",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: [
+                manifest.pop(key) for key in ("manifest_version", "repository_root")
+            ],
+        ),
+        "missing-manifest-field",
+    ),
+    (
+        "missing-target-state",
+        lambda text: _rewrite_manifest(
+            text, lambda manifest: manifest["targets"][0].pop("state")
+        ),
+        "missing-manifest-field",
+    ),
+    (
+        "missing-baseline-validation-bullet",
+        lambda text: re.sub(
+            r"(?m)^- \*\*Baseline Validation:\*\*.*\n", "", text, count=1
+        ),
+        "missing-execution-field",
+    ),
+    (
+        "non-canonical-handoff-requirement",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["handoff"].update(
+                requires=[
+                    "human execution approval",
+                    "exact Manifest v3 review",
+                    "zero blocking preflight findings",
+                ]
+            ),
+        ),
+        "malformed-execution-manifest",
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    "name,mutate,expected_code",
+    PAST_FAILURE_MODES,
+    ids=[mode[0] for mode in PAST_FAILURE_MODES],
+)
+def test_writer_failure_modes_are_blocked_before_handoff(
+    tmp_path: Path, name: str, mutate, expected_code: str
+) -> None:
+    retained = tmp_path / "tmp" / "superpowers" / "plans"
+    retained.mkdir(parents=True)
+    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
+    (tmp_path / ".github").mkdir()
+    plan = retained / WRITER_FIXTURE.name
+    plan.write_text(
+        mutate(WRITER_FIXTURE.read_text(encoding="utf-8")), encoding="utf-8"
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(EXECUTOR_SCRIPT),
+            "preflight",
+            str(plan),
+            "--repo-root",
+            str(tmp_path),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0, name
+    findings = json.loads(result.stdout)["findings"]
+    assert expected_code in {finding["code"] for finding in findings}, name
+
+
+def test_writer_reference_documents_manifest_binding_contract() -> None:
+    reference = (BUNDLE / "references/manifest-v3.md").read_text(encoding="utf-8")
+    normalized = " ".join(reference.split())
+    documented = {
+        "exact-manifest-heading": re.escape("`## Execution Manifest` heading text is exact"),
+        "manifest-section-shape": re.escape("exactly one fenced JSON code block"),
+        "task-heading-binding": re.escape("task ids are exactly `T1` through `T<N>`"),
+        "control-inventory-bijectivity": re.escape("keys, bijective in both directions"),
+        "baseline-validation-bullet": re.escape("`- **Baseline Validation:**`"),
+        "canonical-preflight-heading": re.escape("`## Repository Preflight`"),
+        "canonical-handoff-requires": re.escape("`human approval`"),
+    }
+    found = {
+        name for name, pattern in documented.items() if re.search(pattern, normalized)
+    }
+    assert found == set(documented)

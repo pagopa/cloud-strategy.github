@@ -20,6 +20,11 @@ Before handoff, resolve the executor's loaded physical bundle and run:
 
 `bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`
 
-Confirm zero blocking findings. Only explicitly `legacy/imported` material may
-use reconstruction, with refreshed Manifest v3 approval. Do not downgrade an
-automatable obligation to narrative or manual evidence to make preflight pass.
+Confirm exit code zero and compact payload `status: passed` with zero
+blocking findings. Run this preflight against the exact final plan bytes; a
+ready or handoff claim without that fresh result is invalid. The plan uses
+the exact `## Execution Manifest` heading, one fenced JSON code block in that
+section, and the exact canonical `handoff.requires` strings. Only explicitly
+`legacy/imported` material may use reconstruction, with refreshed Manifest v3
+approval. Do not downgrade an automatable obligation to narrative or manual
+evidence to make preflight pass.

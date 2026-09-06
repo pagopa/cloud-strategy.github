@@ -339,6 +339,20 @@ def test_plan_without_execution_manifest_is_blocking(tmp_path: Path) -> None:
     assert any(item.severity == "blocking" for item in findings)
 
 
+def test_plan_with_manifest_heading_suffix_names_exact_heading(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    plan = _stage_valid_plan(
+        tmp_path, text.replace("## Execution Manifest", "## Execution Manifest v3", 1)
+    )
+    finding = next(
+        item
+        for item in validate_plan(plan, tmp_path)
+        if item.code == "missing-execution-manifest"
+    )
+    assert "`## Execution Manifest v3`" in finding.message
+    assert "`## Execution Manifest`" in finding.message
+
+
 def test_current_plan_requires_control_inventory(tmp_path: Path) -> None:
     text = _fixture("valid-plan.md").read_text()
     start = text.index("## Control Inventory")

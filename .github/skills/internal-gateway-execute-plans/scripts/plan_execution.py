@@ -2034,12 +2034,22 @@ def _validate_plan(
     if not (TASK_HEADING_RE.search(text) or UNCHECKED_TASK_RE.search(text)):
         findings.append(Finding("missing-task", "Plan must contain at least one task heading"))
     if not re.search(r"(?m)^## Execution Manifest\s*$", text):
-        findings.append(
-            Finding(
-                "missing-execution-manifest",
-                "Current plans must contain exactly one ## Execution Manifest",
+        variant = re.search(r"(?im)^##\s*Execution Manifest\b[^\n]*$", text)
+        if variant:
+            findings.append(
+                Finding(
+                    "missing-execution-manifest",
+                    "Plan must use the exact heading `## Execution Manifest`; "
+                    f"found `{variant.group(0).strip()}` with a suffix",
+                )
             )
-        )
+        else:
+            findings.append(
+                Finding(
+                    "missing-execution-manifest",
+                    "Current plans must contain exactly one ## Execution Manifest",
+                )
+            )
     else:
         if snapshot is None:
             try:

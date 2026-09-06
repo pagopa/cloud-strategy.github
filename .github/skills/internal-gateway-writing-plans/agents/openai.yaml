@@ -27,7 +27,15 @@ interface:
     approval metadata, bootstrap metadata, and handoff. Load the bundle-local
     references/manifest-v3.md only for Manifest authoring or review; use its
     exact top-level and nested fields, use validations[].pass_signal, and make every task reference
-    resolve to an existing manifest ID. New writer output uses
+    resolve to an existing manifest ID. Use the exact ## Execution Manifest
+    heading text with no suffix and one fenced JSON code block inside that
+    section; bind one ## Task N: heading per task numbered in manifest order
+    with ids T1 through T<N>; keep Control Inventory IDs bijective with the
+    manifest.controls map; and use the exact canonical handoff.requires
+    strings human approval, exact Manifest v3 review, and zero blocking
+    preflight findings. Gate any ready or handoff claim on a fresh physical
+    executor preflight against the exact final plan bytes with zero blocking
+    findings; a prose assertion never substitutes for that result. New writer output uses
     bootstrap.mode: manifest-only and emits no legacy ## Execution Contract;
     the current migration plan is the sole exact compatibility projection.
     Require
