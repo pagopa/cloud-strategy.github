@@ -13,6 +13,22 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 - Use only policy that exists on disk. Removed files, generated output,
   historical aliases, and past automation are not active policy.
 
+## Skill Resolution
+
+- Treat the injected skill catalog as discovery evidence, not as sole proof
+  that a skill is unavailable.
+- When the user names a skill, or a loaded skill routes work to another named
+  skill, resolve only that skill before declaring it unavailable. Do not scan
+  unrelated skill roots.
+- For filesystem-backed skills, follow symbolic links and verify the exact
+  resolved `SKILL.md`. A readable regular file means the skill is installed
+  even when the catalog or a non-following search omits it.
+- Read a resolved skill from its canonical target directory and resolve its
+  relative resources from that directory.
+- Report the concrete failure: missing skill, broken symbolic link, unreadable
+  file, or unavailable execution capability. Use provider-specific discovery
+  for skills that are not filesystem-backed.
+
 ## Working Agreement
 
 - Identify the target, nearest owner, bounded evidence, and validation path
