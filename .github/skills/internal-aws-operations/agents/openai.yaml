@@ -3,4 +3,4 @@ policy:
 interface:
   display_name: "internal-aws-operations"
   short_description: "AWS monitoring, rollout, and recovery evidence"
-  default_prompt: "Use $internal-aws-operations for this routed AWS operations task."
+  default_prompt: "Use /internal-aws to route this AWS request, then apply $internal-aws-operations for monitoring, logging, rollout validation, backup and restore proof, DR evidence, or audit evidence."

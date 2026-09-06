@@ -57,6 +57,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/awesome-copilot-security-review/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
+- `.github/skills/grilling/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-lambda/SKILL.md`
@@ -103,6 +104,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`
 - `.github/skills/internal-java/SKILL.md`
 - `.github/skills/internal-json/SKILL.md`
+- `.github/skills/internal-knowledge/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-kubernetes/SKILL.md`
 - `.github/skills/internal-lesson-codification/SKILL.md`
@@ -130,22 +132,29 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
 - `.github/skills/local-copilot-log-analyzer/SKILL.md`
 - `.github/skills/local-sync-repos/SKILL.md`
+- `.github/skills/mattpocock-ask-matt/SKILL.md`
 - `.github/skills/mattpocock-code-review/SKILL.md`
 - `.github/skills/mattpocock-codebase-design/SKILL.md`
+- `.github/skills/mattpocock-diagnosing-bugs/SKILL.md`
 - `.github/skills/mattpocock-domain-modeling/SKILL.md`
 - `.github/skills/mattpocock-grill-with-docs/SKILL.md`
 - `.github/skills/mattpocock-handoff/SKILL.md`
 - `.github/skills/mattpocock-implement/SKILL.md`
 - `.github/skills/mattpocock-improve-codebase-architecture/SKILL.md`
+- `.github/skills/mattpocock-prototype/SKILL.md`
 - `.github/skills/mattpocock-research/SKILL.md`
+- `.github/skills/mattpocock-resolving-merge-conflicts/SKILL.md`
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`
 - `.github/skills/mattpocock-teach/SKILL.md`
+- `.github/skills/mattpocock-to-questionnaire/SKILL.md`
 - `.github/skills/mattpocock-to-spec/SKILL.md`
 - `.github/skills/mattpocock-to-tickets/SKILL.md`
 - `.github/skills/mattpocock-triage/SKILL.md`
+- `.github/skills/mattpocock-wait-what/SKILL.md`
 - `.github/skills/mattpocock-wayfinder/SKILL.md`
-- `.github/skills/mattpocock-writing-great-skills/SKILL.md`
+- `.github/skills/mattpocock-wizard/SKILL.md`
+- `.github/skills/mattpocock-writing-for-agents/SKILL.md`
 - `.github/skills/openai-docs/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
@@ -171,28 +180,9 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Scripts
 
-- `.github/scripts/audit_copilot_catalog.py`
-- `.github/scripts/benchmark_skill_tokens.py`
-- `.github/scripts/build_inventory.py`
-- `.github/scripts/check_catalog_consistency.py`
-- `.github/scripts/detect_token_risks.py`
-- `.github/scripts/github_catalog_validation.py`
+- `.github/scripts/benchmark-skill-tokens.py`
 - `.github/scripts/graphify-file-change-hook.sh`
 - `.github/scripts/install-graphify-hooks.sh`
-- `.github/scripts/lib/catalog_checks.py`
-- `.github/scripts/lib/cli_runner.py`
-- `.github/scripts/lib/fingerprinting.py`
-- `.github/scripts/lib/internal_skills.py`
-- `.github/scripts/lib/inventory.py`
-- `.github/scripts/lib/jsonc.py`
-- `.github/scripts/lib/repo_paths.py`
-- `.github/scripts/lib/shared.py`
-- `.github/scripts/lib/skill_change_scope.py`
-- `.github/scripts/lib/sync_exclusions.py`
-- `.github/scripts/lib/token_risks.py`
-- `.github/scripts/run.sh`
-- `.github/scripts/validate_internal_skills.py`
-- `.github/scripts/validate_skill_change_scope.py`
 
 ## Agents
 

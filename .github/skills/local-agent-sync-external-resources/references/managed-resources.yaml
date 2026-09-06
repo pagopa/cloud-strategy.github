@@ -92,61 +92,154 @@ sources:
         canonical_name: superpowers-writing-plans
   mattpocock-skills:
     repository: https://github.com/mattpocock/skills.git
-    ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
+    ref: 6acc160e4e0cd062dbbbd7a1b26ae92855edf07e
+    advertised_ref: v1.2.3
     rewrite_skill_references: true
     backtick_skill_references:
       - code-review
       - tdd
       - to-spec
     assets:
-      - upstream: skills/engineering/grill-with-docs
-        local: .github/skills/mattpocock-grill-with-docs
-        canonical_name: mattpocock-grill-with-docs
-      - upstream: skills/engineering/domain-modeling
-        local: .github/skills/mattpocock-domain-modeling
-        canonical_name: mattpocock-domain-modeling
+      - upstream: skills/engineering/ask-matt
+        local: .github/skills/mattpocock-ask-matt
+        canonical_name: mattpocock-ask-matt
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/code-review
+        local: .github/skills/mattpocock-code-review
+        canonical_name: mattpocock-code-review
       - upstream: skills/engineering/codebase-design
         local: .github/skills/mattpocock-codebase-design
         canonical_name: mattpocock-codebase-design
-      - upstream: skills/engineering/improve-codebase-architecture
-        local: .github/skills/mattpocock-improve-codebase-architecture
-        canonical_name: mattpocock-improve-codebase-architecture
+      - upstream: skills/engineering/diagnosing-bugs
+        local: .github/skills/mattpocock-diagnosing-bugs
+        canonical_name: mattpocock-diagnosing-bugs
+      - upstream: skills/engineering/domain-modeling
+        local: .github/skills/mattpocock-domain-modeling
+        canonical_name: mattpocock-domain-modeling
+      - upstream: skills/engineering/grill-with-docs
+        local: .github/skills/mattpocock-grill-with-docs
+        canonical_name: mattpocock-grill-with-docs
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
       - upstream: skills/engineering/implement
         local: .github/skills/mattpocock-implement
         canonical_name: mattpocock-implement
-      - upstream: skills/engineering/to-tickets
-        local: .github/skills/mattpocock-to-tickets
-        canonical_name: mattpocock-to-tickets
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/improve-codebase-architecture
+        local: .github/skills/mattpocock-improve-codebase-architecture
+        canonical_name: mattpocock-improve-codebase-architecture
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/prototype
+        local: .github/skills/mattpocock-prototype
+        canonical_name: mattpocock-prototype
+      - upstream: skills/engineering/research
+        local: .github/skills/mattpocock-research
+        canonical_name: mattpocock-research
+      - upstream: skills/engineering/resolving-merge-conflicts
+        local: .github/skills/mattpocock-resolving-merge-conflicts
+        canonical_name: mattpocock-resolving-merge-conflicts
+      - upstream: skills/engineering/setup-matt-pocock-skills
+        local: .github/skills/mattpocock-setup-matt-pocock-skills
+        canonical_name: mattpocock-setup-matt-pocock-skills
       - upstream: skills/engineering/tdd
         local: .github/skills/mattpocock-tdd
         canonical_name: mattpocock-tdd
       - upstream: skills/engineering/to-spec
         local: .github/skills/mattpocock-to-spec
         canonical_name: mattpocock-to-spec
-      - upstream: skills/engineering/setup-matt-pocock-skills
-        local: .github/skills/mattpocock-setup-matt-pocock-skills
-        canonical_name: mattpocock-setup-matt-pocock-skills
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/to-tickets
+        local: .github/skills/mattpocock-to-tickets
+        canonical_name: mattpocock-to-tickets
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
       - upstream: skills/engineering/triage
         local: .github/skills/mattpocock-triage
         canonical_name: mattpocock-triage
-      - upstream: skills/engineering/code-review
-        local: .github/skills/mattpocock-code-review
-        canonical_name: mattpocock-code-review
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
       - upstream: skills/engineering/wayfinder
         local: .github/skills/mattpocock-wayfinder
         canonical_name: mattpocock-wayfinder
-      - upstream: skills/engineering/research
-        local: .github/skills/mattpocock-research
-        canonical_name: mattpocock-research
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/wizard
+        local: .github/skills/mattpocock-wizard
+        canonical_name: mattpocock-wizard
+      - upstream: skills/productivity/grill-me
+        local: .github/skills/grill-me
+        canonical_name: grill-me
+      - upstream: skills/productivity/grilling
+        local: .github/skills/grilling
+        canonical_name: grilling
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
       - upstream: skills/productivity/handoff
         local: .github/skills/mattpocock-handoff
         canonical_name: mattpocock-handoff
-      - upstream: skills/productivity/writing-great-skills
-        local: .github/skills/mattpocock-writing-great-skills
-        canonical_name: mattpocock-writing-great-skills
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
       - upstream: skills/productivity/teach
         local: .github/skills/mattpocock-teach
         canonical_name: mattpocock-teach
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/productivity/to-questionnaire
+        local: .github/skills/mattpocock-to-questionnaire
+        canonical_name: mattpocock-to-questionnaire
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/productivity/wait-what
+        local: .github/skills/mattpocock-wait-what
+        canonical_name: mattpocock-wait-what
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/productivity/writing-for-agents
+        local: .github/skills/mattpocock-writing-for-agents
+        canonical_name: mattpocock-writing-for-agents
   vercel-labs-skills:
     repository: https://github.com/vercel-labs/skills.git
     ref: e173b8c88f2581cfdaa1b6767c6519a08155790e
@@ -235,9 +328,6 @@ normalizations:
   - source: obra-superpowers
     from: docs/superpowers
     to: tmp/superpowers
-  - source: mattpocock-skills
-    from: /grilling
-    to: /grill-me
 watchlist:
   - source_family: github/awesome-copilot
     upstream_id: azure-devops-pipelines.instructions.md

@@ -22,7 +22,6 @@ env/
 .codex/hooks.json
 .opencode/*
 !.opencode/agents/
-.github/scripts/lib/graphify-out/*
 .github/scripts/graphify-out/*
 tmp/
 tmp/superpowers/specs/

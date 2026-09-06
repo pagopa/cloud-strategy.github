@@ -1,0 +1,3 @@
+# Numeric-looking values that a YAML parser converts to octal integers.
+file_mode: 0644
+explicit_mode: 0o755

@@ -3,4 +3,4 @@ policy:
 interface:
   display_name: "internal-azure-organization-structure"
   short_description: "Azure tenant, landing-zone, and topology layout"
-  default_prompt: "Use $internal-azure for an Azure organization-structure request, then apply $internal-azure-organization-structure to shape the tenant, management-group, subscription, landing-zone, or platform-topology structure."
+  default_prompt: "Use /internal-azure for an Azure organization-structure request, then apply $internal-azure-organization-structure to shape the tenant, management-group, subscription, landing-zone, or platform-topology structure."

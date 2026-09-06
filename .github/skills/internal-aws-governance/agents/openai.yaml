@@ -3,4 +3,4 @@ policy:
 interface:
   display_name: "internal-aws-governance"
   short_description: "AWS IAM, SCP, and guardrail guidance"
-  default_prompt: "Use $internal-aws-governance for this routed AWS governance task."
+  default_prompt: "Use /internal-aws to route this AWS request, then apply $internal-aws-governance for IAM, trust, federation, SCP, permission-boundary, or access-guardrail work."

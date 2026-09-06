@@ -1,6 +1,6 @@
 ---
 name: internal-go
-description: Use when creating, editing, or reviewing Go files, modules, or dependency metadata before advanced Go service depth is needed.
+description: Use when creating, editing, or reviewing Go files, modules, or dependency metadata before advanced Go service depth is needed. Route deep concurrency design, service architecture, profiling, and production-readiness work to /antigravity-golang-pro.
 ---
 
 # Internal Go

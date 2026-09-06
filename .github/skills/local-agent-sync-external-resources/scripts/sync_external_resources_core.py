@@ -614,146 +614,62 @@ policy:
   allow_implicit_invocation: {allow_implicit_invocation}
 """
 _MATTPOCOCK_SOURCE = "mattpocock-skills"
-_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_START = (
-    "<!-- local-sync:mattpocock-git-autonomy:start -->"
+_MATTPOCOCK_GRILL_ME_SKILL = "grill-me"
+_MATTPOCOCK_GRILLING_SKILL = "grilling"
+_MATTPOCOCK_GRILLING_MERGE_FILES = frozenset(
+    {"SKILL.md", "agents/openai.yaml"}
 )
-_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_END = "<!-- local-sync:mattpocock-git-autonomy:end -->"
-_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_RE = re.compile(
-    re.escape(_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_START)
+_MATTPOCOCK_GRILLING_ALIAS_BODY = "Run a `/grill-me` session.\n"
+_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START = (
+    "<!-- local-sync:grill-me-scope-convergence:start -->"
+)
+_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END = (
+    "<!-- local-sync:grill-me-scope-convergence:end -->"
+)
+_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_RE = re.compile(
+    re.escape(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START)
     + r".*?"
-    + re.escape(_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_END),
+    + re.escape(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END),
     re.DOTALL,
 )
-_MATTPOCOCK_GIT_AUTONOMY_CONTRACT = f"""\
-{_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_START}
-## Local Git-autonomy contract
+_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_CONTRACT = f"""\
+{_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START}
+## Scope and convergence guardrail
 
-- Keep completed changes in the working tree for user review.
-- You may stage only changes owned by the current task when staging helps inspect the exact diff.
-- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
-- Keep pre-existing or unrelated user changes out of the index.
-{_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_END}"""
-_MATTPOCOCK_LEGACY_PATHS = {
-    ".scratch/": "tmp/.issues/",
-    ".out-of-scope/": "tmp/.out-of-scope/",
-    "tmp/handoff/": "tmp/.handoff/",
-    "./tmp/teach/": "./tmp/.teach/",
-    "./tmp/codebase-improve/": "./tmp/.codebase-improve/",
+Narrow tree expansion without replacing the existing rounds, frontier traversal,
+fact recovery, or final user-confirmation mechanics.
+
+- Establish an interview envelope from caller context and the user's request:
+  subject, desired outcome, scope, anti-scope, and requested level of detail.
+- Infer the envelope when it is already clear. Ask for clarification only when
+  an ambiguity would materially change the interview.
+- Before every later round, admit a candidate question only when it maps to an
+  unresolved user decision with settled prerequisites and its answer could
+  materially change the outcome, recommendation, acceptance criteria, or a
+  material risk inside the envelope.
+- Prune duplicate, cosmetic, speculative, premature implementation, and
+  adjacent-improvement branches.
+- Treat each answer as input to the existing decisions, not implicit permission
+  to broaden the subject. Park useful out-of-scope items until the user
+  explicitly accepts a scope change.
+- Treat the frontier as empty when no material in-scope decision remains, even
+  when conceivable downstream questions exist.
+- Interpret “every branch” as every material, decision-relevant branch inside
+  the agreed interview envelope.
+{_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END}"""
+_MATTPOCOCK_RETAINED_PATHS = {
+    ("mattpocock-handoff", "SKILL.md"): (("tmp/handoff/", "tmp/.handoff/"),),
+    ("mattpocock-teach", "SKILL.md"): (("./tmp/teach/", "./tmp/.teach/"),),
+    (
+        "mattpocock-improve-codebase-architecture",
+        "HTML-REPORT.md",
+    ): (("./tmp/codebase-improve/", "./tmp/.codebase-improve/"),),
+    (
+        "mattpocock-improve-codebase-architecture",
+        "SKILL.md",
+    ): (("./tmp/codebase-improve/", "./tmp/.codebase-improve/"),),
 }
-_MATTPOCOCK_WAYFINDER_SKILL = "mattpocock-wayfinder"
-_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_START = (
-    "<!-- local-sync:wayfinder-workspace:start -->"
-)
-_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_END = (
-    "<!-- local-sync:wayfinder-workspace:end -->"
-)
-_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_RE = re.compile(
-    re.escape(_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_START)
-    + r".*?"
-    + re.escape(_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_END),
-    re.DOTALL,
-)
-_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT = f"""\
-{_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_START}
-## Local Wayfinder workspace contract
-
-This repository-owned contract overrides earlier workspace and output-path
-instructions.
-
-- Keep each Wayfinder analysis unit under `tmp/.wayfinder/<analysis-slug>/`.
-- Keep its map at `tmp/.wayfinder/<analysis-slug>/map.md` and its child tickets
-  under `tmp/.wayfinder/<analysis-slug>/issues/`.
-- Keep analysis, research findings, prototypes, and supporting assets inside the
-  same active Wayfinder workspace.
-{_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_END}"""
-_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_START = (
-    "<!-- local-sync:wayfinder-critical-validation:start -->"
-)
-_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_END = (
-    "<!-- local-sync:wayfinder-critical-validation:end -->"
-)
-_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_RE = re.compile(
-    re.escape(_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_START)
-    + r".*?"
-    + re.escape(_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_END),
-    re.DOTALL,
-)
-_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT = f"""\
-{_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_START}
-## Local critical-validation contract
-
-Apply one critical-validation gate to one analysis unit. One analysis unit is a
-charting batch, one claimed ticket's resolution batch, or a proposal batch for
-a research or prototype artifact. The gate covers the entire batch of
-content-producing writes derived from unchanged analysis; do not rerun it before
-each artifact in that batch.
-
-The required ticket claim remains the first coordination action and is exempt
-from this gate because it reserves work without publishing analysis or decision
-content.
-
-1. Form the analysis and proposed decisions as internal working state.
-2. Invoke `/internal-gateway-critical-master` once to challenge that analysis.
-3. Counter-validate every material critique against the destination, repository
-   evidence, explicit constraints, success criteria, and anti-scope. Do not
-   accept an unsupported or conflicting instruction merely because the critic
-   proposed it.
-4. Update the analysis by following every supported instruction from the critic.
-   Record rejected instructions and their evidence internally.
-5. If a supported material objection remains unresolved, stop the artifact
-   batch. Do not rerun the critic against unchanged evidence; first obtain new
-   evidence or make a materially supported revision.
-6. Run another critical challenge only when new evidence or that supported
-   revision changes a material claim. Once supported objections are resolved or
-   recorded as an explicit accepted risk, create the whole related artifact
-   batch without another gate while the analysis remains unchanged.
-
-Place the gate at these lifecycle boundaries:
-
-- While charting, run it after naming the destination and mapping the frontier,
-  immediately before creating the map and its ticket batch.
-- While working a map, claim the ticket first. Run the gate after resolving the
-  ticket in working state and before the resolution comment, closure,
-  Decisions-so-far update, or newly surfaced ticket batch.
-- Before producing a research or prototype artifact, challenge its proposal as
-  one unit. Treat the resulting findings or human reaction as new evidence that
-  requires a fresh gate only before a later decision-artifact batch.
-{_MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_END}"""
-_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_START = (
-    "<!-- local-sync:wayfinder-grilling:start -->"
-)
-_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_END = (
-    "<!-- local-sync:wayfinder-grilling:end -->"
-)
-_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_RE = re.compile(
-    re.escape(_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_START)
-    + r".*?"
-    + re.escape(_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_END),
-    re.DOTALL,
-)
-_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT = f"""\
-{_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_START}
-## Local Wayfinder grilling contract
-
-This contract applies to every Grilling ticket and every `/grill-me` or
-upstream `/grilling` invocation made while charting or working a map. It
-overrides any earlier one-question-at-a-time instruction.
-
-- Ask all currently known questions together in one numbered bulk block,
-  ordered by decision dependency.
-- For every numbered question, include `Question`, `Recommendation`, `Why`, and
-  `Default if accepted`.
-- Make `Recommendation` the suggested answer and `Why` the concrete reason for
-  that suggestion. Treat the default as accepted unless the user overrides it.
-- Put newly discovered or unresolved follow-up questions together in another
-  numbered bulk block. If only one blocking question remains, use a numbered
-  one-item block.
-{_MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_END}"""
-_MATTPOCOCK_WAYFINDER_LEGACY_BRANCH_RE = re.compile(
-    r"captur(?:e|ing)\s+(?:its\s+)?findings\s+on\s+a\s+throwaway\s+"
-    r"`research/<name>`\s+branch",
-    re.IGNORECASE,
-)
+_MATTPOCOCK_GRILLING_REDIRECT_EXCLUSIONS = frozenset({"grill-me", "grilling"})
 _MATTPOCOCK_RESEARCH_SKILL = "mattpocock-research"
 _MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_START = (
     "<!-- local-sync:research-workspace:start -->"
@@ -793,38 +709,19 @@ _MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT = f"""\
 {_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_START}
 ## Local research-delegation contract
 
-This repository-owned contract replaces the generic background-agent
-instruction for research execution.
+The caller owns a value gate before delegating research. Delegate only when a
+bounded worker is likely to improve evidence quality, reduce material context
+cost, or preserve useful parallel progress compared with direct research.
 
-- Delegate every research run to the `internal-luna-executor` subagent.
-- Give Luna a self-contained brief with the question, context, primary-source
-  and citation requirements, output path, and validation expectations.
-- Luna must research the question and write the single Markdown report directly
-  to the requested path. The caller verifies the result and does not repeat the
-  research or write a second report.
-- Verify that the report exists, is non-empty, and includes source citations.
-- If `internal-luna-executor` is unavailable or cannot complete the brief,
-  report a blocker instead of switching to another agent.
-- This contract applies only where the named agent is available. Other runtimes
-  must report that the required executor is unsupported.
+- When the value gate passes, load `/internal-subagent-contract` and issue one
+    bounded brief with the question, context, primary-source and citation
+    requirements, output path, and validation expectations.
+- The caller retains routing, authority, acceptance, and final validation.
+- When delegation adds no clear value or no suitable worker is available,
+    research directly instead of manufacturing a delegation requirement.
+- In either path, verify that the report exists, is non-empty, and includes
+    source citations.
 {_MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_END}"""
-_MATTPOCOCK_RESEARCH_DESCRIPTION_START = (
-    "# local-sync:research-description:start"
-)
-_MATTPOCOCK_RESEARCH_DESCRIPTION_END = "# local-sync:research-description:end"
-_MATTPOCOCK_RESEARCH_DESCRIPTION_CONTRACT_RE = re.compile(
-    r"(?ms)^[ \t]*"
-    + re.escape(_MATTPOCOCK_RESEARCH_DESCRIPTION_START)
-    + r".*?^[ \t]*"
-    + re.escape(_MATTPOCOCK_RESEARCH_DESCRIPTION_END)
-    + r"[ \t]*$"
-)
-_MATTPOCOCK_RESEARCH_DESCRIPTION_LINE_RE = re.compile(
-    r"(?m)^(?P<indent>[ \t]*)short_description:.*$"
-)
-_MATTPOCOCK_RESEARCH_DESCRIPTION = (
-    "Research from high-trust sources via Luna"
-)
 _MATTPOCOCK_HANDOFF_SKILL = "mattpocock-handoff"
 _MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_START = (
     "<!-- local-sync:handoff-workspace:start -->"
@@ -848,7 +745,7 @@ instructions.
 - Save handoff documents under `tmp/.handoff/`.
 - Do not duplicate content already captured in other artifacts (PRDs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead.
 {_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_END}"""
-_GUIDED_QUESTION_SKILLS = frozenset({"superpowers-brainstorming", "grill-me"})
+_GUIDED_QUESTION_SKILLS = frozenset({"superpowers-brainstorming"})
 _GUIDED_QUESTION_CONTRACT_START = "<!-- local-sync:guided-questions:start -->"
 _GUIDED_QUESTION_CONTRACT_END = "<!-- local-sync:guided-questions:end -->"
 _GUIDED_QUESTION_CONTRACT_RE = re.compile(
@@ -942,51 +839,127 @@ def _enforce_guided_question_contract(content: str) -> str:
     )
 
 
-def _normalize_mattpocock_legacy_paths(content: str) -> str:
-    for legacy_path, canonical_path in _MATTPOCOCK_LEGACY_PATHS.items():
-        legacy_pattern = re.compile(
-            r"(?<!tmp/)" + re.escape(legacy_path)
-        )
+def _normalize_mattpocock_retained_paths(
+    canonical_name: str,
+    relative_path: str,
+    content: str,
+) -> str:
+    for legacy_path, canonical_path in _MATTPOCOCK_RETAINED_PATHS.get(
+        (canonical_name, relative_path), ()
+    ):
+        legacy_pattern = re.compile(r"(?<!tmp/)" + re.escape(legacy_path))
         content = legacy_pattern.sub(canonical_path, content)
     return content
 
 
-def _normalize_mattpocock_wayfinder_legacy_instruction(content: str) -> str:
-    return _MATTPOCOCK_WAYFINDER_LEGACY_BRANCH_RE.sub(
-        "keeping findings in the caller-owned Wayfinder workspace",
+def _redirect_mattpocock_grilling_consumers(
+    canonical_name: str,
+    content: str,
+) -> str:
+    if canonical_name in _MATTPOCOCK_GRILLING_REDIRECT_EXCLUSIONS:
+        return content
+    return _SLASH_SKILL_REF_RE.sub(
+        lambda match: "/grill-me"
+        if match.group("name") == "grilling"
+        else match.group(0),
         content,
     )
 
 
-def _enforce_mattpocock_git_autonomy_contract(content: str) -> str:
-    return _enforce_marked_contract(
-        content,
-        _MATTPOCOCK_GIT_AUTONOMY_CONTRACT_RE,
-        _MATTPOCOCK_GIT_AUTONOMY_CONTRACT,
+def _merge_mattpocock_grilling_into_grill_me(
+    resources: ManagedResources,
+    candidate: Path,
+) -> tuple[str, ...]:
+    matt_assets = {
+        asset.canonical_name: asset
+        for asset in resources.assets
+        if asset.source == _MATTPOCOCK_SOURCE
+    }
+    wrapper_asset = matt_assets.get(_MATTPOCOCK_GRILL_ME_SKILL)
+    engine_asset = matt_assets.get(_MATTPOCOCK_GRILLING_SKILL)
+    if wrapper_asset is None and engine_asset is None:
+        return ()
+    if wrapper_asset is None or engine_asset is None:
+        raise ValueError(
+            "grill-me and grilling must both be declared for Matt skill composition."
+        )
+
+    wrapper_path = candidate / wrapper_asset.local / "SKILL.md"
+    engine_dir = candidate / engine_asset.local
+    engine_path = engine_dir / "SKILL.md"
+    if not wrapper_path.exists() and not engine_path.exists():
+        return ()
+    if not wrapper_path.is_file():
+        raise ValueError("grill-me SKILL.md is required for Matt skill composition.")
+    if not engine_path.is_file():
+        raise ValueError("grilling SKILL.md is required for Matt skill composition.")
+
+    bundled_resources = {
+        path.relative_to(engine_dir).as_posix()
+        for path in engine_dir.rglob("*")
+        if path.is_file()
+    }
+    unsupported_resources = sorted(
+        bundled_resources - _MATTPOCOCK_GRILLING_MERGE_FILES
     )
+    if unsupported_resources:
+        raise ValueError(
+            "grilling has unsupported bundled resources for grill-me composition: "
+            + ", ".join(unsupported_resources)
+        )
 
+    wrapper_content = wrapper_path.read_text(encoding="utf-8")
+    engine_content = engine_path.read_text(encoding="utf-8")
+    wrapper_frontmatter = _SKILL_FRONTMATTER_BLOCK_RE.match(wrapper_content)
+    engine_frontmatter = _SKILL_FRONTMATTER_BLOCK_RE.match(engine_content)
+    if wrapper_frontmatter is None:
+        raise ValueError("grill-me SKILL.md must contain YAML frontmatter.")
+    if engine_frontmatter is None:
+        raise ValueError("grilling SKILL.md must contain YAML frontmatter.")
 
-def _enforce_mattpocock_wayfinder_workspace_contract(content: str) -> str:
-    return _enforce_marked_contract(
-        content,
-        _MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_RE,
-        _MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT,
+    engine_body = engine_content[engine_frontmatter.end() :]
+    if not engine_body.strip():
+        raise ValueError("grilling SKILL.md must contain a non-empty body.")
+    wrapper_body = wrapper_content[wrapper_frontmatter.end() :]
+    if engine_body == _MATTPOCOCK_GRILLING_ALIAS_BODY:
+        if not wrapper_body.strip() or "/grilling" in wrapper_body:
+            raise ValueError(
+                "grilling cannot be reduced to an alias before grill-me composition."
+            )
+        normalized_wrapper = _enforce_mattpocock_grill_me_scope_convergence_contract(
+            wrapper_content
+        )
+        if normalized_wrapper != wrapper_content:
+            wrapper_path.write_text(normalized_wrapper, encoding="utf-8")
+            return (wrapper_path.relative_to(candidate).as_posix(),)
+        return ()
+
+    merged_content = wrapper_content[: wrapper_frontmatter.end()] + engine_body
+    merged_content = _enforce_mattpocock_grill_me_scope_convergence_contract(
+        merged_content
     )
-
-
-def _enforce_mattpocock_wayfinder_critical_contract(content: str) -> str:
-    return _enforce_marked_contract(
-        content,
-        _MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_RE,
-        _MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT,
+    aliased_engine_content = (
+        engine_content[: engine_frontmatter.end()]
+        + _MATTPOCOCK_GRILLING_ALIAS_BODY
     )
+    changed: list[str] = []
+
+    if merged_content != wrapper_content:
+        wrapper_path.write_text(merged_content, encoding="utf-8")
+        changed.append(wrapper_path.relative_to(candidate).as_posix())
+    if aliased_engine_content != engine_content:
+        engine_path.write_text(aliased_engine_content, encoding="utf-8")
+        changed.append(engine_path.relative_to(candidate).as_posix())
+    return tuple(changed)
 
 
-def _enforce_mattpocock_wayfinder_grilling_contract(content: str) -> str:
+def _enforce_mattpocock_grill_me_scope_convergence_contract(
+    content: str,
+) -> str:
     return _enforce_marked_contract(
         content,
-        _MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT_RE,
-        _MATTPOCOCK_WAYFINDER_GRILLING_CONTRACT,
+        _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_RE,
+        _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_CONTRACT,
     )
 
 
@@ -1003,26 +976,6 @@ def _enforce_mattpocock_research_delegation_contract(content: str) -> str:
         content,
         _MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT_RE,
         _MATTPOCOCK_RESEARCH_DELEGATION_CONTRACT,
-    )
-
-
-def _enforce_mattpocock_research_description(content: str) -> str:
-    def replace_description(match: re.Match[str]) -> str:
-        indent = match.groupdict().get("indent") or "  "
-        return "\n".join(
-            (
-                f"{indent}{_MATTPOCOCK_RESEARCH_DESCRIPTION_START}",
-                f'{indent}short_description: "{_MATTPOCOCK_RESEARCH_DESCRIPTION}"',
-                f"{indent}{_MATTPOCOCK_RESEARCH_DESCRIPTION_END}",
-            )
-        )
-
-    if _MATTPOCOCK_RESEARCH_DESCRIPTION_CONTRACT_RE.search(content):
-        return _MATTPOCOCK_RESEARCH_DESCRIPTION_CONTRACT_RE.sub(
-            replace_description, content, count=1
-        )
-    return _MATTPOCOCK_RESEARCH_DESCRIPTION_LINE_RE.sub(
-        replace_description, content, count=1
     )
 
 
@@ -1181,6 +1134,10 @@ def normalize_candidate(
                         ),
                         content,
                     )
+                if asset.source == _MATTPOCOCK_SOURCE:
+                    content = _redirect_mattpocock_grilling_consumers(
+                        asset.canonical_name, content
+                    )
                 backtick_references = backtick_references_by_source.get(asset.source, {})
                 if backtick_references:
                     content = _BACKTICK_SKILL_REF_RE.sub(
@@ -1193,14 +1150,11 @@ def normalize_candidate(
                     )
 
             if asset.source == _MATTPOCOCK_SOURCE:
-                content = _normalize_mattpocock_legacy_paths(content)
-                if (
-                    asset.canonical_name == _MATTPOCOCK_WAYFINDER_SKILL
-                    and file_path == asset_dir / "SKILL.md"
-                ):
-                    content = _normalize_mattpocock_wayfinder_legacy_instruction(
-                        content
-                    )
+                content = _normalize_mattpocock_retained_paths(
+                    asset.canonical_name,
+                    file_path.relative_to(asset_dir).as_posix(),
+                    content,
+                )
 
             if (
                 asset.canonical_name in _GUIDED_QUESTION_SKILLS
@@ -1220,14 +1174,6 @@ def normalize_candidate(
                 content = _enforce_codebase_improve_workspace_contract(content)
             if (
                 asset.source == _MATTPOCOCK_SOURCE
-                and asset.canonical_name == _MATTPOCOCK_WAYFINDER_SKILL
-                and file_path == asset_dir / "SKILL.md"
-            ):
-                content = _enforce_mattpocock_wayfinder_workspace_contract(content)
-                content = _enforce_mattpocock_wayfinder_critical_contract(content)
-                content = _enforce_mattpocock_wayfinder_grilling_contract(content)
-            if (
-                asset.source == _MATTPOCOCK_SOURCE
                 and asset.canonical_name == _MATTPOCOCK_RESEARCH_SKILL
                 and file_path == asset_dir / "SKILL.md"
             ):
@@ -1235,21 +1181,10 @@ def normalize_candidate(
                 content = _enforce_mattpocock_research_delegation_contract(content)
             if (
                 asset.source == _MATTPOCOCK_SOURCE
-                and asset.canonical_name == _MATTPOCOCK_RESEARCH_SKILL
-                and file_path == asset_dir / "agents/openai.yaml"
-            ):
-                content = _enforce_mattpocock_research_description(content)
-            if (
-                asset.source == _MATTPOCOCK_SOURCE
                 and asset.canonical_name == _MATTPOCOCK_HANDOFF_SKILL
                 and file_path == asset_dir / "SKILL.md"
             ):
                 content = _enforce_mattpocock_handoff_workspace_contract(content)
-            if (
-                asset.source == _MATTPOCOCK_SOURCE
-                and file_path == asset_dir / "SKILL.md"
-            ):
-                content = _enforce_mattpocock_git_autonomy_contract(content)
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)
 
@@ -1290,6 +1225,12 @@ def normalize_candidate(
                 metadata_path.parent.mkdir(parents=True, exist_ok=True)
                 metadata_path.write_text(metadata, encoding="utf-8")
                 changed.append(metadata_path.relative_to(candidate).as_posix())
+
+    for merged_path in _merge_mattpocock_grilling_into_grill_me(
+        resources, candidate
+    ):
+        if merged_path not in changed:
+            changed.append(merged_path)
 
     return tuple(sorted(changed))
 

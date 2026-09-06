@@ -1,13 +1,13 @@
 ---
 name: internal-tf
-description: Use when Terraform/OpenTofu language-only HCL is the immediate concern.
+description: Use when Terraform/OpenTofu language-only HCL is the immediate concern. Route module architecture, state, plan or apply, provider operation, native `.tftest.hcl` tests, CI, scans, upgrades, and risk diagnosis to /internal-terraform.
 ---
 
 # Terraform/OpenTofu Language
 
 ## Reference files
 
-- `references/common-mistakes.md`: Load when reviewing HCL or typed-interface mistakes.
+- `references/common-mistakes.md`: Load when reviewing HCL, typed-interface, or file-level readability mistakes.
 - `references/structure-standard.md`: Load when choosing the default root file or environment layout.
 - `references/template-examples.md`: Load when a minimal typed HCL example is useful.
 

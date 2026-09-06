@@ -33,6 +33,13 @@ read them from the manifest or the upstream commit.
 - `apply` performs `plan`, prepares missing snapshots, rejects dirty targets
   unless `--allow-dirty`, generates and checks one patch, applies once, rebuilds
   inventory, and reruns scoped validation.
+- `--source <source-id>` limits any mode to one declared source and may be
+  repeated. Unknown IDs fail before execution. Plan and apply validate and
+  replay only overrides whose target belongs to a selected asset. Omitting the
+  option preserves the complete-catalog behavior.
+- `audit --allow-dirty` suppresses only the dirty-target blocker while retaining
+  manifest and override validation. `apply --allow-dirty` remains an explicit
+  authorization to replace explained local target changes.
 
 ## Pinned Content Only
 
@@ -49,9 +56,16 @@ read them from the manifest or the upstream commit.
   `canonical_name` values.
 - `skill_reference_aliases` are source-local and point only at declared
   canonical names.
-- The `mattpocock-skills` source uses the `mattpocock-` prefix. Upstream
-  `/grilling` is normalized to `grill-me` through a declared source
-  replacement, not an alias.
+- The `mattpocock-skills` source imports all 25 direct `engineering/` and
+  `productivity/` bundles from the pinned release. Keep `grill-me` and
+  `grilling` unprefixed; prefix the other 23 canonical names with
+  `mattpocock-`.
+- Redirect Matt consumer references from `/grilling` to `/grill-me` only after
+  canonical reference rewriting. Build the canonical `grill-me` skill with its
+  own frontmatter and metadata plus the `grilling` body, so the interview needs
+  no second skill invocation. Keep `grilling` as the declared upstream engine
+  but publish it as a user-invoked alias back to `/grill-me`; fail candidate
+  creation if the engine adds resources that are not merged.
 - References to undeclared skills remain unchanged and are reported as
   unresolved dependencies.
 
@@ -64,8 +78,13 @@ read them from the manifest or the upstream commit.
 - Apply `invocation_policy` generically per asset. Its fields are
   `copilot.disable_model_invocation` and `codex.allow_implicit_invocation`;
   do not hardcode per-asset exceptions.
-- `superpowers-brainstorming` is the declared exception: keep
-  `disable-model-invocation: true` in `SKILL.md` and set
+- The Matt source declares 13 upstream user-invoked skills explicitly and
+  leaves the other 12 model-invoked skills unrestricted. Keep `grill-me`
+  model-invocable and make `grilling` user-invoked, so skills that must
+  interview the user load the self-contained canonical entrypoint.
+  Preserve this split in both runtimes.
+- `superpowers-brainstorming` remains an independently declared exception:
+  keep `disable-model-invocation: true` in `SKILL.md` and set
   `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
 - After refresh, manually verify that no policy-managed skill is implicitly
   selected in either runtime.
@@ -80,29 +99,13 @@ read them from the manifest or the upstream commit.
 
 ## Guided Question Contract
 
-- Append a repository-owned contract to `superpowers-brainstorming` and
-  `grill-me` whenever either canonical skill is managed, regardless of source.
+- Append the repository-owned bulk-question contract only to
+  `superpowers-brainstorming`.
 - Require numbered bulk question blocks. Every question includes a brief
   `Recommendation`, `Why`, and `Default if accepted`.
 - Explicitly override upstream one-question-at-a-time pacing. A single
   remaining blocker is a numbered one-item block.
 - Use a marker-based idempotent append, never a context-sensitive replay patch.
-
-## Wayfinder Critical Validation And Grilling Contracts
-
-- Append two repository-owned contracts to `mattpocock-wayfinder`.
-- Before artifact creation or update, `internal-gateway-critical-master` must
-  challenge the analysis. Counter-validate every material critique against
-  evidence and constraints, incorporate every supported instruction, and stop
-  when a supported objection remains unresolved.
-- One gate covers one analysis unit and its related content-producing write
-  batch. The required ticket claim is exempt and remains the first coordination
-  action. Rerun the critic only after new evidence or a materially supported
-  revision; never against unchanged evidence.
-- Every Wayfinder Grilling ticket and `grill-me` invocation asks numbered bulk
-  blocks with `Question`, `Recommendation`, `Why`, and `Default if accepted`.
-- Both contracts are canonical-name-scoped, marker-based, idempotent, and never
-  replay patches.
 
 ## Repository-Owned Skill Contracts
 
@@ -110,8 +113,18 @@ read them from the manifest or the upstream commit.
   canonical-name-scoped, marker-based candidate normalizations.
 - Each normalization replaces its own marked block, is idempotent, and
   preserves unrelated upstream content.
-- Matt Pocock handoff output path and PRD-aware non-duplication wording are
-  canonical marked normalizations, not replay-patch ownership.
+- Retain only the Matt Pocock Handoff, Teach, and Improve Architecture
+  repository paths. Keep Handoff non-duplication wording as a canonical marked
+  normalization rather than replay-patch ownership.
+- Keep Matt Research output under `tmp/.research/`. Before delegation, the
+  caller applies a value gate; when delegation is worthwhile, it uses
+  `/internal-subagent-contract` and retains routing, authority, acceptance, and
+  validation.
+- Do not add Git-autonomy, Wayfinder workspace, Wayfinder critical-validation,
+  Wayfinder grilling, or `grill-me` guided-question contracts to Matt imports.
+- After composition, apply one marker-based scope-and-convergence guardrail to
+  canonical `grill-me`; preserve the imported body, rounds, frontier,
+  formatting, and invocation policy.
 - Reserve replay patches for irreducible upstream-line edits. Record why a
   normalization is insufficient before registering an exception.
 - Register each approved in-place override in
@@ -177,6 +190,8 @@ python3 scripts/sync_external_resources.py prepare --workspace ../cloud-strategy
 python3 scripts/sync_external_resources.py audit --format tsv
 python3 scripts/sync_external_resources.py plan --workspace ../cloud-strategy.github-external-refresh --format tsv
 python3 scripts/sync_external_resources.py apply --workspace ../cloud-strategy.github-external-refresh --format tsv
+python3 scripts/sync_external_resources.py plan --source mattpocock-skills --workspace ../cloud-strategy.github-external-refresh --format tsv
+python3 scripts/sync_external_resources.py apply --source mattpocock-skills --workspace ../cloud-strategy.github-external-refresh --format tsv
 ```
 
 ## Live Network Benchmark (Separate Authorization Required)
@@ -190,8 +205,8 @@ separate authorization.
 ## Validation
 
 - `python3 -m compileall scripts`
-- `python3 -m pytest -q tests/github/skills/local-agent-sync-external-resources/scripts`
-- `python3 .github/scripts/validate_internal_skills.py --skill local-agent-sync-external-resources --strict`
+- `python3 -m pytest -q .github/skills/local-agent-sync-external-resources/tests/scripts`
+- `./.github/tools/run.sh validate-internal-skills --skill local-agent-sync-external-resources --strict`
 - `make inventory-build`
 - `make token-risks`
 

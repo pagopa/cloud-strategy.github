@@ -3,4 +3,4 @@ policy:
 interface:
   display_name: "internal-azure-devops"
   short_description: "Azure DevOps pipeline and automation delivery"
-  default_prompt: "Use $internal-azure for an Azure DevOps request, then apply $internal-azure-devops for pipeline or project-automation delivery."
+  default_prompt: "Use /internal-azure for an Azure DevOps request, then apply $internal-azure-devops for pipeline or project-automation delivery."

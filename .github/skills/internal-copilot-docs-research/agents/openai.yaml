@@ -1,4 +1,4 @@
 interface:
   display_name: "internal-copilot-docs-research"
-  short_description: "Help with Internal Copilot Docs Research tasks"
-  default_prompt: "Use $internal-copilot-docs-research for this task and follow the repository-owned workflow in the skill."
+  short_description: "Current Copilot and MCP platform behavior"
+  default_prompt: "Use $internal-copilot-docs-research when a .github/ customization change depends on current GitHub Copilot or MCP platform behavior and repository-local policy is not sufficient."

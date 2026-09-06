@@ -1,9 +1,10 @@
 ---
+disable-model-invocation: true
 name: mattpocock-to-spec
 description: Turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed.
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a spec (you may know this document as a PRD). Do NOT interview the user — just synthesize what you already know.
+This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user — just synthesize what you already know.
 
 The issue tracker and triage label vocabulary should have been provided to you — run `/mattpocock-setup-matt-pocock-skills` if not.
 
@@ -72,12 +73,3 @@ A description of the things that are out of scope for this spec.
 Any further notes about the feature.
 
 </spec-template>
-
-<!-- local-sync:mattpocock-git-autonomy:start -->
-## Local Git-autonomy contract
-
-- Keep completed changes in the working tree for user review.
-- You may stage only changes owned by the current task when staging helps inspect the exact diff.
-- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
-- Keep pre-existing or unrelated user changes out of the index.
-<!-- local-sync:mattpocock-git-autonomy:end -->

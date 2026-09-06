@@ -38,6 +38,22 @@ existing `github_repository` before import. The guard must also fail closed
 when identity, ownership, authority, or recovery facts are missing or
 ambiguous. Stop rather than guessing or silently mutating live resources.
 
+## Plan Delta Interpretation
+
+A non-empty plan is not evidence of a defect in the repository. The default
+reading, that the configuration is wrong, is the one worth distrusting, because
+the other case is common: the configuration is right and the live objects have
+diverged from it. Only the first case is closed by a repository change. An
+allowlist, plan checker, or migration script that already tolerates the
+difference is a prior judgment that the divergence was expected, and a field
+recording provenance, a timestamp, or a generated label tends to differ across
+every managed object at once.
+
+Editing correct configuration until the delta disappears converts an expected
+divergence into a real defect. Where neither reading is supported, report the
+delta as undecided rather than choosing the cheaper one. Anton owns the
+reconciliation mechanics once the delta is classified.
+
 ## Handoff
 
 State the selected primary owner, the repository-specific gate being applied,
