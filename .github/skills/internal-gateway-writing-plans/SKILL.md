@@ -127,11 +127,15 @@ description: Use when repository-owned work needs an approved implementation pla
    `separate-design`, or `rejected-with-reason`; untraceable findings are
    `separate-design`.
 
-   Acceptance gate: before any ready verdict or handoff, run the physical
-   preflight against the exact final plan bytes and require exit code zero
-   with zero blocking findings. A completion claim without that fresh
-   preflight evidence is invalid; repair the plan and rerun the preflight
-   instead of describing the expected result.
+   Acceptance gate: before any ready verdict or handoff, run on the exact
+   final plan bytes, in order: the writer structural check
+   `python3 <writer-bundle>/scripts/check_plan_structure.py <plan>
+   --format compact` with exit code zero, the physical executor preflight
+   `bash <physical-executor-bundle>/scripts/run.sh preflight <plan>
+   --format compact` with exit code zero and zero blocking findings, and the
+   bundle-local pytest suite. A completion claim without that fresh evidence
+   for all three is invalid; repair the plan and rerun every gate instead of
+   describing the expected result.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every
    `automatable-local` or `observable-runtime` row must map to a required
@@ -165,12 +169,13 @@ description: Use when repository-owned work needs an approved implementation pla
 4. Report the plan through the writer-specific compact projection below.
    Keep plan details in the retained artifact. Do not invoke execution,
    create a status sibling, or offer an imported execution owner before
-   explicit approval. The `Evidence:` line records `execution=` as the
-   executed preflight command with its zero-blocking result on the final
-   plan bytes; without that fresh evidence the readiness verdict stays
-   `blocked` or `needs review`, never `ready`. Completion: every line of
-   the projection is present, the material gap is visible, and execution
-   has not started without approval.
+   explicit approval. The `Evidence:` line records `structure=` as the
+   executed writer structural check and `execution=` as the executed
+   preflight command, each with its zero-blocking result on the final plan
+   bytes; without those fresh results the readiness verdict stays `blocked`
+   or `needs review`, never `ready`. Completion: every line of the
+   projection is present, the material gap is visible, and execution has not
+   started without approval.
 
 ## Writer communication
 
@@ -231,6 +236,13 @@ readiness is writer-owned and structural. The executor bundle remains the
 only owner of retained-plan mechanical preflight, loaded bundle resolution,
 state, and execution validation.
 
+Run
+`python3 <writer-bundle>/scripts/check_plan_structure.py <plan> --format compact`
+after every manifest-affecting edit and before human review, and require zero
+blocking findings. The check is writer-owned, structural, read-only, and
+stdlib-only; it never replaces the executor preflight, and a divergence
+between the two is a bundle defect to fix through the writer tests.
+
 ## No-Commit Rule
 
 - Never run `git add`, `git commit`, `git push`, or another Git mutation while
@@ -248,7 +260,10 @@ state, and execution validation.
   re-confirmation of the approved plan.
 - Confirm the executor will record approval evidence and the five delivery
   verdicts in its YAML status sibling before terminal closeout.
-- Run the bundle-local pytest suite and the executor physical preflight
-  against the exact final plan bytes; record the zero-blocking preflight
-  result as the `execution=` evidence in the writer projection.
+- Run the bundle-local pytest suite, the writer structural check
+  `python3 <writer-bundle>/scripts/check_plan_structure.py <plan>
+  --format compact`, and the executor physical preflight against the exact
+  final plan bytes; all three must pass with zero blocking findings, and the
+  structural and preflight results are recorded as the `structure=` and
+  `execution=` evidence in the writer projection.
 - Run `git diff --check` and confirm no Git mutation occurred.

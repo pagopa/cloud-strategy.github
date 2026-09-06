@@ -1,4 +1,5 @@
 import ast
+import importlib.util
 import json
 import re
 import shutil
@@ -21,7 +22,65 @@ EXECUTOR_SCRIPT = (
     / ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
 )
 EXECUTOR_BUNDLE = REPO_ROOT / ".github/skills/internal-gateway-execute-plans"
+EXECUTOR_FIXTURE = EXECUTOR_BUNDLE / "fixtures/valid-plan.md"
+STRUCTURAL_CHECK = BUNDLE / "scripts/check_plan_structure.py"
 INVENTORY = REPO_ROOT / ".github/INVENTORY.md"
+
+
+def _load_structural_check():
+    spec = importlib.util.spec_from_file_location("check_plan_structure", STRUCTURAL_CHECK)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _stage_plan(tmp_path: Path, text: str) -> Path:
+    retained = tmp_path / "tmp" / "superpowers" / "plans"
+    retained.mkdir(parents=True, exist_ok=True)
+    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
+    (tmp_path / ".github").mkdir(exist_ok=True)
+    plan = retained / WRITER_FIXTURE.name
+    plan.write_text(text, encoding="utf-8")
+    return plan
+
+
+def _run_checker(plan: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            str(STRUCTURAL_CHECK),
+            str(plan),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+
+def _run_executor_preflight(plan: Path, repo_root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            str(EXECUTOR_SCRIPT),
+            "preflight",
+            str(plan),
+            "--repo-root",
+            str(repo_root),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+
+def _finding_codes(result: subprocess.CompletedProcess[str]) -> set[str]:
+    payload = json.loads(result.stdout)
+    items = payload.get("findings") or payload.get("finding_sample") or []
+    return {item["code"] for item in items}
 
 
 def _normalized_manifest_contract(text: str) -> str:
@@ -428,3 +487,331 @@ def test_writer_reference_documents_manifest_binding_contract() -> None:
         name for name, pattern in documented.items() if re.search(pattern, normalized)
     }
     assert found == set(documented)
+
+
+def test_structural_check_passes_both_gateway_fixtures(tmp_path: Path) -> None:
+    checker = _load_structural_check()
+    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
+    (tmp_path / ".github").mkdir()
+    retained = tmp_path / "tmp" / "superpowers" / "plans"
+    retained.mkdir(parents=True)
+    for fixture in (WRITER_FIXTURE, EXECUTOR_FIXTURE):
+        staged = retained / fixture.name
+        shutil.copy(fixture, staged)
+        findings = checker.check_plan_structure(
+            staged.read_text(encoding="utf-8"), staged
+        )
+        blocking = [item for item in findings if item.severity == "blocking"]
+        assert not blocking, (fixture.name, blocking)
+
+
+def test_structural_check_reports_lowercase_inventory_row_as_notice(tmp_path: Path) -> None:
+    text = WRITER_FIXTURE.read_text(encoding="utf-8").replace(
+        "| --- | --- | --- | --- | --- | --- | --- | --- |\n",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |\n"
+        "| notes | free text row | - | - | - | - | - | - |\n",
+        1,
+    )
+    checker = _load_structural_check()
+    staged = _stage_plan(tmp_path, text)
+
+    findings = checker.check_plan_structure(staged.read_text(encoding="utf-8"), staged)
+
+    assert staged.name == "2026-07-25-1829-valid-plan.md"
+    notices = [item for item in findings if item.severity == "notice"]
+    assert [item.code for item in notices] == ["inventory-row-not-a-control"]
+    assert not [item for item in findings if item.severity == "blocking"]
+
+
+def test_structural_check_rejects_staged_fixtures_outside_retained_directory(
+    tmp_path: Path,
+) -> None:
+    checker = _load_structural_check()
+    staged = tmp_path / "elsewhere.md"
+    staged.write_text(WRITER_FIXTURE.read_text(encoding="utf-8"), encoding="utf-8")
+    findings = checker.check_plan_structure(staged.read_text(encoding="utf-8"), staged)
+    assert "plan-outside-retained-directory" in {item.code for item in findings}
+
+
+def test_structural_check_compact_payload_matches_executor_shape(
+    tmp_path: Path, capsys
+) -> None:
+    checker = _load_structural_check()
+    staged = _stage_plan(tmp_path, WRITER_FIXTURE.read_text(encoding="utf-8"))
+    result = _run_checker(staged)
+
+    assert result.returncode == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert set(payload) == {"status", "finding_counts", "finding_sample", "next_action"}
+    assert payload["status"] == "passed"
+    assert set(payload["finding_counts"]) == {"total", "blocking", "notice"}
+
+
+def test_structural_check_never_imports_executor_private_code() -> None:
+    source = STRUCTURAL_CHECK.read_text(encoding="utf-8")
+
+    assert "plan_execution" not in source
+    assert "internal-gateway-execute-plans/scripts" not in source
+
+
+def _rewrite_manifest(text: str, mutate) -> str:
+    match = re.search(
+        r"(?ms)^## Execution Manifest\s*\n\s*```json\s*\n(.*?)\n```\s*$",
+        text,
+    )
+    assert match
+    manifest = json.loads(match.group(1))
+    mutate(manifest)
+    return text[: match.start(1)] + json.dumps(manifest, indent=2) + text[match.end(1) :]
+
+
+PRODUCER_FAILURE_MODES = (
+    (
+        "manifest-section-prose",
+        lambda text: text.replace(
+            "## Execution Manifest\n\n```json",
+            "## Execution Manifest\n\nReviewer note: check before dispatch.\n\n```json",
+            1,
+        ),
+        "malformed-execution-manifest",
+        "malformed-execution-manifest",
+    ),
+    (
+        "task-heading-missing-colon",
+        lambda text: text.replace(
+            "### Task 1: Add example test", "### Task 1 Add example test", 1
+        ),
+        "bootstrap-projection-drift",
+        "bootstrap-projection-drift",
+    ),
+    (
+        "task-heading-number-gap",
+        lambda text: text.replace("### Task 2:", "### Task 3:", 1),
+        "bootstrap-projection-drift",
+        "bootstrap-projection-drift",
+    ),
+    (
+        "execution-contract-in-manifest-only",
+        lambda text: text + "\n## Execution Contract\n\n```json\n{\"validations\": []}\n```\n",
+        "obsolete-execution-contract",
+        "obsolete-execution-contract",
+    ),
+    (
+        "duplicate-json-key",
+        lambda text: text.replace(
+            '"plan_id": "2026-07-25-1829-valid-plan",',
+            '"plan_id": "2026-07-25-1829-valid-plan", "plan_id": "drift",',
+            1,
+        ),
+        "duplicate-manifest-field",
+        "duplicate-manifest-field",
+    ),
+    (
+        "unknown-target-reference",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["tasks"][0].update({"target_ids": ["TGT-MISSING"]}),
+        ),
+        "unknown-task-reference",
+        "unknown-task-reference",
+    ),
+    (
+        "git-mutating-validation-command",
+        lambda text: text.replace(
+            '"command": "pytest -q tests/example/test_example.py"',
+            '"command": "git commit -am forbidden"',
+            1,
+        ),
+        "git-mutation-command",
+        "git-mutation-command",
+    ),
+    (
+        "delegation-mode-delegated",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["delegation"].update({"mode": "delegated"}),
+        ),
+        "delegation-not-supported",
+        "delegation-not-supported",
+    ),
+    (
+        "missing-delegation-receipt-key",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["delegation"].pop("receipt"),
+        ),
+        "missing-manifest-field",
+        "malformed-delegation-extension",
+    ),
+    (
+        "handoff-requires-missing-canonical-string",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["handoff"].update(
+                {"requires": ["human approval", "zero blocking preflight findings"]}
+            ),
+        ),
+        "malformed-execution-manifest",
+        "malformed-execution-manifest",
+    ),
+    (
+        "bootstrap-projection-binding-conflict",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["bootstrap"]["projection_binding"].update(
+                {"validations": "manifest.execution_contract"}
+            ),
+        ),
+        "malformed-execution-manifest",
+        "malformed-execution-manifest",
+    ),
+    (
+        "retry-budget-zero",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["retry_policy"].update(
+                {"max_corrective_retries": 0}
+            ),
+        ),
+        "malformed-execution-manifest",
+        "malformed-execution-manifest",
+    ),
+    (
+        "embedded-semantic-fingerprint",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["approval"].update(
+                {"semantic_fingerprint": "sha256:" + "1" * 64}
+            ),
+        ),
+        "unknown-manifest-field",
+        "unknown-manifest-field",
+    ),
+    (
+        "required-heading-suffix",
+        lambda text: text.replace("## Control Inventory", "## Control Inventory v2", 1),
+        "missing-heading",
+        "missing-control-inventory",
+    ),
+    (
+        "manifest-section-trailing-prose",
+        lambda text: text.replace(
+            "## Repository Preflight",
+            "Editorial note after the manifest fence.\n\n## Repository Preflight",
+            1,
+        ),
+        "malformed-execution-manifest",
+        "malformed-execution-manifest",
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    "name,mutate,checker_code,executor_code",
+    PRODUCER_FAILURE_MODES,
+    ids=[mode[0] for mode in PRODUCER_FAILURE_MODES],
+)
+def test_producer_failure_modes_are_blocked_before_handoff(
+    tmp_path: Path,
+    name: str,
+    mutate,
+    checker_code: str | None,
+    executor_code: str | None,
+) -> None:
+    plan = _stage_plan(tmp_path, mutate(WRITER_FIXTURE.read_text(encoding="utf-8")))
+
+    checker_result = _run_checker(plan)
+    executor_result = _run_executor_preflight(plan, tmp_path)
+
+    checker_codes = _finding_codes(checker_result)
+    executor_codes = _finding_codes(executor_result)
+    if checker_code is None:
+        assert checker_result.returncode == 0, (name, checker_codes)
+    else:
+        assert checker_result.returncode != 0, (name, checker_codes)
+        assert checker_code in checker_codes, (name, checker_codes)
+    if executor_code is None:
+        assert executor_result.returncode == 0, (name, executor_codes)
+    else:
+        assert executor_result.returncode != 0, (name, executor_codes)
+        assert executor_code in executor_codes, (name, executor_codes)
+
+
+@pytest.mark.parametrize(
+    "name,mutate",
+    [
+        (mode[0], mode[1])
+        for mode in (*PAST_FAILURE_MODES, *PRODUCER_FAILURE_MODES)
+        if mode[2] is not None
+    ],
+    ids=[mode[0] for mode in (*PAST_FAILURE_MODES, *PRODUCER_FAILURE_MODES) if mode[2] is not None],
+)
+def test_executor_blocking_implies_structural_check_blocking(
+    tmp_path: Path, name: str, mutate
+) -> None:
+    plan = _stage_plan(tmp_path, mutate(WRITER_FIXTURE.read_text(encoding="utf-8")))
+
+    checker_result = _run_checker(plan)
+    executor_result = _run_executor_preflight(plan, tmp_path)
+
+    if executor_result.returncode != 0:
+        assert checker_result.returncode != 0, name
+
+
+@pytest.mark.parametrize(
+    "name,mutate,checker_code",
+    (
+        (
+            "required-heading-wrong-level",
+            lambda text: text.replace("## Goal", "### Goal", 1),
+            "missing-heading",
+        ),
+        (
+            "preflight-field-outside-section",
+            lambda text: text.replace(
+                "- **Baseline Validation:** run `pytest -q tests/example/test_example.py` before edits and record the result.\n",
+                "",
+                1,
+            ).replace(
+                "Validate the manifest-authoritative writer output against the executor.",
+                "Validate the manifest-authoritative writer output against the executor.\n\n"
+                "Baseline Validation: run the focused pytest before edits.",
+                1,
+            ),
+            "missing-execution-field",
+        ),
+        (
+            "handoff-requires-superset",
+            lambda text: _rewrite_manifest(
+                text,
+                lambda manifest: manifest["handoff"].update(
+                    {
+                        "requires": [
+                            "human approval",
+                            "exact Manifest v3 review",
+                            "zero blocking preflight findings",
+                            "extra re-confirmation",
+                        ]
+                    }
+                ),
+            ),
+            "non-canonical-handoff-requires",
+        ),
+    ),
+    ids=[
+        "required-heading-wrong-level",
+        "preflight-field-outside-section",
+        "handoff-requires-superset",
+    ],
+)
+def test_writer_canonical_strictness_blocks_before_executor(
+    tmp_path: Path, name: str, mutate, checker_code: str
+) -> None:
+    plan = _stage_plan(tmp_path, mutate(WRITER_FIXTURE.read_text(encoding="utf-8")))
+
+    checker_result = _run_checker(plan)
+    executor_result = _run_executor_preflight(plan, tmp_path)
+
+    assert checker_result.returncode != 0, name
+    assert checker_code in _finding_codes(checker_result), name
+    assert executor_result.returncode == 0, name

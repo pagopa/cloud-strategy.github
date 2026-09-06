@@ -12,19 +12,24 @@
   environment-dependent verification after implementation.
 
 The executor owns the single mechanical plan validator and normative Execution
-Manifest v3 parser. Do not add a writer-local validator, second lifecycle, or
-duplicate parser. A legacy `## Execution Contract` requires writer-side
-regeneration and is not a current schema exemption.
+Manifest v3 parser; its `preflight` is the sole readiness authority. The
+writer bundle owns a read-only structural producer check,
+`scripts/check_plan_structure.py`, that catches producer shape defects while
+authoring; it imports no executor code, decides no execution semantics, and
+never replaces the executor preflight. A legacy `## Execution Contract`
+requires writer-side regeneration and is not a current schema exemption.
 
-Before handoff, resolve the executor's loaded physical bundle and run:
+Before handoff, run the structural check
+`python3 <writer-bundle>/scripts/check_plan_structure.py <plan> --format compact`
+first, then resolve the executor's loaded physical bundle and run:
 
 `bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`
 
 Confirm exit code zero and compact payload `status: passed` with zero
-blocking findings. Run this preflight against the exact final plan bytes; a
-ready or handoff claim without that fresh result is invalid. The plan uses
-the exact `## Execution Manifest` heading, one fenced JSON code block in that
-section, and the exact canonical `handoff.requires` strings. Only explicitly
-`legacy/imported` material may use reconstruction, with refreshed Manifest v3
-approval. Do not downgrade an automatable obligation to narrative or manual
-evidence to make preflight pass.
+blocking findings for both. Run both gates against the exact final plan
+bytes; a ready or handoff claim without those fresh results is invalid. The
+plan uses the exact `## Execution Manifest` heading, one fenced JSON code
+block in that section, and the exact canonical `handoff.requires` strings.
+Only explicitly `legacy/imported` material may use reconstruction, with
+refreshed Manifest v3 approval. Do not downgrade an automatable obligation to
+narrative or manual evidence to make either gate pass.

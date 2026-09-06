@@ -21,7 +21,8 @@ user report. It does not delegate plan work.
   tasks, controls, validations, approval, warnings, deviations, and authority
   boundaries.
 - Do not rewrite the Manifest or broaden the plan. A plan change requires the
-  writer route and refreshed approval; v3 has no hash or fingerprint binding.
+  writer route and refreshed approval; preflight binds no content hash, while
+  state binding uses the Manifest semantic fingerprint.
 - Do not dispatch a subagent, worker, model switch, or delegated execution
   path. `internal-luna-executor` is metadata only and is never invoked here.
 - Do not run Git mutations. Leave the worktree uncommitted.
@@ -119,8 +120,8 @@ fields:
 `completed_task_ids`, `remaining_task_ids`, `last_validation`, `next_action`,
 `warnings`, `deviations`.
 
-Runtime status and the Execution Manifest use schema version `2`. Older status
-siblings and v1 plans must be regenerated before resuming.
+The Execution Manifest uses schema version `3`; runtime status uses schema
+version `2`. Older status siblings must be regenerated before resuming.
 YAML is the only runtime status representation.
 
 `status` is exactly one of `DONE`, `DONE_WITH_WARNINGS`, `PARTIAL`, or `BLOCKED`:

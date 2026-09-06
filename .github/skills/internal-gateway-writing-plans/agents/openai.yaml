@@ -45,8 +45,11 @@ interface:
     universal test language or layout.
     Require an explicit - No Git mutation. bullet in ## Global Constraints.
     Do not predict runtime candidates or weaken a requirement into a manual
-    attestation. Resolve the loaded executor bundle and run its scripts/run.sh
-    preflight as the sole mechanical validator. After eligibility, the control
+    attestation. After every manifest-affecting edit, run the writer-owned
+    scripts/check_plan_structure.py structural check with zero blocking
+    findings, then resolve the loaded executor bundle and run its
+    scripts/run.sh preflight as the sole mechanical validator on the exact
+    final plan bytes before any ready or handoff claim. After eligibility, the control
     inventory, plan structure, locked decisions, and acceptance are complete,
     default to local authoring with delegation.mode: none, worker:
     primary-owner, and result: not_applicable, without a delegation brief,

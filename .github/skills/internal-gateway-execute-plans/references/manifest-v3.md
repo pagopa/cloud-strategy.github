@@ -41,9 +41,10 @@ external and contains the computed current Manifest `semantic_fingerprint`.
 - `targets` have `id`, `path`, and `state`; `condition` is the only optional
   field. `state` is required on every target and is `create`, `modify`, or
   `inspect`; paths must not point into `.git/**`.
-- `controls` is a non-empty map. Keys are the Control Inventory IDs in
-  uppercase ID form and must match the inventory table exactly. Each value
-  has exactly `class`, `owner`, and `binding`. Classes are
+- `controls` is a non-empty JSON object map, never an array. Keys are the
+  Control Inventory IDs in uppercase ID form and must match the inventory
+  table exactly. Each value has exactly `class`, `owner`, and `binding`.
+  Classes are
   `automatable-local`, `observable-runtime`, `external-capability`,
   `authority-or-scope`, and `genuine-human-judgment`.
 - `validations` have exactly `id`, `command`, `owner`, `pass_signal`, and
@@ -80,15 +81,18 @@ external and contains the computed current Manifest `semantic_fingerprint`.
 ## Markdown Projection
 
 Control Inventory IDs must equal `manifest.controls` keys, bijective in both
-directions. Ordered Task headings must equal `manifest.tasks` IDs, and task
-references must resolve to manifest targets, validations, manual obligations,
-and tasks. A current manifest-only plan has no `## Execution Contract`.
+directions; the inventory table contains only the header row, the separator
+row, and one row per control ID. Ordered Task headings must equal
+`manifest.tasks` IDs in manifest order, and task references must resolve to
+manifest targets, validations, manual obligations, and tasks. A current
+manifest-only plan has no `## Execution Contract`.
 
 ## Plan Markdown Binding
 
 - Required headings are exactly `## Goal`, `## Global Constraints`,
-  `## Repository Preflight`, and `## Control Inventory`. Heading text must
-  match exactly after the marker with no suffix or trailing punctuation.
+  `## Repository Preflight`, and `## Control Inventory`, each at exact level
+  two. Heading text must match exactly after the marker with no suffix or
+  trailing punctuation.
 - `## Global Constraints` contains an explicit no-Git bullet such as
   `- No Git mutation.`
 - `## Repository Preflight` is the canonical heading for new plans and
@@ -100,7 +104,8 @@ and tasks. A current manifest-only plan has no `## Execution Contract`.
   `json` language tag and contains no surrounding prose.
 - Each manifest task has one `## Task N: <title>` heading at any level from
   two to six, numbered consecutively in manifest order; manifest task ids are
-  exactly `T1` through `T<N>` and match the heading numbers.
+  exactly `T1` through `T<N>` and match the heading numbers. Task headings
+  exist only for manifest tasks; no other `Task N:` heading may appear.
 - Control Inventory first-column IDs use uppercase `[A-Z][A-Z0-9-]+` form.
 
 ## Canonical Authoring Blocks
@@ -146,15 +151,17 @@ to pass.
 
 Before handoff, confirm target and authority boundaries, task order and
 references, exact field sets, no Git mutation, approval separation, status
-separation, and zero blocking physical preflight findings. Resolve the loaded
-executor bundle and run
+separation, and zero blocking findings on both producer gates. Run the writer
+structural check
+`python3 <writer-bundle>/scripts/check_plan_structure.py <plan> --format compact`
+first, then resolve the loaded executor bundle and run
 `bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`
 against the exact final plan bytes; a completion or handoff claim requires
-that fresh preflight evidence, and a prose assertion never substitutes for
-it. The binding rules above prevent the five observed producer failures: a
-manifest heading with a version suffix, `controls` serialized as an array,
-missing `manifest_version`, `repository_root`, or `targets[].state` fields, a
-missing Baseline Validation preflight bullet, and non-canonical
-`handoff.requires` strings. Do not create a status sibling while writing the
-plan. The parser wins if prose and parser disagree; do not add a second
-parser or a shared cross-bundle dependency.
+fresh zero-blocking evidence from both, and a prose assertion never
+substitutes for either. The binding rules above prevent the five observed
+producer failures: a manifest heading with a version suffix, `controls`
+serialized as an array, missing `manifest_version`, `repository_root`, or
+`targets[].state` fields, a missing Baseline Validation preflight bullet, and
+non-canonical `handoff.requires` strings. Do not create a status sibling while
+writing the plan. The parser wins if prose and parser disagree; do not add a
+second parser or a shared cross-bundle dependency.
