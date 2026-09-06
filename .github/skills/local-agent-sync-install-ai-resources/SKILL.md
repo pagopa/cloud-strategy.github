@@ -93,10 +93,14 @@ Accept `agents-md` as a CLI alias for the same target.
 - `sync` may auto-apply clean repository-to-home work, including `agents.md`.
   It stops for blockers,
   missing-directory approval, or copied-agent prune gates.
-- `plan` and `audit` are read-only.
+- `plan` and `audit` do not materialize or modify managed runtime resources.
+  They persist their snapshot and lock under the home sync state root, so they
+  are not free of filesystem writes.
 - `apply` needs an explicit request; `--create-missing-dirs` and
   `--prune-managed` remain explicit.
-- `doctor` is read-only and checks roots, support, catalog sources, and state.
+- `doctor` checks roots, support, catalog sources, and state without modifying
+  managed runtime resources. It persists its snapshot and lock under the home
+  sync state root.
 
 ## Reporting
 
