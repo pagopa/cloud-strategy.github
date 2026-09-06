@@ -14,7 +14,7 @@ interface:
     delegate interview mechanics to /grill-me and critical-review procedure to
     /internal-gateway-critical-master. Use exactly two global gates, GRILL-ME
     and CRITICAL REVIEW. Require CRITICAL REVIEW before close, +spec, or
-    +plan; complete it structurally with exactly three lenses including one
+    +plan; complete it structurally with at least three lenses, the third a
     lateral analogy or reverse-assumption lens, classified findings, and a
     conclusion. A scoped override names one action and records accepted-risk
     while preserving every other gate. After setup and every named analysis

@@ -286,7 +286,7 @@ def _validate_manifest(manifest: object) -> Mapping[str, object]:
     )
     if review_lenses != ["primary", "evidence", "lateral"]:
         raise _schema_error(
-            "manifest.lifecycle_workflow.review_lenses must contain the exact three review lenses"
+            "manifest.lifecycle_workflow.review_lenses must contain the three required review lenses"
         )
     lateral_lens_types = _require_string_list(
         lifecycle.get("lateral_lens_types"),
@@ -1161,9 +1161,11 @@ def _score_observation(
                 critical_review.get("gate") == "CRITICAL REVIEW"
                 and critical_review.get("explicit") is True
                 and critical_review.get("completed") is True
-                and lens_names == expected_lenses
-                and len(lenses) == 3  # type: ignore[arg-type]
-                and bool(lateral_types.intersection(lifecycle["lateral_lens_types"]))
+                and isinstance(lenses, list)
+                and len(lenses) >= 3
+                and lens_names[:3] == expected_lenses
+                and bool(lateral_types)
+                and lateral_types.issubset(set(lifecycle["lateral_lens_types"]))
                 and isinstance(critical_review.get("conclusion"), str)
                 and bool(str(critical_review.get("conclusion")).strip())
                 and classified_ids == finding_ids

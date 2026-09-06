@@ -18,12 +18,10 @@ At the start of each analysis unit, record:
 
 - `Subject`: one canonical subject for the analysis and any optional critical review;
 - `Decision focus`: the decision the analysis must make possible;
-- `Mode`: the current analysis mode;
+- `Mode`: the current analysis mode; the only defined value is `analysis-only`;
 - `Desired artifact`: none or the one Markdown artifact the user explicitly requests;
 - `Implementation permission`: whether later implementation or execution has
-  been explicitly requested;
-- `Plan authoring readiness`: whether a retained spec is complete enough for a
-  later explicit `+plan` selection.
+  been explicitly requested.
 
 The latest explicit subject or mode instruction wins. On a `subject-change` or
 `mode-change`, park the prior unit with its capsule, start the new unit, and do
@@ -75,8 +73,8 @@ owned by `/grill-me`.
 `CRITICAL REVIEW` is required before `close`, `+spec`, or `+plan`. The gateway
 records completion as a structural review record, while review procedure and
 report mechanics remain owned by `/internal-gateway-critical-master`. A review
-is complete only when its record contains exactly three lenses, including one
-lateral lens of type `analogy` or `reverse-assumption`, every finding has one
+is complete only when its record contains at least three lenses, the third
+lateral (`analogy` or `reverse-assumption`), every finding has one
 classification, and a non-empty conclusion is recorded. Use the approved
 finding classes `blocking-now`, `acceptance-required`, `follow-up`,
 `separate-design`, and `rejected-with-reason`.

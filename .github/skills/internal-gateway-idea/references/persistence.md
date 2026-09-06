@@ -33,8 +33,8 @@ The same recovery record also carries the gate and menu projection:
 - `global_gates`: exactly `GRILL-ME` and `CRITICAL REVIEW`;
 - `grill_me`: the post-setup gate event, eligible decision IDs, question IDs,
   route owner, and any repeat-round eligibility evidence;
-- `critical_review`: `pending` or `completed`, its exactly three lens records,
-  lateral lens type, classified findings, conclusion, and explicit
+- `critical_review`: `pending` or `completed`, its at least three lens records
+  with a lateral third lens, classified findings, conclusion, and explicit
   disposition state;
 - `gate_override`: absent unless one named action is explicitly recorded as
   `accepted-risk`, with all other gates preserved;

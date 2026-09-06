@@ -1226,3 +1226,22 @@ def test_manifest_and_records_derive_the_two_gate_contract() -> None:
     assert result.get("gate_override_violation_cases") == []
     assert result.get("menu_projection_violation_cases") == []
     assert result.get("provisional_save_violation_cases") == []
+
+
+def test_critical_review_accepts_additional_lens_beyond_three() -> None:
+    scorer = load_scorer()
+    run = passing_run()
+    review = next(
+        event
+        for event in run["observations"][4]["transition_events"]
+        if event.get("event") == "critical-review"
+    )
+    review["lenses"] = [
+        *review["lenses"],
+        {"name": "gap-coverage", "type": "constraint-audit"},
+    ]
+
+    result = scorer.score(load_manifest(), run)
+
+    assert result["accepted"] is True
+    assert result["critical_review_completion_violation_cases"] == []
