@@ -12,9 +12,7 @@ The three artifacts look alike and are not interchangeable. Classify before draf
 | `docs/standards/<name>.md` | A convention the repository follows by agreement | None | None, by definition |
 | `docs/engineering-principles.md` | The criteria that decide between alternatives | None | None |
 
-When a convention acquires an automated check it stops being a standard. Move it to the `RULES.md` of the owning domain with an identifier and an enforcement owner, and remove it from the standard in the same wave. Leaving it in both places is a contradiction, not redundancy.
-
-When a rule loses its check it does not become a standard. Record `not enforced` and report the gap.
+Classify by meaning and owner, not by whether a check exists. A standard is a convention the repository follows by agreement, a rule is a domain invariant, and a principle is a repeated decision criterion. Automated enforcement does not change the semantic category: a check on a convention is enforcement evidence for the standard, while a rule remains a rule because of its invariant. When a rule has no check, record `not enforced` and report the gap.
 
 ## Evidence and seeding
 
@@ -50,9 +48,9 @@ Each principle states the criterion, the trade-off it accepts, and the decisions
 
 ## Guides
 
-Write a guide only for an evidenced chain from a declaration to its effect: what a contributor writes, what consumes it, and what changes as a result. A guide with no consumer describes a machine that does not exist.
+Write a guide only for an evidenced reader task, recovery, troubleshooting journey, or declaration-to-effect chain: identify what the reader does, what consumes it, and what changes as a result. A guide with no consumer describes a machine that does not exist.
 
-- One guide per chain.
+- One guide per evidenced reader journey.
 - At most three guides per wave.
 - Name the guide with a term the repository already uses. A guide named after a concept that appears nowhere in the repository is a sign the chain was inferred.
 - State the chain in the repository's own vocabulary. Keep product, provider, and tool names inside the evidence, never in the contract.

@@ -74,11 +74,11 @@
 
 **Expected:** Resolve `sync` because the declared layout is already realized. Include existing documents and the missing README for the new significant component, load `references/knowledge-topology.md` only for that new artifact, and leave already-correct documents untouched.
 
-### Keep a targeted request narrow
+### Keep targeted writes closed
 
 **Prompt:** "Refresh `src/service-a/README.md`." <!-- knowledge-refs: ignore -->
 
-**Expected:** Resolve `targeted`, write only that destination, and skip the preflight gate. Report any wider documentation gap instead of authoring it, and do not create a root context document that does not already exist.
+**Expected:** Resolve `targeted`, let `references/knowledge-scope.md` own the exact normalized allowlist, and write only that destination. Skip the preflight gate, report any wider documentation gap, and do not create or update a root context document from an unlisted signal.
 
 ### Leave a current repository unchanged
 
@@ -86,17 +86,29 @@
 
 **Expected:** Evaluate the unchanged predicate for every planned target, report them as `unchanged`, and write zero files. Rewriting for style alone is a defect.
 
+### Treat a material omission as a refresh trigger
+
+**Prompt:** "Refresh the existing service README; it has the right sections but does not explain the dependency a reader must use to complete the task."
+
+**Expected:** Let `references/knowledge-scope.md` own the unchanged decision. Treat the missing reader-critical explanation as a material omission, add it to the existing README owner, and do not create a new artifact or claim `unchanged` until the stated reader outcome is supported.
+
 ### Refuse an unevidenced domain
 
 **Prompt:** "Bootstrap the knowledge layout with one domain per top-level directory."
 
 **Expected:** Create a domain only where the boundary signals are evidenced. Record the rejected directories in the exclusion ledger, never scaffold empty documentation-mode directories, and state that no relationship is evidenced rather than inventing one between contexts.
 
-### Promote a domain the evidence supports
+### Resist domain promotion from tooling differences
 
-**Prompt:** "Bootstrap the knowledge layout for this repository." One area owns a separate infrastructure root, a separate composite action, and a different audience, and every other area depends on it directionally.
+**Prompt:** "Bootstrap the knowledge layout for this repository." One area uses a different tool, state file, and delivery workflow, but the repository shows no distinct vocabulary, lifecycle boundary, invariants, or team ownership.
 
-**Expected:** Count the promotion signals and promote the area, because two or more are evidenced. Select the layout for two or more domains and record the domain set as an ADR. Relative size is not a signal: keeping the narrower layout requires the user's explicit decision carried as the ledger reason, never the agent's own judgement that the smaller area is too small to matter.
+**Expected:** Let `references/knowledge-topology.md` own promotion. Treat tooling, state, schema, and delivery differences as corroborating evidence only; without a semantic or ownership boundary, keep the area in the existing domain, report the evidence gap, and create no domain artifact merely to reflect the operational difference.
+
+### Keep evidence coverage from becoming an artifact quota
+
+**Prompt:** "Align the knowledge layout and account for every evidence row, even when a row does not justify a document."
+
+**Expected:** Let `references/knowledge-topology.md` own the row outcome. Record an unsupported candidate as `considered, not evidenced`, identify the reader outcome and detailed owner, and make no write when evidence is insufficient; coverage accounting never widens the targeted allowlist or creates an artifact by itself.
 
 ### Discover a standard and a principle during setup
 
@@ -116,11 +128,41 @@
 
 **Expected:** Name what limits the wave, whether coherence, the ten-document ceiling, or a user decision, and report what the next wave resumes. A wave far below the ceiling with no stated limit is under-delivery rather than restraint.
 
-### Resolve the diagram disposition of every authored README
+### Keep a short README proportional
 
-**Prompt:** "Bootstrap the knowledge layout." Three components evidence at least three material relationships each; the remaining nine do not.
+**Prompt:** "Refresh a small component README whose reader only needs its purpose, one usage path, and one safe validation command."
 
-**Expected:** Resolve the disposition in every authored README as the document is written, never as a later wave: a diagram where the threshold is met, and the fixed `No diagram is provided` sentence with its reason everywhere else, linking to the document that already draws the relationship instead of redrawing it. Verify each diagram by rendering or offline parsing before writing. A repository where some READMEs carry neither outcome is incomplete even when every wave reported success.
+**Expected:** Let `references/readme-maintenance.md` choose only the sections that support that reader outcome. Leave the README without a diagram when fewer than three material evidenced relationships need one, omit fixed diagram boilerplate, and preserve the existing generated-block and safe-validation rules.
+
+### Extend an existing document for a material omission
+
+**Prompt:** "Refresh the existing architecture document; its current structure is valid but it omits an evidenced boundary that the reader needs to understand the system."
+
+**Expected:** Keep the existing architecture owner and valid sections unchanged, add the material omission to `references/architecture-maintenance.md`'s evidence-backed structure, and report the added evidence and validation. Do not create a second architecture document or force unrelated empty sections.
+
+### Keep a standard semantic when a check is added
+
+**Prompt:** "The repository now has a check for an existing naming convention; update the knowledge artifacts."
+
+**Expected:** Let `references/standards-maintenance.md` keep the convention's semantic category. Record the check as enforcement evidence, do not move the convention to a rule owner merely because automation exists, and preserve the existing standard's reader-facing meaning.
+
+### Guide a recovery or troubleshooting task
+
+**Prompt:** "Document how a contributor recovers from the repository's evidenced deployment failure and verifies the effect."
+
+**Expected:** Let `references/standards-maintenance.md` own guide eligibility. Add one guide only when the task, recovery, troubleshooting journey, consumer, and effect are evidenced; otherwise keep the gap as `considered, not evidenced` and create no placeholder guide.
+
+### Keep architecture structure proportional
+
+**Prompt:** "Refresh the architecture document for a repository where only boundaries, relationships, and validation paths are evidenced."
+
+**Expected:** Let `references/architecture-maintenance.md` use only sections needed for the stated reader outcome, preserve explicit unknowns, and leave technology, flows, or decisions out when they have no evidence. Do not treat a fixed heading count as completion.
+
+### Keep public projections aligned
+
+**Prompt:** "Use internal-knowledge to refresh an explicit documentation destination and preserve the bundle's portable contract."
+
+**Expected:** Route the request through `SKILL.md` and its bundle-local references, with `agents/openai.yaml` projecting the same exact targeted allowlist, evidence proportionality, one detailed owner per rule, and enforcement-gap boundary. Keep the contract self-contained and host-specific paths out of the prompt; if a projection disagrees with a detailed owner, report the mismatch instead of inventing a new artifact or contract field.
 
 ### Check ownership before excluding a managed path
 

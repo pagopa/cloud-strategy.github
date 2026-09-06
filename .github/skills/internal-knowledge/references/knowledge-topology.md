@@ -64,7 +64,7 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 
 Author the last three artifacts with [standards maintenance](standards-maintenance.md).
 
-The plan accounts for every row. Standards, principles, and guides are the rows most often passed over, because nothing in the repository asks for them by name.
+Every evidence-table row ends as one of four outcomes: `planned`, `existing owner covers`, `explicit exclusion`, or `considered, not evidenced`. The last outcome records that the reader outcome and detailed owner were considered but the evidence is insufficient; never create an artifact merely to satisfy a row. The plan accounts for every row. Standards, principles, and guides are the rows most often passed over, because nothing in the repository asks for them by name.
 
 ## Context documents
 
@@ -105,9 +105,9 @@ Distinguish three levels and never collapse them:
 2. **Bounded context** — a knowledge domain that additionally owns state, lifecycle, and invariants, evidenced on disk.
 3. **Component** — a physical unit of code or configuration.
 
-Promote an area to its own domain only when at least two of these signals are evidenced: the same word means different things inside and outside it; it is represented differently from neighbouring areas; it serves a different audience; it uses a different tool set; it lives in a separate code base, state file, or schema; it follows a separate delivery process; it can be delivered independently; or another area depends on it directionally.
+Promote an area to its own domain only when an evidenced semantic or ownership boundary exists. The boundary must be visible in at least one of these forms: distinct ubiquitous language; an evidenced bounded context that owns its own lifecycle or invariants; or decoupled team ownership with responsibility that does not follow the neighbouring context. A different tool, state file, schema, delivery process, or deployability may corroborate a boundary, but an operational difference alone never creates one.
 
-The list is closed, and two signals make promotion the default. Enumerate that list explicitly, with a verdict and an evidence path for each signal, and record the resulting count in the plan before the layout is selected. The enumeration precedes the ADR that records the domain set: a decision written from an impression rather than from the enumerated signals is the ordinary way a repository acquires a layout it has to supersede in the next invocation. The plan promotes the area, or it carries the user's explicit decision to keep the narrower layout as the ledger reason. Relative size is not a signal: an area holding far less material than its neighbour is still a domain when its own signals hold. When an accepted ADR records a domain set the current evidence exceeds, report the drift and propose the superseding decision.
+Enumerate that list explicitly: record a verdict and an evidence path for each candidate signal, then record the semantic or ownership boundary in the plan before the layout is selected. The enumeration precedes the ADR that records the domain set: a decision written from an impression rather than from the evidenced boundary is the ordinary way a repository acquires a layout it has to supersede in the next invocation. The plan promotes the area, or it carries the user's explicit decision to keep the narrower layout as the ledger reason. Relative size is not a signal: an area holding far less material than its neighbour is still a domain when its own semantic or ownership boundary holds. When an accepted ADR records a domain set the current evidence exceeds, report the drift and propose the superseding decision.
 
 Name domains in the vocabulary the repository already uses. A domain name that appears nowhere in the repository is a sign the boundary is invented.
 

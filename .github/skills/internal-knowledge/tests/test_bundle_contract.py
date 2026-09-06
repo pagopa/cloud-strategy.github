@@ -20,6 +20,10 @@ AUTHORING_REFERENCES = {
 }
 
 
+def read_bundle_text(relative_path: str) -> str:
+    return (BUNDLE_ROOT / relative_path).read_text(encoding="utf-8")
+
+
 def test_skill_frontmatter_is_portable() -> None:
     skill_text = SKILL_PATH.read_text(encoding="utf-8")
     frontmatter = yaml.safe_load(skill_text.split("---", 2)[1])
@@ -75,15 +79,69 @@ def test_readme_reference_keeps_omission_reporting_discipline() -> None:
     assert "omit it silently" not in reference
 
 
-def test_readme_reference_makes_the_diagram_disposition_exhaustive() -> None:
-    reference = (BUNDLE_ROOT / "references" / "readme-maintenance.md").read_text(
-        encoding="utf-8"
-    )
+def test_architecture_reference_is_reader_proportional() -> None:
+    reference = read_bundle_text("references/architecture-maintenance.md")
 
-    assert "the two outcomes are exhaustive" in reference
-    assert "`No diagram is provided`" in reference
-    assert "carrying neither outcome is incomplete" in reference
-    assert "parsing it offline when no renderer is reachable" in reference
+    assert "Use only the sections needed for the stated reader outcome" in reference
+    assert "Do not create empty sections" in reference
+    assert "Use exactly these level-two headings in this order" not in reference
+
+
+def test_readme_reference_does_not_require_diagram_boilerplate() -> None:
+    reference = read_bundle_text("references/readme-maintenance.md")
+
+    assert "Use Mermaid only when at least three material evidenced relationships" in reference
+    assert "No diagram is provided" not in reference
+    assert "a README carrying neither outcome is incomplete" not in reference
+
+
+def test_standards_reference_classifies_by_semantics_not_enforcement() -> None:
+    reference = read_bundle_text("references/standards-maintenance.md")
+
+    assert "Automated enforcement does not change the semantic category" in reference
+    assert "move it to the `RULES.md`" not in reference
+
+
+def test_guides_cover_evidenced_reader_work_beyond_declaration_effects() -> None:
+    reference = read_bundle_text("references/standards-maintenance.md")
+
+    assert "task, recovery, troubleshooting" in reference
+    assert "One guide per evidenced reader journey" in reference
+
+
+def test_skill_projection_names_one_detailed_contract_owner() -> None:
+    skill = read_bundle_text("SKILL.md")
+
+    assert "one detailed owner" in skill
+    assert "material omission" in skill
+    assert "targeted" in skill
+    assert "self-contained" in skill
+
+
+def test_public_prompt_projects_scope_without_host_dependencies() -> None:
+    payload = yaml.safe_load(read_bundle_text("agents/openai.yaml"))
+    prompt = payload["interface"]["default_prompt"]
+
+    for anchor in ("targeted", "sync", "setup", "one detailed owner", "enforcement gap"):
+        assert anchor in prompt
+    for retired_or_host_specific in (
+        "knowledge-map.yaml",
+        "docs/knowledge-components.txt",
+        ".github/actions/",
+        "two signals make promotion the default",
+        "one Mermaid topology diagram",
+    ):
+        assert retired_or_host_specific not in prompt
+    assert "/Users/" not in prompt
+    assert "../" not in prompt
+
+
+def test_evaluations_cover_the_public_contract_projection() -> None:
+    scenarios = read_bundle_text("evals/evaluation_scenarios.md")
+
+    assert "### Keep public projections aligned" in scenarios
+    assert "one detailed owner" in scenarios
+    assert "host-specific" in scenarios
 
 
 def test_readme_reference_guards_generated_block_interaction() -> None:
@@ -137,14 +195,34 @@ def test_topology_reference_keeps_documentation_mode_anti_scope() -> None:
     assert "none evidenced" in reference
 
 
-def test_topology_binds_the_promotion_threshold() -> None:
-    reference = (BUNDLE_ROOT / "references" / "knowledge-topology.md").read_text(
-        encoding="utf-8"
-    )
+def test_targeted_scope_has_no_implicit_root_write() -> None:
+    scope = read_bundle_text("references/knowledge-scope.md")
 
-    assert "two signals make promotion the default" in reference
-    assert "Relative size is not a signal" in reference
-    assert "The plan accounts for every row" in reference
+    assert "In `targeted`, the allowlist is the normalized set of user-supplied destinations." in scope
+    assert "The layout root document is the single exception in `targeted`" not in scope
+
+
+def test_unchanged_requires_the_stated_reader_outcome() -> None:
+    scope = read_bundle_text("references/knowledge-scope.md")
+
+    assert "material omission" in scope
+    assert "no material addition for its stated reader outcome" in scope
+
+
+def test_scope_accepts_considered_not_evidenced_without_creating_an_artifact() -> None:
+    topology = read_bundle_text("references/knowledge-topology.md")
+
+    assert "considered, not evidenced" in topology
+    assert "never create an artifact merely to satisfy a row" in topology
+
+
+def test_topology_promotion_requires_a_semantic_or_ownership_boundary() -> None:
+    topology = read_bundle_text("references/knowledge-topology.md")
+
+    assert "distinct ubiquitous language" in topology
+    assert "bounded context" in topology
+    assert "decoupled team ownership" in topology
+    assert "two signals make promotion the default" not in topology
 
 
 def test_scope_defines_the_bucket_mechanism() -> None:
@@ -205,7 +283,7 @@ def test_skill_loads_authoring_references_before_the_plan() -> None:
     skill_text = SKILL_PATH.read_text(encoding="utf-8")
 
     assert "before drafting the plan" in skill_text
-    assert "Mermaid topology diagram" in skill_text
+    assert "diagram only when it improves comprehension" in skill_text
 
 
 def test_evals_cover_under_delivery_branches() -> None:
@@ -214,11 +292,16 @@ def test_evals_cover_under_delivery_branches() -> None:
     )
 
     for heading in (
-        "### Promote a domain the evidence supports",
+        "### Resist domain promotion from tooling differences",
         "### Discover a standard and a principle during setup",
         "### Author a component README with a diagram",
         "### Justify a wave below the ceiling",
-        "### Resolve the diagram disposition of every authored README",
+        "### Keep a short README proportional",
+        "### Extend an existing document for a material omission",
+        "### Keep a standard semantic when a check is added",
+        "### Guide a recovery or troubleshooting task",
+        "### Keep architecture structure proportional",
+        "### Keep public projections aligned",
         "### Check ownership before excluding a managed path",
         "### Update only the docs bucket",
         "### Update only the README bucket",

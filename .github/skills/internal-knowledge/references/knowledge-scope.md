@@ -108,6 +108,8 @@ Always excluded, without further analysis: paths ignored by version control; ven
 
 Discovery proposes; it never authorizes. Every discovered directory, and every row of the evidence table in [knowledge topology](knowledge-topology.md), is either a planned target or an entry in the exclusion ledger with a one-line reason. Silent omission is a defect.
 
+Account for every discovered directory and evidence-table row as `planned`, `existing owner covers`, `considered, not evidenced`, or `explicit exclusion`. Only `planned` becomes a target; the other outcomes remain visible in the plan or completion report, and `considered, not evidenced` never creates an artifact by itself.
+
 ## Write allowlist
 
 - In `targeted`, the allowlist is the normalized set of user-supplied destinations.
@@ -116,7 +118,7 @@ Discovery proposes; it never authorizes. Every discovered directory, and every r
 - The allowlist never grows after approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
 - Repository governance and contribution files are evidence, never targets. Read them, cite them, place them in the reading order, and leave them untouched.
 - A path is generated or externally synchronized only when its own generator or manifest lists that path. A directory pattern is not evidence of ownership: read the entries, because a manifest covering a tree normally enumerates exact paths, and excluding a repository-owned document as managed drops it from the plan without anyone noticing.
-- The layout root document is the single exception in `targeted`: the skill may add or update the row describing an authored target, and nothing else in that file. When no root document exists, `targeted` does not create one; it reports the absence.
+- `targeted` has no implicit root-layout exception. If the layout root is not a supplied destination, report any gap it creates and leave the root untouched.
 
 ## Unchanged predicate
 
@@ -129,6 +131,7 @@ A target is `unchanged` when all of the following hold:
 3. Every relative link resolves from the document's directory.
 4. Every generated block is intact and internally consistent.
 5. No material claim in the document contradicts current repository evidence.
+6. There is no material addition for its stated reader outcome still required. If a material omission prevents that outcome, the target is not `unchanged`.
 
 When the predicate holds, report the target as `unchanged` and do not write it. When it fails, name the failing clause in the plan; that clause is the justification for the rewrite. Stylistic preference is never a justification.
 
@@ -142,12 +145,13 @@ The plan states, briefly:
 - the layout, its declaration source, the evidenced domain set, and any drift;
 - whether the external context-format skill is available, whenever the plan includes a context document;
 - one row per planned target with its path, its state under the unchanged predicate, and the reason it is included;
+- every evidence row accounted for as `planned`, `existing owner covers`, `considered, not evidenced`, or `explicit exclusion`, with only `planned` entering the target list;
 - the exclusion ledger;
 - artifacts to be created that do not exist yet;
 - the requested bucket, the intent-to-bucket reading, and any mismatch the classification produces;
 - out-of-bucket shape drift as a named follow-up block with a copyable `setup` prompt, when the drift is outside the bucket;
 - the current wave and what remains for later waves;
-- one Mermaid diagram of the resulting topology.
+- a Mermaid topology diagram only when it improves comprehension for the scope under review; otherwise record why it is not warranted.
 
 The plan is negotiable line by line. Removing a row moves it to the exclusion ledger with the reason recorded as a user decision. Rejecting the plan means zero writes.
 
