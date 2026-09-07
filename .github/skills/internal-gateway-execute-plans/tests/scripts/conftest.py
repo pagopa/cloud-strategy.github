@@ -3,10 +3,7 @@ from pathlib import Path
 
 import pytest
 
-BUNDLE = (
-    Path(__file__).resolve().parents[5]
-    / ".github/skills/internal-gateway-execute-plans"
-)
+BUNDLE = Path(__file__).resolve().parents[2]
 FIXTURES = BUNDLE / "fixtures"
 
 

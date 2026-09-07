@@ -15,12 +15,18 @@ from typing import Literal, Sequence
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
+from source_prepare_core import (  # noqa: E402
+    PrepareSourceResult,
+    prepare_sources,
+    verify_commit_dates_against_cache,
+)
 from sync_external_resources_core import (  # noqa: E402
     ImportedOverride,
-    ManagedAsset,
     ManagedResources,
     OverrideResult,
+    SourceProvenance,
     SyncCommandError,
+    build_source_provenance,
     find_dirty_targets,
     load_managed_resources,
     load_overrides,
@@ -33,10 +39,6 @@ from sync_external_resources_core import (  # noqa: E402
 from sync_output_core import (  # noqa: E402
     OutputRecord,
     render_tsv,
-)
-from source_prepare_core import (  # noqa: E402
-    PrepareSourceResult,
-    prepare_sources,
 )
 
 DEFAULT_MANIFEST = (
@@ -63,6 +65,7 @@ class SyncOutcome:
     repository_changed: bool
     source_results: tuple[PrepareSourceResult, ...] = ()
     source_root: str | None = None
+    source_provenance: tuple[SourceProvenance, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         result: dict[str, object] = {
@@ -98,6 +101,18 @@ class SyncOutcome:
                     "duration_ms": r.duration_ms,
                 }
                 for r in self.source_results
+            ]
+        if self.source_provenance:
+            result["source_provenance"] = [
+                {
+                    "source_id": p.source_id,
+                    "repository": p.repository,
+                    "ref": p.ref,
+                    "advertised_ref": p.advertised_ref,
+                    "commit_date": p.commit_date,
+                    "skills_count": p.skills_count,
+                }
+                for p in self.source_provenance
             ]
         return result
 
@@ -192,6 +207,51 @@ class SyncOutcome:
                     sr.fetch_strategy,
                 )
             )
+        prepared_source_ids = {sr.source_id for sr in self.source_results}
+        for provenance in self.source_provenance:
+            records.extend(
+                (
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.repository",
+                        "ok",
+                        provenance.repository,
+                    ),
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.ref",
+                        "ok",
+                        provenance.ref,
+                    ),
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.commit_date",
+                        "ok",
+                        provenance.commit_date or "-",
+                    ),
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.advertised_ref",
+                        "ok",
+                        provenance.advertised_ref or "-",
+                    ),
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.skills_count",
+                        "ok",
+                        str(provenance.skills_count),
+                    ),
+                )
+            )
+            if provenance.source_id not in prepared_source_ids:
+                records.append(
+                    OutputRecord(
+                        "source",
+                        provenance.source_id,
+                        "ok",
+                        provenance.ref,
+                    )
+                )
         return tuple(records)
 
 
@@ -466,6 +526,7 @@ def _prepare(
         repository_changed=False,
         source_results=results,
         source_root=str(sources_root),
+        source_provenance=build_source_provenance(resources),
     )
 
 
@@ -502,6 +563,7 @@ def _audit(
         validations=tuple(validations),
         blockers=tuple(blockers),
         repository_changed=False,
+        source_provenance=build_source_provenance(resources),
     )
 
 
@@ -558,6 +620,7 @@ def _plan(
     source_results = _materialize_candidate_with_auto_prepare(
         resources, workspace, candidate, sources_root
     )
+    verify_commit_dates_against_cache(resources, workspace)
     changed = normalize_candidate(resources, candidate)
     validations = (
         "prepared-sources-validated",
@@ -586,6 +649,7 @@ def _plan(
         repository_changed=False,
         source_results=source_results,
         source_root=str(sources_root),
+        source_provenance=build_source_provenance(resources),
     )
 
 
@@ -618,6 +682,7 @@ def _apply(
     source_results = _materialize_candidate_with_auto_prepare(
         resources, workspace, candidate, sources_root
     )
+    verify_commit_dates_against_cache(resources, workspace)
     changed = normalize_candidate(resources, candidate)
     validations = (
         "prepared-sources-validated",
@@ -650,6 +715,7 @@ def _apply(
         repository_changed=repository_changed,
         source_results=source_results,
         source_root=str(sources_root),
+        source_provenance=build_source_provenance(resources),
     )
 
 

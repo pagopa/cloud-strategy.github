@@ -10,21 +10,20 @@ from pathlib import Path
 import pytest
 import yaml
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-BUNDLE = REPO_ROOT / ".github/skills/internal-gateway-writing-plans"
+BUNDLE = Path(__file__).resolve().parents[1]
 WRITER_FIXTURE = BUNDLE / "fixtures/2026-07-25-1829-valid-plan.md"
-EXECUTOR_SCRIPT = (
-    REPO_ROOT
-    / ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
-)
-EXECUTOR_BUNDLE = REPO_ROOT / ".github/skills/internal-gateway-execute-plans"
+EXECUTOR_BUNDLE = BUNDLE.parent / "internal-gateway-execute-plans"
+EXECUTOR_SCRIPT = EXECUTOR_BUNDLE / "scripts/plan_execution.py"
 EXECUTOR_FIXTURE = EXECUTOR_BUNDLE / "fixtures/valid-plan.md"
 STRUCTURAL_CHECK = BUNDLE / "scripts/check_plan_structure.py"
-INVENTORY = REPO_ROOT / ".github/INVENTORY.md"
+INVENTORY = next(
+    (
+        parent / ".github/INVENTORY.md"
+        for parent in Path(__file__).resolve().parents
+        if (parent / ".github/INVENTORY.md").exists()
+    ),
+    None,
+)
 
 
 def _load_structural_check():
@@ -246,7 +245,7 @@ def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> No
             executor_fixture,
         ).group(1)
     )
-    inventory = INVENTORY.read_text(encoding="utf-8")
+    inventory = INVENTORY.read_text(encoding="utf-8") if INVENTORY else None
 
     assert isinstance(writer_metadata, dict) and "interface" in writer_metadata
     assert isinstance(executor_metadata, dict) and "interface" in executor_metadata
@@ -263,8 +262,12 @@ def test_metadata_fixtures_runner_and_inventory_are_structurally_aligned() -> No
     assert executor_manifest["retry_policy"]["max_corrective_retries"] == 3
     assert "## Execution Contract" not in executor_fixture
     assert "schema_version: 2" in executor_fixture
-    assert ".github/skills/internal-gateway-writing-plans/SKILL.md" in inventory
-    assert ".github/skills/internal-gateway-execute-plans/SKILL.md" in inventory
+    if inventory is not None:
+        for registered in (
+            ".github/skills/internal-gateway-writing-plans/SKILL.md",
+            ".github/skills/internal-gateway-execute-plans/SKILL.md",
+        ):
+            assert registered in inventory
 
 
 def test_writer_plan_remains_actionable_through_preflight_cli(tmp_path: Path) -> None:

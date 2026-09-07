@@ -675,3 +675,54 @@ def test_network_fetch_uses_extended_timeout(monkeypatch: pytest.MonkeyPatch) ->
         for _, timeout in calls
     )
     assert len(calls) == 2
+
+
+def test_read_commit_date_returns_none_without_cache() -> None:
+    assert (
+        source_prepare_core.read_commit_date(
+            Path("/nonexistent-cache"), _FULL_SHA40
+        )
+        is None
+    )
+
+
+def test_prepare_sources_verifies_declared_commit_date(
+    tmp_path: Path,
+    fixture_remote: tuple[Path, str],
+) -> None:
+    import dataclasses
+
+    remote_path, commit_sha = fixture_remote
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    sources_root = tmp_path / "sources"
+    sources_root.mkdir()
+
+    baseline = _single_source_resources(remote_path, commit_sha)
+    prepare_sources(baseline, workspace, sources_root)
+
+    cache = (
+        workspace
+        / "cache"
+        / "repositories"
+        / _cache_key_for_repository(str(remote_path))
+    )
+    actual_date = source_prepare_core.read_commit_date(cache, commit_sha)
+    assert actual_date is not None
+
+    correct_source = dataclasses.replace(
+        baseline.sources[0], commit_date=actual_date[:10]
+    )
+    prepare_sources(
+        ManagedResources(sources=(correct_source,), replacements=(), watchlist=()),
+        workspace,
+        sources_root,
+    )
+
+    wrong_source = dataclasses.replace(baseline.sources[0], commit_date="2001-01-01")
+    with pytest.raises(ValueError, match="commit_date"):
+        prepare_sources(
+            ManagedResources(sources=(wrong_source,), replacements=(), watchlist=()),
+            workspace,
+            sources_root,
+        )

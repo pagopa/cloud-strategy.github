@@ -7,12 +7,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-BUNDLE = REPO_ROOT / ".github/skills/internal-gateway-execute-plans"
+BUNDLE = Path(__file__).resolve().parents[2]
 SCRIPTS = BUNDLE / "scripts"
 FIXTURES = BUNDLE / "fixtures"
 sys.path.insert(0, str(SCRIPTS))

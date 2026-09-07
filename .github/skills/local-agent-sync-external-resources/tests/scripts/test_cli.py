@@ -1059,3 +1059,237 @@ def test_prepare_tsv_metric_rows_use_status_column_for_status(
     assert rows[("metric", "example.duration_ms")] == ("ok", "5")
     assert rows[("validation", "example.fetch_strategy")] == ("ok", "direct-sha")
     assert rows[("source", "example")] == ("fetched", "a" * 40)
+
+
+def test_audit_tsv_emits_source_provenance_rows(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        """\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    commit_date: "2026-01-02"
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text("version: 1\noverrides: []\n", encoding="utf-8")
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\n", encoding="utf-8")
+    _commit_all(repo)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "audit",
+            "--repo-root",
+            str(repo),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+            "--format",
+            "tsv",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    rows = {}
+    for line in result.stdout.splitlines()[1:]:
+        record, key, status, value = line.split("\t", 3)
+        rows[(record, key)] = (status, value)
+
+    assert rows[("source", "test-source")] == ("ok", "a" * 40)
+    assert rows[("metric", "test-source.repository")] == ("ok", "example.com/repo")
+    assert rows[("metric", "test-source.commit_date")] == ("ok", "2026-01-02")
+    assert rows[("metric", "test-source.advertised_ref")] == ("ok", "-")
+    assert rows[("metric", "test-source.skills_count")] == ("ok", "1")
+
+
+def test_audit_json_reports_source_provenance(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        """\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    commit_date: "2026-01-02"
+    advertised_ref: v1.2.3
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text("version: 1\noverrides: []\n", encoding="utf-8")
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\n", encoding="utf-8")
+    _commit_all(repo)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "audit",
+            "--repo-root",
+            str(repo),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["source_provenance"] == [
+        {
+            "source_id": "test-source",
+            "repository": "example.com/repo",
+            "ref": "a" * 40,
+            "advertised_ref": "v1.2.3",
+            "commit_date": "2026-01-02",
+            "skills_count": 1,
+        }
+    ]
+
+
+def test_plan_rejects_commit_date_mismatch_against_cache(tmp_path: Path) -> None:
+    from source_prepare_core import _cache_key_for_repository
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    work = tmp_path / "work"
+    work.mkdir()
+    _run_git(work, ["init"])
+    _run_git(work, ["config", "user.email", "test@test.com"])
+    _run_git(work, ["config", "user.name", "Test"])
+    (work / "marker.txt").write_text("marker\n", encoding="utf-8")
+    _commit_all(work)
+    commit_sha = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=work,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        f"""\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: {commit_sha}
+    commit_date: "2001-01-01"
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text("version: 1\noverrides: []\n", encoding="utf-8")
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
+    _commit_all(repo)
+
+    workspace = tmp_path / "external-workspace"
+    workspace.mkdir()
+    cache = (
+        workspace
+        / "cache"
+        / "repositories"
+        / _cache_key_for_repository("https://example.com/repo.git")
+    )
+    cache.mkdir(parents=True)
+    _run_git(cache, ["init", "--bare"])
+    _run_git(cache, ["fetch", str(work), "HEAD"])
+
+    sources_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
+    source_dir = sources_root / "test-source" / "skills" / "example"
+    source_dir.mkdir(parents=True)
+    (source_dir / "SKILL.md").write_text(
+        "---\nname: example\n---\nNew content.\n", encoding="utf-8"
+    )
+    _write_source_metadata_for_fixture(
+        sources_root,
+        "test-source",
+        "https://example.com/repo.git",
+        commit_sha,
+        "skills/example",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "plan",
+            "--repo-root",
+            str(repo),
+            "--workspace",
+            str(workspace),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    payload = json.loads(result.stdout or "{}")
+    assert payload["blockers"] and "commit_date mismatch" in payload["blockers"][0]

@@ -1,15 +1,74 @@
 version: 1
+# Pinned import sources. The summary table is machine-checked by
+# tests/scripts/test_manifest.py::test_live_manifest_summary_table_matches_declared_sources
+# against the parsed sources below. `ref` remains the sole accepted source
+# identity; tag and commit_date are informational provenance.
+# managed-sources-summary:start
+# | source | repository | ref (sha) | tag | commit_date | skills |
+# |---|---|---|---|---|---|
+# | addyosmani-agent-skills | addyosmani/agent-skills | ff2df4c07e78 | - | 2026-07-24 | 2 |
+# | anthropic-skills | anthropics/skills | b29e7cf65e5c | - | 2026-07-24 | 4 |
+# | antonbabenko-terraform-skill | antonbabenko/terraform-skill | 0a3a4a66e990 | - | 2026-07-03 | 1 |
+# | atlassian-mcp-server | atlassian/atlassian-mcp-server | f22e7075136a | - | 2026-07-08 | 1 |
+# | github-awesome-copilot | github/awesome-copilot | aa280f28b1b7 | - | 2026-07-24 | 10 |
+# | mattpocock-skills | mattpocock/skills | 6acc160e4e0c | v1.2.3 | 2026-08-06 | 25 |
+# | obra-superpowers | obra/superpowers | 3dcbd5c4b48e | - | 2026-07-24 | 13 |
+# | openai-skills-curated | openai/skills | 49f948faa925 | - | 2026-06-24 | 2 |
+# | openai-skills-retained-doc | openai/skills | 49f948faa925 | - | 2026-06-24 | 1 |
+# | sickn33-antigravity | sickn33/antigravity-awesome-skills | e66fc833f202 | - | 2026-07-24 | 7 |
+# | vercel-labs-skills | vercel-labs/skills | e173b8c88f25 | - | 2026-07-22 | 1 |
+# managed-sources-summary:end
 sources:
+  addyosmani-agent-skills:
+    repository: https://github.com/addyosmani/agent-skills.git
+    ref: ff2df4c07e7836a092ed28e1e9b42f4d6009280c
+    commit_date: 2026-07-24
+    assets:
+      - upstream: skills/code-simplification
+        local: .github/skills/addyosmani-code-simplification
+        canonical_name: addyosmani-code-simplification
+      - upstream: skills/code-review-and-quality
+        local: .github/skills/addyosmani-code-review-and-quality
+        canonical_name: addyosmani-code-review-and-quality
+  anthropic-skills:
+    repository: https://github.com/anthropics/skills.git
+    ref: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
+    commit_date: 2026-07-24
+    rewrite_skill_references: true
+    ensure_python_shebangs: true
+    assets:
+      - upstream: skills/docx
+        local: .github/skills/anthropic-docx
+        canonical_name: anthropic-docx
+      - upstream: skills/pdf
+        local: .github/skills/anthropic-pdf
+        canonical_name: anthropic-pdf
+      - upstream: skills/pptx
+        local: .github/skills/anthropic-pptx
+        canonical_name: anthropic-pptx
+      - upstream: skills/xlsx
+        local: .github/skills/anthropic-xlsx
+        canonical_name: anthropic-xlsx
   antonbabenko-terraform-skill:
     repository: https://github.com/antonbabenko/terraform-skill.git
     ref: 0a3a4a66e99001347d36a41e10260a825be3ab62
+    commit_date: 2026-07-03
     assets:
       - upstream: skills/terraform-skill
         local: .github/skills/antonbabenko-terraform-skill
         canonical_name: antonbabenko-terraform-skill
+  atlassian-mcp-server:
+    repository: https://github.com/atlassian/atlassian-mcp-server.git
+    ref: f22e7075136a62baa7c10200a64884f83bf3ebe1
+    commit_date: 2026-07-08
+    assets:
+      - upstream: skills/search-company-knowledge
+        local: .github/skills/search-company-knowledge
+        canonical_name: search-company-knowledge
   github-awesome-copilot:
     repository: https://github.com/github/awesome-copilot.git
     ref: aa280f28b1b73f9b6e6917b607eb92127b67b419
+    commit_date: 2026-07-24
     assets:
       - upstream: skills/agentic-eval
         local: .github/skills/awesome-copilot-agentic-eval
@@ -41,58 +100,10 @@ sources:
       - upstream: skills/security-review
         local: .github/skills/awesome-copilot-security-review
         canonical_name: awesome-copilot-security-review
-  obra-superpowers:
-    repository: https://github.com/obra/superpowers.git
-    ref: 3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9
-    assets:
-      - upstream: skills/brainstorming
-        local: .github/skills/superpowers-brainstorming
-        canonical_name: superpowers-brainstorming
-        invocation_policy:
-          copilot:
-            disable_model_invocation: true
-          codex:
-            allow_implicit_invocation: false
-            short_description: Explore ideas before implementation
-      - upstream: skills/dispatching-parallel-agents
-        local: .github/skills/superpowers-dispatching-parallel-agents
-        canonical_name: superpowers-dispatching-parallel-agents
-      - upstream: skills/executing-plans
-        local: .github/skills/superpowers-executing-plans
-        canonical_name: superpowers-executing-plans
-      - upstream: skills/finishing-a-development-branch
-        local: .github/skills/superpowers-finishing-a-development-branch
-        canonical_name: superpowers-finishing-a-development-branch
-      - upstream: skills/receiving-code-review
-        local: .github/skills/superpowers-receiving-code-review
-        canonical_name: superpowers-receiving-code-review
-      - upstream: skills/requesting-code-review
-        local: .github/skills/superpowers-requesting-code-review
-        canonical_name: superpowers-requesting-code-review
-      - upstream: skills/subagent-driven-development
-        local: .github/skills/superpowers-subagent-driven-development
-        canonical_name: superpowers-subagent-driven-development
-      - upstream: skills/systematic-debugging
-        local: .github/skills/superpowers-systematic-debugging
-        canonical_name: superpowers-systematic-debugging
-      - upstream: skills/test-driven-development
-        local: .github/skills/superpowers-test-driven-development
-        canonical_name: superpowers-test-driven-development
-      - upstream: skills/using-git-worktrees
-        local: .github/skills/superpowers-using-git-worktrees
-        canonical_name: superpowers-using-git-worktrees
-      - upstream: skills/using-superpowers
-        local: .github/skills/superpowers-using-superpowers
-        canonical_name: superpowers-using-superpowers
-      - upstream: skills/verification-before-completion
-        local: .github/skills/superpowers-verification-before-completion
-        canonical_name: superpowers-verification-before-completion
-      - upstream: skills/writing-plans
-        local: .github/skills/superpowers-writing-plans
-        canonical_name: superpowers-writing-plans
   mattpocock-skills:
     repository: https://github.com/mattpocock/skills.git
     ref: 6acc160e4e0cd062dbbbd7a1b26ae92855edf07e
+    commit_date: 2026-08-06
     advertised_ref: v1.2.3
     rewrite_skill_references: true
     backtick_skill_references:
@@ -240,16 +251,60 @@ sources:
       - upstream: skills/productivity/writing-for-agents
         local: .github/skills/mattpocock-writing-for-agents
         canonical_name: mattpocock-writing-for-agents
-  vercel-labs-skills:
-    repository: https://github.com/vercel-labs/skills.git
-    ref: e173b8c88f2581cfdaa1b6767c6519a08155790e
+  obra-superpowers:
+    repository: https://github.com/obra/superpowers.git
+    ref: 3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9
+    commit_date: 2026-07-24
     assets:
-      - upstream: skills/find-skills
-        local: .github/skills/vercel-find-skills
-        canonical_name: vercel-find-skills
+      - upstream: skills/brainstorming
+        local: .github/skills/superpowers-brainstorming
+        canonical_name: superpowers-brainstorming
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+            short_description: Explore ideas before implementation
+      - upstream: skills/dispatching-parallel-agents
+        local: .github/skills/superpowers-dispatching-parallel-agents
+        canonical_name: superpowers-dispatching-parallel-agents
+      - upstream: skills/executing-plans
+        local: .github/skills/superpowers-executing-plans
+        canonical_name: superpowers-executing-plans
+      - upstream: skills/finishing-a-development-branch
+        local: .github/skills/superpowers-finishing-a-development-branch
+        canonical_name: superpowers-finishing-a-development-branch
+      - upstream: skills/receiving-code-review
+        local: .github/skills/superpowers-receiving-code-review
+        canonical_name: superpowers-receiving-code-review
+      - upstream: skills/requesting-code-review
+        local: .github/skills/superpowers-requesting-code-review
+        canonical_name: superpowers-requesting-code-review
+      - upstream: skills/subagent-driven-development
+        local: .github/skills/superpowers-subagent-driven-development
+        canonical_name: superpowers-subagent-driven-development
+      - upstream: skills/systematic-debugging
+        local: .github/skills/superpowers-systematic-debugging
+        canonical_name: superpowers-systematic-debugging
+      - upstream: skills/test-driven-development
+        local: .github/skills/superpowers-test-driven-development
+        canonical_name: superpowers-test-driven-development
+      - upstream: skills/using-git-worktrees
+        local: .github/skills/superpowers-using-git-worktrees
+        canonical_name: superpowers-using-git-worktrees
+      - upstream: skills/using-superpowers
+        local: .github/skills/superpowers-using-superpowers
+        canonical_name: superpowers-using-superpowers
+      - upstream: skills/verification-before-completion
+        local: .github/skills/superpowers-verification-before-completion
+        canonical_name: superpowers-verification-before-completion
+      - upstream: skills/writing-plans
+        local: .github/skills/superpowers-writing-plans
+        canonical_name: superpowers-writing-plans
   openai-skills-curated:
     repository: https://github.com/openai/skills.git
     ref: 49f948faa9258a0c61caceaf225e179651397431
+    commit_date: 2026-06-24
     assets:
       - upstream: skills/.curated/gh-address-comments
         local: .github/skills/openai-gh-address-comments
@@ -260,6 +315,7 @@ sources:
   openai-skills-retained-doc:
     repository: https://github.com/openai/skills.git
     ref: 49f948faa9258a0c61caceaf225e179651397431
+    commit_date: 2026-06-24
     assets:
       - upstream: skills/.curated/openai-docs
         local: .github/skills/openai-docs
@@ -267,6 +323,7 @@ sources:
   sickn33-antigravity:
     repository: https://github.com/sickn33/antigravity-awesome-skills.git
     ref: e66fc833f2022c3534ba74af835db14c34f9a732
+    commit_date: 2026-07-24
     assets:
       - upstream: skills/api-design-principles
         local: .github/skills/antigravity-api-design-principles
@@ -289,41 +346,14 @@ sources:
       - upstream: skills/network-engineer
         local: .github/skills/antigravity-network-engineer
         canonical_name: antigravity-network-engineer
-  addyosmani-agent-skills:
-    repository: https://github.com/addyosmani/agent-skills.git
-    ref: ff2df4c07e7836a092ed28e1e9b42f4d6009280c
+  vercel-labs-skills:
+    repository: https://github.com/vercel-labs/skills.git
+    ref: e173b8c88f2581cfdaa1b6767c6519a08155790e
+    commit_date: 2026-07-22
     assets:
-      - upstream: skills/code-simplification
-        local: .github/skills/addyosmani-code-simplification
-        canonical_name: addyosmani-code-simplification
-      - upstream: skills/code-review-and-quality
-        local: .github/skills/addyosmani-code-review-and-quality
-        canonical_name: addyosmani-code-review-and-quality
-  atlassian-mcp-server:
-    repository: https://github.com/atlassian/atlassian-mcp-server.git
-    ref: f22e7075136a62baa7c10200a64884f83bf3ebe1
-    assets:
-      - upstream: skills/search-company-knowledge
-        local: .github/skills/search-company-knowledge
-        canonical_name: search-company-knowledge
-  anthropic-skills:
-    repository: https://github.com/anthropics/skills.git
-    ref: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
-    rewrite_skill_references: true
-    ensure_python_shebangs: true
-    assets:
-      - upstream: skills/docx
-        local: .github/skills/anthropic-docx
-        canonical_name: anthropic-docx
-      - upstream: skills/pdf
-        local: .github/skills/anthropic-pdf
-        canonical_name: anthropic-pdf
-      - upstream: skills/pptx
-        local: .github/skills/anthropic-pptx
-        canonical_name: anthropic-pptx
-      - upstream: skills/xlsx
-        local: .github/skills/anthropic-xlsx
-        canonical_name: anthropic-xlsx
+      - upstream: skills/find-skills
+        local: .github/skills/vercel-find-skills
+        canonical_name: vercel-find-skills
 normalizations:
   - source: obra-superpowers
     from: docs/superpowers

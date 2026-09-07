@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import datetime
 import hashlib
 import re
 import shutil
@@ -45,6 +46,7 @@ class ManagedSource:
     ref: str
     advertised_ref: str | None
     assets: tuple[ManagedAsset, ...]
+    commit_date: str | None = None
     rewrite_skill_references: bool = False
     ensure_python_shebangs: bool = False
     skill_reference_aliases: tuple[tuple[str, str], ...] = ()
@@ -64,6 +66,67 @@ def compute_prepared_source_paths_sha256(source: ManagedSource) -> str:
     return hashlib.sha256(
         ",".join(upstream_paths).encode("utf-8")
     ).hexdigest()
+
+
+_REPO_DISPLAY_MIN_PARTS = 2
+
+
+def repo_display(repository: str) -> str:
+    value = repository
+    if "://" in value:
+        value = value.split("://", 1)[1]
+    if value.endswith(".git"):
+        value = value[: -len(".git")]
+    parts = [part for part in value.split("/") if part]
+    if len(parts) >= _REPO_DISPLAY_MIN_PARTS:
+        return "/".join(parts[-_REPO_DISPLAY_MIN_PARTS:])
+    return value
+
+
+@dataclass(frozen=True)
+class SourceProvenance:
+    source_id: str
+    repository: str
+    ref: str
+    advertised_ref: str | None
+    commit_date: str | None
+    skills_count: int
+
+
+def build_source_provenance(
+    resources: ManagedResources,
+) -> tuple[SourceProvenance, ...]:
+    return tuple(
+        SourceProvenance(
+            source_id=source.source_id,
+            repository=repo_display(source.repository),
+            ref=source.ref,
+            advertised_ref=source.advertised_ref,
+            commit_date=source.commit_date,
+            skills_count=len(source.assets),
+        )
+        for source in sorted(resources.sources, key=lambda item: item.source_id)
+    )
+
+
+_SOURCE_SUMMARY_START = "# managed-sources-summary:start"
+_SOURCE_SUMMARY_END = "# managed-sources-summary:end"
+
+
+def render_source_summary_table(resources: ManagedResources) -> str:
+    lines = [
+        _SOURCE_SUMMARY_START,
+        "# | source | repository | ref (sha) | tag | commit_date | skills |",
+        "# |---|---|---|---|---|---|",
+    ]
+    for provenance in build_source_provenance(resources):
+        lines.append(
+            f"# | {provenance.source_id} | {provenance.repository} | "
+            f"{provenance.ref[:12]} | {provenance.advertised_ref or '-'} | "
+            f"{provenance.commit_date or '-'} | {provenance.skills_count} |"
+        )
+    lines.append(_SOURCE_SUMMARY_END)
+    return "\n".join(lines)
 
 
 @dataclass(frozen=True)
@@ -104,6 +167,25 @@ def _optional_non_empty_string(value: object, field: str) -> str | None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field} must be a non-empty string when provided.")
     return value.strip()
+
+
+def _optional_commit_date(value: object, field: str) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
+        return value.isoformat()
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string when provided.")
+    stripped = value.strip()
+    if len(stripped) != 10:
+        raise ValueError(f"{field} must be an ISO date (YYYY-MM-DD), got {stripped!r}.")
+    try:
+        datetime.date.fromisoformat(stripped)
+    except ValueError as exc:
+        raise ValueError(
+            f"{field} must be an ISO date (YYYY-MM-DD), got {stripped!r}."
+        ) from exc
+    return stripped
 
 
 _INVOCATION_POLICY_RUNTIME_FIELDS: dict[str, tuple[str, ...]] = {
@@ -217,6 +299,10 @@ def load_managed_resources(path: Path) -> ManagedResources:
             raw_source.get("advertised_ref"),
             f"source {source_id} advertised_ref",
         )
+        commit_date = _optional_commit_date(
+            raw_source.get("commit_date"),
+            f"source {source_id} commit_date",
+        )
         raw_assets = raw_source.get("assets")
         if not isinstance(raw_assets, list) or not raw_assets:
             raise ValueError(
@@ -322,6 +408,7 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 repository=repository,
                 ref=ref,
                 advertised_ref=advertised_ref,
+                commit_date=commit_date,
                 assets=tuple(assets),
                 rewrite_skill_references=rewrite_skill_references,
                 ensure_python_shebangs=ensure_python_shebangs,

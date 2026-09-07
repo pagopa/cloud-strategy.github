@@ -15,10 +15,17 @@ sys.path.insert(0, SCRIPT_DIR.as_posix())
 from sync_external_resources_core import (  # noqa: E402
     load_managed_resources,
     load_overrides,
+    render_source_summary_table,
     validate_override_patches,
 )
 
 _COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_MANIFEST_PATH = (
+    ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
+)
+_SUMMARY_START = "# managed-sources-summary:start"
+_SUMMARY_END = "# managed-sources-summary:end"
 
 _FULL_SHA40 = "a" * 40
 _FULL_SHA40_ALT = "b" * 40
@@ -82,14 +89,81 @@ def _write_manifest(tmp_path: Path, body: str) -> Path:
 
 
 def test_live_manifest_refs_are_full_lowercase_object_ids(repo_root: Path) -> None:
-    manifest = load_managed_resources(
-        repo_root
-        / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
-    )
+    manifest = load_managed_resources(repo_root / _MANIFEST_PATH)
     for source in manifest.sources:
         assert _COMMIT_OBJECT_ID_RE.match(source.ref), (
             f"source {source.source_id} ref {source.ref!r} "
             f"is not a full lowercase commit object ID"
+        )
+
+
+def _load_live_manifest(repo_root: Path):
+    return load_managed_resources(repo_root / _MANIFEST_PATH)
+
+
+def test_live_manifest_declares_commit_date_for_every_source(repo_root: Path) -> None:
+    manifest = _load_live_manifest(repo_root)
+    for source in manifest.sources:
+        assert source.commit_date is not None, (
+            f"source {source.source_id} must declare a pinned commit_date"
+        )
+        assert _ISO_DATE_RE.match(source.commit_date), (
+            f"source {source.source_id} commit_date {source.commit_date!r} "
+            f"is not an ISO date"
+        )
+
+
+def test_live_manifest_summary_table_matches_declared_sources(repo_root: Path) -> None:
+    manifest_path = repo_root / _MANIFEST_PATH
+    manifest = _load_live_manifest(repo_root)
+    text = manifest_path.read_text(encoding="utf-8")
+    start = text.index(_SUMMARY_START)
+    end = text.index(_SUMMARY_END) + len(_SUMMARY_END)
+
+    assert text[start:end].strip() == render_source_summary_table(manifest)
+
+
+def test_manifest_accepts_optional_commit_date(tmp_path: Path) -> None:
+    manifest = load_managed_resources(
+        _write_manifest(
+            tmp_path,
+            f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    commit_date: "2026-07-24"
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        )
+    )
+    assert manifest.sources[0].commit_date == "2026-07-24"
+
+
+def test_manifest_rejects_invalid_commit_date(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="commit_date"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    commit_date: "2026-13-45"
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+            )
         )
 
 

@@ -44,11 +44,14 @@ entrypoint; a consumer working directory or a home-directory fallback is never
 an executor owner.
 
 The executor bundle owns its runtime dependencies. Declare direct dependencies
-in `scripts/requirements.in`, generate the hash-locked
-`scripts/requirements.txt` with the repository lock generator, and invoke the
-bundle through `scripts/run.sh`. The runner must derive its physical bundle
-from its loaded entrypoint and must not use repository-global requirements.
-Provision the local runtime only with the explicit
+in `scripts/requirements.in`; generate the hash-locked pip-format
+`scripts/requirements.txt` from them so that it pins PyYAML with sha256
+hashes, the checks `scripts/run.sh` enforces. Regenerate the lock from the
+bundle root with
+`uv pip compile --generate-hashes --universal --output-file scripts/requirements.txt scripts/requirements.in`
+and invoke the bundle through `scripts/run.sh`. The runner must derive its
+physical bundle from its loaded entrypoint and must not use repository-global
+requirements. Provision the local runtime only with the explicit
 `bash <physical-executor-bundle>/scripts/run.sh --bootstrap` command; ordinary
 preflight and state-check calls reuse the provisioned runtime and fail closed
 when it is unavailable.

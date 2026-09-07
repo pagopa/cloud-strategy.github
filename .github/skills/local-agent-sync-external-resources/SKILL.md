@@ -18,16 +18,26 @@ The canonical source of truth is
 [`references/managed-resources.yaml`](references/managed-resources.yaml).
 The `ref` field is the full commit object ID and the sole accepted source
 identity. Top-level `version: 1` is the manifest schema version, not an
-upstream release. Release/tag values and `advertised_ref` are informational
-and never replace `ref`. Commit dates and tag metadata are not tracked here;
-read them from the manifest or the upstream commit.
+upstream release. Release/tag values (`advertised_ref`) are informational and
+never replace `ref`.
+
+- The comment table between the `managed-sources-summary:start` and `:end`
+  markers is the per-source readability index: source, repository, pinned
+  short SHA, tag when declared, commit date, and imported skill count. A test
+  verifies that the table always matches the parsed sources.
+- `commit_date` records the committer date of the pinned commit in
+  `YYYY-MM-DD` form. The date is a property of the frozen SHA, so it never
+  drifts; record it when pinning a new ref. `prepare` verifies it against the
+  cached commit, and `plan`/`apply` re-verify against the local cache when it
+  exists. A mismatch is a blocker that names the fix: update `commit_date` in
+  the manifest or re-pin the ref.
 
 ## Modes
 
 - `prepare` fetches pinned Git content into a repository-keyed partial-clone
   cache and exports manifest-declared paths into verified snapshots.
 - `audit` validates registries, local paths, canonical names, hashes, watchlist
-  shape, and dirty state. It does not fetch or write.
+  shape, and dirty state. It is offline and does not fetch or write.
 - `plan` requires an external workspace, prepares missing snapshots, builds and
   validates the complete candidate, and emits a changed-path summary.
 - `apply` performs `plan`, prepares missing snapshots, rejects dirty targets
@@ -49,89 +59,14 @@ read them from the manifest or the upstream commit.
 - No `git pull`, argumentless `git fetch`, or `git remote update`.
 - No package managers (`pip`, `uv`, `npm`, `brew`, `yarn`, `pnpm`) are allowed.
 
-## Managed Skill Reference Normalization
+## Skill Normalizations
 
-- A source may set `rewrite_skill_references: true` to rewrite slash commands
-  and backtick skill references from declared upstream basenames to declared
-  `canonical_name` values.
-- `skill_reference_aliases` are source-local and point only at declared
-  canonical names.
-- The `mattpocock-skills` source imports all 25 direct `engineering/` and
-  `productivity/` bundles from the pinned release. Keep `grill-me` and
-  `grilling` unprefixed; prefix the other 23 canonical names with
-  `mattpocock-`.
-- Redirect Matt consumer references from `/grilling` to `/grill-me` only after
-  canonical reference rewriting. Build the canonical `grill-me` skill with its
-  own frontmatter and metadata plus the `grilling` body, so the interview needs
-  no second skill invocation. Keep `grilling` as the declared upstream engine
-  but publish it as a user-invoked alias back to `/grill-me`; fail candidate
-  creation if the engine adds resources that are not merged.
-- References to undeclared skills remain unchanged and are reported as
-  unresolved dependencies.
-
-## Managed Skill Frontmatter
-
-- Normalize managed `SKILL.md` files for Codex and GitHub Copilot while
-  preserving `/skill-name` references.
-- Remove `disable-model-invocation` by default because it is not standard Codex
-  skill metadata.
-- Apply `invocation_policy` generically per asset. Its fields are
-  `copilot.disable_model_invocation` and `codex.allow_implicit_invocation`;
-  do not hardcode per-asset exceptions.
-- The Matt source declares 13 upstream user-invoked skills explicitly and
-  leaves the other 12 model-invoked skills unrestricted. Keep `grill-me`
-  model-invocable and make `grilling` user-invoked, so skills that must
-  interview the user load the self-contained canonical entrypoint.
-  Preserve this split in both runtimes.
-- `superpowers-brainstorming` remains an independently declared exception:
-  keep `disable-model-invocation: true` in `SKILL.md` and set
-  `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
-- After refresh, manually verify that no policy-managed skill is implicitly
-  selected in either runtime.
-
-## Executable Python Normalization
-
-- A source may set `ensure_python_shebangs: true` to prepend
-  `#!/usr/bin/env python3` to executable `.py` files without a shebang.
-- The Anthropic source enables this normalization.
-- Preserve existing shebangs, non-executable Python modules, and non-Python
-  executables unchanged.
-
-## Guided Question Contract
-
-- Append the repository-owned bulk-question contract only to
-  `superpowers-brainstorming`.
-- Require numbered bulk question blocks. Every question includes a brief
-  `Recommendation`, `Why`, and `Default if accepted`.
-- Explicitly override upstream one-question-at-a-time pacing. A single
-  remaining blocker is a numbered one-item block.
-- Use a marker-based idempotent append, never a context-sensitive replay patch.
-
-## Repository-Owned Skill Contracts
-
-- Express additive behavior, workspace, and output-path requirements as
-  canonical-name-scoped, marker-based candidate normalizations.
-- Each normalization replaces its own marked block, is idempotent, and
-  preserves unrelated upstream content.
-- Retain only the Matt Pocock Handoff, Teach, and Improve Architecture
-  repository paths. Keep Handoff non-duplication wording as a canonical marked
-  normalization rather than replay-patch ownership.
-- Keep Matt Research output under `tmp/.research/`. Before delegation, the
-  caller applies a value gate; when delegation is worthwhile, it uses
-  `/internal-subagent-contract` and retains routing, authority, acceptance, and
-  validation.
-- Do not add Git-autonomy, Wayfinder workspace, Wayfinder critical-validation,
-  Wayfinder grilling, or `grill-me` guided-question contracts to Matt imports.
-- After composition, apply one marker-based scope-and-convergence guardrail to
-  canonical `grill-me`; preserve the imported body, rounds, frontier,
-  formatting, and invocation policy.
-- Reserve replay patches for irreducible upstream-line edits. Record why a
-  normalization is insufficient before registering an exception.
-- Register each approved in-place override in
-  `references/imported-asset-overrides.yaml` with a replay patch and expected
-  content hash.
-- Replay runs clean `git apply --check` first, then `--3way --check` only when
-  declared. Stop for review if neither applies.
+Imported-skill normalization policy (reference rewriting, invocation
+frontmatter, Python shebangs, guided questions, and repository-owned skill
+contracts) lives in
+[`references/skill-normalizations.md`](references/skill-normalizations.md).
+Reserve replay patches for irreducible upstream-line edits; register approved
+in-place overrides in `references/imported-asset-overrides.yaml`.
 
 ## Workspace And Snapshot Flow
 
@@ -164,9 +99,13 @@ read them from the manifest or the upstream commit.
   `validation`, `blocker`.
 - Metric and per-source validation rows use key `<source_id>.<name>`, status
   `ok` or `fail`, and the value in `value`.
+- Provenance metric rows, derived from the manifest in every mode, use keys
+  `<source_id>.repository` (owner/repo form), `<source_id>.ref`,
+  `<source_id>.commit_date`, `<source_id>.advertised_ref`, and
+  `<source_id>.skills_count`; an undeclared tag or date is reported as `-`.
 - `summary.source_root` names the snapshot directory.
 - `--format text` is the default; `--format json` retains backward-compatible
-  keys.
+  keys and adds a `source_provenance` list.
 
 ## Safety
 
@@ -180,7 +119,8 @@ read them from the manifest or the upstream commit.
 
 1. Run `audit` to validate the manifest, overrides, and local dirty state.
 2. Run `plan` with `--workspace` and confirm the candidate can be built.
-3. Review the changed-path summary, metrics, and override replay results.
+3. Review the changed-path summary, provenance rows, metrics, and override
+   replay results.
 4. Run `apply` to produce and apply the validated repository patch.
 
 ## Canonical Commands
@@ -213,7 +153,7 @@ separate authorization.
 ## Output
 
 Report: mode, workspace, source root when used, managed count, changed paths,
-override results, source metrics, validation, and blockers.
+override results, provenance rows, source metrics, validation, and blockers.
 
 ## Anti-Scope
 

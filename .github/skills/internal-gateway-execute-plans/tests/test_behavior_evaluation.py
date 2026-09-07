@@ -12,15 +12,8 @@ HERE = Path(__file__).parent
 EVALUATION = HERE / "evaluation"
 BENCHMARK = EVALUATION / "benchmark.json"
 SCORER = EVALUATION / "score_executor_eval.py"
-REPO_ROOT = next(
-    parent
-    for parent in HERE.parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-EXECUTOR_SCRIPT = (
-    REPO_ROOT
-    / ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
-)
+BUNDLE = HERE.parent
+EXECUTOR_SCRIPT = BUNDLE / "scripts/plan_execution.py"
 EXPECTED_CASES = {
     "VALID_PLAN_DONE",
     "IN_TARGET_OMISSION_DONE",
@@ -568,10 +561,7 @@ def test_bootstrap_does_not_replace_five_delivery_verdicts() -> None:
 
 def test_yaml_status_cases_preserve_five_verdict_categories() -> None:
     executor = _load_executor()
-    plan = (
-        REPO_ROOT
-        / ".github/skills/internal-gateway-execute-plans/fixtures/valid-plan.md"
-    )
+    plan = BUNDLE / "fixtures/valid-plan.md"
     manifest = executor.parse_execution_manifest(plan.read_text())
     task_ids = tuple(executor._manifest_task_ids(manifest))
     verdicts = _passing_verdicts(executor)

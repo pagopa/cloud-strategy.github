@@ -3,14 +3,29 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import yaml
 from common.constants import INVENTORY_PATH
 from common.files import write_text
 from common.paths import path_list
 
-SECTION_ORDER = ("Instructions", "Skills", "Scripts", "Agents", "Prompts")
+MANAGED_RESOURCES_RELATIVE_PATH = (
+    ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
+)
+SECTION_ORDER = (
+    "Instructions",
+    "Skills",
+    "Imported Skill Provenance",
+    "Scripts",
+    "Agents",
+    "Prompts",
+)
 EMPTY_MESSAGES = {
     "Instructions": "No instruction files currently ship in the live catalog.",
     "Skills": "No skill files currently ship in the live catalog.",
+    "Imported Skill Provenance": (
+        "No imported skill provenance is available; declare sources in the "
+        "external resource manifest."
+    ),
     "Scripts": "No script files currently ship in the live catalog.",
     "Agents": "No agent files currently ship in the live catalog.",
     "Prompts": "No prompt files currently ship in the live catalog.",
@@ -28,10 +43,81 @@ DOCUMENT_SUPPORT_ONLY_SKILLS = (
 IGNORED_SCRIPT_BASENAMES = {"__init__.py"}
 
 
+def _repo_display(repository: str) -> str:
+    value = repository
+    if "://" in value:
+        value = value.split("://", 1)[1]
+    if value.endswith(".git"):
+        value = value[: -len(".git")]
+    parts = [part for part in value.split("/") if part]
+    if len(parts) >= 2:
+        return "/".join(parts[-2:])
+    return value
+
+
+def _manifest_provenance_groups(root: Path) -> list[dict[str, object]]:
+    manifest_path = root / MANAGED_RESOURCES_RELATIVE_PATH
+    if not manifest_path.exists():
+        return []
+    try:
+        payload = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return []
+    if not isinstance(payload, dict):
+        return []
+    sources = payload.get("sources")
+    if not isinstance(sources, dict):
+        return []
+
+    groups: list[dict[str, object]] = []
+    for source_id in sorted(sources):
+        source = sources[source_id]
+        if not isinstance(source, dict):
+            continue
+        repository = str(source.get("repository") or "")
+        ref = str(source.get("ref") or "")
+        raw_assets = source.get("assets") or []
+        paths = sorted(
+            f"{asset['local']}/SKILL.md"
+            for asset in raw_assets
+            if isinstance(asset, dict) and asset.get("local")
+        )
+        if not repository or not ref or not paths:
+            continue
+        groups.append(
+            {
+                "repository": _repo_display(repository),
+                "ref": ref[:12],
+                "tag": str(source.get("advertised_ref")) if source.get("advertised_ref") else None,
+                "commit_date": str(source.get("commit_date")) if source.get("commit_date") else None,
+                "paths": paths,
+            }
+        )
+    return groups
+
+
+def _format_provenance_heading(group: dict[str, object]) -> str:
+    parts = [f"{group['repository']} — ref {group['ref']}"]
+    if group.get("tag"):
+        parts.append(f"tag {group['tag']}")
+    if group.get("commit_date"):
+        parts.append(str(group["commit_date"]))
+    parts.append(f"{len(group['paths'])} skills")
+    return " · ".join(parts)
+
+
 def collect_inventory_sections(root: Path) -> dict[str, list[str]]:
+    skills = path_list(root, ".github/skills/**/SKILL.md")
+    imported = {
+        path
+        for group in _manifest_provenance_groups(root)
+        for path in group["paths"]
+    }
+    provenance = sorted(set(skills) & imported)
     return {
         "Instructions": path_list(root, ".github/instructions/**/*.instructions.md"),
-        "Skills": path_list(root, ".github/skills/**/SKILL.md"),
+        "Skills": skills,
+        "Imported Skill Provenance": provenance,
         "Scripts": _collect_script_paths(root),
         "Agents": path_list(root, ".github/agents/*.agent.md"),
         "Prompts": path_list(root, ".github/prompts/*.prompt.md"),
@@ -81,7 +167,10 @@ def sections_from_catalog_paths(paths: list[str]) -> dict[str, list[str]]:
     return {section: sorted(entries) for section, entries in sections.items()}
 
 
-def render_inventory_markdown(sections: dict[str, list[str]]) -> str:
+def render_inventory_markdown(
+    sections: dict[str, list[str]],
+    provenance_groups: list[dict[str, object]] | None = None,
+) -> str:
     lines = [
         "# Copilot Inventory",
         "",
@@ -92,6 +181,17 @@ def render_inventory_markdown(sections: dict[str, list[str]]) -> str:
         lines.append(f"## {section}")
         lines.append("")
         entries = sections.get(section, [])
+        if section == "Imported Skill Provenance" and provenance_groups is not None:
+            if provenance_groups:
+                for group in provenance_groups:
+                    lines.append(f"### {_format_provenance_heading(group)}")
+                    lines.append("")
+                    lines.extend(f"- `{path}`" for path in group["paths"])
+                    lines.append("")
+            else:
+                lines.append(EMPTY_MESSAGES[section])
+                lines.append("")
+            continue
         if entries:
             lines.extend(f"- `{entry}`" for entry in entries)
             if section == "Skills":
@@ -112,7 +212,10 @@ def render_inventory_markdown(sections: dict[str, list[str]]) -> str:
 
 
 def build_inventory_markdown(root: Path) -> str:
-    return render_inventory_markdown(collect_inventory_sections(root))
+    return render_inventory_markdown(
+        collect_inventory_sections(root),
+        _manifest_provenance_groups(root),
+    )
 
 
 def write_inventory(root: Path) -> Path:
