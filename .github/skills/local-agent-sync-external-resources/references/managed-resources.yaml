@@ -6,23 +6,24 @@ version: 1
 # managed-sources-summary:start
 # | source | repository | ref (sha) | tag | commit_date | skills |
 # |---|---|---|---|---|---|
-# | addyosmani-agent-skills | addyosmani/agent-skills | ff2df4c07e78 | - | 2026-07-24 | 2 |
-# | anthropic-skills | anthropics/skills | b29e7cf65e5c | - | 2026-07-24 | 4 |
+# | addyosmani-agent-skills | addyosmani/agent-skills | 84ee50673804 | 0.6.9 | 2026-09-04 | 2 |
+# | anthropic-skills | anthropics/skills | 41bbe19d1a1a | - | 2026-09-03 | 4 |
 # | antonbabenko-terraform-skill | antonbabenko/terraform-skill | 0a3a4a66e990 | - | 2026-07-03 | 1 |
-# | atlassian-mcp-server | atlassian/atlassian-mcp-server | f22e7075136a | - | 2026-07-08 | 1 |
-# | github-awesome-copilot | github/awesome-copilot | aa280f28b1b7 | - | 2026-07-24 | 10 |
+# | atlassian-mcp-server | atlassian/atlassian-mcp-server | 798f8138c976 | - | 2026-09-03 | 1 |
+# | github-awesome-copilot | github/awesome-copilot | f38fb6cf039b | - | 2026-09-07 | 10 |
 # | mattpocock-skills | mattpocock/skills | 6acc160e4e0c | v1.2.3 | 2026-08-06 | 25 |
-# | obra-superpowers | obra/superpowers | 3dcbd5c4b48e | - | 2026-07-24 | 13 |
-# | openai-skills-curated | openai/skills | 49f948faa925 | - | 2026-06-24 | 2 |
-# | openai-skills-retained-doc | openai/skills | 49f948faa925 | - | 2026-06-24 | 1 |
-# | sickn33-antigravity | sickn33/antigravity-awesome-skills | e66fc833f202 | - | 2026-07-24 | 7 |
-# | vercel-labs-skills | vercel-labs/skills | e173b8c88f25 | - | 2026-07-22 | 1 |
+# | obra-superpowers | obra/superpowers | b36e0829c6d0 | v6.3.0 | 2026-08-12 | 13 |
+# | openai-skills-curated | openai/skills | 49f948faa925 | - | 2026-06-23 | 2 |
+# | openai-skills-retained-doc | openai/skills | 49f948faa925 | - | 2026-06-23 | 1 |
+# | sickn33-antigravity | sickn33/antigravity-awesome-skills | b1aebac60a88 | v16.9.1 | 2026-09-06 | 7 |
+# | vercel-labs-skills | vercel-labs/skills | 1682051d48c3 | v1.5.24 | 2026-09-06 | 1 |
 # managed-sources-summary:end
 sources:
   addyosmani-agent-skills:
     repository: https://github.com/addyosmani/agent-skills.git
-    ref: ff2df4c07e7836a092ed28e1e9b42f4d6009280c
-    commit_date: 2026-07-24
+    ref: 84ee50673804b95c287d1e4eb4f1c1dad7c5188a
+    commit_date: 2026-09-04
+    advertised_ref: 0.6.9
     assets:
       - upstream: skills/code-simplification
         local: .github/skills/addyosmani-code-simplification
@@ -32,8 +33,8 @@ sources:
         canonical_name: addyosmani-code-review-and-quality
   anthropic-skills:
     repository: https://github.com/anthropics/skills.git
-    ref: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
-    commit_date: 2026-07-24
+    ref: 41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f
+    commit_date: 2026-09-03
     rewrite_skill_references: true
     ensure_python_shebangs: true
     assets:
@@ -59,16 +60,16 @@ sources:
         canonical_name: antonbabenko-terraform-skill
   atlassian-mcp-server:
     repository: https://github.com/atlassian/atlassian-mcp-server.git
-    ref: f22e7075136a62baa7c10200a64884f83bf3ebe1
-    commit_date: 2026-07-08
+    ref: 798f8138c976599aa91075f3fc0bb481c3818848
+    commit_date: 2026-09-03
     assets:
       - upstream: skills/search-company-knowledge
         local: .github/skills/search-company-knowledge
         canonical_name: search-company-knowledge
   github-awesome-copilot:
     repository: https://github.com/github/awesome-copilot.git
-    ref: aa280f28b1b73f9b6e6917b607eb92127b67b419
-    commit_date: 2026-07-24
+    ref: f38fb6cf039b835990d0f49dc161d7c2af99ef69
+    commit_date: 2026-09-07
     assets:
       - upstream: skills/agentic-eval
         local: .github/skills/awesome-copilot-agentic-eval
@@ -253,8 +254,9 @@ sources:
         canonical_name: mattpocock-writing-for-agents
   obra-superpowers:
     repository: https://github.com/obra/superpowers.git
-    ref: 3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9
-    commit_date: 2026-07-24
+    ref: b36e0829c6d0140e93cfef2ca599b1b07d4a7797
+    commit_date: 2026-08-12
+    advertised_ref: v6.3.0
     assets:
       - upstream: skills/brainstorming
         local: .github/skills/superpowers-brainstorming
@@ -304,7 +306,7 @@ sources:
   openai-skills-curated:
     repository: https://github.com/openai/skills.git
     ref: 49f948faa9258a0c61caceaf225e179651397431
-    commit_date: 2026-06-24
+    commit_date: 2026-06-23
     assets:
       - upstream: skills/.curated/gh-address-comments
         local: .github/skills/openai-gh-address-comments
@@ -315,15 +317,16 @@ sources:
   openai-skills-retained-doc:
     repository: https://github.com/openai/skills.git
     ref: 49f948faa9258a0c61caceaf225e179651397431
-    commit_date: 2026-06-24
+    commit_date: 2026-06-23
     assets:
       - upstream: skills/.curated/openai-docs
         local: .github/skills/openai-docs
         canonical_name: openai-docs
   sickn33-antigravity:
     repository: https://github.com/sickn33/antigravity-awesome-skills.git
-    ref: e66fc833f2022c3534ba74af835db14c34f9a732
-    commit_date: 2026-07-24
+    ref: b1aebac60a88dffa0f5723cb3816f22cc0af6b13
+    commit_date: 2026-09-06
+    advertised_ref: v16.9.1
     assets:
       - upstream: skills/api-design-principles
         local: .github/skills/antigravity-api-design-principles
@@ -348,8 +351,9 @@ sources:
         canonical_name: antigravity-network-engineer
   vercel-labs-skills:
     repository: https://github.com/vercel-labs/skills.git
-    ref: e173b8c88f2581cfdaa1b6767c6519a08155790e
-    commit_date: 2026-07-22
+    ref: 1682051d48c34f5eb135e6475c1a965dce05e820
+    commit_date: 2026-09-06
+    advertised_ref: v1.5.24
     assets:
       - upstream: skills/find-skills
         local: .github/skills/vercel-find-skills

@@ -180,12 +180,12 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Imported Skill Provenance
 
-### addyosmani/agent-skills — ref ff2df4c07e78 · 2026-07-24 · 2 skills
+### addyosmani/agent-skills — ref 84ee50673804 · tag 0.6.9 · 2026-09-04 · 2 skills
 
 - `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
 - `.github/skills/addyosmani-code-simplification/SKILL.md`
 
-### anthropics/skills — ref b29e7cf65e5c · 2026-07-24 · 4 skills
+### anthropics/skills — ref 41bbe19d1a1a · 2026-09-03 · 4 skills
 
 - `.github/skills/anthropic-docx/SKILL.md`
 - `.github/skills/anthropic-pdf/SKILL.md`
@@ -196,11 +196,11 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 - `.github/skills/antonbabenko-terraform-skill/SKILL.md`
 
-### atlassian/atlassian-mcp-server — ref f22e7075136a · 2026-07-08 · 1 skills
+### atlassian/atlassian-mcp-server — ref 798f8138c976 · 2026-09-03 · 1 skills
 
 - `.github/skills/search-company-knowledge/SKILL.md`
 
-### github/awesome-copilot — ref aa280f28b1b7 · 2026-07-24 · 10 skills
+### github/awesome-copilot — ref f38fb6cf039b · 2026-09-07 · 10 skills
 
 - `.github/skills/awesome-copilot-agentic-eval/SKILL.md`
 - `.github/skills/awesome-copilot-azure-devops-cli/SKILL.md`
@@ -241,7 +241,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/mattpocock-wizard/SKILL.md`
 - `.github/skills/mattpocock-writing-for-agents/SKILL.md`
 
-### obra/superpowers — ref 3dcbd5c4b48e · 2026-07-24 · 13 skills
+### obra/superpowers — ref b36e0829c6d0 · tag v6.3.0 · 2026-08-12 · 13 skills
 
 - `.github/skills/superpowers-brainstorming/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
@@ -257,16 +257,16 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/superpowers-verification-before-completion/SKILL.md`
 - `.github/skills/superpowers-writing-plans/SKILL.md`
 
-### openai/skills — ref 49f948faa925 · 2026-06-24 · 2 skills
+### openai/skills — ref 49f948faa925 · 2026-06-23 · 2 skills
 
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
 
-### openai/skills — ref 49f948faa925 · 2026-06-24 · 1 skills
+### openai/skills — ref 49f948faa925 · 2026-06-23 · 1 skills
 
 - `.github/skills/openai-docs/SKILL.md`
 
-### sickn33/antigravity-awesome-skills — ref e66fc833f202 · 2026-07-24 · 7 skills
+### sickn33/antigravity-awesome-skills — ref b1aebac60a88 · tag v16.9.1 · 2026-09-06 · 7 skills
 
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
@@ -276,7 +276,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/antigravity-kubernetes-architect/SKILL.md`
 - `.github/skills/antigravity-network-engineer/SKILL.md`
 
-### vercel-labs/skills — ref e173b8c88f25 · 2026-07-22 · 1 skills
+### vercel-labs/skills — ref 1682051d48c3 · tag v1.5.24 · 2026-09-06 · 1 skills
 
 - `.github/skills/vercel-find-skills/SKILL.md`
 
