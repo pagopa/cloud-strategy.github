@@ -7,10 +7,12 @@
   "ignores": [
     // Keep transient retained work out of markdownlint; dedicated contract tests cover tmp/superpowers artifacts.
     "tmp/**",
-    // Ignore the local script venv because it is generated tooling state, not repo-owned content.
-    ".github/scripts/.venv/**",
+    // Ignore the local tools venv because it is generated tooling state, not repo-owned content.
+    ".github/tools/.venv/**",
     // Ignore any generated virtual environment, including task-specific variants.
     "**/.venv*/**",
+    // Ignore generated skill-local runtime environments.
+    ".github/skills/**/.runtime/**",
     // Ignore temporary retained execution artifacts outside tmp/.
     ".superpowers/**",
     // Test fixtures are intentionally non-document-shaped markdown inputs.

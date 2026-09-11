@@ -4,6 +4,8 @@ description: Use this agent when a caller assigns one bounded brief/result task 
 tools: [read, search, web, edit, execute]
 model: GPT-5.6 Luna
 agents: []
+user-invocable: false
+disable-model-invocation: false
 ---
 
 # Luna Executor

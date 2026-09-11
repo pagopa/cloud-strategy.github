@@ -3,4 +3,4 @@ policy:
 interface:
   display_name: "internal-aws-mcp-research"
   short_description: "Current AWS documentation and IAM evidence"
-  default_prompt: "Use $internal-aws-mcp-research for this routed AWS research task."
+  default_prompt: "Use /internal-aws to route this AWS request, then apply $internal-aws-mcp-research for current AWS documentation, regional availability, service behavior, or IAM and policy-simulation evidence."

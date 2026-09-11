@@ -19,13 +19,15 @@ repository.
 | Category | Observed tooling |
 | --- | --- |
 | Sync logic | `.github/skills/local-sync-repos/scripts/sync_repos.py`, `.github/skills/local-sync-repos/scripts/sync_contract.py` |
-| Catalog generation | `.github/scripts/build_inventory.py`, inventory helpers in `.github/scripts/lib/`, and `./.github/scripts/run.sh build_inventory` |
-| Contract checks | `pytest` tests under `tests/`, plus validator subcommands through `run.sh` |
+| Catalog generation | `.github/tools/inventory/build-inventory.py` and `./.github/tools/run.sh build-inventory` |
+| Contract checks | `pytest` tests under `tests/` and `.github/skills/*/tests/`, plus validator subcommands through `.github/tools/run.sh` |
 | Linting and policy checks | Make targets such as `docs-lint`, `token-risks`, and catalog checks |
 
 ## Validation Surface
 
 - Python tests are the primary regression mechanism for sync and contract logic.
+- Skill-owned tests live under the owning `.github/skills/<skill>/tests/` bundle;
+  root `tests/` mirrors repository automation and owns cross-boundary contracts.
 - Script-level validators check catalog consistency and generated inventory.
 - Make targets provide standard execution entrypoints for maintainers.
 

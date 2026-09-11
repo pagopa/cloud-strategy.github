@@ -1,4 +1,4 @@
 interface:
   display_name: "internal-copilot-audit"
-  short_description: "Help with Internal Copilot Audit tasks"
-  default_prompt: "Use $internal-copilot-audit for this task and follow the repository-owned workflow in the skill."
+  short_description: "Audit repository-owned Copilot assets"
+  default_prompt: "Use $internal-copilot-audit to audit repository-owned Copilot assets under .github/ for overlap, hollow references, stale contracts, naming drift, and governance drift."

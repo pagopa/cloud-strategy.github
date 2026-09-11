@@ -32,3 +32,11 @@ Keep diagrams small and directly tied to current repository evidence.
 - Update the smallest valid document when repository evidence changes.
 - Keep unknown facts explicit as `Unknown / To verify`.
 - Link to canonical owners instead of duplicating binding policy.
+
+## Validation
+
+Run `make docs-lint` to validate repository Markdown.
+
+No diagram is provided because this README routes readers among knowledge
+documents; repository-wide component and flow relationships belong in
+[architecture.md](architecture.md).

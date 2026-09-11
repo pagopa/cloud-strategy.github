@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: mattpocock-improve-codebase-architecture
 description: Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
 ---
@@ -23,7 +24,7 @@ This command is _informed_ by the project's domain model and built on a shared d
 
 Read the project's domain glossary (`CONTEXT.md`) and any ADRs in the area you're touching first.
 
-Then use the Agent tool with `subagent_type=Explore` to walk the codebase. Don't follow rigid heuristics — explore organically and note where you experience friction:
+Then spawn a sub-agent to walk the codebase. Don't follow rigid heuristics — explore organically and note where you experience friction:
 
 - Where does understanding one concept require bouncing between many small modules?
 - Where are modules **shallow** — interface nearly as complex as the implementation?
@@ -80,12 +81,3 @@ instructions.
     diagrams, analysis, working state, and supporting files inside it.
 - Do not create codebase-improvement artifacts outside the active workspace.
 <!-- local-sync:codebase-improve-workspace:end -->
-
-<!-- local-sync:mattpocock-git-autonomy:start -->
-## Local Git-autonomy contract
-
-- Keep completed changes in the working tree for user review.
-- You may stage only changes owned by the current task when staging helps inspect the exact diff.
-- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
-- Keep pre-existing or unrelated user changes out of the index.
-<!-- local-sync:mattpocock-git-autonomy:end -->

@@ -131,7 +131,7 @@ kept clear without a new reusable owner, stop and surface that boundary.
 ## Authoring Workflow
 
 1. Run a proportional requirements gate.
-   Resolve purpose, route, inputs, actions, invocation boundary, risk, output, and validation. Ask only questions that materially change the contract.
+   Resolve purpose, route, inputs, actions, invocation boundary, risk, output, and validation. Route every question that materially changes the contract through `/grill-me`; do not ask material questions in an ad-hoc route.
 2. Define the operating role and stance in one sentence.
    Translate persona language into observable behavior. Do not invent credentials or prestige.
 3. Validate a new name and target path.

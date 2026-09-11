@@ -57,6 +57,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/awesome-copilot-security-review/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
+- `.github/skills/grilling/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-lambda/SKILL.md`
@@ -103,6 +104,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`
 - `.github/skills/internal-java/SKILL.md`
 - `.github/skills/internal-json/SKILL.md`
+- `.github/skills/internal-knowledge/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-kubernetes/SKILL.md`
 - `.github/skills/internal-lesson-codification/SKILL.md`
@@ -130,22 +132,29 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
 - `.github/skills/local-copilot-log-analyzer/SKILL.md`
 - `.github/skills/local-sync-repos/SKILL.md`
+- `.github/skills/mattpocock-ask-matt/SKILL.md`
 - `.github/skills/mattpocock-code-review/SKILL.md`
 - `.github/skills/mattpocock-codebase-design/SKILL.md`
+- `.github/skills/mattpocock-diagnosing-bugs/SKILL.md`
 - `.github/skills/mattpocock-domain-modeling/SKILL.md`
 - `.github/skills/mattpocock-grill-with-docs/SKILL.md`
 - `.github/skills/mattpocock-handoff/SKILL.md`
 - `.github/skills/mattpocock-implement/SKILL.md`
 - `.github/skills/mattpocock-improve-codebase-architecture/SKILL.md`
+- `.github/skills/mattpocock-prototype/SKILL.md`
 - `.github/skills/mattpocock-research/SKILL.md`
+- `.github/skills/mattpocock-resolving-merge-conflicts/SKILL.md`
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`
 - `.github/skills/mattpocock-teach/SKILL.md`
+- `.github/skills/mattpocock-to-questionnaire/SKILL.md`
 - `.github/skills/mattpocock-to-spec/SKILL.md`
 - `.github/skills/mattpocock-to-tickets/SKILL.md`
 - `.github/skills/mattpocock-triage/SKILL.md`
+- `.github/skills/mattpocock-wait-what/SKILL.md`
 - `.github/skills/mattpocock-wayfinder/SKILL.md`
-- `.github/skills/mattpocock-writing-great-skills/SKILL.md`
+- `.github/skills/mattpocock-wizard/SKILL.md`
+- `.github/skills/mattpocock-writing-for-agents/SKILL.md`
 - `.github/skills/openai-docs/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
@@ -169,30 +178,113 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 These vendor-prefixed imported document skills remain support-only depth for repositories that explicitly need document workflows.
 
+## Imported Skill Provenance
+
+### addyosmani/agent-skills — ref 84ee50673804 · tag 0.6.9 · 2026-09-04 · 2 skills
+
+- `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
+- `.github/skills/addyosmani-code-simplification/SKILL.md`
+
+### anthropics/skills — ref 41bbe19d1a1a · 2026-09-03 · 4 skills
+
+- `.github/skills/anthropic-docx/SKILL.md`
+- `.github/skills/anthropic-pdf/SKILL.md`
+- `.github/skills/anthropic-pptx/SKILL.md`
+- `.github/skills/anthropic-xlsx/SKILL.md`
+
+### antonbabenko/terraform-skill — ref 0a3a4a66e990 · 2026-07-03 · 1 skills
+
+- `.github/skills/antonbabenko-terraform-skill/SKILL.md`
+
+### atlassian/atlassian-mcp-server — ref 798f8138c976 · 2026-09-03 · 1 skills
+
+- `.github/skills/search-company-knowledge/SKILL.md`
+
+### github/awesome-copilot — ref f38fb6cf039b · 2026-09-07 · 10 skills
+
+- `.github/skills/awesome-copilot-agentic-eval/SKILL.md`
+- `.github/skills/awesome-copilot-azure-devops-cli/SKILL.md`
+- `.github/skills/awesome-copilot-azure-pricing/SKILL.md`
+- `.github/skills/awesome-copilot-azure-resource-health-diagnose/SKILL.md`
+- `.github/skills/awesome-copilot-azure-role-selector/SKILL.md`
+- `.github/skills/awesome-copilot-cloud-design-patterns/SKILL.md`
+- `.github/skills/awesome-copilot-codeql/SKILL.md`
+- `.github/skills/awesome-copilot-dependabot/SKILL.md`
+- `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
+- `.github/skills/awesome-copilot-security-review/SKILL.md`
+
+### mattpocock/skills — ref 6acc160e4e0c · tag v1.2.3 · 2026-08-06 · 25 skills
+
+- `.github/skills/grill-me/SKILL.md`
+- `.github/skills/grilling/SKILL.md`
+- `.github/skills/mattpocock-ask-matt/SKILL.md`
+- `.github/skills/mattpocock-code-review/SKILL.md`
+- `.github/skills/mattpocock-codebase-design/SKILL.md`
+- `.github/skills/mattpocock-diagnosing-bugs/SKILL.md`
+- `.github/skills/mattpocock-domain-modeling/SKILL.md`
+- `.github/skills/mattpocock-grill-with-docs/SKILL.md`
+- `.github/skills/mattpocock-handoff/SKILL.md`
+- `.github/skills/mattpocock-implement/SKILL.md`
+- `.github/skills/mattpocock-improve-codebase-architecture/SKILL.md`
+- `.github/skills/mattpocock-prototype/SKILL.md`
+- `.github/skills/mattpocock-research/SKILL.md`
+- `.github/skills/mattpocock-resolving-merge-conflicts/SKILL.md`
+- `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
+- `.github/skills/mattpocock-tdd/SKILL.md`
+- `.github/skills/mattpocock-teach/SKILL.md`
+- `.github/skills/mattpocock-to-questionnaire/SKILL.md`
+- `.github/skills/mattpocock-to-spec/SKILL.md`
+- `.github/skills/mattpocock-to-tickets/SKILL.md`
+- `.github/skills/mattpocock-triage/SKILL.md`
+- `.github/skills/mattpocock-wait-what/SKILL.md`
+- `.github/skills/mattpocock-wayfinder/SKILL.md`
+- `.github/skills/mattpocock-wizard/SKILL.md`
+- `.github/skills/mattpocock-writing-for-agents/SKILL.md`
+
+### obra/superpowers — ref b36e0829c6d0 · tag v6.3.0 · 2026-08-12 · 13 skills
+
+- `.github/skills/superpowers-brainstorming/SKILL.md`
+- `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
+- `.github/skills/superpowers-executing-plans/SKILL.md`
+- `.github/skills/superpowers-finishing-a-development-branch/SKILL.md`
+- `.github/skills/superpowers-receiving-code-review/SKILL.md`
+- `.github/skills/superpowers-requesting-code-review/SKILL.md`
+- `.github/skills/superpowers-subagent-driven-development/SKILL.md`
+- `.github/skills/superpowers-systematic-debugging/SKILL.md`
+- `.github/skills/superpowers-test-driven-development/SKILL.md`
+- `.github/skills/superpowers-using-git-worktrees/SKILL.md`
+- `.github/skills/superpowers-using-superpowers/SKILL.md`
+- `.github/skills/superpowers-verification-before-completion/SKILL.md`
+- `.github/skills/superpowers-writing-plans/SKILL.md`
+
+### openai/skills — ref 49f948faa925 · 2026-06-23 · 2 skills
+
+- `.github/skills/openai-gh-address-comments/SKILL.md`
+- `.github/skills/openai-gh-fix-ci/SKILL.md`
+
+### openai/skills — ref 49f948faa925 · 2026-06-23 · 1 skills
+
+- `.github/skills/openai-docs/SKILL.md`
+
+### sickn33/antigravity-awesome-skills — ref b1aebac60a88 · tag v16.9.1 · 2026-09-06 · 7 skills
+
+- `.github/skills/antigravity-api-design-principles/SKILL.md`
+- `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
+- `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
+- `.github/skills/antigravity-golang-pro/SKILL.md`
+- `.github/skills/antigravity-grafana-dashboards/SKILL.md`
+- `.github/skills/antigravity-kubernetes-architect/SKILL.md`
+- `.github/skills/antigravity-network-engineer/SKILL.md`
+
+### vercel-labs/skills — ref 1682051d48c3 · tag v1.5.24 · 2026-09-06 · 1 skills
+
+- `.github/skills/vercel-find-skills/SKILL.md`
+
 ## Scripts
 
-- `.github/scripts/audit_copilot_catalog.py`
-- `.github/scripts/benchmark_skill_tokens.py`
-- `.github/scripts/build_inventory.py`
-- `.github/scripts/check_catalog_consistency.py`
-- `.github/scripts/detect_token_risks.py`
-- `.github/scripts/github_catalog_validation.py`
+- `.github/scripts/benchmark-skill-tokens.py`
 - `.github/scripts/graphify-file-change-hook.sh`
 - `.github/scripts/install-graphify-hooks.sh`
-- `.github/scripts/lib/catalog_checks.py`
-- `.github/scripts/lib/cli_runner.py`
-- `.github/scripts/lib/fingerprinting.py`
-- `.github/scripts/lib/internal_skills.py`
-- `.github/scripts/lib/inventory.py`
-- `.github/scripts/lib/jsonc.py`
-- `.github/scripts/lib/repo_paths.py`
-- `.github/scripts/lib/shared.py`
-- `.github/scripts/lib/skill_change_scope.py`
-- `.github/scripts/lib/sync_exclusions.py`
-- `.github/scripts/lib/token_risks.py`
-- `.github/scripts/run.sh`
-- `.github/scripts/validate_internal_skills.py`
-- `.github/scripts/validate_skill_change_scope.py`
 
 ## Agents
 

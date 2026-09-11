@@ -1,6 +1,6 @@
 ---
 name: internal-markitdown
-description: Use when converting any file, URL, or YouTube video to Markdown with markitdown, when a YouTube transcript is requested, or when markitdown extras or plugins are mentioned.
+description: Use when converting any file, URL, or YouTube video to Markdown with markitdown, when a YouTube transcript is requested, or when markitdown extras or plugins are mentioned. Route Markdown structure, fence, or link review to /internal-markdown, and workbook or tabular data integrity to /internal-excel.
 ---
 
 # Internal Markitdown
@@ -57,5 +57,3 @@ Two installs coexist; name the install target before debugging.
 
 - Confirm the output file exists and contains the expected section anchors
   (for YouTube: `### Transcript`).
-- Run `python3 .github/scripts/validate_internal_skills.py --skill internal-markitdown --strict`
-  after editing this bundle.

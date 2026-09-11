@@ -42,11 +42,12 @@ linter-owned diagnostics to the configured tooling.
 - Keep reusable logic explicit about its inputs. Put environment-specific and
   operator-tuned values at a configuration or composition boundary rather than
   scattering them through implementation code.
-- Place a Python test under repository-root `tests/` when it verifies Python
-  behavior or a real observable external contract such as CLI, subprocess,
-  filesystem, protocol, JSON, or wrapper behavior. Reading another
-  technology's source or configuration alone does not establish a Python test
-  boundary.
+- Place a Python test under `.github/skills/<skill>/tests/` when it verifies
+  that skill bundle's Python behavior or a real observable contract such as a
+  CLI, subprocess, filesystem, protocol, JSON, or wrapper. Place it under
+  repository-root `tests/` when it verifies shared or cross-boundary behavior.
+  Reading another technology's source or configuration alone does not
+  establish a Python test boundary.
 - Baseline dependency and output rules are owned by the selected owner.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback
   dependency mirrors.

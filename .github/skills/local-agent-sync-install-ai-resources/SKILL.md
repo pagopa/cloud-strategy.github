@@ -7,7 +7,7 @@ description: Use when planning, auditing, or applying repository-owned AI resour
 
 ## Referenced skills
 
-- None.
+- internal-knowledge
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 The repository is the only source of truth for managed resources. Home is a
@@ -48,7 +48,7 @@ Use `scripts/run.sh`.
 | Readiness check | `doctor --targets skills` |
 
 `dry-run` is an alias for `plan`. The repository dispatcher
-`./.github/scripts/run.sh sync_home_ai_resources ...` remains a delegating
+`./.github/tools/run.sh sync_home_ai_resources ...` remains a delegating
 compatibility entrypoint.
 
 When the user calls this skill with an `agents.md` request, `agents.md` means `sync --targets agents.md`.
@@ -93,10 +93,14 @@ Accept `agents-md` as a CLI alias for the same target.
 - `sync` may auto-apply clean repository-to-home work, including `agents.md`.
   It stops for blockers,
   missing-directory approval, or copied-agent prune gates.
-- `plan` and `audit` are read-only.
+- `plan` and `audit` do not materialize or modify managed runtime resources.
+  They persist their snapshot and lock under the home sync state root, so they
+  are not free of filesystem writes.
 - `apply` needs an explicit request; `--create-missing-dirs` and
   `--prune-managed` remain explicit.
-- `doctor` is read-only and checks roots, support, catalog sources, and state.
+- `doctor` checks roots, support, catalog sources, and state without modifying
+  managed runtime resources. It persists its snapshot and lock under the home
+  sync state root.
 
 ## Reporting
 
@@ -118,7 +122,7 @@ action; see `references/error-codes.md`.
 ## Validation
 
 - Run focused tests under
-  `tests/github/skills/local-agent-sync-install-ai-resources/scripts`.
-- Run `bash -n scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
-- Rebuild `.github/INVENTORY.md` with `./.github/scripts/run.sh build_inventory --root .` after bundle changes.
-- Run `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks` after bundle or automation changes.
+  `.github/skills/local-agent-sync-install-ai-resources/tests/scripts`.
+- Run `bash -n scripts/run.sh .github/tools/run.sh` after shell entrypoint changes.
+- Rebuild `.github/INVENTORY.md` with `./.github/tools/run.sh build-inventory --root .` after bundle changes.
+- Run `./.github/tools/run.sh validate-catalog --root . --include-token-risks` after bundle or automation changes.

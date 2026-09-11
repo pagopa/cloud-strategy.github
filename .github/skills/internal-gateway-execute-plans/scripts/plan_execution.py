@@ -25,6 +25,9 @@ class Finding:
     severity: Literal["blocking", "notice"] = "blocking"
 
 
+COMPACT_MESSAGE_LIMIT = 160
+
+
 VerdictOutcome = Literal["passed", "failed", "inconclusive"]
 VERDICT_CATEGORIES = (
     "structure",
@@ -505,6 +508,18 @@ def _remember_unique(
     seen.add(value)
 
 
+def _fence_surrounding_condition(body: str) -> str:
+    opening = re.search(r"(?m)^[ \t]*```json[ \t]*$", body)
+    outside = body
+    if opening:
+        closing = re.search(r"(?m)^[ \t]*```[ \t]*$", body[opening.end():])
+        if closing:
+            outside = body[: opening.start()] + body[opening.end() + closing.end():]
+    if re.search(r"(?m)^\s*-{3,}\s*$", outside):
+        return "found a `---` Markdown separator; remove the separator"
+    return "found surrounding prose or a second fence; remove it"
+
+
 def _manifest_fenced_object(text: str, heading: str) -> Mapping[str, object]:
     matches = list(re.finditer(rf"(?m)^## {re.escape(heading)}\s*$", text))
     if not matches:
@@ -524,7 +539,8 @@ def _manifest_fenced_object(text: str, heading: str) -> Mapping[str, object]:
     if not fenced:
         raise ExecutionContractError(
             "malformed-execution-manifest",
-            f"{heading} must contain exactly one immediately contained ```json fenced object",
+            f"{heading} must contain exactly one immediately contained ```json fence; "
+            f"{_fence_surrounding_condition(body)} so the fence is the only section content",
         )
     try:
         raw = json.loads(fenced.group(1), object_pairs_hook=_reject_duplicate_json_fields)
@@ -617,7 +633,13 @@ def _validate_targets(value: object) -> None:
 
 
 def _validate_controls(value: object) -> None:
-    controls = _manifest_object(value, "controls")
+    if not isinstance(value, Mapping):
+        raise ExecutionContractError(
+            "malformed-execution-manifest",
+            "controls must be a JSON object mapping Control Inventory IDs to "
+            '{"class", "owner", "binding"} entries; an array is rejected',
+        )
+    controls = value
     if not controls:
         raise ValueError("controls must not be empty")
     for control_id, raw_control in controls.items():
@@ -2034,12 +2056,22 @@ def _validate_plan(
     if not (TASK_HEADING_RE.search(text) or UNCHECKED_TASK_RE.search(text)):
         findings.append(Finding("missing-task", "Plan must contain at least one task heading"))
     if not re.search(r"(?m)^## Execution Manifest\s*$", text):
-        findings.append(
-            Finding(
-                "missing-execution-manifest",
-                "Current plans must contain exactly one ## Execution Manifest",
+        variant = re.search(r"(?im)^##\s*Execution Manifest\b[^\n]*$", text)
+        if variant:
+            findings.append(
+                Finding(
+                    "missing-execution-manifest",
+                    "Plan must use the exact heading `## Execution Manifest`; "
+                    f"found `{variant.group(0).strip()}` with a suffix",
+                )
             )
-        )
+        else:
+            findings.append(
+                Finding(
+                    "missing-execution-manifest",
+                    "Current plans must contain exactly one ## Execution Manifest",
+                )
+            )
     else:
         if snapshot is None:
             try:
@@ -2104,6 +2136,12 @@ def validate_state(
     )
 
 
+def _bounded_message(message: str) -> str:
+    if len(message) <= COMPACT_MESSAGE_LIMIT:
+        return message
+    return message[: COMPACT_MESSAGE_LIMIT - 3] + "..."
+
+
 def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
     blocking = [item for item in findings if item.severity == "blocking"]
     notices = [item for item in findings if item.severity == "notice"]
@@ -2115,7 +2153,11 @@ def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
             "notice": len(notices),
         },
         "finding_sample": [
-            {"code": item.code, "severity": item.severity}
+            {
+                "code": item.code,
+                "severity": item.severity,
+                "message": _bounded_message(item.message),
+            }
             for item in findings[:10]
         ],
         "next_action": (

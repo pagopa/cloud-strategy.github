@@ -33,8 +33,8 @@ The same recovery record also carries the gate and menu projection:
 - `global_gates`: exactly `GRILL-ME` and `CRITICAL REVIEW`;
 - `grill_me`: the post-setup gate event, eligible decision IDs, question IDs,
   route owner, and any repeat-round eligibility evidence;
-- `critical_review`: `pending` or `completed`, its exactly three lens records,
-  lateral lens type, classified findings, conclusion, and explicit
+- `critical_review`: `pending` or `completed`, its at least three lens records
+  with a lateral third lens, classified findings, conclusion, and explicit
   disposition state;
 - `gate_override`: absent unless one named action is explicitly recorded as
   `accepted-risk`, with all other gates preserved;
@@ -67,12 +67,15 @@ acceptance conditions, and residual risks. It must also preserve the gate
 state, menu locks, finding classifications, and any named-action
 `accepted-risk` override. This keeps planning replay lossless without the
 transcript. Do not create a separate critical report or transcript and do not
-save twice as separate artifacts. A `+ plan` acceptance action uses
-the single retained plan path locked by `/internal-gateway-writing-plans`;
-this gateway does not create or structure that plan directly.
+save twice as separate analysis artifacts. A verified `+ spec` artifact records
+`plan_authoring_ready: true`. A later `+ plan` acceptance uses the retained
+spec as its source and the single plan path locked by
+`/internal-gateway-writing-plans`; this gateway does not create or structure
+that plan directly.
 
-After `+ spec` acceptance, state that implementation-oriented design, planning,
-and execution remain separate explicitly requested actions. After `+ plan`
-acceptance, state that execution remains a separate action requiring explicit
-approval. In both cases, do not invoke execution or imply that artifact
+After `+ spec` acceptance, state that the verified artifact is plan-ready and
+that plan authoring remains available through a later explicit `+ plan`
+selection. `Implementation permission: false` is not a plan-writing blocker.
+After `+ plan` acceptance, state that execution remains a separate action
+requiring explicit approval. Do not invoke execution or imply that artifact
 acceptance authorizes it.

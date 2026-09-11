@@ -19,11 +19,18 @@ interface:
     authority before live external operations, use a safe local fallback when
     available, and stop fail-closed otherwise. Close out with one canonical
     ledger and fresh focused plus broader evidence, without numeric thresholds.
-    Inspect local evidence first, use /grill-me only for one unrecoverable
-    material fact, and run /internal-gateway-critical-master before non-trivial
+    Inspect local evidence first; when a material fact cannot be recovered
+    locally, run a bounded /grill-me interview and keep it to the facts that
+    unblock the route. Run
+    /internal-gateway-critical-master before non-trivial
     action. Allow one evidence-backed reformulation and re-critique when new
-    evidence changes a rejected plan. Classify prompt or skill-only edits as
-    validation-only under /internal-tdd. Load
+    evidence changes a rejected plan. Downgrade non-trivial to trivial only
+    when a deterministic local validator exists, no contract or consumer
+    changes, and the rationale is recorded; always report the downgrade and
+    confirm with the user first when any contract or consumer is touched.
+    Under /internal-tdd record exactly one posture per task and use the owning
+    format's native validator as the seam where one exists; reserve
+    validation-only for tasks with no useful executable or evaluable seam. Load
     /addyosmani-code-simplification only for explicit simplification work.
     After the caller locks value, scope, authority, objective, expected output,
     acceptance, and validation, it may invoke internal-luna-executor through
@@ -39,5 +46,6 @@ interface:
     record a caller-owned LifecycleRecord and do not fabricate a WorkerResult
     or VerificationReceipt; local fallback starts a new authorized route. Stop
     with the exact
-    violated condition, evidence, and required next decision. Use
+    violated condition, evidence, and required next decision. Report Outcome,
+    Changed, Checks, Risks, and Next in that order. Use
     /superpowers-verification-before-completion before positive claims.

@@ -13,7 +13,7 @@
   "evidence": [
     {
       "acceptance_id": "A1",
-      "ref": "tests/github/skills/internal-skill-creator/test_delegation_fixtures.py::test_valid_creator_result_binds_artifact_acceptance_and_progress",
+      "ref": ".github/skills/internal-skill-creator/tests/test_delegation_fixtures.py::test_valid_creator_result_binds_artifact_acceptance_and_progress",
       "outcome": "pass"
     }
   ],

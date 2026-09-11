@@ -16,6 +16,7 @@ the declared review engine.
   deliverable: GitHub Actions contributor observations
   evidence: target and linked static evidence
   ```
+
 - The envelope fields are the caller-owned contract. The caller selects and
   invokes the specialist; the specialist returns exactly the contributor
   record schema defined here. Invoke neither contributor for unrelated code.

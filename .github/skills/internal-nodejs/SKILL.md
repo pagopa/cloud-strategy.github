@@ -1,6 +1,6 @@
 ---
 name: internal-nodejs
-description: Use when reviewing localized JavaScript or TypeScript changes, changing Node.js package metadata, runtime configuration, dependencies, or editing a single module within established application boundaries.
+description: Use when reviewing localized JavaScript or TypeScript changes, changing Node.js package metadata, runtime configuration, dependencies, or editing a single module within established application boundaries. Route application or service structure, adapters, and cross-module behavior to /internal-nodejs-project.
 ---
 
 # Internal Node.js

@@ -5,9 +5,13 @@ interface:
     Use /internal-gateway-writing-plans after approval to capture the target,
     anti-scope, nearest owner, validation path, stop conditions, and observable
     acceptance. A user-accepted Consolidated Analysis Spec supplied by
-    /internal-gateway-idea permits writing only when the user explicitly
-    requests it; direct invocation requires explicit user approval, and neither
-    path permits execution or status creation. Build
+    /internal-gateway-idea with plan_authoring_ready true, combined with the
+    user's later explicit +plan selection, supplies source readiness and the
+    current plan-writing request; continue without another discovery or
+    approval round and do not treat implementation_permission false as a
+    plan-authoring block. Direct
+    invocation still requires explicit user approval, and neither path permits
+    execution or status creation. Build
     a control inventory that classifies every task,
     acceptance criterion, and declared obligation exactly once; map local and
     runtime controls to required validations and external, authority, or human
@@ -23,7 +27,15 @@ interface:
     approval metadata, bootstrap metadata, and handoff. Load the bundle-local
     references/manifest-v3.md only for Manifest authoring or review; use its
     exact top-level and nested fields, use validations[].pass_signal, and make every task reference
-    resolve to an existing manifest ID. New writer output uses
+    resolve to an existing manifest ID. Use the exact ## Execution Manifest
+    heading text with no suffix and one fenced JSON code block inside that
+    section; bind one ## Task N: heading per task numbered in manifest order
+    with ids T1 through T<N>; keep Control Inventory IDs bijective with the
+    manifest.controls map; and use the exact canonical handoff.requires
+    strings human approval, exact Manifest v3 review, and zero blocking
+    preflight findings. Gate any ready or handoff claim on a fresh physical
+    executor preflight against the exact final plan bytes with zero blocking
+    findings; a prose assertion never substitutes for that result. New writer output uses
     bootstrap.mode: manifest-only and emits no legacy ## Execution Contract;
     the current migration plan is the sole exact compatibility projection.
     Require
@@ -33,8 +45,11 @@ interface:
     universal test language or layout.
     Require an explicit - No Git mutation. bullet in ## Global Constraints.
     Do not predict runtime candidates or weaken a requirement into a manual
-    attestation. Resolve the loaded executor bundle and run its scripts/run.sh
-    preflight as the sole mechanical validator. After eligibility, the control
+    attestation. After every manifest-affecting edit, run the writer-owned
+    scripts/check_plan_structure.py structural check with zero blocking
+    findings, then resolve the loaded executor bundle and run its
+    scripts/run.sh preflight as the sole mechanical validator on the exact
+    final plan bytes before any ready or handoff claim. After eligibility, the control
     inventory, plan structure, locked decisions, and acceptance are complete,
     default to local authoring with delegation.mode: none, worker:
     primary-owner, and result: not_applicable, without a delegation brief,

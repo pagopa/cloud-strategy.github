@@ -12,23 +12,25 @@ If any of these files don't exist, **proceed silently**. Don't flag their absenc
 
 ## File structure
 
-This repository uses the single-context layout:
+This repository uses the multi-context layout:
 
 ```text
 /
-├── CONTEXT.md
+├── CONTEXT-MAP.md
 ├── docs/adr/
-│   ├── 0001-example-decision.md
-│   └── 0002-another-decision.md
-└── src/
+│   ├── 0001-terraform-skill-routing-boundaries.md
+│   └── 0002-knowledge-domain-layout.md
+└── docs/domain/
+    |-- catalog-governance/CONTEXT.md
+    `-- source-synchronization/CONTEXT.md
 ```
 
 ## Use the glossary's vocabulary
 
-When output names a domain concept, use the term defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
+When output names a domain concept, use the term defined in the relevant domain `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
 
-If a concept isn't present in the glossary, reconsider whether the term belongs to the project or note the genuine documentation gap.
+If a concept isn't present in the relevant glossary, reconsider whether the term belongs to the project or note the genuine documentation gap.
 
 ## Flag ADR conflicts
 
-If output contradicts an existing ADR, surface the conflict explicitly rather than silently overriding it.
+If output contradicts an existing ADR, surface the conflict explicitly rather than silently overriding it. Read the relevant domain glossary and `docs/adr/` records before structural changes.
