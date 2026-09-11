@@ -8,6 +8,12 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-09-11
+
+- Hardened `.github/skills/internal-gateway-writing-plans/` and `.github/skills/internal-gateway-execute-plans/` against the post-mortem plan-generation defects: the writer checker and the executor parser now emit separator-aware and prose-aware manifest-fence messages with removal hints and bounded 160-character compact finding messages.
+- Added the manifest-section hygiene rule, the canonical complete 16-field manifest skeleton with canonical nested values, and the ordered evidence-gate command checklist carrying the literal tokens `structure=passed(0 blocking)` and `execution=passed(0 blocking)` to both `references/manifest-v3.md` files, enforced by full post-preamble reference equality.
+- Pinned the post-mortem mutations (`manifest-separator-after-fence`, `partial-manifest-missing-fields`) in the writer regression corpus and added `tests/internal_gateway/test_bundle_alignment.py` with the skeleton parser pin and the differential parity harness for structural mutations.
+
 ## 2026-08-12
 
 - Narrowed `.github/skills/internal-tf/` to language-only structure guidance, moved cross-platform provider lockfile evidence and executable import-safe guards to `.github/skills/internal-terraform/references/operational-validation.md`, and preserved the wrapper as the fail-safe primary for mixed and operational work.

@@ -166,9 +166,14 @@ def test_gateway_normative_manifest_contracts_remain_equal() -> None:
         encoding="utf-8"
     )
     writer = (BUNDLE / "references/manifest-v3.md").read_text(encoding="utf-8")
+    contract_heading = "## Top-Level Contract"
 
     assert _normalized_manifest_contract(executor) == _normalized_manifest_contract(
         writer
+    )
+    assert (
+        executor[executor.index(contract_heading) :]
+        == writer[writer.index(contract_heading) :]
     )
 
 
@@ -557,6 +562,53 @@ def test_structural_check_never_imports_executor_private_code() -> None:
     assert "internal-gateway-execute-plans/scripts" not in source
 
 
+def _first_blocking_message(payload: dict[str, object]) -> str:
+    sample = payload["finding_sample"]
+    blocking = [item for item in sample if item["severity"] == "blocking"]
+    assert blocking
+    message = blocking[0]["message"]
+    assert isinstance(message, str)
+    return message
+
+
+def test_compact_message_names_manifest_separator_and_removal_hint(
+    tmp_path: Path,
+) -> None:
+    text = WRITER_FIXTURE.read_text(encoding="utf-8")
+    mutated = text.replace(
+        "\n```\n\n## Repository Preflight",
+        "\n```\n\n---\n\n## Repository Preflight",
+        1,
+    )
+    assert mutated != text
+    staged = _stage_plan(tmp_path, mutated)
+
+    result = _run_checker(staged)
+
+    assert result.returncode != 0
+    message = _first_blocking_message(json.loads(result.stdout))
+    assert len(message) <= 160
+    assert "separator" in message.lower() or "prose" in message.lower()
+    assert "remove" in message.lower()
+
+
+def test_compact_message_names_missing_manifest_fields(tmp_path: Path) -> None:
+    missing = ("manifest_version", "repository_root", "validations")
+    text = _rewrite_manifest(
+        WRITER_FIXTURE.read_text(encoding="utf-8"),
+        lambda manifest: [manifest.pop(field) for field in missing],
+    )
+    staged = _stage_plan(tmp_path, text)
+
+    result = _run_checker(staged)
+
+    assert result.returncode != 0
+    message = _first_blocking_message(json.loads(result.stdout))
+    assert len(message) <= 160
+    for field in missing:
+        assert field in message
+
+
 def _rewrite_manifest(text: str, mutate) -> str:
     match = re.search(
         r"(?ms)^## Execution Manifest\s*\n\s*```json\s*\n(.*?)\n```\s*$",
@@ -705,6 +757,28 @@ PRODUCER_FAILURE_MODES = (
         ),
         "malformed-execution-manifest",
         "malformed-execution-manifest",
+    ),
+    (
+        "manifest-separator-after-fence",
+        lambda text: text.replace(
+            "\n```\n\n## Repository Preflight",
+            "\n```\n\n---\n\n## Repository Preflight",
+            1,
+        ),
+        "malformed-execution-manifest",
+        "malformed-execution-manifest",
+    ),
+    (
+        "partial-manifest-missing-fields",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: [
+                manifest.pop(key)
+                for key in ("manifest_version", "repository_root", "validations")
+            ],
+        ),
+        "missing-manifest-field",
+        "missing-manifest-field",
     ),
 )
 

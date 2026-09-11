@@ -522,6 +522,34 @@ def test_compact_output_is_bounded() -> None:
     )
 
 
+def test_preflight_separator_after_manifest_fence_names_condition(
+    tmp_path: Path,
+) -> None:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    mutated = text.replace(
+        "\n```\n\n## Valid DONE_WITH_WARNINGS Status",
+        "\n```\n\n---\n\n## Valid DONE_WITH_WARNINGS Status",
+        1,
+    )
+    assert mutated != text
+    plan = _stage_valid_plan(tmp_path, mutated)
+
+    findings = validate_plan(plan, tmp_path)
+
+    finding = next(
+        item for item in findings if item.code == "malformed-execution-manifest"
+    )
+    assert "separator" in finding.message.lower() or "prose" in finding.message.lower()
+    assert "remove" in finding.message.lower()
+
+    payload = build_compact_payload(findings)
+    blocking = [
+        item for item in payload["finding_sample"] if item["severity"] == "blocking"
+    ]
+    assert blocking
+    assert all(len(item["message"]) <= 160 for item in blocking)
+
+
 def test_preflight_cli_valid_fixture(tmp_path: Path) -> None:
     plan = _stage_valid_plan(tmp_path)
     result = subprocess.run(

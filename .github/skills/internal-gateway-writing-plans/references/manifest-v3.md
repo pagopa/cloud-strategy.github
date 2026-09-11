@@ -99,9 +99,11 @@ manifest-only plan has no `## Execution Contract`.
   contains the four bold bullets `- **Baseline Validation:**`,
   `- **Recovery Policy:**`, `- **Escalation Conditions:**`, and
   `- **User-Facing Report:**`, each with a concrete value.
-- The `## Execution Manifest` heading text is exact with no version suffix;
-  its section body is exactly one fenced JSON code block opened with the
-  `json` language tag and contains no surrounding prose.
+- The `## Execution Manifest` heading text is exact with no version suffix.
+  The section body is exactly one fenced JSON code block opened with the `json`
+  language tag and nothing else: no `---` separator, no prose, and no second
+  fence. All 16 top-level fields are mandatory; a partial manifest is invalid.
+  Remove any separator or prose so the fence is the only section content.
 - Each manifest task has one `## Task N: <title>` heading at any level from
   two to six, numbered consecutively in manifest order; manifest task ids are
   exactly `T1` through `T<N>` and match the heading numbers. Task headings
@@ -132,6 +134,108 @@ manifest-only plan has no `## Execution Contract`.
   `status_sibling` `none`; `git_mutation` `prohibited`.
 - `rollout` such as `["baseline", "focused", "final"]`.
 
+## Canonical Complete Skeleton
+
+The canonical complete plan manifest with all 16 top-level fields and canonical
+nested values:
+
+```json
+{
+  "schema_version": 3,
+  "manifest_version": "execution-manifest/v3",
+  "plan_id": "2026-01-01-example-plan",
+  "repository_root": ".",
+  "authority_boundaries": {
+    "normative_owner": "/internal-gateway-writing-plans",
+    "execution_owner": "/internal-gateway-execute-plans",
+    "worker": "primary-owner",
+    "caller_owns": ["routing", "scope", "authority", "lifecycle", "retry", "independent_validation", "acceptance", "closeout"],
+    "protected_paths": ["superpowers-*/**", "mattpocock-*/**"],
+    "no_git_mutation": true
+  },
+  "delegation": {
+    "schema_version": 1,
+    "mode": "none",
+    "worker": "primary-owner",
+    "result": "not_applicable",
+    "receipt": null,
+    "acceptance": null
+  },
+  "targets": [
+    {"id": "TGT-01", "path": "path/to/target.py", "state": "modify"}
+  ],
+  "controls": {
+    "CI-01": {
+      "class": "automatable-local",
+      "owner": "focused suite",
+      "binding": ["T1", "V-01"]
+    }
+  },
+  "validations": [
+    {
+      "id": "V-01",
+      "command": "python3 -m pytest -q tests/example",
+      "owner": "plan owner",
+      "pass_signal": "pytest exit code 0",
+      "phases": ["focused", "final"]
+    }
+  ],
+  "manual_obligations": [
+    {
+      "id": "MO-01",
+      "kind": "human",
+      "required": true,
+      "acceptance": "A reviewer accepts the result or opens a corrective follow-up."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "order": 1,
+      "posture": "feature-first",
+      "objective": "Apply the approved change to path/to/target.py.",
+      "depends_on": [],
+      "target_ids": ["TGT-01"],
+      "validation_ids": ["V-01"],
+      "manual_obligation_ids": ["MO-01"],
+      "acceptance": ["The focused validation passes on the final bytes."],
+      "stop_conditions": ["An authority, scope, or safety barrier appears."]
+    }
+  ],
+  "retry_policy": {
+    "initial_attempts": 1,
+    "max_context_refills": 1,
+    "max_corrective_retries": 3,
+    "caller_may_lower": true,
+    "repeat_progress_status": "stalled",
+    "minor_or_cosmetic_reopens": false
+  },
+  "approval": {
+    "editorial_content_change": "Editorial Markdown drift does not require refreshed approval.",
+    "normative_manifest_change": "Normative Manifest drift requires refreshed external approval."
+  },
+  "bootstrap": {
+    "mode": "manifest-only",
+    "compatibility_projection": [],
+    "projection_binding": {
+      "controls": "manifest.controls",
+      "tasks": "manifest.tasks",
+      "validations": "manifest.validations",
+      "authority": "manifest.authority_boundaries"
+    },
+    "legacy_only": "reject",
+    "retirement_evidence": "The Manifest v3 object is the sole execution contract."
+  },
+  "rollout": ["baseline", "focused", "final"],
+  "handoff": {
+    "next_owner": "/internal-gateway-execute-plans",
+    "requires": ["human approval", "exact Manifest v3 review", "zero blocking preflight findings"],
+    "status_sibling": "none",
+    "git_mutation": "prohibited"
+  }
+}
+```
+
 ## Runtime Separation
 
 The plan remains separate from the schema-2 YAML status sibling. Status has
@@ -149,19 +253,23 @@ to pass.
 
 ## Projection Checklist
 
-Before handoff, confirm target and authority boundaries, task order and
-references, exact field sets, no Git mutation, approval separation, status
-separation, and zero blocking findings on both producer gates. Run the writer
-structural check
-`python3 <writer-bundle>/scripts/check_plan_structure.py <plan> --format compact`
-first, then resolve the loaded executor bundle and run
-`bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`
-against the exact final plan bytes; a completion or handoff claim requires
-fresh zero-blocking evidence from both, and a prose assertion never
-substitutes for either. The binding rules above prevent the five observed
-producer failures: a manifest heading with a version suffix, `controls`
-serialized as an array, missing `manifest_version`, `repository_root`, or
-`targets[].state` fields, a missing Baseline Validation preflight bullet, and
-non-canonical `handoff.requires` strings. Do not create a status sibling while
-writing the plan. The parser wins if prose and parser disagree; do not add a
-second parser or a shared cross-bundle dependency.
+Run both evidence gates on the exact final plan bytes, in this order, and
+retain the literal result tokens:
+
+1. Writer structural check:
+   `python3 <writer-bundle>/scripts/check_plan_structure.py <plan> --format compact`
+   must report `structure=passed(0 blocking)`.
+2. Executor preflight:
+   `bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`
+   must report `execution=passed(0 blocking)`.
+
+A prose assertion never substitutes for either executed result. Before handoff,
+confirm target and authority boundaries, task order and references, exact field
+sets, no Git mutation, approval separation, and status separation. The binding
+rules above prevent the five observed producer failures: a manifest heading
+with a version suffix, `controls` serialized as an array, missing
+`manifest_version`, `repository_root`, or `targets[].state` fields, a missing
+Baseline Validation preflight bullet, and non-canonical `handoff.requires`
+strings. Do not create a status sibling while writing the plan. The parser
+wins if prose and parser disagree; do not add a second parser or a shared
+cross-bundle dependency.

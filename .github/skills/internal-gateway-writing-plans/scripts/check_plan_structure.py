@@ -158,6 +158,7 @@ GIT_MUTATING_SUBCOMMANDS = frozenset(
 GIT_OPTIONS_WITH_VALUE = frozenset(
     {"-C", "-c", "--config-env", "--exec-path", "--git-dir", "--namespace", "--work-tree"}
 )
+COMPACT_MESSAGE_LIMIT = 160
 
 
 @dataclass(frozen=True)
@@ -312,6 +313,18 @@ def _require_level2_heading(text: str, heading: str) -> None:
     raise StructureError("missing-heading", f"Plan missing required heading: {heading}")
 
 
+def _fence_surrounding_condition(body: str) -> str:
+    opening = re.search(r"(?m)^[ \t]*```json[ \t]*$", body)
+    outside = body
+    if opening:
+        closing = re.search(r"(?m)^[ \t]*```[ \t]*$", body[opening.end():])
+        if closing:
+            outside = body[: opening.start()] + body[opening.end() + closing.end():]
+    if re.search(r"(?m)^\s*-{3,}\s*$", outside):
+        return "found a `---` Markdown separator; remove the separator"
+    return "found surrounding prose or a second fence; remove it"
+
+
 def _manifest_fenced_object(text: str, heading: str) -> Mapping[str, object]:
     matches = list(re.finditer(rf"(?m)^## {re.escape(heading)}\s*$", text))
     if not matches:
@@ -337,8 +350,8 @@ def _manifest_fenced_object(text: str, heading: str) -> Mapping[str, object]:
             )
         raise StructureError(
             "malformed-execution-manifest",
-            f"`## {heading}` must contain exactly one immediately contained ```json fenced "
-            "object with no surrounding prose and no second fence",
+            f"`## {heading}` must contain exactly one immediately contained ```json fence; "
+            f"{_fence_surrounding_condition(body)} so the fence is the only section content",
         )
     try:
         raw = json.loads(fenced.group(1), object_pairs_hook=_reject_duplicate_json_fields)
@@ -1067,6 +1080,12 @@ def _find_repo_root(start: Path) -> Path:
     return start.resolve()
 
 
+def _bounded_message(message: str) -> str:
+    if len(message) <= COMPACT_MESSAGE_LIMIT:
+        return message
+    return message[: COMPACT_MESSAGE_LIMIT - 3] + "..."
+
+
 def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
     blocking = [item for item in findings if item.severity == "blocking"]
     notices = [item for item in findings if item.severity == "notice"]
@@ -1078,7 +1097,12 @@ def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
             "notice": len(notices),
         },
         "finding_sample": [
-            {"code": item.code, "severity": item.severity} for item in findings[:10]
+            {
+                "code": item.code,
+                "severity": item.severity,
+                "message": _bounded_message(item.message),
+            }
+            for item in findings[:10]
         ],
         "next_action": (
             "Run the executor preflight against the exact final plan bytes."
