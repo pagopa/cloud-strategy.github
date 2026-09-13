@@ -100,12 +100,24 @@ interface:
     hits, ## Execution Authorization with exactly one Mode: line, and
     ## Completeness Audit with literal commands and raw evidence; ## Task Graph
     stays optional and aligned with manifest depends_on. Load
-    references/delegation.md only for the delegated exception route. Perform
-    human review, then use the writer projection: Plan, Scope, the five distinct
-    evidence categories with the audit status folded into semantic, Risk, and
-    one Next action.     Do not copy the manifest or tasks into chat. Name
-    /internal-gateway-execute-plans as the only next owner for execution-ready
-    plans after explicit execution approval. Observe the No-Commit Rule: no Git mutations. Producer
+     references/delegation.md only for the delegated exception route. Perform
+     human review, then use the writer projection: Plan, Status, Scope, the
+     five distinct evidence categories with the audit status folded into
+     semantic, Risk, and one Next action. Select the authorization mode from
+     execution intent: a plan the user wants applied is authored
+     execution-ready with modify or create targets, quoting the user's plan
+     request as the Authorization line, and implementation_permission false
+     in a source spec is an idea-stage marker that never forces
+     authoring-only or inspect targets. Reserve authoring-only for a
+     genuinely blocking condition or an explicitly requested analysis-only
+     plan, and stop at writing time naming that condition. Status has
+     exactly two values: ready to execute, requiring execution-ready mode
+     and all five categories passed on final bytes, or blocked with the one
+     blocking reason and the single unblocking decision; there is no middle
+     review state and residual concerns become Risk lines.
+     Do not copy the manifest or tasks into chat. Name
+     /internal-gateway-execute-plans as the only next owner for execution-ready
+     plans after explicit execution approval. Observe the No-Commit Rule: no Git mutations. Producer
     readiness remains writer-owned and structural; writer compatibility checks
     must not import executor-private code, while retained-plan mechanical
     preflight remains executor-owned.

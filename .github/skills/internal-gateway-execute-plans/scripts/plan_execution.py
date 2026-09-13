@@ -1534,10 +1534,17 @@ def parse_resume_state(payload: Mapping[str, object]) -> ResumeState:
                 "done-with-unpassed-delivery-verdicts",
                 "DONE status requires all five delivery verdicts to be passed",
             )
-    if status == "DONE" and (warnings or deviations):
+    if status == "DONE" and (
+        warnings
+        or any(
+            _deviation_class(f"{item['mismatch']} {item['resolution']}")
+            != "plan-normalization"
+            for item in deviations
+        )
+    ):
         raise ExecutionContractError(
             "done-with-warning-records",
-            "DONE status requires empty warnings and deviations",
+            "DONE status requires empty warnings and only plan-normalization deviations",
         )
     if status == "DONE_WITH_WARNINGS" and not warnings:
         raise ExecutionContractError(

@@ -26,23 +26,38 @@ description: Use when repository-owned work needs an approved implementation pla
 ## Contract
 
 0. Establish writing eligibility before any implementation-plan writing.
-   Eligibility requires a current explicit request to write an implementation
-   plan, a verifiable approval state for that writing, the target and
-   anti-scope, consolidated decisions and residual risks, the nearest owner
-   and authority boundary, observable acceptance and validation path, and
-   stop conditions. A user-accepted `Consolidated Analysis Spec` from
-   `/internal-gateway-idea`, an approved design, a reviewed retained spec, or
-   equivalent direct input is eligible only when all of those conditions are
-   present; producer identity does not substitute for any condition. Neither
-   path authorizes plan execution, status creation, or Git mutation. A
-   verified retained spec from `/internal-gateway-idea` with
-   `plan_authoring_ready: true`, combined with the user's later explicit
-   `+plan` selection, satisfies source readiness and the current
-   plan-writing request; continue without another discovery or approval
-   round. `implementation_permission: false` is expected because plan
-   authoring is not implementation; it must not block writing eligibility.
-   The handoff still needs the target, anti-scope, decisions, risks,
-   acceptance, validation, and authority facts required above.
+   Check each of the following before writing:
+   - Eligibility requires a current explicit request to write an implementation
+     plan, a verifiable approval state for that writing, the target and
+     anti-scope, consolidated decisions and residual risks, the nearest owner
+     and authority boundary, observable acceptance and validation path, and
+     stop conditions. Producer identity does not substitute for any condition.
+   - Eligible source inputs are a user-accepted `Consolidated Analysis Spec`
+     from `/internal-gateway-idea`, an approved design, a reviewed retained
+     spec, or equivalent direct input, only when all eligibility conditions are
+     present. A verified retained spec from `/internal-gateway-idea` with
+     `plan_authoring_ready: true`, combined with the user's later explicit
+     `+plan` selection, satisfies source readiness and the current plan-writing
+     request; continue without another discovery or approval round.
+   - `implementation_permission: false` is expected because plan authoring is
+     not implementation; it must not block writing eligibility. The handoff
+     still needs the target, anti-scope, decisions, risks, acceptance,
+     validation, and authority facts required above.
+   - Neither an eligible source input nor the writing request authorizes plan
+     execution, status creation, or Git mutation.
+   - Select the authorization mode from execution intent. A user who asks for a
+     plan in order to apply it — the normal case — receives an
+     `execution-ready` plan whose intended targets carry `modify` or `create`
+     states and whose `Authorization:` line quotes the user's plan request.
+     Source-spec markers such as `implementation_permission: false` describe
+     idea-stage boundaries only; they never force `authoring-only` or `inspect`
+     targets on a plan the user wants applied.
+   - Reserve `authoring-only` with `inspect` targets for a genuinely blocking
+     condition — an unsafe target, a missing authority decision, or unresolved
+     material ambiguity — or for an explicitly requested analysis-only plan.
+     When such a condition exists, stop at writing time and name it; never hand
+     the executor a plan that was never meant to be executable. Non-blocking
+     review concerns become `Risk` lines, never a lower plan mode.
 1. Capture the target, anti-scope, nearest owner, validation path, stop
    conditions, and observable acceptance. Build a control inventory before
    delegation: classify every task, acceptance criterion, and declared
@@ -161,30 +176,42 @@ description: Use when repository-owned work needs an approved implementation pla
    explicit approval. The `Evidence:` line records `structure=` as the
    executed writer structural check and `execution=` as the executed
    preflight command, each with its zero-blocking result on the final plan
-   bytes; without those fresh results the readiness verdict stays `blocked`
-   or `needs review`, never `ready`. Completion: every line of the
-   projection is present, the material gap is visible, and execution has not
-   started without approval.
+   bytes; without those fresh results the status stays `blocked —
+   evidence incomplete`, never `ready to execute`. Completion: every line
+   of the projection is present, the material gap is visible, and execution
+   has not started without approval.
 
 ## Writer communication
 
-Use exactly five short lines after plan authoring or review:
+Use exactly six short lines after plan authoring or review, in the user's
+conversation language, keeping the field labels canonical:
 
 ```text
-Plan: <retained path> | <ready, blocked, or needs review>
+Plan: <retained path>
+Status: ready to execute | blocked — <one-line reason>
 Scope: <one-line target and anti-scope>
-Evidence: structure=<...>; semantic=<...; audit=...>; provenance=<...>; baseline=<...>; execution=<...>
-Risk: <one material risk or none>
-Next: <one owner and action; execution owner handoff requires no re-confirmation>
+Evidence: structure=<...>; semantic=<...>; provenance=<...>; baseline=<...>; execution=<...>
+Risk: <one material residual risk or none>
+Next: <ready: one execution instruction; blocked: the one decision that unblocks>
 ```
 
-Do not copy tasks, the control inventory, or the manifest into chat. The five
-evidence categories remain distinct with the completeness audit status folded
-into `semantic=`; a missing category keeps readiness inconclusive. Put
-acceptance conditions and residual gaps in `Risk` or `Next`, not in a second
-narrative. Use a Mermaid diagram only when the plan's task dependency or
-handoff cannot be understood clearly from the five lines; the diagram is
-supplementary, never a replacement for them.
+`Status` has exactly two values. `ready to execute` requires an
+`execution-ready` mode and all five evidence categories passed on the
+final plan bytes; anything else is `blocked — <reason>` naming the single
+blocking condition. There is no middle review state: a review concern is
+either material, which blocks writing, or residual, which becomes a
+`Risk` line. For a ready plan, `Next` is one instruction such as `Say
+"execute" or invoke /internal-gateway-execute-plans; execution then
+proceeds without re-confirmation.` For a blocked plan, `Next` names the
+one user decision or named-owner action that unblocks, never a procedure.
+Do not copy tasks, the control inventory, or the manifest into chat. The
+five evidence categories remain distinct with the completeness audit
+status folded into `semantic=`; a missing category keeps the status
+`blocked — evidence incomplete`. Put acceptance conditions and residual
+gaps in `Risk` or `Next`, not in a second narrative. Use a Mermaid
+diagram only when the plan's task dependency or handoff cannot be
+understood clearly from the six lines; the diagram is supplementary,
+never a replacement for them.
 
 ## Command Portability
 
@@ -214,7 +241,7 @@ enforces the retained plan.
 - **Baseline Validation:** Run the manifest's baseline validation before edits and record the result.
 - **Recovery Policy:** Use the finite per-task corrective budget; each recovery must be distinct, task-local, safe, and implied by the approved acceptance.
 - **Escalation Conditions:** Stop for authority, scope, safety, or unresolved task-local failures.
-- **User-Facing Report:** Report the plan path, scope, five evidence categories, one risk, and one next action.
+- **User-Facing Report:** Report the plan path, two-state status, scope, five evidence categories, one risk, and one next action.
 
 ## No-Commit Rule
 

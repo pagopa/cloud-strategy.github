@@ -302,7 +302,9 @@ and `constraint-supersession`. Any other kind is rejected and stops with
 `BLOCKED`. The `resolution` must name the pre-edit Manifest `sha256:` semantic
 fingerprint and the superseded or backfilled content. Every normalization edit
 regenerates the status sibling because the Manifest semantics changed; the
-deviation ledger is the surviving provenance trace.
+deviation ledger is the surviving provenance trace. A DONE closeout admits only
+`plan-normalization` deviation records; all other deviation classes require
+`DONE_WITH_WARNINGS` or remain blocked.
 
 ## Projection Checklist
 

@@ -33,10 +33,15 @@ interface:
       unblock action; never weaken validation or use DONE_WITH_WARNINGS for a
       technical failure.
     Before a completion claim, run the plan's final validations,
-     git diff --check, and /superpowers-verification-before-completion. Return
-     the compact four-line projection for DONE, a warning line for
-     DONE_WITH_WARNINGS, and evidence-backed causes/actions for PARTIAL or
-     BLOCKED.
+      git diff --check, and /superpowers-verification-before-completion. Return
+      the compact four-line projection for DONE, a warning line for
+      DONE_WITH_WARNINGS, and for PARTIAL or BLOCKED exactly Plan, Stopped
+      at, Why with the controlling cause in plain language, and Unblock
+      with the single decision or action required, never a multi-step
+      procedure. An authoring-only plan or a target set with no modify or
+      create target is a plan-shape incompatibility: stop BLOCKED, name the
+      missing execution intent, and return the plan to the writer without
+      instructing the user to promote targets or rewrite the Manifest.
     Resolve the executor from the loaded physical bundle and use its
     hash-locked scripts/requirements.txt through scripts/run.sh for both
     preflight and state-check; never fall back to consumer-relative or

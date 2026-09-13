@@ -1351,6 +1351,60 @@ def test_state_check_accepts_plan_normalization_deviation(tmp_path: Path) -> Non
     assert result.returncode == 0, result.stderr or result.stdout
 
 
+def test_done_state_accepts_plan_normalization_deviation(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.DONE.yaml")
+    payload = _status_payload(module, plan)
+    payload["deviations"] = [
+        {
+            "task": "T1",
+            "mismatch": "plan-normalization: authorization-backfill",
+            "resolution": _plan_normalization_resolution(),
+        }
+    ]
+
+    module.write_status_yaml(state, payload)
+
+    assert module.validate_state(plan, state, tmp_path) == []
+
+
+def test_done_state_rejects_non_normalization_deviation(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan)
+    payload["deviations"] = [
+        {
+            "task": "T1",
+            "mismatch": "path moved during execution",
+            "resolution": "Recorded the relocated path in the retained plan.",
+        }
+    ]
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.DONE.yaml"))
+
+    assert exc.value.code == "done-with-warning-records"
+
+
+def test_done_state_rejects_warning(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan)
+    payload["warnings"] = [
+        {
+            "kind": "human-follow-up",
+            "evidence": "A follow-up remains.",
+            "next_action": "Complete the follow-up.",
+        }
+    ]
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.DONE.yaml"))
+
+    assert exc.value.code == "done-with-warning-records"
+
+
 def test_yaml_status_filename_and_content_status_must_match(tmp_path: Path) -> None:
     module = sys.modules["plan_execution"]
     plan = _stage_valid_plan(tmp_path)

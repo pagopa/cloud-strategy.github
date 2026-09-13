@@ -36,6 +36,13 @@ user report. It does not delegate plan work.
   fingerprint.
 - Do not dispatch a subagent, worker, model switch, or delegated execution
   path. `internal-luna-executor` is metadata only and is never invoked here.
+- An `authoring-only` plan or a target set with no `modify` or `create`
+  target is a plan-shape incompatibility, not an execution defect. Stop
+  immediately with `BLOCKED`, name the missing execution intent in one
+  plain line, and return the plan to `/internal-gateway-writing-plans`
+  with the one missing decision. Never instruct the user to promote
+  target states, rewrite the Manifest, or re-run writer gates; those are
+  writer-owned actions.
 - Do not run Git mutations. Leave the worktree uncommitted.
 
 ## Manifest Contract Loading
@@ -141,7 +148,9 @@ YAML is the only runtime status representation.
 `status` is exactly one of `DONE`, `DONE_WITH_WARNINGS`, `PARTIAL`, or `BLOCKED`:
 
 - `DONE`: every task is complete, every required local or observable check
-  passes, no warning remains, no deviation remains, and no task remains.
+  passes, no warning remains, only surviving `plan-normalization` deviation
+  records (the provenance ledger) remain, no other deviation remains, and no
+  task remains.
 - `DONE_WITH_WARNINGS`: every task is complete and all five delivery verdicts
   pass; at least one typed warning is visible. Warning kinds are
   `human-follow-up`, `external-unavailable`, and `missing-tool-equivalent`.
@@ -203,9 +212,13 @@ failure as `DONE_WITH_WARNINGS`.
 
 ## User Report
 
-For `DONE`, return exactly four lines, in this order, with no extra status prose:
+Write the report in the user's conversation language, keeping the field
+labels canonical. Lead with the outcome; keep each line short.
 
-`Plan: <path and terminal status>`
+For `DONE`, return exactly four lines, in this order, with no extra status
+prose:
+
+`Plan: <path> — DONE`
 
 `Changed: <files or no changes>`
 
@@ -213,7 +226,21 @@ For `DONE`, return exactly four lines, in this order, with no extra status prose
 
 `Next: <one action or none>`
 
-For `DONE_WITH_WARNINGS`, add one `Warning:` line after `Checks`. For `PARTIAL`
-and `BLOCKED`, report 1-3 evidence-backed causes under `Perché mi sono fermato`
-and 2-4 concrete actions under `Cosa fare`; do not hide a blocker behind the
-compact four-line projection.
+For `DONE_WITH_WARNINGS`, add one `Warning:` line after `Checks`.
+
+For `PARTIAL` and `BLOCKED`, return exactly four lines:
+
+`Plan: <path> — <PARTIAL or BLOCKED>`
+
+`Stopped at: <task id or phase>`
+
+`Why: <the controlling cause in plain language, with its evidence; at most
+three causes, only when more than one genuinely controls the stop>`
+
+`Unblock: <the single decision or action required from the user or the
+named owner — never a multi-step procedure>`
+
+Each cause is one line of plain language, not a gate log; do not list
+mechanical checks that passed. A plan-shape incompatibility names the
+missing execution intent and returns the plan to the writer. Do not hide
+a blocker behind the compact projection.
