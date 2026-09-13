@@ -33,9 +33,13 @@ interface:
     with ids T1 through T<N>; keep Control Inventory IDs bijective with the
     manifest.controls map; and use the exact canonical handoff.requires
     strings human approval, exact Manifest v3 review, and zero blocking
-    preflight findings. Gate any ready or handoff claim on a fresh physical
-    executor preflight against the exact final plan bytes with zero blocking
-    findings; a prose assertion never substitutes for that result. New writer output uses
+    preflight findings. Gate any ready or handoff claim on both gate compact
+    outputs, the writer structural check and the physical executor preflight,
+    against the exact final plan bytes with zero blocking findings, cite both
+    outputs together in the OK report, and offer the
+    /internal-gateway-execute-plans handoff only for execution-ready plans;
+    authoring-only plans stay retained with the writer as next owner. A prose
+    assertion never substitutes for those results. New writer output uses
     bootstrap.mode: manifest-only and emits no legacy ## Execution Contract;
     the current migration plan is the sole exact compatibility projection.
     Require
@@ -81,23 +85,27 @@ interface:
     delegation.mode none, worker primary-owner, and no inherited worker
     artifacts. The parent retains routing, authority, lifecycle,
     retry choice, independent validation, semantic review, final preflight,
-    final acceptance, handoff, and the no-Git-mutation boundary. Before critic output
-    can expand scope,
-    classify every finding exactly once as blocking-now, acceptance-required,
-    follow-up, separate-design, or rejected-with-reason; untraceable findings
-    are separate-design. Producer readiness is writer-owned and structural,
-    while retained-plan mechanical preflight remains executor-owned. The
-    executor status sibling records externally computed semantic approval evidence, typed
-     warnings/deviations, and all five delivery verdict categories.
-     explicitly legacy/imported material requires reconstruction and refreshed
-     v3 approval. Probe every validations[].command before handoff with command
-     -v or a native path check, distinguish command-not-found from validation
-     failure, and handle exit 127 as a missing-tool condition. Perform human
-    review, then use the writer projection: Plan, Scope, the five distinct
-    evidence verdicts, Risk, and one Next action. Do not copy the manifest or
-    tasks into chat. Name /internal-gateway-execute-plans as the only next
-    owner after explicit execution approval. Observe the No-Commit Rule: no Git
-    mutations.
-    Producer readiness remains writer-owned and structural; writer compatibility
-    checks must not import executor-private code, while retained-plan mechanical
+    final acceptance, handoff, and the no-Git-mutation boundary. Before critic
+    output can expand scope, classify every finding exactly once as
+    blocking-now, acceptance-required, follow-up, separate-design, or
+    rejected-with-reason; untraceable findings are separate-design. The
+    executor status sibling records externally computed semantic approval
+    evidence, typed warnings/deviations, and all five delivery verdict
+    categories. Treat explicitly legacy or imported material as requiring
+    reconstruction and refreshed v3 approval. Probe every `validations[].command`
+    before handoff with command -v or a native path check, distinguish
+    command-not-found from validation failure, and handle exit 127 as a
+    missing-tool condition. Current plans also carry the completeness sections
+    bound by references/manifest-v3.md: ## Target Census with raw file:line
+    hits, ## Execution Authorization with exactly one Mode: line, and
+    ## Completeness Audit with literal commands and raw evidence; ## Task Graph
+    stays optional and aligned with manifest depends_on. Load
+    references/delegation.md only for the delegated exception route. Perform
+    human review, then use the writer projection: Plan, Scope, the five distinct
+    evidence categories with the audit status folded into semantic, Risk, and
+    one Next action.     Do not copy the manifest or tasks into chat. Name
+    /internal-gateway-execute-plans as the only next owner for execution-ready
+    plans after explicit execution approval. Observe the No-Commit Rule: no Git mutations. Producer
+    readiness remains writer-owned and structural; writer compatibility checks
+    must not import executor-private code, while retained-plan mechanical
     preflight remains executor-owned.

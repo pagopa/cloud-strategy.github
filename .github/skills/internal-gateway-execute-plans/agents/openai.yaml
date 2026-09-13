@@ -11,7 +11,13 @@ interface:
     in the current session and use /internal-tdd at executable task boundaries.
     Diagnose failures, repair only clearly implied omissions inside approved
     targets, preserve independent work around pre-existing failures, and stop
-    for authority, scope, or safety gaps. Do not dispatch subagents, workers,
+    for authority, scope, or safety gaps. Normalize only the five
+    parser-validated plan-normalization kinds, authorization-backfill,
+    census-backfill, audit-backfill, orphan-rebind, and constraint-supersession,
+    each with the pre-edit sha256 fingerprint and the superseded or backfilled
+    content, then re-run the preflight; never change targets, validation
+    semantics, retry limits, authority boundaries, or protected paths, and
+    never make the retained plan file a task target. Do not dispatch subagents, workers,
     models, or delegated plan execution; internal-luna-executor is metadata
      only. Use only DONE, DONE_WITH_WARNINGS, PARTIAL, and BLOCKED. Persist one YAML status sibling
      with schema version 2, hash-free approval_evidence, typed warnings, strict

@@ -78,6 +78,15 @@ description: Use when repository-owned work needs an approved implementation pla
    `## Execution Contract`, and treats the current migration plan as the sole explicit
    compatibility projection, accepted only when its manifest metadata and Markdown
    projection bind exactly, and retired at closeout.
+   Current plans also carry the completeness sections bound by the same
+   reference: `## Target Census` with raw `file:line` hits, `## Execution
+   Authorization` with exactly one `Mode:` line, `## Completeness Audit` with
+   literal commands and raw evidence, and an optional generated `## Task Graph`
+   aligned with manifest `depends_on`. `## Execution Authorization` is the
+   single authorization carrier: it owns the mode, the quoted `Authorization:`
+   line for `execution-ready`, and the writer/executor handoff pairing, while
+   Global Constraints carry no execution-gating prose and no scope-limiting
+   bullet that contradicts a declared `modify` target.
    Classify each executable or evaluable task through `/internal-tdd`. Map
    every posture to focused and broad validation; require observed
    red-first evidence only for `mandatory-test-first`, while
@@ -96,32 +105,9 @@ description: Use when repository-owned work needs an approved implementation pla
    lifecycle event and stop blocked; continue locally only after explicit caller
    authorization, then record the new local route with no synthetic worker artifacts.
 
-   Before invoking any worker, materialize the exact retained-plan skeleton and output path
-   with the final Manifest tuple. Resolve the physical executor bundle from its loaded runner
-   and run
-   `bash <physical-executor-bundle>/scripts/run.sh preflight <skeleton> --format compact`.
-   A nonzero result or any blocking finding, including `delegation-not-supported`, prevents
-   dispatch and requires local authoring or a corrected route.
+   Load [`references/delegation.md`](references/delegation.md) for worker
+   preflight, brief, receipt, retry, and plan-owner retention before invoking any worker.
 
-   For an explicitly chosen delegated route, fix the objective, value gate, bounded evidence,
-   constraints, exact retained-plan write scope, expected output, acceptance, validation, and
-   budgets; write one `DelegationBrief` v1 in `mode: plan` through
-   `/internal-subagent-contract` before invoking `internal-luna-executor`, binding the single
-   retained-plan path as `write_scope` and `expected_output.path` with the required manifest
-   and preflight acceptance plus exact focused validation, and record
-   `worker: internal-luna-executor` in the plan authority boundary. Luna returns the semantic
-   fields for one `WorkerResult` v1; the runtime adapter composes deterministic fields and a
-   caller-owned `VerificationReceipt` v1, and unobserved validation or budget data stay
-   claims or `unavailable`. Caller acceptance binds the exact final artifact bytes and
-   manifest semantic fingerprint; a material edit invalidates the result and receipt and
-   routes one new evidence-bound corrective brief to Luna under the retry contract instead of
-   silently transferring authorship to the parent. Caller-authorized local continuation
-   begins a fresh local route with the local tuple and no inherited worker artifacts.
-   Preserve the final-byte physical preflight requirement on either branch.
-
-   The plan owner retains eligibility, control classification, routing,
-   authority, lifecycle, retry choice, semantic review, independent
-   `preflight`, final acceptance, handoff, and the no-Git-mutation boundary.
    Before critic output can expand scope, classify every finding exactly
    once as `blocking-now`, `acceptance-required`, `follow-up`,
    `separate-design`, or `rejected-with-reason`; untraceable findings are
@@ -133,8 +119,11 @@ description: Use when repository-owned work needs an approved implementation pla
    --format compact` with exit code zero, the physical executor preflight
    `bash <physical-executor-bundle>/scripts/run.sh preflight <plan>
    --format compact` with exit code zero and zero blocking findings, and the
-   bundle-local pytest suite. A completion claim without that fresh evidence
-   for all three is invalid; repair the plan and rerun every gate instead of
+   bundle-local pytest suite. Cite both gate compact outputs together at every
+   OK report and offer the `/internal-gateway-execute-plans` handoff only for
+   `execution-ready` plans; `authoring-only` plans stay retained with the
+   writer as next owner. A completion claim without that fresh evidence for
+   all three is invalid; repair the plan and rerun every gate instead of
    describing the expected result.
 3. Perform human review for task actionability, approved scope, focused
    validation, control coverage, safety, and handoff quality. Every
@@ -184,24 +173,25 @@ Use exactly five short lines after plan authoring or review:
 ```text
 Plan: <retained path> | <ready, blocked, or needs review>
 Scope: <one-line target and anti-scope>
-Evidence: structure=<...>; semantic=<...>; provenance=<...>; baseline=<...>; execution=<...>
+Evidence: structure=<...>; semantic=<...; audit=...>; provenance=<...>; baseline=<...>; execution=<...>
 Risk: <one material risk or none>
 Next: <one owner and action; execution owner handoff requires no re-confirmation>
 ```
 
 Do not copy tasks, the control inventory, or the manifest into chat. The five
-evidence categories remain distinct; a missing category keeps readiness
-inconclusive. Put acceptance conditions and residual gaps in `Risk` or
-`Next`, not in a second narrative. Use a Mermaid diagram only when the plan's
-task dependency or handoff cannot be understood clearly from the five lines;
-the diagram is supplementary, never a replacement for them.
+evidence categories remain distinct with the completeness audit status folded
+into `semantic=`; a missing category keeps readiness inconclusive. Put
+acceptance conditions and residual gaps in `Risk` or `Next`, not in a second
+narrative. Use a Mermaid diagram only when the plan's task dependency or
+handoff cannot be understood clearly from the five lines; the diagram is
+supplementary, never a replacement for them.
 
 ## Command Portability
 
 Before writing validation commands or handing off a plan, load
 [`references/command-portability.md`](references/command-portability.md). It
 owns native command form, availability probes, missing-tool handling, task
-ordering, and the executor preflight boundary.
+ordering, the producer-readiness boundary, and the executor preflight boundary.
 
 ## Manifest Contract Loading
 
@@ -225,23 +215,6 @@ enforces the retained plan.
 - **Recovery Policy:** Use the finite per-task corrective budget; each recovery must be distinct, task-local, safe, and implied by the approved acceptance.
 - **Escalation Conditions:** Stop for authority, scope, safety, or unresolved task-local failures.
 - **User-Facing Report:** Report the plan path, scope, five evidence categories, one risk, and one next action.
-
-### Producer readiness boundary
-
-The writer owns producer-side readiness: it may prove the control inventory,
-ordered task projection, manifest-only shape, and handoff ownership from the
-plan it emits. These checks use parsed structure and do not import
-`internal-gateway-execute-plans` or any executor-private module. Producer
-readiness is writer-owned and structural. The executor bundle remains the
-only owner of retained-plan mechanical preflight, loaded bundle resolution,
-state, and execution validation.
-
-Run
-`python3 <writer-bundle>/scripts/check_plan_structure.py <plan> --format compact`
-after every manifest-affecting edit and before human review, and require zero
-blocking findings. The check is writer-owned, structural, read-only, and
-stdlib-only; it never replaces the executor preflight, and a divergence
-between the two is a bundle defect to fix through the writer tests.
 
 ## No-Commit Rule
 

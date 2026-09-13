@@ -33,3 +33,20 @@ block in that section, and the exact canonical `handoff.requires` strings.
 Only explicitly `legacy/imported` material may use reconstruction, with
 refreshed Manifest v3 approval. Do not downgrade an automatable obligation to
 narrative or manual evidence to make either gate pass.
+
+## Producer readiness
+
+The writer owns producer-side readiness: it may prove the control inventory,
+ordered task projection, manifest-only shape, and handoff ownership from the
+plan it emits. These checks use parsed structure and do not import
+`internal-gateway-execute-plans` or any executor-private module. Producer
+readiness is writer-owned and structural. The executor bundle remains the only
+owner of retained-plan mechanical preflight, loaded bundle resolution, state,
+and execution validation.
+
+Run
+`python3 <writer-bundle>/scripts/check_plan_structure.py <plan> --format compact`
+after every manifest-affecting edit and before human review, and require zero
+blocking findings. The check is writer-owned, structural, read-only, and
+stdlib-only; it never replaces the executor preflight, and a divergence between
+the two is a bundle defect to fix through the writer tests.

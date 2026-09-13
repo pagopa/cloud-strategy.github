@@ -544,7 +544,6 @@ def test_structural_check_rejects_staged_fixtures_outside_retained_directory(
 def test_structural_check_compact_payload_matches_executor_shape(
     tmp_path: Path, capsys
 ) -> None:
-    checker = _load_structural_check()
     staged = _stage_plan(tmp_path, WRITER_FIXTURE.read_text(encoding="utf-8"))
     result = _run_checker(staged)
 
@@ -892,3 +891,286 @@ def test_writer_canonical_strictness_blocks_before_executor(
     assert checker_result.returncode != 0, name
     assert checker_code in _finding_codes(checker_result), name
     assert executor_result.returncode == 0, name
+
+
+def _remove_section(text: str, heading: str) -> str:
+    lines = text.splitlines(keepends=True)
+    collecting = False
+    kept: list[str] = []
+    for line in lines:
+        if line.strip() == f"## {heading}":
+            collecting = True
+            continue
+        if collecting and line.startswith("## "):
+            collecting = False
+        if not collecting:
+            kept.append(line)
+    return "".join(kept)
+
+
+def _replace_after(text: str, marker: str, old: str, new: str) -> str:
+    index = text.index(marker)
+    return text[:index] + text[index:].replace(old, new, 1)
+
+
+def _remove_table_row(text: str, heading: str, first_cell: str) -> str:
+    lines = text.splitlines(keepends=True)
+    in_section = False
+    kept: list[str] = []
+    for line in lines:
+        if line.strip() == f"## {heading}":
+            in_section = True
+        elif in_section and line.startswith("## "):
+            in_section = False
+        if in_section and line.strip().startswith("|"):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if cells and cells[0] == first_cell:
+                continue
+        kept.append(line)
+    return "".join(kept)
+
+
+def _writer_findings(tmp_path: Path, text: str) -> list:
+    checker = _load_structural_check()
+    plan = _stage_plan(tmp_path, text)
+    return checker.check_plan_structure(plan.read_text(encoding="utf-8"), plan)
+
+
+def _blocking_codes(findings: list) -> set[str]:
+    return {item.code for item in findings if item.severity == "blocking"}
+
+
+COMPLETENESS_FAILURE_MODES = (
+    (
+        "missing-target-census",
+        lambda text: _remove_section(text, "Target Census"),
+        "missing-heading",
+    ),
+    (
+        "target-census-gap",
+        lambda text: _remove_table_row(text, "Target Census", "TC-01"),
+        "target-census-gap",
+    ),
+    (
+        "target-census-not-raw-hits",
+        lambda text: text.replace(
+            "tests/example/test_example.py:1", "3 matching lines", 1
+        ),
+        "target-census-hits",
+    ),
+    (
+        "target-census-unknown-target",
+        lambda text: text.replace("| TC-01 | TGT-EXAMPLE |", "| TC-01 | TGT-MISSING |", 1),
+        "target-census-malformed",
+    ),
+    (
+        "missing-execution-authorization",
+        lambda text: _remove_section(text, "Execution Authorization"),
+        "missing-heading",
+    ),
+    (
+        "authorization-mode-invalid",
+        lambda text: text.replace("- Mode: execution-ready", "- Mode: maybe-later", 1),
+        "authorization-mode",
+    ),
+    (
+        "execution-ready-without-statement",
+        lambda text: re.sub(r"(?m)^- Authorization:.*\n", "", text, count=1),
+        "authorization-statement-missing",
+    ),
+    (
+        "execution-ready-denial-prose",
+        lambda text: text.replace(
+            "- Preserve fixture integrity.",
+            "- Preserve fixture integrity.\n- Execution permission: false.",
+            1,
+        ),
+        "authorization-gating-prose",
+    ),
+    (
+        "authorization-gating-prose",
+        lambda text: text.replace(
+            "- Preserve fixture integrity.",
+            "- Preserve fixture integrity.\n"
+            "- Analysis and planning only; do not execute implementation steps.",
+            1,
+        ),
+        "authorization-gating-prose",
+    ),
+    (
+        "authorization-scope-conflict",
+        lambda text: text.replace(
+            "- Preserve fixture integrity.",
+            "- Preserve fixture integrity.\n- Do not modify tests/example/test_example.py.",
+            1,
+        ),
+        "authorization-scope-conflict",
+    ),
+    (
+        "authoring-only-executor-handoff",
+        lambda text: re.sub(
+            r"(?m)^- Authorization:.*\n",
+            "",
+            text.replace("- Mode: execution-ready", "- Mode: authoring-only", 1),
+            count=1,
+        ),
+        "authoring-only-handoff",
+    ),
+    (
+        "execution-ready-writer-handoff",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["handoff"].update(
+                {"next_owner": "/internal-gateway-writing-plans"}
+            ),
+        ),
+        "execution-ready-handoff",
+    ),
+    (
+        "missing-completeness-audit",
+        lambda text: _remove_section(text, "Completeness Audit"),
+        "missing-heading",
+    ),
+    (
+        "completeness-audit-gap",
+        lambda text: _remove_table_row(text, "Completeness Audit", "TC-02"),
+        "completeness-audit-gap",
+    ),
+    (
+        "completeness-audit-unknown-row",
+        lambda text: _replace_after(text, "## Completeness Audit", "| TC-01 |", "| TC-99 |"),
+        "completeness-audit-malformed",
+    ),
+    (
+        "target-orphan",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["targets"].append(
+                {"id": "TGT-ORPHAN", "path": "docs/orphan.md", "state": "inspect"}
+            ),
+        ),
+        "target-orphan",
+    ),
+    (
+        "task-without-obligation",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["tasks"][0].update(
+                {"validation_ids": [], "manual_obligation_ids": []}
+            ),
+        ),
+        "task-without-obligation",
+    ),
+    (
+        "orphan-validation",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["validations"].append(
+                {
+                    "id": "V-ORPHAN",
+                    "command": "python3 -m pytest -q tests/example",
+                    "owner": "focused pytest",
+                    "pass_signal": "exit-code-0",
+                    "phases": ["focused"],
+                }
+            ),
+        ),
+        "orphan-validation",
+    ),
+    (
+        "control-binding-unresolved",
+        lambda text: _rewrite_manifest(
+            text,
+            lambda manifest: manifest["controls"]["CI-01"].update(
+                {"binding": ["T1", "missing-binding"]}
+            ),
+        ),
+        "control-binding-unresolved",
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    "name,mutate,expected_code",
+    COMPLETENESS_FAILURE_MODES,
+    ids=[mode[0] for mode in COMPLETENESS_FAILURE_MODES],
+)
+def test_completeness_checks_block_incomplete_plans(
+    tmp_path: Path, name: str, mutate, expected_code: str
+) -> None:
+    findings = _writer_findings(
+        tmp_path, mutate(WRITER_FIXTURE.read_text(encoding="utf-8"))
+    )
+
+    assert expected_code in _blocking_codes(findings), (name, _blocking_codes(findings))
+
+
+def test_legitimate_anti_scope_constraint_stays_green(tmp_path: Path) -> None:
+    text = WRITER_FIXTURE.read_text(encoding="utf-8").replace(
+        "- Preserve fixture integrity.",
+        "- Preserve fixture integrity.\n"
+        "- Do not modify docs/unrelated.md or tests/other/test_other.py.",
+        1,
+    )
+
+    findings = _writer_findings(tmp_path, text)
+
+    assert not _blocking_codes(findings), _blocking_codes(findings)
+
+
+def test_authoring_only_with_writer_handoff_is_retained_without_blocking(
+    tmp_path: Path,
+) -> None:
+    text = re.sub(
+        r"(?m)^- Authorization:.*\n",
+        "",
+        WRITER_FIXTURE.read_text(encoding="utf-8").replace(
+            "- Mode: execution-ready", "- Mode: authoring-only", 1
+        ),
+        count=1,
+    )
+    text = _rewrite_manifest(
+        text,
+        lambda manifest: manifest["handoff"].update(
+            {"next_owner": "/internal-gateway-writing-plans"}
+        ),
+    )
+
+    findings = _writer_findings(tmp_path, text)
+
+    assert not _blocking_codes(findings), _blocking_codes(findings)
+
+
+def test_task_graph_aligned_with_manifest_dependencies_passes(tmp_path: Path) -> None:
+    text = WRITER_FIXTURE.read_text(encoding="utf-8") + (
+        "\n## Task Graph\n\n```mermaid\ngraph TD\n  T1 --> T2\n```\n"
+    )
+
+    findings = _writer_findings(tmp_path, text)
+
+    assert not [
+        item for item in findings if item.code.startswith("task-graph")
+    ], findings
+
+
+@pytest.mark.parametrize(
+    "graph_body,expected_code",
+    (
+        ("graph TD\n  T2 --> T1\n", "task-graph-drift"),
+        ("graph TD\n  T1 --> T3\n", "task-graph-drift"),
+        ("graph TD\n  T1 --> T2\nbroken", "task-graph-malformed"),
+    ),
+    ids=("reversed-edge", "unknown-node", "missing-fence"),
+)
+def test_task_graph_drift_blocks(
+    tmp_path: Path, graph_body: str, expected_code: str
+) -> None:
+    if expected_code == "task-graph-malformed":
+        section = f"\n## Task Graph\n\n{graph_body}\n"
+    else:
+        section = f"\n## Task Graph\n\n```mermaid\n{graph_body}```\n"
+    findings = _writer_findings(
+        tmp_path, WRITER_FIXTURE.read_text(encoding="utf-8") + section
+    )
+
+    assert expected_code in _blocking_codes(findings), _blocking_codes(findings)

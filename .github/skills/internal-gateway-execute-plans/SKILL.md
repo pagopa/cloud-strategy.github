@@ -20,9 +20,20 @@ user report. It does not delegate plan work.
 - The writer-owned `## Execution Manifest` v3 is authoritative for targets,
   tasks, controls, validations, approval, warnings, deviations, and authority
   boundaries.
-- Do not rewrite the Manifest or broaden the plan. A plan change requires the
-  writer route and refreshed approval; preflight binds no content hash, while
-  state binding uses the Manifest semantic fingerprint.
+- Bounded normalization replaces rewriting: when the preflight reports a
+  mechanically repairable defect on a plan with `modify` targets, edit only the
+  authorization backfill, census or audit backfill, an orphaned task reference
+  rebind, or a superseded Global Constraint, then record one
+  `plan-normalization` deviation carrying the pre-edit semantic `sha256:`
+  fingerprint and the superseded or backfilled content, re-run the preflight,
+  and proceed only on zero blocking findings. The only accepted mismatch kinds
+  are `authorization-backfill`, `census-backfill`, `audit-backfill`,
+  `orphan-rebind`, and `constraint-supersession`. Never change targets,
+  validation semantics, retry limits, authority boundaries, or protected
+  paths, and never make the retained plan file a task target. Normative plan
+  changes still require the writer route and refreshed approval; preflight
+  binds no content hash, while state binding uses the Manifest semantic
+  fingerprint.
 - Do not dispatch a subagent, worker, model switch, or delegated execution
   path. `internal-luna-executor` is metadata only and is never invoked here.
 - Do not run Git mutations. Leave the worktree uncommitted.
@@ -147,9 +158,11 @@ approval. The executor derives it from the approved plan as
 remains admissible only when an explicit statement already exists. The
 statement is exactly `explicit execution approval`. `delivery_verdicts` contains the five canonical category records.
 Each warning has exactly `kind`, `evidence`, and `next_action`. Each deviation
-has exactly `task`, `mismatch`, and `resolution`; only unequivocal path moves,
-structural ID/name alignment, equivalent missing-tool replacements, and targets
-already in the declared state may be recorded.
+has exactly `task`, `mismatch`, and `resolution`; accepted records are
+unequivocal path moves, structural ID/name alignment, equivalent missing-tool
+replacements, targets already in the declared state, and parser-validated
+`plan-normalization` kinds with the pre-edit `sha256:` fingerprint and the
+superseded or backfilled content.
 
 The uppercase filename status and YAML `status` must agree. Validate it with
 the loaded bundle runner:

@@ -348,6 +348,109 @@ def test_plan_with_manifest_heading_suffix_names_exact_heading(tmp_path: Path) -
     assert "`## Execution Manifest`" in finding.message
 
 
+def _with_modify_target(text: str) -> str:
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["targets"][0]["state"] = "modify"
+    return text[:start] + json.dumps(manifest, indent=2) + text[end:]
+
+
+def _without_section(text: str, heading: str) -> str:
+    start = text.index(f"## {heading}")
+    end = text.index("\n## ", start + 3) + 1
+    return text[:start] + text[end:]
+
+
+def _with_writer_handoff(text: str) -> str:
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    manifest["handoff"]["next_owner"] = "/internal-gateway-writing-plans"
+    return text[:start] + json.dumps(manifest, indent=2) + text[end:]
+
+
+AUTHORIZATION_FAILURE_MODES = (
+    (
+        "authorization-missing",
+        lambda text: _without_section(text, "Execution Authorization"),
+        "authorization-missing",
+    ),
+    (
+        "authoring-only-mode",
+        lambda text: re.sub(
+            r"(?m)^- Authorization:.*\n",
+            "",
+            text.replace("- Mode: execution-ready", "- Mode: authoring-only", 1),
+            count=1,
+        ),
+        "authorization-invalid",
+    ),
+    (
+        "gating-prose",
+        lambda text: text.replace(
+            "- Preserve fixture integrity.",
+            "- Preserve fixture integrity.\n"
+            "- Analysis and planning only; do not execute implementation steps.",
+            1,
+        ),
+        "authorization-invalid",
+    ),
+    (
+        "writer-handoff-owner",
+        _with_writer_handoff,
+        "authorization-invalid",
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    "name,mutate,expected_code",
+    AUTHORIZATION_FAILURE_MODES,
+    ids=[mode[0] for mode in AUTHORIZATION_FAILURE_MODES],
+)
+def test_authorization_failures_block_modify_targets(
+    tmp_path: Path, name: str, mutate, expected_code: str
+) -> None:
+    text = mutate(_with_modify_target(_fixture("valid-plan.md").read_text()))
+    plan = _stage_valid_plan(tmp_path, text)
+
+    findings = validate_plan(plan, tmp_path)
+    matching = [item for item in findings if item.code == expected_code]
+
+    assert matching, (name, {item.code for item in findings})
+    assert all(item.severity == "blocking" for item in matching)
+    assert any(
+        "plan-normalization: authorization-backfill" in item.message
+        for item in matching
+    ), name
+
+
+def test_authorization_findings_skip_inspect_only_plans(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        "- Preserve fixture integrity.",
+        "- Preserve fixture integrity.\n- Analysis and planning only.",
+        1,
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    codes = {item.code for item in validate_plan(plan, tmp_path)}
+
+    assert "authorization-missing" not in codes
+    assert "authorization-invalid" not in codes
+
+
+def test_executor_accepts_writer_handoff_manifest_tuple(tmp_path: Path) -> None:
+    text = _with_writer_handoff(
+        _with_modify_target(_fixture("valid-plan.md").read_text())
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert "malformed-execution-manifest" not in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
 def test_current_plan_requires_control_inventory(tmp_path: Path) -> None:
     text = _fixture("valid-plan.md").read_text()
     start = text.index("## Control Inventory")
@@ -1133,6 +1236,119 @@ def _status_payload(
         delivery_verdicts=delivery_verdicts,
         repo_root=plan.parents[3],
     )
+
+
+PLAN_NORMALIZATION_KINDS = (
+    "authorization-backfill",
+    "census-backfill",
+    "audit-backfill",
+    "orphan-rebind",
+    "constraint-supersession",
+)
+
+
+def _plan_normalization_resolution() -> str:
+    return (
+        "Backfilled the missing content from the approved source; pre-edit semantic "
+        "fingerprint sha256:" + "a" * 64 + " superseded the prior bytes."
+    )
+
+
+@pytest.mark.parametrize("kind", PLAN_NORMALIZATION_KINDS)
+def test_plan_normalization_deviations_accept_enumerated_kinds(
+    tmp_path: Path, kind: str
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan, "PARTIAL")
+    payload["deviations"] = [
+        {
+            "task": "T1",
+            "mismatch": f"plan-normalization: {kind}",
+            "resolution": _plan_normalization_resolution(),
+        }
+    ]
+
+    parsed = module.parse_status_yaml(
+        payload, plan.with_name(f"{plan.stem}.PARTIAL.yaml")
+    )
+
+    assert parsed.deviations[0]["mismatch"] == f"plan-normalization: {kind}"
+
+
+def test_plan_normalization_rejects_out_of_vocabulary_kind(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan, "PARTIAL")
+    payload["deviations"] = [
+        {
+            "task": "T1",
+            "mismatch": "plan-normalization: scope-widening",
+            "resolution": _plan_normalization_resolution(),
+        }
+    ]
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.PARTIAL.yaml"))
+
+    assert exc.value.code == "invalid-deviation"
+
+
+def test_plan_normalization_rejects_missing_pre_edit_digest(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan, "PARTIAL")
+    payload["deviations"] = [
+        {
+            "task": "T1",
+            "mismatch": "plan-normalization: authorization-backfill",
+            "resolution": "Backfilled the authorization and superseded the prior bytes.",
+        }
+    ]
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.PARTIAL.yaml"))
+
+    assert exc.value.code == "invalid-deviation"
+
+
+def test_plan_normalization_rejects_missing_superseded_content(
+    tmp_path: Path,
+) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    payload = _status_payload(module, plan, "PARTIAL")
+    payload["deviations"] = [
+        {
+            "task": "T1",
+            "mismatch": "plan-normalization: orphan-rebind",
+            "resolution": "Recorded the pre-edit fingerprint sha256:" + "a" * 64,
+        }
+    ]
+
+    with pytest.raises(module.ExecutionContractError) as exc:
+        module.parse_status_yaml(payload, plan.with_name(f"{plan.stem}.PARTIAL.yaml"))
+
+    assert exc.value.code == "invalid-deviation"
+
+
+def test_state_check_accepts_plan_normalization_deviation(tmp_path: Path) -> None:
+    module = sys.modules["plan_execution"]
+    plan = _stage_valid_plan(tmp_path)
+    state = plan.with_name(f"{plan.stem}.PARTIAL.yaml")
+    payload = _status_payload(module, plan, "PARTIAL")
+    payload["deviations"] = [
+        {
+            "task": "T1",
+            "mismatch": "plan-normalization: authorization-backfill",
+            "resolution": _plan_normalization_resolution(),
+        }
+    ]
+    module.write_status_yaml(state, payload)
+
+    result = _run_state_check(plan, state, tmp_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
 
 
 def test_yaml_status_filename_and_content_status_must_match(tmp_path: Path) -> None:

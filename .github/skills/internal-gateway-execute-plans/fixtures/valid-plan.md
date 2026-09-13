@@ -20,6 +20,23 @@ Validate the manifest-authoritative execution CLI against a realistic writer out
 - No Git mutation.
 - Preserve fixture integrity.
 
+## Target Census
+
+| Census ID | Target | Search | Hits | Disposition |
+| --- | --- | --- | --- | --- |
+| TC-01 | TGT-FIXTURE | `rg -n "fixture" tests/fixture` | none | Inspect-only target; no symbols are removed or renamed. |
+
+## Execution Authorization
+
+- Mode: execution-ready
+- Authorization: "Authorize execution-ready authoring of this fixture plan; execute only after human review and explicit approval."
+
+## Completeness Audit
+
+| Census ID | Command | Evidence | Result |
+| --- | --- | --- | --- |
+| TC-01 | `rg -n "fixture" tests/fixture` | none: inspect-only target; no references require changes. | Covered by T1. |
+
 ## Status Contract
 
 - YAML is the current runtime status and uses one uppercase sibling: `<plan-basename>.DONE.yaml`, `<plan-basename>.DONE_WITH_WARNINGS.yaml`, `<plan-basename>.PARTIAL.yaml`, or `<plan-basename>.BLOCKED.yaml`.

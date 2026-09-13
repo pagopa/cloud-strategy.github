@@ -20,7 +20,9 @@ from typing import Literal
 
 MANIFEST_SCHEMA_VERSION = 3
 MANIFEST_VERSION = "execution-manifest/v3"
+WRITER_OWNER = "/internal-gateway-writing-plans"
 EXECUTION_OWNER = "/internal-gateway-execute-plans"
+HANDOFF_OWNERS = (WRITER_OWNER, EXECUTION_OWNER)
 CANONICAL_HANDOFF_REQUIRES = (
     "human approval",
     "exact Manifest v3 review",
@@ -88,18 +90,13 @@ MANIFEST_POSTURES = frozenset(
 )
 MANIFEST_PHASES = frozenset({"baseline", "focused", "final"})
 MANIFEST_EQUIVALENCE = frozenset({"exact-only", "allowed-if-admissible"})
-MANIFEST_BOOTSTRAP_MODES = frozenset({"explicit-single-plan", "manifest-only"})
+MANIFEST_BOOTSTRAP_MODES = frozenset({"manifest-only"})
 PROJECTION_BINDING = {
     "controls": "manifest.controls",
     "tasks": "manifest.tasks",
     "validations": "manifest.validations",
     "authority": "manifest.authority_boundaries",
 }
-CANONICAL_COMPATIBILITY_PROJECTION = (
-    "Control Inventory",
-    "Task headings",
-    "Execution Contract",
-)
 CANONICAL_DELEGATION = {
     "schema_version": 1,
     "mode": "none",
@@ -113,6 +110,9 @@ REQUIRED_LEVEL2_HEADINGS = (
     "Global Constraints",
     "Repository Preflight",
     "Control Inventory",
+    "Target Census",
+    "Execution Authorization",
+    "Completeness Audit",
 )
 REQUIRED_EXECUTION_FIELDS = (
     "Baseline Validation",
@@ -124,6 +124,39 @@ SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 CONTROL_ID_RE = re.compile(r"[A-Z][A-Z0-9-]+")
 TASK_HEADING_RE = re.compile(r"(?im)^#{2,6}\s+Task(?:\s+\d+)?(?:\s*:|\b)")
 TASK_NUMBER_HEADING_RE = re.compile(r"(?im)^#{2,6}\s+Task\s+(\d+)\s*:")
+CENSUS_ID_RE = re.compile(r"TC-\d+")
+CENSUS_RAW_HIT_RE = re.compile(r"[A-Za-z0-9_./~-]+:\d+")
+AUTHORIZATION_MODE_RE = re.compile(
+    r"(?im)^\s*(?:[-*]\s+)?(?:\*\*)?Mode:(?:\*\*)?\s*(\S+)\s*$"
+)
+AUTHORIZATION_STATEMENT_RE = re.compile(
+    r'(?im)^\s*(?:[-*]\s+)?(?:\*\*)?Authorization:(?:\*\*)?\s*".+"\s*$'
+)
+GATING_PROSE_RE = re.compile(
+    r"(?i)("
+    r"analysis[- ]and[- ]planning only"
+    r"|planning[- ]only"
+    r"|analysis[- ]only"
+    r"|not for execution"
+    r"|do not (?:execute|implement|perform|carry out|start|begin)"
+    r"\b[^.\n]{0,80}\b(?:implementation|the plan|the work)\b"
+    r"|execution permission\s*:\s*(?:false|no|denied)\b"
+    r"|implementation (?:is )?(?:not allowed|forbidden|prohibited|out of scope)\b"
+    r")"
+)
+SCOPE_LIMIT_RE = re.compile(
+    r"(?i)("
+    r"\b(?:do not|don't|must not|never)\s+"
+    r"(?:modify|change|edit|touch|alter|update|rewrite|remove|delete)\b"
+    r"|\bno (?:modifications?|changes?|edits?|updates?) to\b"
+    r"|\b(?:must|should) not be "
+    r"(?:modified|changed|edited|touched|altered|updated|rewritten|removed|deleted)\b"
+    r")"
+)
+TASK_TOKEN_RE = re.compile(r"\bT\d+\b")
+TASK_EDGE_RE = re.compile(
+    r"\b(T\d+)\b[^\n]*?(?:-->|==>|-\.->|--x|--o)[^\n]*?\b(T\d+)\b"
+)
 UNCHECKED_TASK_RE = re.compile(r"(?m)^\s*[-*]\s+\[\s\]\s+\S")
 GIT_MUTATING_SUBCOMMANDS = frozenset(
     {
@@ -294,6 +327,21 @@ def _extract_section(text: str, heading: str) -> str:
         if collecting:
             collected.append(line)
     return "\n".join(collected).strip()
+
+
+def _section_table_rows(section: str) -> list[list[str]]:
+    rows: list[list[str]] = []
+    for line in section.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if not cells or all(not cell or set(cell) <= {"-", ":"} for cell in cells):
+            continue
+        if cells[0].lower().replace(" ", "") in {"id", "censusid"}:
+            continue
+        rows.append(cells)
+    return rows
 
 
 def _level2_heading(text: str, heading: str) -> re.Match[str] | None:
@@ -666,19 +714,13 @@ def _validate_bootstrap(value: object) -> None:
     if mode not in MANIFEST_BOOTSTRAP_MODES:
         raise StructureError(
             "malformed-execution-manifest",
-            "bootstrap.mode must be explicit-single-plan or manifest-only",
+            "bootstrap.mode must be manifest-only",
         )
     projection = _strings(bootstrap["compatibility_projection"], "bootstrap.compatibility_projection")
-    if mode == "manifest-only" and projection:
+    if projection:
         raise StructureError(
             "malformed-execution-manifest",
             "manifest-only plans must not emit a compatibility projection",
-        )
-    if mode == "explicit-single-plan" and projection != CANONICAL_COMPATIBILITY_PROJECTION:
-        raise StructureError(
-            "malformed-execution-manifest",
-            "explicit-single-plan compatibility_projection must be "
-            '["Control Inventory", "Task headings", "Execution Contract"]',
         )
     binding = _mapping(bootstrap["projection_binding"], "bootstrap.projection_binding")
     _exact_fields(binding, frozenset(PROJECTION_BINDING), "bootstrap.projection_binding")
@@ -703,10 +745,10 @@ def _validate_rollout_and_handoff(root: Mapping[str, object]) -> None:
         frozenset({"next_owner", "requires", "status_sibling", "git_mutation"}),
         "handoff",
     )
-    if handoff["next_owner"] != EXECUTION_OWNER:
+    if handoff["next_owner"] not in HANDOFF_OWNERS:
         raise StructureError(
             "malformed-execution-manifest",
-            f"handoff.next_owner must be {EXECUTION_OWNER}",
+            f"handoff.next_owner must be {WRITER_OWNER} or {EXECUTION_OWNER}",
         )
     requires = _strings(handoff["requires"], "handoff.requires", allow_empty=False)
     missing = [required for required in CANONICAL_HANDOFF_REQUIRES if required not in requires]
@@ -770,54 +812,6 @@ def parse_structural_manifest(text: str) -> dict[str, object]:
             "Execution Manifest must not contain a content or semantic digest value",
         )
     return dict(root)
-
-
-def _parse_bootstrap_projection(text: str) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    root = _mapping(_manifest_fenced_object(text, "Execution Contract"), "Execution Contract")
-    raw_validations = root.get("validations")
-    raw_manual = root.get("manual_obligations", [])
-    if not isinstance(raw_validations, list) or not isinstance(raw_manual, list):
-        raise StructureError(
-            "malformed-execution-contract",
-            "Execution Contract projection must contain validation and manual-obligation lists",
-        )
-    validations: list[dict[str, object]] = []
-    validation_ids: set[str] = set()
-    for index, raw_validation in enumerate(raw_validations):
-        validation = _mapping(raw_validation, f"Execution Contract validations[{index}]")
-        validation_id = _string(validation.get("id"), "Execution Contract validation id")
-        if validation_id in validation_ids:
-            raise StructureError(
-                "duplicate-execution-contract-validation-id",
-                f"Duplicate Execution Contract validation id: {validation_id}",
-            )
-        validation_ids.add(validation_id)
-        validations.append(
-            {
-                "id": validation_id,
-                "command": _string(
-                    validation.get("command"), "Execution Contract validation command"
-                ),
-                "phases": _strings(
-                    validation.get("phases"),
-                    "Execution Contract validation phases",
-                    allow_empty=False,
-                ),
-            }
-        )
-    manual: list[dict[str, object]] = []
-    manual_ids: set[str] = set()
-    for index, raw_obligation in enumerate(raw_manual):
-        obligation = _mapping(raw_obligation, f"Execution Contract manual_obligations[{index}]")
-        obligation_id = _string(obligation.get("id"), "Execution Contract manual obligation id")
-        if obligation_id in manual_ids:
-            raise StructureError(
-                "duplicate-execution-contract-manual-id",
-                f"Duplicate Execution Contract manual obligation id: {obligation_id}",
-            )
-        manual_ids.add(obligation_id)
-        manual.append({"id": obligation_id})
-    return validations, manual
 
 
 def _markdown_findings(text: str) -> list[Finding]:
@@ -932,7 +926,7 @@ def _check_projection_binding(text: str, manifest: Mapping[str, object]) -> list
         findings.append(
             Finding("bootstrap-projection-drift", "Authority projection drift: no_git_mutation is not true")
         )
-    if bootstrap.get("mode") == "manifest-only" and _level2_heading(text, "Execution Contract"):
+    if _level2_heading(text, "Execution Contract"):
         findings.append(
             Finding(
                 "obsolete-execution-contract",
@@ -940,60 +934,357 @@ def _check_projection_binding(text: str, manifest: Mapping[str, object]) -> list
                 "remove the section and its fenced block",
             )
         )
-    if bootstrap.get("mode") == "explicit-single-plan":
-        findings.extend(_check_execution_contract_projection(text, manifest))
     return findings
 
 
-def _check_execution_contract_projection(
+def _check_target_census(text: str, manifest: Mapping[str, object]) -> list[Finding]:
+    findings: list[Finding] = []
+    target_items = [
+        item
+        for item in manifest.get("targets") or []
+        if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+    ]
+    target_ids = {str(item["id"]) for item in target_items}
+    rows = _section_table_rows(_extract_section(text, "Target Census"))
+    census_ids: list[str] = []
+    covered: set[str] = set()
+    for index, cells in enumerate(rows, start=1):
+        if len(cells) < 5 or not all(cells[:5]):
+            findings.append(
+                Finding(
+                    "target-census-malformed",
+                    f"Target Census row {index} must have non-empty Census ID, Target, "
+                    "Search, Hits, and Disposition cells",
+                )
+            )
+            continue
+        census_id, target_id, _search, hits, _disposition = cells[:5]
+        if not CENSUS_ID_RE.fullmatch(census_id):
+            findings.append(
+                Finding(
+                    "target-census-malformed",
+                    f"Target Census row `{census_id}` must use the `TC-<n>` ID form",
+                )
+            )
+            continue
+        if census_id in census_ids:
+            findings.append(
+                Finding(
+                    "target-census-malformed",
+                    f"Duplicate Target Census ID: {census_id}",
+                )
+            )
+            continue
+        census_ids.append(census_id)
+        if target_id not in target_ids:
+            findings.append(
+                Finding(
+                    "target-census-malformed",
+                    f"Target Census row {census_id} names unknown manifest target "
+                    f"`{target_id}`",
+                )
+            )
+            continue
+        covered.add(target_id)
+        if not CENSUS_RAW_HIT_RE.search(hits) and hits.lower() not in {"none", "no hits"}:
+            findings.append(
+                Finding(
+                    "target-census-hits",
+                    f"Target Census row {census_id} must record raw `file:line` hits or the "
+                    f"literal `none`; found `{hits}`",
+                )
+            )
+    missing = sorted(
+        str(item["id"])
+        for item in target_items
+        if item.get("state") == "modify" and item["id"] not in covered
+    )
+    if missing:
+        findings.append(
+            Finding(
+                "target-census-gap",
+                f"Every `modify` target needs a Target Census row; missing {missing}",
+            )
+        )
+    return findings
+
+
+def _handoff_next_owner(manifest: Mapping[str, object]) -> str | None:
+    handoff = manifest.get("handoff")
+    if isinstance(handoff, Mapping):
+        owner = handoff.get("next_owner")
+        if isinstance(owner, str):
+            return owner
+    return None
+
+
+def _authorization_scope_conflicts(
+    constraints: str, manifest: Mapping[str, object]
+) -> list[Finding]:
+    findings: list[Finding] = []
+    modify_targets = [
+        (str(target.get("id")), str(target.get("path")))
+        for target in manifest.get("targets") or []
+        if isinstance(target, Mapping) and target.get("state") == "modify"
+    ]
+    for line in constraints.splitlines():
+        if not SCOPE_LIMIT_RE.search(line):
+            continue
+        for target_id, path in modify_targets:
+            names_path = bool(path) and path in line
+            names_id = re.search(rf"\b{re.escape(target_id)}\b", line) is not None
+            if names_path or names_id:
+                findings.append(
+                    Finding(
+                        "authorization-scope-conflict",
+                        "Global Constraints scope-limiting prose contradicts declared modify "
+                        f"target `{target_id}` (`{path}`); remove the contradiction",
+                    )
+                )
+                break
+    return findings
+
+
+def _check_execution_authorization(
     text: str, manifest: Mapping[str, object]
 ) -> list[Finding]:
     findings: list[Finding] = []
-    try:
-        projected_validations, projected_manual = _parse_bootstrap_projection(text)
-    except StructureError as exc:
-        return [Finding(exc.code, f"Execution Contract projection is invalid: {exc}")]
-    manifest_by_id = {
-        item["id"]: item
-        for item in manifest.get("validations") or []
-        if isinstance(item, Mapping)
-    }
-    contract_by_id = {item["id"]: item for item in projected_validations}
-    if set(manifest_by_id) != set(contract_by_id):
+    constraints = _extract_section(text, "Global Constraints")
+    if GATING_PROSE_RE.search(constraints):
         findings.append(
             Finding(
-                "bootstrap-projection-drift",
-                "Execution Contract projection drift: validation IDs do not equal manifest.validations",
+                "authorization-gating-prose",
+                "`## Global Constraints` must not carry execution-gating prose; "
+                "`## Execution Authorization` is the single authorization carrier",
             )
         )
-    else:
-        for validation_id, manifest_item in manifest_by_id.items():
-            contract_item = contract_by_id[validation_id]
-            if (
-                manifest_item["command"] != contract_item["command"]
-                or tuple(manifest_item["phases"]) != tuple(contract_item["phases"])
-            ):
-                findings.append(
-                    Finding(
-                        "bootstrap-projection-drift",
-                        f"Execution Contract projection drift for validation {validation_id}",
-                    )
+    findings.extend(_authorization_scope_conflicts(constraints, manifest))
+    section = _extract_section(text, "Execution Authorization")
+    modes = AUTHORIZATION_MODE_RE.findall(section)
+    if len(modes) != 1:
+        return findings + [
+            Finding(
+                "authorization-mode",
+                "`## Execution Authorization` must contain exactly one `Mode:` line with "
+                "`execution-ready` or `authoring-only`",
+            )
+        ]
+    mode = modes[0]
+    if mode not in {"execution-ready", "authoring-only"}:
+        return findings + [
+            Finding(
+                "authorization-mode",
+                "Execution Authorization Mode must be `execution-ready` or `authoring-only`; "
+                f"found `{mode}`",
+            )
+        ]
+    has_statement = AUTHORIZATION_STATEMENT_RE.search(section) is not None
+    next_owner = _handoff_next_owner(manifest)
+    if mode == "execution-ready":
+        if not has_statement:
+            findings.append(
+                Finding(
+                    "authorization-statement-missing",
+                    "Execution-ready plans must quote the literal user authorization on an "
+                    '`Authorization: "<statement>"` line',
                 )
-    manifest_manual = {
-        item["id"]: item
-        for item in manifest.get("manual_obligations") or []
-        if isinstance(item, Mapping)
+            )
+        if next_owner != EXECUTION_OWNER:
+            findings.append(
+                Finding(
+                    "execution-ready-handoff",
+                    "Execution-ready plans must hand off to "
+                    f"{EXECUTION_OWNER}; found `{next_owner}`",
+                )
+            )
+    else:
+        if has_statement:
+            findings.append(
+                Finding(
+                    "authorization-statement-conflict",
+                    "`authoring-only` plans must not carry an execution authorization statement",
+                )
+            )
+        if next_owner == EXECUTION_OWNER:
+            findings.append(
+                Finding(
+                    "authoring-only-handoff",
+                    "`authoring-only` plans must not offer the execution handoff; "
+                    f"use {WRITER_OWNER}",
+                )
+            )
+    return findings
+
+
+def _check_completeness_audit(text: str) -> list[Finding]:
+    findings: list[Finding] = []
+    known = {
+        cells[0]
+        for cells in _section_table_rows(_extract_section(text, "Target Census"))
+        if cells and CENSUS_ID_RE.fullmatch(cells[0])
     }
-    contract_manual = {item["id"]: item for item in projected_manual}
-    if set(manifest_manual) != set(contract_manual):
+    audited: set[str] = set()
+    for index, cells in enumerate(
+        _section_table_rows(_extract_section(text, "Completeness Audit")), start=1
+    ):
+        if len(cells) < 4 or not all(cells[:4]):
+            findings.append(
+                Finding(
+                    "completeness-audit-malformed",
+                    f"Completeness Audit row {index} must have non-empty Census ID, Command, "
+                    "Evidence, and Result cells",
+                )
+            )
+            continue
+        census_id, command = cells[0], cells[1]
+        if not CENSUS_ID_RE.fullmatch(census_id) or census_id not in known:
+            findings.append(
+                Finding(
+                    "completeness-audit-malformed",
+                    f"Completeness Audit row references unknown census ID `{census_id}`",
+                )
+            )
+            continue
+        audited.add(census_id)
+        if "`" not in command:
+            findings.append(
+                Finding(
+                    "completeness-audit-command",
+                    f"Completeness Audit row {census_id} must record the literal command in "
+                    "backticks",
+                )
+            )
+    uncovered = sorted(known - audited)
+    if uncovered:
         findings.append(
             Finding(
-                "bootstrap-projection-drift",
-                "Execution Contract projection drift: manual obligation IDs do not equal "
-                "manifest.manual_obligations",
+                "completeness-audit-gap",
+                f"Every census row needs a Completeness Audit row; missing {uncovered}",
             )
         )
     return findings
+
+
+def _check_plan_coverage(manifest: Mapping[str, object]) -> list[Finding]:
+    findings: list[Finding] = []
+    tasks = [item for item in manifest.get("tasks") or [] if isinstance(item, Mapping)]
+    validations = [
+        item for item in manifest.get("validations") or [] if isinstance(item, Mapping)
+    ]
+    obligations = [
+        item
+        for item in manifest.get("manual_obligations") or []
+        if isinstance(item, Mapping)
+    ]
+    task_targets = {
+        target_id
+        for task in tasks
+        for target_id in task.get("target_ids") or []
+        if isinstance(target_id, str)
+    }
+    for target in manifest.get("targets") or []:
+        if isinstance(target, Mapping) and target.get("id") not in task_targets:
+            findings.append(
+                Finding(
+                    "target-orphan",
+                    f"Target `{target.get('id')}` is not referenced by any task",
+                )
+            )
+    for task in tasks:
+        if not (task.get("validation_ids") or task.get("manual_obligation_ids")):
+            findings.append(
+                Finding(
+                    "task-without-obligation",
+                    f"Task `{task.get('id')}` must reference a validation or manual obligation",
+                )
+            )
+    referenced_validations = {
+        validation_id
+        for task in tasks
+        for validation_id in task.get("validation_ids") or []
+        if isinstance(validation_id, str)
+    }
+    for validation in validations:
+        if validation.get("id") not in referenced_validations:
+            findings.append(
+                Finding(
+                    "orphan-validation",
+                    f"Validation `{validation.get('id')}` is not referenced by any task",
+                )
+            )
+    resolvable = (
+        {task.get("id") for task in tasks}
+        | {validation.get("id") for validation in validations}
+        | {obligation.get("id") for obligation in obligations}
+    )
+    controls = manifest.get("controls")
+    if isinstance(controls, Mapping):
+        for control_id, raw_control in controls.items():
+            if not isinstance(raw_control, Mapping) or not isinstance(
+                raw_control.get("binding"), list
+            ):
+                continue
+            unresolved = [
+                item
+                for item in raw_control["binding"]
+                if isinstance(item, str) and item not in resolvable
+            ]
+            if unresolved:
+                findings.append(
+                    Finding(
+                        "control-binding-unresolved",
+                        f"Control `{control_id}` binds to IDs that do not resolve to a task, "
+                        f"validation, or manual obligation: {unresolved}",
+                    )
+                )
+    return findings
+
+
+def _check_task_graph(text: str, manifest: Mapping[str, object]) -> list[Finding]:
+    section = _extract_section(text, "Task Graph")
+    if not section:
+        return []
+    fenced = re.fullmatch(r"\s*```mermaid\s*\n(.*?)\n\s*```\s*", section, re.DOTALL)
+    if not fenced:
+        return [
+            Finding(
+                "task-graph-malformed",
+                "`## Task Graph` must contain exactly one fenced ```mermaid block and nothing "
+                "else",
+            )
+        ]
+    body = fenced.group(1)
+    tasks = {
+        str(item["id"]): item
+        for item in manifest.get("tasks") or []
+        if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+    }
+    nodes = set(TASK_TOKEN_RE.findall(body))
+    if nodes != set(tasks):
+        return [
+            Finding(
+                "task-graph-drift",
+                "Task Graph nodes must equal manifest task IDs; "
+                f"graph={sorted(nodes)} manifest={sorted(tasks)}",
+            )
+        ]
+    expected = {
+        (str(dependency), task_id)
+        for task_id, task in tasks.items()
+        for dependency in task.get("depends_on") or []
+        if isinstance(dependency, str)
+    }
+    found = {(left, right) for left, right in TASK_EDGE_RE.findall(body)}
+    if found != expected:
+        return [
+            Finding(
+                "task-graph-drift",
+                "Task Graph edges must equal manifest dependency pairs "
+                f"(dependency --> dependent); graph={sorted(found)} "
+                f"manifest={sorted(expected)}",
+            )
+        ]
+    return []
 
 
 def _producer_notices(plan_path: Path | None, manifest: Mapping[str, object]) -> list[Finding]:
@@ -1008,33 +1299,6 @@ def _producer_notices(plan_path: Path | None, manifest: Mapping[str, object]) ->
                 "notice",
             )
         )
-    tasks = {item["id"] for item in manifest.get("tasks") or [] if isinstance(item, Mapping)}
-    validations = {
-        item["id"] for item in manifest.get("validations") or [] if isinstance(item, Mapping)
-    }
-    obligations = {
-        item["id"] for item in manifest.get("manual_obligations") or [] if isinstance(item, Mapping)
-    }
-    resolvable = tasks | validations | obligations
-    controls = manifest.get("controls")
-    if isinstance(controls, Mapping):
-        for control_id, raw_control in controls.items():
-            if not isinstance(raw_control, Mapping) or not isinstance(raw_control.get("binding"), list):
-                continue
-            unresolved = [
-                item
-                for item in raw_control["binding"]
-                if isinstance(item, str) and item not in resolvable
-            ]
-            if unresolved:
-                notices.append(
-                    Finding(
-                        "control-binding-unresolved",
-                        f"Control `{control_id}` binds to IDs that do not resolve to a task, "
-                        f"validation, or manual obligation: {unresolved}",
-                        "notice",
-                    )
-                )
     return notices
 
 
@@ -1050,6 +1314,11 @@ def check_plan_structure(text: str, plan_path: Path | None = None) -> list[Findi
     findings.extend(_check_control_inventory(text, manifest))
     findings.extend(_check_task_headings(text, manifest))
     findings.extend(_check_projection_binding(text, manifest))
+    findings.extend(_check_target_census(text, manifest))
+    findings.extend(_check_execution_authorization(text, manifest))
+    findings.extend(_check_completeness_audit(text))
+    findings.extend(_check_plan_coverage(manifest))
+    findings.extend(_check_task_graph(text, manifest))
     findings.extend(_producer_notices(plan_path, manifest))
     if plan_path is not None:
         retained_dir = _find_repo_root(plan_path) / "tmp" / "superpowers" / "plans"

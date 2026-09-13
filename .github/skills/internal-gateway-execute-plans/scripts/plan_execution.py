@@ -144,7 +144,7 @@ MANIFEST_POSTURES = frozenset(
     {"mandatory-test-first", "feature-first", "prototype-unverified", "validation-only"}
 )
 MANIFEST_TARGET_STATES = frozenset({"create", "modify", "inspect"})
-MANIFEST_BOOTSTRAP_MODES = frozenset({"explicit-single-plan", "manifest-only"})
+MANIFEST_BOOTSTRAP_MODES = frozenset({"manifest-only"})
 MANIFEST_PHASES = frozenset({"baseline", "focused", "final"})
 MANIFEST_EQUIVALENCE = frozenset({"exact-only", "allowed-if-admissible"})
 MANIFEST_FIELDS = frozenset(
@@ -168,19 +168,47 @@ MANIFEST_FIELDS = frozenset(
     }
 )
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
+SHA256_DIGEST_RE = re.compile(r"(?i)sha256:[0-9a-f]{64}")
+PLAN_NORMALIZATION_PREFIX = "plan-normalization:"
+PLAN_NORMALIZATION_KINDS = frozenset(
+    {
+        "authorization-backfill",
+        "census-backfill",
+        "audit-backfill",
+        "orphan-rebind",
+        "constraint-supersession",
+    }
+)
+SUPERSEDED_CONTENT_MARKERS = ("superseded", "backfill", "backfilled", "replaced")
 DELEGATION_FIELDS = frozenset(
     {"schema_version", "mode", "worker", "result", "receipt", "acceptance"}
 )
 DELEGATION_MODES = frozenset({"none", "delegated"})
 LOCAL_DELEGATION_RESULT = "not_applicable"
-CURRENT_DELEGATION_COMPATIBILITY = "manifest-v3"
 
 TASK_HEADING_RE = re.compile(r"(?im)^#{2,6}\s+Task(?:\s+\d+)?(?:\s*:|\b)")
 UNCHECKED_TASK_RE = re.compile(r"(?m)^\s*[-*]\s+\[\s\]\s+\S")
-PLAN_HEADING_ALIASES = {
-    "Repository Preflight": ("Repository Preflight", "Preflight", "Preflight Gate"),
-}
-REQUIRED_PLAN_HEADINGS = ("Goal", "Global Constraints")
+REQUIRED_PLAN_HEADINGS = ("Goal", "Global Constraints", "Repository Preflight")
+WRITER_OWNER = "/internal-gateway-writing-plans"
+EXECUTION_OWNER = "/internal-gateway-execute-plans"
+AUTHORIZATION_MODE_RE = re.compile(
+    r"(?im)^\s*(?:[-*]\s+)?(?:\*\*)?Mode:(?:\*\*)?\s*(\S+)\s*$"
+)
+AUTHORIZATION_STATEMENT_RE = re.compile(
+    r'(?im)^\s*(?:[-*]\s+)?(?:\*\*)?Authorization:(?:\*\*)?\s*".+"\s*$'
+)
+GATING_PROSE_RE = re.compile(
+    r"(?i)("
+    r"analysis[- ]and[- ]planning only"
+    r"|planning[- ]only"
+    r"|analysis[- ]only"
+    r"|not for execution"
+    r"|do not (?:execute|implement|perform|carry out|start|begin)"
+    r"\b[^.\n]{0,80}\b(?:implementation|the plan|the work)\b"
+    r"|execution permission\s*:\s*(?:false|no|denied)\b"
+    r"|implementation (?:is )?(?:not allowed|forbidden|prohibited|out of scope)\b"
+    r")"
+)
 REQUIRED_EXECUTION_FIELDS = (
     "Baseline Validation",
     "Recovery Policy",
@@ -422,12 +450,6 @@ def _manifest_exact_fields(
             "missing-manifest-field",
             f"{label} is missing fields: {sorted(missing)}",
         )
-
-
-def delegation_compatibility_mode(manifest: Mapping[str, object]) -> str:
-    """Name the current local Manifest v3 provenance mode."""
-
-    return CURRENT_DELEGATION_COMPATIBILITY
 
 
 def _validate_delegation_provenance(
@@ -869,15 +891,7 @@ def _validate_bootstrap(value: object) -> None:
     projection = _strings(
         bootstrap["compatibility_projection"], "bootstrap.compatibility_projection"
     )
-    if mode == "explicit-single-plan" and projection != (
-        "Control Inventory",
-        "Task headings",
-        "Execution Contract",
-    ):
-        raise ValueError(
-            "bootstrap.compatibility_projection is not the supported projection"
-        )
-    if mode == "manifest-only" and projection:
+    if projection:
         raise ValueError("manifest-only plans must not emit a compatibility projection")
     binding = _manifest_object(
         bootstrap["projection_binding"], "bootstrap.projection_binding"
@@ -907,8 +921,10 @@ def _validate_rollout_and_handoff(root: Mapping[str, object]) -> None:
         {"next_owner", "requires", "status_sibling", "git_mutation"},
         "handoff",
     )
-    if handoff["next_owner"] != "/internal-gateway-execute-plans":
-        raise ValueError("handoff.next_owner must be /internal-gateway-execute-plans")
+    if handoff["next_owner"] not in {WRITER_OWNER, EXECUTION_OWNER}:
+        raise ValueError(
+            f"handoff.next_owner must be {WRITER_OWNER} or {EXECUTION_OWNER}"
+        )
     requires = _manifest_non_empty_strings(
         handoff["requires"], "handoff.requires"
     )
@@ -948,54 +964,6 @@ def parse_execution_manifest(text: str) -> dict[str, object]:
     except (TypeError, ValueError) as exc:
         raise ExecutionContractError("malformed-execution-manifest", str(exc)) from exc
     return dict(root)
-
-
-def _parse_bootstrap_projection(
-    text: str,
-) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    """Read only the validation and manual IDs needed for bootstrap drift checks."""
-
-    root = _manifest_fenced_object(text, "Execution Contract")
-    raw_validations = root.get("validations")
-    raw_manual_obligations = root.get("manual_obligations", [])
-    if not isinstance(raw_validations, list) or not isinstance(raw_manual_obligations, list):
-        raise ExecutionContractError(
-            "malformed-execution-contract",
-            "Execution Contract projection must contain validation and manual-obligation lists",
-        )
-    validations: list[dict[str, object]] = []
-    validation_ids: set[str] = set()
-    for index, raw_validation in enumerate(raw_validations):
-        validation = _manifest_object(raw_validation, f"Execution Contract validations[{index}]")
-        validation_id = _string(validation.get("id"), "Execution Contract validation id")
-        if validation_id in validation_ids:
-            raise ExecutionContractError(
-                "duplicate-execution-contract-validation-id",
-                f"Duplicate Execution Contract validation id: {validation_id}",
-            )
-        validation_ids.add(validation_id)
-        validations.append(
-            {
-                "id": validation_id,
-                "command": _string(validation.get("command"), "Execution Contract validation command"),
-                "phases": list(_manifest_non_empty_strings(validation.get("phases"), "Execution Contract validation phases")),
-            }
-        )
-    manual_obligations: list[dict[str, object]] = []
-    manual_ids: set[str] = set()
-    for index, raw_obligation in enumerate(raw_manual_obligations):
-        obligation = _manifest_object(raw_obligation, f"Execution Contract manual_obligations[{index}]")
-        obligation_id = _string(obligation.get("id"), "Execution Contract manual obligation id")
-        if obligation_id in manual_ids:
-            raise ExecutionContractError(
-                "duplicate-execution-contract-manual-id",
-                f"Duplicate Execution Contract manual obligation id: {obligation_id}",
-            )
-        manual_ids.add(obligation_id)
-        manual_obligations.append(
-            {"id": obligation_id}
-        )
-    return validations, manual_obligations
 
 
 def _mapping(value: object, label: str) -> Mapping[str, object]:
@@ -1195,8 +1163,21 @@ def _parse_warnings(value: object) -> tuple[dict[str, str], ...]:
     return tuple(warnings)
 
 
+def _plan_normalization_kind(mismatch: str) -> str | None:
+    match = re.fullmatch(
+        rf"(?i){re.escape(PLAN_NORMALIZATION_PREFIX)}\s*([a-z0-9-]+)",
+        mismatch.strip(),
+    )
+    if match is None:
+        return None
+    kind = match.group(1).lower()
+    return kind if kind in PLAN_NORMALIZATION_KINDS else None
+
+
 def _deviation_class(text: str) -> str | None:
     lowered = text.lower()
+    if PLAN_NORMALIZATION_PREFIX in lowered:
+        return "plan-normalization"
     forbidden = (
         "ambiguous",
         "semantic scope",
@@ -1242,10 +1223,31 @@ def _parse_deviations(value: object) -> tuple[dict[str, str], ...]:
             resolution = _string(mapping["resolution"], f"{label}.resolution")
         except (TypeError, ValueError) as exc:
             raise ExecutionContractError("malformed-deviation", str(exc)) from exc
-        if _deviation_class(f"{mismatch} {resolution}") is None:
+        if mismatch.strip().lower().startswith(PLAN_NORMALIZATION_PREFIX):
+            if _plan_normalization_kind(mismatch) is None:
+                raise ExecutionContractError(
+                    "invalid-deviation",
+                    f"{label} names an out-of-vocabulary plan-normalization kind",
+                )
+            if SHA256_DIGEST_RE.search(resolution) is None:
+                raise ExecutionContractError(
+                    "invalid-deviation",
+                    f"{label} plan-normalization resolution must carry the pre-edit "
+                    "sha256 semantic fingerprint",
+                )
+            if not any(
+                marker in resolution.lower() for marker in SUPERSEDED_CONTENT_MARKERS
+            ):
+                raise ExecutionContractError(
+                    "invalid-deviation",
+                    f"{label} plan-normalization resolution must record the superseded "
+                    "or backfilled content",
+                )
+        elif _deviation_class(f"{mismatch} {resolution}") is None:
             raise ExecutionContractError(
                 "invalid-deviation",
-                f"{label} is not an unequivocal path, structural, missing-tool, or declared-state resolution",
+                f"{label} is not an unequivocal path, structural, missing-tool, "
+                "declared-state, or plan-normalization resolution",
             )
         deviations.append(
             {"task": task, "mismatch": mismatch, "resolution": resolution}
@@ -1931,50 +1933,12 @@ def validate_manifest_projection(
 
     bootstrap = manifest.get("bootstrap")
     bootstrap_mode = bootstrap.get("mode") if isinstance(bootstrap, Mapping) else None
-    if bootstrap_mode == "explicit-single-plan":
-        try:
-            projected_validations, projected_manual_obligations = _parse_bootstrap_projection(text)
-        except ExecutionContractError as exc:
-            findings.append(f"Execution Contract projection is invalid: {exc}")
-        else:
-            manifest_validations = manifest.get("validations")
-            manifest_by_id = {
-                item["id"]: item
-                for item in manifest_validations or []
-                if isinstance(item, Mapping)
-            }
-            contract_by_id = {item["id"]: item for item in projected_validations}
-            if set(manifest_by_id) != set(contract_by_id):
-                findings.append(
-                    "Execution Contract projection drift: validation IDs do not equal manifest.validations"
-                )
-            else:
-                for validation_id, manifest_item in manifest_by_id.items():
-                    contract_item = contract_by_id[validation_id]
-                    if (
-                        manifest_item["command"] != contract_item["command"]
-                        or tuple(manifest_item["phases"]) != tuple(contract_item["phases"])
-                    ):
-                        findings.append(
-                            f"Execution Contract projection drift for validation {validation_id}"
-                        )
-            manifest_manual = {
-                item["id"]: item
-                for item in manifest.get("manual_obligations", [])
-                if isinstance(item, Mapping)
-            }
-            contract_manual = {item["id"]: item for item in projected_manual_obligations}
-            if set(manifest_manual) != set(contract_manual):
-                findings.append(
-                    "Execution Contract projection drift: manual obligation IDs do not equal manifest.manual_obligations"
-                )
-    elif bootstrap_mode == "manifest-only":
-        if re.search(r"(?m)^## Execution Contract\s*$", text):
-            findings.append(
-                "manifest-only plans must not contain an Execution Contract projection"
-            )
-    else:
+    if bootstrap_mode != "manifest-only":
         findings.append("Bootstrap projection mode is invalid or missing")
+    elif re.search(r"(?m)^## Execution Contract\s*$", text):
+        findings.append(
+            "manifest-only plans must not contain an Execution Contract projection"
+        )
 
     authority = manifest.get("authority_boundaries")
     if not isinstance(authority, Mapping) or authority.get("no_git_mutation") is not True:
@@ -2008,6 +1972,67 @@ def _plan_reference_matches(plan_path: Path, status_path: Path, reference: str, 
     return plan_path.resolve() in candidates
 
 
+def _authorization_findings(
+    text: str, manifest: Mapping[str, object]
+) -> list[Finding]:
+    """Block modify-target plans without a valid execution-ready authorization."""
+
+    targets = manifest.get("targets")
+    if not isinstance(targets, list) or not any(
+        isinstance(target, Mapping) and target.get("state") == "modify"
+        for target in targets
+    ):
+        return []
+    findings: list[Finding] = []
+    repair = "repair it as `plan-normalization: authorization-backfill`"
+    section = _extract_section(text, "Execution Authorization")
+    modes = AUTHORIZATION_MODE_RE.findall(section)
+    if len(modes) != 1:
+        findings.append(
+            Finding(
+                "authorization-missing",
+                "Plan has `modify` targets but no single `## Execution Authorization` "
+                f"`Mode:` line; {repair}",
+            )
+        )
+        return findings
+    mode = modes[0]
+    if mode != "execution-ready":
+        findings.append(
+            Finding(
+                "authorization-invalid",
+                f"`modify` targets require `Mode: execution-ready`, found `{mode}`; {repair}",
+            )
+        )
+        return findings
+    if AUTHORIZATION_STATEMENT_RE.search(section) is None:
+        findings.append(
+            Finding(
+                "authorization-invalid",
+                "Execution-ready authorization is missing the quoted "
+                f'`Authorization: "<statement>"` line; {repair}',
+            )
+        )
+    if GATING_PROSE_RE.search(_extract_section(text, "Global Constraints")):
+        findings.append(
+            Finding(
+                "authorization-invalid",
+                f"`## Global Constraints` carry execution-gating prose; {repair}",
+            )
+        )
+    handoff = manifest.get("handoff")
+    owner = handoff.get("next_owner") if isinstance(handoff, Mapping) else None
+    if owner != EXECUTION_OWNER:
+        findings.append(
+            Finding(
+                "authorization-invalid",
+                f"`handoff.next_owner` `{owner}` does not pair with execution-ready; "
+                f"{repair}",
+            )
+        )
+    return findings
+
+
 def _validate_plan(
     path: Path, repo_root: Path, snapshot: _PlanSnapshot | None = None
 ) -> list[Finding]:
@@ -2032,9 +2057,6 @@ def _validate_plan(
     for required in REQUIRED_PLAN_HEADINGS:
         if required not in headings and f"**{required}:**" not in text:
             findings.append(Finding("missing-heading", f"Plan missing required heading: {required}"))
-    for canonical, aliases in PLAN_HEADING_ALIASES.items():
-        if not any(alias in headings for alias in aliases):
-            findings.append(Finding("missing-heading", f"Plan missing required heading: {canonical}"))
     for required in REQUIRED_EXECUTION_FIELDS:
         if not re.search(rf"(?im)^\s*(?:[-*]\s+)?(?:\*\*)?{re.escape(required)}(?:\*\*)?\s*:", text):
             findings.append(Finding("missing-execution-field", f"Plan missing required execution field: {required}"))
@@ -2086,6 +2108,7 @@ def _validate_plan(
                     else "bootstrap-projection-drift"
                 )
                 findings.append(Finding(code, message))
+            findings.extend(_authorization_findings(text, manifest))
     return findings
 
 

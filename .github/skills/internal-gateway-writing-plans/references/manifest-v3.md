@@ -73,7 +73,9 @@ external and contains the computed current Manifest `semantic_fingerprint`.
   `manifest.validations`, and `manifest.authority_boundaries`.
 - `rollout` is a non-empty list of strings.
 - `handoff` has exactly `next_owner`, `requires`, `status_sibling`, and
-  `git_mutation`. `next_owner` is `/internal-gateway-execute-plans`;
+  `git_mutation`. `next_owner` is the writer or executor owner and must pair
+  with the authorization mode: `/internal-gateway-execute-plans` for
+  `execution-ready`, `/internal-gateway-writing-plans` for `authoring-only`;
   `requires` must contain the exact canonical strings `human approval`,
   `exact Manifest v3 review`, and `zero blocking preflight findings`;
   `status_sibling` is `none`; and `git_mutation` is `prohibited`.
@@ -109,6 +111,44 @@ manifest-only plan has no `## Execution Contract`.
   exactly `T1` through `T<N>` and match the heading numbers. Task headings
   exist only for manifest tasks; no other `Task N:` heading may appear.
 - Control Inventory first-column IDs use uppercase `[A-Z][A-Z0-9-]+` form.
+
+## Plan Completeness Sections
+
+Current writer output carries these exact level-2 headings in addition to the
+manifest and inventory headings. The executor parser tolerates them; the writer
+structural check owns their shape and coverage.
+
+- `## Target Census` covers every `modify` target with at least one search row.
+  Each row names a unique `TC-<n>` census ID, a manifest target ID, a
+  deterministic search command, raw `file:line` hit evidence or a no-hit token
+  (`none` or `no hits`, matched case-insensitively), and a disposition. Every
+  symbol, rule, or label that a task removes, renames, or references must appear
+  as a search term; the structural check enforces coverage and raw hits, and
+  human review verifies the derivation.
+- `## Execution Authorization` is the single authorization carrier: it contains
+  exactly one `Mode:` line whose value is `execution-ready` or `authoring-only`.
+  `execution-ready` requires an `Authorization: "<statement>"` line quoting the
+  literal user authorization and pairs with `handoff.next_owner`
+  `/internal-gateway-execute-plans`; `authoring-only` keeps the artifact
+  retained for revision, carries no authorization statement, pairs with
+  `/internal-gateway-writing-plans`, and never offers the execution handoff.
+  Global Constraints must not carry execution-gating prose, and a
+  scope-limiting bullet must not contradict a declared `modify` target.
+- `## Completeness Audit` contains one table row per census row, each with a
+  backticked literal command and raw evidence. Shape and coverage are
+  mechanical; semantic completeness is established by the recorded audit and
+  human review, never by the mechanical check alone.
+- `## Task Graph` is optional. When present, it is a single fenced `mermaid`
+  block whose nodes are exactly the manifest task IDs and whose `X --> Y` edges
+  are exactly the dependency pairs where `Y` depends on `X`. Emit it only when
+  the manifest has at least three dependency relations; otherwise keep the
+  relationship in chat. That emission threshold is an authoring convention; the
+  structural check validates only shape and drift when the section is present.
+
+Plan-internal coverage is writer-owned: every target is referenced by a task,
+every task references a validation or manual obligation, every validation is
+referenced by a task, and every control binding resolves to a task, validation,
+or manual obligation.
 
 ## Canonical Authoring Blocks
 
@@ -251,9 +291,22 @@ Bootstrap records contain only `check`, `status`, and `next_action`; status is
 `execution_readiness`. Both successful terminal statuses require every category
 to pass.
 
+## Plan Normalization Deviations
+
+`plan-normalization` is the bounded executor repair type for mechanically
+repairable plan defects on plans with `modify` targets. The deviation keeps the
+exact `task`, `mismatch`, and `resolution` field set. `mismatch` is exactly
+`plan-normalization: <kind>` with one of these five kinds:
+`authorization-backfill`, `census-backfill`, `audit-backfill`, `orphan-rebind`,
+and `constraint-supersession`. Any other kind is rejected and stops with
+`BLOCKED`. The `resolution` must name the pre-edit Manifest `sha256:` semantic
+fingerprint and the superseded or backfilled content. Every normalization edit
+regenerates the status sibling because the Manifest semantics changed; the
+deviation ledger is the surviving provenance trace.
+
 ## Projection Checklist
 
-Run both evidence gates on the exact final plan bytes, in this order, and
+Run all three evidence gates on the exact final plan bytes, in this order, and
 retain the literal result tokens:
 
 1. Writer structural check:
@@ -262,8 +315,11 @@ retain the literal result tokens:
 2. Executor preflight:
    `bash <physical-executor-bundle>/scripts/run.sh preflight <plan> --format compact`
    must report `execution=passed(0 blocking)`.
+3. Bundle-local writer suite:
+   `python3 -m pytest <writer-bundle>/tests -q`
+   must report zero failures.
 
-A prose assertion never substitutes for either executed result. Before handoff,
+A prose assertion never substitutes for any executed result. Before handoff,
 confirm target and authority boundaries, task order and references, exact field
 sets, no Git mutation, approval separation, and status separation. The binding
 rules above prevent the five observed producer failures: a manifest heading

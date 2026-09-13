@@ -27,7 +27,7 @@ WRITER_CHECKER = WRITER_BUNDLE / "scripts/check_plan_structure.py"
 EXECUTOR_PARSER = EXECUTOR_BUNDLE / "scripts/plan_execution.py"
 SKELETON_HEADING = "## Canonical Complete Skeleton"
 FIELD_FINDING_CODES = frozenset({"missing-manifest-field", "unknown-manifest-field"})
-MINIMUM_EXECUTOR_BLOCKING_CASES = 8
+MINIMUM_EXECUTOR_BLOCKING_CASES = 16
 
 MINIMAL_PLAN_TEMPLATE = """# Example Plan
 
@@ -38,6 +38,23 @@ Exercise the canonical skeleton.
 ## Global Constraints
 
 - No Git mutation.
+
+## Target Census
+
+| Census ID | Target | Search | Hits | Disposition |
+| --- | --- | --- | --- | --- |
+| TC-01 | TGT-01 | `rg -n "target" path/to/target.py` | path/to/target.py:1 | Modify scope for T1. |
+
+## Execution Authorization
+
+- Mode: execution-ready
+- Authorization: "Authorize execution-ready authoring of the canonical skeleton plan."
+
+## Completeness Audit
+
+| Census ID | Command | Evidence | Result |
+| --- | --- | --- | --- |
+| TC-01 | `rg -n "target" path/to/target.py` | path/to/target.py:1 | Covered by T1. |
 
 ## Repository Preflight
 
@@ -166,6 +183,21 @@ def test_reference_skeleton_wraps_into_a_clean_minimal_plan(tmp_path: Path) -> N
     assert not _blocking(executor_findings), executor_findings
 
 
+def _without_authorization_section(text: str) -> str:
+    start = text.index("## Execution Authorization")
+    end = text.index("## Completeness Audit", start)
+    return text[:start] + text[end:]
+
+
+def _authoring_only(text: str) -> str:
+    return re.sub(
+        r"(?m)^- Authorization:.*\n",
+        "",
+        text.replace("- Mode: execution-ready", "- Mode: authoring-only", 1),
+        count=1,
+    )
+
+
 def _structural_corpus() -> tuple[tuple[str, object], ...]:
     return (
         (
@@ -261,6 +293,31 @@ def _structural_corpus() -> tuple[tuple[str, object], ...]:
                 1,
             ),
         ),
+        (
+            "authorization-missing",
+            lambda text: _without_authorization_section(text),
+        ),
+        (
+            "authoring-only-mode",
+            lambda text: _authoring_only(text),
+        ),
+        (
+            "gating-prose",
+            lambda text: text.replace(
+                "- No Git mutation.",
+                "- No Git mutation.\n"
+                "- Analysis and planning only; do not execute implementation steps.",
+                1,
+            ),
+        ),
+        (
+            "scope-limiting-conflict",
+            lambda text: text.replace(
+                "- No Git mutation.",
+                "- No Git mutation.\n- Do not modify path/to/target.py.",
+                1,
+            ),
+        ),
     )
 
 
@@ -276,6 +333,7 @@ def test_differential_structural_parity(tmp_path: Path) -> None:
     assert not _blocking(base_executor.validate_plan(base_plan, tmp_path))
 
     executor_blocking_cases: list[str] = []
+    writer_blocking_cases: list[str] = []
     for name, mutate in _structural_corpus():
         case_dir = tmp_path / name
         case_dir.mkdir()
@@ -286,10 +344,21 @@ def test_differential_structural_parity(tmp_path: Path) -> None:
         )
         executor_blocking = _blocking(base_executor.validate_plan(plan, case_dir))
 
+        if writer_blocking:
+            writer_blocking_cases.append(name)
         if executor_blocking:
             executor_blocking_cases.append(name)
         assert not executor_blocking or writer_blocking, name
 
-    assert len(executor_blocking_cases) >= MINIMUM_EXECUTOR_BLOCKING_CASES, (
+    assert {
+        "authorization-missing",
+        "authoring-only-mode",
+        "gating-prose",
+    } <= set(executor_blocking_cases)
+    # scope-limiting-conflict stays writer-stricter by design: the writer gate
+    # rejects scope-limiting prose that contradicts a declared modify target
+    # while the executor parser leaves scope judgment to the writer gate.
+    assert "scope-limiting-conflict" in writer_blocking_cases
+    assert len(executor_blocking_cases) == MINIMUM_EXECUTOR_BLOCKING_CASES, (
         executor_blocking_cases
     )
