@@ -8,6 +8,21 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-09-11
+
+- Hardened `.github/skills/internal-gateway-writing-plans/` and `.github/skills/internal-gateway-execute-plans/` against the post-mortem plan-generation defects: the writer checker and the executor parser now emit separator-aware and prose-aware manifest-fence messages with removal hints and bounded 160-character compact finding messages.
+- Added the manifest-section hygiene rule, the canonical complete 16-field manifest skeleton with canonical nested values, and the ordered evidence-gate command checklist carrying the literal tokens `structure=passed(0 blocking)` and `execution=passed(0 blocking)` to both `references/manifest-v3.md` files, enforced by full post-preamble reference equality.
+- Pinned the post-mortem mutations (`manifest-separator-after-fence`, `partial-manifest-missing-fields`) in the writer regression corpus and added `tests/internal_gateway/test_bundle_alignment.py` with the skeleton parser pin and the differential parity harness for structural mutations.
+- Added the plan-completeness contract to both gateway bundles: mandatory `## Target Census`, `## Execution Authorization`, and `## Completeness Audit` sections plus the optional `## Task Graph`, enforced by new blocking checks in `.github/skills/internal-gateway-writing-plans/scripts/check_plan_structure.py` and covered by its regression corpus.
+- Aligned both `references/manifest-v3.md` copies with checker behavior: documented the accepted no-hit tokens, the backticked completeness-audit command, the Task Graph emission convention, and the bundle-local pytest suite as the third evidence gate.
+- Moved the writer gateway's delegated-authoring mechanics to `references/delegation.md` to keep `SKILL.md` within the 220-line body budget, and repaired the writer `agents/openai.yaml` projection with a complete legacy-material clause, normalized indentation, and the completeness and delegation sync.
+- Hardened the writer gate against contradictory plans: execution-gating prose in `## Global Constraints` now blocks in every mode, scope-limiting prose blocks only when it contradicts a declared `modify` target, and the authorization mode must pair with the writer/executor handoff owner in `.github/skills/internal-gateway-writing-plans/scripts/check_plan_structure.py`.
+- Added native executor authorization findings `authorization-missing` and `authorization-invalid` for plans with `modify` targets, each naming the `plan-normalization: authorization-backfill` repair, and widened `handoff.next_owner` acceptance to the writer and executor owners in `.github/skills/internal-gateway-execute-plans/scripts/plan_execution.py`.
+- Added the parser-validated `plan-normalization` deviation vocabulary (`authorization-backfill`, `census-backfill`, `audit-backfill`, `orphan-rebind`, `constraint-supersession`) requiring the pre-edit `sha256:` semantic fingerprint and the superseded or backfilled content, documented identically in both `references/manifest-v3.md` copies.
+- Encoded the dual-gate OK evidence contract and the execution-ready-only handoff offer in the writer surfaces and the bounded normalization loop with typed deviations in the executor surfaces, keeping both `SKILL.md` bodies within the 220-line budget.
+- Swept proven-dead legacy paths after a caller/test/current-plan audit: removed the `explicit-single-plan` bootstrap apparatus, the `Preflight` and `Preflight Gate` heading aliases, and the unused delegation compatibility helper, retaining the live rejection codes.
+- Extended `tests/internal_gateway/test_bundle_alignment.py` with the missing-authorization, authoring-only, gating-prose, and scope-conflict corpus entries and raised `MINIMUM_EXECUTOR_BLOCKING_CASES` to the new observed count of 16.
+
 ## 2026-08-12
 
 - Narrowed `.github/skills/internal-tf/` to language-only structure guidance, moved cross-platform provider lockfile evidence and executable import-safe guards to `.github/skills/internal-terraform/references/operational-validation.md`, and preserved the wrapper as the fail-safe primary for mixed and operational work.

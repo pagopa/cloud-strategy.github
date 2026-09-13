@@ -3,4 +3,4 @@ policy:
 interface:
   display_name: "internal-azure-strategic"
   short_description: "Azure strategic decision framing and tradeoff analysis"
-  default_prompt: "Use $internal-azure for an Azure decision-framing request, then apply $internal-azure-strategic to compare tradeoffs and recommend a direction."
+  default_prompt: "Use /internal-azure for an Azure decision-framing request, then apply $internal-azure-strategic to compare tradeoffs and recommend a direction."

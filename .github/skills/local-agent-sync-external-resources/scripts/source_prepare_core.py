@@ -7,7 +7,6 @@ import os
 import shutil
 import subprocess
 import tarfile
-import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,7 +19,6 @@ from sync_external_resources_core import (
     _run_command,
     compute_prepared_source_paths_sha256,
 )
-
 
 NETWORK_COMMAND_TIMEOUT_SECONDS = 1800
 
@@ -183,6 +181,63 @@ def _verify_commit(cache: Path, sha: str) -> None:
     obj_type = type_result.stdout.strip()
     if obj_type != "commit":
         raise ValueError(f"object {sha} is {obj_type}, expected commit")
+
+
+def read_commit_date(cache: Path, sha: str) -> str | None:
+    """Read the committer date of a pinned commit from a local cache.
+
+    Local read only: never fetches. Returns None when the cache or the
+    commit object is unavailable.
+    """
+    if not (cache / "HEAD").exists():
+        return None
+    result = subprocess.run(
+        ["git", "show", "-s", "--format=%cI", sha],
+        cwd=cache,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip() or None
+
+
+def _commit_date_mismatch_message(
+    source: ManagedSource, actual_date: str
+) -> str:
+    return (
+        f"source {source.source_id} commit_date mismatch: manifest declares "
+        f"{source.commit_date}, commit {source.ref[:12]} is dated {actual_date}. "
+        "Update commit_date in the manifest or re-pin the ref."
+    )
+
+
+def _verify_declared_commit_date(cache: Path, source: ManagedSource) -> None:
+    if source.commit_date is None:
+        return
+    actual = read_commit_date(cache, source.ref)
+    if actual is None:
+        raise ValueError(
+            f"source {source.source_id}: cannot verify commit_date "
+            f"{source.commit_date}: commit {source.ref[:12]} not in cache."
+        )
+    if actual[:10] != source.commit_date:
+        raise ValueError(_commit_date_mismatch_message(source, actual[:10]))
+
+
+def verify_commit_dates_against_cache(
+    resources: ManagedResources, workspace: Path
+) -> None:
+    for source in resources.sources:
+        if source.commit_date is None:
+            continue
+        cache = _cache_dir(workspace, source.repository)
+        actual = read_commit_date(cache, source.ref)
+        if actual is None:
+            continue
+        if actual[:10] != source.commit_date:
+            raise ValueError(_commit_date_mismatch_message(source, actual[:10]))
 
 
 def _write_pin(cache: Path, sha: str) -> None:
@@ -398,6 +453,8 @@ def _prepare_one_source(
             before = _cache_size(cache)
             cache_status, fetch_strategy = _fetch_source(cache, source)
             bytes_added = max(0, _cache_size(cache) - before)
+
+        _verify_declared_commit_date(cache, source)
 
         staging_dir = sources_root.parent / f".{source.source_id}.staging"
         if staging_dir.exists():

@@ -1,6 +1,6 @@
 interface:
   display_name: "internal-github-governance"
   short_description: "GitHub guardrails, permissions, and policy guidance"
-  default_prompt: "Use /internal-github to route this request to /internal-github-governance."
+  default_prompt: "Use /internal-github to route this request to $internal-github-governance."
 policy:
   allow_implicit_invocation: false

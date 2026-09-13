@@ -20,8 +20,20 @@ user report. It does not delegate plan work.
 - The writer-owned `## Execution Manifest` v3 is authoritative for targets,
   tasks, controls, validations, approval, warnings, deviations, and authority
   boundaries.
-- Do not rewrite the Manifest or broaden the plan. A plan change requires the
-  writer route and refreshed approval; v3 has no hash or fingerprint binding.
+- Bounded normalization replaces rewriting: when the preflight reports a
+  mechanically repairable defect on a plan with `modify` targets, edit only the
+  authorization backfill, census or audit backfill, an orphaned task reference
+  rebind, or a superseded Global Constraint, then record one
+  `plan-normalization` deviation carrying the pre-edit semantic `sha256:`
+  fingerprint and the superseded or backfilled content, re-run the preflight,
+  and proceed only on zero blocking findings. The only accepted mismatch kinds
+  are `authorization-backfill`, `census-backfill`, `audit-backfill`,
+  `orphan-rebind`, and `constraint-supersession`. Never change targets,
+  validation semantics, retry limits, authority boundaries, or protected
+  paths, and never make the retained plan file a task target. Normative plan
+  changes still require the writer route and refreshed approval; preflight
+  binds no content hash, while state binding uses the Manifest semantic
+  fingerprint.
 - Do not dispatch a subagent, worker, model switch, or delegated execution
   path. `internal-luna-executor` is metadata only and is never invoked here.
 - Do not run Git mutations. Leave the worktree uncommitted.
@@ -43,11 +55,14 @@ entrypoint; a consumer working directory or a home-directory fallback is never
 an executor owner.
 
 The executor bundle owns its runtime dependencies. Declare direct dependencies
-in `scripts/requirements.in`, generate the hash-locked
-`scripts/requirements.txt` with the repository lock generator, and invoke the
-bundle through `scripts/run.sh`. The runner must derive its physical bundle
-from its loaded entrypoint and must not use repository-global requirements.
-Provision the local runtime only with the explicit
+in `scripts/requirements.in`; generate the hash-locked pip-format
+`scripts/requirements.txt` from them so that it pins PyYAML with sha256
+hashes, the checks `scripts/run.sh` enforces. Regenerate the lock from the
+bundle root with
+`uv pip compile --generate-hashes --universal --output-file scripts/requirements.txt scripts/requirements.in`
+and invoke the bundle through `scripts/run.sh`. The runner must derive its
+physical bundle from its loaded entrypoint and must not use repository-global
+requirements. Provision the local runtime only with the explicit
 `bash <physical-executor-bundle>/scripts/run.sh --bootstrap` command; ordinary
 preflight and state-check calls reuse the provisioned runtime and fail closed
 when it is unavailable.
@@ -119,8 +134,8 @@ fields:
 `completed_task_ids`, `remaining_task_ids`, `last_validation`, `next_action`,
 `warnings`, `deviations`.
 
-Runtime status and the Execution Manifest use schema version `2`. Older status
-siblings and v1 plans must be regenerated before resuming.
+The Execution Manifest uses schema version `3`; runtime status uses schema
+version `2`. Older status siblings must be regenerated before resuming.
 YAML is the only runtime status representation.
 
 `status` is exactly one of `DONE`, `DONE_WITH_WARNINGS`, `PARTIAL`, or `BLOCKED`:
@@ -143,9 +158,11 @@ approval. The executor derives it from the approved plan as
 remains admissible only when an explicit statement already exists. The
 statement is exactly `explicit execution approval`. `delivery_verdicts` contains the five canonical category records.
 Each warning has exactly `kind`, `evidence`, and `next_action`. Each deviation
-has exactly `task`, `mismatch`, and `resolution`; only unequivocal path moves,
-structural ID/name alignment, equivalent missing-tool replacements, and targets
-already in the declared state may be recorded.
+has exactly `task`, `mismatch`, and `resolution`; accepted records are
+unequivocal path moves, structural ID/name alignment, equivalent missing-tool
+replacements, targets already in the declared state, and parser-validated
+`plan-normalization` kinds with the pre-edit `sha256:` fingerprint and the
+superseded or backfilled content.
 
 The uppercase filename status and YAML `status` must agree. Validate it with
 the loaded bundle runner:

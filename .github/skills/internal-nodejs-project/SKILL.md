@@ -1,6 +1,6 @@
 ---
 name: internal-nodejs-project
-description: Use when creating, modifying, reviewing, or refactoring Node.js or TypeScript application behavior and structure across services, APIs, handlers, modules, adapters, or tests.
+description: Use when creating, modifying, reviewing, or refactoring Node.js or TypeScript application behavior and structure across services, APIs, handlers, modules, adapters, or tests. Route localized changes, package metadata, and dependencies to /internal-nodejs.
 ---
 
 # Node.js Project Skill

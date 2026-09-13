@@ -3,4 +3,4 @@ policy:
 interface:
   display_name: "internal-aws-lambda"
   short_description: "AWS Lambda runtime and event-source patterns"
-  default_prompt: "Use $internal-aws-lambda for this routed AWS Lambda task."
+  default_prompt: "Use /internal-aws to route this AWS request, then apply $internal-aws-lambda for handler, event-source, runtime, packaging, retry, concurrency, or cold-start work."

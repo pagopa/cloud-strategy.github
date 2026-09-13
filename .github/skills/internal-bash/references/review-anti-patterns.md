@@ -41,6 +41,7 @@ major dialect mismatch. Do not recommend Bash syntax to a POSIX `sh` target.
 | SH-m04 | A `grep`-to-`awk` pipeline where one `awk` suffices | Unnecessary pipe |
 | SH-m05 | Missing `command -v` check before using external tools | Fails confusingly if a tool is missing |
 | SH-m06 | Non-English log messages or comments | Language policy violation |
+| SH-m07 | A non-obvious function has no header comment | Callers cannot tell which globals, arguments, and outputs the helper depends on |
 
 ## Nit
 

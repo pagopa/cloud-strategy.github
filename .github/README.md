@@ -11,3 +11,12 @@ customization assets maintained in `cloud-strategy.github`.
 
 - Repository-local sync agents are documented in [`agents/README.md`](agents/README.md).
 - Reusable gateway and review workflows live under [`skills/`](skills/).
+
+## Validation
+
+Run `make github-catalog-validation` for the repository-owned GitHub catalog
+validation. Run `make docs-lint` after Markdown changes.
+
+No diagram is provided because this directory README is a catalog navigation
+surface; current component and flow relationships belong in
+[docs/architecture.md](../docs/architecture.md).

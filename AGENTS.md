@@ -13,6 +13,24 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 - Use only policy that exists on disk. Removed files, generated output,
   historical aliases, and past automation are not active policy.
 
+## Skill Resolution
+
+- Treat the injected skill catalog as discovery evidence, not as sole proof
+  that a skill is unavailable.
+- When the user names a skill, or a loaded skill routes work to another named
+  skill, resolve only that skill in the declared skill roots before declaring
+  it unavailable. Do not scan unrelated roots.
+- For filesystem-backed skills, follow symbolic links within the applicable
+  filesystem permissions and trust boundaries, then verify the exact resolved
+  `SKILL.md`. A readable regular file proves that the local skill resource is
+  present even when the catalog or a non-following search omits it; it does not
+  prove that the runtime can invoke the skill.
+- After validating the resolved target, read the skill from its canonical
+  directory and resolve its relative resources from that directory.
+- Report the concrete failure: missing skill, broken symbolic link, unreadable
+  file, or unavailable execution capability. Use provider-specific discovery
+  for skills that are not filesystem-backed.
+
 ## Working Agreement
 
 - Identify the target, nearest owner, bounded evidence, and validation path
@@ -77,25 +95,27 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 
 - A direct user-requested format or an applicable skill-owned output contract
   controls the response layout, required fields, ordering, length, visual use,
-  and machine-readable shape. Apply the following defaults only where that
-  narrower contract is silent.
-- Do not invent a cross-skill response template. When a skill owns the
-  response, use that skill's specialized projection and preserve its field
-  order. The root policy is only a fallback for work with no narrower owner.
-- Keep analysis, review, diagnosis, comparison, report, and handoff responses
-  concise and proportional. Preserve material blockers, risks, uncertainty,
-  validation gaps, and the next required action in the locations defined by
-  the owning skill.
+  and machine-readable shape. When a skill owns the response, use that skill's
+  specialized projection and preserve its field order; apply the defaults below
+  only where that narrower contract is silent.
+- Lead with the outcome, and let supporting detail follow.
+- Default to compact output that fits one screen, expanding on request or as
+  the material's complexity requires.
+- Preserve material errors, security warnings, blockers, risks, uncertainty,
+  validation gaps, and the next required action in the locations defined by the
+  owning skill.
 - For non-trivial flows, sequences, dependencies, ownership models, state
-  transitions, or multi-part comparisons, strongly prefer the smallest useful
-  Mermaid diagram when it communicates the relationship faster and more
-  clearly than prose alone. Skip decorative or redundant visuals. Preserve the
-  diagram's controlling conclusion in adjacent text so the response remains
-  useful when Mermaid is not rendered.
-- Keep full evidence and decision history in an existing retained artifact when
-  one already owns that detail. Use the human-facing response for the outcome,
-  material delta, risk, and next action. Do not create an artifact solely to
-  shorten the response.
+  transitions, or multi-part comparisons, strongly prefer Mermaid when it
+  communicates the relationship faster and more clearly than prose alone. Use
+  the smallest set of diagrams that carries the relationship, one or more as
+  the material requires; keep each diagram minimal, and preserve its
+  controlling conclusion in adjacent text so the response remains useful when
+  Mermaid is not rendered.
+- Group related material with headings, bullets, or tables where that aids
+  scanning. Keep full evidence and decision history in an existing retained
+  artifact when one already owns that detail; use the human-facing response for
+  the outcome, material delta, risk, and next action, and do not create an
+  artifact solely to shorten the response.
 
 ## Protected Skill Boundary
 

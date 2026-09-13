@@ -1,15 +1,75 @@
 version: 1
+# Pinned import sources. The summary table is machine-checked by
+# tests/scripts/test_manifest.py::test_live_manifest_summary_table_matches_declared_sources
+# against the parsed sources below. `ref` remains the sole accepted source
+# identity; tag and commit_date are informational provenance.
+# managed-sources-summary:start
+# | source | repository | ref (sha) | tag | commit_date | skills |
+# |---|---|---|---|---|---|
+# | addyosmani-agent-skills | addyosmani/agent-skills | 84ee50673804 | 0.6.9 | 2026-09-04 | 2 |
+# | anthropic-skills | anthropics/skills | 41bbe19d1a1a | - | 2026-09-03 | 4 |
+# | antonbabenko-terraform-skill | antonbabenko/terraform-skill | 0a3a4a66e990 | - | 2026-07-03 | 1 |
+# | atlassian-mcp-server | atlassian/atlassian-mcp-server | 798f8138c976 | - | 2026-09-03 | 1 |
+# | github-awesome-copilot | github/awesome-copilot | f38fb6cf039b | - | 2026-09-07 | 10 |
+# | mattpocock-skills | mattpocock/skills | 6acc160e4e0c | v1.2.3 | 2026-08-06 | 25 |
+# | obra-superpowers | obra/superpowers | b36e0829c6d0 | v6.3.0 | 2026-08-12 | 13 |
+# | openai-skills-curated | openai/skills | 49f948faa925 | - | 2026-06-23 | 2 |
+# | openai-skills-retained-doc | openai/skills | 49f948faa925 | - | 2026-06-23 | 1 |
+# | sickn33-antigravity | sickn33/antigravity-awesome-skills | b1aebac60a88 | v16.9.1 | 2026-09-06 | 7 |
+# | vercel-labs-skills | vercel-labs/skills | 1682051d48c3 | v1.5.24 | 2026-09-06 | 1 |
+# managed-sources-summary:end
 sources:
+  addyosmani-agent-skills:
+    repository: https://github.com/addyosmani/agent-skills.git
+    ref: 84ee50673804b95c287d1e4eb4f1c1dad7c5188a
+    commit_date: 2026-09-04
+    advertised_ref: 0.6.9
+    assets:
+      - upstream: skills/code-simplification
+        local: .github/skills/addyosmani-code-simplification
+        canonical_name: addyosmani-code-simplification
+      - upstream: skills/code-review-and-quality
+        local: .github/skills/addyosmani-code-review-and-quality
+        canonical_name: addyosmani-code-review-and-quality
+  anthropic-skills:
+    repository: https://github.com/anthropics/skills.git
+    ref: 41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f
+    commit_date: 2026-09-03
+    rewrite_skill_references: true
+    ensure_python_shebangs: true
+    assets:
+      - upstream: skills/docx
+        local: .github/skills/anthropic-docx
+        canonical_name: anthropic-docx
+      - upstream: skills/pdf
+        local: .github/skills/anthropic-pdf
+        canonical_name: anthropic-pdf
+      - upstream: skills/pptx
+        local: .github/skills/anthropic-pptx
+        canonical_name: anthropic-pptx
+      - upstream: skills/xlsx
+        local: .github/skills/anthropic-xlsx
+        canonical_name: anthropic-xlsx
   antonbabenko-terraform-skill:
     repository: https://github.com/antonbabenko/terraform-skill.git
     ref: 0a3a4a66e99001347d36a41e10260a825be3ab62
+    commit_date: 2026-07-03
     assets:
       - upstream: skills/terraform-skill
         local: .github/skills/antonbabenko-terraform-skill
         canonical_name: antonbabenko-terraform-skill
+  atlassian-mcp-server:
+    repository: https://github.com/atlassian/atlassian-mcp-server.git
+    ref: 798f8138c976599aa91075f3fc0bb481c3818848
+    commit_date: 2026-09-03
+    assets:
+      - upstream: skills/search-company-knowledge
+        local: .github/skills/search-company-knowledge
+        canonical_name: search-company-knowledge
   github-awesome-copilot:
     repository: https://github.com/github/awesome-copilot.git
-    ref: aa280f28b1b73f9b6e6917b607eb92127b67b419
+    ref: f38fb6cf039b835990d0f49dc161d7c2af99ef69
+    commit_date: 2026-09-07
     assets:
       - upstream: skills/agentic-eval
         local: .github/skills/awesome-copilot-agentic-eval
@@ -41,9 +101,162 @@ sources:
       - upstream: skills/security-review
         local: .github/skills/awesome-copilot-security-review
         canonical_name: awesome-copilot-security-review
+  mattpocock-skills:
+    repository: https://github.com/mattpocock/skills.git
+    ref: 6acc160e4e0cd062dbbbd7a1b26ae92855edf07e
+    commit_date: 2026-08-06
+    advertised_ref: v1.2.3
+    rewrite_skill_references: true
+    backtick_skill_references:
+      - code-review
+      - tdd
+      - to-spec
+    assets:
+      - upstream: skills/engineering/ask-matt
+        local: .github/skills/mattpocock-ask-matt
+        canonical_name: mattpocock-ask-matt
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/code-review
+        local: .github/skills/mattpocock-code-review
+        canonical_name: mattpocock-code-review
+      - upstream: skills/engineering/codebase-design
+        local: .github/skills/mattpocock-codebase-design
+        canonical_name: mattpocock-codebase-design
+      - upstream: skills/engineering/diagnosing-bugs
+        local: .github/skills/mattpocock-diagnosing-bugs
+        canonical_name: mattpocock-diagnosing-bugs
+      - upstream: skills/engineering/domain-modeling
+        local: .github/skills/mattpocock-domain-modeling
+        canonical_name: mattpocock-domain-modeling
+      - upstream: skills/engineering/grill-with-docs
+        local: .github/skills/mattpocock-grill-with-docs
+        canonical_name: mattpocock-grill-with-docs
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/implement
+        local: .github/skills/mattpocock-implement
+        canonical_name: mattpocock-implement
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/improve-codebase-architecture
+        local: .github/skills/mattpocock-improve-codebase-architecture
+        canonical_name: mattpocock-improve-codebase-architecture
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/prototype
+        local: .github/skills/mattpocock-prototype
+        canonical_name: mattpocock-prototype
+      - upstream: skills/engineering/research
+        local: .github/skills/mattpocock-research
+        canonical_name: mattpocock-research
+      - upstream: skills/engineering/resolving-merge-conflicts
+        local: .github/skills/mattpocock-resolving-merge-conflicts
+        canonical_name: mattpocock-resolving-merge-conflicts
+      - upstream: skills/engineering/setup-matt-pocock-skills
+        local: .github/skills/mattpocock-setup-matt-pocock-skills
+        canonical_name: mattpocock-setup-matt-pocock-skills
+      - upstream: skills/engineering/tdd
+        local: .github/skills/mattpocock-tdd
+        canonical_name: mattpocock-tdd
+      - upstream: skills/engineering/to-spec
+        local: .github/skills/mattpocock-to-spec
+        canonical_name: mattpocock-to-spec
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/to-tickets
+        local: .github/skills/mattpocock-to-tickets
+        canonical_name: mattpocock-to-tickets
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/triage
+        local: .github/skills/mattpocock-triage
+        canonical_name: mattpocock-triage
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/wayfinder
+        local: .github/skills/mattpocock-wayfinder
+        canonical_name: mattpocock-wayfinder
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/engineering/wizard
+        local: .github/skills/mattpocock-wizard
+        canonical_name: mattpocock-wizard
+      - upstream: skills/productivity/grill-me
+        local: .github/skills/grill-me
+        canonical_name: grill-me
+      - upstream: skills/productivity/grilling
+        local: .github/skills/grilling
+        canonical_name: grilling
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/productivity/handoff
+        local: .github/skills/mattpocock-handoff
+        canonical_name: mattpocock-handoff
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/productivity/teach
+        local: .github/skills/mattpocock-teach
+        canonical_name: mattpocock-teach
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/productivity/to-questionnaire
+        local: .github/skills/mattpocock-to-questionnaire
+        canonical_name: mattpocock-to-questionnaire
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/productivity/wait-what
+        local: .github/skills/mattpocock-wait-what
+        canonical_name: mattpocock-wait-what
+        invocation_policy:
+          copilot:
+            disable_model_invocation: true
+          codex:
+            allow_implicit_invocation: false
+      - upstream: skills/productivity/writing-for-agents
+        local: .github/skills/mattpocock-writing-for-agents
+        canonical_name: mattpocock-writing-for-agents
   obra-superpowers:
     repository: https://github.com/obra/superpowers.git
-    ref: 3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9
+    ref: b36e0829c6d0140e93cfef2ca599b1b07d4a7797
+    commit_date: 2026-08-12
+    advertised_ref: v6.3.0
     assets:
       - upstream: skills/brainstorming
         local: .github/skills/superpowers-brainstorming
@@ -90,73 +303,10 @@ sources:
       - upstream: skills/writing-plans
         local: .github/skills/superpowers-writing-plans
         canonical_name: superpowers-writing-plans
-  mattpocock-skills:
-    repository: https://github.com/mattpocock/skills.git
-    ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
-    rewrite_skill_references: true
-    backtick_skill_references:
-      - code-review
-      - tdd
-      - to-spec
-    assets:
-      - upstream: skills/engineering/grill-with-docs
-        local: .github/skills/mattpocock-grill-with-docs
-        canonical_name: mattpocock-grill-with-docs
-      - upstream: skills/engineering/domain-modeling
-        local: .github/skills/mattpocock-domain-modeling
-        canonical_name: mattpocock-domain-modeling
-      - upstream: skills/engineering/codebase-design
-        local: .github/skills/mattpocock-codebase-design
-        canonical_name: mattpocock-codebase-design
-      - upstream: skills/engineering/improve-codebase-architecture
-        local: .github/skills/mattpocock-improve-codebase-architecture
-        canonical_name: mattpocock-improve-codebase-architecture
-      - upstream: skills/engineering/implement
-        local: .github/skills/mattpocock-implement
-        canonical_name: mattpocock-implement
-      - upstream: skills/engineering/to-tickets
-        local: .github/skills/mattpocock-to-tickets
-        canonical_name: mattpocock-to-tickets
-      - upstream: skills/engineering/tdd
-        local: .github/skills/mattpocock-tdd
-        canonical_name: mattpocock-tdd
-      - upstream: skills/engineering/to-spec
-        local: .github/skills/mattpocock-to-spec
-        canonical_name: mattpocock-to-spec
-      - upstream: skills/engineering/setup-matt-pocock-skills
-        local: .github/skills/mattpocock-setup-matt-pocock-skills
-        canonical_name: mattpocock-setup-matt-pocock-skills
-      - upstream: skills/engineering/triage
-        local: .github/skills/mattpocock-triage
-        canonical_name: mattpocock-triage
-      - upstream: skills/engineering/code-review
-        local: .github/skills/mattpocock-code-review
-        canonical_name: mattpocock-code-review
-      - upstream: skills/engineering/wayfinder
-        local: .github/skills/mattpocock-wayfinder
-        canonical_name: mattpocock-wayfinder
-      - upstream: skills/engineering/research
-        local: .github/skills/mattpocock-research
-        canonical_name: mattpocock-research
-      - upstream: skills/productivity/handoff
-        local: .github/skills/mattpocock-handoff
-        canonical_name: mattpocock-handoff
-      - upstream: skills/productivity/writing-great-skills
-        local: .github/skills/mattpocock-writing-great-skills
-        canonical_name: mattpocock-writing-great-skills
-      - upstream: skills/productivity/teach
-        local: .github/skills/mattpocock-teach
-        canonical_name: mattpocock-teach
-  vercel-labs-skills:
-    repository: https://github.com/vercel-labs/skills.git
-    ref: e173b8c88f2581cfdaa1b6767c6519a08155790e
-    assets:
-      - upstream: skills/find-skills
-        local: .github/skills/vercel-find-skills
-        canonical_name: vercel-find-skills
   openai-skills-curated:
     repository: https://github.com/openai/skills.git
     ref: 49f948faa9258a0c61caceaf225e179651397431
+    commit_date: 2026-06-23
     assets:
       - upstream: skills/.curated/gh-address-comments
         local: .github/skills/openai-gh-address-comments
@@ -167,13 +317,16 @@ sources:
   openai-skills-retained-doc:
     repository: https://github.com/openai/skills.git
     ref: 49f948faa9258a0c61caceaf225e179651397431
+    commit_date: 2026-06-23
     assets:
       - upstream: skills/.curated/openai-docs
         local: .github/skills/openai-docs
         canonical_name: openai-docs
   sickn33-antigravity:
     repository: https://github.com/sickn33/antigravity-awesome-skills.git
-    ref: e66fc833f2022c3534ba74af835db14c34f9a732
+    ref: b1aebac60a88dffa0f5723cb3816f22cc0af6b13
+    commit_date: 2026-09-06
+    advertised_ref: v16.9.1
     assets:
       - upstream: skills/api-design-principles
         local: .github/skills/antigravity-api-design-principles
@@ -196,48 +349,19 @@ sources:
       - upstream: skills/network-engineer
         local: .github/skills/antigravity-network-engineer
         canonical_name: antigravity-network-engineer
-  addyosmani-agent-skills:
-    repository: https://github.com/addyosmani/agent-skills.git
-    ref: ff2df4c07e7836a092ed28e1e9b42f4d6009280c
+  vercel-labs-skills:
+    repository: https://github.com/vercel-labs/skills.git
+    ref: 1682051d48c34f5eb135e6475c1a965dce05e820
+    commit_date: 2026-09-06
+    advertised_ref: v1.5.24
     assets:
-      - upstream: skills/code-simplification
-        local: .github/skills/addyosmani-code-simplification
-        canonical_name: addyosmani-code-simplification
-      - upstream: skills/code-review-and-quality
-        local: .github/skills/addyosmani-code-review-and-quality
-        canonical_name: addyosmani-code-review-and-quality
-  atlassian-mcp-server:
-    repository: https://github.com/atlassian/atlassian-mcp-server.git
-    ref: f22e7075136a62baa7c10200a64884f83bf3ebe1
-    assets:
-      - upstream: skills/search-company-knowledge
-        local: .github/skills/search-company-knowledge
-        canonical_name: search-company-knowledge
-  anthropic-skills:
-    repository: https://github.com/anthropics/skills.git
-    ref: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
-    rewrite_skill_references: true
-    ensure_python_shebangs: true
-    assets:
-      - upstream: skills/docx
-        local: .github/skills/anthropic-docx
-        canonical_name: anthropic-docx
-      - upstream: skills/pdf
-        local: .github/skills/anthropic-pdf
-        canonical_name: anthropic-pdf
-      - upstream: skills/pptx
-        local: .github/skills/anthropic-pptx
-        canonical_name: anthropic-pptx
-      - upstream: skills/xlsx
-        local: .github/skills/anthropic-xlsx
-        canonical_name: anthropic-xlsx
+      - upstream: skills/find-skills
+        local: .github/skills/vercel-find-skills
+        canonical_name: vercel-find-skills
 normalizations:
   - source: obra-superpowers
     from: docs/superpowers
     to: tmp/superpowers
-  - source: mattpocock-skills
-    from: /grilling
-    to: /grill-me
 watchlist:
   - source_family: github/awesome-copilot
     upstream_id: azure-devops-pipelines.instructions.md

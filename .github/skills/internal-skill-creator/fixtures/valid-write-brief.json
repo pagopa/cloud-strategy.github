@@ -41,7 +41,7 @@
     {
       "id": "V1",
       "owner": "caller",
-      "command": "python3 -m pytest -q tests/github/skills/internal-skill-creator",
+      "command": "python3 -m pytest -q .github/skills/internal-skill-creator/tests",
       "pass_signal": "exit-code-0"
     }
   ],

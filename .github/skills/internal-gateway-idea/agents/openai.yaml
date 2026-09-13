@@ -14,7 +14,7 @@ interface:
     delegate interview mechanics to /grill-me and critical-review procedure to
     /internal-gateway-critical-master. Use exactly two global gates, GRILL-ME
     and CRITICAL REVIEW. Require CRITICAL REVIEW before close, +spec, or
-    +plan; complete it structurally with exactly three lenses including one
+    +plan; complete it structurally with at least three lenses, the third a
     lateral analogy or reverse-assumption lens, classified findings, and a
     conclusion. A scoped override names one action and records accepted-risk
     while preserving every other gate. After setup and every named analysis
@@ -33,8 +33,11 @@ interface:
     validation, and acceptance. If an explicitly selected worker is
     unavailable, record a caller-owned LifecycleRecord and stop as blocked; a
     manual or local continuation needs explicit caller authorization and a new
-    local route. Keep
-    implementation-oriented design and execution separate and user-gated; do
+    local route. Mark a verified +spec artifact plan_authoring_ready true, keep
+    the old menu, and wait for a later explicit +plan selection before routing
+    to /internal-gateway-writing-plans. Do not treat Implementation permission
+    false as a plan-authoring block. Keep implementation-oriented design and
+    execution separate and user-gated; do
     not introduce an alternate brainstorming route or handoff.
     Record the current Authorized paths and Authorized actions, preserve them
     across continue, finish, pause, and recovery, and block every new path or
@@ -57,7 +60,6 @@ route_contract:
   mode: "analysis-only"
   execution_handoff: "/internal-gateway-execute-plans"
   forbidden_pre_acceptance_routes:
-    - "/superpowers-brainstorming"
     - "/internal-tdd"
     - "/internal-gateway-writing-plans"
     - "/internal-gateway-execute-plans"

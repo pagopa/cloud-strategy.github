@@ -98,9 +98,12 @@ from the new checkout to recreate managed links.
 
 - `sync`: build an apply plan and auto-apply only clean repository-to-home
   work. It may create links and copy translated agents.
-- `plan` or `dry-run`: read-only proposed operations.
-- `audit`: read-only comparison of source, manifest, and managed targets.
-- `doctor`: read-only runtime-root, support, catalog, and state checks.
+- `plan` or `dry-run`: proposed operations without managed-resource changes;
+  persists `last-plan.json` and the state lock.
+- `audit`: comparison of source, manifest, and managed targets without changing
+  them; persists `last-audit.json` and the state lock.
+- `doctor`: runtime-root, support, catalog, and state checks without changing
+  managed resources; persists `last-audit.json` and the state lock.
 - `apply`: explicit materialization; directory creation and copied-agent
   pruning retain their explicit flags.
 
@@ -119,4 +122,4 @@ unchanged skills rather than enumerating them. Translate every blocker using
 - Python CLI: `scripts/sync_home_ai_resources.py`
 - Planning and apply implementation: `scripts/home_syncing.py`
 - Contract loader: `scripts/home_sync_contract.py`
-- Repository dispatcher: `.github/scripts/run.sh sync_home_ai_resources ...`
+- Repository dispatcher: `.github/tools/run.sh sync_home_ai_resources ...`

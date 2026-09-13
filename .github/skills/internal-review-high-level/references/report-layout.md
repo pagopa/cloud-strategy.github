@@ -1,6 +1,6 @@
 # Report Layout
 
-### Finding block shape
+## Finding block shape
 
 Each finding is one compact block:
 
@@ -24,12 +24,12 @@ Rules:
   them to the caller-owned record when one exists.
 - Keep residual risk beside the finding or evidence gap it qualifies.
 
-### Evidence gaps shape
+## Evidence gaps shape
 
 Each gap is a bold name followed by what stays unconfirmed and why it can
 change the verdict. A bare name or one-word entry is invalid.
 
-### Open shape
+## Open shape
 
 Each open question is numbered and stated in plain language. When the answer
 is a choice, list lettered options with their consequence (for example `A)`
