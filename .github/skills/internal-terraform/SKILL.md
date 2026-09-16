@@ -41,8 +41,9 @@ decide operational, state, or adoption semantics.
 For adoption, collect only facts that affect the selected route: runtime and
 version, changed root or path, desired/live/state evidence, canonical identity
 and ambiguity, ownership disposition, mutation authority, environment
-criticality, immediate risk, evidence mode, and recovery status. Mark unknown
-facts explicitly and stop on ambiguity rather than guessing.
+criticality, immediate risk, evidence mode, recovery status, runner path and
+capability, import mode, manifest evidence, and per-scope state boundary. Mark
+unknown facts explicitly and stop on ambiguity rather than guessing.
 
 For other non-language branches, retain only the runtime/version, changed-root
 path, relevant files and providers, execution path, environment criticality,
@@ -55,8 +56,17 @@ and immediate risk needed for the selected owner.
 - Operational validation, native tests, CI reachability, provider lockfile
   evidence, state or drift, recovery, or infrastructure diagnosis: load
   `references/operational-validation.md`.
+- Bulk or multi-state import: additionally load
+  `references/import-orchestration.md`.
+- AWS Identity Center import: additionally load
+  `references/aws-identity-center-import.md` only for that adapter path.
 - Language-only work loads no wrapper-owned operational reference. Both local
   references are resolved relative to this skill bundle.
+
+For operational imports, a discovered executable `./terraform.sh` in the
+selected consumer root is the mandatory default runner. Require verified
+adapter capability before use and fail closed when the wrapper is absent,
+unexecutable, or unsupported; never fall back silently to direct Terraform.
 
 This skill provides guidance and routing instructions only. It cannot enforce
 runtime identity, ownership, mutation, or recovery gates; the selected owner

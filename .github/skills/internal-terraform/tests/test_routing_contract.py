@@ -48,6 +48,8 @@ def test_routing_fixture_covers_the_required_scenario_matrix() -> None:
         "module-architecture",
         "ci-or-provider-operation",
         "ambiguous-adoption-identity",
+        "bulk-multi-state-import",
+        "aws-identity-center-import",
     }
 
     assert {scenario["id"] for scenario in scenarios} == expected_ids
@@ -119,6 +121,18 @@ def test_mixed_and_ambiguous_scenarios_keep_one_fail_safe_primary_owner() -> Non
         scenario = scenarios[scenario_id]
         assert scenario["primary_owner"] == "internal-terraform"
         assert scenario["fail_closed_on_unknown"] is True
+
+    assert scenarios["bulk-multi-state-import"]["loaded_local_references"] == [
+        "references/existing-infrastructure-adoption.md",
+        "references/operational-validation.md",
+        "references/import-orchestration.md",
+    ]
+    assert scenarios["aws-identity-center-import"]["loaded_local_references"] == [
+        "references/existing-infrastructure-adoption.md",
+        "references/operational-validation.md",
+        "references/import-orchestration.md",
+        "references/aws-identity-center-import.md",
+    ]
 
     assert scenarios["mixed-adoption"]["delegated_owner"] == "internal-tf"
     assert scenarios["ambiguous-adoption-identity"]["delegated_owner"] is None

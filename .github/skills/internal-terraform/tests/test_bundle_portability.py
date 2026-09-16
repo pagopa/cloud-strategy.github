@@ -37,6 +37,8 @@ def test_wrapper_references_resolve_from_a_standalone_materialized_bundle(
     required_references = {
         "references/existing-infrastructure-adoption.md",
         "references/operational-validation.md",
+        "references/import-orchestration.md",
+        "references/aws-identity-center-import.md",
     }
 
     assert required_references <= references
@@ -57,10 +59,9 @@ def test_fixture_references_are_present_in_the_owning_bundle() -> None:
         for reference in scenario["loaded_local_references"]
         if reference.startswith("references/")
     }
+    wrapper_references = _reference_targets(
+        (source_bundle / "SKILL.md").read_text(encoding="utf-8")
+    )
 
-    for reference in expected_references:
-        if reference in {
-            "references/existing-infrastructure-adoption.md",
-            "references/operational-validation.md",
-        }:
-            assert (source_bundle / reference).is_file(), reference
+    for reference in expected_references & wrapper_references:
+        assert (source_bundle / reference).is_file(), reference

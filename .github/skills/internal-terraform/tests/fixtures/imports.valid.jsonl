@@ -1,0 +1,2 @@
+{"scope":"interop","address":"aws_identitystore_group.groups[\"existing\"]","resource_kind":"identitystore_group","lookup":{"canonical_id":"store-1/group-existing","import_id":"store-1/group-existing"}}
+{"scope":"interop","address":"aws_identitystore_group.groups[\"missing\"]","resource_kind":"identitystore_group","lookup":{"canonical_id":"store-1/group-missing","import_id":"store-1/group-missing"}}

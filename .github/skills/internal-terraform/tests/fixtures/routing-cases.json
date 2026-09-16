@@ -75,6 +75,31 @@
       "loaded_local_references": ["references/existing-infrastructure-adoption.md"],
       "forbidden_local_references": [],
       "fail_closed_on_unknown": true
+    },
+    {
+      "id": "bulk-multi-state-import",
+      "primary_owner": "internal-terraform",
+      "delegated_owner": null,
+      "loaded_local_references": [
+        "references/existing-infrastructure-adoption.md",
+        "references/operational-validation.md",
+        "references/import-orchestration.md"
+      ],
+      "forbidden_local_references": [],
+      "fail_closed_on_unknown": true
+    },
+    {
+      "id": "aws-identity-center-import",
+      "primary_owner": "internal-terraform",
+      "delegated_owner": null,
+      "loaded_local_references": [
+        "references/existing-infrastructure-adoption.md",
+        "references/operational-validation.md",
+        "references/import-orchestration.md",
+        "references/aws-identity-center-import.md"
+      ],
+      "forbidden_local_references": [],
+      "fail_closed_on_unknown": true
     }
   ],
   "metadata_contract": {

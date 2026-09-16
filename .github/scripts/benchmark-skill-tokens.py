@@ -114,6 +114,31 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
         "loaded_local_references": ["references/existing-infrastructure-adoption.md"],
         "forbidden_local_references": [],
     },
+    {
+        "scenario": "bulk-multi-state-import",
+        "primary_owner": "internal-terraform",
+        "delegated_owner": None,
+        "delegated_core_owner": ANTON_CORE_SKILL,
+        "loaded_local_references": [
+            "references/existing-infrastructure-adoption.md",
+            "references/operational-validation.md",
+            "references/import-orchestration.md",
+        ],
+        "forbidden_local_references": [],
+    },
+    {
+        "scenario": "aws-identity-center-import",
+        "primary_owner": "internal-terraform",
+        "delegated_owner": None,
+        "delegated_core_owner": ANTON_CORE_SKILL,
+        "loaded_local_references": [
+            "references/existing-infrastructure-adoption.md",
+            "references/operational-validation.md",
+            "references/import-orchestration.md",
+            "references/aws-identity-center-import.md",
+        ],
+        "forbidden_local_references": [],
+    },
 )
 
 CHAIN_RISK_PATTERNS = [
