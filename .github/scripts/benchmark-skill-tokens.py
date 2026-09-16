@@ -35,6 +35,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "hcl-only",
         "primary_owner": "internal-tf",
+        "execution_owner": None,
         "delegated_owner": None,
         "delegated_core_owner": None,
         "loaded_local_references": ["references/common-mistakes.md"],
@@ -46,6 +47,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "tfvars-json-only",
         "primary_owner": "internal-tf",
+        "execution_owner": None,
         "delegated_owner": None,
         "delegated_core_owner": None,
         "loaded_local_references": ["references/structure-standard.md"],
@@ -57,6 +59,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "mixed-adoption",
         "primary_owner": "internal-terraform",
+        "execution_owner": None,
         "delegated_owner": "internal-tf",
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": [
@@ -68,6 +71,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "native-test",
         "primary_owner": "internal-terraform",
+        "execution_owner": None,
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": ["references/operational-validation.md"],
@@ -78,6 +82,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "state-or-drift",
         "primary_owner": "internal-terraform",
+        "execution_owner": None,
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": ["references/operational-validation.md"],
@@ -88,6 +93,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "module-architecture",
         "primary_owner": "internal-terraform",
+        "execution_owner": None,
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": [],
@@ -99,6 +105,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "ci-or-provider-operation",
         "primary_owner": "internal-terraform",
+        "execution_owner": None,
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": ["references/operational-validation.md"],
@@ -109,6 +116,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "ambiguous-adoption-identity",
         "primary_owner": "internal-terraform",
+        "execution_owner": None,
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": ["references/existing-infrastructure-adoption.md"],
@@ -117,6 +125,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "bulk-multi-state-import",
         "primary_owner": "internal-terraform",
+        "execution_owner": "internal-terraform-import",
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": [
@@ -129,6 +138,7 @@ TERRAFORM_SCENARIOS: tuple[dict[str, Any], ...] = (
     {
         "scenario": "aws-identity-center-import",
         "primary_owner": "internal-terraform",
+        "execution_owner": "internal-terraform-import",
         "delegated_owner": None,
         "delegated_core_owner": ANTON_CORE_SKILL,
         "loaded_local_references": [
@@ -236,8 +246,11 @@ def build_terraform_scenario_report(root: Path) -> list[dict[str, Any]]:
     reports: list[dict[str, Any]] = []
     for scenario in TERRAFORM_SCENARIOS:
         primary_owner = scenario["primary_owner"]
+        execution_owner = scenario["execution_owner"]
         delegated_owner = scenario["delegated_owner"]
         owners = [primary_owner]
+        if execution_owner:
+            owners.append(execution_owner)
         if delegated_owner:
             owners.append(delegated_owner)
 
@@ -257,6 +270,7 @@ def build_terraform_scenario_report(root: Path) -> list[dict[str, Any]]:
             {
                 "scenario": scenario["scenario"],
                 "primary_owner": primary_owner,
+                "execution_owner": execution_owner,
                 "delegated_owner": delegated_owner,
                 "delegated_core_owner": delegated_core_owner,
                 "loaded_local_references": list(scenario["loaded_local_references"]),

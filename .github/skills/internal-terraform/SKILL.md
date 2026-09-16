@@ -24,11 +24,12 @@ decide operational, state, or adoption semantics.
   import-block syntax and shape only, with no state, provider operation,
   plan/apply, native test, CI, or cloud behavior. Set `Primary = /internal-tf`
   and do not preload this wrapper's operational references.
-- Existing-infrastructure adoption, operational import, bulk import, state
+- Existing-infrastructure adoption, operational import assessment, state
   reconstruction, IaC migration, native tests, module architecture, provider
   operations, plans, CI-integrated roots, drift, upgrades, recovery, and risk
   diagnosis remain `Primary = /antonbabenko-terraform-skill` through this
-  wrapper.
+  wrapper. An approved bulk or provider-specific import may then hand off
+  execution to `/internal-terraform-import`.
 - HCL plus an operational or adoption concern keeps Anton primary through this
   wrapper. `/internal-tf` may contribute only a separable language finding;
   operational ownership is not split away from the wrapper.
@@ -56,10 +57,6 @@ and immediate risk needed for the selected owner.
 - Operational validation, native tests, CI reachability, provider lockfile
   evidence, state or drift, recovery, or infrastructure diagnosis: load
   `references/operational-validation.md`.
-- Bulk or multi-state import: additionally load
-  `references/import-orchestration.md`.
-- AWS Identity Center import: additionally load
-  `references/aws-identity-center-import.md` only for that adapter path.
 - Language-only work loads no wrapper-owned operational reference. Both local
   references are resolved relative to this skill bundle.
 
@@ -75,7 +72,11 @@ and native runtime remain authoritative for those behaviors.
 ### Handoff
 
 Before invoking the selected target, state Primary, Reason (deliverable and
-boundary), Context, and Validation (the narrowest check expected).
+boundary), Context, and Validation (the narrowest check expected). For an
+approved import, also state `Execution owner = /internal-terraform-import` and
+provide the consumer root, mode, scopes, identity, reconciliation, ownership,
+runner, mutation, convergence, and recovery evidence. Missing or ambiguous
+evidence keeps this wrapper primary and blocks live execution.
 
 ### Guardrails
 

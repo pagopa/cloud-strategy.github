@@ -8,6 +8,10 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-09-16
+
+- Split approved Terraform import execution into the secondary `.github/skills/internal-terraform-import/` bundle while retaining `.github/skills/internal-terraform/` as the stable decision and routing wrapper; the relocated runner now defaults to non-mutating assessment and requires complete execute evidence for live import or apply.
+
 ## 2026-09-11
 
 - Hardened `.github/skills/internal-gateway-writing-plans/` and `.github/skills/internal-gateway-execute-plans/` against the post-mortem plan-generation defects: the writer checker and the executor parser now emit separator-aware and prose-aware manifest-fence messages with removal hints and bounded 160-character compact finding messages.

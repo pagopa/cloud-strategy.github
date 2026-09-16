@@ -1,8 +1,8 @@
 # Portable Import Orchestration
 
-Use this reference for bulk or multi-state adoption imports. The selected
-consumer repository remains responsible for its root, wrapper contract,
-identity, scope catalogue, and mutation authority.
+Use this reference after `/internal-terraform` hands off a bulk or multi-state
+adoption import. The selected consumer repository remains responsible for its
+root, wrapper contract, identity, scope catalogue, and mutation authority.
 
 ## Input and adapters
 
@@ -16,8 +16,8 @@ with this stable record shape:
 The orchestrator normalizes records, rejects malformed or ambiguous input, and
 passes them to two consumer-supplied adapters:
 
-- The runner adapter proves state inspection, import, plan, and (when live
-  HCL execution is explicitly enabled) apply capability.
+- The runner adapter proves state inspection, import, plan, and (when live HCL
+  execution is explicitly enabled) apply capability.
 - The resource adapter resolves one canonical live identity and one literal
   import ID for the declared resource kind.
 

@@ -37,6 +37,7 @@ def test_terraform_benchmark_covers_the_routing_fixture() -> None:
     required_fields = {
         "scenario",
         "primary_owner",
+        "execution_owner",
         "delegated_owner",
         "loaded_local_references",
         "forbidden_local_references",
@@ -49,6 +50,7 @@ def test_terraform_benchmark_covers_the_routing_fixture() -> None:
         assert required_fields <= report.keys()
         expected = fixture_by_id[scenario_id]
         assert report["primary_owner"] == expected["primary_owner"]
+        assert report["execution_owner"] == expected["execution_owner"]
         assert report["delegated_owner"] == expected["delegated_owner"]
         assert report["loaded_local_references"] == expected["loaded_local_references"]
         assert (
@@ -68,6 +70,9 @@ def test_terraform_benchmark_keeps_language_and_operational_owners_distinct() ->
     assert reports["tfvars-json-only"]["primary_owner"] == "internal-tf"
     assert reports["mixed-adoption"]["primary_owner"] == "internal-terraform"
     assert reports["mixed-adoption"]["delegated_owner"] == "internal-tf"
+    assert reports["mixed-adoption"]["execution_owner"] is None
+    assert reports["bulk-multi-state-import"]["execution_owner"] == "internal-terraform-import"
+    assert reports["aws-identity-center-import"]["execution_owner"] == "internal-terraform-import"
     assert reports["mixed-adoption"]["delegated_core_tokens"] > 0
     assert reports["hcl-only"]["delegated_core_tokens"] == 0
     assert reports["native-test"]["delegated_core_tokens"] > 0
@@ -84,6 +89,8 @@ def test_terraform_benchmark_excludes_forbidden_references_from_the_proxy() -> N
         )
         expected_reference_tokens = 0
         owners = [report["primary_owner"]]
+        if report["execution_owner"]:
+            owners.append(report["execution_owner"])
         if report["delegated_owner"]:
             owners.append(report["delegated_owner"])
         for reference in report["loaded_local_references"]:
@@ -109,4 +116,15 @@ def test_benchmark_output_labels_static_proxy_and_runtime_gap(capsys: Any) -> No
     assert "static proxy" in output["measurement_note"].casefold()
     assert "does not prove runtime loading" in output["measurement_note"].casefold()
     assert "billed-token savings" in output["measurement_note"].casefold()
-    assert len(output["terraform_scenarios"]) == 8
+    assert {item["scenario"] for item in output["terraform_scenarios"]} == {
+        "hcl-only",
+        "tfvars-json-only",
+        "mixed-adoption",
+        "native-test",
+        "state-or-drift",
+        "module-architecture",
+        "ci-or-provider-operation",
+        "ambiguous-adoption-identity",
+        "bulk-multi-state-import",
+        "aws-identity-center-import",
+    }

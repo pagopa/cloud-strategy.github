@@ -124,6 +124,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-skill-creator/SKILL.md`
 - `.github/skills/internal-subagent-contract/SKILL.md`
 - `.github/skills/internal-tdd/SKILL.md`
+- `.github/skills/internal-terraform-import/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/internal-tf/SKILL.md`
 - `.github/skills/internal-wayfinder-report/SKILL.md`

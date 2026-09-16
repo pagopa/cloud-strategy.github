@@ -37,8 +37,6 @@ def test_wrapper_references_resolve_from_a_standalone_materialized_bundle(
     required_references = {
         "references/existing-infrastructure-adoption.md",
         "references/operational-validation.md",
-        "references/import-orchestration.md",
-        "references/aws-identity-center-import.md",
     }
 
     assert required_references <= references
@@ -50,18 +48,48 @@ def test_wrapper_references_resolve_from_a_standalone_materialized_bundle(
         assert (copied_bundle / reference).is_file(), reference
 
 
+def test_import_references_resolve_from_the_secondary_bundle(tmp_path: Path) -> None:
+    source_bundle = REPO_ROOT / ".github/skills/internal-terraform-import"
+    copied_bundle = tmp_path / "standalone" / "internal-terraform-import"
+    shutil.copytree(source_bundle, copied_bundle)
+
+    skill_text = (copied_bundle / "SKILL.md").read_text(encoding="utf-8")
+    references = _reference_targets(skill_text)
+    required_references = {
+        "references/import-orchestration.md",
+        "references/aws-identity-center-import.md",
+    }
+
+    assert required_references <= references
+    for reference in references:
+        assert reference.startswith("references/"), reference
+        assert (copied_bundle / reference).is_file(), reference
+
+
 def test_fixture_references_are_present_in_the_owning_bundle() -> None:
     fixture = _load_fixture()
     source_bundle = REPO_ROOT / ".github/skills/internal-terraform"
-    expected_references = {
-        reference
-        for scenario in fixture["scenarios"]
-        for reference in scenario["loaded_local_references"]
-        if reference.startswith("references/")
-    }
+    import_bundle = REPO_ROOT / ".github/skills/internal-terraform-import"
     wrapper_references = _reference_targets(
         (source_bundle / "SKILL.md").read_text(encoding="utf-8")
     )
+    import_references = _reference_targets(
+        (import_bundle / "SKILL.md").read_text(encoding="utf-8")
+    )
 
-    for reference in expected_references & wrapper_references:
-        assert (source_bundle / reference).is_file(), reference
+    wrapper_owned = {
+        "references/existing-infrastructure-adoption.md",
+        "references/operational-validation.md",
+    }
+    import_owned = {
+        "references/import-orchestration.md",
+        "references/aws-identity-center-import.md",
+    }
+    for scenario in fixture["scenarios"]:
+        for reference in scenario["loaded_local_references"]:
+            if reference in wrapper_owned:
+                assert reference in wrapper_references, reference
+                assert (source_bundle / reference).is_file(), reference
+            elif reference in import_owned:
+                assert reference in import_references, reference
+                assert (import_bundle / reference).is_file(), reference

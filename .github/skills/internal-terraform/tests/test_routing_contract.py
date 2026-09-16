@@ -16,6 +16,7 @@ REPO_ROOT = next(
 FIXTURE_PATH = Path(__file__).parent / "fixtures/routing-cases.json"
 SKILL_PATHS = {
     "internal-terraform": REPO_ROOT / ".github/skills/internal-terraform",
+    "internal-terraform-import": REPO_ROOT / ".github/skills/internal-terraform-import",
     "internal-tf": REPO_ROOT / ".github/skills/internal-tf",
 }
 
@@ -58,6 +59,14 @@ def test_routing_fixture_covers_the_required_scenario_matrix() -> None:
         "internal-terraform",
     }
     assert all("fail_closed_on_unknown" in scenario for scenario in scenarios)
+    assert all("execution_owner" in scenario for scenario in scenarios)
+
+    scenarios_by_id = {scenario["id"]: scenario for scenario in scenarios}
+    assert scenarios_by_id["bulk-multi-state-import"]["primary_owner"] == "internal-terraform"
+    assert scenarios_by_id["bulk-multi-state-import"]["execution_owner"] == "internal-terraform-import"
+    assert scenarios_by_id["aws-identity-center-import"]["execution_owner"] == "internal-terraform-import"
+    assert scenarios_by_id["ambiguous-adoption-identity"]["execution_owner"] is None
+    assert scenarios_by_id["hcl-only"]["execution_owner"] is None
 
     for scenario in scenarios:
         assert scenario["primary_owner"] == (

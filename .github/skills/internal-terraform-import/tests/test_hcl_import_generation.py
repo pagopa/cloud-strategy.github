@@ -13,12 +13,44 @@ REPO_ROOT = next(
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").is_file() and (parent / ".github").is_dir()
 )
-RUNNER = REPO_ROOT / ".github/skills/internal-terraform/scripts/import-manifest-runner.sh"
+RUNNER = REPO_ROOT / ".github/skills/internal-terraform-import/scripts/import-manifest-runner.sh"
 
 
 def _write_executable(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
     path.chmod(path.stat().st_mode | stat.S_IXUSR)
+
+
+def _write_handoff(path: Path, root: Path, *, decision: str = "assess", **overrides: object) -> Path:
+    payload: dict[str, object] = {
+        "schema_version": 1,
+        "kind": "internal-terraform-import-handoff",
+        "decision": decision,
+        "consumer_root": str(root.resolve()),
+        "mode": "hcl",
+        "scopes": ["interop"],
+        "identity_status": "pending",
+        "reconciliation_status": "pending",
+        "ownership_disposition": "unknown",
+        "mutation_authority": "not-approved",
+        "convergence_decision": "adoption-only",
+        "runner_status": "verified",
+        "recovery_status": "pending",
+        "approval_reference": "review-record-id",
+    }
+    if decision == "execute":
+        payload.update(
+            {
+                "identity_status": "verified",
+                "reconciliation_status": "complete",
+                "ownership_disposition": "unmanaged",
+                "mutation_authority": "approved",
+                "recovery_status": "ready",
+            }
+        )
+    payload.update(overrides)
+    path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+    return path
 
 
 def _make_hcl_consumer(
@@ -82,8 +114,11 @@ def _run_hcl(
     runner_adapter: Path,
     resource_adapter: Path,
     scope: str | None = "interop",
+    decision: str = "assess",
     extra: tuple[str, ...] = (),
 ) -> subprocess.CompletedProcess[str]:
+    handoff = manifest.parent / "handoff.json"
+    _write_handoff(handoff, root, decision=decision)
     args = [
         str(RUNNER),
         "--manifest",
@@ -95,6 +130,8 @@ def _run_hcl(
         str(runner_adapter),
         "--resource-adapter",
         str(resource_adapter),
+        "--handoff",
+        str(handoff),
     ]
     if scope is not None:
         args.extend(["--scope", scope])
@@ -128,14 +165,7 @@ def test_hcl_generates_one_scoped_adapter_owned_for_each_import(tmp_path: Path) 
             _group_record('aws_identitystore_group.groups["other"]', "other", "store-1/group-other", scope="other"),
         ],
     )
-
-    result = _run_hcl(
-        manifest,
-        root=root,
-        runner_adapter=runner_adapter,
-        resource_adapter=resource_adapter,
-    )
-
+    result = _run_hcl(manifest, root=root, runner_adapter=runner_adapter, resource_adapter=resource_adapter)
     assert result.returncode == 0
     generated = (root / "imports.generated.tf").read_text(encoding="utf-8")
     assert '"store-1/group-new"' in generated
@@ -147,9 +177,7 @@ def test_hcl_generates_one_scoped_adapter_owned_for_each_import(tmp_path: Path) 
 
 
 def test_hcl_excludes_state_confirmed_addresses(tmp_path: Path) -> None:
-    root, runner_adapter, resource_adapter, _ = _make_hcl_consumer(
-        tmp_path, state_identity="store-1/group-existing"
-    )
+    root, runner_adapter, resource_adapter, _ = _make_hcl_consumer(tmp_path, state_identity="store-1/group-existing")
     manifest = _manifest(
         tmp_path / "imports.jsonl",
         [
@@ -157,14 +185,7 @@ def test_hcl_excludes_state_confirmed_addresses(tmp_path: Path) -> None:
             _group_record('aws_identitystore_group.groups["new"]', "new", "store-1/group-new"),
         ],
     )
-
-    result = _run_hcl(
-        manifest,
-        root=root,
-        runner_adapter=runner_adapter,
-        resource_adapter=resource_adapter,
-    )
-
+    result = _run_hcl(manifest, root=root, runner_adapter=runner_adapter, resource_adapter=resource_adapter)
     assert result.returncode == 0
     generated = (root / "imports.generated.tf").read_text(encoding="utf-8")
     assert "group-existing" not in generated
@@ -174,15 +195,7 @@ def test_hcl_excludes_state_confirmed_addresses(tmp_path: Path) -> None:
 def test_hcl_requires_one_selected_scope(tmp_path: Path) -> None:
     root, runner_adapter, resource_adapter, _ = _make_hcl_consumer(tmp_path)
     manifest = _manifest(tmp_path / "imports.jsonl", [_group_record("aws.foo", "new", "id")])
-
-    result = _run_hcl(
-        manifest,
-        root=root,
-        runner_adapter=runner_adapter,
-        resource_adapter=resource_adapter,
-        scope=None,
-    )
-
+    result = _run_hcl(manifest, root=root, runner_adapter=runner_adapter, resource_adapter=resource_adapter, scope=None)
     assert result.returncode != 0
     assert "exactly one scope" in result.stderr
 
@@ -190,63 +203,32 @@ def test_hcl_requires_one_selected_scope(tmp_path: Path) -> None:
 def test_hcl_retains_generated_file_after_plan_failure(tmp_path: Path) -> None:
     root, runner_adapter, resource_adapter, _ = _make_hcl_consumer(tmp_path, plan_fails=True)
     manifest = _manifest(tmp_path / "imports.jsonl", [_group_record("aws.foo", "new", "id")])
-
-    result = _run_hcl(
-        manifest,
-        root=root,
-        runner_adapter=runner_adapter,
-        resource_adapter=resource_adapter,
-        extra=("--live",),
-    )
-
+    result = _run_hcl(manifest, root=root, runner_adapter=runner_adapter, resource_adapter=resource_adapter, decision="execute", extra=("--live",))
     assert result.returncode != 0
     assert (root / "imports.generated.tf").is_file()
 
 
 def test_hcl_removes_file_only_after_live_verification_and_post_plan(tmp_path: Path) -> None:
     root, runner_adapter, resource_adapter, _ = _make_hcl_consumer(tmp_path)
-    manifest = _manifest(
-        tmp_path / "imports.jsonl",
-        [_group_record('aws_identitystore_group.groups["new"]', "new", "store-1/group-new")],
-    )
-
-    result = _run_hcl(
-        manifest,
-        root=root,
-        runner_adapter=runner_adapter,
-        resource_adapter=resource_adapter,
-        extra=("--live",),
-    )
-
+    manifest = _manifest(tmp_path / "imports.jsonl", [_group_record('aws_identitystore_group.groups["new"]', "new", "store-1/group-new")])
+    result = _run_hcl(manifest, root=root, runner_adapter=runner_adapter, resource_adapter=resource_adapter, decision="execute", extra=("--live",))
     assert result.returncode == 0
     assert not (root / "imports.generated.tf").exists()
 
 
 def test_script_mode_rejects_record_selected_for_hcl(tmp_path: Path) -> None:
     root, runner_adapter, resource_adapter, _ = _make_hcl_consumer(tmp_path)
-    manifest = _manifest(
-        tmp_path / "imports.jsonl",
-        [{**_group_record("aws.foo", "new", "id"), "mode": "hcl"}],
-    )
-
+    manifest = _manifest(tmp_path / "imports.jsonl", [{**_group_record("aws.foo", "new", "id"), "mode": "hcl"}])
+    handoff = tmp_path / "script-handoff.json"
+    _write_handoff(handoff, root, decision="assess")
     result = subprocess.run(
         [
-            str(RUNNER),
-            "--manifest",
-            str(manifest),
-            "--mode=script",
-            "--root",
-            str(root),
-            "--runner-adapter",
-            str(runner_adapter),
-            "--resource-adapter",
-            str(resource_adapter),
+            str(RUNNER), "--manifest", str(manifest), "--mode=script", "--root", str(root),
+            "--runner-adapter", str(runner_adapter), "--resource-adapter", str(resource_adapter),
+            "--handoff", str(handoff),
         ],
-        cwd=REPO_ROOT,
-        text=True,
-        capture_output=True,
+        cwd=REPO_ROOT, text=True, capture_output=True,
     )
-
     assert result.returncode != 0
     assert "mode" in result.stderr
 
@@ -257,13 +239,6 @@ def test_hcl_requires_adapter_owned_destination_metadata(tmp_path: Path, bad_fie
     record = _group_record("aws.foo", "new", "id")
     record["lookup"][bad_field] = ""
     manifest = _manifest(tmp_path / "imports.jsonl", [record])
-
-    result = _run_hcl(
-        manifest,
-        root=root,
-        runner_adapter=runner_adapter,
-        resource_adapter=resource_adapter,
-    )
-
+    result = _run_hcl(manifest, root=root, runner_adapter=runner_adapter, resource_adapter=resource_adapter)
     assert result.returncode != 0
     assert "metadata" in result.stderr

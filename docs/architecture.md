@@ -137,7 +137,7 @@ Evidence: `.github/skills/local-agent-sync-install-ai-resources/references/home-
 
 | Decision | Status | Evidence | Trade-off | Related ADR |
 | --- | --- | --- | --- | --- |
-| Keep `internal-terraform` as the stable wrapper and route language-only HCL to `internal-tf`. | Documented | `docs/adr/0001-terraform-skill-routing-boundaries.md` | Preserves a stable entrypoint while keeping operational depth conditional. | [ADR 0001](adr/0001-terraform-skill-routing-boundaries.md) |
+| Keep `internal-terraform` as the stable decision wrapper, route language-only HCL to `internal-tf`, and hand off approved import execution to `internal-terraform-import`. | Documented | `docs/adr/0001-terraform-skill-routing-boundaries.md`, `.github/skills/internal-terraform-import/` | Preserves one entrypoint while isolating mutation-capable import execution behind explicit evidence gates. | [ADR 0001](adr/0001-terraform-skill-routing-boundaries.md) |
 | Use separate catalog-governance and source-synchronization knowledge contexts. | Documented | [ADR 0002](adr/0002-knowledge-domain-layout.md), `CONTEXT-MAP.md` | Adds navigation and glossary boundaries while requiring cross-context links. | [ADR 0002](adr/0002-knowledge-domain-layout.md) |
 | Keep the generated inventory separate from stable policy. | Documented | `INTERNAL_CONTRACT.md`, `.github/INVENTORY.md` | Adds a generated artifact to maintain, but reduces policy drift. | None |
 

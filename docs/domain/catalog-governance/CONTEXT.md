@@ -31,8 +31,14 @@ The repository-owned owner for Terraform and OpenTofu language-only HCL work.
 _Avoid_: Terraform operations owner
 
 **Terraform wrapper/core**:
-The `internal-terraform` entrypoint and its operational or mixed-work routing boundary.
-_Avoid_: Standalone native-test owner
+The `internal-terraform` entrypoint and its operational or mixed-work decision boundary.
+_Avoid_: Standalone native-test owner or import execution owner
+
+**Terraform import execution owner**:
+The secondary `internal-terraform-import` bundle that runs an approved import
+handoff and owns portable import orchestration, identity adapters, and live
+safety gates.
+_Avoid_: Terraform decision owner or general cloud governance owner
 
 **Native Terraform test**:
 A Terraform or OpenTofu test artifact or execution using native test syntax or commands.

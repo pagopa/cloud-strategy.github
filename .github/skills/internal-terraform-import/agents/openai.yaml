@@ -1,0 +1,6 @@
+policy:
+  allow_implicit_invocation: true
+interface:
+  display_name: "internal-terraform-import"
+  short_description: "Execute approved imports after wrapper handoff"
+  default_prompt: "Use $internal-terraform-import only after /internal-terraform hands off an approved import with explicit scope and safety evidence. Reject direct invocation without the wrapper handoff; keep assessment non-mutating and require all live execution gates before import or apply."

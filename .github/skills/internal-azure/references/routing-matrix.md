@@ -27,6 +27,7 @@
 | Pipeline YAML review | `/internal-azure-devops` |
 | Choosing between landing-zone alternatives | `/internal-azure-strategic` |
 | Terraform operational, mixed, adoption, state, provider, plan/apply, or module decision | `/internal-terraform` |
+| Approved Terraform import assessment or execution | `/internal-terraform` → `/internal-terraform-import` |
 | Terraform language-only HCL, `.tf`, `.tfvars`, or `.tfvars.json` edit | `/internal-tf` |
 | Native `.tftest.hcl` or `.tftest.json` test | `/internal-terraform` → `/antonbabenko-terraform-skill` |
 | Terraform module, state, or drift decision | `/internal-terraform` → `/antonbabenko-terraform-skill` |
