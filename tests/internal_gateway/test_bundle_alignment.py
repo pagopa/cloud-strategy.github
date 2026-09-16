@@ -15,6 +15,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -27,7 +28,7 @@ WRITER_CHECKER = WRITER_BUNDLE / "scripts/check_plan_structure.py"
 EXECUTOR_PARSER = EXECUTOR_BUNDLE / "scripts/plan_execution.py"
 SKELETON_HEADING = "## Canonical Complete Skeleton"
 FIELD_FINDING_CODES = frozenset({"missing-manifest-field", "unknown-manifest-field"})
-MINIMUM_EXECUTOR_BLOCKING_CASES = 16
+MINIMUM_EXECUTOR_BLOCKING_CASES = 17
 
 MINIMAL_PLAN_TEMPLATE = """# Example Plan
 
@@ -318,6 +319,12 @@ def _structural_corpus() -> tuple[tuple[str, object], ...]:
                 1,
             ),
         ),
+        (
+            "task-self-dependency",
+            lambda text: _rewrite_manifest(
+                text, lambda m: m["tasks"][0].update({"depends_on": ["T1"]})
+            ),
+        ),
     )
 
 
@@ -362,3 +369,58 @@ def test_differential_structural_parity(tmp_path: Path) -> None:
     assert len(executor_blocking_cases) == MINIMUM_EXECUTOR_BLOCKING_CASES, (
         executor_blocking_cases
     )
+
+
+def _run_cli_preflight(
+    repo_root: Path, plan: Path
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            "bash",
+            str(EXECUTOR_BUNDLE / "scripts/run.sh"),
+            "preflight",
+            str(plan),
+            "--repo-root",
+            str(repo_root),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_run_sh_cli_matches_in_process_parser(tmp_path: Path) -> None:
+    """CLI residual guard: the run.sh wrapper must not alter parser findings."""
+
+    base_text = _render_plan(_extract_skeleton(WRITER_REFERENCE))
+
+    clean_dir = tmp_path / "clean"
+    clean_dir.mkdir()
+    clean_plan = _stage_plan(clean_dir, base_text)
+    clean_result = _run_cli_preflight(clean_dir, clean_plan)
+    assert clean_result.returncode == 0, clean_result.stderr
+    assert json.loads(clean_result.stdout)["status"] == "passed"
+
+    blocking_text = _rewrite_manifest(
+        base_text, lambda m: m["tasks"][0].update({"depends_on": ["T1"]})
+    )
+    blocking_dir = tmp_path / "blocking"
+    blocking_dir.mkdir()
+    blocking_plan = _stage_plan(blocking_dir, blocking_text)
+    blocking_result = _run_cli_preflight(blocking_dir, blocking_plan)
+    assert blocking_result.returncode != 0, blocking_result.stdout
+
+    in_process_codes = {
+        item.code
+        for item in _executor().validate_plan(blocking_plan, blocking_dir)
+        if item.severity == "blocking"
+    }
+    cli_codes = {
+        item["code"]
+        for item in json.loads(blocking_result.stdout)["finding_sample"]
+        if item["severity"] == "blocking"
+    }
+    assert "invalid-task-dependency" in in_process_codes
+    assert cli_codes == in_process_codes

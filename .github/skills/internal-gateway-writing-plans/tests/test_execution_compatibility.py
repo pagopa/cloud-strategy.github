@@ -768,6 +768,22 @@ PRODUCER_FAILURE_MODES = (
         "malformed-execution-manifest",
     ),
     (
+        "task-self-dependency",
+        lambda text: _rewrite_manifest(
+            text, lambda manifest: manifest["tasks"][0].update({"depends_on": ["T1"]})
+        ),
+        "invalid-task-dependency",
+        "invalid-task-dependency",
+    ),
+    (
+        "task-forward-dependency",
+        lambda text: _rewrite_manifest(
+            text, lambda manifest: manifest["tasks"][0].update({"depends_on": ["T2"]})
+        ),
+        "invalid-task-dependency",
+        "invalid-task-dependency",
+    ),
+    (
         "partial-manifest-missing-fields",
         lambda text: _rewrite_manifest(
             text,

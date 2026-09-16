@@ -637,6 +637,23 @@ def _validate_task_references(root: Mapping[str, object]) -> None:
                     "unknown-task-reference",
                     f"tasks[{index}].{field} references unknown IDs: {unknown}",
                 )
+    task_orders = {
+        task["id"]: task["order"]
+        for task in (
+            _mapping(item, f"tasks[{index}]")
+            for index, item in enumerate(root["tasks"])
+        )
+    }
+    for index, raw_task in enumerate(root["tasks"]):
+        task = _mapping(raw_task, f"tasks[{index}]")
+        for reference in task["depends_on"]:
+            if task_orders[reference] >= task["order"]:
+                raise StructureError(
+                    "invalid-task-dependency",
+                    f"tasks[{index}].depends_on references `{reference}` "
+                    f"(order {task_orders[reference]}), not earlier than its own "
+                    f"order {task['order']}; dependencies must be backward edges",
+                )
 
 
 def _validate_retry_policy(value: object) -> None:

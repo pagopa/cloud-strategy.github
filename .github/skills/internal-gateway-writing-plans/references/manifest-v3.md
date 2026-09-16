@@ -57,6 +57,9 @@ external and contains the computed current Manifest `semantic_fingerprint`.
   `target_ids`, `validation_ids`, `manual_obligation_ids`, `acceptance`, and
   `stop_conditions`. References must resolve to existing IDs; `order` is a
   unique positive integer and matches the Markdown task-heading order.
+  Every `depends_on` entry must reference a task with a strictly smaller
+  `order`: execution proceeds in manifest order, so self-dependencies and
+  forward or cyclic edges are never satisfiable and are blocking.
 - `retry_policy` has exactly `initial_attempts`, `max_context_refills`,
   `max_corrective_retries`, `caller_may_lower`, `repeat_progress_status`, and
   `minor_or_cosmetic_reopens`. New plans default to `1`, `1`, `3`, `true`,

@@ -567,6 +567,60 @@ def test_current_plan_rejects_unknown_task_references(
     )
 
 
+def _rewrite_fixture_manifest(tmp_path: Path, mutate) -> Path:
+    text = _fixture("valid-plan.md").read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    end = text.index("\n```", start)
+    manifest = json.loads(text[start:end])
+    mutate(manifest)
+    return _stage_valid_plan(
+        tmp_path, text[:start] + json.dumps(manifest, indent=2) + text[end:]
+    )
+
+
+def test_current_plan_rejects_self_dependency(tmp_path: Path) -> None:
+    plan = _rewrite_fixture_manifest(
+        tmp_path, lambda manifest: manifest["tasks"][0].update({"depends_on": ["T1"]})
+    )
+
+    findings = validate_plan(plan, tmp_path)
+
+    matching = [item for item in findings if item.code == "invalid-task-dependency"]
+    assert matching, {item.code for item in findings}
+    assert all(item.severity == "blocking" for item in matching)
+
+
+def test_current_plan_rejects_forward_dependency(tmp_path: Path) -> None:
+    def mutate(manifest: dict[str, object]) -> None:
+        first = dict(manifest["tasks"][0])
+        manifest["tasks"].append(
+            dict(first, id="T2", order=2, depends_on=[], objective="Second task.")
+        )
+        manifest["tasks"][0]["depends_on"] = ["T2"]
+
+    plan = _rewrite_fixture_manifest(tmp_path, mutate)
+
+    findings = validate_plan(plan, tmp_path)
+
+    matching = [item for item in findings if item.code == "invalid-task-dependency"]
+    assert matching, {item.code for item in findings}
+    assert all(item.severity == "blocking" for item in matching)
+
+
+def test_current_plan_accepts_backward_dependency(tmp_path: Path) -> None:
+    def mutate(manifest: dict[str, object]) -> None:
+        first = dict(manifest["tasks"][0])
+        manifest["tasks"].append(
+            dict(first, id="T2", order=2, depends_on=["T1"], objective="Second task.")
+        )
+
+    plan = _rewrite_fixture_manifest(tmp_path, mutate)
+
+    findings = validate_plan(plan, tmp_path)
+
+    assert "invalid-task-dependency" not in {item.code for item in findings}
+
+
 @pytest.mark.parametrize(
     ("needle", "replacement", "message"),
     (
