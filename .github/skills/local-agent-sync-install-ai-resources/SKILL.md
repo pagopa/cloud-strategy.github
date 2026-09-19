@@ -30,6 +30,9 @@ bundle directly.
   Markdown agents are translated only for Codex and OpenCode copy targets.
 - Home-only skills are unmanaged and preserved. This includes catalog-excluded
   `graphify` and every `local-*` bundle.
+- When a repository skill is renamed, rerun `sync --targets skills` so the
+  stale managed link is removed and the canonical link for the new skill ID is
+  created.
 - Reverse synchronization, reconciliation, and copied-skill fallback are
   forbidden.
 
