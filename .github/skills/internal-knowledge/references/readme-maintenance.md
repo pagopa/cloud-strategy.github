@@ -51,6 +51,11 @@ Use Mermaid only when at least three material evidenced relationships are cleare
 
 Include a diagram only when the threshold is met and it improves the stated reader outcome. Otherwise omit it; when the omission needs explanation, record `omitted-with-reason` in the completion report. If another document already draws the relationship, link to it in the report or surrounding prose rather than redrawing a diagram a second document owns. Do not add fixed in-document diagram boilerplate merely to account for an omission.
 
+During a read-only audit, a README is evidence within the named perimeter. Its
+length, link set, or absence of a section does not authorize a refresh, widen
+the audit, or prove ownership of another artifact. Report the observed reader
+gap or unknown and leave authoring to a separate explicit request.
+
 Verify each diagram before writing it, by rendering it or by parsing it offline when no renderer is reachable. An unreachable renderer neither excuses the verification nor justifies dropping a warranted diagram. Write the arrows as literal `-->` and `->>`: an editing tool that emits `&gt;` or `&lt;` inside the fence produces a block that reads correctly in the diff and fails to parse.
 
 ## Validation and Completion

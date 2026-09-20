@@ -61,10 +61,19 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 | A convention repeated across the repository with no automated check | `docs/standards/<name>.md` | The convention is already enforced; enforcement makes it a rule, not a standard. |
 | Recurring criteria that decide between alternatives | `docs/engineering-principles.md` | Only one occurrence is evidenced. |
 | An evidenced chain from a declaration to its effect | `docs/guides/<name>.md` | A component README already covers the chain. |
+| Durable project purpose, boundaries, and current orientation not already owned by an existing knowledge document | A project-orientation entry at the repository's existing canonical owner | The orientation is already complete, or the evidence is only temporary, aspirational, or inferred. |
+| An approved specification selected for durable retention with a canonical owner and stable reader value | A project-memory entry linking to the existing specification | The source is draft, unapproved, a backlog item, or has no identifiable owner. |
 
 Author the last three artifacts with [standards maintenance](standards-maintenance.md).
 
 Every evidence-table row ends as one of four outcomes: `planned`, `existing owner covers`, `explicit exclusion`, or `considered, not evidenced`. The last outcome records that the reader outcome and detailed owner were considered but the evidence is insufficient; never create an artifact merely to satisfy a row. The plan accounts for every row. Standards, principles, and guides are the rows most often passed over, because nothing in the repository asks for them by name.
+
+Project orientation and selected specifications are optional durable knowledge,
+not a new documentation mode. Before retaining either one, check whether an
+existing README, context document, architecture document, ADR, or specification
+already owns the material. Prefer a link or a small orientation entry at that
+owner over a duplicate copy. If no canonical owner or durable evidence exists,
+record the gap as `considered, not evidenced` and do not create a placeholder.
 
 ## Context documents
 

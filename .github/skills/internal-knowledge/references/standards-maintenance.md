@@ -6,11 +6,11 @@ Use this reference for the three artifacts that record how a repository works ra
 
 The three artifacts look alike and are not interchangeable. Classify before drafting.
 
-| Artifact | What it records | Stable identifier | Automated check |
+| Artifact | What it records | Stable identifier | Enforcement evidence |
 | --- | --- | --- | --- |
 | `docs/domain/<slug>/RULES.md` | An invariant that must hold | Required | Named, or `not enforced` |
-| `docs/standards/<name>.md` | A convention the repository follows by agreement | None | None, by definition |
-| `docs/engineering-principles.md` | The criteria that decide between alternatives | None | None |
+| `docs/standards/<name>.md` | A convention the repository follows by agreement | None | Optional evidence; it never changes the semantic category |
+| `docs/engineering-principles.md` | The criteria that decide between alternatives | None | Optional evidence; it never changes the semantic category |
 
 Classify by meaning and owner, not by whether a check exists. A standard is a convention the repository follows by agreement, a rule is a domain invariant, and a principle is a repeated decision criterion. Automated enforcement does not change the semantic category: a check on a convention is enforcement evidence for the standard, while a rule remains a rule because of its invariant. When a rule has no check, record `not enforced` and report the gap.
 

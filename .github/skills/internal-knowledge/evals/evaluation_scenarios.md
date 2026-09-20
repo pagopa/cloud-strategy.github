@@ -162,7 +162,7 @@
 
 **Prompt:** "Use internal-knowledge to refresh an explicit documentation destination and preserve the bundle's portable contract."
 
-**Expected:** Route the request through `SKILL.md` and its bundle-local references, with `agents/openai.yaml` projecting the same exact targeted allowlist, evidence proportionality, one detailed owner per rule, and enforcement-gap boundary. Keep the contract self-contained and host-specific paths out of the prompt; if a projection disagrees with a detailed owner, report the mismatch instead of inventing a new artifact or contract field.
+**Expected:** Route the request through `SKILL.md` and its bundle-local references, with `agents/openai.yaml` projecting all five modes, audit precedence and no-write behavior, the same exact targeted allowlist, evidence proportionality, selective project memory, one detailed owner per rule, and the enforcement-gap boundary. Keep the contract self-contained and host-specific paths out of the prompt; if a projection disagrees with a detailed owner, report the mismatch instead of inventing a new artifact or contract field.
 
 ### Check ownership before excluding a managed path
 
@@ -192,7 +192,7 @@
 
 **Prompt:** "Record our naming convention; a validator already rejects the wrong names."
 
-**Expected:** Recognize that an enforced convention is a rule, not a standard. Load `references/standards-maintenance.md`, record it in the `RULES.md` of the owning domain with an identifier, a severity, and the enforcement owner, and keep it out of `docs/standards/`.
+**Expected:** Keep the convention in its standard owner. Record the validator as enforcement evidence without changing the semantic category; use a `RULES.md` owner only when an invariant is evidenced, with its identifier, severity, and enforcement owner.
 
 ### Report the enforcement gap
 
@@ -229,6 +229,36 @@
 **Prompt:** "Refresh the repository documentation; bootstrap whatever is missing."
 
 **Expected:** Treat `refresh` as `sync` and `bootstrap` as `setup` when mapping user vocabulary to modes, resolve exactly one mode from the layout check, and state the resolved mode and the signal that selected it in the plan. Old vocabulary in a request never selects a nonexistent mode.
+
+### Audit an explicit file without authoring
+
+**Prompt:** "Audit `docs/architecture.md` for stale ownership and fix anything you find."
+
+**Expected:** Resolve `audit` before treating the path as a targeted destination. Inspect the named file and only directly necessary supporting evidence, report findings with actual coverage and exclusions, and make no file change or implicit authoring handoff despite the request to fix findings.
+
+### Report partial audit coverage
+
+**Prompt:** "Audit the documentation directory for cross-links; do not inspect generated output or remote systems."
+
+**Expected:** Keep the perimeter bounded, list generated output and remote systems as exclusions or unknowns, report the wider concern without claiming repository-wide completeness, and stop without persisting a report by default.
+
+### Keep semantic contradictions as findings
+
+**Prompt:** "The structural checks pass, but an architecture document and an ADR disagree about the current boundary. Audit the contradiction."
+
+**Expected:** Treat the disagreement as a prioritized finding supported by both evidence paths. Do not invent a resolution, rewrite the ADR, change status, or treat a structural pass as proof of semantic accuracy; a separate owner-authorized request is required for repair.
+
+### Retain selective project memory
+
+**Prompt:** "Keep the approved project orientation and selected specification available for future contributors, but do not copy our issue backlog."
+
+**Expected:** Use `references/project-memory-maintenance.md` as the detailed owner. Check the existing canonical owner, approval and state evidence, reader outcome, and links; retain only eligible durable orientation or a link-first approved specification, and leave backlog, planning, execution, drafts, and unknown completion state with their existing owners.
+
+### Audit a README-only request without authoring
+
+**Prompt:** "Audit `src/service-a/README.md` and tell me whether its navigation is proportional; do not change it."
+
+**Expected:** Resolve `audit`, not the README authoring bucket. Treat the README as evidence within the named perimeter, report missing reader-critical material or unknowns, and leave the file and any generated block unchanged.
 
 ## Should not trigger
 

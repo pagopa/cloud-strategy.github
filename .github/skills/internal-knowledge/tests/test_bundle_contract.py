@@ -1,4 +1,4 @@
-"""Structural contract tests for the authoring-only knowledge skill."""
+"""Structural contract tests for the repository knowledge skill."""
 
 from __future__ import annotations
 
@@ -9,12 +9,14 @@ import yaml
 
 BUNDLE_ROOT = Path(__file__).resolve().parent.parent
 SKILL_PATH = BUNDLE_ROOT / "SKILL.md"
-AUTHORING_REFERENCES = {
+BUNDLE_REFERENCES = {
     "references/adr-maintenance.md",
     "references/architecture-maintenance.md",
+    "references/knowledge-audit.md",
     "references/knowledge-scope.md",
     "references/knowledge-topology.md",
     "references/madr-minimal.md",
+    "references/project-memory-maintenance.md",
     "references/readme-maintenance.md",
     "references/standards-maintenance.md",
 }
@@ -46,7 +48,7 @@ def test_skill_declares_only_authoring_references() -> None:
         re.findall(r"\[[^]]+\]\((references/[^)]+)\)", skill_text)
     )
 
-    assert linked_references == AUTHORING_REFERENCES
+    assert linked_references == BUNDLE_REFERENCES
     assert all((BUNDLE_ROOT / reference).is_file() for reference in linked_references)
 
 
@@ -122,7 +124,18 @@ def test_public_prompt_projects_scope_without_host_dependencies() -> None:
     payload = yaml.safe_load(read_bundle_text("agents/openai.yaml"))
     prompt = payload["interface"]["default_prompt"]
 
-    for anchor in ("targeted", "sync", "setup", "one detailed owner", "enforcement gap"):
+    for anchor in (
+        "five modes",
+        "help",
+        "audit",
+        "targeted",
+        "sync",
+        "setup",
+        "read-only",
+        "selective durable",
+        "one detailed owner",
+        "enforcement gap",
+    ):
         assert anchor in prompt
     for retired_or_host_specific in (
         "knowledge-map.yaml",
@@ -157,8 +170,10 @@ def test_readme_reference_guards_generated_block_interaction() -> None:
 def test_skill_resolves_one_mode_before_writing() -> None:
     skill_text = SKILL_PATH.read_text(encoding="utf-8")
 
-    for mode in ("`help`", "`targeted`", "`sync`", "`setup`"):
+    for mode in ("`help`", "`audit`", "`targeted`", "`sync`", "`setup`"):
         assert mode in skill_text
+    assert "audit` when it explicitly asks" in skill_text
+    assert "before interpreting any named path" in skill_text
     assert "bucket" in skill_text
     assert "never installs a check" in skill_text
     assert "enforcement gap" in skill_text
@@ -310,3 +325,61 @@ def test_evals_cover_under_delivery_branches() -> None:
         "### Map the old mode vocabulary to the new one",
     ):
         assert heading in scenarios
+
+
+def test_evaluations_cover_audit_memory_and_projection_cases() -> None:
+    scenarios = read_bundle_text("evals/evaluation_scenarios.md")
+
+    for heading in (
+        "### Audit an explicit file without authoring",
+        "### Report partial audit coverage",
+        "### Keep semantic contradictions as findings",
+        "### Retain selective project memory",
+        "### Audit a README-only request without authoring",
+        "### Keep public projections aligned",
+        "### Keep a short README proportional",
+        "### Keep architecture structure proportional",
+        "### Keep a standard semantic when a check is added",
+    ):
+        assert heading in scenarios
+
+    assert "an enforced convention is a rule, not a standard" not in scenarios
+
+
+def test_bundle_owners_keep_audit_and_memory_contracts_local() -> None:
+    audit = read_bundle_text("references/knowledge-audit.md")
+    memory = read_bundle_text("references/project-memory-maintenance.md")
+
+    for phrase in (
+        "bounded",
+        "read-only",
+        "actual coverage",
+        "exclusions",
+        "unknown",
+        "did not persist a report",
+    ):
+        assert phrase in audit
+    for phrase in (
+        "canonical owner",
+        "approved",
+        "historical",
+        "implementation-complete",
+        "backlog",
+        "automatic promotion",
+    ):
+        assert phrase in memory
+
+
+def test_cross_file_contract_preserves_reference_boundaries() -> None:
+    standards = read_bundle_text("references/standards-maintenance.md")
+    architecture = read_bundle_text("references/architecture-maintenance.md")
+    readme = read_bundle_text("references/readme-maintenance.md")
+    adr = read_bundle_text("references/adr-maintenance.md")
+    skill = read_bundle_text("SKILL.md")
+
+    assert "Automated enforcement does not change the semantic category" in standards
+    assert "Use only the sections needed for the stated reader outcome" in architecture
+    assert "Use Mermaid only when at least three material evidenced relationships" in readme
+    assert "accepted ADR bodies" in skill
+    assert "accepted ADR body is immutable" in adr
+    assert "generated block byte-for-byte" in readme

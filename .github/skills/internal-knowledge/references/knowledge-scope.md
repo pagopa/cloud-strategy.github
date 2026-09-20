@@ -5,6 +5,7 @@ Use this reference to decide **what the skill may touch** before any drafting st
 ## Contents
 
 - [Mode resolution](#mode-resolution)
+- [Audit mode](#audit-mode)
 - [Buckets](#buckets)
 - [Help mode](#help-mode)
 - [Layout declaration and drift](#layout-declaration-and-drift)
@@ -18,20 +19,21 @@ Use this reference to decide **what the skill may touch** before any drafting st
 
 ## Mode resolution
 
-Resolve one provisional mode from the request signals before reading evidence, then run the layout check. State the final mode and the signal that selected it in the plan.
+Resolve exactly one provisional mode from the request signals before reading evidence. Apply the signals in order and stop at the first match. State the final mode and the signal that selected it.
 
 | Mode | Selecting signal | Write allowlist |
 | --- | --- | --- |
 | `help` | The request opens with `help`, or asks what this skill can do, which mode applies, or how to phrase the real request. | None. Read-only. |
+| `audit` | The request explicitly asks for a bounded read-only audit, review, inspection, or diagnosis of documentation or its ownership/evidence. | No write allowlist. Read only the normalized audit perimeter and directly necessary supporting evidence. |
 | `targeted` | The user names explicit paths, directories, or a single document. | Only those normalized destinations. |
 | `sync` | No explicit targets, and the repository already realizes its declared knowledge layout. | The approved plan intersected with the requested bucket: existing documents plus missing documents on the closed derived-gap list. |
 | `setup` | No explicit targets, and the declared layout is absent, incomplete, or contradicted by what exists on disk. | The approved plan intersected with the requested bucket: the layout and component documents the bucket admits. |
 
-Apply the signals in order and stop at the first match. When two modes remain defensible after the check, do not guess: state both readings and ask which one applies.
+An explicit `audit` signal wins before path interpretation, so a request such as "audit this README" remains read-only rather than becoming targeted authoring. If a request combines audit with a possible fix, complete the audit report only and require a separate explicit authoring request for any change. When two modes remain defensible after the check, do not guess: state both readings and ask which one applies.
 
 `sync` aligns documents to repository evidence and is not a sync contract over managed copies. When the request is about managed-copy state, blockers, or apply flows, stop and ask which run applies before resolving a mode.
 
-The layout check runs in `sync` and in a provisional `setup`, never in `help` or `targeted`. Derive the evidenced domain set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
+The layout check runs in `sync` and in a provisional `setup`, never in `help`, `audit`, or `targeted`. Derive the evidenced domain set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
 
 `targeted` never widens into `sync`. A request naming three directories stays at three directories even when the repository clearly needs more; report the wider gap instead of acting on it.
 
@@ -53,6 +55,30 @@ When the request supports more than one reading, present at most three candidate
 When `help` arrives with no request, summarize the modes, state the repository's current layout and any drift, and name the single most valuable next invocation.
 
 Never start the work the answer describes. `help` ends with the proposed prompt; sending it is the user's decision.
+
+## Audit mode
+
+Audit is a report-only mode for a bounded documentation question. It is not a
+short form of `sync`, `setup`, or `targeted` authoring.
+
+Normalize the read perimeter before inspecting content:
+
+- Use the files or directories named by the caller when they are present.
+- If no perimeter is named, ask one focused scope question; never infer a
+  repository-wide audit from an unqualified request.
+- Read directly referenced local evidence only when it is necessary to explain
+  a finding. Record that supporting read in actual coverage rather than
+  silently widening the perimeter.
+- Record excluded paths, unavailable evidence, and unknown runtime or remote
+  behavior. A partial audit reports the wider concern and its exclusion
+  instead of expanding the request.
+
+Audit may read the normalized perimeter and necessary supporting evidence, but
+it has no write allowlist. It must not edit files, persist a report by default,
+change ADR status, install tools, regenerate graphs, invoke an authoring mode,
+or alter remote state. Audit findings remain findings until a separate request
+and the owning review process authorize a change. See [knowledge audit](knowledge-audit.md)
+for the evidence classes, procedure, and report shape.
 
 ## Layout declaration and drift
 
@@ -112,6 +138,8 @@ Account for every discovered directory and evidence-table row as `planned`, `exi
 
 ## Write allowlist
 
+- In `audit`, there is no write allowlist. The normalized perimeter is a read
+  boundary only, and a report is not persisted by default.
 - In `targeted`, the allowlist is the normalized set of user-supplied destinations.
 - In `sync` and `setup`, the allowlist is exactly the approved plan intersected with the requested bucket. Approval is what authorizes a write, not discovery.
 - A row outside the requested bucket is reported as excluded with the reason `outside the requested bucket`; it never produces an unplanned write.
@@ -178,3 +206,8 @@ When a bucket excludes material gaps, such as a missing `RULES.md` for an eviden
 State what each validator actually covered as counts, not as a verdict. A check that resolved nothing also reports no failures, so a bare pass is compatible with having checked nothing; the counts are what separate the two.
 
 A local validator proves only the paths it actually covered. Do not present it as proof of the whole plan.
+
+An audit has no authored-target status list. Report the inspected perimeter,
+actual coverage, exclusions, checks executed, prioritized findings with
+evidence and impact, unknowns, and next actions. State that no files changed
+and do not present bounded evidence as repository-wide completeness.

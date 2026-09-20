@@ -20,6 +20,15 @@ Choose the ADR directory for the affected architectural scope. Use a root ADR di
 
 Create a new ADR with the local heading, metadata, section order, status vocabulary, and language. Ground context, decision, rationale, alternatives, and consequences in repository evidence and the settled trade-off. Do not invent consensus, approval, ownership, or implementation state.
 
+## Applicability And Indexing
+
+When the repository has an ADR index, record the affected scope and
+applicability there with a link to the decision. Keep applicability as an index
+or projection concern; do not rewrite an accepted ADR body to improve its
+discoverability. Do not infer applicability from a filename, directory, or
+current implementation alone. If no local index exists, report the gap rather
+than inventing a metadata field or registry.
+
 ## Status and Immutability
 
 - A proposed ADR may be revised before acceptance.
