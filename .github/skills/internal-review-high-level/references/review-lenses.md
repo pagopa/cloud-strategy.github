@@ -12,6 +12,19 @@ verdict. Keep observations, inferences, findings, and unknowns distinct.
 - `evidence gap`: the available evidence cannot establish or rule out the
   concern. Keep the concern qualified until verification provides support.
 
+## Evidence outcome
+
+Report one evidence outcome separately from the review verdict:
+
+- `MATERIAL CONCERNS SUPPORTED`: the review has adequate support for at least
+  one material finding.
+- `NO MATERIAL CONCERNS FOUND`: the review has adequate evidence for the
+  declared scope and supports no material concern.
+- `INSUFFICIENT EVIDENCE TO ASSESS`: one or more decisive questions remain
+  unassessed. This does not erase a supported finding; when both occur, retain
+  `MATERIAL CONCERNS SUPPORTED` and list the unassessed question as an evidence
+  gap.
+
 ## Severity
 
 Severity describes the consequence if a supported concern remains unresolved:
@@ -33,18 +46,26 @@ Confidence describes evidence strength and is separate from severity:
 - `plausible`: the concern is credible but needs verification.
 - `speculative`: the concern lacks direct evidence and remains an evidence gap.
 
+Do not assign severity to a purely speculative concern, and do not emit a
+speculative concern as a material finding.
+
 ## Verdict
 
-- `DECISION READY`: the available evidence supports the declared decision with no material unresolved concern.
-- `DECISION READY WITH KNOWN RISK`: the decision is supportable, but a visible, bounded risk remains.
-- `DECISION BLOCKED`: a material, supported concern blocks the declared decision.
-- `REVIEW INCONCLUSIVE`: evidence gaps prevent a reliable decision.
+- `REVIEW READY`: the available evidence supports suitability for the declared
+  use with no material unresolved concern.
+- `REVIEW READY WITH LIMITATIONS`: the artifact is suitable for the declared
+  use, but a visible, bounded limitation or non-decisive evidence gap remains.
+- `REVISION REQUIRED`: a supported material concern prevents suitability for
+  the declared use or breaks a material contract. This is a review finding,
+  not authorization to remediate.
+- `REVIEW INCONCLUSIVE`: evidence gaps prevent a reliable suitability
+  assessment and no supported finding already determines that revision is
+  required.
 
-Use `NO MATERIAL CONCERNS FOUND` when the review is adequately evidenced and no
-material concern is supported. Use `MATERIAL CONCERNS SUPPORTED` when the
-review is adequately evidenced and at least one material finding is supported.
-Use `INSUFFICIENT EVIDENCE TO ASSESS` when evidence gaps prevent either
-conclusion; these outcomes are not interchangeable.
+Verdict and evidence outcome are independently reportable. When a supported
+blocking defect and a decisive evidence gap coexist, use `REVISION REQUIRED`
+when the defect blocks the declared use, retain `MATERIAL CONCERNS SUPPORTED`,
+and list the gap separately. These outcomes are not interchangeable.
 
 ## Material finding
 
@@ -53,9 +74,11 @@ Each finding is one compact block with stable field names per language:
 - English: `Problem` / `Suggestion` / `Why`.
 - Italian: `Problema` / `Suggerimento` / `Perché`.
 
-Severity and confidence appear in the block header. Deeper bookkeeping fields
-such as `Fix owner` and `Expected verification` go to the caller-owned record
-when one exists; they do not appear in chat.
+Severity and confidence appear in the block header. Every finding carries a
+location or evidence anchor, the evidence status, and the consequence. Keep
+`Expected verification` or an explicit closure condition when closure is not
+obvious. Deeper bookkeeping fields such as `Fix owner` go to the caller-owned
+record when one exists; they do not grant the reviewer remediation authority.
 
 Recommendations describe the decision-relevant outcome and expected
 verification. They do not provide replacement artifact content or perform the
