@@ -46,8 +46,8 @@ whether the core skill owns sequencing.
 
 | Posture | Use when | Required posture |
 | --- | --- | --- |
-| `mandatory-test-first` | The work is a reproducible bug fix, regression, behavior-preserving refactor, established public contract, or involves security, authorization, secrets, persistent state, migration, destructive behavior, or another high-impact failure mode. | Choose the observable behavior, establish red evidence, then load `/superpowers-test-driven-development` for the implementation loop. |
-| `feature-first` | The work is a new, exploratory, reversible capability and changes no established contract. | Implementation may precede the durable regression check, but focused and broader validation must be reachable before `feature-first-validated` completion. |
+| `mandatory-test-first` | The work is a reproducible bug fix, regression, behavior-preserving refactor, established public contract, or involves security, authorization, secrets, persistent state, migration, destructive behavior, or another high-impact failure mode. | Choose the observable boundary, then load `/superpowers-test-driven-development` before writing the first red test. Follow its test-quality reference and establish a failure caused by the missing or incorrect behavior before changing production code. |
+| `feature-first` | The work is a new, exploratory, reversible capability and changes no established contract. | Implementation may precede the durable regression check, but `feature-first-validated` completion requires fresh focused validation and the closest applicable broader validation. If the broader check is unavailable or fails outside the task scope, report the actual verified scope and missing evidence rather than implying complete validation. Do not reroute finished production work to `prototype-unverified` merely to obtain a completion label. |
 | `prototype-unverified` | The work is an explicit learning artifact with declared scope, risk, and missing validation. | Never present it as production-ready; report the missing evidence. |
 | `validation-only` | No useful executable or evaluable seam exists. | Name the seam gap and alternate validator before editing. |
 
@@ -56,12 +56,11 @@ The postures are mutually exclusive. A new-feature label alone never grants
 instructional source and asserting its wording does not create an evaluable
 seam.
 
-For deterministic configuration or infrastructure-template edits where the
-owning format provides a native validator, such as `terraform fmt` and
-`terraform test` for Terraform, that native validator is the executable seam:
-recording it as the selected validation satisfies the chosen posture, and no
-additional wording test, external harness, or manufactured test-first history
-may be required for such edits.
+Use the nearest native validator for the property it can establish. Selecting
+a command is not execution evidence. Formatting or schema validation does not
+establish behavioral correctness. Do not manufacture a failing test for a
+formatting-only change. For a semantic change, select a behavioral check or
+report the unverified property.
 
 ## Execution Contract
 
@@ -76,9 +75,10 @@ may be required for such edits.
    location, relevant runner or trigger, duplication evidence, and decision.
    This is an operational decision, not a second plan schema or a mandatory
    field set for unrelated tasks.
-3. For `mandatory-test-first`, establish red evidence and delegate the
-   implementation loop to `/superpowers-test-driven-development` rather than
-   reproducing it locally.
+3. For `mandatory-test-first`, choose the observable boundary, then load
+   `/superpowers-test-driven-development` before writing the first red test.
+   Follow its test-quality reference and establish a failure caused by the
+   missing or incorrect behavior before changing production code.
 4. For prompt, agent, or LLM-output drift, define concrete evaluation examples
    or failure cases before changing behavior.
 5. After the parent locks the posture, boundary, artifact shape, write scope,
@@ -88,7 +88,7 @@ may be required for such edits.
    The parent retains posture choice, boundary choice, routing, authority,
    lifecycle, retry choice, red proof, refactor, independent validation, and
    final verification.
-6. Run the focused check and closest broader validation, then load
+6. Run the focused check and closest applicable broader validation, then load
    `/superpowers-verification-before-completion` before positive claims.
 
 ## Completion
@@ -96,7 +96,7 @@ may be required for such edits.
 | State | Required evidence |
 | --- | --- |
 | `test-first-validated` | The `mandatory-test-first` loop has observed red evidence plus fresh focused and broader passing validation. |
-| `feature-first-validated` | The `feature-first` work has fresh focused validation and reachable broader validation. |
+| `feature-first-validated` | The `feature-first` work has fresh focused validation and the closest applicable broader validation. |
 | `prototype-unverified` | Scope, risk, and missing validation remain explicit; the artifact is not production-ready. |
 | `validation-only` | The seam gap and alternate validation are recorded. |
 

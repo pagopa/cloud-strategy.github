@@ -25,7 +25,7 @@ diagnostic into a manual review finding.
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
 | PY-M08 | Missing focused tests for new or changed behavior | Leaves the changed contract without regression coverage |
-| PY-M09 | Python tests outside repository-root `tests/` or without paths that make the covered owner or checked behavior obvious | Breaks test discoverability and ownership mapping |
+| PY-M09 | Python tests placed outside their owning component's native test location, or placed where the path does not make the covered owner or checked behavior obvious | Breaks test discoverability and ownership mapping |
 | PY-m01 | Unused imports | Dead code noise |
 | PY-m02 | Hardcoded file paths or URLs | Portability and configuration concern |
 | PY-m04 | `noqa` or `type: ignore` without inline justification | Hides real issues |
