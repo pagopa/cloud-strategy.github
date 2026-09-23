@@ -5,6 +5,11 @@ orientation or a selected approved specification. Project memory is selective
 durable knowledge. It is not an issue tracker, backlog, planning system, or
 execution record.
 
+The managerial lane may link durable project purpose or an approved
+specification to this owner, but it does not copy the managerial state
+vocabulary here. Roadmap priorities, initiatives, proposals, plans, retry
+history, and completion claims stay with their detailed owners.
+
 ## Retention Boundary
 
 Retain a memory item only when all of the following are evidenced:

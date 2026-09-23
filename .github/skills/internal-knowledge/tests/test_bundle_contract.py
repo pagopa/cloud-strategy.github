@@ -16,6 +16,7 @@ BUNDLE_REFERENCES = {
     "references/knowledge-scope.md",
     "references/knowledge-topology.md",
     "references/madr-minimal.md",
+    "references/managerial-maintenance.md",
     "references/project-memory-maintenance.md",
     "references/readme-maintenance.md",
     "references/standards-maintenance.md",
@@ -135,6 +136,21 @@ def test_public_prompt_projects_scope_without_host_dependencies() -> None:
         "selective durable",
         "one detailed owner",
         "enforcement gap",
+        "common core",
+        "technical lane",
+        "managerial lane",
+        "authoring choice",
+        "not a runtime profile",
+        "proposal",
+        "accepted decision",
+        "current implementation",
+        "observed outcome",
+        "bounded handoff",
+        "instruction owner",
+        "self-contained vocabulary",
+        "README index",
+        "generated files",
+        "historical records",
     ):
         assert anchor in prompt
     for retired_or_host_specific in (
@@ -155,6 +171,28 @@ def test_evaluations_cover_the_public_contract_projection() -> None:
     assert "### Keep public projections aligned" in scenarios
     assert "one detailed owner" in scenarios
     assert "host-specific" in scenarios
+
+
+def test_lane_scenarios_have_standalone_prompts_and_expected_boundaries() -> None:
+    scenarios = read_bundle_text("evals/evaluation_scenarios.md")
+
+    for heading in (
+        "### Standalone technical setup",
+        "### Standalone managerial setup",
+        "### Mixed-lane realignment",
+        "### Route a missing instruction owner",
+        "### Keep proposal and approval separate",
+        "### Keep public projections aligned across lanes",
+    ):
+        start = scenarios.index(heading)
+        section = scenarios[start : scenarios.find("\n### ", start + len(heading))]
+        assert "**Prompt:**" in section
+        assert "**Expected:**" in section
+
+    assert "without importing host manifests or paths" in scenarios
+    assert "without a host repository, host manifest, host script" in scenarios
+    assert "without host dependencies" in scenarios
+    assert "never auto-promote" in scenarios
 
 
 def test_readme_reference_guards_generated_block_interaction() -> None:
@@ -195,7 +233,9 @@ def test_scope_reference_keeps_write_gates_mechanical() -> None:
         "## Enforcement gap",
     ):
         assert section in reference
-    assert "at most ten authored documents" in reference
+    assert "coherent batch" in reference
+    assert "not a fixed quota" in reference
+    assert "The ceiling is not a target" in reference
     assert "`help` ends with the proposed prompt" in reference
 
 
@@ -383,3 +423,97 @@ def test_cross_file_contract_preserves_reference_boundaries() -> None:
     assert "accepted ADR bodies" in skill
     assert "accepted ADR body is immutable" in adr
     assert "generated block byte-for-byte" in readme
+
+
+def test_skill_defines_common_core_and_two_authoring_lanes() -> None:
+    skill = read_bundle_text("SKILL.md")
+    topology = read_bundle_text("references/knowledge-topology.md")
+    managerial_path = BUNDLE_ROOT / "references" / "managerial-maintenance.md"
+    assert managerial_path.is_file()
+    managerial = managerial_path.read_text(encoding="utf-8")
+
+    for phrase in (
+        "common core",
+        "technical lane",
+        "managerial lane",
+        "lane choice is an authoring choice",
+    ):
+        assert phrase in skill
+    for phrase in (
+        "README index",
+        "project orientation",
+        "roadmap",
+        "maintenance route",
+        "evidence-backed technical extension",
+    ):
+        assert phrase in topology
+    assert "purpose, priorities, initiatives, proposals, and observed outcomes" in managerial
+
+
+def test_lane_selection_is_not_a_runtime_profile() -> None:
+    skill = read_bundle_text("SKILL.md")
+    topology = read_bundle_text("references/knowledge-topology.md")
+
+    assert "not a runtime profile" in skill
+    assert "Never add a profile field" in topology
+    assert "Never create a profile directory" in topology
+    assert "Never create a profile registry" in topology
+
+
+def test_managerial_contract_preserves_proposal_and_approval_states() -> None:
+    managerial_path = BUNDLE_ROOT / "references" / "managerial-maintenance.md"
+    assert managerial_path.is_file()
+    managerial = managerial_path.read_text(encoding="utf-8")
+
+    for phrase in (
+        "proposal",
+        "accepted decision",
+        "current implementation",
+        "observed outcome",
+        "must not auto-promote",
+    ):
+        assert phrase in managerial
+
+
+def test_missing_instruction_routes_use_a_bounded_owner_handoff() -> None:
+    audit = read_bundle_text("references/knowledge-audit.md")
+    managerial_path = BUNDLE_ROOT / "references" / "managerial-maintenance.md"
+    assert managerial_path.is_file()
+    managerial = managerial_path.read_text(encoding="utf-8")
+
+    assert "bounded handoff" in audit
+    assert "instruction owner" in audit
+    assert "report the gap before complete setup" in managerial
+
+
+def test_coherent_batches_do_not_use_a_fixed_ten_document_quota() -> None:
+    scope = read_bundle_text("references/knowledge-scope.md")
+
+    assert "coherent batch" in scope
+    assert "ten-document ceiling" in scope
+    assert "not a fixed quota" in scope
+
+
+def test_topology_distinguishes_indexes_extensions_generated_and_history() -> None:
+    topology = read_bundle_text("references/knowledge-topology.md")
+    readme = read_bundle_text("references/readme-maintenance.md")
+
+    assert "README index" in topology
+    assert "legitimate extension" in topology
+    assert "generated files" in topology
+    assert "historical records" in topology
+    assert "preserve generated blocks" in readme
+
+
+def test_evaluations_cover_lane_setup_alignment_audit_and_proposals() -> None:
+    scenarios = read_bundle_text("evals/evaluation_scenarios.md")
+
+    for heading in (
+        "### Standalone technical setup",
+        "### Standalone managerial setup",
+        "### Mixed-lane realignment",
+        "### Route a missing instruction owner",
+        "### Keep proposal and approval separate",
+        "### Keep public projections aligned across lanes",
+    ):
+        assert heading in scenarios

@@ -260,6 +260,42 @@
 
 **Expected:** Resolve `audit`, not the README authoring bucket. Treat the README as evidence within the named perimeter, report missing reader-critical material or unknowns, and leave the file and any generated block unchanged.
 
+### Standalone technical setup
+
+**Prompt:** "Set up technical knowledge for this repository from its evidence."
+
+**Expected:** Resolve `setup` without importing host manifests or paths, create the common core first, and add only evidenced technical extensions such as architecture, principles, domains, ADRs, guides, or specialist references. Tooling differences alone do not create a technical domain.
+
+### Standalone managerial setup
+
+**Prompt:** "Set up the managerial knowledge needed to explain purpose, priorities, initiatives, proposals, and outcomes."
+
+**Expected:** Use the self-contained managerial owner and its self-contained vocabulary fallback; the standalone run works without a host repository, host manifest, host script. Keep purpose and priorities distinct from technical topology, and preserve proposal, accepted-decision, current-implementation, and observed-outcome states without inventing a technical domain.
+
+### Mixed-lane realignment
+
+**Prompt:** "Realign the repository knowledge after both technical and managerial evidence changed."
+
+**Expected:** Resolve one existing mode, plan one coherent batch across the two lanes, preserve each correct owner, and report any missing evidence or protected generated/history content instead of moving it opportunistically.
+
+### Route a missing instruction owner
+
+**Prompt:** "The repository has no instruction route for this knowledge gap; finish the setup anyway."
+
+**Expected:** Report the missing route as a bounded handoff to the instruction owner, leave policy and instruction files untouched, and do not claim complete setup until the owner resolves the gap.
+
+### Keep proposal and approval separate
+
+**Prompt:** "Turn this proposed initiative into the approved implementation record."
+
+**Expected:** Keep the item proposed until explicit authority is observed; never auto-promote it to an accepted decision, current implementation, or observed outcome.
+
+### Keep public projections aligned across lanes
+
+**Prompt:** "Explain how the public skill prompt handles technical and managerial lane choices."
+
+**Expected:** The public projection retains the five runtime modes, presents lane choice as an authoring choice rather than a runtime profile, and points to the same detailed owners as the bundle references without host-specific dependencies. The standalone evaluation passes without host dependencies.
+
 ## Should not trigger
 
 ### Ordinary documentation edit

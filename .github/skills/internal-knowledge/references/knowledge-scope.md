@@ -187,7 +187,7 @@ The plan is negotiable line by line. Removing a row moves it to the exclusion le
 
 Order the plan by reader value: the layout root document first, then the components a reader must understand to use the repository, then the remainder.
 
-Write at most one wave per invocation, and at most ten authored documents in a wave. The ceiling is not a target: when the evidence supports more documents than the wave carries, the plan names what limits it, whether coherence, the ceiling itself, or a user decision. A wave must leave the repository coherent on its own: never publish a document whose links point at artifacts a later wave would create. Report the remaining waves so the next invocation resumes without rediscovery.
+Write at most one coherent wave per invocation. A coherent batch contains every authored document needed to keep one owner split and its links coherent; the former ten-document ceiling is not a fixed quota. The ceiling is not a target: bound the wave by evidence, coherence, or an explicit user decision, and explain the boundary when more documents remain. A wave must leave the repository coherent on its own: never publish a document whose links point at artifacts a later wave would create. Report the remaining waves so the next invocation resumes without rediscovery.
 
 A wave partitions documents, never the obligations of an authoring reference. Every rule that reference states for a document, including its sections, its links, and its diagram disposition, is satisfied when that document is written. Treating one obligation as its own later wave leaves every document already published incomplete, and the defect survives review because each wave looked finished on its own.
 

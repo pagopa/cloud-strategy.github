@@ -19,6 +19,15 @@ Audit is read-only and non-persistent by default. It must not:
 
 A possible fix may be recorded as a next action, but it is never applied by the audit. A separate request must name the authoring destination and owner.
 
+## Missing instruction route
+
+When ordinary maintenance is not discoverable without invoking this skill,
+record a `missing-instruction-route` finding. The finding names the missing
+instruction owner and a bounded handoff: the owner must make the route
+discoverable, while this skill remains read-only and does not edit policy,
+workflow, validator, manifest, or instruction files. Report the gap before complete setup and keep the handoff incomplete until the owner supplies the
+route.
+
 ## Scope And Evidence
 
 Start with the normalized files or directories explicitly named by the caller. If the request has no bounded perimeter, ask one focused scope question before reading content. Do not infer a repository-wide audit from a generic request.

@@ -16,6 +16,28 @@ Load it in `setup`. Load it in `sync` only when the plan introduces an artifact 
 - [Documentation modes](#documentation-modes)
 - [Anti-scope](#anti-scope)
 
+## Common core and lanes
+
+Every realized layout starts with a common core: a README index, project orientation, roadmap, and knowledge-maintenance route. These documents give a
+reader navigation, purpose, priorities, and the procedure for keeping the
+knowledge current without making a technical claim they do not own.
+
+The technical lane is an evidence-backed technical extension. It may include
+architecture, principles, domain contexts and rules, ADRs, guides, or
+specialist references when the repository supports the reader outcome. A
+legitimate extension has an evidenced owner and lifecycle; tooling or state
+differences alone do not create a technical domain.
+
+The managerial lane covers purpose, priorities, initiatives, proposals, and observed outcomes. It is an authoring lane, not a runtime profile. Never add a profile field, never create a profile directory, and never create a profile registry. The five runtime modes remain the only modes.
+Never create a profile directory or profile registry as a documentation
+convenience.
+Never create a profile registry as a documentation convenience.
+
+README indexes inside the requested docs perimeter are ordinary targets.
+Generated files remain with their generator, and historical records remain with their historical owner. Preserve both boundaries while accounting for
+the evidence row and reporting an unavailable or protected source.
+Treat generated files as protected evidence, not as authored replacements.
+
 ## Supported layouts
 
 Every repository has at least one knowledge domain. The evidenced domain count selects the layout; a declaration proposes a layout and never overrides the evidence.
