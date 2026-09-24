@@ -78,8 +78,9 @@ when several entrypoints use the same dependency set.
 Load `references/layout-and-templates.md` for a repository-aligned layout,
 importable entrypoint, hash-locked requirements, or launcher guidance.
 
-Load `references/reporting.md` when human-facing output, `rich`, redaction,
-diagnostics, or final summaries are part of the tool contract.
+Load `references/reporting.md` when a direct-execution tool contract includes
+human lifecycle output, bounded diagnostics, redaction, or final summaries;
+keep machine-readable output plain.
 
 ## Testing and validation
 

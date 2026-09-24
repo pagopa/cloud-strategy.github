@@ -61,8 +61,8 @@ only for an explicit POSIX.1-2024 baseline.
 - Destructive or repeatable scripts should be idempotent and expose `--dry-run` when operator risk is non-trivial.
 - Keep operator entrypoints thin and extract repeated branches into sourced helper files only when reuse is real.
 - Treat 300 lines as a review threshold and 400 lines as a split-or-justify gate for standalone scripts.
-- When script output can grow and the script is agent-facing, prefer bounded summaries by default and add an explicit compact or quiet mode that still preserves blockers, failures, and required next actions.
-- Keep full-detail output reachable through an explicit flag or durable artifact path when operators need full diagnostics.
+- Consider a terminal-only `--compact` projection only for a new interface with measured high output volume; preserve execution, non-terminal contracts, and any existing `--format compact` interface.
+- Load `references/operator-output.md` for multi-step lifecycle output, bounded diagnostics, quiet and verbose behavior, and failure-continuation guidance.
 
 ## Testing
 

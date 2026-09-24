@@ -92,6 +92,9 @@ Load [conditional review contributor](references/conditional-review-contributor.
   the action shares state and exposes caller-visible outputs.
 - Load [output forwarding pattern](references/output-forwarding-pattern.md)
   when a step result becomes an action output.
+- Load [script caller guidance](references/script-caller-guidance.md) when a
+  workflow or action calls a script and must forward its output, formats,
+  failures, or artifacts.
 - Load [composite testing pattern](references/testing-pattern.md) for smoke,
   failure-path, and contract checks.
 - Load [action README template](references/action-readme-template.md) for
