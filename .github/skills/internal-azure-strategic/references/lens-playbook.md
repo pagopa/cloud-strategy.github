@@ -6,7 +6,7 @@ structure.
 ## Common lens combinations
 
 | Situation | Start with | Add only when it changes the recommendation |
-|---|---|---|
+| --- | --- | --- |
 | Landing-zone or platform-topology choice | organization-structure, governance | FinOps, continuity, or operations |
 | Identity or delegated-access choice | identity and access, governance | blast radius or compliance |
 | Rollout across management groups or subscriptions | rollout and rollback, blast radius | operations or continuity |

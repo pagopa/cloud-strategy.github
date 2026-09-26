@@ -10,8 +10,9 @@ review.
 
 ## When to use
 
-Use when `/internal-azure` selects a pipeline, environment-promotion, or Azure
-DevOps automation deliverable.
+Use when `/internal-azure` selects the DevOps lane: Azure DevOps pipeline
+YAML, environment promotion, triggers, approvals, artifact flow, or project
+automation.
 
 ## Workflow
 
@@ -29,6 +30,7 @@ DevOps automation deliverable.
    deployment is in scope.
 6. Run focused validation for YAML syntax, repository checks, pipeline linting,
    dry runs, or Azure DevOps validation commands available in the repository.
+7. Verify every item in Completion criteria before finishing.
 
 ## Pipeline principles
 
@@ -39,9 +41,18 @@ DevOps automation deliverable.
 - Publish test results and artifacts with recognizable names.
 - Preserve repository conventions before introducing new pipeline structure.
 
-Load `references/pipelines.md` for the deeper authoring and review baseline.
+## References
+
+- [`references/pipelines.md`](references/pipelines.md): load for the deeper
+  authoring and review baseline.
 
 ## Completion criteria
 
-Return the classified request, discovered conventions, pipeline or automation
-design, security controls, rollback posture, and focused validation result.
+Return, in this order:
+
+1. Classified request.
+2. Discovered conventions.
+3. Pipeline or automation design.
+4. Security controls.
+5. Rollback posture.
+6. Focused validation result.

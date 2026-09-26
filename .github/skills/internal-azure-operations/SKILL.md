@@ -10,8 +10,9 @@ decision.
 
 ## When to use
 
-Use when `/internal-azure` routes work requiring operational proof or
-validation.
+Use when `/internal-azure` selects the operations lane: preflight,
+observability, rollout evidence, backup/restore proof, continuity validation,
+or operational reporting.
 
 ## Workflow
 
@@ -44,10 +45,20 @@ validation.
 Use current Microsoft documentation when the answer depends on Azure Monitor,
 Backup, Site Recovery, Policy compliance, or service behavior.
 
-Load `references/validation-and-evidence.md` for branch-specific preflight,
-rollout, recovery, and evidence checklists.
+## References
+
+- [`references/validation-and-evidence.md`](references/validation-and-evidence.md):
+  load for branch-specific preflight, rollout, recovery, and evidence
+  checklists.
 
 ## Completion criteria
 
-Return the operational objective, evidence state, rollout unit, observed signals,
-recovery proof when relevant, open risks, and next validation action.
+Return, in this order:
+
+1. Operational objective.
+2. Evidence state.
+3. Rollout unit.
+4. Observed signals.
+5. Recovery proof, when relevant.
+6. Open risks.
+7. Next validation action.
