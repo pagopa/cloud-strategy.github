@@ -1,6 +1,6 @@
 ---
 name: internal-mermaid
-description: Use when generating, modifying, validating, reviewing, or troubleshooting Mermaid diagrams.
+description: Use when generating, modifying, validating, reviewing, or troubleshooting Mermaid diagrams. Route surrounding Markdown structure, fences, or links to /internal-markdown.
 ---
 
 # Internal Mermaid
@@ -14,6 +14,8 @@ description: Use when generating, modifying, validating, reviewing, or troublesh
 
 - The work concerns prose, policy, or another diagram language rather than
   Mermaid.
+- The surrounding Markdown structure, fences, or links are the concern; route
+  them to `/internal-markdown`.
 - A visual editor or renderer is the primary task.
 
 ## Theme-neutral communication
