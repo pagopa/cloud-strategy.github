@@ -83,10 +83,20 @@ declared source.
   Only an explicit user request in the current conversation authorizes a
   commit.
 - Leave bundled prompts and scripts byte-identical to upstream; the `SKILL.md`
-  contract controls them.
+  contract controls them. The only exception is the sibling-path rule below.
 - Adding or changing this block changes the
   `superpowers-brainstorming` override `expected_content_hash`; recompute it in
   the same change.
+
+## Superpowers Sibling Paths
+
+- In every file of every `obra-superpowers` asset, including scripts, rewrite
+  relative sibling-skill paths such as `../subagent-driven-development/` or
+  `../../subagent-driven-development/` to the prefixed canonical directory
+  name.
+- Rewrite only a path segment that follows one or more `../` and matches the
+  upstream directory name of a declared `obra-superpowers` asset. Leave every
+  other byte unchanged.
 
 ## Repository-Owned Skill Contracts
 

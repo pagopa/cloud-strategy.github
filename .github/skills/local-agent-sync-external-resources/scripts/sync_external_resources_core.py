@@ -963,6 +963,18 @@ def _enforce_superpowers_no_commit_contract(content: str) -> str:
     )
 
 
+_SIBLING_SKILL_PATH_RE = re.compile(r"(?P<up>(?:\.\./)+)(?P<name>[a-z0-9][a-z0-9-]*)/")
+
+
+def _prefix_superpowers_sibling_paths(content: str, names: dict[str, str]) -> str:
+    return _SIBLING_SKILL_PATH_RE.sub(
+        lambda match: match.group("up")
+        + names.get(match.group("name"), match.group("name"))
+        + "/",
+        content,
+    )
+
+
 def _normalize_mattpocock_retained_paths(
     canonical_name: str,
     relative_path: str,
@@ -1232,6 +1244,12 @@ def normalize_candidate(
 
     changed: list[str] = []
     sources_by_id = {source.source_id: source for source in resources.sources}
+    superpowers_sibling_names = {
+        Path(asset.upstream).name: asset.canonical_name
+        for source in resources.sources
+        if source.source_id == _SUPERPOWERS_SOURCE
+        for asset in source.assets
+    }
     skill_references_by_source: dict[str, dict[str, str]] = {}
     backtick_references_by_source: dict[str, dict[str, str]] = {}
     for source in resources.sources:
@@ -1304,6 +1322,11 @@ def normalize_candidate(
                         + "`",
                         content,
                     )
+
+            if asset.source == _SUPERPOWERS_SOURCE:
+                content = _prefix_superpowers_sibling_paths(
+                    content, superpowers_sibling_names
+                )
 
             if asset.source == _MATTPOCOCK_SOURCE:
                 content = _normalize_mattpocock_retained_paths(

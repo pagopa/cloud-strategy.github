@@ -758,6 +758,89 @@ def test_normalization_enforces_no_commit_contract_for_superpowers_skills(
     assert "local-sync:no-commit" not in other_skill.read_text(encoding="utf-8")
 
 
+def test_normalization_prefixes_superpowers_sibling_paths_in_all_files(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    executing = ".github/skills/superpowers-executing-plans"
+    driven = ".github/skills/superpowers-subagent-driven-development"
+    script = candidate / executing / "scripts" / "task-done"
+    skill = candidate / executing / "SKILL.md"
+    script.parent.mkdir(parents=True)
+    (candidate / driven).mkdir(parents=True)
+    (candidate / driven / "SKILL.md").write_text(
+        "---\nname: superpowers-subagent-driven-development\n---\n",
+        encoding="utf-8",
+    )
+    script_body = (
+        '#!/usr/bin/env bash\n'
+        'sdd="$(cd "$(dirname "$0")/../../subagent-driven-development/scripts" && pwd)"\n'
+        'other="../unknown-skill/scripts"\n'
+    )
+    script.write_text(script_body, encoding="utf-8")
+    skill.write_text(
+        "---\nname: superpowers-executing-plans\n---\n"
+        "Run `../subagent-driven-development/scripts/sdd-workspace PLAN`.\n",
+        encoding="utf-8",
+    )
+    other_local = ".github/skills/example"
+    other_script = candidate / other_local / "scripts" / "run"
+    other_script.parent.mkdir(parents=True)
+    other_script.write_text("../../subagent-driven-development/scripts\n", encoding="utf-8")
+    superpowers_assets = tuple(
+        ManagedAsset(
+            source="obra-superpowers",
+            upstream=f"skills/{name}",
+            local=f".github/skills/superpowers-{name}",
+            canonical_name=f"superpowers-{name}",
+        )
+        for name in ("executing-plans", "subagent-driven-development")
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="obra-superpowers",
+                repository="https://github.com/obra/superpowers.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=superpowers_assets,
+            ),
+            ManagedSource(
+                source_id="test",
+                repository="https://example.com/test.git",
+                ref="b" * 40,
+                advertised_ref=None,
+                assets=(
+                    ManagedAsset(
+                        source="test",
+                        upstream="skills/example",
+                        local=other_local,
+                        canonical_name="example",
+                    ),
+                ),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    assert f"{executing}/scripts/task-done" in first_changed
+    assert second_changed == ()
+    assert script.read_text(encoding="utf-8") == script_body.replace(
+        "../../subagent-driven-development/",
+        "../../superpowers-subagent-driven-development/",
+    )
+    assert "../superpowers-subagent-driven-development/scripts/sdd-workspace" in (
+        skill.read_text(encoding="utf-8")
+    )
+    assert other_script.read_text(encoding="utf-8") == (
+        "../../subagent-driven-development/scripts\n"
+    )
+
+
 def _policy_driven_resources(canonical_name: str, local: str) -> ManagedResources:
     asset = ManagedAsset(
         source="upstream",
