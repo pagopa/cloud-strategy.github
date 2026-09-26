@@ -1,6 +1,45 @@
 # Pause and Persistence
 
-Conversation-only analysis is the default. On pause, return this compact state:
+Conversation-only analysis is the default.
+
+## Recovery record
+
+Store and recover these projections together as the one canonical recovery
+record:
+
+- `unit_lock`: `Subject`, `Mode`, `Decision focus`, `Desired artifact`, and
+  `Implementation permission`;
+- `state_capsule`: accepted, rejected, deferred, and accepted-risk decision
+  IDs; eligible-now IDs; blocked-later IDs with prerequisites; evidence
+  anchors; and the next action;
+- `decision_ledger`: each stable `Decision ID` with state, basis, reopen
+  condition, and dependencies;
+- `authority_envelope`: the exact `Authorized paths` and `Authorized actions`
+  plus the unchanged continuation boundary;
+- `communication_projection`: material deltas, one outcome, up to three
+  controlling evidence items, one principal risk, active choice, blockers,
+  unknowns, acceptance conditions, residual risks, and diagnostic word count.
+
+The record also carries the gate and menu projection:
+
+- `global_gates`: exactly `GRILL-ME` and `CRITICAL REVIEW`;
+- `grill_me`: the post-setup gate event, eligible decision IDs, question IDs,
+  route owner, and any repeat-round eligibility evidence;
+- `critical_review`: `pending` or `completed`, its lens records, classified
+  findings, conclusion, and disposition state;
+- `gate_override`: absent unless one named action is recorded as
+  `accepted-risk`;
+- `menu`: the seven entries with positions, availability, and lock reasons.
+
+Gate state is structural recovery data, not a second report or transcript.
+Never infer that a recommendation, checkpoint, status, or recovery event
+completed a gate. A missing or contradictory projection triggers the
+fail-closed rule in `SKILL.md`.
+
+## Pause view
+
+On pause, return this projection of the state capsule and carry the authority
+envelope unchanged:
 
 ```markdown
 ## ⏸️ Resume from here
@@ -11,71 +50,27 @@ Conversation-only analysis is the default. On pause, return this compact state:
 - `🔒 Closed decisions`
 ```
 
-The pause view is a readable projection of the current state capsule. Rebuild
-it from the capsule after context compaction, a subject change, or a mode
-change. If a field cannot be recovered, mark the affected decision `open`.
-Carry the current `Authorized paths` and `Authorized actions` with the resume
-projection as an authority boundary, not as a new state-capsule decision. A
-pause, continuation, or recovery never expands that envelope, and a protected
-status never supplies user authority.
+Rebuild it from the capsule after compaction, a subject change, or a mode
+change. Mark the decision of any unrecoverable field `open`.
 
-The state capsule, decision ledger, authority envelope, and canonical
-communication projection must be stored and recovered as one canonical
-recovery record. The resume view is only a projection of that record. Before
-continuing or authoring, verify the unit lock, stable decision IDs and states,
-evidence anchors, exact authority sets, next action, and communication fields:
-material deltas, outcome, up to three controlling evidence items, principal
-risk, active choice, blockers, unknowns, acceptance conditions, residual
-risks, and diagnostic word count. If any required projection is missing or
-conflicting, fail closed, preserve the last valid record, and leave affected
-decisions `open`; do not infer a path, action, decision, or acceptance.
+## Artifact
 
-The same recovery record also carries the gate and menu projection:
-
-- `global_gates`: exactly `GRILL-ME` and `CRITICAL REVIEW`;
-- `grill_me`: the post-setup gate event, eligible decision IDs, question IDs,
-  route owner, and any repeat-round eligibility evidence;
-- `critical_review`: `pending` or `completed`, its at least three lens records
-  with a lateral third lens, classified findings, conclusion, and explicit
-  disposition state;
-- `gate_override`: absent unless one named action is explicitly recorded as
-  `accepted-risk`, with all other gates preserved;
-- `menu`: the same seven numbered entries, their positions, availability, and
-  short lock reasons for the current phase.
-
-The gate state is structural recovery data, not a second report or transcript.
-On reconstruction, reject a missing or contradictory gate/menu projection and
-preserve the last valid record. Never infer that a recommendation, checkpoint,
-status, or recovery event completed a gate.
-
-Create an analysis file only when the user explicitly selects
-`💾 Save the analysis`, selects the `+spec` acceptance action, or asks to
-continue in another conversation. Write at most one Markdown artifact at the
-supplied path. When no path is supplied for the analysis artifact, use
+Create an analysis file only when the user selects `save` or `+spec`, or asks
+to continue in another conversation. Write at most one Markdown artifact at the
+supplied path. Without a path, use
 `tmp/superpowers/specs/YYYY-MM-DD-<topic>-analysis.md`, disclose that `tmp/` is
-disposable, and update that same file in place.
+disposable, and update that same file in place. Saving does not close the
+review gate.
 
-`Save the analysis` follows the save checkpoint rules in the skill's
-[Phase menu and gate](../SKILL.md#phase-menu-and-gate) section. Saving also
-does not close the review gate.
+The artifact holds the current Candidate or Consolidated Analysis Spec and the
+full recovery record, including finding classifications and any named-action
+`accepted-risk` override, so planning replay is lossless without the
+transcript. Never create a separate critical report, transcript, or second
+analysis artifact.
 
-The artifact must contain the current Candidate or Consolidated Analysis Spec,
-its state capsule, evidence anchors, next action, and the one canonical
-communication projection: material deltas, one outcome, up to three controlling
-evidence items, one principal risk, active choice, blockers, unknowns,
-acceptance conditions, and residual risks. It must also preserve the gate
-state, menu locks, finding classifications, and any named-action
-`accepted-risk` override. This keeps planning replay lossless without the
-transcript. Do not create a separate critical report or transcript and do not
-save twice as separate analysis artifacts. A verified `+spec` artifact records
-`plan_authoring_ready: true`. A later `+plan` acceptance uses the retained
-spec as its source and the single plan path locked by
+After a verified `+spec`, record `plan_authoring_ready: true` and state that
+plan authoring stays available through a later explicit `+plan`. `+plan` uses
+the retained spec and the single plan path locked by
 `/internal-gateway-writing-plans`; this gateway does not create or structure
-that plan directly.
-
-After `+spec` acceptance, state that the verified artifact is plan-ready and
-that plan authoring remains available through a later explicit `+plan`
-selection. `Implementation permission: false` is not a plan-writing blocker.
-After `+plan` acceptance, state that execution remains a separate action
-requiring explicit approval. Do not invoke execution or imply that artifact
-acceptance authorizes it.
+that plan. After `+plan`, state that execution is a separate action that needs
+explicit approval.

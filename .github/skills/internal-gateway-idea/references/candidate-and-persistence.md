@@ -1,4 +1,4 @@
-# Candidate and Persistence
+# Candidate, Review, and Acceptance
 
 ## Chat projection
 
@@ -10,10 +10,10 @@ Present one compact Candidate using these sections when they contain material:
 4. `### ⚠️ Risks` — blockers, unknowns, acceptance conditions, and residuals.
 5. `### ❓ Decisions needed` — one numbered block for eligible decisions.
 
-Keep the seven gateway menu entries in their fixed positions with lock reasons.
-Do not duplicate the spec, critical report, ledger, or recovery record in chat.
-Use at most one Mermaid diagram when it clarifies at least three relationships.
-A recommendation is not acceptance.
+Follow it with the seven-entry phase menu from `SKILL.md`. Do not duplicate
+the spec, critical report, ledger, or recovery record in chat. Use at most one
+Mermaid diagram, only when it clarifies at least three relationships. A
+recommendation is not acceptance.
 
 ## Candidate Analysis Spec
 
@@ -23,38 +23,17 @@ and `Success criteria`; `Scope` and `Anti-scope`; `Facts`, `Reports`,
 `Recommendation`; `Rejected alternatives`; `Risks` and `Disconfirming signals`;
 `Deferred questions`; and `Specific critical focus`.
 
-Present the Candidate before acceptance. After critical review, show exactly:
+## Critical review and realignment
 
-1. `✅ Accept as the Consolidated Analysis Spec +spec`
-2. `✅ Accept as the Consolidated Analysis Spec +plan`
-3. `💾 Save the analysis`
-4. `⏹️ Close without a file or plan`
+Pass the Candidate and its `Specific critical focus` to
+`/internal-gateway-critical-master`. Keep blocking or unresolved findings open
+and require an explicit user choice before integrating any finding. On
+realignment, incorporate supported findings, reject conflicts with evidence,
+return unresolved decisions to `/grill-me`, and reopen only affected branches.
 
-Only options 1 and 2 promote the Candidate. Option 1 authorizes only the
-consolidated spec artifact and records `plan_authoring_ready: true` after
-verification. Option 2 authorizes only the plan-authoring handoff, either from
-the Candidate or a retained plan-ready spec. `Implementation permission: false`
-does not block option 2. Neither option authorizes implementation or execution.
+## Acceptance
 
-## Artifact authoring
-
-After `+spec` or `+plan`, load and apply
-[`artifact-authoring.md`](artifact-authoring.md). It owns conditional delegation
-admission and retained owner responsibilities for the selected artifact.
-
-## Critical review integration
-
-The `CRITICAL REVIEW` gate is mandatory before close or promotion. Pass the
-Candidate and `Specific critical focus` to `/internal-gateway-critical-master`.
-Keep blocking or unresolved findings open. Require an explicit user choice
-before integrating findings. On realignment, incorporate supported findings,
-reject conflicts with evidence, return unresolved decisions to `/grill-me`, and
-reopen only affected branches. Promote only after every finding is incorporated,
-rejected, accepted as risk, or routed, followed by option 1 or 2.
-
-## Persistence
-
-Conversation-only analysis remains the default. On pause, save, cross-chat
-continuation, or accepted artifact creation, load and apply
-[`persistence.md`](persistence.md). It owns the resume projection,
-single-artifact rule, default path, and post-acceptance handoff.
+Promote only after every finding is incorporated, rejected, accepted as risk,
+or routed, and the user then selects `+spec` or `+plan`. Each action has the
+scope defined in the `SKILL.md` unit lock; `+plan` may start from the Candidate
+or from a retained plan-ready spec. `save` and `close` never promote.

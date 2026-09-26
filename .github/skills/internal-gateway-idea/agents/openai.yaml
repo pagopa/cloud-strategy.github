@@ -2,59 +2,18 @@ interface:
   display_name: "internal-gateway-idea"
   short_description: "Conversation-first analysis for unclear ideas"
   default_prompt: >-
-    Use $internal-gateway-idea only when explicitly selected and keep one
-    autonomous route owned by this gateway while turning an early or unclear
-    idea into a decision-ready Analysis Spec. Keep the analysis in
-    conversation by default, distinguish Facts, Reports, Assumptions, Unknowns,
-    and Constraints, and use a compact emoji-guided chat layout. Send all
-    currently known eligible decisions to /grill-me in one numbered bulk block
-    immediately after setup and use later numbered blocks only for newly
-    eligible follow-ups. Route every material doubt, ambiguity, missing
-    decision, and user-input question through the mandatory GRILL-ME gate;
-    delegate interview mechanics to /grill-me and critical-review procedure to
-    /internal-gateway-critical-master. Use exactly two global gates, GRILL-ME
-    and CRITICAL REVIEW. Require CRITICAL REVIEW before close, +spec, or
-    +plan; complete it structurally with at least three lenses, the third a
-    lateral analogy or reverse-assumption lens, classified findings, and a
-    conclusion. A scoped override names one action and records accepted-risk
-    while preserving every other gate. After setup and every named analysis
-    phase, project the same seven numbered entries in order: 1 🔄 continue,
-    2 🔍 critical review, 3 🧩 realign when findings exist, 4 📝 +spec,
-    5 🗺️ +plan, 6 💾 save, 7 ⏹️ close; keep locked entries visible with
-    reasons. Save is provisional and records critical_review: pending before
-    review. After a critical review, offer an explicit option to realign the
-    same analysis with supported findings. Keep the exact four-option Candidate acceptance gate. Default to local authoring with
-    delegation.mode: none, worker: primary-owner, and result: not_applicable;
-    create no delegation brief, worker result, receipt, or retrospective worker
-    claim. Delegate the selected spec or plan artifact through
-    internal-luna-executor and /internal-subagent-contract only when the
-    caller-owned value gate proves one autonomous, bounded, verifiable evidence
-    package is materially useful; retain parent-owned synthesis, review,
-    validation, and acceptance. If an explicitly selected worker is
-    unavailable, record a caller-owned LifecycleRecord and stop as blocked; a
-    manual or local continuation needs explicit caller authorization and a new
-    local route. Mark a verified +spec artifact plan_authoring_ready true, keep
-    the old menu, and wait for a later explicit +plan selection before routing
-    to /internal-gateway-writing-plans. Do not treat Implementation permission
-    false as a plan-authoring block. Keep implementation-oriented design and
-    execution separate and user-gated; do
-    not introduce an alternate brainstorming route or handoff.
-    Record the current Authorized paths and Authorized actions, preserve them
-    across continue, finish, pause, and recovery, and block every new path or
-    action as authority-or-scope until the user explicitly accepts it. Keep
-    protected workflow status separate from user authority. Present the
-    specialized Candidate projection in this order: active decision and state
-    delta, recommendation and why, controlling evidence grouped by
-    implication, material risks and acceptance conditions, then the eligible
-    decision block. Keep full detail in the canonical record or selected
-    artifact; never repeat it as a transcript and never omit material items
-    silently.
-    Critical review precedes +spec and +plan; critical findings require
-    explicit realignment before integration. Use diagnostic word counts only
-    and at most one useful Mermaid diagram for three or more relationships,
-    with the conclusion in adjacent prose. The caller retains verification,
-    acceptance, closeout, and the sole post-approval handoff to
-    /internal-gateway-execute-plans.
+    Use $internal-gateway-idea only when explicitly selected. It is one
+    autonomous route that turns an early or unclear idea into a
+    decision-ready Analysis Spec in analysis-only mode, keeping the work in
+    the conversation by default. Follow SKILL.md: record the unit lock,
+    recover local evidence first, route every material decision through the
+    mandatory GRILL-ME gate with /grill-me, and require the CRITICAL REVIEW
+    gate with /internal-gateway-critical-master before close, +spec, or
+    +plan. Show the seven-entry phase menu with visible lock reasons, never
+    integrate findings automatically, keep Authorized paths and Authorized
+    actions unchanged, and block anything outside them as authority-or-scope.
+    Implementation and execution stay separate and user-gated; the caller
+    keeps the sole post-approval handoff to /internal-gateway-execute-plans.
 route_contract:
   owner: "/internal-gateway-idea"
   mode: "analysis-only"
