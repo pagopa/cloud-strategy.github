@@ -1,6 +1,7 @@
 # Multi-Step Composite Template
 
-Use this starter when a composite action must validate input, share state across steps, and expose a caller-visible output.
+Use this starter when a composite action must validate input, share state
+across steps, and expose a caller-visible output.
 
 ```yaml
 name: Package Directory
@@ -44,6 +45,8 @@ runs:
 
 Keep the shape intentional:
 
-- use `$GITHUB_ENV` for intra-action state and `$GITHUB_OUTPUT` for caller-visible data
-- give output-producing steps stable `id` values
-- extract longer build or deploy logic into a script once the action becomes orchestration-heavy
+- Use `$GITHUB_ENV` for intra-action state and `$GITHUB_OUTPUT` for
+  caller-visible data.
+- Give output-producing steps stable `id` values.
+- Extract longer build or deploy logic into a script once the action becomes
+  orchestration-heavy.

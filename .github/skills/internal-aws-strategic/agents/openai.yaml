@@ -3,4 +3,4 @@ policy:
 interface:
   display_name: "internal-aws-strategic"
   short_description: "AWS option, tradeoff, and risk decisions"
-  default_prompt: "Use $internal-aws-strategic for this routed AWS decision task."
+  default_prompt: "Use /internal-aws to route this AWS request, then apply $internal-aws-strategic for option comparison, tradeoffs, cost-value analysis, blast radius, or reversibility."

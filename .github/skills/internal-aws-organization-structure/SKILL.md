@@ -16,28 +16,38 @@ into a structural result with explicit ownership and rollout scope.
 - Delegated administrator placement decisions.
 - StackSets topology or rollout-scope guidance.
 - Network placement or multi-region layout at platform level.
-- Shared-services, security, or log-archive account layout and account-purpose segmentation.
+- Shared-services, security, or log-archive account layout and account-purpose
+  segmentation.
 - Multi-account or multi-region structural decisions.
 
-## Working model
+## Core rules
 
-- Keep the management account minimal unless AWS explicitly requires otherwise.
+- Keep the management account minimal unless AWS explicitly requires
+  otherwise.
 - Distinguish financial ownership from operational ownership.
 - Prefer delegated administration when it materially reduces blast radius.
-- Separate structure (where capabilities live) from governance (what controls apply).
-- Name the smallest safe rollout unit for structural change: account, OU, or region set.
+- Separate structure (where capabilities live) from governance (what controls
+  apply).
+- Name the smallest safe rollout unit for structural change: account, OU, or
+  region set.
 
-Load `references/control-surface-map.md` for the control-surface split and default review checklist when the structure choice is ambiguous.
+## Output
 
-## Output expectations
+- Narrow request: recommended structure choice, short reason, and the main
+  blast-radius or rollout note.
+- Broader request: structural objective, candidate layouts, recommended
+  placement model, smallest safe rollout unit, and main risks.
 
-Narrow asks: recommended structure choice · short reason · main blast-radius or rollout note.
-Broader asks: structural objective · candidate layouts · recommended placement model · smallest safe rollout unit · main risks.
+## References
+
+- [references/control-surface-map.md](references/control-surface-map.md): load
+  for the control-surface split and default review checklist when the
+  structure choice is ambiguous.
 
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Treating the management account as the default operating account | Increases blast radius and weakens separation of duties | Keep management account minimal and prefer delegated administrator accounts |
 | Mixing payer responsibility with day-to-day operational ownership | Finance and platform controls drift together and are harder to change | State financial owner and operational owner separately |
 | Proposing OU or account layouts without a rollout scope | Structural changes become hard to stage or roll back | Name the smallest safe rollout unit: account, OU, or region set |
@@ -45,10 +55,14 @@ Broader asks: structural objective · candidate layouts · recommended placement
 | Using structure answers to sneak in IAM or SCP design | Lane boundary blurs and review gets weaker | Keep placement here and keep guardrail logic out of the structure answer |
 | Recommending shared services placement without naming ownership | Central accounts become dumping grounds | State which platform capability lives centrally and which workload teams own execution accounts |
 
-## Completion contract
+## Completion criteria
 
-- Placement model is explicit: management account, delegated administrator, shared-services account, or member account.
-- Smallest safe rollout unit is named and matches the proposed structural change.
-- Blast radius is explicit for OU moves, delegated admin changes, StackSets rollout, or regional topology shifts.
-- Financial ownership and operational ownership are separated when both appear.
+- Placement model is explicit: management account, delegated administrator,
+  shared-services account, or member account.
+- Smallest safe rollout unit is named and matches the proposed structural
+  change.
+- Blast radius is explicit for OU moves, delegated admin changes, StackSets
+  rollout, or regional topology shifts.
+- Financial ownership and operational ownership are separated when both
+  appear.
 - Structural assumptions and rollback boundaries are visible.

@@ -1,5 +1,8 @@
 # Cloud Auth Snippets for GitHub Actions
 
+Use these OIDC starters when a workflow authenticates to AWS, Azure, or GCP
+without long-lived credentials.
+
 ## AWS — OIDC Federation
 
 ```yaml

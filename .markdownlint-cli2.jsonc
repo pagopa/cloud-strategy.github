@@ -7,18 +7,18 @@
   "ignores": [
     // Keep transient retained work out of markdownlint; dedicated contract tests cover tmp/superpowers artifacts.
     "tmp/**",
-    // Ignore the local script venv because it is generated tooling state, not repo-owned content.
-    ".github/scripts/.venv/**",
+    // Ignore the local tools venv because it is generated tooling state, not repo-owned content.
+    ".github/tools/.venv/**",
     // Ignore any generated virtual environment, including task-specific variants.
     "**/.venv*/**",
+    // Ignore generated skill-local runtime environments.
+    ".github/skills/**/.runtime/**",
     // Ignore temporary retained execution artifacts outside tmp/.
     ".superpowers/**",
     // Test fixtures are intentionally non-document-shaped markdown inputs.
     "tests/fixtures/critical_output_*.md",
     // Skill bundle card fixtures are emoji cards, not structured Markdown documents.
     ".github/skills/internal-gateway-critical-master/fixtures/*.md",
-    // Retained-plan and status fixtures intentionally start at contract-owned H2 headings.
-    ".github/skills/internal-gateway-execute-plans/fixtures/*.md",
     // The internal Markdown checker owns these deliberately invalid regression fixtures.
     ".github/skills/internal-markdown/fixtures/invalid/*.md",
     // Ignore local OpenCode runtime artifacts.

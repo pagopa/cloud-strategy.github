@@ -1,0 +1,10 @@
+diff --git a/.github/skills/superpowers-brainstorming/SKILL.md b/.github/skills/superpowers-brainstorming/SKILL.md
+--- a/.github/skills/superpowers-brainstorming/SKILL.md
++++ b/.github/skills/superpowers-brainstorming/SKILL.md
+@@ -1,5 +1,5 @@
+ ---
+ disable-model-invocation: true
+ name: superpowers-brainstorming
+-description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
++description: Use only when called directly to explore user intent, requirements, and design before implementation.
+ ---

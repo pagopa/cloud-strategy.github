@@ -1,0 +1,177 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gcp",
+  "requirements": [
+    {
+      "id": "R-DELIVERABLE",
+      "text": "Identify the next concrete deliverable for a Google Cloud request before choosing a lane.",
+      "source": "internal-gcp SKILL.md: Workflow step 1"
+    },
+    {
+      "id": "R-OWNER",
+      "text": "Select one primary owner for the lane that owns the identified deliverable.",
+      "source": "internal-gcp SKILL.md: Workflow step 2"
+    },
+    {
+      "id": "R-MAP",
+      "text": "Map organization, governance, operations, and strategic deliverables to their corresponding Google Cloud specialist lanes.",
+      "source": "internal-gcp SKILL.md: Destinations"
+    },
+    {
+      "id": "R-CLARIFY",
+      "text": "Ask one clarifying question only when the deliverable cannot be determined.",
+      "source": "internal-gcp SKILL.md: Workflow step 3"
+    },
+    {
+      "id": "R-INVOKE",
+      "text": "Invoke the selected specialist and apply that specialist's instructions for the remainder of the lane.",
+      "source": "internal-gcp SKILL.md: Workflow step 4"
+    },
+    {
+      "id": "R-SEQUENCE",
+      "text": "Keep one primary owner for the active lane and order any later lane by deliverable dependency.",
+      "source": "internal-gcp SKILL.md: Completion criteria"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-DIRECT-ROUTE",
+      "family": "first-time-skill-creation",
+      "kind": "rubric",
+      "requirement_ids": ["R-DELIVERABLE", "R-OWNER", "R-MAP", "R-INVOKE"],
+      "prompt": "Our platform team needs to decide where the Shared VPC host project and its service projects should live across folders. Route this Google Cloud request and begin the correct lane.",
+      "initial_state": "The request asks for a placement decision and provides no competing governance or operations deliverable.",
+      "expected_output": "A single organization-structure owner is selected, with a handoff focused on the Shared VPC placement deliverable.",
+      "files": [],
+      "assertions": [
+        {"id": "A-PLACEMENT-OWNER", "text": "The response identifies the organization-structure lane as the primary owner for Shared VPC placement.", "critical": true},
+        {"id": "A-SINGLE-HANDOFF", "text": "The response hands off one placement deliverable instead of asking all GCP lanes to act together.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Select governance or operations as the primary owner for the placement decision.",
+        "Invoke multiple specialist lanes as co-equal owners."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The output names organization structure as the owner and makes the placement deliverable explicit.",
+          "The handoff preserves one active primary lane."
+        ],
+        "fail": [
+          "The output routes a Shared VPC placement question to governance or operations.",
+          "The output starts several lanes without selecting one owner."
+        ]
+      }
+    },
+    {
+      "id": "C-MULTI-DOMAIN-SEQUENCE",
+      "family": "held-out-downstream-work",
+      "kind": "rubric",
+      "requirement_ids": ["R-DELIVERABLE", "R-OWNER", "R-MAP", "R-INVOKE", "R-SEQUENCE"],
+      "prompt": "We are creating a new regulated GCP environment: choose the folder and project topology, define IAM and Org Policy guardrails, then prove the rollout with monitoring and recovery evidence. Sequence the work.",
+      "initial_state": "Structural placement must settle before governance, and governance must settle before operational proof.",
+      "expected_output": "A dependency-ordered handoff starts with organization structure, follows with governance, and ends with operations, while naming one primary owner at each stage.",
+      "files": ["references/routing-matrix.md"],
+      "assertions": [
+        {"id": "A-STRUCTURE-FIRST", "text": "The sequence puts organization structure before governance and operational proof.", "critical": true},
+        {"id": "A-DEPENDENCY-ORDER", "text": "The output explains the later lanes as dependent deliverables rather than parallel primary owners.", "critical": true},
+        {"id": "A-ROUTING-MAP", "text": "Each requested deliverable is assigned to the corresponding GCP lane.", "critical": false}
+      ],
+      "forbidden_actions": [
+        "Begin operational proof before the structure and governance decisions are ordered.",
+        "Treat all three lanes as simultaneous primary owners."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The output gives the order organization structure, governance, then operations.",
+          "The output states which deliverable unlocks each later lane."
+        ],
+        "fail": [
+          "The output starts with monitoring evidence or puts governance before unresolved placement.",
+          "The output offers no primary owner or dependency order."
+        ]
+      }
+    },
+    {
+      "id": "C-AMBIGUOUS-DELIVERABLE",
+      "family": "material-ambiguity",
+      "kind": "rubric",
+      "requirement_ids": ["R-DELIVERABLE", "R-CLARIFY", "R-OWNER"],
+      "prompt": "Can you help with our GCP platform setup?",
+      "initial_state": "The prompt does not say whether the user needs topology, governance, operations, or a strategic recommendation.",
+      "expected_output": "One focused question asks which concrete deliverable is needed before a specialist owner is selected.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ONE-QUESTION", "text": "The response asks no more than one question that distinguishes the possible deliverables.", "critical": true},
+        {"id": "A-DEFER-OWNER", "text": "The response does not claim a primary owner before the missing deliverable is clarified.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Ask a list of unrelated clarification questions.",
+        "Choose a specialist lane without resolving the deliverable ambiguity."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "One concise question makes the requested GCP deliverable determinable.",
+          "No lane is presented as selected before the answer."
+        ],
+        "fail": [
+          "The response guesses a lane from the vague prompt.",
+          "The response asks multiple questions or begins specialist work."
+        ]
+      }
+    },
+    {
+      "id": "C-COMPETING-OWNER",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-DELIVERABLE", "R-OWNER", "R-MAP"],
+      "prompt": "Write Terraform HCL for a reusable GCP project module, including variables, resources, and outputs.",
+      "initial_state": "The cloud provider is GCP, but the requested primary deliverable is Terraform source code.",
+      "expected_output": "The response identifies Terraform authoring as the controlling deliverable and routes it to internal-terraform rather than selecting a GCP platform lane.",
+      "files": [],
+      "assertions": [
+        {"id": "A-TERRAFORM-OWNER", "text": "The response names internal-terraform as the owner of the requested HCL deliverable.", "critical": true},
+        {"id": "A-NO-GCP-LANE", "text": "The response does not pretend that organization, governance, operations, or strategic GCP work owns the Terraform source change.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Start authoring Terraform inside a GCP specialist lane.",
+        "Select a GCP lane solely because the target provider is Google Cloud."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The output distinguishes provider context from the Terraform implementation owner.",
+          "The output routes the source-code task to internal-terraform."
+        ],
+        "fail": [
+          "The output selects a GCP specialist for the HCL implementation.",
+          "The output begins cloud topology or control-stack analysis instead of routing the code task."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Decide where our Shared VPC host project and service projects should sit across the GCP folder hierarchy.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Define the GCP IAM and workload identity guardrails for an external CI system.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Validate the staged rollout of an Org Policy baseline and collect evidence before expanding to more projects.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Compare two GCP regional platform designs and recommend one before implementation.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "We need a new GCP folder and project layout, then IAM controls and rollout proof; put those deliverables in dependency order.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Produce recovery evidence for a critical GCP service after a restore exercise.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-07", "query": "Separate billing-account ownership from platform ownership for our GCP environment design.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "I have a GCP platform request but cannot tell whether the deliverable is topology, governance, operational proof, or a decision comparison.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Design an AWS organization and account hierarchy for our workloads.", "should_trigger": false, "split": "train", "competing_owner": "internal-aws"},
+      {"id": "Q-10", "query": "Choose an Azure subscription and management-group layout for regulated applications.", "should_trigger": false, "split": "train", "competing_owner": "internal-azure"},
+      {"id": "Q-11", "query": "Write a reusable Terraform module that creates the GCP projects and IAM bindings.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-12", "query": "Author the raw GCP Org Policy JSON payloads for a policy-as-code repository.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-cloud-policy"},
+      {"id": "Q-13", "query": "Continue the already-selected GCP governance lane and define the IAM control stack; do not classify the request again.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gcp-governance"},
+      {"id": "Q-14", "query": "Continue the already-selected GCP operations lane and write the rollout evidence report.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gcp-operations"}
+    ]
+  }
+}

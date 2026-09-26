@@ -1,6 +1,7 @@
 # Output Forwarding Pattern
 
-Use this pattern when a composite action computes a value in one step and needs to expose it to callers as an action output.
+Use this pattern when a composite action computes a value in one step and needs
+to expose it to callers as an action output.
 
 ```yaml
 name: Normalize Target
@@ -40,9 +41,10 @@ runs:
 
 Keep the contract stable:
 
-- declare the public output in `outputs:`
-- give the producing step an `id`
-- write caller-visible key-value pairs to `$GITHUB_OUTPUT`
-- use `$GITHUB_ENV` only for step-to-step state inside the action
+- Declare the public output in `outputs:`.
+- Give the producing step an `id`.
+- Write caller-visible key-value pairs to `$GITHUB_OUTPUT`.
+- Use `$GITHUB_ENV` only for step-to-step state inside the action.
 
-Do not forward values through temp files when `$GITHUB_OUTPUT` and `$GITHUB_ENV` already express the contract clearly.
+Do not forward values through temp files when `$GITHUB_OUTPUT` and
+`$GITHUB_ENV` already express the contract clearly.

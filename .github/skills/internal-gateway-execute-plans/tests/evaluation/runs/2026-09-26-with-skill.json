@@ -1,0 +1,89 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "internal-gateway-execute-plans",
+  "date": "2026-09-26",
+  "host": "VS Code GitHub Copilot Chat; one isolated read-only dry-run subagent per case, scenario state supplied in the prompt, assertions withheld from the subagent",
+  "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+  "configuration": "with-skill",
+  "case_results": [
+    {
+      "case_id": "C-DIRTY-TASK-FILE",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-DIRTY-TASK-FILE'",
+      "assertions": [
+        {"id": "A-STOP-DIRTY", "passed": true, "evidence": "Stops before Task 1 on src/sync.py; report 'BLOCKED' names the dirty path and leaves the user changes untouched."}
+      ]
+    },
+    {
+      "case_id": "C-HEAD-MOVED",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-HEAD-MOVED'",
+      "assertions": [
+        {"id": "A-STOP-HEAD", "passed": true, "evidence": "Detects def5678 != START abc1234 and stops before Task 2."},
+        {"id": "A-NO-GIT", "passed": true, "evidence": "Explicitly runs no reset, checkout, overwrite, or new baseline; Next asks the user to reconcile the new commit."}
+      ]
+    },
+    {
+      "case_id": "C-LEGACY-MANIFEST",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-LEGACY-MANIFEST'",
+      "assertions": [
+        {"id": "A-NO-LEGACY-RUN", "passed": true, "evidence": "Stops on the Execution Manifest, runs no task or setup, and reports 'Next: re-author tmp/superpowers/plans/old-plan.md through /internal-gateway-writing-plans'."}
+      ]
+    },
+    {
+      "case_id": "C-SUBAGENT-BRIEF",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-SUBAGENT-BRIEF'",
+      "assertions": [
+        {"id": "A-BRIEF-CONTRACT", "passed": true, "evidence": "Task 1 brief contains the local no-commit contract, the perimeter src/a.py and tests/test_a.py, the mandatory-test-first posture, and the stop rules; reviews use CP diffs."},
+        {"id": "A-RULINGS", "passed": true, "evidence": "Final report lists 'Task 2: Ruling: renamed helper to match spec' and keeps the ledger."}
+      ]
+    },
+    {
+      "case_id": "C-NATIVE-ROUTE",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-NATIVE-ROUTE'",
+      "assertions": [
+        {"id": "A-NATIVE-EXECUTOR", "passed": true, "evidence": "Loads /internal-gateway-execute-plans for the bare 'Native' answer and selects /superpowers-executing-plans."},
+        {"id": "A-GATEWAY-SETUP", "passed": true, "evidence": "Records START abc1234, the status, and CP0 before Task 1; skips worktrees."}
+      ]
+    },
+    {
+      "case_id": "C-RESUME-OWN-CHANGES",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-RESUME-OWN-CHANGES'",
+      "assertions": [
+        {"id": "A-RESUME-CONTINUES", "passed": true, "evidence": "Resumes at Task 2 from CP1 and does not redo Task 1."},
+        {"id": "A-NO-DIRTY-STOP", "passed": true, "evidence": "Treats uncommitted src/a.py as recorded Task 1 work inside CP1, not as a dirty-file stop; reuses START and CP0."}
+      ]
+    },
+    {
+      "case_id": "C-RESUME-MID-TASK",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-RESUME-MID-TASK'",
+      "assertions": [
+        {"id": "A-PARTIAL-RESUME", "passed": true, "evidence": "Differences limited to Task 2 Files: paths; resumes Task 2 on the partial edits without reset or stash."},
+        {"id": "A-PARTIAL-NOTE", "passed": true, "evidence": "Appends 'Task 2: resumed on partial state' before continuing."}
+      ]
+    },
+    {
+      "case_id": "C-RESUME-TAMPERED",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-RESUME-TAMPERED'",
+      "assertions": [
+        {"id": "A-STOP-TAMPER", "passed": true, "evidence": "Fresh checkpoint differs from CP1 in completed Task 1 file src/a.py; stops for reconciliation before Task 2."},
+        {"id": "A-KEEP-EDIT", "passed": true, "evidence": "Explicitly does not reset, overwrite, or revert src/a.py; report is BLOCKED and names the path."}
+      ]
+    },
+    {
+      "case_id": "C-PREEXISTING-DIRT",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval C-PREEXISTING-DIRT'",
+      "assertions": [
+        {"id": "A-CP0-ATTRIBUTION", "passed": true, "evidence": "Final review uses 'git diff CP0 CP1', with dirty docs/notes.md captured in CP0."},
+        {"id": "A-CHANGED-CLEAN", "passed": true, "evidence": "Changed lists only src/a.py and tests/test_a.py; docs/notes.md is omitted."}
+      ]
+    }
+  ]
+}

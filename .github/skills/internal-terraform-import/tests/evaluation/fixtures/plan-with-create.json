@@ -1,0 +1,1 @@
+{"actions":[{"address":"aws_identitystore_group.groups[\"existing\"]","action":"import"},{"address":"aws_identitystore_group.groups[\"missing\"]","action":"create"}]}

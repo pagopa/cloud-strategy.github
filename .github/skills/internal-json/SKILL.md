@@ -16,14 +16,16 @@ description: Use when editing or reviewing strict JSON grammar, encoding, duplic
 
 ## When not to use
 
-- Ecosystem-managed JSON whose owner defines a stronger contract.
-- JSON embedded in another domain where that domain owner decides the schema.
+- Ecosystem-managed JSON whose owner defines a stronger contract; route it to
+  that owner.
+- JSON embedded in another domain where that domain owner decides the schema;
+  route schema questions to that owner.
 - Generated JSON unless the task explicitly asks for format validation.
 
 ## Baseline
 
-- Use strict JSON syntax and grammar: no comments, trailing commas, or non-standard
-  constants.
+- Use strict JSON syntax and grammar: no comments, trailing commas, or
+  non-standard constants.
 - Decode as UTF-8 without a BOM and reject duplicate object names.
 - Preserve object order as presentation; JSON object order is not semantic.
 - Keep integers within interoperable binary64-safe bounds and reject finite
@@ -44,3 +46,6 @@ dependencies. Supported checks include strict grammar, UTF-8/BOM handling,
 duplicate names via `object_pairs_hook`, non-standard constants, unpaired
 surrogates, and numeric interoperability. Schema and content semantics are
 unsupported; route them to the domain owner.
+
+For output formats, self-test, finding IDs, and numeric limits, read
+[`references/validation-contract.md`](references/validation-contract.md).

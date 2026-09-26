@@ -1,9 +1,9 @@
 ---
 name: internal-github-actions
-description: "Use when /internal-github routes GitHub Actions workflow, reusable-workflow, or composite-action work under `.github/workflows/` and `.github/actions/**/action.yml` or `action.yaml`."
+description: Use when /internal-github routes GitHub Actions workflow, reusable-workflow, or composite-action work under `.github/workflows/` and `.github/actions/**/action.yml` or `action.yaml`.
 ---
 
-# GitHub Actions Skill
+# Internal GitHub Actions
 
 Own GitHub Actions behavior under `.github/workflows/` and
 `.github/actions/**/action.yml` or `action.yaml`, including workflow authoring,
@@ -38,14 +38,11 @@ contracts.
 
 ## Composite-action authoring rules
 
-Input validation is the first contract step; validate required values before
-the action performs its main logic.
-
+- Validate required inputs first, before the main logic, and fail clearly.
 - Pass expression inputs through `env:` instead of interpolating them directly
   in `run:`.
 - Keep `shell: bash` explicit on every composite step.
 - Start shell blocks with `set -euo pipefail`.
-- Validate required inputs before the main logic and fail clearly.
 - Forward caller-visible values through `outputs:` mapped from `$GITHUB_OUTPUT`.
 - Use `$GITHUB_ENV` only for step-to-step state inside the action.
 - Extract long shell logic into a dedicated script early.
@@ -66,12 +63,10 @@ concurrency belong in a reusable workflow; steps and caller-visible outputs
 belong in a composite action; thin orchestration around language-specific
 commands belongs in a script.
 
-## Conditional review contributor
-
-Load [conditional review contributor](references/conditional-review-contributor.md) when participating in a routed review.
-
 ## Reference map
 
+- Load [review contributor](references/conditional-review-contributor.md)
+  when participating in a routed review.
 - Load [auth snippets](references/auth-snippets.md) for AWS, Azure, and GCP
   OIDC examples.
 - Load [workflow example](references/workflow-example.md) for a compact manual
@@ -84,7 +79,7 @@ Load [conditional review contributor](references/conditional-review-contributor.
   deterministic cache keys and reviewed artifact transfers.
 - Load [reuse decision tree](references/reuse-decision-tree.md) when multiple
   reuse patterns remain plausible.
-- Load [security hardening checklist](references/security-hardening-checklist.md)
+- Load [security checklist](references/security-hardening-checklist.md)
   for deployment, secrets, self-hosted runners, or untrusted events.
 - Load [minimal composite template](references/minimal-template.md) for the
   smallest safe starter `action.yml`.
@@ -92,25 +87,15 @@ Load [conditional review contributor](references/conditional-review-contributor.
   the action shares state and exposes caller-visible outputs.
 - Load [output forwarding pattern](references/output-forwarding-pattern.md)
   when a step result becomes an action output.
+- Load [script caller guidance](references/script-caller-guidance.md) when a
+  workflow or action calls a script and must forward its output, formats,
+  failures, or artifacts.
 - Load [composite testing pattern](references/testing-pattern.md) for smoke,
   failure-path, and contract checks.
 - Load [action README template](references/action-readme-template.md) for
   inputs, outputs, side effects, and usage documentation.
 - Load [composite versioning strategy](references/versioning-strategy.md) for
   published or compatibility-sensitive actions.
-
-## Completion criteria
-
-- Workflow behavior, `workflow_call` contracts, and composite-action
-  `action.yml` contracts are valid.
-- The reuse-pattern selection is explicit and matches the unit of reuse.
-- OIDC, least privilege, full-SHA pins, input validation, and release safety
-  are addressed when relevant.
-- Composite inputs and outputs are explicit, safely forwarded, and documented
-  when relevant.
-- Explicit Bash, strict mode, compatibility, smoke, and failure-path checks
-  are addressed for composite actions.
-- Context availability and focused validation are checked.
 
 ## Validation
 
@@ -126,3 +111,16 @@ Load [conditional review contributor](references/conditional-review-contributor.
   composite shell step declares Bash and strict mode.
 - Verify caller-visible composite outputs are mapped from `$GITHUB_OUTPUT` and
   documented.
+
+## Completion criteria
+
+- Workflow behavior, `workflow_call` contracts, and composite-action
+  `action.yml` contracts are valid.
+- The reuse-pattern selection is explicit and matches the unit of reuse.
+- OIDC, least privilege, full-SHA pins, input validation, and release safety
+  are addressed when relevant.
+- Composite inputs and outputs are explicit, safely forwarded, and documented
+  when relevant.
+- Explicit Bash, strict mode, compatibility, smoke, and failure-path checks
+  are addressed for composite actions.
+- Context availability and focused validation are checked.

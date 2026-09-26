@@ -1,68 +1,66 @@
 ---
 name: internal-bash-script
-description: Use when creating, reviewing, or modifying standalone Bash or POSIX `sh` scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints.
+description: Use when creating, reviewing, or modifying standalone Bash or POSIX `sh` scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints. Route embedded shell fragments and sourced helpers inside another program to /internal-bash.
 ---
 
 # Internal Bash Script
 
 ## When to use
 
-- New Bash scripts.
-- Existing Bash scripts that need review or updates.
-- Standalone operator-facing wrappers, launchers, and shell utilities.
+- Creating, reviewing, or modifying a standalone Bash or POSIX `sh` script,
+  utility, wrapper, launcher, or other operator entrypoint.
+- Route sourced helpers and shell fragments to `/internal-bash`. Route shell
+  embedded in another format to that format's owner first.
 
-## When not to use
+## Dialect minimum
 
-- Embedded shell fragments and sourced helpers inside another program; route
-  them to `/internal-bash`.
-- Sourced or non-operator Bash helpers that do not own an operator-facing
-  entrypoint.
-- Workflow or platform behavior beyond the standalone shell entrypoint.
+Record the dialect contract before choosing a template: the declared
+interpreter, the execution environment, and the compatibility target. Preserve
+the declared interpreter and never change it silently.
 
-## Dialect decision
+- `Dialect: Bash`: follow the deployment shebang convention, normally
+  `#!/usr/bin/env bash`. Use `set -euo pipefail` with documented exceptions.
+  Arrays, `[[ ]]`, and `local` are valid only here.
+- `Dialect: POSIX sh`: follow the target's shebang convention. Use `set -eu`,
+  scalar variables, positional parameters, and `[ ]` or `test`. Do not use
+  arrays or `local`. Use `pipefail` only with an explicit POSIX.1-2024
+  baseline.
 
-Classify the shell before choosing script patterns. Preserve the declared
-interpreter and record the execution environment and compatibility target:
+Bash invoked as `sh` is not cross-shell portability proof.
 
-- `Dialect: Bash` when the entrypoint and runtime provide Bash.
-- `Dialect: POSIX`sh`` when the entrypoint or deployment target requires POSIX
-  shell syntax.
+Add `Compatibility target: Bash 3.2` only when the caller or repository
+declares macOS `/bin/bash` support. Then avoid `mapfile`, `readarray`,
+`declare -A`, `${var,,}`, `${var^^}`, and `wait -n`, and guard an empty-array
+expansion under `set -u` with a `${#array[@]}` check. Static checks do not
+detect these. Run the script's own harness under `/bin/bash` 3.2 in an isolated
+workspace, or report `Bash 3.2 compatibility: unverified`.
 
-Require an explicit POSIX baseline before treating POSIX.1-2024 Issue 8
-behavior as portable. Bash invoked as `sh` is not cross-shell portability proof,
-and the interpreter must not be changed silently.
+## Portable minimum
 
-## Portable core
-
-Quote expansions, check statuses at correctness boundaries, use `if`, `case`,
-`test`, or `[ ]` for shared control flow, validate dependencies before first
-use, and use `mktemp` with cleanup traps for temporary state.
-
-## Bash branch
-
-For `Dialect: Bash`, follow the deployment shebang convention, normally
-`#!/usr/bin/env bash`, and use `set -euo pipefail` with documented exceptions.
-Arrays for dynamic commands, `[[ ]]`, `local`, and Bash-specific traps or
-options are valid only in this branch.
-
-## POSIX `sh` branch
-
-For `Dialect: POSIX`sh``, follow the shebang convention declared by the target,
-use `set -eu` with contextual `-e` caveats, and use scalar variables, positional
-parameters, `[ ]`, and `test`. Do not use Bash arrays or `local`; use `pipefail`
-only for an explicit POSIX.1-2024 baseline.
-
-## Script-specific operator guidance
-
-- Use `command -v` before first use of required external tools.
+- Quote expansions and check statuses at correctness boundaries.
+- Validate required external commands with `command -v` before first use.
+- Use `mktemp` with cleanup traps for temporary state.
 - Use structured parsers such as `jq` or `yq` for JSON and YAML when available.
-- Prefer `printf` for formatted output and arrays for dynamic commands only in
-  the Bash branch.
-- Destructive or repeatable scripts should be idempotent and expose `--dry-run` when operator risk is non-trivial.
-- Keep operator entrypoints thin and extract repeated branches into sourced helper files only when reuse is real.
-- Treat 300 lines as a review threshold and 400 lines as a split-or-justify gate for standalone scripts.
-- When script output can grow and the script is agent-facing, prefer bounded summaries by default and add an explicit compact or quiet mode that still preserves blockers, failures, and required next actions.
-- Keep full-detail output reachable through an explicit flag or durable artifact path when operators need full diagnostics.
+
+For the full anti-pattern catalog, owner-routing table, and the static
+checker, load `/internal-bash` when it is available.
+
+## Operator guidance
+
+- Prefer `printf` for formatted output.
+- Destructive or repeatable scripts should be idempotent and expose
+  `--dry-run` when operator risk is non-trivial.
+- Prefer safe reruns with guards like `mkdir -p`, existence checks, or
+  replace-in-place flows.
+- Use `--` before user-supplied paths in destructive commands such as
+  `rm -rf -- "$target"`.
+- Keep operator entrypoints thin and extract repeated branches into sourced
+  helper files only when reuse is real.
+- Treat 300 lines as a review threshold and 400 lines as a split-or-justify
+  gate for standalone scripts.
+- Preserve an existing `--format compact` option, payload, and consumers.
+  Consider a terminal-only `--compact` projection only for a new interface
+  with measured high output volume.
 
 ## Testing
 
@@ -70,27 +68,32 @@ only for an explicit POSIX.1-2024 baseline.
 - Prefer the repository's existing Bash harness. Cover parser decisions,
   guards, dry-run behavior, command construction, and rerun safety at their
   stable boundary.
+- When the script is documented for direct invocation, that invocation is the
+  stable boundary. Reaching the code through an interpreter tests a different
+  boundary and leaves the executable bit, the shebang, and `PATH` resolution
+  unverified: `bash ./tool.sh` passes where `./tool.sh` fails.
 - When no harness can exercise the behavior before editing, record a pre-code testability exception and the alternate validation path. Use syntax, lint,
   and a safe non-mutating invocation as evidence; do not represent later
   regression coverage as test-first work.
 
-## Templates and hardening helpers
+## References
 
-After dialect selection, load `references/templates.md` when you need the
-starter script, argument parser skeleton, or cleanup helpers. Choose only the
-matching Bash or POSIX `sh` section.
-
-- Prefer safe reruns with guards like `mkdir -p`, existence checks, or replace-in-place flows.
-- Use `--` before user-supplied paths in destructive commands such as `rm -rf -- "$target"`.
-
-## Common mistakes
-
-Load `references/common-mistakes.md` for the full mistake table.
+- [references/templates.md](references/templates.md): load after the dialect
+  decision for the starter script, argument parser, ERR trap, or cleanup
+  helpers. Use only the section that matches the dialect.
+- [references/operator-output.md](references/operator-output.md): load for
+  multi-step lifecycle output, bounded diagnostics, compact, quiet, and verbose
+  behavior, and failure continuation.
+- [references/common-mistakes.md](references/common-mistakes.md): load before
+  finishing any script creation, modification, or review.
 
 ## Validation
 
-- `bash -n script.sh` (syntax check)
-- `shellcheck -s bash script.sh` (lint)
-- `shfmt -d script.sh` (format diff, if available)
-- `sh -n script.sh` (POSIX `sh` syntax check)
-- `shellcheck -s sh script.sh` (POSIX `sh` lint)
+- `Dialect: Bash`: run `bash -n FILE` and `shellcheck -s bash FILE`.
+- `Dialect: POSIX sh`: run `dash -n FILE` (or `sh -n FILE`, reported as
+  limited evidence) and `shellcheck -s sh FILE`.
+- When `/internal-bash` is loaded, its static checker runs these checks with a
+  stable exit contract.
+- Run a safe, non-mutating direct invocation, such as `./tool.sh --help`, to
+  verify the executable bit, the shebang, and the argument parser.
+- `shfmt -d FILE` is an optional format check.

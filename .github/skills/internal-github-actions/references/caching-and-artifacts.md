@@ -1,6 +1,7 @@
 # Caching and Artifacts
 
-Use cache for reproducible dependency reuse across runs. Use artifacts for explicit transfers or human review between jobs.
+Use cache for reproducible dependency reuse across runs. Use artifacts for
+explicit transfers or human review between jobs.
 
 | Need | Prefer | Why |
 | --- | --- | --- |
@@ -22,9 +23,12 @@ Use cache for reproducible dependency reuse across runs. Use artifacts for expli
       npm-${{ runner.os }}-
 ```
 
-Use stable inputs like lockfiles, tool versions, or build configuration. Do not use timestamps or raw `github.run_id` in cache keys.
+Use stable inputs like lockfiles, tool versions, or build configuration. Do not
+use timestamps or raw `github.run_id` in cache keys.
 
-When a cache path needs a runner-scoped location such as `runner.temp`, resolve it in a step key that allows the `runner` context. Do not put `runner.temp` in workflow-root `env` or `jobs.<job_id>.env`.
+When a cache path needs a runner-scoped location such as `runner.temp`, resolve
+it in a step key that allows the `runner` context. Do not put `runner.temp` in
+workflow-root `env` or `jobs.<job_id>.env`.
 
 ## Runner temp cache example
 
@@ -69,7 +73,8 @@ When a cache path needs a runner-scoped location such as `runner.temp`, resolve 
 
 Keep artifact usage explicit:
 
-- name artifacts for the exact transfer they represent
-- set `retention-days` deliberately instead of inheriting defaults
-- upload only reviewed or reusable outputs, not hidden mutable state
-- prefer job outputs or reusable workflows when the transfer is small and immediate
+- Name artifacts for the exact transfer they represent.
+- Set `retention-days` deliberately instead of inheriting defaults.
+- Upload only reviewed or reusable outputs, not hidden mutable state.
+- Prefer job outputs or reusable workflows when the transfer is small and
+  immediate.

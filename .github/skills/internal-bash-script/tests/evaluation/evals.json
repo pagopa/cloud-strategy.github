@@ -1,0 +1,237 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-bash-script",
+  "requirements": [
+    {
+      "id": "R-DIALECT-MINIMUM",
+      "text": "Record the dialect contract and apply this bundle's dialect and portable minimum before choosing a template; /internal-bash is an optional enrichment, and the task completes without it.",
+      "source": "internal-bash-script SKILL.md: Dialect minimum, Portable minimum"
+    },
+    {
+      "id": "R-ROUTE",
+      "text": "Route sourced helpers and shell fragments to internal-bash and embedded shell to the enclosing format's owner first.",
+      "source": "internal-bash-script SKILL.md: When to use"
+    },
+    {
+      "id": "R-OPERATOR-SAFETY",
+      "text": "An operator entrypoint states its purpose and usage, exposes --help, validates arguments, uses -- before user-supplied paths in destructive commands, and offers --dry-run when operator risk is non-trivial.",
+      "source": "internal-bash-script SKILL.md: Operator guidance; references/common-mistakes.md"
+    },
+    {
+      "id": "R-TEST-BOUNDARY",
+      "text": "For behavior changes, create the failing focused check first and exercise a directly invoked script through direct invocation, not through an interpreter.",
+      "source": "internal-bash-script SKILL.md: Testing"
+    },
+    {
+      "id": "R-TEMPLATE-DIALECT",
+      "text": "Use only the template section that matches the recorded dialect.",
+      "source": "internal-bash-script SKILL.md: References; references/templates.md"
+    },
+    {
+      "id": "R-VALIDATION",
+      "text": "Validate every changed script with the dialect's syntax check and shellcheck, or the internal-bash checker when loaded, plus a safe, non-mutating direct invocation.",
+      "source": "internal-bash-script SKILL.md: Validation"
+    },
+    {
+      "id": "R-COMPACT-INTERFACE",
+      "text": "Preserve an existing --format compact option, payload, and consumers; do not rename it or change its meaning.",
+      "source": "internal-bash-script SKILL.md: Operator guidance; references/operator-output.md"
+    },
+    {
+      "id": "R-BASH32-TARGET",
+      "text": "Apply Bash 3.2 rules only when the target is declared, and report compatibility as unverified unless the script's own harness ran under Bash 3.2 in an isolated workspace.",
+      "source": "internal-bash-script SKILL.md: Dialect minimum"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-OPERATOR-GUARDS",
+      "family": "operator-safety",
+      "kind": "deterministic",
+      "requirement_ids": ["R-OPERATOR-SAFETY", "R-VALIDATION"],
+      "prompt": "Review this cache cleanup script that operators run by hand.",
+      "initial_state": "A destructive Bash entrypoint. Reproduce with a disposable directory: mkdir -p tmp/eval-cache/dev, then run with CACHE_ROOT=tmp/eval-cache.",
+      "expected_output": "The valid script supports --help and --dry-run, rejects missing values, and uses rm -rf --; the defective script is flagged for missing usage, missing argument validation, no dry-run, and an unguarded rm -rf.",
+      "files": ["tests/evaluation/fixtures/cache-clean-valid.sh"],
+      "assertions": [
+        {"id": "A-HELP", "text": "`./cache-clean-valid.sh --help` exits 0 and prints usage without side effects.", "critical": true},
+        {"id": "A-DRY-RUN", "text": "`CACHE_ROOT=tmp/eval-cache ./cache-clean-valid.sh --env dev --dry-run` exits 0 and tmp/eval-cache/dev still exists.", "critical": true},
+        {"id": "A-MISSING-VALUE", "text": "`./cache-clean-valid.sh --env` exits 1 with an error on stderr.", "critical": true},
+        {"id": "A-STATIC-CHECK", "text": "`bash -n` and `shellcheck -s bash` pass on the valid fixture and report findings on the defective fixture.", "critical": true},
+        {"id": "A-DEFECT-FLAGGED", "text": "The review of the defective fixture names every missing guard.", "critical": true}
+      ],
+      "forbidden_actions": ["Run the defective fixture without a disposable CACHE_ROOT."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/cache-clean-defective.sh"
+    },
+    {
+      "id": "C-DIALECT-MINIMUM",
+      "family": "dialect-minimum",
+      "kind": "rubric",
+      "requirement_ids": ["R-DIALECT-MINIMUM", "R-TEMPLATE-DIALECT"],
+      "prompt": "Create scripts/rotate-logs.sh for our Alpine containers; it must run under /bin/sh.",
+      "initial_state": "No existing script; the deployment target provides BusyBox sh only.",
+      "expected_output": "Record Dialect: POSIX sh and start from the POSIX sh template without arrays, local, or [[ ]].",
+      "files": [],
+      "assertions": [
+        {"id": "A-DIALECT-RECORDED", "text": "The dialect contract is stated before a template is chosen.", "critical": true},
+        {"id": "A-POSIX-TEMPLATE", "text": "The output uses only the POSIX sh template section.", "critical": true}
+      ],
+      "forbidden_actions": ["Use the Bash template for a /bin/sh target."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript states Dialect: POSIX sh, and the script has a #!/bin/sh shebang with set -eu."],
+        "fail": ["The script uses #!/usr/bin/env bash, arrays, local, or [[ ]]."]
+      }
+    },
+    {
+      "id": "C-BASELINE-UNAVAILABLE",
+      "family": "missing-dependency",
+      "kind": "rubric",
+      "requirement_ids": ["R-DIALECT-MINIMUM", "R-VALIDATION"],
+      "prompt": "Add a --verbose flag to tests/evaluation/fixtures/report.sh.",
+      "initial_state": "The host exposes internal-bash-script but not internal-bash; the script is tests/evaluation/fixtures/report.sh.",
+      "expected_output": "The change is completed with this bundle alone: dialect recorded as Bash, bash -n and shellcheck -s bash run, and ./report.sh --help invoked directly.",
+      "files": ["tests/evaluation/fixtures/report.sh"],
+      "assertions": [
+        {"id": "A-NO-BLOCK", "text": "The missing internal-bash skill does not block or stall the task.", "critical": true},
+        {"id": "A-FALLBACK-CHECKS", "text": "bash -n and shellcheck -s bash are run on the changed script.", "critical": true}
+      ],
+      "forbidden_actions": ["Invoke a script path inside another skill bundle."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The transcript shows the change, both static checks, and the direct --help run without loading internal-bash."],
+        "fail": ["The agent stops because internal-bash is missing, or skips static checks."]
+      }
+    },
+    {
+      "id": "C-COMPACT-PRESERVE",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-COMPACT-INTERFACE"],
+      "prompt": "Tidy up the output of tests/evaluation/fixtures/status-compact.sh and add a --compact flag for terminals.",
+      "initial_state": "The script already exposes --format compact, and a CI job parses its ok= and fail= fields.",
+      "expected_output": "--format compact keeps its name and exact payload; any new terminal projection is additive and leaves the CI format unchanged.",
+      "files": ["tests/evaluation/fixtures/status-compact.sh"],
+      "assertions": [
+        {"id": "A-PAYLOAD-KEPT", "text": "`--format compact` still prints `ok=3 fail=0`.", "critical": true},
+        {"id": "A-NO-RENAME", "text": "--format compact is not renamed or aliased away to --compact.", "critical": true}
+      ],
+      "forbidden_actions": ["Change or remove the existing --format compact payload."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["A before/after run of --format compact shows identical output."],
+        "fail": ["The compact payload changes, or --format compact is replaced by --compact."]
+      }
+    },
+    {
+      "id": "C-DIRECT-INVOCATION",
+      "family": "test-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-TEST-BOUNDARY", "R-VALIDATION"],
+      "prompt": "Add a --json flag to tests/evaluation/fixtures/report.sh, which operators run as ./report.sh; extend the harness beside it.",
+      "initial_state": "An executable Bash script and a Python harness (report-harness.py) that invokes it directly.",
+      "expected_output": "A failing harness check that invokes ./report.sh --dir . --json directly, then the implementation, then the passing check plus bash -n and shellcheck.",
+      "files": ["tests/evaluation/fixtures/report.sh", "tests/evaluation/fixtures/report-harness.py"],
+      "assertions": [
+        {"id": "A-RED-FIRST", "text": "The failing test runs before the implementation edit.", "critical": true},
+        {"id": "A-DIRECT", "text": "The test runs the script directly, not as `bash ./report.sh`.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim test-first work for a test added after the implementation."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The red run precedes the diff and the subprocess call targets the script path."],
+        "fail": ["The test wraps the script in bash, or the red run is missing."]
+      }
+    },
+    {
+      "id": "C-ROUTE-SOURCED",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE"],
+      "prompt": "Clean up lib/retry.sh; it only defines functions that our scripts source.",
+      "initial_state": "A sourced function library with no shebang and no entrypoint.",
+      "expected_output": "Route the work to internal-bash; operator guidance such as --help and --dry-run is not added to a sourced library.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ROUTED", "text": "internal-bash owns the change.", "critical": true}
+      ],
+      "forbidden_actions": ["Add argument parsing or a main entrypoint to a sourced library."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The transcript routes to internal-bash and keeps the file a function library."],
+        "fail": ["The agent adds usage text, --help, or main to the sourced file."]
+      }
+    },
+    {
+      "id": "C-BASH32-EMPTY-ARRAY",
+      "family": "evidence-honesty",
+      "kind": "deterministic",
+      "requirement_ids": ["R-BASH32-TARGET", "R-VALIDATION"],
+      "prompt": "Operators also run this script with the macOS system Bash. Is it compatible?",
+      "initial_state": "macOS host where /bin/bash --version reports 3.2; on any other host record the case as blocked. The fixtures only print text.",
+      "expected_output": "bash -n and shellcheck -s bash pass on both fixtures, so the answer does not treat them as compatibility proof. Under /bin/bash 3.2 the defective fixture exits 1 with an unbound-variable error and the valid fixture exits 0.",
+      "files": ["tests/evaluation/fixtures/bash32-empty-array-valid.bash"],
+      "assertions": [
+        {"id": "A-STATIC-LIMIT", "text": "The answer states that bash -n and shellcheck do not establish Bash 3.2 compatibility.", "critical": true},
+        {"id": "A-RUNTIME-SPLIT", "text": "/bin/bash 3.2 exits 1 on the defective fixture and 0 on the valid fixture.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim Bash 3.2 compatibility from static checks alone.", "Invoke a script path inside another skill bundle."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/bash32-empty-array-defective.bash"
+    },
+    {
+      "id": "C-DIALECT-PARITY",
+      "family": "dialect-parity",
+      "kind": "rubric",
+      "requirement_ids": ["R-DIALECT-MINIMUM"],
+      "prompt": "Review the dialect handling in tests/evaluation/fixtures/posix-parity.sh; operators run it under /bin/sh on Alpine.",
+      "initial_state": "The same fixture ships in internal-bash, whose C-DIALECT-PARITY case uses the same assertion IDs.",
+      "expected_output": "Record Dialect: POSIX sh, keep the #!/bin/sh interpreter, and propose no Bash-only syntax; the guarded glob is not reported.",
+      "files": ["tests/evaluation/fixtures/posix-parity.sh"],
+      "assertions": [
+        {"id": "A-PARITY-DIALECT", "text": "The answer records Dialect: POSIX sh.", "critical": true},
+        {"id": "A-PARITY-INTERPRETER", "text": "The #!/bin/sh interpreter is kept.", "critical": true},
+        {"id": "A-PARITY-NO-BASH", "text": "No change introduces [[ ]], arrays, local, or pipefail.", "critical": true}
+      ],
+      "forbidden_actions": ["Change #!/bin/sh to a Bash shebang without approval."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The same three assertions hold for this skill and for internal-bash on the shared fixture."],
+        "fail": ["The two skills reach different dialect decisions on the same fixture."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Write a bootstrap.sh that developers run once to install the toolchain.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Add --dry-run to scripts/cleanup.sh before we run it in production.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Review our deploy wrapper script for operator safety and error messages.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Create a launcher script that picks the right JVM and execs the app.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "The backup.sh utility needs --help and proper argument validation.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Make run-checks.sh print started and passed lines per step and a final summary.", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Port our installer script from Bash to POSIX sh so it runs on BusyBox.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Write a test for tools/release.sh that calls it the way operators do.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Split this 500-line maintenance script into an entrypoint plus sourced helpers.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-10", "query": "Review the quoting in lib/common.sh, which our tools source.", "should_trigger": false, "split": "train", "competing_owner": "internal-bash"},
+      {"id": "Q-11", "query": "Fix the shell inside this Make recipe that breaks on paths with spaces.", "should_trigger": false, "split": "train", "competing_owner": "internal-makefile"},
+      {"id": "Q-12", "query": "Add a matrix job to the CI workflow.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-actions"},
+      {"id": "Q-13", "query": "Build a Python CLI with click to manage releases.", "should_trigger": false, "split": "train", "competing_owner": "internal-python-script"},
+      {"id": "Q-14", "query": "Optimize the Dockerfile layer order for caching.", "should_trigger": false, "split": "train", "competing_owner": "internal-docker"},
+      {"id": "Q-15", "query": "Is `local` portable in a POSIX sh function library?", "should_trigger": false, "split": "train", "competing_owner": "internal-bash"},
+      {"id": "Q-16", "query": "Generate an interactive wizard that walks me through creating CI secrets by hand.", "should_trigger": false, "split": "held-out", "competing_owner": "mattpocock-wizard"},
+      {"id": "Q-17", "query": "Configure my shell aliases in .zshrc.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-18", "query": "Add targets and .PHONY to the Makefile for lint and test.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-makefile"},
+      {"id": "Q-19", "query": "Why does my ./tool.sh fail with permission denied while bash tool.sh works?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-20", "query": "Harden the sourced trap helper used by all our scripts.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-bash"}
+    ]
+  }
+}

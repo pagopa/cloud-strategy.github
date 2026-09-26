@@ -1,6 +1,7 @@
 # GCP Governance Guardrail Map
 
-When the control surface or exception pattern needs deeper comparison, load this reference.
+Control patterns, federation and service-account patterns, and governed
+exception evidence for Google Cloud governance decisions.
 
 ## Control patterns
 
@@ -15,9 +16,12 @@ When the control surface or exception pattern needs deeper comparison, load this
 ## Federation and service-account patterns
 
 - External CI systems use federation with narrow project or folder IAM scope.
-- Shared automation uses a purpose-built service account per automation boundary.
-- Human operators use a time-bounded emergency path with explicit approval and logging.
-- Identity mechanism, token trust, and resource authorization remain separate review points.
+- Shared automation uses a purpose-built service account per automation
+  boundary.
+- Human operators use a time-bounded emergency path with explicit approval and
+  logging.
+- Identity mechanism, token trust, and resource authorization remain separate
+  review points.
 
 ## Governed exception evidence
 

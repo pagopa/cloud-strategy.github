@@ -47,7 +47,7 @@ def test_internal_gateway_critical_master_copilot_contract() -> None:
     assert set(frontmatter) == {"name", "description", "tools", "agents"}
     assert frontmatter["name"] == "internal-gateway-critical-master"
     assert frontmatter["description"].startswith("Use this agent when")
-    assert frontmatter["tools"] == ["read", "search", "edit", "execute"]
+    assert frontmatter["tools"] == ["read", "search"]
     assert "model" not in frontmatter
     assert "effort" not in frontmatter
     assert "model_reasoning_effort" not in frontmatter
@@ -69,8 +69,6 @@ def test_internal_gateway_critical_master_copilot_contract() -> None:
         "load and follow `internal-gateway-critical-master`",
         "no structured input is required",
         "full critical procedure",
-        "prefer read-only",
-        "explicitly requests",
         "readable markdown report",
         "skill's fixed layout",
         "no-context failure",
@@ -97,7 +95,7 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
     assert "critical-analysis" in payload["description"]
     assert "model" not in payload
     assert "model_reasoning_effort" not in payload
-    assert payload["sandbox_mode"] == "workspace-write"
+    assert payload["sandbox_mode"] == "read-only"
 
     assert isinstance(instructions, str)
     assert instructions.strip()
@@ -105,8 +103,6 @@ def test_internal_gateway_critical_master_codex_contract() -> None:
     for marker in (
         "structured input is optional",
         "only analysis failure",
-        "prefer read-only",
-        "explicitly asks",
         "readable markdown report",
         "skill's fixed layout",
         "no-context failure",
@@ -139,8 +135,8 @@ def test_internal_gateway_critical_master_opencode_native_contract() -> None:
         "read": "allow",
         "grep": "allow",
         "glob": "allow",
-        "edit": "ask",
-        "bash": "ask",
+        "edit": "deny",
+        "bash": "deny",
         "list": "allow",
     }
 
@@ -148,7 +144,6 @@ def test_internal_gateway_critical_master_opencode_native_contract() -> None:
     lowered = body.lower()
     for marker in (
         "load and follow `internal-gateway-critical-master`",
-        "prefer read-only",
         "readable markdown report",
         "no-context failure",
     ):

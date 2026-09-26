@@ -1,6 +1,7 @@
 # GCP Strategic Lens Playbook
 
-When lens choice or option comparison needs deeper structure, load this reference.
+Lens combinations, lens signals, depth control, worked decision shapes, and
+the decision-note pattern for Google Cloud strategic decisions.
 
 ## Common lens combinations
 
@@ -15,16 +16,18 @@ When lens choice or option comparison needs deeper structure, load this referenc
 ## Lens signals
 
 - Cost impact changes the preferred option: use FinOps.
-- Org, folder, project, or Shared VPC layout changes: use organization structure.
+- Org, folder, project, or Shared VPC layout changes: use organization
+  structure.
 - IAM, workload identity, or Org Policy behavior changes: use governance.
 - Monitoring, backup, inventory, or validation burden changes: use operations.
 - Critical platform capability may be interrupted by failure: use BC/DR.
 
 ## Depth control
 
-- Use Quick answer when one option clearly wins and the question is narrow.
-- Use Decision note when at least two viable options remain.
-- Use Deep analysis when the question is broad, high-risk, or explicitly detailed.
+- Use quick answer when one option clearly wins and the question is narrow.
+- Use decision note when at least two viable options remain.
+- Use deep analysis when the question is broad, high-risk, or explicitly
+  detailed.
 
 ## Worked decision shapes
 
@@ -41,5 +44,7 @@ When lens choice or option comparison needs deeper structure, load this referenc
 2. Assumptions: current state, scale, compliance, and continuity constraints.
 3. Viable options: two or three realistic Google Cloud paths.
 4. Recommendation: the option that wins and why.
-5. Tradeoffs and blast radius: benefits, costs, risks, and difficult-to-reverse effects.
-6. Validation note: the current fact, proof, or behavior required before implementation.
+5. Tradeoffs and blast radius: benefits, costs, risks, and difficult-to-reverse
+   effects.
+6. Validation note: the current fact, proof, or behavior required before
+   implementation.

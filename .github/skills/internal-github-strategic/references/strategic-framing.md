@@ -1,7 +1,7 @@
 # GitHub Strategic Framing Reference
 
 Use this reference when a GitHub decision needs worked lens combinations,
-decision-note depth, or a comparison shape.
+a decision-note structure, or a comparison shape.
 
 ## Common lens combinations
 
@@ -15,11 +15,11 @@ decision-note depth, or a comparison shape.
 
 ## Signals for another lens
 
-- Spend or licensing could change the recommendation: add `FinOps`.
-- Permissions, Apps, rulesets, OIDC, or environments change: add `governance`.
-- Runner, audit, or validation burden changes: add `operations`.
-- Delivery continuity or recovery posture changes: add `BC/DR`.
-- Developer workflow or repository shape changes: add `maintainability`.
+- Spend or licensing could change the recommendation: add FinOps.
+- Permissions, Apps, rulesets, OIDC, or environments change: add governance.
+- Runner, audit, or validation burden changes: add operations.
+- Delivery continuity or recovery posture changes: add BC/DR.
+- Developer workflow or repository shape changes: add maintainability.
 
 ## Worked decision shapes
 
@@ -57,12 +57,3 @@ decision-note depth, or a comparison shape.
 5. Tradeoffs and blast radius: what improves, what gets harder, and what is
    difficult to reverse.
 6. Validation need: which current fact, proof, or test remains before action.
-
-## Depth control
-
-- Stay in `Quick answer` when one option is clearly better and downside is
-  local.
-- Use `Decision note` when at least two viable options remain or the choice
-  changes trust, continuity, repository shape, or licensing posture.
-- Use `Deep analysis` when explicitly requested or when the risk profile makes
-  a short comparison unsafe.

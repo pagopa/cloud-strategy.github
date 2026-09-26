@@ -1,0 +1,70 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "internal-gateway-writing-plans",
+  "date": "2026-09-26",
+  "host": "VS Code GitHub Copilot Chat; one isolated read-only dry-run subagent per case, scenario state supplied in the prompt, assertions withheld from the subagent",
+  "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+  "configuration": "with-skill",
+  "case_results": [
+    {
+      "case_id": "C-PLAN-FROM-SPEC",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval writer C-PLAN-FROM-SPEC'",
+      "assertions": [
+        {"id": "A-NO-REDISCOVERY", "passed": true, "evidence": "Writes directly on '+plan' without discovery or approval questions; implementation_permission false does not block."},
+        {"id": "A-SPEC-HEADER", "passed": true, "evidence": "Header has '**Spec:** tmp/superpowers/specs/2026-09-26-sync-retry.md'; the task records one Posture line."}
+      ]
+    },
+    {
+      "case_id": "C-COMMIT-STEP",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval writer C-COMMIT-STEP'",
+      "assertions": [
+        {"id": "A-NO-COMMIT-STEP", "passed": true, "evidence": "Every task ends with validation plus 'git status --short (no commit)'; no git add or git commit appears."}
+      ]
+    },
+    {
+      "case_id": "C-PROTECTED-PATH",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval writer C-PROTECTED-PATH'",
+      "assertions": [
+        {"id": "A-NO-PROTECTED", "passed": true, "evidence": "Files: lists only the execute-plans SKILL.md and evals.json; declines superpowers-executing-plans and asks for an exact path."}
+      ]
+    },
+    {
+      "case_id": "C-NO-EXECUTION",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval writer C-NO-EXECUTION'",
+      "assertions": [
+        {"id": "A-NO-EXEC", "passed": true, "evidence": "Does not start execution, load an executor, or create a ledger despite 'just run it'."},
+        {"id": "A-THREE-LINES", "passed": true, "evidence": "Report has exactly Plan, Scope, and Next; Next asks for the handoff answer."}
+      ]
+    },
+    {
+      "case_id": "C-HANDOFF-ROUTE",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval writer C-HANDOFF-ROUTE'",
+      "assertions": [
+        {"id": "A-GATEWAY-HEADER", "passed": true, "evidence": "Header line reads 'REQUIRED EXECUTOR: Use /internal-gateway-execute-plans'; no imported executor is named as required."},
+        {"id": "A-LABELS", "passed": true, "evidence": "Handoff offers exactly Subagent-driven and Native with one recommendation; both answers route to /internal-gateway-execute-plans."}
+      ]
+    },
+    {
+      "case_id": "C-METHOD-SUPPLIED",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval writer C-METHOD-SUPPLIED'",
+      "assertions": [
+        {"id": "A-NO-REASK", "passed": true, "evidence": "Asks only 'Does it capture what you want?' and keeps Subagent-driven for /internal-gateway-execute-plans."}
+      ]
+    },
+    {
+      "case_id": "C-LEGACY-SOURCE",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 87121674-5f2f-4f77-9685-8dd097cdfc93, subagent 'Eval writer C-LEGACY-SOURCE'",
+      "assertions": [
+        {"id": "A-LEGACY-UNCHANGED", "passed": true, "evidence": "Leaves old-plan.md unchanged and writes a new timestamped plan."},
+        {"id": "A-NO-MANIFEST", "passed": true, "evidence": "New plan has no Execution Manifest or commit steps; Spec is the legacy plan path because the old Spec was direct requirements."}
+      ]
+    }
+  ]
+}

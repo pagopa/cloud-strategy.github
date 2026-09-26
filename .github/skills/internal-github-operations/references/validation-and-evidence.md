@@ -5,20 +5,20 @@ audit, and drift evidence.
 
 ## Preflight
 
-- confirm scope and rollout unit
-- confirm rollback trigger and owner
-- confirm runner, workflow, and audit signals for the affected surface
-- confirm permission and environment assumptions before widening rollout
-- confirm reporting or export surfaces needed for follow-up evidence
+- Confirm scope and rollout unit.
+- Confirm rollback trigger and owner.
+- Confirm runner, workflow, and audit signals for the affected surface.
+- Confirm permission and environment assumptions before widening rollout.
+- Confirm reporting or export surfaces needed for follow-up evidence.
 
 ## Rollout and post-rollout
 
-- validate the first safe unit before widening scope
-- record what was actually observed versus what was only expected
-- collect the audit trail for what changed
-- prove intended workflows still run with expected permissions
-- prove runner capacity and health match operating assumptions
-- confirm audit and reporting surfaces describe the intended state
+- Validate the first safe unit before widening scope.
+- Record what was actually observed versus what was only expected.
+- Collect the audit trail for what changed.
+- Prove intended workflows still run with expected permissions.
+- Prove runner capacity and health match operating assumptions.
+- Confirm audit and reporting surfaces describe the intended state.
 
 ## Runner health evidence
 

@@ -171,6 +171,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Scope:
   - repo-root helper entry points
   - `.github/scripts/**`
+  - `.github/tools/**`
   - catalog review and consistency guidance
 - Expected behavior:
   - same-named files in different locations are not classified as duplicate from naming or path alone

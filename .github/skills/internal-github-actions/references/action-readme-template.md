@@ -1,6 +1,7 @@
 # Action README Template
 
-Use this template when a composite action needs a minimal, repeatable consumer contract.
+Use this template when a composite action needs a minimal, repeatable consumer
+contract.
 
 ````md
 # <action-name>

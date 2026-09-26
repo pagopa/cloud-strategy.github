@@ -1,10 +1,12 @@
 # Composite Action Testing Pattern
 
-Use a small layered strategy instead of assuming the action works because `action.yml` looks correct.
+Use a small layered strategy instead of assuming the action works because
+`action.yml` looks correct.
 
 ## 1. Smoke workflow
 
-Run the action from a workflow that checks out the repository, calls the local action, and asserts one success-path output.
+Run the action from a workflow that checks out the repository, calls the local
+action, and asserts one success-path output.
 
 ```yaml
 jobs:
@@ -32,10 +34,12 @@ jobs:
 
 ## 2. Failure-path check
 
-- Trigger at least one invalid input case and assert the action fails early with a clear error.
+- Trigger at least one invalid input case and assert the action fails early
+  with a clear error.
 
 ## 3. Contract check
 
 - Keep README inputs and outputs in sync with `action.yml`.
 - Re-run smoke checks when adding or renaming any input or output.
-- Treat output name changes as compatibility changes, not as harmless refactors.
+- Treat output name changes as compatibility changes, not as harmless
+  refactors.

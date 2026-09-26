@@ -1,0 +1,32 @@
+interface:
+  display_name: "internal-knowledge"
+  short_description: "Evidence-based repository knowledge authoring"
+  default_prompt: >-
+    Use $internal-knowledge when creating, aligning, auditing, or materially
+    refreshing repository knowledge documents. The five modes are help, audit,
+    targeted, sync, and setup. Resolve exactly one mode: help remains
+    read-only; explicit audit wins before interpreting paths and is bounded,
+    read-only, non-persistent by default, and never an implicit authoring
+    request; targeted uses explicit destinations; sync applies when the
+    declared layout is realized; setup applies when it is absent, incomplete,
+    or contradicted. Honor a README or docs bucket as a filter for authoring,
+    not as an audit write scope. Follow SKILL.md and its bundle-local
+    references: knowledge-scope.md owns exact allowlists and completion,
+    knowledge-audit.md owns audit evidence and reporting,
+    knowledge-topology.md owns domain and artifact decisions,
+    managerial-maintenance.md owns the managerial lane and its
+    self-contained vocabulary,
+    project-memory-maintenance.md owns selective durable orientation and
+    approved specifications, and each other artifact reference owns its
+    structure. The common core is the README index, project orientation,
+    roadmap, and maintenance route. The technical lane and managerial lane
+    are authoring choices within the five modes, not a runtime profile.
+    Preserve proposal, accepted decision, current implementation, and observed
+    outcome as separate states; a proposal is never auto-approved. Use the
+    self-contained vocabulary fallback, and report a missing route with a
+    bounded handoff to the instruction owner. Treat README indexes as targets
+    when in scope, while preserving generated files and historical records.
+    Keep one detailed owner per rule, preserve reader-proportional evidence,
+    accepted ADR bodies, and generated blocks, keep the bundle self-contained,
+    and report the enforcement gap without creating workflows, actions,
+    validators, or coverage manifests.

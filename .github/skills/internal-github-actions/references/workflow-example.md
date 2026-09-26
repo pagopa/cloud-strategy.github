@@ -1,6 +1,8 @@
 # Workflow Archetype: Validated Manual Deploy
 
-Use this starter when a workflow needs a manual entrypoint, input validation, and protected deployment gates without turning into a one-size-fits-all catalog.
+Use this starter when a workflow needs a manual entrypoint, input validation,
+and protected deployment gates without turning into a one-size-fits-all
+catalog.
 
 ```yaml
 name: deploy-service
@@ -72,8 +74,11 @@ jobs:
           ./scripts/deploy.sh "$TARGET"
 ```
 
-Adapt this archetype by:
+Adapt this archetype as follows:
 
-- adding `workflow_call` when the same deploy orchestration is reused inside the repository
-- introducing artifacts with explicit `retention-days` only when a reviewed transfer is required
-- moving repeated step logic into a composite action instead of expanding the deploy job inline
+- Add `workflow_call` when the same deploy orchestration is reused inside the
+  repository.
+- Introduce artifacts with explicit `retention-days` only when a reviewed
+  transfer is required.
+- Move repeated step logic into a composite action instead of expanding the
+  deploy job inline.

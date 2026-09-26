@@ -1,0 +1,180 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gcp-organization-structure",
+  "requirements": [
+    {
+      "id": "R-REQUIREMENTS",
+      "text": "Establish platform requirements, organizational owners, billing owners, workload boundaries, environment model, and regional or residency constraints.",
+      "source": "internal-gcp-organization-structure SKILL.md: Workflow step 1"
+    },
+    {
+      "id": "R-COMPARE",
+      "text": "Compare viable organization, folder, billing-account, project, and Shared VPC placement models against ownership, isolation, connectivity, and rollout needs.",
+      "source": "internal-gcp-organization-structure SKILL.md: Workflow step 2"
+    },
+    {
+      "id": "R-SELECT",
+      "text": "Select the placement model and state where each capability lives, including the Shared VPC host and service-project relationship.",
+      "source": "internal-gcp-organization-structure SKILL.md: Workflow step 3"
+    },
+    {
+      "id": "R-UNIT",
+      "text": "Name the smallest structural change unit, such as one folder, project set, host project, or region set.",
+      "source": "internal-gcp-organization-structure SKILL.md: Workflow step 4"
+    },
+    {
+      "id": "R-IMPLICATIONS",
+      "text": "Surface region, residency, connectivity, continuity, and ownership implications that shape the recommendation.",
+      "source": "internal-gcp-organization-structure SKILL.md: Workflow step 5"
+    },
+    {
+      "id": "R-OUTPUT",
+      "text": "Return the structural objective and requirements, candidate comparison, recommended placement, separate billing and platform ownership, smallest change unit, and material regional or connectivity assumptions.",
+      "source": "internal-gcp-organization-structure SKILL.md: Output"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-SHARED-VPC-PLACEMENT",
+      "family": "first-time-skill-creation",
+      "kind": "rubric",
+      "requirement_ids": ["R-REQUIREMENTS", "R-COMPARE", "R-SELECT", "R-UNIT", "R-IMPLICATIONS", "R-OUTPUT"],
+      "prompt": "Design the GCP organization and Shared VPC placement for a central platform team serving development and production workloads owned by separate business units.",
+      "initial_state": "A central network team may operate the host project, while workload teams need independent service-project ownership and billing traceability.",
+      "expected_output": "A structural decision compares placement models, recommends the host and service-project relationship, separates ownership, names the first change unit, and states connectivity and continuity assumptions.",
+      "files": ["references/topology-map.md"],
+      "assertions": [
+        {"id": "A-STRUCTURAL-OBJECTIVE", "text": "The output states workload boundaries, platform and billing owners, and the environment requirements driving placement.", "critical": true},
+        {"id": "A-MODEL-COMPARISON", "text": "At least two viable placement models are compared against ownership, isolation, connectivity, and rollout needs.", "critical": true},
+        {"id": "A-HOST-SERVICE", "text": "The recommendation explicitly names the Shared VPC host project and its service-project relationship.", "critical": true},
+        {"id": "A-SMALLEST-UNIT", "text": "The output names the smallest initial structural change unit and material connectivity or continuity assumptions.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Recommend a Shared VPC without naming host and service-project ownership.",
+        "Treat billing ownership as identical to platform ownership without examining the boundary."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The response compares realistic topology models and chooses one with explicit host, service-project, billing, and platform ownership.",
+          "The first rollout unit and its connectivity assumptions are observable in the recommendation."
+        ],
+        "fail": [
+          "The response gives a generic folder diagram with no ownership or Shared VPC relationship.",
+          "The response proposes a broad migration without a smallest change unit."
+        ]
+      }
+    },
+    {
+      "id": "C-REGIONAL-RESIDENCY",
+      "family": "held-out-downstream-work",
+      "kind": "rubric",
+      "requirement_ids": ["R-REQUIREMENTS", "R-COMPARE", "R-SELECT", "R-UNIT", "R-IMPLICATIONS", "R-OUTPUT"],
+      "prompt": "Choose a GCP project and folder model for workloads that must stay in two residency regions while sharing a platform service layer.",
+      "initial_state": "Residency and continuity constraints may require separate project families, and the platform service layer must not erase the boundary.",
+      "expected_output": "A placement comparison makes residency, connectivity, ownership, and continuity implications explicit, selects a model, and starts with a named workload or region set.",
+      "files": ["references/topology-map.md"],
+      "assertions": [
+        {"id": "A-RESIDENCY-CONSTRAINT", "text": "The output treats residency as a placement constraint and explains its effect on project or folder segmentation.", "critical": true},
+        {"id": "A-CONTINUITY", "text": "The recommendation states continuity and connectivity consequences of the selected regional model.", "critical": true},
+        {"id": "A-REGION-UNIT", "text": "The output names an initial region or workload set as the smallest structural change unit.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Collapse distinct residency boundaries into one project family without justification.",
+        "Claim continuity without stating the regional or connectivity assumption."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The selected placement visibly preserves the stated residency boundary and names the resulting ownership model.",
+          "The rollout begins with a bounded region or workload slice and states what must be proven before widening."
+        ],
+        "fail": [
+          "The output treats residency as a footnote instead of a placement constraint.",
+          "The output has no initial structural unit or continuity implication."
+        ]
+      }
+    },
+    {
+      "id": "C-BILLING-OWNERSHIP",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-REQUIREMENTS", "R-SELECT", "R-IMPLICATIONS", "R-OUTPUT"],
+      "prompt": "Realign GCP billing ownership for a product portfolio while keeping a centrally operated Shared VPC platform.",
+      "initial_state": "Business units need chargeback visibility, but network and shared-service operations remain centralized.",
+      "expected_output": "The output separates financial and platform responsibility, selects a billing/project arrangement, and calls out automation, approval, and connectivity implications.",
+      "files": [],
+      "assertions": [
+        {"id": "A-OWNERSHIP-SEPARATION", "text": "Billing ownership and platform ownership are named separately where they differ.", "critical": true},
+        {"id": "A-PLACEMENT", "text": "The output states where projects, billing accounts, and shared networking capabilities live.", "critical": true},
+        {"id": "A-IMPLICATIONS", "text": "The recommendation addresses chargeback or showback, support paths, and connectivity implications.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Assume a billing-account move automatically transfers platform ownership.",
+        "Ignore the Shared VPC host and service-project relationship."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The response makes financial responsibility traceable without obscuring network platform responsibility.",
+          "The chosen placement and its operational implications are concrete."
+        ],
+        "fail": [
+          "The response only discusses billing labels and never selects a placement model.",
+          "The response leaves ownership or shared networking ambiguous."
+        ]
+      }
+    },
+    {
+      "id": "C-COMPETING-OWNER",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-OUTPUT", "R-SELECT"],
+      "prompt": "Define the GCP IAM bindings, workload identity trust, and Org Policy controls for an existing project hierarchy; do not change the hierarchy.",
+      "initial_state": "The primary deliverable is governance control design, while organization structure is explicitly fixed.",
+      "expected_output": "The response routes the request to internal-gcp-governance and does not invent a new folder, billing, or Shared VPC placement model.",
+      "files": [],
+      "assertions": [
+        {"id": "A-GOVERNANCE-ROUTE", "text": "The response identifies governance as the owner because the requested deliverable is IAM, workload trust, and Org Policy control design.", "critical": true},
+        {"id": "A-STRUCTURE-BOUNDARY", "text": "The response respects the fixed hierarchy and does not return an unsolicited topology recommendation.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Redesign the folder or project hierarchy when the prompt says it is fixed.",
+        "Treat IAM and Org Policy authoring as a placement decision."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The output routes the control-stack deliverable to internal-gcp-governance.",
+          "The output keeps the existing structural boundary intact."
+        ],
+        "fail": [
+          "The output proposes folder or project changes instead of governance controls.",
+          "The output claims organization structure owns the fixed-hierarchy control task."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Design the GCP organization and Shared VPC host and service-project placement for a central platform team.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Choose a folder and project segmentation model for separate development, staging, and production environments.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Realign billing-account ownership while keeping platform and Shared VPC operations centralized.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Place workloads across GCP regions and project families to satisfy residency constraints.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Compare a central Shared VPC host project with product-aligned host projects and recommend a topology.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Choose the smallest folder or project set for the first safe rollout of a new platform structure.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-07", "query": "Separate network ownership, workload ownership, and chargeback responsibility in the GCP hierarchy.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Define a GCP topology that preserves regional continuity while isolating regulated workloads.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Define the IAM, workload identity, and Org Policy control stack for an existing GCP hierarchy.", "should_trigger": false, "split": "train", "competing_owner": "internal-gcp-governance"},
+      {"id": "Q-10", "query": "Validate monitoring, backup, restore, and rollout evidence for a GCP topology change.", "should_trigger": false, "split": "train", "competing_owner": "internal-gcp-operations"},
+      {"id": "Q-11", "query": "Compare two GCP placement options and recommend one using cost, risk, and reversibility.", "should_trigger": false, "split": "train", "competing_owner": "internal-gcp-strategic"},
+      {"id": "Q-12", "query": "Write Terraform code that creates the GCP folder hierarchy, projects, and Shared VPC.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-terraform"},
+      {"id": "Q-13", "query": "Design an AWS organization and account structure for separate business units.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-aws"},
+      {"id": "Q-14", "query": "Choose an Azure subscription and management-group topology for a regulated platform.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-azure"}
+    ]
+  }
+}

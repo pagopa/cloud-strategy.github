@@ -16,28 +16,7 @@ cost-value decision, or risk decision before implementation. Keep clearly
 scoped structure, governance, operations, research, and Lambda work in its
 positive domain lane.
 
-## Optional lens activation
-
-Use only the minimum set of lenses needed for the request. If the user names
-lenses, prioritize those. Otherwise infer the smallest useful set from the
-decision.
-
-Start narrow and expand only when the request is broad, risky, or ambiguous.
-Keep active lenses explicit when more than one is in play.
-
-For lens selection or combination guidance, load
-`references/lens-playbook.md`. Activate BC/DR only when resilience, backup,
-recovery, failover, RTO, RPO, or multi-region continuity changes the
-recommendation; otherwise state that the continuity lens was not material.
-
-## Freshness dependency
-
-When current AWS documentation, service behavior, IAM semantics, support
-boundaries, limits, or updated guidance can change the decision, state the
-required current-fact evidence and the affected assumption. Do not present an
-unverified current fact as settled.
-
-## Mandatory behavior
+## Core rules
 
 - Identify the decision before discussing implementation tools.
 - Make assumptions explicit.
@@ -47,7 +26,27 @@ unverified current fact as settled.
 - Include cost-value considerations when they matter.
 - Stay proportional to the size of the question.
 
-## Adaptive output modes
+## Lens selection
+
+Use only the minimum set of lenses needed for the request. If the user names
+lenses, prioritize those. Otherwise infer the smallest useful set from the
+decision.
+
+Start narrow and expand only when the request is broad, risky, or ambiguous.
+Keep active lenses explicit when more than one is in play.
+
+Activate BC/DR only when resilience, backup, recovery, failover, RTO, RPO, or
+multi-region continuity changes the recommendation; otherwise state that the
+continuity lens was not material.
+
+## Freshness dependency
+
+When current AWS documentation, service behavior, IAM semantics, support
+boundaries, limits, or updated guidance can change the decision, state the
+required current-fact evidence and the affected assumption. Do not present an
+unverified current fact as settled.
+
+## Output modes
 
 ### Quick answer
 
@@ -65,6 +64,11 @@ Use for broad, ambiguous, high-risk, or explicitly detailed requests. Include
 context, assumptions, active lenses, options, recommendation, risks, blast
 radius, reversibility, and evidence requirements.
 
+## References
+
+- [references/lens-playbook.md](references/lens-playbook.md): load for lens
+  selection or combination guidance.
+
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
@@ -75,10 +79,11 @@ radius, reversibility, and evidence requirements.
 | Expanding into tool or IaC selection without a request | The response drifts from AWS platform tradeoffs | Center the recommendation on the AWS choice |
 | Giving generic advice without context or cost implication | The result is hard to act on and easy to misapply | Tie it to assumptions, options, tradeoffs, and value |
 
-## Completion contract
+## Completion criteria
 
 - The decision statement is explicit and narrow enough to evaluate.
 - Assumptions, active lenses, and strongest tradeoff are named.
 - Reversibility or blast-radius guidance is included when material.
-- Cost-value or operational impact is called out when it changes the decision.
+- Cost-value or operational impact is called out when it changes the
+  decision.
 - Freshness dependencies and unresolved evidence gaps are visible.

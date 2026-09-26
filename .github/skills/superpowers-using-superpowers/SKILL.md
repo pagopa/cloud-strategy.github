@@ -53,10 +53,32 @@ These thoughts mean STOP—you're rationalizing:
 
 If your harness appears here, read its reference file for special instructions:
 
+- Claude Code: `references/claude-code-tools.md`
 - Codex: `references/codex-tools.md`
 - Pi: `references/pi-tools.md`
 - Antigravity: `references/antigravity-tools.md`
+- Hermes Agent: `references/hermes-tools.md`
+- Muse: `references/muse-tools.md`
 
 ## User Instructions
 
 User instructions (CLAUDE.md, AGENTS.md, GEMINI.md, etc, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.
+
+<!-- local-sync:no-commit:start -->
+## Local no-commit contract
+
+This repository-owned contract overrides any earlier instruction in this skill,
+its bundled prompts, or its scripts to create Git commits.
+
+- Do not create, amend, squash, or push Git commits. Do not run `git commit`,
+  `git merge`, `git rebase`, `git cherry-pick`, or `git push`.
+- Leave every change uncommitted in the working tree. The user owns staging,
+  commits, and integration.
+- Where a step says to commit, run that step's validation instead, then report
+  the changed files and the `git status --short` summary.
+- Where a step or script needs a commit range such as `BASE..HEAD`, review the
+  uncommitted changes with `git diff <BASE>` instead.
+- Include this contract in every subagent brief dispatched from this skill.
+- Only an explicit user request in the current conversation authorizes a
+  commit, and only for that request.
+<!-- local-sync:no-commit:end -->

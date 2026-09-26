@@ -1,6 +1,7 @@
 # Workflow Patterns Catalog
 
-Use this catalog when the baseline example is too small but a repository-specific one-off workflow would still repeat known shapes.
+Use this catalog when the baseline example is too small but a
+repository-specific one-off workflow would still repeat known shapes.
 
 ## Matrix validation
 
@@ -41,7 +42,8 @@ environment:
   name: production
 ```
 
-- Validate the target in an earlier job and deploy only from the normalized value.
+- Validate the target in an earlier job and deploy only from the normalized
+  value.
 - Keep deployment permissions and secrets scoped to the deploy job.
 - Use protected environments instead of bespoke approval logic in shell steps.
 
@@ -55,4 +57,5 @@ on:
 
 - Make scheduled jobs idempotent and safe to rerun.
 - Add explicit `timeout-minutes` and narrow `permissions`.
-- Avoid destructive mutations unless the workflow revalidates state and emits clear logs or notifications.
+- Avoid destructive mutations unless the workflow revalidates state and emits
+  clear logs or notifications.

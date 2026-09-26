@@ -3,11 +3,7 @@ name: internal-docker
 description: Use when creating or modifying Dockerfiles, Compose assets, image build settings, or container hardening rules.
 ---
 
-# Docker Skill
-
-## Referenced skills
-
-- None.
+# Internal Docker
 
 ## When to use
 
@@ -17,27 +13,21 @@ description: Use when creating or modifying Dockerfiles, Compose assets, image b
 
 ## Mandatory rules
 
-- Pin images by digest (`@sha256:...`), never by floating tag alone.
-- Use multi-stage builds to separate build and runtime layers.
-- Run as non-root user in the final stage.
-- Use `COPY --from=build` to bring only compiled artifacts into runtime.
-- Minimize layer count — combine related `RUN` commands.
-- Always include a `.dockerignore` to exclude `.git`, `node_modules`, `__pycache__`, etc.
-
-## Dockerfile patterns
-
-Load `references/dockerfile-patterns.md` when you need the canonical multi-stage or single-stage example.
-
-## Common mistakes
-
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Using `latest` or floating tags | Non-reproducible builds, supply-chain risk | Pin by digest: `image@sha256:abc...` |
-| Running as root in production | Container escape gives host-level privileges | Add `USER node` / `USER nobody` in final stage |
-| Copying entire context without `.dockerignore` | Bloated image with `.git`, secrets, dev deps | Create `.dockerignore` excluding non-essential files |
-| Installing dev dependencies in runtime stage | Larger image, unnecessary attack surface | Use multi-stage: install in build, copy only artifacts |
-| One `RUN` per command | Excessive layers, larger image, slower pulls | Combine related commands with `&&` |
-| Missing `--no-cache-dir` on pip install | Wasted space from pip cache in layer | Always `pip install --no-cache-dir` |
+- Pin images by digest (`image@sha256:...`), never by `latest` or another
+  floating tag alone; floating tags make builds non-reproducible and add
+  supply-chain risk.
+- Use multi-stage builds: install build and dev dependencies in the build
+  stage, then `COPY --from=build` only compiled artifacts into the runtime
+  stage. Dev dependencies in the runtime stage enlarge the image and the
+  attack surface.
+- Run as a non-root user in the final stage, for example `USER node` or
+  `USER nobody`; a container escape from root gives host-level privileges.
+- Combine related `RUN` commands with `&&`; one `RUN` per command adds layers,
+  enlarges the image, and slows pulls.
+- Always include a `.dockerignore` that excludes `.git`, `node_modules`,
+  `__pycache__`, secrets, dev dependencies, and other non-essential files.
+- Always use `pip install --no-cache-dir` so the pip cache does not persist in
+  a layer.
 
 ## Validation
 
@@ -45,3 +35,8 @@ Load `references/dockerfile-patterns.md` when you need the canonical multi-stage
 - Verify non-root user in final stage.
 - Verify `.dockerignore` exists and excludes sensitive/unnecessary files.
 - Build or lint the container definition when tooling is available.
+
+## References
+
+- [`references/dockerfile-patterns.md`](references/dockerfile-patterns.md):
+  load when you need the canonical multi-stage or single-stage example.

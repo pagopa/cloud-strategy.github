@@ -1,6 +1,7 @@
 # AWS Governance Guardrail Map
 
-Use this reference when the user needs a clearer split between AWS governance surfaces.
+Use this reference when the user needs a clearer split between AWS governance
+surfaces.
 
 ## Quick split
 
@@ -15,7 +16,8 @@ Use this reference when the user needs a clearer split between AWS governance su
 ## Control design checklist
 
 1. State the scope: root, OU, account set, account, principal, or session.
-2. State whether the mechanism prevents, grants, constrains, delegates, or creates an exception.
+2. State whether the mechanism prevents, grants, constrains, delegates, or
+   creates an exception.
 3. Record the trust boundary and exception path.
 4. Name the simulation or staged validation required before rollout.
 

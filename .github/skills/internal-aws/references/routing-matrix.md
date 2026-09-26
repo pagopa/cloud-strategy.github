@@ -6,7 +6,8 @@
 - SCP, permission boundary, or trust review → `/internal-aws-governance`.
 - Backup and restore proof → `/internal-aws-operations`.
 - Lambda retry or event-source behavior → `/internal-aws-lambda`.
-- Current AWS service documentation or regional availability → `/internal-aws-mcp-research`.
+- Current AWS service documentation or regional availability →
+  `/internal-aws-mcp-research`.
 - AWS option comparison or tradeoff decision → `/internal-aws-strategic`.
 - AWS spend or savings analysis → `/antigravity-aws-cost-optimizer`.
 

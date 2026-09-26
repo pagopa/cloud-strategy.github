@@ -1,0 +1,304 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-bash",
+  "requirements": [
+    {
+      "id": "R-ROUTE-OWNER",
+      "text": "Classify shell work before applying rules: operator entrypoints go to internal-bash-script, sourced files and fragments stay here, and shell embedded in another format is claimed by that format's owner first.",
+      "source": "internal-bash SKILL.md: When to use, Owner routing"
+    },
+    {
+      "id": "R-DIALECT",
+      "text": "Record the dialect contract, preserve the declared interpreter, and never recommend Bash syntax for a POSIX sh target.",
+      "source": "internal-bash SKILL.md: Dialect decision, Bash branch, POSIX sh branch"
+    },
+    {
+      "id": "R-REVIEW-IDS",
+      "text": "Report review findings with the catalog ID, severity, location, and declared dialect; a finding that assumes the wrong dialect is not reported.",
+      "source": "internal-bash SKILL.md: Review; references/review-anti-patterns.md"
+    },
+    {
+      "id": "R-CHECKER",
+      "text": "Validate changed shell with the bundle checker, which selects the dialect from the shebang or --dialect, returns 0, 1, or 2, and never executes the checked file.",
+      "source": "internal-bash SKILL.md: Validation; scripts/check.sh"
+    },
+    {
+      "id": "R-EVIDENCE-LIMITS",
+      "text": "Report the checker result as static evidence only; sh -n without dash is limited evidence and neither proves runtime behavior nor portability across every supported sh.",
+      "source": "internal-bash SKILL.md: Validation"
+    },
+    {
+      "id": "R-CATALOG-CONDITIONS",
+      "text": "Report a catalog finding only when its stated condition holds in the reviewed code; code that meets the negative control is not a finding.",
+      "source": "internal-bash references/review-anti-patterns.md"
+    },
+    {
+      "id": "R-BASH32-TARGET",
+      "text": "Apply Bash 3.2 rules only when the target is declared, and report compatibility as unverified unless the target's own harness ran under Bash 3.2 in an isolated workspace.",
+      "source": "internal-bash SKILL.md: Dialect decision"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-CHECKER-QUOTING",
+      "family": "checker-contract",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CHECKER"],
+      "prompt": "Validate this Bash helper before I merge it.",
+      "initial_state": "A Bash file with a bash shebang; shellcheck and dash are installed.",
+      "expected_output": "The checker passes the valid file with exit 0 and reports the defective file with exit 1 and SC2086 quoting findings.",
+      "files": ["fixtures/valid/tool.bash"],
+      "assertions": [
+        {"id": "A-EXIT-CONTRACT", "text": "The valid file returns 0 and the defective file returns 1.", "critical": true},
+        {"id": "A-NO-EXECUTION", "text": "The file is checked statically and never executed.", "critical": true}
+      ],
+      "forbidden_actions": ["Run the checked file to validate it."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "fixtures/invalid/unquoted.bash"
+    },
+    {
+      "id": "C-POSIX-MISMATCH",
+      "family": "dialect-mismatch",
+      "kind": "deterministic",
+      "requirement_ids": ["R-DIALECT", "R-CHECKER"],
+      "prompt": "This file ships as /bin/sh on Alpine. Is it safe?",
+      "initial_state": "A file with a #!/bin/sh shebang that uses local and [[ ]].",
+      "expected_output": "Keep the sh interpreter, report the Bash extensions as a dialect mismatch, and propose POSIX replacements; the checker returns 1 for the defective file and 0 for the valid one.",
+      "files": ["fixtures/valid/helper.sh"],
+      "assertions": [
+        {"id": "A-KEEP-INTERPRETER", "text": "The answer does not switch the shebang to Bash.", "critical": true},
+        {"id": "A-POSIX-FIX", "text": "Replacements use [ ] or test and no local or arrays.", "critical": true}
+      ],
+      "forbidden_actions": ["Change #!/bin/sh to a Bash shebang without approval."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "fixtures/invalid/bash-in-sh.sh"
+    },
+    {
+      "id": "C-SOURCED-NO-SHEBANG",
+      "family": "checker-contract",
+      "kind": "rubric",
+      "requirement_ids": ["R-CHECKER", "R-DIALECT"],
+      "prompt": "Lint lib/common.sh; it has no shebang and is sourced by our Bash tools.",
+      "initial_state": "A sourced helper without a shebang, used only by Bash callers.",
+      "expected_output": "Record Dialect: Bash from the caller contract and run the checker with --dialect bash instead of guessing or adding a shebang.",
+      "files": ["fixtures/valid/sourced-helper.sh"],
+      "assertions": [
+        {"id": "A-EXPLICIT-DIALECT", "text": "The checker call passes --dialect derived from the caller contract.", "critical": true}
+      ],
+      "forbidden_actions": ["Add a shebang to a sourced helper only to satisfy the checker."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript names the caller-provided dialect and shows scripts/check.sh --dialect bash."],
+        "fail": ["The agent adds a shebang or treats the checker's exit 2 as a lint finding."]
+      }
+    },
+    {
+      "id": "C-REVIEW-IDS",
+      "family": "review",
+      "kind": "rubric",
+      "requirement_ids": ["R-REVIEW-IDS", "R-DIALECT"],
+      "prompt": "Review tests/evaluation/fixtures/posix-fragment.sh, a helper our /bin/sh entrypoints source, and list the problems.",
+      "initial_state": "The fixture is a POSIX sh function library sourced by #!/bin/sh callers.",
+      "expected_output": "A finding list that cites the unquoted expansions on lines 5 and 7 and the unguarded cd on line 5, each with catalog ID, severity, and line, under Dialect: POSIX sh.",
+      "files": ["tests/evaluation/fixtures/posix-fragment.sh"],
+      "assertions": [
+        {"id": "A-IDS", "text": "Each finding carries a catalog ID, severity, and a line that exists in the fixture.", "critical": true},
+        {"id": "A-COMPLETE", "text": "The unguarded cd and both unquoted expansions are reported.", "critical": true},
+        {"id": "A-NO-WRONG-DIALECT", "text": "No finding recommends [[ ]], arrays, or local for the POSIX target.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Every reported line number maps to the cited defect in the fixture, and the dialect is stated as POSIX sh."],
+        "fail": ["A defect is missed, a line number is wrong, or a fix introduces Bash-only syntax."]
+      }
+    },
+    {
+      "id": "C-ROUTE-ENTRYPOINT",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE-OWNER"],
+      "prompt": "Write a new scripts/release.sh that operators run with --version and --dry-run.",
+      "initial_state": "No existing script; the request is a new operator entrypoint.",
+      "expected_output": "Route the work to internal-bash-script; this skill is at most an optional enrichment for its catalog and checker.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ROUTED", "text": "The operator entrypoint is handled by internal-bash-script.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["internal-bash-script owns the entrypoint; internal-bash appears only as an optional enrichment."],
+        "fail": ["The script is written using only internal-bash with no operator guidance."]
+      }
+    },
+    {
+      "id": "C-ROUTE-EMBEDDED",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE-OWNER"],
+      "prompt": "The run: step in .github/workflows/ci.yml fails on filenames with spaces; fix the shell.",
+      "initial_state": "A GitHub Actions workflow with a multi-line run: block.",
+      "expected_output": "Load the workflow owner first, then apply this skill only to the quoting semantics inside run:.",
+      "files": [],
+      "assertions": [
+        {"id": "A-FORMAT-OWNER-FIRST", "text": "The workflow owner is loaded before shell rules are applied.", "critical": true}
+      ],
+      "forbidden_actions": ["Change workflow triggers or permissions as part of a shell fix."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The transcript loads the GitHub Actions owner and limits this skill to the run: shell."],
+        "fail": ["The agent treats the workflow file as a shell file and ignores the workflow contract."]
+      }
+    },
+    {
+      "id": "C-LIMITED-EVIDENCE",
+      "family": "evidence-honesty",
+      "kind": "rubric",
+      "requirement_ids": ["R-EVIDENCE-LIMITS"],
+      "prompt": "Confirm this POSIX helper is portable; dash is not installed on this Mac.",
+      "initial_state": "macOS host with /bin/sh as Bash in POSIX mode and no dash.",
+      "expected_output": "Report the checker pass as limited static evidence and name the missing check under each supported sh.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-PORTABILITY-CLAIM", "text": "The answer does not claim cross-shell portability from sh -n.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The report cites the limited-evidence line and lists the remaining evidence gap."],
+        "fail": ["The report states the helper is portable based on the macOS sh result."]
+      }
+    },
+    {
+      "id": "C-READ-RAW",
+      "family": "catalog-coverage",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CHECKER", "R-REVIEW-IDS"],
+      "prompt": "Check this POSIX helper that prints each entry of a list file.",
+      "initial_state": "Two #!/bin/sh helpers; shellcheck and dash are installed.",
+      "expected_output": "The checker returns 1 with SC2162 for the defective helper and 0 for the valid one; the review cites SH-M09 on the read line.",
+      "files": ["tests/evaluation/fixtures/read-lines-valid.sh"],
+      "assertions": [
+        {"id": "A-EXIT-CONTRACT", "text": "scripts/check.sh returns 1 for the defective fixture and 0 for the valid fixture.", "critical": true},
+        {"id": "A-CATALOG-ID", "text": "The finding carries SH-M09 and the line of the read loop.", "critical": true}
+      ],
+      "forbidden_actions": ["Run the checked file to validate it."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/read-lines-defective.sh"
+    },
+    {
+      "id": "C-FILENAME-SPLIT",
+      "family": "catalog-coverage",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CHECKER", "R-REVIEW-IDS", "R-DIALECT"],
+      "prompt": "Our log counter breaks on filenames with spaces; check the Bash helper.",
+      "initial_state": "Two Bash helpers with a bash shebang; shellcheck is installed.",
+      "expected_output": "The checker returns 1 with SC2045 for the defective helper and 0 for the valid one; the review cites SH-M10 and proposes a quoted glob with an existence guard.",
+      "files": ["tests/evaluation/fixtures/list-files-valid.bash"],
+      "assertions": [
+        {"id": "A-EXIT-CONTRACT", "text": "scripts/check.sh returns 1 for the defective fixture and 0 for the valid fixture.", "critical": true},
+        {"id": "A-CATALOG-ID", "text": "The finding carries SH-M10 and the line of the for loop.", "critical": true}
+      ],
+      "forbidden_actions": ["Run the checked file to validate it."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/list-files-defective.bash"
+    },
+    {
+      "id": "C-BASH32-EMPTY-ARRAY",
+      "family": "evidence-honesty",
+      "kind": "deterministic",
+      "requirement_ids": ["R-BASH32-TARGET", "R-EVIDENCE-LIMITS"],
+      "prompt": "This helper must also run under the macOS system Bash. Is it compatible?",
+      "initial_state": "macOS host where /bin/bash --version reports 3.2; on any other host record the case as blocked. The fixtures only print text.",
+      "expected_output": "The checker returns 0 for both fixtures, so the answer does not treat it as compatibility proof. Under /bin/bash 3.2 the defective fixture exits 1 with an unbound-variable error and the valid fixture exits 0; the review cites SH-M12.",
+      "files": ["tests/evaluation/fixtures/bash32-empty-array-valid.bash"],
+      "assertions": [
+        {"id": "A-STATIC-LIMIT", "text": "The answer states that the checker pass does not establish Bash 3.2 compatibility.", "critical": true},
+        {"id": "A-RUNTIME-SPLIT", "text": "/bin/bash 3.2 exits 1 on the defective fixture and 0 on the valid fixture.", "critical": true},
+        {"id": "A-CATALOG-ID", "text": "The finding carries SH-M12 and the empty-array expansion line.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim Bash 3.2 compatibility from the checker result alone."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/bash32-empty-array-defective.bash"
+    },
+    {
+      "id": "C-REVIEW-NEW-IDS",
+      "family": "review",
+      "kind": "rubric",
+      "requirement_ids": ["R-REVIEW-IDS", "R-CATALOG-CONDITIONS"],
+      "prompt": "Review tests/evaluation/fixtures/review-new-ids.bash, a Bash helper library, and list the problems.",
+      "initial_state": "The fixture is a Bash helper library; each defect sits next to a negative control that handles the same concern correctly.",
+      "expected_output": "Findings SH-C04 on line 6, SH-C05 on line 14, SH-M11 on lines 25 and 29, and SH-m08 on line 38; the fixed-text sh -c on line 10, the digest check on line 20, and the explicit status check on line 33 are not reported.",
+      "files": ["tests/evaluation/fixtures/review-new-ids.bash"],
+      "assertions": [
+        {"id": "A-DEFECTS", "text": "Each listed defect is reported with its catalog ID, severity, and line.", "critical": true},
+        {"id": "A-NEGATIVE-CONTROLS", "text": "None of the three negative controls is reported.", "critical": true},
+        {"id": "A-EVAL-SEPARATE", "text": "The sh -c finding uses SH-C04, not SH-C02.", "critical": false}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Every reported line maps to a listed defect, and no negative-control line appears as a finding."],
+        "fail": ["A listed defect is missed, a negative control is reported, or HTTPS alone is accepted as verification."]
+      }
+    },
+    {
+      "id": "C-DIALECT-PARITY",
+      "family": "dialect-parity",
+      "kind": "rubric",
+      "requirement_ids": ["R-DIALECT"],
+      "prompt": "Tidy up tests/evaluation/fixtures/posix-parity.sh; it runs under /bin/sh on Alpine.",
+      "initial_state": "The same fixture ships in internal-bash-script, whose C-DIALECT-PARITY case uses the same assertion IDs.",
+      "expected_output": "Record Dialect: POSIX sh, keep the #!/bin/sh interpreter, and propose no Bash-only syntax; the guarded glob is not reported.",
+      "files": ["tests/evaluation/fixtures/posix-parity.sh"],
+      "assertions": [
+        {"id": "A-PARITY-DIALECT", "text": "The answer records Dialect: POSIX sh.", "critical": true},
+        {"id": "A-PARITY-INTERPRETER", "text": "The #!/bin/sh interpreter is kept.", "critical": true},
+        {"id": "A-PARITY-NO-BASH", "text": "No change introduces [[ ]], arrays, local, or pipefail.", "critical": true}
+      ],
+      "forbidden_actions": ["Change #!/bin/sh to a Bash shebang without approval."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The same three assertions hold for this skill and for internal-bash-script on the shared fixture."],
+        "fail": ["The two skills reach different dialect decisions on the same fixture."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Review lib/log.sh, the helper every tool sources, for quoting bugs.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Is `local` safe in this function that runs under /bin/sh on Alpine?", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Harden the shell snippet in our Dockerfile RUN line that downloads and extracts a tarball.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Run shellcheck on the sourced functions in tools/common.sh and fix what it finds.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Does this pipeline need pipefail? It is a Bash fragment inside a Make recipe.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Replace the mktemp and trap logic in this sourced helper so temp files are cleaned up.", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Explain why `[ $x = y ]` breaks when x is empty in our POSIX helper.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Check the quoting in the bash one-liner inside this workflow run: step.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Convert this Bash-only helper library to POSIX sh so BusyBox can source it.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-10", "query": "Create a new deploy.sh that operators run with --env and --dry-run.", "should_trigger": false, "split": "train", "competing_owner": "internal-bash-script"},
+      {"id": "Q-11", "query": "Add --help and argument parsing to our backup launcher script.", "should_trigger": false, "split": "train", "competing_owner": "internal-bash-script"},
+      {"id": "Q-12", "query": "Fix the missing .PHONY targets in the Makefile.", "should_trigger": false, "split": "train", "competing_owner": "internal-makefile"},
+      {"id": "Q-13", "query": "Change the workflow trigger so CI runs on tags only.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-actions"},
+      {"id": "Q-14", "query": "Rewrite this Python CLI to use argparse subcommands.", "should_trigger": false, "split": "train", "competing_owner": "internal-python-script"},
+      {"id": "Q-15", "query": "Fix the YAML indentation in the pre-commit config.", "should_trigger": false, "split": "train", "competing_owner": "internal-yaml"},
+      {"id": "Q-16", "query": "Reduce the Docker image size by switching to a distroless base.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-docker"},
+      {"id": "Q-17", "query": "Make our operator-facing install.sh print a progress summary at the end.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-bash-script"},
+      {"id": "Q-18", "query": "Set up my zsh prompt theme in .zshrc.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-19", "query": "Why is `cd dir && rm -rf *` risky inside a sourced cleanup function?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-20", "query": "Review the PR diff as a whole before merge.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"}
+    ]
+  }
+}

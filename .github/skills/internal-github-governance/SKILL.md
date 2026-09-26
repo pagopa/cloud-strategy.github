@@ -40,8 +40,10 @@ boundary, trust design, exception path, or policy decision.
 - Keep Copilot entitlement and governance explicit when they differ from
   repository permissions.
 
-Load `references/guardrail-map.md` when the correct governance surface or
-trust boundary needs comparison.
+## Reference map
+
+- Load [guardrail map](references/guardrail-map.md) when the correct
+  governance surface or trust boundary needs comparison.
 
 ## Completion criteria
 

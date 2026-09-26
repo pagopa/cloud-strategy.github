@@ -10,9 +10,9 @@ decisions.
 
 ## When to use
 
-Arrive here only when /internal-azure selects the governance lane: Azure
-authorization, workload identity, privileged access, Policy, guardrails, or
-governed exceptions.
+Use when `/internal-azure` selects the governance lane: Azure authorization,
+workload identity, privileged access, Policy, guardrails, or governed
+exceptions.
 
 ## Workflow
 
@@ -44,10 +44,18 @@ Use current Microsoft documentation when the recommendation depends on Azure
 RBAC semantics, managed identity support, Policy effects, or privileged-access
 behavior.
 
-Load `references/guardrail-map.md` for control patterns, identity examples, and
-exception evidence.
+## References
+
+- [`references/guardrail-map.md`](references/guardrail-map.md): load for
+  control patterns, identity examples, and exception evidence.
 
 ## Completion criteria
 
-Return the governance objective, control scope, recommended mechanism, exception
-path, rollout evidence, and remaining validation risks.
+Return, in this order:
+
+1. Governance objective.
+2. Control scope.
+3. Recommended mechanism.
+4. Exception path.
+5. Rollout evidence.
+6. Remaining validation risks.

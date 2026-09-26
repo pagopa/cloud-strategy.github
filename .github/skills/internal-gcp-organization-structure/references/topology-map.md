@@ -1,6 +1,7 @@
 # GCP Organization Structure Topology Map
 
-When placement alternatives remain ambiguous, load this reference for deeper comparison.
+Placement patterns, Shared VPC heuristics, billing ownership patterns, and
+structural change units for Google Cloud topology decisions.
 
 ## Placement patterns
 
@@ -14,16 +15,23 @@ When placement alternatives remain ambiguous, load this reference for deeper com
 
 ## Shared VPC heuristics
 
-- Use a central host project with named service projects when one operating boundary serves many workloads.
-- Use a dedicated host project or separate topology segment when network administration requires regulatory or autonomous isolation.
-- Start a broad-impact change with one folder and one low-risk service-project set so inheritance and blast radius remain visible.
-- Separate network and shared-service ownership when the host project would otherwise become the default home for unrelated capabilities.
+- Use a central host project with named service projects when one operating
+  boundary serves many workloads.
+- Use a dedicated host project or separate topology segment when network
+  administration requires regulatory or autonomous isolation.
+- Start a broad-impact change with one folder and one low-risk service-project
+  set so inheritance and blast radius remain visible.
+- Separate network and shared-service ownership when the host project would
+  otherwise become the default home for unrelated capabilities.
 
 ## Billing ownership patterns
 
-- Central platform funding may use billing ownership separate from workload project ownership, with explicit chargeback or showback assumptions.
-- Business-unit spend ownership may coexist with a centrally operated Shared VPC service when dependency and support paths are documented.
-- Regulated workloads may use a dedicated billing boundary or reporting model when financial reporting follows the residency or approval boundary.
+- Central platform funding may use billing ownership separate from workload
+  project ownership, with explicit chargeback or showback assumptions.
+- Business-unit spend ownership may coexist with a centrally operated Shared
+  VPC service when dependency and support paths are documented.
+- Regulated workloads may use a dedicated billing boundary or reporting model
+  when financial reporting follows the residency or approval boundary.
 
 ## Structural change units
 

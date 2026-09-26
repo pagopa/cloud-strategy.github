@@ -9,9 +9,8 @@ Use this workflow for Azure tenant and platform layout decisions.
 
 ## When to use
 
-Arrive here only when /internal-azure selects the organization-structure
-lane: Azure hierarchy, subscriptions, landing zones, residency, or platform
-topology.
+Use when `/internal-azure` selects the organization-structure lane: Azure
+hierarchy, subscriptions, landing zones, residency, or platform topology.
 
 ## Workflow
 
@@ -25,6 +24,7 @@ topology.
    or region set that can be validated safely.
 5. Define validation conditions for inheritance, connectivity, automation,
    ownership, and continuity assumptions before widening the rollout.
+6. Verify every item in Completion criteria before finishing.
 
 ## Azure structure patterns
 
@@ -40,14 +40,21 @@ topology.
 
 ## Current facts
 
-Use current Microsoft documentation when the recommendation depends on landing-
-zone guidance, management-group behavior, subscription constraints, networking
-capabilities, or region-sensitive platform limits.
+Use current Microsoft documentation when the recommendation depends on
+landing-zone guidance, management-group behavior, subscription constraints,
+networking capabilities, or region-sensitive platform limits.
 
-Load `references/topology-map.md` for structural mappings, placement heuristics,
-or safe rollout examples.
+## References
+
+- [`references/topology-map.md`](references/topology-map.md): load for
+  structural mappings, placement heuristics, or safe rollout examples.
 
 ## Completion criteria
 
-Return the recommended structure, the placement rationale, the smallest safe
-rollout unit, the material risks, and the validation conditions.
+Return, in this order:
+
+1. Recommended structure.
+2. Placement rationale.
+3. Smallest safe rollout unit.
+4. Material risks.
+5. Validation conditions.

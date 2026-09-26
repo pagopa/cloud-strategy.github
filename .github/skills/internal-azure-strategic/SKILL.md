@@ -10,8 +10,8 @@ immediate deliverable.
 
 ## When to use
 
-Use when `/internal-azure` selects a strategic Azure decision, tradeoff note, or
-multi-lens analysis.
+Use when `/internal-azure` selects the strategic lane: an Azure decision,
+tradeoff note, or multi-lens analysis.
 
 ## Workflow
 
@@ -34,14 +34,27 @@ multi-lens analysis.
 - Use a decision note when two or three viable options require tradeoff review.
 - Use deep analysis for broad, consequential, high-risk, or explicitly detailed
   decisions.
-- Use current Microsoft documentation when freshness about service support,
-  landing-zone guidance, Policy behavior, regional capability, or service limits
-  could change the recommendation.
 
-Load `references/lens-playbook.md` for lens combinations, depth selection, and
-decision-note structure.
+## Current facts
+
+Use current Microsoft documentation when freshness about service support,
+landing-zone guidance, Policy behavior, regional capability, or service limits
+could change the recommendation.
+
+## References
+
+- [`references/lens-playbook.md`](references/lens-playbook.md): load for lens
+  combinations, depth selection, and decision-note structure.
 
 ## Completion criteria
 
-Return the decision statement, assumptions, active lenses, realistic options,
-recommendation, material risk, reversibility, and validation path.
+Return, in this order:
+
+1. Decision statement.
+2. Assumptions.
+3. Active lenses.
+4. Realistic options.
+5. Recommendation.
+6. Material risk.
+7. Reversibility.
+8. Validation path.

@@ -18,23 +18,28 @@ caller-owned `VerificationReceipt` without changing semantic worker fields.
 
 ## When to use
 
-Use it at the producer/worker/consumer boundary when a bounded task needs a
-machine-readable brief, result, artifact hash, acceptance evidence, or
-progress check. Do not use it as a router, retry loop, reviewer, or lifecycle
-owner.
+- A bounded task at the producer/worker/consumer boundary needs a
+  machine-readable brief, result, artifact hash, acceptance evidence, or
+  progress check.
+
+## When not to use
+
+- Routing, retry loops, review, or lifecycle ownership. The caller keeps these
+  decisions.
 
 ## Roles
 
-- The producer writes a complete `DelegationBrief` with a measurable objective,
-  value gate, bounded evidence, write scope, acceptance, and budgets.
-- The worker reads caller-authorized policy and brief evidence, performs the
+- **Producer:** writes a complete `DelegationBrief` with a measurable
+  objective, value gate, bounded evidence, write scope, acceptance, and
+  budgets.
+- **Worker:** reads caller-authorized policy and brief evidence, performs the
   bounded assignment, writes only declared artifacts, and returns semantic
   worker fields.
-- The runtime adapter composes the deterministic `WorkerResult` envelope,
+- **Runtime adapter:** composes the deterministic `WorkerResult` envelope,
   persists it outside worker scope, and produces a `VerificationReceipt` when
-  a terminal worker payload exists. When no terminal payload exists, the
-  caller records a separate `LifecycleRecord` instead.
-- The consumer checks result and receipt before deciding acceptance, retry,
+  a terminal worker payload exists. Otherwise the caller records a separate
+  `LifecycleRecord`.
+- **Consumer:** checks result and receipt before deciding acceptance, retry,
   promotion, or closeout.
 
 ## Value gate
@@ -46,24 +51,27 @@ gate. `value_delivered: true` requires an artifact or acceptance-bound pass
 evidence; a prose summary is not value.
 
 For `mode: plan`, the `value_gate` also requires non-empty
-`local_alternative` and `off_critical_path` fields. The caller must compare the
-worker package with the actual primary-owner alternative and explain why the
-package is not on the critical path. The validator checks only that these
-fields are present and non-empty; the caller owns the semantic admission
-decision. If the comparison or rationale is not substantive, the caller must
-use local authoring with `mode: none` rather than invoke a worker. Provider or
-model identity never satisfies this gate.
+`local_alternative` and `off_critical_path` fields:
 
-## Three protocol branches
+- The caller compares the worker package with the actual primary-owner
+  alternative and explains why the package is not on the critical path.
+- The validator checks only that both fields are present and non-empty; the
+  caller owns the semantic admission decision.
+- If the comparison or rationale is not substantive, the caller uses local
+  authoring with `mode: none` instead of invoking a worker.
+- Provider or model identity never satisfies this gate.
+
+## Protocol branches
 
 - `read` supplies bounded evidence and produces no worker write scope.
 - `write` supplies a bounded implementation or artifact scope.
 - `plan` supplies bounded drafting scope and a caller-owned acceptance check.
 
-Evidence uses `fact:<inline-value>` or `path:<repository-relative-path>`;
-unprefixed repository paths remain the v1 compatibility form. Resolved paths
-form the worker read allowlist. All branches use the same versioned fields. The protocol does not select a
-provider, model, skill, route, reviewer, retry, or acceptance decision.
+All branches use the same versioned fields. Evidence uses
+`fact:<inline-value>` or `path:<repository-relative-path>`; unprefixed
+repository paths remain the v1 compatibility form. Resolved paths form the
+worker read allowlist. The protocol does not select a provider, model, skill,
+route, reviewer, retry, or acceptance decision.
 
 ## Status and retry breaker
 
@@ -87,17 +95,16 @@ Retry: <recommended/not recommended + required new input>
 ```
 
 The caller-owned `VerificationReceipt` remains separate and is not repeated in
-the worker summary. A result is not accepted because its prose sounds complete:
-the caller must verify the declared bytes, scope, evidence, receipt, and
-acceptance decision. A timeout or missing terminal result is `stalled`, never a
-successful summary. A timeout, interruption, or missing terminal result must
-be represented by a caller-owned `LifecycleRecord`; it must not be converted
-into a successful `WorkerResult` or a fabricated receipt.
+the worker summary. A result is not accepted because its prose sounds
+complete: the caller must verify the declared bytes, scope, evidence, receipt,
+and acceptance decision.
 
 ## Lifecycle record projection
 
-When the worker is unavailable or does not emit a terminal payload, the caller
-records lifecycle evidence separately from the worker protocol:
+When a timeout, interruption, unavailable executor, or missing terminal output
+prevents a worker payload, the caller records lifecycle evidence separately
+from the worker protocol. It must not be converted into a successful
+`WorkerResult` or a fabricated receipt.
 
 ```text
 Event: <timeout | interrupted | unavailable | no_terminal_result>
@@ -112,11 +119,25 @@ missing terminal output. `unavailable` records an unavailable executor. The
 record binds the delegation ID and exact brief hash, and may be persisted as a
 `.lifecycle.json` sibling without creating result or receipt files.
 
+## Validation
+
+Run the bundle validator from the repository root:
+
+```bash
+python3 <this-bundle>/scripts/subagent_contract.py brief <brief.json>
+python3 <this-bundle>/scripts/subagent_contract.py result <result.json> <brief.json>
+python3 <this-bundle>/scripts/subagent_contract.py progress-signature <result.json>
+```
+
 ## Completion criteria
 
 The consumer accepts a result only after it verifies the adapter-composed
-result and caller-owned receipt. Receipt attestations are `verified`,
+result and caller-owned receipt as described in
+[Worker result projection](#worker-result-projection). Receipt
+attestations are `verified`,
 `worker_claim`, `unavailable`, or `failed`; caller acceptance stays separate.
-Use the executable validator in
-`scripts/subagent_contract.py`; load `references/protocol.md` for examples,
-canonical projections, cache fields, and migration details.
+
+## References
+
+- [`references/protocol.md`](references/protocol.md): load for examples,
+  canonical projections, cache fields, and migration details.
