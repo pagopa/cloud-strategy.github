@@ -15,18 +15,16 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 
 ## Skill Resolution
 
-- Treat the injected skill catalog as discovery evidence, not as sole proof
-  that a skill is unavailable.
-- When the user names a skill, or a loaded skill routes work to another named
-  skill, resolve only that skill in the declared skill roots before declaring
-  it unavailable. Do not scan unrelated roots.
-- For filesystem-backed skills, follow symbolic links within the applicable
-  filesystem permissions and trust boundaries, then verify the exact resolved
-  `SKILL.md`. A readable regular file proves that the local skill resource is
-  present even when the catalog or a non-following search omits it; it does not
-  prove that the runtime can invoke the skill.
-- After validating the resolved target, read the skill from its canonical
-  directory and resolve its relative resources from that directory.
+- The injected skill catalog is discovery evidence, not proof that a skill is
+  unavailable.
+- When the user or a loaded skill names a skill, search only the declared skill
+  roots for that one skill before declaring it unavailable.
+- For filesystem-backed skills, follow symbolic links within permission and
+  trust boundaries and verify the exact resolved `SKILL.md`. A readable regular
+  file proves the skill is present, even when the catalog or a non-following
+  search omits it; it does not prove the runtime can invoke it.
+- Read the skill and resolve its relative resources from its canonical
+  directory.
 - Report the concrete failure: missing skill, broken symbolic link, unreadable
   file, or unavailable execution capability. Use provider-specific discovery
   for skills that are not filesystem-backed.
@@ -35,38 +33,35 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 
 - Identify the target, nearest owner, bounded evidence, and validation path
   before broad reading or commands.
-- Match tool depth to task scope. A local naming or configuration question must
-  not trigger repository-wide analysis.
-- For a question limited to known files, paths, components, or file types, inspect
-  the smallest relevant set directly with targeted commands such as `rg --files`
-  and `sed`. Honor explicit scope limits and do not invoke graphify.
-- Use graphify when the answer requires broad architecture discovery, relationships
-  across repository areas, dependency or data-flow tracing, or finding an unknown
-  component or call path. The local-scope fast path takes precedence over broader
-  tool triggers.
+- Match tool depth to task scope. Answer local naming or configuration
+  questions locally, without repository-wide analysis.
+- For a question limited to known files, paths, components, or file types,
+  inspect only that set with targeted commands such as `rg --files` and `sed`.
+  Honor explicit scope limits and skip graphify.
+- Use graphify only when the answer requires broad architecture discovery,
+  relationships across repository areas, dependency or data-flow tracing, or
+  finding an unknown component or call path. This local-scope fast path takes
+  precedence over the `## graphify` section and other broad tool triggers.
+- Downshift for policy-only work. When the target state is a small declared
+  policy change in known files, use only the nearest owner, the test-first rule
+  in Validation And Delivery, the repository's change-scope validation, and
+  adjacent tests. Load graphify, critical review, brainstorming, or external
+  research only on concrete ambiguity or contradiction.
 - Proceed directly for deterministic, low-risk work. Align with the user before
   non-trivial, ambiguous, architectural, policy, contract, or multi-step changes.
+- For non-trivial work, state the target state, anti-scope, assumptions,
+  tradeoffs, and validation path before implementation or handoff.
 - Make the smallest change that fixes the controlling issue. Preserve user work
-  and avoid unrelated refactors.
+  and keep unrelated code as it is.
 - Keep one active primary owner per execution lane. That owner retains material
   decisions and final acceptance; load narrower owners only when evidence shows
   they are needed.
-- For non-trivial work, state the target state, anti-scope, assumptions,
-  tradeoffs, and validation path before implementation or handoff.
-- Reason from repository evidence. Do not invent runtimes, validators, sync
-  flows, tests, or policy.
-- Downshift for policy-only work. When the target state is a small declared
-  policy change in known files, use only the nearest owner, the mandatory
-  test-first guardrail, the repository's change-scope validation, and adjacent
-  tests. Load graphify, critical review, brainstorming, or external research
-  only on concrete ambiguity or contradiction.
+- Ground every statement about runtimes, validators, sync flows, tests, and
+  policy in repository evidence. When evidence is missing, say so explicitly.
 - On a dirty working tree, snapshot the initial state, declare the task file
   allowlist, and run targeted checks before global ones. Classify global
   failures outside the allowlist as pre-existing; do not reopen
   implementation for them.
-- Before the final answer, re-read the changed files from the working tree
-  and compare them with the claims made in the answer. Do not report checks,
-  content, or behavior that the final state does not contain.
 
 ## Placement And Authoring
 
@@ -90,6 +85,9 @@ it generic enough to reuse in any repository; keep repository-specific rules in
   documentation so stale checks cannot restore the old behavior.
 - Treat prose as guidance, not enforcement. Put hard guarantees in permissions,
   validators, hooks, or CI.
+- Before the final answer, re-read the changed files from the working tree
+  and compare them with the answer. Report only checks, content, and behavior
+  that the final state contains.
 
 ### Human-Facing Responses
 
@@ -104,18 +102,15 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 - Preserve material errors, security warnings, blockers, risks, uncertainty,
   validation gaps, and the next required action in the locations defined by the
   owning skill.
-- For non-trivial flows, sequences, dependencies, ownership models, state
-  transitions, or multi-part comparisons, strongly prefer Mermaid when it
-  communicates the relationship faster and more clearly than prose alone. Use
-  the smallest set of diagrams that carries the relationship, one or more as
-  the material requires; keep each diagram minimal, and preserve its
-  controlling conclusion in adjacent text so the response remains useful when
-  Mermaid is not rendered.
+- Strongly prefer Mermaid for non-trivial flows, sequences, dependencies,
+  ownership models, state transitions, or multi-part comparisons when it is
+  clearer than prose. Use the fewest minimal diagrams that carry the
+  relationship, and state each diagram's conclusion in adjacent text.
 - Group related material with headings, bullets, or tables where that aids
-  scanning. Keep full evidence and decision history in an existing retained
-  artifact when one already owns that detail; use the human-facing response for
-  the outcome, material delta, risk, and next action, and do not create an
-  artifact solely to shorten the response.
+  scanning. When an existing retained artifact owns full evidence and decision
+  history, keep that detail there and use the response for the outcome,
+  material delta, risk, and next action. Create an artifact only when the work
+  needs one, never solely to shorten the response.
 
 ## Protected Skill Boundary
 
