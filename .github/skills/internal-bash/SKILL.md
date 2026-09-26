@@ -5,28 +5,23 @@ description: Use when creating, analyzing, reviewing, or modifying embedded Bash
 
 # Internal Bash
 
-## Referenced files
-
-- `references/review-anti-patterns.md`: Bash review anti-pattern catalog with
-  ID-tagged patterns, severity, rationale, and examples. Load for focused review
-  of shell content within this skill's scope.
-
 ## When to use
 
-- Review or modification of sourced `.sh` helpers and Bash snippets where the
-  main need is a shared safety baseline.
-- Shell embedded in repository automation when no narrower owner has stronger rules.
-- Non-operator Bash helpers that do not own a standalone operator entrypoint.
-- Quick checks for quoting, strict mode, guard clauses, temp files, and parser choices.
+- Sourced `.sh` helpers, shell snippets, and non-operator shell fragments.
+- Shell semantics inside another format, such as a CI `run:` step, a Make
+  recipe, or a Dockerfile `RUN`, after that format's owner has claimed the file.
+- The dialect, safety, review, and validation baseline that
+  `/internal-bash-script` may load for the full catalog and the checker.
 
-## When not to use
+## Owner routing
 
-- Standalone script design, standalone script review, launcher behavior,
-  operator UX, or script templates. Route standalone scripts, utilities,
-  wrappers, and launchers to `/internal-bash-script`.
-- Shell embedded in an automation format whose enclosing platform contract is
-  the primary subject.
-- Workflow-level behavior beyond the shell fragment itself.
+Classify the file before applying rules:
+
+| Evidence | Owner |
+| --- | --- |
+| Operator entrypoint: shebang with direct invocation, arguments, or usage text | Route to `/internal-bash-script` |
+| Sourced file, function library, or shell fragment | This skill |
+| Shell embedded in another format | Load that format's owner first; use this skill only for the shell semantics |
 
 ## Dialect decision
 
@@ -52,9 +47,10 @@ portable. Do not infer portability from Bash invoked as `sh`.
 
 ## Bash branch
 
-For `Dialect: Bash`, use the repository shebang convention
-`#!/usr/bin/env bash`, `set -euo pipefail` with documented exceptions, arrays
-for dynamic commands, `[[ ]]`, `local`, and Bash-specific traps or options.
+For `Dialect: Bash`, follow the deployment shebang convention, normally
+`#!/usr/bin/env bash`. Use `set -euo pipefail` with documented exceptions,
+arrays for dynamic commands, `[[ ]]`, `local`, and Bash-specific traps or
+options.
 
 ## POSIX `sh` branch
 
@@ -72,11 +68,34 @@ baseline; it is not a safe assumption for an unspecified `/bin/sh`.
 - Apply pragmatic DRY: de-duplicate repeated decision paths, but keep one-off
   logic local when extraction harms auditability.
 
+## Review
+
+For a focused review, load
+[references/review-anti-patterns.md](references/review-anti-patterns.md) and
+report each finding with its ID, severity, location, and the declared dialect.
+A finding that assumes the wrong dialect is not a finding.
+
 ## Validation
 
-For `Dialect: Bash`, run `bash -n <script>.sh` and
-`shellcheck -s bash <script>.sh` when available. For `Dialect: POSIX sh`, run
-`sh -n <script>.sh`, `shellcheck -s sh <script>.sh`, and execute under each
-repository-supported `sh` implementation. Bash invoked as `sh` is not
-cross-shell portability proof. Run the repository wrapper or focused command
-when behavior changes.
+Run the bundle checker from this skill directory with explicit files:
+
+```bash
+scripts/check.sh [--dialect bash|sh] FILE [FILE ...]
+```
+
+- The shebang selects the dialect, including `env` options such as
+  `#!/usr/bin/env -S bash`. `--dialect` overrides it and is required for a
+  file without a shebang, such as a sourced helper.
+- `Dialect: Bash` runs `bash -n` and `shellcheck -s bash`. `Dialect: POSIX sh`
+  runs `dash -n` and `shellcheck -s sh`; without `dash` it runs `sh -n` and
+  reports limited evidence.
+- Exit `0` means the checks passed within supported scope, `1` means findings,
+  and `2` means a usage, dependency, file, or interpreter failure.
+- The checker requires `shellcheck` and the selected interpreter, never
+  executes the checked files, bounds each tool's output to 100 lines of 500
+  characters, and supports `--self-test` for the bundled fixtures.
+
+The checker does not prove runtime behavior or portability across every
+supported `sh`. For behavior changes, also run the repository wrapper or a
+focused test under each supported implementation. `shfmt -d FILE` is an
+optional format check.

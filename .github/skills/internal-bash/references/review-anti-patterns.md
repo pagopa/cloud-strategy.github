@@ -1,6 +1,8 @@
 # Shell Review Anti-Patterns
 
-Scope: embedded shell, sourced helpers, and non-operator shell fragments.
+Scope: every shell file or fragment reviewed through `internal-bash`,
+including standalone scripts reviewed through `internal-bash-script`. Operator
+entrypoint findings live in that skill's common-mistakes reference.
 
 ## Controlling review question
 
@@ -37,7 +39,6 @@ major dialect mismatch. Do not recommend Bash syntax to a POSIX `sh` target.
 | --- | --- | --- |
 | SH-m01 | `echo` used where portable formatting or escape handling matters | Output can vary between shells and inputs |
 | SH-m02 | Hardcoded paths such as `/usr/local/bin/tool` | Portability concern |
-| SH-m03 | Operator-facing script lacks purpose or usage context | Operators cannot discover the entrypoint contract locally |
 | SH-m04 | A `grep`-to-`awk` pipeline where one `awk` suffices | Unnecessary pipe |
 | SH-m05 | Missing `command -v` check before using external tools | Fails confusingly if a tool is missing |
 | SH-m06 | Non-English log messages or comments | Language policy violation |
@@ -56,8 +57,8 @@ major dialect mismatch. Do not recommend Bash syntax to a POSIX `sh` target.
 ## Safe examples
 
 ```bash
-# Bash branch: arrays and local are deliberate.
 #!/usr/bin/env bash
+# Bash branch: arrays and local are deliberate.
 set -euo pipefail
 
 process_directory() {
@@ -72,8 +73,8 @@ process_directory() {
 ```
 
 ```sh
-# POSIX sh branch: scalar variables and [ ] are deliberate.
 #!/bin/sh
+# POSIX sh branch: scalar variables and [ ] are deliberate.
 set -eu
 
 process_file() {
