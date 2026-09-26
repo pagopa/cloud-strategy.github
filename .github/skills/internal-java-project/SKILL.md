@@ -3,7 +3,7 @@ name: internal-java-project
 description: Use when framework-neutral Java application or library design is the primary concern, including module, package, domain, API, collaborator, concurrency, unit-test, or contract-test boundaries. Do not use for isolated language-level source changes or generic build metadata; route language and build correctness to /internal-java. Do not use for framework-managed wiring and runtime behavior; route Spring Boot runtime semantics to /internal-java-spring-boot-development.
 ---
 
-# Java Project Skill
+# Internal Java Project
 
 ## When to use
 
@@ -19,9 +19,9 @@ description: Use when framework-neutral Java application or library design is th
 - Framework-managed wiring, configuration binding, transactions, HTTP or data
   adapters, scheduling, test contexts, service connections, or runtime
   behavior determines correctness; route Spring Boot runtime semantics to
-  /internal-java-spring-boot-development.
+  `/internal-java-spring-boot-development`.
 - An isolated Java source change or generic build metadata is the main concern;
-  route language and build correctness to /internal-java.
+  route language and build correctness to `/internal-java`.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
 ## Project design
@@ -54,12 +54,13 @@ description: Use when framework-neutral Java application or library design is th
   boundaries. Keep machine-readable output stable and human formatting at the
   CLI or UI edge.
 
-## Common mistakes
-
-Load `references/common-mistakes.md` for the full mistake table.
-
 ## Validation
 
 - Run the repository's wrapper or established compile and test commands.
 - Check the project linter or formatter when available.
 - Re-run the narrowest meaningful test set before widening validation.
+
+## References
+
+- [`references/common-mistakes.md`](references/common-mistakes.md): load for
+  the full mistake table.

@@ -5,11 +5,6 @@ description: Use when reviewing localized JavaScript or TypeScript changes, chan
 
 # Internal Node.js
 
-## Referenced files
-
-- `references/review-anti-patterns.md`: load for evidence-based,
-  Node.js-specific code review depth.
-
 ## When to use
 
 - Review localized JavaScript or TypeScript changes for language, runtime,
@@ -19,21 +14,18 @@ description: Use when reviewing localized JavaScript or TypeScript changes, chan
 - Create, fix, or refactor a single module whose application boundaries and
   validation path are already clear.
 
+This skill owns Node.js and TypeScript runtime correctness, package and
+compiler configuration, dependency intent, and localized module quality.
+
 ## When not to use
 
-- Do not use for application-wide changes spanning services, APIs, handlers,
-  modules, adapters, or tests across multiple application boundaries. Route
-  application/service structure, adapters, and cross-module behavior to
-  /internal-nodejs-project.
-- Route frontend design, generic JSON, Docker, workflows, and infrastructure
-  to their domain owners.
-
-## Responsibility boundary
-
-- Own Node.js and TypeScript runtime correctness, package and compiler
-  configuration, dependency intent, and localized module quality.
-- Do not own application decomposition, cross-boundary behavior, transport
-  orchestration, or application-wide test strategy.
+- Application decomposition, cross-boundary behavior, transport
+  orchestration, application-wide test strategy, or changes spanning services,
+  APIs, handlers, modules, adapters, or tests across multiple application
+  boundaries. Route application/service structure, adapters, and cross-module
+  behavior to `/internal-nodejs-project`.
+- Frontend design, generic JSON, Docker, workflows, and infrastructure; route
+  them to their domain owners.
 
 ## Baseline
 
@@ -48,10 +40,13 @@ description: Use when reviewing localized JavaScript or TypeScript changes, chan
   than environment toggles.
 - Bound async resources and outbound work with timeouts, cancellation, and
   cleanup where the execution path requires them.
-- Run the repository-native validation nearest to the changed metadata or
-  localized module.
 
 ## Validation
 
-- Use the repository's established package, compiler, and test commands for
-  the changed surface.
+- Run the repository's established package, compiler, and test commands
+  nearest to the changed metadata or localized module.
+
+## References
+
+- [`references/review-anti-patterns.md`](references/review-anti-patterns.md):
+  load for evidence-based, Node.js-specific code review depth.

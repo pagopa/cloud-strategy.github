@@ -17,9 +17,10 @@ description: Use when Spring Boot-specific framework or runtime semantics determ
 ## When not to use
 
 - Route ordinary Java source correctness or generic Maven/Gradle metadata to
-  /internal-java when no Spring Boot-specific behavior determines the outcome.
+  `/internal-java` when no Spring Boot-specific behavior determines the
+  outcome.
 - Route framework-neutral module, package, domain, API, collaborator,
-  concurrency, or test design to /internal-java-project.
+  concurrency, or test design to `/internal-java-project`.
 
 ## Workflow
 
@@ -28,18 +29,13 @@ description: Use when Spring Boot-specific framework or runtime semantics determ
    documentation before relying on version-sensitive behavior.
 2. Decide whether the active branch is HTTP/configuration, persistence/data,
    testing, dependency management, bean wiring, scheduling, transactions, or
-   runtime execution. Load only the matching reference.
+   runtime execution. Load only the matching reference from
+   [References](#references).
 3. Keep framework-managed adapters at the edge and domain behavior in plain
    collaborators that remain easy to test. Use explicit required dependencies,
    typed configuration, focused stereotypes, and narrow transaction boundaries.
 4. Choose the smallest Spring context that proves the framework behavior. Use
    the checked-in wrapper and repository task for validation.
-
-## References
-
-- Load `references/http-config.md` when the task is mainly about controllers, request/response DTOs, validation, exception mapping, or application configuration.
-- Load `references/testing-and-data.md` when the task is mainly about repositories, transactions, test slices, containerized integration tests, or data-access boundaries.
-- Load `references/runtime-semantics.md` when the task is mainly about Boot dependency management, bean wiring, transactions, scheduling, startup behavior, or virtual-thread enablement.
 
 ## Branch guidance
 
@@ -57,5 +53,18 @@ description: Use when Spring Boot-specific framework or runtime semantics determ
 ## Validation
 
 - Identify the project's existing Java build and test command before running it.
-- Prefer `./mvnw`, `mvn`, `./gradlew`, or the checked-in equivalent over generic
-  guesses, and validate the smallest affected context before widening scope.
+- Prefer `./mvnw`, `mvn`, `./gradlew`, or the checked-in equivalent over
+  generic guesses, and validate the smallest affected context before widening
+  scope.
+
+## References
+
+- [`references/http-config.md`](references/http-config.md): load when the task
+  is mainly about controllers, request/response DTOs, validation, exception
+  mapping, or application configuration.
+- [`references/testing-and-data.md`](references/testing-and-data.md): load
+  when the task is mainly about repositories, transactions, test slices,
+  containerized integration tests, or data-access boundaries.
+- [`references/runtime-semantics.md`](references/runtime-semantics.md): load
+  when the task is mainly about Boot dependency management, bean wiring,
+  transactions, scheduling, startup behavior, or virtual-thread enablement.
