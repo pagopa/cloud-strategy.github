@@ -23,6 +23,8 @@ REQUIRED_RUN_FIELDS = (
     "verdict",
     "scope_violations",
 )
+# Run-record verdicts map to MERGE READY, CHANGES REQUIRED, and REVIEW BLOCKED.
+ALLOWED_VERDICTS = ("approve", "request-changes", "blocked")
 
 
 def load_json(path: str | Path) -> dict[str, Any]:
@@ -63,6 +65,10 @@ def _validate_schema(manifest: dict[str, Any], run: dict[str, Any]) -> None:
         errors.append(f"run missing fields: {', '.join(missing_run)}")
     if run.get("contract_version") != manifest.get("contract_version"):
         errors.append("manifest and run contract_version differ")
+    if "verdict" in run and run["verdict"] not in ALLOWED_VERDICTS:
+        errors.append(
+            f"run verdict must be one of: {', '.join(ALLOWED_VERDICTS)}"
+        )
     if (
         "required_conditional_loaded_skills" in manifest
         and "conditional_loaded_skills" not in run

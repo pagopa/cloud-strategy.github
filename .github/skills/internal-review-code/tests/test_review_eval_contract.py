@@ -100,6 +100,26 @@ def test_missing_finding_or_skill_fails_acceptance() -> None:
     assert result["loaded_skills_exact"] is False
 
 
+def test_unknown_verdict_is_rejected_even_when_everything_else_passes() -> None:
+    scorer = _load_scorer()
+
+    for verdict in ("looks-good", "MERGE READY", ""):
+        try:
+            scorer.score(MANIFEST, {**PASSING_RUN, "verdict": verdict})
+        except ValueError as exc:
+            assert "verdict" in str(exc)
+        else:
+            raise AssertionError(f"verdict {verdict!r} was accepted")
+
+
+def test_blocked_verdict_is_a_valid_run_value() -> None:
+    scorer = _load_scorer()
+
+    result = scorer.score(MANIFEST, {**PASSING_RUN, "verdict": "blocked"})
+
+    assert result["false_approval"] is False
+
+
 def test_actions_manifest_requires_the_merged_contributor() -> None:
     scorer = _load_scorer()
     manifest = {

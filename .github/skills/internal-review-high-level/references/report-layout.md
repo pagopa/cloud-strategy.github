@@ -1,18 +1,36 @@
 # Report Layout
 
-## Compact report order
+Follow the report order in `SKILL.md`. This file defines the shape of each
+section.
 
-Open with the review verdict, the separate evidence outcome, and a one-sentence
-reason that states the declared use, reviewed scope, coverage, and material
-limit. Then use this order and omit sections that do not change the review:
+## Report skeleton
 
-1. `# 🛰️ Review High Level: <target>`.
-2. Verdict and evidence outcome with the reason blockquote.
-3. The smallest useful purpose-selected diagram set, if a visual adds value.
-4. `## 📌 Findings` with material finding blocks.
-5. `## 🧪 Evidence gaps` that can change the verdict.
-6. `## ❓ Open` when a material question remains.
-7. `## 👉 Next` with concrete follow-up actions.
+The emoji show the report structure at a glance. Keep them on every report,
+translate only the words, and omit sections that add nothing.
+
+```markdown
+# 🛰️ Review High Level: <target>
+
+🔎 **<VERDICT>** · **<EVIDENCE OUTCOME>**
+
+> 📌 <one-sentence reason: declared use, reviewed scope, coverage, limit>
+
+## 🗺️ <diagram title>
+
+## 📌 Findings
+
+## 🧪 Evidence gaps
+
+## ❓ Open
+
+## 👉 Next
+```
+
+## Verdict line shape
+
+State the review verdict and the separate evidence outcome, then a
+one-sentence reason that states the declared use, reviewed scope, coverage, and
+material limit.
 
 ## Finding block shape
 
@@ -20,27 +38,28 @@ Each finding is one compact block. Keep `Problem`, `Suggestion`, and `Why`
 stable in the current report language:
 
 ```markdown
-**N. <short title>** — <severity>/<confidence>
+**N. <short title>** — <severity emoji> <severity> / <confidence>
 
-- **<Problem>:** what is wrong, one to two sentences, with a traceable
-  location such as `path:line` or section reference.
-- **<Suggestion>:** the smallest useful report-only follow-up, one to two
+- ❗ **<Problem>:** what is wrong, one to two sentences.
+- ➡️ **<Suggestion>:** the smallest useful report-only follow-up, one to two
   sentences.
-- **<Why>:** why it matters for the verdict, one to two sentences.
-- **Location:** the affected artifact, section, transition, or mechanism.
-- **Evidence:** `direct observation`, `supported inference`, or `evidence gap`,
-  with the supporting anchor.
-- **Consequence:** the effect on the declared use, affected transition, or
+- 🎯 **<Why>:** why it matters for the verdict, one to two sentences.
+- 📍 **Location:** the affected artifact, section, transition, or mechanism,
+  with a traceable anchor such as `path:line` or a section reference.
+- 🔬 **Evidence:** `direct observation`, `supported inference`, or
+  `evidence gap`, with the supporting anchor.
+- 💥 **Consequence:** the effect on the declared use, affected transition, or
   accountability boundary.
-- **Expected verification:** the closure condition when closure is not
+- ✅ **Expected verification:** the closure condition when closure is not
   obvious; omit it only when the report already states a complete check.
 ```
 
 Rules:
 
 - Severity and confidence are written as independent canonical values. Use the
-  full severity vocabulary `critical`, `high`, `medium`, and `low`; symbols or
-  formatting may accompany them but cannot carry their meaning alone.
+  full severity vocabulary with its marker: `🔴 critical`, `🟠 high`,
+  `🟡 medium`, and `🔵 low`. The marker supports scanning; the word carries
+  the meaning.
 - Each field must be understandable without rereading the investigation:
   name the file, section, decision, or mechanism involved; never a cryptic ID
   alone.
@@ -67,13 +86,13 @@ keep the current owner, `B)` propose a separate design), then add one
 suggested option marked with `💡` together with a one-sentence reason. Omit
 the section when nothing material is open.
 
-### Next shape
+## Next shape
 
 Number each action, make it concrete, and reference the finding, evidence
 gap, or open question it closes. One action per step; no vague instructions
 such as "improve the document".
 
-### Mermaid rules
+## Mermaid rules
 
 Use the smallest useful diagram set, including no diagram, when a visual
 projection clarifies relationships in scope. Select the diagram by purpose:

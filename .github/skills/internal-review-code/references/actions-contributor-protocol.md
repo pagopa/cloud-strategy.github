@@ -17,9 +17,10 @@ the declared review engine.
   evidence: target and linked static evidence
   ```
 
-- The envelope fields are the caller-owned contract. The caller selects and
-  invokes the specialist; the specialist returns exactly the contributor
-  record schema defined here. Invoke neither contributor for unrelated code.
+- The envelope fields are the caller-owned contract. The caller invokes
+  `/internal-github` with this envelope; the gateway selects and invokes the
+  specialist, which returns exactly the contributor record schema defined
+  here. Invoke no contributor for unrelated code.
 
 ## Contributor record
 
@@ -57,8 +58,8 @@ declared review engine remains responsible for substantive review.
 
 ## Unavailable evidence
 
-If target, source, or declared review engine evidence is insufficient for a safe review, the
-wrapper returns `REVIEW BLOCKED`. If static review is possible but runtime
-capture is unavailable, preserve the local observations and record an explicit
-evidence gap; route live evidence to the operations owner as a separate
-follow-up.
+If target, source, or declared review engine evidence is insufficient for a
+safe review, the wrapper returns `REVIEW BLOCKED`. If static review is possible
+but runtime capture is unavailable, preserve the local observations and record
+an explicit evidence gap; route live evidence to the operations owner as a
+separate follow-up.

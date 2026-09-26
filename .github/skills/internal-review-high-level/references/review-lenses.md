@@ -46,8 +46,7 @@ Confidence describes evidence strength and is separate from severity:
 - `plausible`: the concern is credible but needs verification.
 - `speculative`: the concern lacks direct evidence and remains an evidence gap.
 
-Do not assign severity to a purely speculative concern, and do not emit a
-speculative concern as a material finding.
+Do not emit a speculative concern as a material finding.
 
 ## Verdict
 
@@ -67,20 +66,10 @@ blocking defect and a decisive evidence gap coexist, use `REVISION REQUIRED`
 when the defect blocks the declared use, retain `MATERIAL CONCERNS SUPPORTED`,
 and list the gap separately. These outcomes are not interchangeable.
 
-## Material finding
+## Recommendations
 
-Each finding is one compact block with stable field names per language:
-
-- English: `Problem` / `Suggestion` / `Why`.
-- Italian: `Problema` / `Suggerimento` / `Perché`.
-
-Severity and confidence appear in the block header. Every finding carries a
-location or evidence anchor, the evidence status, and the consequence. Keep
-`Expected verification` or an explicit closure condition when closure is not
-obvious. Deeper bookkeeping fields such as `Fix owner` go to the caller-owned
-record when one exists; they do not grant the reviewer remediation authority.
-
-Recommendations describe the decision-relevant outcome and expected
-verification. They do not provide replacement artifact content or perform the
-follow-up. A speculative concern stays an evidence gap until its evidence
-status improves.
+The finding fields are defined in `SKILL.md` and shaped in
+[`report-layout.md`](report-layout.md). Recommendations describe the
+decision-relevant outcome and expected verification. They do not provide
+replacement artifact content or perform the follow-up. A speculative concern
+stays an evidence gap until its evidence status improves.

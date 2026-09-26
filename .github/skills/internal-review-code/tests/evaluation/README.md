@@ -25,6 +25,10 @@ the model, target fingerprint, `review_skill_sha256`, `engine_sha256`, Chat
 Debug reference, loaded skill identities, matched finding IDs, verdict, and
 scope violations.
 
+The run `verdict` must be `approve`, `request-changes`, or `blocked`; these
+record the public verdicts `MERGE READY`, `CHANGES REQUIRED`, and
+`REVIEW BLOCKED`. The scorer rejects any other value.
+
 Pytest validates only fixture and scorer behavior. It does not validate review
 recall, runtime skill loading, or a model's report quality.
 
