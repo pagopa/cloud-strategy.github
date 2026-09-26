@@ -12,6 +12,8 @@ Use this format for new updates:
 
 - Rebuilt `.github/skills/internal-gateway-writing-plans/` and `.github/skills/internal-gateway-execute-plans/` as thin overlays on `superpowers-writing-plans`, `superpowers-executing-plans`, and `superpowers-subagent-driven-development`; retired the Execution Manifest v3, its parser, structural checker, bundled runtime, YAML status sibling, fixtures, and v3 tests, including `tests/internal_gateway/test_bundle_alignment.py` and `tests/internal_gateway/test_execute_plans_v3_contract.py`.
 - Execution now runs in the current checkout without commits, records `START` in the superpowers ledger, and stops when `HEAD` moves, a task file was dirty at start, or a change leaves the plan's `Files:` perimeter.
+- `internal-gateway-execute-plans` now records object-only checkpoint trees (`CP0..CPn`) for resume, per-task and fix-round review diffs, perimeter checks, and `CP0`-based final attribution; resume continues on partial state inside the first incomplete task and otherwise stops for reconciliation.
+- `internal-gateway-writing-plans` now replaces the imported executor header, offers the imported `Subagent-driven` or `Native` handoff, routes every answer to `/internal-gateway-execute-plans`, and converts legacy manifest plans into new plans on explicit request; both eval packs gained cases and a `with-skill` run record.
 - The external-resource sync now prefixes relative sibling-skill paths in every `obra-superpowers` file, including scripts, so `task-start` and `task-done` resolve in this repository.
 
 ## 2026-09-16

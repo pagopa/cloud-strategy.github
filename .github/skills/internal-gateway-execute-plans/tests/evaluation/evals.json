@@ -4,22 +4,32 @@
   "requirements": [
     {
       "id": "R-SETUP",
-      "text": "Use the current checkout without branches or worktrees, record START and the initial status in the ledger, and stop when a task file already has uncommitted changes.",
+      "text": "On first start, use the current checkout without branches or worktrees, record START, the initial status, and checkpoint CP0 in the ledger, and stop when a task file already has uncommitted changes.",
+      "source": "internal-gateway-execute-plans SKILL.md: Checkpoints, Workflow, 2. Set up"
+    },
+    {
+      "id": "R-RESUME",
+      "text": "On resume, reuse START and the ledger checkpoints instead of git log; continue when a fresh checkpoint matches the latest one or differs only inside the first incomplete task's Files: paths, and otherwise stop for reconciliation without reset or overwrite.",
       "source": "internal-gateway-execute-plans SKILL.md: Workflow, 2. Set up"
     },
     {
       "id": "R-NO-COMMIT",
-      "text": "Never commit; review with git diff START plus untracked files, and carry the no-commit contract, perimeter, posture, and stop rules into every subagent brief.",
-      "source": "internal-gateway-execute-plans SKILL.md: Workflow, 3. Run the executor"
+      "text": "Never commit; record a checkpoint after each task and fix round, review each task and fix round with checkpoint-to-checkpoint diffs, run the final review from CP0, and carry the no-commit contract, perimeter, posture, and stop rules into every subagent brief.",
+      "source": "internal-gateway-execute-plans SKILL.md: Checkpoints, Workflow, 3. Run the executor, 5. Finish"
+    },
+    {
+      "id": "R-ROUTE",
+      "text": "Use /superpowers-executing-plans for Native, its alias Inline, or no stated choice, and /superpowers-subagent-driven-development for Subagent-driven.",
+      "source": "internal-gateway-execute-plans SKILL.md: Workflow, 1. Select the executor"
     },
     {
       "id": "R-STOP",
-      "text": "Stop when HEAD differs from START, a change leaves the Files: perimeter, or a protected imported skill path would change; a ruling never widens the perimeter.",
+      "text": "Stop when HEAD differs from START, a checkpoint diff or required change leaves the Files: perimeter, or a protected imported skill path would change; a ruling never widens the perimeter.",
       "source": "internal-gateway-execute-plans SKILL.md: Approval and perimeter, 4. Stop"
     },
     {
       "id": "R-LEGACY",
-      "text": "Return a plan containing a legacy Execution Manifest to /internal-gateway-writing-plans instead of executing it.",
+      "text": "Return a plan containing a legacy Execution Manifest to /internal-gateway-writing-plans instead of executing it, with a Next line that asks for re-authoring.",
       "source": "internal-gateway-execute-plans SKILL.md: When not to use"
     },
     {
@@ -77,7 +87,7 @@
       "requirement_ids": ["R-LEGACY"],
       "prompt": "Execute tmp/superpowers/plans/old-plan.md.",
       "initial_state": "The plan contains a ## Execution Manifest JSON block.",
-      "expected_output": "Return the plan to /internal-gateway-writing-plans for re-authoring without executing any task.",
+      "expected_output": "Return the plan to /internal-gateway-writing-plans for re-authoring without executing any task; the Next line asks for re-authoring through the writer.",
       "files": [],
       "assertions": [
         {"id": "A-NO-LEGACY-RUN", "text": "No task from the legacy plan runs.", "critical": true}
@@ -110,6 +120,111 @@
         "pass": ["No commits exist after the run and the ledger is kept."],
         "fail": ["A subagent commits or the ledger is deleted."]
       }
+    },
+    {
+      "id": "C-NATIVE-ROUTE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE", "R-SETUP"],
+      "prompt": "Native",
+      "initial_state": "The writer just asked the handoff question for an approved plan.",
+      "expected_output": "Run the plan through /superpowers-executing-plans under this gateway's setup and stop rules.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NATIVE-EXECUTOR", "text": "The run uses /superpowers-executing-plans, not subagent-driven development.", "critical": true},
+        {"id": "A-GATEWAY-SETUP", "text": "START and CP0 are recorded before Task 1.", "critical": true}
+      ],
+      "forbidden_actions": ["Create a worktree or branch."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The ledger starts with START and CP0 and the inline executor runs."],
+        "fail": ["The run skips the gateway setup or picks the subagent executor."]
+      }
+    },
+    {
+      "id": "C-RESUME-OWN-CHANGES",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-RESUME"],
+      "prompt": "Resume the plan.",
+      "initial_state": "The ledger names this plan and records START, CP0, and Task 1 complete with CP1; Task 1 files are uncommitted and the working state matches CP1.",
+      "expected_output": "Continue at Task 2 without the first-start dirty-file stop.",
+      "files": [],
+      "assertions": [
+        {"id": "A-RESUME-CONTINUES", "text": "The run resumes at Task 2 and does not redo Task 1.", "critical": true},
+        {"id": "A-NO-DIRTY-STOP", "text": "The run's own Task 1 changes do not trigger a dirty-file stop.", "critical": true}
+      ],
+      "forbidden_actions": ["Record a new START or CP0 on resume."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The ledger shows Task 2 started from CP1."],
+        "fail": ["The run reports BLOCKED on Task 1 files."]
+      }
+    },
+    {
+      "id": "C-RESUME-MID-TASK",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-RESUME"],
+      "prompt": "Continue the plan after the interruption.",
+      "initial_state": "The latest checkpoint is CP1 after Task 1; the working state differs from CP1 only inside Task 2 Files: paths.",
+      "expected_output": "Resume Task 2 on the partial state and note it in the ledger.",
+      "files": [],
+      "assertions": [
+        {"id": "A-PARTIAL-RESUME", "text": "The run resumes Task 2 instead of stopping for reconciliation.", "critical": true},
+        {"id": "A-PARTIAL-NOTE", "text": "The ledger records that Task 2 resumed on partial state.", "critical": false}
+      ],
+      "forbidden_actions": ["Discard the partial Task 2 edits."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Task 2 completes from the partial state with a fresh checkpoint."],
+        "fail": ["The run stops or resets the partial edits."]
+      }
+    },
+    {
+      "id": "C-RESUME-TAMPERED",
+      "family": "authority-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-RESUME", "R-STOP"],
+      "prompt": "Resume the plan.",
+      "initial_state": "The latest checkpoint is CP1 after Task 1; a file from completed Task 1 was edited after CP1.",
+      "expected_output": "Stop for reconciliation and name the changed path without resetting it.",
+      "files": [],
+      "assertions": [
+        {"id": "A-STOP-TAMPER", "text": "The run stops before any task edit.", "critical": true},
+        {"id": "A-KEEP-EDIT", "text": "The changed file keeps its current content.", "critical": true}
+      ],
+      "forbidden_actions": ["Reset, checkout, or overwrite the changed file."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The report is BLOCKED and names the changed Task 1 path."],
+        "fail": ["The run continues or restores CP1."]
+      }
+    },
+    {
+      "id": "C-PREEXISTING-DIRT",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-NO-COMMIT", "R-REPORT"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "An unrelated file outside every Files: block has uncommitted user changes before the run.",
+      "expected_output": "Run the plan and keep the unrelated file out of the final review and the Changed line.",
+      "files": [],
+      "assertions": [
+        {"id": "A-CP0-ATTRIBUTION", "text": "The final review diff starts from CP0, not from START.", "critical": true},
+        {"id": "A-CHANGED-CLEAN", "text": "The Changed line omits the unrelated file.", "critical": true}
+      ],
+      "forbidden_actions": ["Report the user's pre-existing change as run output."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Changed lists only paths the run modified."],
+        "fail": ["The unrelated file appears in Changed or in the review package."]
+      }
     }
   ],
   "triggers": {
@@ -120,7 +235,8 @@
       {"id": "Q-04", "query": "Run the approved retained plan subagent-driven.", "should_trigger": true, "split": "held-out"},
       {"id": "Q-05", "query": "Write an implementation plan from this spec.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-writing-plans"},
       {"id": "Q-06", "query": "Rename this variable in one file.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-simple-task"},
-      {"id": "Q-07", "query": "Review this branch before merge.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"}
+      {"id": "Q-07", "query": "Review this branch before merge.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"},
+      {"id": "Q-08", "query": "Native", "should_trigger": true, "split": "train"}
     ]
   }
 }

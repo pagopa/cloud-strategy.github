@@ -14,8 +14,18 @@
     },
     {
       "id": "R-NO-COMMIT",
-      "text": "Write no commit steps, run no Git mutation, and never start execution; close with the Inline-or-Subagent handoff question.",
+      "text": "Write no commit steps, run no Git mutation, and never start execution.",
       "source": "internal-gateway-writing-plans SKILL.md: Workflow, Boundaries"
+    },
+    {
+      "id": "R-HANDOFF",
+      "text": "Replace the imported executor header line with /internal-gateway-execute-plans; without a supplied method offer Subagent-driven and Native with the imported recommendation, with a supplied method ask only for plan confirmation, and route every approved answer to /internal-gateway-execute-plans.",
+      "source": "internal-gateway-writing-plans SKILL.md: Workflow"
+    },
+    {
+      "id": "R-LEGACY",
+      "text": "Accept a legacy retained plan only as conversion input after an explicit re-authoring request; leave it unchanged, write a new plan, and give its Execution Manifest, execution permissions, and obsolete workflow text no authority.",
+      "source": "internal-gateway-writing-plans SKILL.md: Eligibility, Legacy plans"
     },
     {
       "id": "R-REPORT",
@@ -105,6 +115,68 @@
         "pass": ["The Next line asks for the handoff answer."],
         "fail": ["The writer executes tasks."]
       }
+    },
+    {
+      "id": "C-HANDOFF-ROUTE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF"],
+      "prompt": "Write the plan for the approved design.",
+      "initial_state": "Eligibility holds and the user has not supplied an execution method.",
+      "expected_output": "The plan header names /internal-gateway-execute-plans, and the handoff offers Subagent-driven and Native with one recommendation, routed to the gateway.",
+      "files": [],
+      "assertions": [
+        {"id": "A-GATEWAY-HEADER", "text": "The plan header names /internal-gateway-execute-plans and no imported executor as required.", "critical": true},
+        {"id": "A-LABELS", "text": "The handoff offers exactly Subagent-driven and Native.", "critical": true}
+      ],
+      "forbidden_actions": ["Route the answer directly to an imported superpowers executor."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Either answer leads to /internal-gateway-execute-plans."],
+        "fail": ["The header or handoff names an imported executor as the next skill."]
+      }
+    },
+    {
+      "id": "C-METHOD-SUPPLIED",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF", "R-REPORT"],
+      "prompt": "Write the plan; I want it subagent-driven.",
+      "initial_state": "Eligibility holds and the user already chose Subagent-driven.",
+      "expected_output": "Ask only for plan confirmation and keep Subagent-driven for /internal-gateway-execute-plans.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-REASK", "text": "The handoff does not ask for the execution method again.", "critical": true}
+      ],
+      "forbidden_actions": ["Replace the supplied method with a recommendation."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The Next line asks the user to confirm the plan."],
+        "fail": ["The writer offers both methods again."]
+      }
+    },
+    {
+      "id": "C-LEGACY-SOURCE",
+      "family": "held-out-downstream",
+      "kind": "rubric",
+      "requirement_ids": ["R-LEGACY", "R-ELIGIBILITY"],
+      "prompt": "Re-author tmp/superpowers/plans/old-plan.md for the new executor.",
+      "initial_state": "The executor returned old-plan.md because it contains a ## Execution Manifest; its Spec header names direct requirements.",
+      "expected_output": "Write a new plan with the legacy plan path as Spec, leave old-plan.md unchanged, and carry no manifest authority.",
+      "files": [],
+      "assertions": [
+        {"id": "A-LEGACY-UNCHANGED", "text": "old-plan.md keeps its content.", "critical": true},
+        {"id": "A-NO-MANIFEST", "text": "The new plan contains no Execution Manifest.", "critical": true}
+      ],
+      "forbidden_actions": ["Treat the legacy manifest or its permissions as authority."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The new plan's Spec header names the legacy plan path."],
+        "fail": ["The writer edits old-plan.md or copies its manifest."]
+      }
     }
   ],
   "triggers": {
@@ -116,7 +188,8 @@
       {"id": "Q-05", "query": "Execute the approved plan now.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-execute-plans"},
       {"id": "Q-06", "query": "Help me figure out whether this refactor is worth doing.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-idea"},
       {"id": "Q-07", "query": "Fix this one typo in the README.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-simple-task"},
-      {"id": "Q-08", "query": "Update the imported superpowers-writing-plans skill text.", "should_trigger": false, "split": "held-out"}
+      {"id": "Q-08", "query": "Update the imported superpowers-writing-plans skill text.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-09", "query": "Re-author the legacy plan the executor rejected.", "should_trigger": true, "split": "train"}
     ]
   }
 }

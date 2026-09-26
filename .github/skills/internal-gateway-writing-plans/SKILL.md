@@ -16,6 +16,7 @@ report. The imported skill owns plan structure and self-review.
   retained spec, or concrete direct requirements.
 - `/internal-gateway-idea` hands off a `+plan` selection, with or without a
   retained spec marked `plan_authoring_ready: true`.
+- `/internal-gateway-execute-plans` returns a legacy plan for re-authoring.
 
 ## When not to use
 
@@ -30,12 +31,20 @@ Write only when all three conditions hold:
 
 1. The current conversation contains an explicit request to write a plan.
 2. A source exists: a retained spec path, an approved design, a reviewed
-   retained spec, or concrete direct requirements.
+   retained spec, concrete direct requirements, or a legacy plan.
 3. The target and the anti-scope are known.
 
 A `+plan` selection satisfies conditions 1 and 2 without another discovery or
 approval round. `implementation_permission: false` never blocks plan writing.
 When a condition is missing, stop and name the one decision that unblocks it.
+
+## Legacy plans
+
+A retained plan with a legacy `## Execution Manifest` is conversion input only
+after an explicit re-authoring request. Leave it unchanged and write a new
+plan. Set `**Spec:**` to its Spec when that names a path; otherwise, including
+`direct requirements`, use the legacy plan path. Its manifest, execution
+permissions, and obsolete workflow text carry no authority.
 
 ## Workflow
 
@@ -46,8 +55,8 @@ When a condition is missing, stop and name the one decision that unblocks it.
    - Save the plan to `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<topic>.md`.
    - Set the header `**Spec:**` to the source path. For direct requirements,
      write `direct requirements` and copy them into Global Constraints.
-   - In the header, name `/internal-gateway-execute-plans` as the executor
-     instead of the imported executors.
+   - Replace the imported `For agentic workers` header line with one that
+     names `/internal-gateway-execute-plans` as the required executor.
    - Classify every executable or evaluable task through `/internal-tdd`.
      Record one `Posture:` line per task and order its steps to match: red
      first for `mandatory-test-first`, a passing characterization check first
@@ -60,9 +69,11 @@ When a condition is missing, stop and name the one decision that unblocks it.
      tool exists before you write its command; never invent a command.
    - Write no commit steps. Replace each one with the task validation and
      `git status --short`.
-3. Close with the imported handoff question. Offer `Inline` as the default and
-   `Subagent-driven` as the alternative. The user's answer is the execution
-   approval; do not start execution here.
+3. Close with the imported handoff question. Without a supplied method, offer
+   `Subagent-driven` and `Native` with its one-line recommendation; with one,
+   ask only for plan confirmation. Route every approved answer to
+   `/internal-gateway-execute-plans`, never to an imported executor. The answer
+   is the execution approval; do not start execution here.
 
 ## Boundaries
 

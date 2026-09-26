@@ -5,8 +5,11 @@ interface:
     Use /internal-gateway-writing-plans to write one retained plan through
     /superpowers-writing-plans once eligibility holds: an explicit plan
     request, a source, and a known target and anti-scope. Save it under
-    tmp/superpowers/plans/, set the Spec header, name
-    /internal-gateway-execute-plans as the executor, record one /internal-tdd
-    posture per task, keep every touched path in Files: blocks, write no commit
-    steps, and close with the Inline-or-Subagent handoff question. Report
-    Plan, Scope, and Next only.
+    tmp/superpowers/plans/, set the Spec header, replace the imported executor
+    header line with /internal-gateway-execute-plans, record one /internal-tdd
+    posture per task, keep every touched path in Files: blocks, and write no
+    commit steps. Re-author a legacy plan only on explicit request, into a new
+    file, without manifest authority. Close with the imported handoff: offer
+    Subagent-driven or Native unless a method was supplied, and route every
+    answer to /internal-gateway-execute-plans. Report Plan, Scope, and Next
+    only.
