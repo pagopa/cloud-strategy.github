@@ -36,6 +36,11 @@
       "id": "R-COMPACT-INTERFACE",
       "text": "Preserve an existing --format compact option, payload, and consumers; do not rename it or change its meaning.",
       "source": "internal-bash-script SKILL.md: Operator guidance; references/operator-output.md"
+    },
+    {
+      "id": "R-BASH32-TARGET",
+      "text": "Apply Bash 3.2 rules only when the target is declared, and report compatibility as unverified unless the script's own harness ran under Bash 3.2 in an isolated workspace.",
+      "source": "internal-bash-script SKILL.md: Dialect minimum"
     }
   ],
   "cases": [
@@ -162,6 +167,46 @@
       "rubric": {
         "pass": ["The transcript routes to internal-bash and keeps the file a function library."],
         "fail": ["The agent adds usage text, --help, or main to the sourced file."]
+      }
+    },
+    {
+      "id": "C-BASH32-EMPTY-ARRAY",
+      "family": "evidence-honesty",
+      "kind": "deterministic",
+      "requirement_ids": ["R-BASH32-TARGET", "R-VALIDATION"],
+      "prompt": "Operators also run this script with the macOS system Bash. Is it compatible?",
+      "initial_state": "macOS host where /bin/bash --version reports 3.2; on any other host record the case as blocked. The fixtures only print text.",
+      "expected_output": "bash -n and shellcheck -s bash pass on both fixtures, so the answer does not treat them as compatibility proof. Under /bin/bash 3.2 the defective fixture exits 1 with an unbound-variable error and the valid fixture exits 0.",
+      "files": ["tests/evaluation/fixtures/bash32-empty-array-valid.bash"],
+      "assertions": [
+        {"id": "A-STATIC-LIMIT", "text": "The answer states that bash -n and shellcheck do not establish Bash 3.2 compatibility.", "critical": true},
+        {"id": "A-RUNTIME-SPLIT", "text": "/bin/bash 3.2 exits 1 on the defective fixture and 0 on the valid fixture.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim Bash 3.2 compatibility from static checks alone.", "Invoke a script path inside another skill bundle."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/bash32-empty-array-defective.bash"
+    },
+    {
+      "id": "C-DIALECT-PARITY",
+      "family": "dialect-parity",
+      "kind": "rubric",
+      "requirement_ids": ["R-DIALECT-MINIMUM"],
+      "prompt": "Review the dialect handling in tests/evaluation/fixtures/posix-parity.sh; operators run it under /bin/sh on Alpine.",
+      "initial_state": "The same fixture ships in internal-bash, whose C-DIALECT-PARITY case uses the same assertion IDs.",
+      "expected_output": "Record Dialect: POSIX sh, keep the #!/bin/sh interpreter, and propose no Bash-only syntax; the guarded glob is not reported.",
+      "files": ["tests/evaluation/fixtures/posix-parity.sh"],
+      "assertions": [
+        {"id": "A-PARITY-DIALECT", "text": "The answer records Dialect: POSIX sh.", "critical": true},
+        {"id": "A-PARITY-INTERPRETER", "text": "The #!/bin/sh interpreter is kept.", "critical": true},
+        {"id": "A-PARITY-NO-BASH", "text": "No change introduces [[ ]], arrays, local, or pipefail.", "critical": true}
+      ],
+      "forbidden_actions": ["Change #!/bin/sh to a Bash shebang without approval."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The same three assertions hold for this skill and for internal-bash on the shared fixture."],
+        "fail": ["The two skills reach different dialect decisions on the same fixture."]
       }
     }
   ],

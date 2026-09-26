@@ -28,6 +28,13 @@ the declared interpreter and never change it silently.
 
 Bash invoked as `sh` is not cross-shell portability proof.
 
+Add `Compatibility target: Bash 3.2` only when the caller or repository
+declares macOS `/bin/bash` support. Then avoid `mapfile`, `readarray`,
+`declare -A`, `${var,,}`, `${var^^}`, and `wait -n`, and guard an empty-array
+expansion under `set -u` with a `${#array[@]}` check. Static checks do not
+detect these. Run the script's own harness under `/bin/bash` 3.2 in an isolated
+workspace, or report `Bash 3.2 compatibility: unverified`.
+
 ## Portable minimum
 
 - Quote expansions and check statuses at correctness boundaries.

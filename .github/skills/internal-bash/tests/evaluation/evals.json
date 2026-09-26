@@ -26,6 +26,16 @@
       "id": "R-EVIDENCE-LIMITS",
       "text": "Report the checker result as static evidence only; sh -n without dash is limited evidence and neither proves runtime behavior nor portability across every supported sh.",
       "source": "internal-bash SKILL.md: Validation"
+    },
+    {
+      "id": "R-CATALOG-CONDITIONS",
+      "text": "Report a catalog finding only when its stated condition holds in the reviewed code; code that meets the negative control is not a finding.",
+      "source": "internal-bash references/review-anti-patterns.md"
+    },
+    {
+      "id": "R-BASH32-TARGET",
+      "text": "Apply Bash 3.2 rules only when the target is declared, and report compatibility as unverified unless the target's own harness ran under Bash 3.2 in an isolated workspace.",
+      "source": "internal-bash SKILL.md: Dialect decision"
     }
   ],
   "cases": [
@@ -165,6 +175,105 @@
       "rubric": {
         "pass": ["The report cites the limited-evidence line and lists the remaining evidence gap."],
         "fail": ["The report states the helper is portable based on the macOS sh result."]
+      }
+    },
+    {
+      "id": "C-READ-RAW",
+      "family": "catalog-coverage",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CHECKER", "R-REVIEW-IDS"],
+      "prompt": "Check this POSIX helper that prints each entry of a list file.",
+      "initial_state": "Two #!/bin/sh helpers; shellcheck and dash are installed.",
+      "expected_output": "The checker returns 1 with SC2162 for the defective helper and 0 for the valid one; the review cites SH-M09 on the read line.",
+      "files": ["tests/evaluation/fixtures/read-lines-valid.sh"],
+      "assertions": [
+        {"id": "A-EXIT-CONTRACT", "text": "scripts/check.sh returns 1 for the defective fixture and 0 for the valid fixture.", "critical": true},
+        {"id": "A-CATALOG-ID", "text": "The finding carries SH-M09 and the line of the read loop.", "critical": true}
+      ],
+      "forbidden_actions": ["Run the checked file to validate it."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/read-lines-defective.sh"
+    },
+    {
+      "id": "C-FILENAME-SPLIT",
+      "family": "catalog-coverage",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CHECKER", "R-REVIEW-IDS", "R-DIALECT"],
+      "prompt": "Our log counter breaks on filenames with spaces; check the Bash helper.",
+      "initial_state": "Two Bash helpers with a bash shebang; shellcheck is installed.",
+      "expected_output": "The checker returns 1 with SC2045 for the defective helper and 0 for the valid one; the review cites SH-M10 and proposes a quoted glob with an existence guard.",
+      "files": ["tests/evaluation/fixtures/list-files-valid.bash"],
+      "assertions": [
+        {"id": "A-EXIT-CONTRACT", "text": "scripts/check.sh returns 1 for the defective fixture and 0 for the valid fixture.", "critical": true},
+        {"id": "A-CATALOG-ID", "text": "The finding carries SH-M10 and the line of the for loop.", "critical": true}
+      ],
+      "forbidden_actions": ["Run the checked file to validate it."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/list-files-defective.bash"
+    },
+    {
+      "id": "C-BASH32-EMPTY-ARRAY",
+      "family": "evidence-honesty",
+      "kind": "deterministic",
+      "requirement_ids": ["R-BASH32-TARGET", "R-EVIDENCE-LIMITS"],
+      "prompt": "This helper must also run under the macOS system Bash. Is it compatible?",
+      "initial_state": "macOS host where /bin/bash --version reports 3.2; on any other host record the case as blocked. The fixtures only print text.",
+      "expected_output": "The checker returns 0 for both fixtures, so the answer does not treat it as compatibility proof. Under /bin/bash 3.2 the defective fixture exits 1 with an unbound-variable error and the valid fixture exits 0; the review cites SH-M12.",
+      "files": ["tests/evaluation/fixtures/bash32-empty-array-valid.bash"],
+      "assertions": [
+        {"id": "A-STATIC-LIMIT", "text": "The answer states that the checker pass does not establish Bash 3.2 compatibility.", "critical": true},
+        {"id": "A-RUNTIME-SPLIT", "text": "/bin/bash 3.2 exits 1 on the defective fixture and 0 on the valid fixture.", "critical": true},
+        {"id": "A-CATALOG-ID", "text": "The finding carries SH-M12 and the empty-array expansion line.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim Bash 3.2 compatibility from the checker result alone."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/bash32-empty-array-defective.bash"
+    },
+    {
+      "id": "C-REVIEW-NEW-IDS",
+      "family": "review",
+      "kind": "rubric",
+      "requirement_ids": ["R-REVIEW-IDS", "R-CATALOG-CONDITIONS"],
+      "prompt": "Review tests/evaluation/fixtures/review-new-ids.bash, a Bash helper library, and list the problems.",
+      "initial_state": "The fixture is a Bash helper library; each defect sits next to a negative control that handles the same concern correctly.",
+      "expected_output": "Findings SH-C04 on line 6, SH-C05 on line 14, SH-M11 on lines 25 and 29, and SH-m08 on line 38; the fixed-text sh -c on line 10, the digest check on line 20, and the explicit status check on line 33 are not reported.",
+      "files": ["tests/evaluation/fixtures/review-new-ids.bash"],
+      "assertions": [
+        {"id": "A-DEFECTS", "text": "Each listed defect is reported with its catalog ID, severity, and line.", "critical": true},
+        {"id": "A-NEGATIVE-CONTROLS", "text": "None of the three negative controls is reported.", "critical": true},
+        {"id": "A-EVAL-SEPARATE", "text": "The sh -c finding uses SH-C04, not SH-C02.", "critical": false}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Every reported line maps to a listed defect, and no negative-control line appears as a finding."],
+        "fail": ["A listed defect is missed, a negative control is reported, or HTTPS alone is accepted as verification."]
+      }
+    },
+    {
+      "id": "C-DIALECT-PARITY",
+      "family": "dialect-parity",
+      "kind": "rubric",
+      "requirement_ids": ["R-DIALECT"],
+      "prompt": "Tidy up tests/evaluation/fixtures/posix-parity.sh; it runs under /bin/sh on Alpine.",
+      "initial_state": "The same fixture ships in internal-bash-script, whose C-DIALECT-PARITY case uses the same assertion IDs.",
+      "expected_output": "Record Dialect: POSIX sh, keep the #!/bin/sh interpreter, and propose no Bash-only syntax; the guarded glob is not reported.",
+      "files": ["tests/evaluation/fixtures/posix-parity.sh"],
+      "assertions": [
+        {"id": "A-PARITY-DIALECT", "text": "The answer records Dialect: POSIX sh.", "critical": true},
+        {"id": "A-PARITY-INTERPRETER", "text": "The #!/bin/sh interpreter is kept.", "critical": true},
+        {"id": "A-PARITY-NO-BASH", "text": "No change introduces [[ ]], arrays, local, or pipefail.", "critical": true}
+      ],
+      "forbidden_actions": ["Change #!/bin/sh to a Bash shebang without approval."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The same three assertions hold for this skill and for internal-bash-script on the shared fixture."],
+        "fail": ["The two skills reach different dialect decisions on the same fixture."]
       }
     }
   ],

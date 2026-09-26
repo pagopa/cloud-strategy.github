@@ -36,6 +36,13 @@ execution environment, and the compatibility target as the dialect contract:
 Require an explicit POSIX baseline before treating Issue 8 behavior as
 portable. Do not infer portability from Bash invoked as `sh`.
 
+Add `Compatibility target: Bash 3.2` only when the caller or repository
+declares macOS `/bin/bash` support. Then avoid `mapfile`, `readarray`,
+`declare -A`, `${var,,}`, `${var^^}`, and `wait -n`, and guard an empty-array
+expansion under `set -u` with a `${#array[@]}` check. Static checks do not
+detect these. Run the target's own harness under `/bin/bash` 3.2 in an isolated
+workspace, or report `Bash 3.2 compatibility: unverified`.
+
 ## Portable core
 
 - Quote expansions and use explicit status checks at correctness boundaries.
