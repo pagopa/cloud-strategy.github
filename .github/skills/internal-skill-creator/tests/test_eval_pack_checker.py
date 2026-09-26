@@ -1,3 +1,4 @@
+import copy
 import importlib.util
 import json
 import subprocess
@@ -32,9 +33,7 @@ def test_valid_pack_and_run_record_have_no_findings():
     pack = json.loads(pack_path.read_text(encoding="utf-8"))
 
     assert CHECKER.check_pack(pack_path, BUNDLE_ROOT, "fixture-skill") == []
-    assert CHECKER.check_run_record(
-        FIXTURES / "valid-run-record.json", BUNDLE_ROOT, pack
-    ) == []
+    assert CHECKER.check_run_record(FIXTURES / "valid-run-record.json", pack) == []
 
 
 def test_each_defective_fixture_returns_its_declared_codes(tmp_path):
@@ -45,11 +44,56 @@ def test_each_defective_fixture_returns_its_declared_codes(tmp_path):
         if "record" in entry:
             record_path = tmp_path / f"{entry['name']}.json"
             record_path.write_text(json.dumps(entry["record"]), encoding="utf-8")
-            findings = CHECKER.check_run_record(record_path, BUNDLE_ROOT, valid_pack)
+            findings = CHECKER.check_run_record(record_path, valid_pack)
         else:
             pack_path = _write_pack(tmp_path, entry)
             findings = CHECKER.check_pack(pack_path, BUNDLE_ROOT, "fixture-skill")
         assert _codes(findings) == sorted(entry["expected_codes"]), entry["name"]
+
+
+def _mutated(base, changes):
+    result = copy.deepcopy(base)
+    for change in changes:
+        target = result
+        for key in change["path"][:-1]:
+            target = target[key]
+        target[change["path"][-1]] = change["value"]
+    return result
+
+
+def test_each_mutation_fixture_returns_its_declared_codes(tmp_path):
+    valid_pack = json.loads((FIXTURES / "valid-pack.json").read_text(encoding="utf-8"))
+    valid_run = json.loads((FIXTURES / "valid-run-record.json").read_text(encoding="utf-8"))
+    entries = json.loads((FIXTURES / "pack-mutations.json").read_text(encoding="utf-8"))
+
+    for entry in entries:
+        path = tmp_path / f"{entry['name']}.json"
+        if entry["target"] == "run":
+            path.write_text(json.dumps(_mutated(valid_run, entry["changes"])), encoding="utf-8")
+            findings = CHECKER.check_run_record(path, valid_pack)
+        else:
+            path.write_text(json.dumps(_mutated(valid_pack, entry["changes"])), encoding="utf-8")
+            findings = CHECKER.check_pack(path, BUNDLE_ROOT, "fixture-skill")
+        assert _codes(findings) == sorted(entry["expected_codes"]), entry["name"]
+
+
+def test_symlink_escaping_the_bundle_is_rejected(tmp_path):
+    bundle = tmp_path / "bundle"
+    bundle.mkdir()
+    (bundle / "defective.json").write_text("{}", encoding="utf-8")
+    outside = tmp_path / "outside.txt"
+    outside.write_text("outside", encoding="utf-8")
+    (bundle / "escape.txt").symlink_to(outside)
+    pack = json.loads((FIXTURES / "valid-pack.json").read_text(encoding="utf-8"))
+    pack["cases"][0]["defective_fixture"] = "defective.json"
+    pack_path = tmp_path / "pack.json"
+
+    pack_path.write_text(json.dumps(pack), encoding="utf-8")
+    assert CHECKER.check_pack(pack_path, bundle, "fixture-skill") == []
+
+    pack["cases"][0]["files"] = ["escape.txt"]
+    pack_path.write_text(json.dumps(pack), encoding="utf-8")
+    assert _codes(CHECKER.check_pack(pack_path, bundle, "fixture-skill")) == ["eval-pack-unsafe-path"]
 
 
 def test_cli_returns_compact_failure_and_success_statuses(tmp_path):

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Iterable
 
 from common.findings import Finding
+from common.repository import path_exists_at_ref as path_exists_at_ref
 
 _SKILLS_PREFIX = ".github/skills/"
 
@@ -120,19 +121,3 @@ def detect_protected_skill_changes(
         )
         for bundle in sorted(bundles - allowed)
     ]
-
-
-def path_exists_at_ref(root: Path, ref: str, path: str) -> bool:
-    """Return whether a repository path exists at a Git ref; invalid refs are absent."""
-
-    try:
-        subprocess.run(
-            ["git", "cat-file", "-e", f"{ref}:{path}"],
-            cwd=root,
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-    except (OSError, subprocess.SubprocessError, ValueError):
-        return False
-    return True

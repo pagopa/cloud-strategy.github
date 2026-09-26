@@ -19,9 +19,9 @@ travel with the bundle.
 
 For each skill created or behaviorally changed, deliver the skill, its updated
 eval pack, and either run evidence or a clear statement that the run remains
-unavailable. An editorial touch to a skill with an existing pack does not
-require a behavioral migration; record the missing pack as a non-blocking gap
-when a host validator reports it.
+unavailable. An editorial touch to a skill without a pack does not require a
+new pack; record the missing pack as a non-blocking gap when a host validator
+reports it.
 
 Build the pack before judging candidate outputs:
 
@@ -58,11 +58,12 @@ Each case has a unique `C-[A-Z0-9-]+` ID, `family`, `kind`, non-empty
 `requirement_ids`, `prompt`, `initial_state`, and `expected_output`, plus
 `files`, `assertions`, `forbidden_actions`, `status`, and `held_out`. Requirement
 references must resolve. `files` is a list, and each path must be relative,
-existing, inside the bundle, and remain inside it through symlinks.
+name an existing regular file inside the bundle, and remain inside it through
+symlinks.
 
 Use `kind: deterministic` when an executable expected result can distinguish
-correct from incorrect behavior. Such a case must name an existing
-`defective_fixture`. Use `kind: rubric` for judgment tasks and provide `rubric`
+correct from incorrect behavior. Such a case must name a `defective_fixture`
+file that satisfies the same path rule. Use `kind: rubric` for judgment tasks and provide `rubric`
 with anchored `pass` and `fail` lists. Do not require outputs to repeat
 instruction wording. Assertions have unique IDs within the case, explanatory
 text, and a boolean `critical` flag. `forbidden_actions` lists unsafe or
@@ -124,9 +125,12 @@ results. Each result names a case, status (`executed`, `passed`, `failed`, or
 `blocked`), transcript reference when executed, and assertion verdicts.
 
 The run's assertion IDs must match that case's IDs exactly, including when a
-grader records no passing assertions. A passed result needs evidence for every
-assertion, all assertions must pass, and a failed critical assertion cannot be
-reported as passed. Do not change a case specification to imply it ran.
+grader records no passing assertions. Each case appears at most once per run,
+and every verdict carries string evidence. A passed result needs evidence for
+every assertion and all assertions must pass. An executed result with a failed
+critical assertion must be recorded as `failed`; `blocked` means the
+assertions were not evaluated. Do not change a case specification to imply it
+ran.
 
 ## Evaluation levels and migration
 

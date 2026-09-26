@@ -1,7 +1,7 @@
 # Grading and Analysis
 
-Keep grading criteria independent from the outputs under review. When evidence
-is weak or ambiguous, the expectation must carry the burden of proof.
+Keep grading criteria independent from the outputs under review. When the
+evidence is weak or ambiguous, the assertion fails.
 
 ## Grading
 

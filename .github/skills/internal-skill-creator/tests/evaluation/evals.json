@@ -750,7 +750,7 @@
         "id": "Q-06",
         "query": "Validate an eval pack schema, requirement coverage, and bundle-local file references.",
         "should_trigger": true,
-        "split": "train"
+        "split": "held-out"
       },
       {
         "id": "Q-07",
@@ -766,9 +766,10 @@
       },
       {
         "id": "Q-09",
-        "query": "Determine if a delegated task has bounded evidence, one write path, and complete acceptance.",
-        "should_trigger": true,
-        "split": "train"
+        "query": "Before dispatching one worker, check that this single subagent brief has bounded evidence, one write path, and complete acceptance criteria.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-subagent-contract"
       },
       {
         "id": "Q-10",
@@ -780,7 +781,7 @@
         "id": "Q-11",
         "query": "Measure an approved with-skill and baseline run using pinned host and model details.",
         "should_trigger": true,
-        "split": "train"
+        "split": "held-out"
       },
       {
         "id": "Q-12",
@@ -792,7 +793,7 @@
         "id": "Q-13",
         "query": "Compare a new skill against the same task without the skill where isolation is available.",
         "should_trigger": true,
-        "split": "train"
+        "split": "held-out"
       },
       {
         "id": "Q-14",
@@ -802,8 +803,8 @@
       },
       {
         "id": "Q-15",
-        "query": "Create an agent in .github/agents/ and decide which owner should handle it.",
-        "should_trigger": true,
+        "query": "Create a new Copilot custom agent under .github/agents/ with its tool list and handoff rules.",
+        "should_trigger": false,
         "split": "held-out",
         "competing_owner": "internal-agent-creator"
       },
@@ -834,9 +835,24 @@
       },
       {
         "id": "Q-20",
-        "query": "Run a normal repository test unrelated to a skill authoring task.",
+        "query": "A pytest case in the repository skill validator fails after a refactor; find the root cause without changing any skill's scope or triggers.",
         "should_trigger": false,
-        "split": "held-out"
+        "split": "held-out",
+        "competing_owner": "internal-debugging"
+      },
+      {
+        "id": "Q-21",
+        "query": "Refresh an imported third-party skill bundle from its upstream source through the manifest-driven sync CLI.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "local-agent-sync-external-resources"
+      },
+      {
+        "id": "Q-22",
+        "query": "Update the repository README and architecture document to describe the new skill catalog layout.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-knowledge"
       }
     ]
   }

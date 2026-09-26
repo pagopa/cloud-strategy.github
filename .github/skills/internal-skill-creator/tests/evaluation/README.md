@@ -1,7 +1,7 @@
 # Internal Skill Creator Evaluation
 
 `evals.json` is the fixed structural and behavioral case pack for the creator.
-Case specifications are generated; no runtime run records exist. `generated`,
+Case specifications are `generated` or `not-run`; no runtime run records exist. `generated`,
 `not-run`, and `blocked` describe specification evidence state. `passed` is
 only available in a separate run record after an observed, graded run.
 The pack migrates all six delegation cases: three eligible modes, two local or

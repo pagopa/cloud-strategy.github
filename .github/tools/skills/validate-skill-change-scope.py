@@ -43,6 +43,12 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help="Allow one exact protected bundle path. Repeatable.",
     )
+    parser.add_argument(
+        "--check",
+        choices=["all", "protected-skills", "eval-packs"],
+        default="all",
+        help="Select which finding family to evaluate.",
+    )
     parser.add_argument("--format", choices=["text", "json", "compact"], default="text")
     return parser.parse_args()
 
@@ -87,8 +93,16 @@ def main() -> int:
 
     findings = run_finding_cli(
         detect_fn=lambda: [
-            *detect_protected_skill_changes(changed_paths, allowed),
-            *detect_eval_pack_scope_findings(root, changed_paths, args.base_ref),
+            *(
+                detect_protected_skill_changes(changed_paths, allowed)
+                if args.check in {"all", "protected-skills"}
+                else []
+            ),
+            *(
+                detect_eval_pack_scope_findings(root, changed_paths, args.base_ref)
+                if args.check in {"all", "eval-packs"}
+                else []
+            ),
         ],
         format_name=args.format,
         render_text=render_text,

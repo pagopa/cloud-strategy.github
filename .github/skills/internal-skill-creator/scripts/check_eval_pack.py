@@ -13,38 +13,42 @@ from typing import Any
 
 PACK_SCHEMA = "skill-eval-pack/v1"
 RUN_SCHEMA = "skill-eval-run/v1"
-PACK_FIELDS = {"schema", "skill", "requirements", "cases", "triggers"}
-REQUIREMENT_FIELDS = {"id", "text", "source"}
-CASE_FIELDS = {
-    "id",
-    "family",
-    "kind",
-    "requirement_ids",
-    "prompt",
-    "initial_state",
-    "expected_output",
-    "files",
-    "assertions",
-    "forbidden_actions",
-    "defective_fixture",
-    "rubric",
-    "status",
-    "held_out",
-}
-TRIGGER_FIELDS = {"id", "query", "should_trigger", "split", "competing_owner"}
-RUN_FIELDS = {
-    "schema",
-    "skill",
-    "date",
-    "host",
-    "model",
-    "configuration",
-    "case_results",
-}
+PACK_FIELDS = frozenset({"schema", "skill", "requirements", "cases", "triggers"})
+REQUIREMENT_FIELDS = frozenset({"id", "text", "source"})
+CASE_FIELDS = frozenset(
+    {
+        "id",
+        "family",
+        "kind",
+        "requirement_ids",
+        "prompt",
+        "initial_state",
+        "expected_output",
+        "files",
+        "assertions",
+        "forbidden_actions",
+        "status",
+        "held_out",
+    }
+)
+CASE_TEXT_FIELDS = ("family", "prompt", "initial_state", "expected_output")
+ASSERTION_FIELDS = frozenset({"id", "text", "critical"})
+QUERY_FIELDS = frozenset({"id", "query", "should_trigger", "split"})
+RUN_FIELDS = frozenset(
+    {"schema", "skill", "date", "host", "model", "configuration", "case_results"}
+)
+RESULT_FIELDS = frozenset({"case_id", "status", "assertions"})
+VERDICT_FIELDS = frozenset({"id", "passed", "evidence"})
+CASE_KINDS = frozenset({"deterministic", "rubric"})
+PACK_STATUSES = frozenset({"generated", "not-run", "blocked"})
+SPLITS = frozenset({"train", "held-out"})
+CONFIGURATIONS = frozenset({"with-skill", "baseline-none", "baseline-previous"})
+RUN_STATUSES = frozenset({"executed", "passed", "failed", "blocked"})
+TRANSCRIPT_STATUSES = frozenset({"executed", "passed", "failed"})
 IDENTIFIERS = {
-    "requirement": re.compile(r"^R-[A-Z0-9-]+$"),
-    "case": re.compile(r"^C-[A-Z0-9-]+$"),
-    "query": re.compile(r"^Q-[A-Z0-9-]+$"),
+    "requirement": re.compile(r"R-[A-Z0-9-]+"),
+    "case": re.compile(r"C-[A-Z0-9-]+"),
+    "query": re.compile(r"Q-[A-Z0-9-]+"),
 }
 
 
@@ -72,7 +76,7 @@ def _finding(code: str, message: str, path: Path | None = None) -> dict[str, str
     return finding
 
 
-def _has_exact_fields(value: Any, required: set[str], optional: set[str] = frozenset()) -> bool:
+def _has_exact_fields(value: Any, required: frozenset[str], optional: frozenset[str] = frozenset()) -> bool:
     return isinstance(value, dict) and required <= value.keys() and value.keys() <= required | optional
 
 
@@ -80,7 +84,20 @@ def _nonempty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
-def _safe_existing_path(bundle_root: Path, value: Any) -> bool:
+def _one_of(value: Any, allowed: Any) -> bool:
+    return isinstance(value, str) and value in allowed
+
+
+def _iso_date(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        return date.fromisoformat(value).isoformat() == value
+    except ValueError:
+        return False
+
+
+def _safe_existing_file(bundle_root: Path, value: Any) -> bool:
     if not isinstance(value, str) or not value or "\\" in value:
         return False
     relative = Path(value)
@@ -92,7 +109,7 @@ def _safe_existing_path(bundle_root: Path, value: Any) -> bool:
         resolved_path.relative_to(resolved_root)
     except (OSError, RuntimeError, ValueError):
         return False
-    return True
+    return resolved_path.is_file()
 
 
 def _pack_from_path(pack_path: Path, findings: list[dict[str, str]]) -> Any:
@@ -104,108 +121,94 @@ def _pack_from_path(pack_path: Path, findings: list[dict[str, str]]) -> Any:
 
 
 def _validate_pack(pack: Any, bundle_root: Path, skill_name: str) -> list[dict[str, str]]:
-    findings: list[dict[str, str]] = []
-    if not _has_exact_fields(pack, PACK_FIELDS) or pack.get("schema") != PACK_SCHEMA or pack.get("skill") != skill_name:
-        findings.append(_finding("eval-pack-schema", "Pack top-level fields, schema, or skill name are invalid."))
-        return findings
-
-    requirements = pack["requirements"]
-    cases = pack["cases"]
-    triggers = pack["triggers"]
+    if not _has_exact_fields(pack, PACK_FIELDS) or pack["schema"] != PACK_SCHEMA or pack["skill"] != skill_name:
+        return [_finding("eval-pack-schema", "Pack top-level fields, schema, or skill name are invalid.")]
+    requirements, cases, triggers = pack["requirements"], pack["cases"], pack["triggers"]
     if not isinstance(requirements, list) or not requirements or not isinstance(cases, list) or not cases:
-        findings.append(_finding("eval-pack-schema", "Requirements and cases must be non-empty lists."))
-        return findings
-    if not _has_exact_fields(triggers, {"queries"}) or not isinstance(triggers["queries"], list):
-        findings.append(_finding("eval-pack-schema", "Triggers must contain a queries list."))
-        return findings
+        return [_finding("eval-pack-schema", "Requirements and cases must be non-empty lists.")]
+    if not _has_exact_fields(triggers, frozenset({"queries"})) or not isinstance(triggers["queries"], list):
+        return [_finding("eval-pack-schema", "Triggers must contain a queries list.")]
 
-    requirement_ids: set[str] = set()
-    case_ids: set[str] = set()
-    query_ids: set[str] = set()
+    findings: list[dict[str, str]] = []
     all_ids: set[str] = set()
+    requirement_ids: set[str] = set()
     covered_requirements: set[str] = set()
 
-    def add_unique(identifier: Any, pattern: re.Pattern[str], seen: set[str]) -> bool:
-        if not isinstance(identifier, str) or not pattern.fullmatch(identifier):
+    def add_unique(identifier: Any, category: str) -> bool:
+        if not isinstance(identifier, str) or not IDENTIFIERS[category].fullmatch(identifier):
+            findings.append(_finding("eval-pack-schema", f"Invalid {category} identifier: {identifier!r}"))
             return False
-        if identifier in all_ids or identifier in seen:
+        if identifier in all_ids:
             findings.append(_finding("eval-pack-duplicate-id", f"Duplicate identifier: {identifier}"))
             return False
         all_ids.add(identifier)
-        seen.add(identifier)
         return True
 
     for item in requirements:
-        if not _has_exact_fields(item, REQUIREMENT_FIELDS) or not all(
-            _nonempty_string(item.get(field)) for field in ("id", "text", "source")
-        ):
+        if not _has_exact_fields(item, REQUIREMENT_FIELDS) or not all(_nonempty_string(item[field]) for field in REQUIREMENT_FIELDS):
             findings.append(_finding("eval-pack-schema", "Requirement entries need id, text, and source strings."))
             continue
-        if not IDENTIFIERS["requirement"].fullmatch(item["id"]):
-            findings.append(_finding("eval-pack-schema", f"Invalid requirement identifier: {item['id']}"))
-        else:
-            add_unique(item["id"], IDENTIFIERS["requirement"], requirement_ids)
+        if add_unique(item["id"], "requirement"):
+            requirement_ids.add(item["id"])
 
-    known_requirements = set(requirement_ids)
     for case in cases:
-        if not isinstance(case, dict):
-            findings.append(_finding("eval-pack-schema", "Case entries must be objects."))
-            continue
-        kind = case.get("kind")
-        required = CASE_FIELDS - {"defective_fixture", "rubric"}
-        optional = {"defective_fixture"} if kind == "deterministic" else {"rubric"}
-        if not _has_exact_fields(case, required, optional) or kind not in {"deterministic", "rubric"}:
+        kind = case.get("kind") if isinstance(case, dict) else None
+        optional = frozenset({"defective_fixture"} if kind == "deterministic" else {"rubric"})
+        if not _one_of(kind, CASE_KINDS) or not _has_exact_fields(case, CASE_FIELDS, optional):
             findings.append(_finding("eval-pack-schema", "Case fields or kind are invalid."))
             continue
-        if not isinstance(case["id"], str) or not IDENTIFIERS["case"].fullmatch(case["id"]):
-            findings.append(_finding("eval-pack-schema", f"Invalid case identifier: {case['id']}"))
-        else:
-            add_unique(case["id"], IDENTIFIERS["case"], case_ids)
-        if not all(_nonempty_string(case[field]) for field in ("family", "prompt", "initial_state", "expected_output")):
-            findings.append(_finding("eval-pack-schema", f"Case {case.get('id')} has an empty text field."))
+        add_unique(case["id"], "case")
+        label = case["id"] if isinstance(case["id"], str) else "<invalid>"
+        if not all(_nonempty_string(case[field]) for field in CASE_TEXT_FIELDS):
+            findings.append(_finding("eval-pack-schema", f"Case {label} has an empty text field."))
         reqs = case["requirement_ids"]
         if not isinstance(reqs, list) or not reqs:
-            findings.append(_finding("eval-pack-schema", f"Case {case.get('id')} needs requirement IDs."))
+            findings.append(_finding("eval-pack-schema", f"Case {label} needs requirement IDs."))
         else:
             for req_id in reqs:
-                if req_id not in known_requirements:
-                    findings.append(_finding("eval-pack-unresolved-requirement", f"Unknown requirement {req_id}."))
-                else:
+                if _one_of(req_id, requirement_ids):
                     covered_requirements.add(req_id)
-        if not isinstance(case["files"], list) or any(not _safe_existing_path(bundle_root, item) for item in case["files"]):
-            findings.append(_finding("eval-pack-unsafe-path", f"Case {case.get('id')} has an unsafe or missing file path."))
+                else:
+                    findings.append(_finding("eval-pack-unresolved-requirement", f"Unknown requirement {req_id!r}."))
+        if not isinstance(case["files"], list) or not all(_safe_existing_file(bundle_root, item) for item in case["files"]):
+            findings.append(_finding("eval-pack-unsafe-path", f"Case {label} has an unsafe or missing file path."))
         assertions = case["assertions"]
         if not isinstance(assertions, list) or not assertions:
-            findings.append(_finding("eval-pack-schema", f"Case {case.get('id')} needs assertions."))
+            findings.append(_finding("eval-pack-schema", f"Case {label} needs assertions."))
         else:
             assertion_ids: set[str] = set()
             for assertion in assertions:
-                if not _has_exact_fields(assertion, {"id", "text", "critical"}) or not _nonempty_string(assertion.get("id")) or not _nonempty_string(assertion.get("text")) or not isinstance(assertion.get("critical"), bool):
-                    findings.append(_finding("eval-pack-schema", f"Case {case.get('id')} has an invalid assertion."))
+                if (
+                    not _has_exact_fields(assertion, ASSERTION_FIELDS)
+                    or not _nonempty_string(assertion["id"])
+                    or not _nonempty_string(assertion["text"])
+                    or not isinstance(assertion["critical"], bool)
+                ):
+                    findings.append(_finding("eval-pack-schema", f"Case {label} has an invalid assertion."))
                 elif assertion["id"] in assertion_ids:
-                    findings.append(_finding("eval-pack-duplicate-id", f"Duplicate assertion identifier {assertion['id']} in {case.get('id')}."))
+                    findings.append(_finding("eval-pack-duplicate-id", f"Duplicate assertion identifier {assertion['id']} in {label}."))
                 else:
                     assertion_ids.add(assertion["id"])
-        if not isinstance(case["forbidden_actions"], list) or any(not _nonempty_string(item) for item in case["forbidden_actions"]):
-            findings.append(_finding("eval-pack-schema", f"Case {case.get('id')} has invalid forbidden actions."))
-        if case["status"] not in {"generated", "not-run", "blocked"}:
-            findings.append(_finding("eval-pack-invalid-status", f"Case {case.get('id')} has an invalid evidence status."))
+        if not isinstance(case["forbidden_actions"], list) or not all(_nonempty_string(item) for item in case["forbidden_actions"]):
+            findings.append(_finding("eval-pack-schema", f"Case {label} has invalid forbidden actions."))
+        if not _one_of(case["status"], PACK_STATUSES):
+            findings.append(_finding("eval-pack-invalid-status", f"Case {label} has an invalid evidence status."))
         if not isinstance(case["held_out"], bool):
-            findings.append(_finding("eval-pack-schema", f"Case {case.get('id')} held_out must be boolean."))
+            findings.append(_finding("eval-pack-schema", f"Case {label} held_out must be boolean."))
         if kind == "deterministic":
             if "defective_fixture" not in case:
-                findings.append(_finding("eval-pack-missing-defective-fixture", f"Deterministic case {case.get('id')} has no defective fixture."))
-            elif not _safe_existing_path(bundle_root, case["defective_fixture"]):
-                findings.append(_finding("eval-pack-unsafe-path", f"Case {case.get('id')} has an unsafe or missing defective fixture."))
+                findings.append(_finding("eval-pack-missing-defective-fixture", f"Deterministic case {label} has no defective fixture."))
+            elif not _safe_existing_file(bundle_root, case["defective_fixture"]):
+                findings.append(_finding("eval-pack-unsafe-path", f"Case {label} has an unsafe or missing defective fixture."))
         elif "rubric" not in case:
-            findings.append(_finding("eval-pack-missing-rubric", f"Rubric case {case.get('id')} has no rubric."))
-        elif not _has_exact_fields(case["rubric"], {"pass", "fail"}) or any(
-            not isinstance(case["rubric"].get(key), list)
-            or not case["rubric"][key]
-            or any(not _nonempty_string(anchor) for anchor in case["rubric"][key])
+            findings.append(_finding("eval-pack-missing-rubric", f"Rubric case {label} has no rubric."))
+        elif not _has_exact_fields(case["rubric"], frozenset({"pass", "fail"})) or not all(
+            isinstance(case["rubric"][key], list)
+            and case["rubric"][key]
+            and all(_nonempty_string(anchor) for anchor in case["rubric"][key])
             for key in ("pass", "fail")
         ):
-            findings.append(_finding("eval-pack-missing-rubric", f"Rubric case {case.get('id')} has no anchored pass/fail rubric."))
+            findings.append(_finding("eval-pack-missing-rubric", f"Rubric case {label} has no anchored pass/fail rubric."))
 
     if requirement_ids - covered_requirements:
         findings.append(_finding("eval-pack-uncovered-requirement", "One or more requirements have no case coverage."))
@@ -213,19 +216,20 @@ def _validate_pack(pack: Any, bundle_root: Path, skill_name: str) -> list[dict[s
     polarities: set[bool] = set()
     splits: set[str] = set()
     for query in triggers["queries"]:
-        if not _has_exact_fields(query, TRIGGER_FIELDS - {"competing_owner"}, {"competing_owner"}) or not _nonempty_string(query.get("id")) or not _nonempty_string(query.get("query")) or not isinstance(query.get("should_trigger"), bool) or query.get("split") not in {"train", "held-out"}:
+        if (
+            not _has_exact_fields(query, QUERY_FIELDS, frozenset({"competing_owner"}))
+            or not _nonempty_string(query["query"])
+            or not isinstance(query["should_trigger"], bool)
+            or not _one_of(query["split"], SPLITS)
+        ):
             findings.append(_finding("eval-pack-trigger-coverage", "A trigger query has invalid fields."))
             continue
-        if not IDENTIFIERS["query"].fullmatch(query["id"]):
-            findings.append(_finding("eval-pack-schema", f"Invalid trigger identifier: {query['id']}"))
-            continue
-        if not add_unique(query["id"], IDENTIFIERS["query"], query_ids):
-            continue
-        polarities.add(query["should_trigger"])
-        splits.add(query["split"])
+        if add_unique(query["id"], "query"):
+            polarities.add(query["should_trigger"])
+            splits.add(query["split"])
         if "competing_owner" in query and not _nonempty_string(query["competing_owner"]):
-            findings.append(_finding("eval-pack-schema", f"Trigger {query['id']} has an empty competing owner."))
-    if polarities != {True, False} or splits != {"train", "held-out"}:
+            findings.append(_finding("eval-pack-schema", "A trigger query has an empty competing owner."))
+    if polarities != {True, False} or splits != set(SPLITS):
         findings.append(_finding("eval-pack-trigger-coverage", "Triggers need both polarities and both train and held-out splits."))
     return findings
 
@@ -241,44 +245,63 @@ def check_pack(pack_path: Path, bundle_root: Path, skill_name: str) -> list[dict
     return _validate_pack(pack, Path(bundle_root), skill_name)
 
 
-def check_run_record(record_path: Path, bundle_root: Path, pack: dict[str, Any]) -> list[dict[str, str]]:
+def check_run_record(record_path: Path, pack: dict[str, Any]) -> list[dict[str, str]]:
     """Validate a run record against the exact cases and assertions in a pack."""
     try:
         record = _load_json(Path(record_path))
     except (OSError, UnicodeError, json.JSONDecodeError, DuplicateJSONKey) as exc:
         return [_finding("eval-run-unbacked-result", f"Run record is not valid strict JSON: {exc}", Path(record_path))]
-    try:
-        valid_date = isinstance(record, dict) and date.fromisoformat(record.get("date", "")).isoformat() == record.get("date")
-    except (TypeError, ValueError):
-        valid_date = False
-    if not _has_exact_fields(record, RUN_FIELDS) or record.get("schema") != RUN_SCHEMA or record.get("skill") != pack.get("skill") or not valid_date or not _nonempty_string(record.get("host")) or not _nonempty_string(record.get("model")) or record.get("configuration") not in {"with-skill", "baseline-none", "baseline-previous"} or not isinstance(record.get("case_results"), list):
+    if (
+        not _has_exact_fields(record, RUN_FIELDS)
+        or record["schema"] != RUN_SCHEMA
+        or record["skill"] != pack.get("skill")
+        or not _iso_date(record["date"])
+        or not _nonempty_string(record["host"])
+        or not _nonempty_string(record["model"])
+        or not _one_of(record["configuration"], CONFIGURATIONS)
+        or not isinstance(record["case_results"], list)
+    ):
         return [_finding("eval-run-unbacked-result", "Run record metadata or fields are invalid.", Path(record_path))]
     cases = {case["id"]: case for case in pack.get("cases", []) if isinstance(case, dict) and isinstance(case.get("id"), str)}
     findings: list[dict[str, str]] = []
+    seen: set[str] = set()
     for result in record["case_results"]:
-        if not isinstance(result, dict) or not {"case_id", "status", "assertions"} <= result.keys() or result.keys() - {"case_id", "status", "transcript_ref", "assertions"}:
+        if not _has_exact_fields(result, RESULT_FIELDS, frozenset({"transcript_ref"})):
             findings.append(_finding("eval-run-unbacked-result", "Run case result fields are invalid."))
             continue
-        case = cases.get(result.get("case_id"))
-        status = result.get("status")
-        if case is None or status not in {"executed", "passed", "failed", "blocked"}:
-            findings.append(_finding("eval-run-unbacked-result", f"Run result is not backed by a pack case: {result.get('case_id')}"))
+        case_id, status = result["case_id"], result["status"]
+        if not _one_of(case_id, cases) or not _one_of(status, RUN_STATUSES):
+            findings.append(_finding("eval-run-unbacked-result", f"Run result is not backed by a pack case: {case_id!r}"))
             continue
-        if status in {"executed", "passed", "failed"} and not _nonempty_string(result.get("transcript_ref")):
-            findings.append(_finding("eval-run-unbacked-result", f"{status} result for {result['case_id']} has no transcript reference."))
-        declared = {item.get("id"): item for item in case.get("assertions", []) if isinstance(item, dict)}
-        assertions = result.get("assertions")
-        if not isinstance(assertions, list) or any(not isinstance(item, dict) or set(item) != {"id", "passed", "evidence"} or not isinstance(item.get("passed"), bool) for item in assertions):
-            findings.append(_finding("eval-run-assertion-mismatch", f"Run assertions for {result['case_id']} are malformed."))
+        if case_id in seen:
+            findings.append(_finding("eval-run-unbacked-result", f"Duplicate run result for {case_id}."))
             continue
-        actual = [item["id"] for item in assertions]
+        seen.add(case_id)
+        if status in TRANSCRIPT_STATUSES and not _nonempty_string(result.get("transcript_ref")):
+            findings.append(_finding("eval-run-unbacked-result", f"{status} result for {case_id} has no transcript reference."))
+        declared = {
+            item["id"]: item
+            for item in cases[case_id].get("assertions", [])
+            if isinstance(item, dict) and isinstance(item.get("id"), str)
+        }
+        verdicts = result["assertions"]
+        if not isinstance(verdicts, list) or not all(
+            _has_exact_fields(item, VERDICT_FIELDS)
+            and isinstance(item["id"], str)
+            and isinstance(item["passed"], bool)
+            and isinstance(item["evidence"], str)
+            for item in verdicts
+        ):
+            findings.append(_finding("eval-run-assertion-mismatch", f"Run assertions for {case_id} are malformed."))
+            continue
+        actual = [item["id"] for item in verdicts]
         if len(actual) != len(set(actual)) or set(actual) != set(declared):
-            findings.append(_finding("eval-run-assertion-mismatch", f"Run assertions do not match case {result['case_id']} exactly."))
+            findings.append(_finding("eval-run-assertion-mismatch", f"Run assertions do not match case {case_id} exactly."))
             continue
-        if status == "passed" and any(not item["passed"] or not _nonempty_string(item["evidence"]) for item in assertions):
-            findings.append(_finding("eval-run-unbacked-result", f"Passed result for {result['case_id']} lacks passing assertion evidence."))
-        if status == "passed" and any(declared[item["id"]].get("critical") and not item["passed"] for item in assertions):
-            findings.append(_finding("eval-run-unbacked-result", f"Passed result has a failed critical assertion for {result['case_id']}"))
+        if status == "passed" and not all(item["passed"] and _nonempty_string(item["evidence"]) for item in verdicts):
+            findings.append(_finding("eval-run-unbacked-result", f"Passed result for {case_id} lacks passing assertion evidence."))
+        if status == "executed" and any(declared[item["id"]].get("critical") is True and not item["passed"] for item in verdicts):
+            findings.append(_finding("eval-run-unbacked-result", f"A failed critical assertion requires status failed for {case_id}."))
     return findings
 
 
@@ -313,7 +336,7 @@ def main(argv: list[str] | None = None) -> int:
         if pack is None:
             findings.append(_finding("eval-run-unbacked-result", "Pack could not be loaded for run validation."))
         else:
-            findings.extend(check_run_record(args.run_record, args.bundle_root, pack))
+            findings.extend(check_run_record(args.run_record, pack))
     if args.format == "compact":
         print(json.dumps(_payload(findings), sort_keys=True))
     elif findings:

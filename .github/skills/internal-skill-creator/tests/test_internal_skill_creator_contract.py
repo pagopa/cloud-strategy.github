@@ -41,6 +41,7 @@ def test_bundle_contains_declared_local_siblings() -> None:
     assert (BUNDLE_ROOT / "fixtures/eval-packs/valid-pack.json").is_file()
     assert (BUNDLE_ROOT / "fixtures/eval-packs/defective-packs.json").is_file()
     assert (BUNDLE_ROOT / "fixtures/eval-packs/valid-run-record.json").is_file()
+    assert (BUNDLE_ROOT / "fixtures/eval-packs/pack-mutations.json").is_file()
     assert (BUNDLE_ROOT / "tests/evaluation/evals.json").is_file()
     assert (BUNDLE_ROOT / "tests/evaluation/fixtures/generated-pack-output.json").is_file()
     assert (BUNDLE_ROOT / "tests/evaluation/fixtures/generated-pack-defective.json").is_file()
