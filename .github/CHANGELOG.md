@@ -8,6 +8,12 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-09-26
+
+- Rebuilt `.github/skills/internal-gateway-writing-plans/` and `.github/skills/internal-gateway-execute-plans/` as thin overlays on `superpowers-writing-plans`, `superpowers-executing-plans`, and `superpowers-subagent-driven-development`; retired the Execution Manifest v3, its parser, structural checker, bundled runtime, YAML status sibling, fixtures, and v3 tests, including `tests/internal_gateway/test_bundle_alignment.py` and `tests/internal_gateway/test_execute_plans_v3_contract.py`.
+- Execution now runs in the current checkout without commits, records `START` in the superpowers ledger, and stops when `HEAD` moves, a task file was dirty at start, or a change leaves the plan's `Files:` perimeter.
+- The external-resource sync now prefixes relative sibling-skill paths in every `obra-superpowers` file, including scripts, so `task-start` and `task-done` resolve in this repository.
+
 ## 2026-09-16
 
 - Split approved Terraform import execution into the secondary `.github/skills/internal-terraform-import/` bundle while retaining `.github/skills/internal-terraform/` as the stable decision and routing wrapper; the relocated runner now defaults to non-mutating assessment and requires complete execute evidence for live import or apply.

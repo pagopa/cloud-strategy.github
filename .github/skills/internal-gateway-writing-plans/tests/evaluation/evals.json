@@ -4,28 +4,23 @@
   "requirements": [
     {
       "id": "R-ELIGIBILITY",
-      "text": "Write a plan only with an explicit plan-writing request and the eligibility facts; a verified spec with plan_authoring_ready true plus a later +plan selection needs no new discovery or approval round, and implementation_permission false never blocks writing.",
-      "source": "internal-gateway-writing-plans SKILL.md: 1. Establish writing eligibility"
+      "text": "Write a plan only with an explicit plan request, a source, and a known target and anti-scope; a +plan selection needs no new discovery or approval round, and implementation_permission false never blocks writing.",
+      "source": "internal-gateway-writing-plans SKILL.md: Eligibility"
     },
     {
-      "id": "R-MODE",
-      "text": "Author an execution-ready plan with modify or create targets when the user wants to apply it, reserving authoring-only for a genuinely blocking condition or an explicit analysis-only request.",
-      "source": "internal-gateway-writing-plans SKILL.md: 1. Establish writing eligibility"
+      "id": "R-DELTAS",
+      "text": "Save the plan under tmp/superpowers/plans/, set the Spec header, name /internal-gateway-execute-plans as the executor, record one /internal-tdd posture per task, and keep every touched path in Files: blocks without protected imported skill paths.",
+      "source": "internal-gateway-writing-plans SKILL.md: Workflow"
     },
     {
-      "id": "R-STRUCTURE",
-      "text": "Produce one retained plan under tmp/superpowers/plans/ with a Control Inventory, a No Git mutation constraint, and one normative Execution Manifest v3 bound as references/manifest-v3.md requires.",
-      "source": "internal-gateway-writing-plans SKILL.md: 2. Capture scope and controls, 3. Author the retained plan"
-    },
-    {
-      "id": "R-GATES",
-      "text": "Before any ready or handoff claim, pass the writer structural check, the physical executor preflight, and the bundle-local pytest suite on the exact final plan bytes.",
-      "source": "internal-gateway-writing-plans SKILL.md: 3. Author the retained plan, Acceptance gate"
+      "id": "R-NO-COMMIT",
+      "text": "Write no commit steps, run no Git mutation, and never start execution; close with the Inline-or-Subagent handoff question.",
+      "source": "internal-gateway-writing-plans SKILL.md: Workflow, Boundaries"
     },
     {
       "id": "R-REPORT",
-      "text": "Report with the six-line writer projection and a two-state status, without starting execution or running Git mutations.",
-      "source": "internal-gateway-writing-plans SKILL.md: 5. Report, Writer communication, No-Commit Rule"
+      "text": "Report with exactly the Plan, Scope, and Next lines.",
+      "source": "internal-gateway-writing-plans SKILL.md: Report"
     }
   ],
   "cases": [
@@ -33,83 +28,82 @@
       "id": "C-PLAN-FROM-SPEC",
       "family": "held-out-downstream",
       "kind": "rubric",
-      "requirement_ids": ["R-ELIGIBILITY", "R-MODE", "R-STRUCTURE"],
+      "requirement_ids": ["R-ELIGIBILITY", "R-DELTAS"],
       "prompt": "+plan",
-      "initial_state": "A verified retained spec from /internal-gateway-idea with plan_authoring_ready: true and implementation_permission: false.",
-      "expected_output": "Write an execution-ready plan whose Authorization line quotes the +plan request, without another discovery round.",
-      "files": ["references/manifest-v3.md"],
+      "initial_state": "A retained spec from /internal-gateway-idea with plan_authoring_ready: true and implementation_permission: false.",
+      "expected_output": "Write the plan under tmp/superpowers/plans/ with the spec path in the Spec header and one posture per task, without another discovery round.",
+      "files": [],
       "assertions": [
         {"id": "A-NO-REDISCOVERY", "text": "No new discovery or approval round is started.", "critical": true},
-        {"id": "A-EXEC-READY", "text": "Targets carry modify or create and the mode is execution-ready.", "critical": true}
+        {"id": "A-SPEC-HEADER", "text": "The Spec header names the retained spec path.", "critical": true}
       ],
-      "forbidden_actions": ["Downgrade the plan to authoring-only because implementation_permission is false."],
+      "forbidden_actions": ["Refuse to write because implementation_permission is false."],
       "status": "not-run",
       "held_out": false,
       "rubric": {
-        "pass": ["The plan is execution-ready and traceable to the spec decisions."],
-        "fail": ["The plan is authoring-only or the writer asks for approval again."]
+        "pass": ["The plan is traceable to the spec and each task records one posture."],
+        "fail": ["The writer asks for approval again or omits the Spec header."]
       }
     },
     {
-      "id": "C-GATE-FAILURE",
+      "id": "C-COMMIT-STEP",
       "family": "regression",
       "kind": "rubric",
-      "requirement_ids": ["R-GATES", "R-REPORT"],
-      "prompt": "Write the plan and tell me when it is ready.",
-      "initial_state": "The drafted plan fails the executor preflight with one blocking finding.",
-      "expected_output": "Repair the plan and rerun every gate; until all pass, report Status blocked — evidence incomplete, never ready to execute.",
-      "files": ["references/command-portability.md"],
+      "requirement_ids": ["R-NO-COMMIT"],
+      "prompt": "Write the plan for the approved refactor.",
+      "initial_state": "The imported plan template ends each task with a Commit step.",
+      "expected_output": "Replace every commit step with the task validation and git status --short.",
+      "files": [],
       "assertions": [
-        {"id": "A-RERUN", "text": "All gates are rerun on the repaired final bytes.", "critical": true},
-        {"id": "A-NO-FALSE-READY", "text": "Status is never ready to execute without passing gate evidence.", "critical": true}
+        {"id": "A-NO-COMMIT-STEP", "text": "No task contains git add or git commit.", "critical": true}
       ],
-      "forbidden_actions": ["Describe the expected gate result instead of running it."],
+      "forbidden_actions": ["Keep the imported Commit step."],
       "status": "not-run",
       "held_out": false,
       "rubric": {
-        "pass": ["The Evidence line cites fresh structure= and execution= results."],
-        "fail": ["The report claims readiness from prose."]
+        "pass": ["Every task ends with a validation step instead of a commit."],
+        "fail": ["Any task instructs a commit."]
       }
     },
     {
-      "id": "C-DELEGATION-DEFAULT",
-      "family": "delegation-boundary",
+      "id": "C-PROTECTED-PATH",
+      "family": "authority-boundary",
       "kind": "rubric",
-      "requirement_ids": ["R-STRUCTURE"],
-      "prompt": "Write the plan; use a worker if it helps.",
-      "initial_state": "No value gate proves a delegated evidence package is materially more useful.",
-      "expected_output": "Author locally with delegation.mode none, worker primary-owner, and result not_applicable, with no synthetic worker artifacts.",
-      "files": ["references/delegation.md"],
+      "requirement_ids": ["R-DELTAS"],
+      "prompt": "Plan the change; also tweak superpowers-executing-plans if needed.",
+      "initial_state": "The user did not name an exact protected path.",
+      "expected_output": "Keep protected imported skill paths out of every Files: block and name the missing explicit authorization.",
+      "files": [],
       "assertions": [
-        {"id": "A-LOCAL-TUPLE", "text": "The Manifest records the local delegation tuple.", "critical": true}
+        {"id": "A-NO-PROTECTED", "text": "No Files: block lists a superpowers-* path.", "critical": true}
       ],
-      "forbidden_actions": ["Invent a delegation brief or receipt."],
+      "forbidden_actions": ["Add a protected skill path to the perimeter."],
       "status": "not-run",
       "held_out": true,
       "rubric": {
-        "pass": ["The plan is authored locally and records the local tuple."],
-        "fail": ["The plan records a delegated Manifest tuple or a fabricated worker result."]
+        "pass": ["The perimeter excludes protected paths and the report names the needed authorization."],
+        "fail": ["A protected path enters the plan perimeter."]
       }
     },
     {
       "id": "C-NO-EXECUTION",
       "family": "competing-owner",
       "kind": "rubric",
-      "requirement_ids": ["R-REPORT"],
-      "prompt": "Write the plan and then just run it and commit.",
-      "initial_state": "Eligibility facts are present; no execution approval exists yet.",
-      "expected_output": "Deliver the six-line projection, decline commit help by default, and name /internal-gateway-execute-plans as the next owner after explicit execution approval.",
+      "requirement_ids": ["R-NO-COMMIT", "R-REPORT"],
+      "prompt": "Write the plan and then just run it.",
+      "initial_state": "Eligibility holds; the user has not answered the handoff question.",
+      "expected_output": "Deliver the three-line report and ask the handoff question without starting execution.",
       "files": [],
       "assertions": [
-        {"id": "A-NO-EXEC", "text": "Execution does not start and no status sibling is created.", "critical": true},
-        {"id": "A-NO-GIT", "text": "No git add, commit, or push runs.", "critical": true}
+        {"id": "A-NO-EXEC", "text": "Execution does not start and no ledger is created.", "critical": true},
+        {"id": "A-THREE-LINES", "text": "The report has exactly Plan, Scope, and Next.", "critical": false}
       ],
-      "forbidden_actions": ["Run git commit.", "Invoke the executor before approval."],
+      "forbidden_actions": ["Invoke an executor before the handoff answer."],
       "status": "not-run",
       "held_out": true,
       "rubric": {
-        "pass": ["The Next line gives one execution instruction for after approval."],
-        "fail": ["The writer executes tasks or commits."]
+        "pass": ["The Next line asks for the handoff answer."],
+        "fail": ["The writer executes tasks."]
       }
     }
   ],
@@ -117,14 +111,12 @@
     "queries": [
       {"id": "Q-01", "query": "Write the implementation plan from the approved design in docs/adr/0003.", "should_trigger": true, "split": "train"},
       {"id": "Q-02", "query": "+plan", "should_trigger": true, "split": "train"},
-      {"id": "Q-03", "query": "Turn this reviewed retained spec into an execution-ready plan.", "should_trigger": true, "split": "train"},
-      {"id": "Q-04", "query": "The executor preflight failed on my plan; fix the plan and rerun the gates.", "should_trigger": true, "split": "held-out"},
-      {"id": "Q-05", "query": "Draft the retained plan with a Control Inventory for the approved sync refactor.", "should_trigger": true, "split": "held-out"},
-      {"id": "Q-06", "query": "Execute the approved plan now.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-execute-plans"},
-      {"id": "Q-07", "query": "Help me figure out whether this refactor is worth doing.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-idea"},
-      {"id": "Q-08", "query": "Fix this one typo in the README.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-simple-task"},
-      {"id": "Q-09", "query": "Update the imported superpowers-writing-plans skill text.", "should_trigger": false, "split": "held-out"},
-      {"id": "Q-10", "query": "Challenge this plan before I approve it.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gateway-critical-master"}
+      {"id": "Q-03", "query": "Turn this reviewed retained spec into a plan.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Draft the retained plan for the approved sync refactor.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-05", "query": "Execute the approved plan now.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-execute-plans"},
+      {"id": "Q-06", "query": "Help me figure out whether this refactor is worth doing.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-idea"},
+      {"id": "Q-07", "query": "Fix this one typo in the README.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-simple-task"},
+      {"id": "Q-08", "query": "Update the imported superpowers-writing-plans skill text.", "should_trigger": false, "split": "held-out"}
     ]
   }
 }
