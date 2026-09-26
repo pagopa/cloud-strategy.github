@@ -69,7 +69,7 @@ def test_audit_does_not_fetch_or_write(repo_root: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["mode"] == "audit"
     assert payload["repository_changed"] is False
-    assert payload["managed_assets"] == 67
+    assert payload["managed_assets"] == 68
 
 
 def test_plan_materializes_only_the_selected_source(tmp_path: Path) -> None:

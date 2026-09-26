@@ -382,7 +382,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 67
+    assert len(manifest.assets) == 68
     assert len(manifest.watchlist) == 11
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
@@ -493,6 +493,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         item.local for item in manifest.assets if item.source == "obra-superpowers"
     } == {
         ".github/skills/superpowers-brainstorming",
+        ".github/skills/superpowers-diagnosing-superpowers",
         ".github/skills/superpowers-dispatching-parallel-agents",
         ".github/skills/superpowers-executing-plans",
         ".github/skills/superpowers-finishing-a-development-branch",

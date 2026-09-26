@@ -161,6 +161,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
 - `.github/skills/search-company-knowledge/SKILL.md`
 - `.github/skills/superpowers-brainstorming/SKILL.md`
+- `.github/skills/superpowers-diagnosing-superpowers/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
 - `.github/skills/superpowers-executing-plans/SKILL.md`
 - `.github/skills/superpowers-finishing-a-development-branch/SKILL.md`
@@ -242,9 +243,10 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/mattpocock-wizard/SKILL.md`
 - `.github/skills/mattpocock-writing-for-agents/SKILL.md`
 
-### obra/superpowers — ref b36e0829c6d0 · tag v6.3.0 · 2026-08-12 · 13 skills
+### obra/superpowers — ref 8ca22dba9a94 · tag v6.4.2 · 2026-09-25 · 14 skills
 
 - `.github/skills/superpowers-brainstorming/SKILL.md`
+- `.github/skills/superpowers-diagnosing-superpowers/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
 - `.github/skills/superpowers-executing-plans/SKILL.md`
 - `.github/skills/superpowers-finishing-a-development-branch/SKILL.md`

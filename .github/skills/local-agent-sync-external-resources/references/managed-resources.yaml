@@ -12,7 +12,7 @@ version: 1
 # | atlassian-mcp-server | atlassian/atlassian-mcp-server | 798f8138c976 | - | 2026-09-03 | 1 |
 # | github-awesome-copilot | github/awesome-copilot | f38fb6cf039b | - | 2026-09-07 | 10 |
 # | mattpocock-skills | mattpocock/skills | 6acc160e4e0c | v1.2.3 | 2026-08-06 | 25 |
-# | obra-superpowers | obra/superpowers | b36e0829c6d0 | v6.3.0 | 2026-08-12 | 13 |
+# | obra-superpowers | obra/superpowers | 8ca22dba9a94 | v6.4.2 | 2026-09-25 | 14 |
 # | openai-skills-curated | openai/skills | 49f948faa925 | - | 2026-06-23 | 2 |
 # | openai-skills-retained-doc | openai/skills | 49f948faa925 | - | 2026-06-23 | 1 |
 # | sickn33-antigravity | sickn33/antigravity-awesome-skills | b1aebac60a88 | v16.9.1 | 2026-09-06 | 7 |
@@ -254,9 +254,9 @@ sources:
         canonical_name: mattpocock-writing-for-agents
   obra-superpowers:
     repository: https://github.com/obra/superpowers.git
-    ref: b36e0829c6d0140e93cfef2ca599b1b07d4a7797
-    commit_date: 2026-08-12
-    advertised_ref: v6.3.0
+    ref: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
+    commit_date: 2026-09-25
+    advertised_ref: v6.4.2
     assets:
       - upstream: skills/brainstorming
         local: .github/skills/superpowers-brainstorming
@@ -267,6 +267,9 @@ sources:
           codex:
             allow_implicit_invocation: false
             short_description: Explore ideas before implementation
+      - upstream: skills/diagnosing-superpowers
+        local: .github/skills/superpowers-diagnosing-superpowers
+        canonical_name: superpowers-diagnosing-superpowers
       - upstream: skills/dispatching-parallel-agents
         local: .github/skills/superpowers-dispatching-parallel-agents
         canonical_name: superpowers-dispatching-parallel-agents

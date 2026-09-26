@@ -60,3 +60,16 @@ overrides:
   baseline_repo_commit: 10cc5e9
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     the shortened company-knowledge trigger still covers internal search requests.
+- id: superpowers-brainstorming-description-direct-invocation
+  target_path: .github/skills/superpowers-brainstorming/SKILL.md
+  source_family: obra/superpowers
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply
+  approval: explicit-user-counter-validated
+  reason: Limit activation to direct invocation only, preventing unintended automatic
+    triggers before creative work.
+  patch_path: patches/superpowers-brainstorming-description.patch
+  expected_content_hash: 76175adb7e88aa17b3cfba121d2d764b73dbdda2130fce4484b918b89e3ed904
+  baseline_repo_commit: e28cd84
+  validation_note: Stop the refresh if the patch does not apply cleanly; verify description
+    remains trigger-first and limited to direct invocation.
