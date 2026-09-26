@@ -1,4 +1,4 @@
-# Common mistakes
+# AWS Lambda Common Mistakes
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |

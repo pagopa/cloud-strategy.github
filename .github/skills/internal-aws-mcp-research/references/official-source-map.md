@@ -1,6 +1,6 @@
 # AWS Official Source Map
 
-Use this file as the starting map for AWS control-plane research.
+Use this reference when starting AWS control-plane research.
 
 ## AWS MCP server sources
 

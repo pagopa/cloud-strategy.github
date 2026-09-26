@@ -1,6 +1,7 @@
 # AWS Strategic Lens Playbook
 
-Use this reference when the user wants more depth than the base skill should load by default.
+Use this reference when the user wants more depth than the base skill should
+load by default.
 
 ## Common lens combinations
 
@@ -14,17 +15,22 @@ Use this reference when the user wants more depth than the base skill should loa
 
 ## Signals that another lens should be suggested
 
-- Cost could materially change the recommended option: suggest `FinOps`
-- A failure would interrupt critical platform capability: suggest `BC/DR`
-- The choice changes account, OU, or network topology: suggest `organization-structure`
-- The choice changes permissions, trust, or preventive controls: suggest `governance`
-- The choice adds operational burden or verification work: suggest `operations`
+- Cost could materially change the recommended option: suggest `FinOps`.
+- A failure would interrupt critical platform capability: suggest `BC/DR`.
+- The choice changes account, OU, or network topology: suggest
+  `organization-structure`.
+- The choice changes permissions, trust, or preventive controls: suggest
+  `governance`.
+- The choice adds operational burden or verification work: suggest
+  `operations`.
 
 ## Depth control
 
-- Stay in `Quick answer` mode when one option is clearly better and the user asked a narrow question.
+- Stay in `Quick answer` mode when one option is clearly better and the user
+  asked a narrow question.
 - Upgrade to `Decision note` when at least two viable options exist.
-- Upgrade to `Deep analysis` only when the user asks for it or the risk profile justifies it.
+- Upgrade to `Deep analysis` only when the user asks for it or the risk profile
+  justifies it.
 
 ## Worked AWS decision shapes
 
@@ -54,16 +60,20 @@ Use this reference when the user wants more depth than the base skill should loa
 
 ## Decision note pattern
 
-Use this when the question is too consequential for a quick answer but does not need a full deep analysis.
+Use this when the question is too consequential for a quick answer but does not
+need a full deep analysis.
 
 1. Decision statement: what AWS choice is being made.
-2. Assumptions: what current state, constraints, or timelines the recommendation depends on.
+2. Assumptions: what current state, constraints, or timelines the
+   recommendation depends on.
 3. Viable options: usually two or three realistic AWS-local paths.
 4. Recommendation: which option wins and why.
-5. Tradeoffs and blast radius: what gets better, what gets harder, and what is hard to reverse.
-6. Validation note: what current-fact check, proof, or remaining evidence requirement is still required.
+5. Tradeoffs and blast radius: what gets better, what gets harder, and what is
+   hard to reverse.
+6. Validation note: what current-fact check, proof, or remaining evidence
+   requirement is still required.
 
-## When to stay quick answer versus upgrade to a decision note
+## When to stay in quick answer versus upgrade to a decision note
 
 | Stay in `Quick answer` when | Upgrade to `Decision note` when |
 | --- | --- |

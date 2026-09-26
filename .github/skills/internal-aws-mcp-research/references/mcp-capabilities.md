@@ -6,10 +6,10 @@ Use this reference to choose the safest AWS MCP path for the question at hand.
 
 Best for:
 
-- current AWS documentation
-- architecture and best-practice lookups
-- regional availability checks
-- CloudFormation and CDK reference discovery
+- Current AWS documentation.
+- Architecture and best-practice lookups.
+- Regional availability checks.
+- CloudFormation and CDK reference discovery.
 
 Notable capabilities from the server documentation:
 
@@ -21,25 +21,26 @@ Notable capabilities from the server documentation:
 
 Operational notes:
 
-- remote HTTP server
-- public internet access required
-- no AWS account or AWS authentication required
-- subject to rate limits
+- Remote HTTP server.
+- Public internet access required.
+- No AWS account or AWS authentication required.
+- Subject to rate limits.
 
 ## AWS IAM MCP
 
 Best for:
 
-- inspecting current IAM state in an AWS account
-- listing users, roles, groups, and policies
-- retrieving inline policy details
-- simulating permissions before rollout
+- Inspecting current IAM state in an AWS account.
+- Listing users, roles, groups, and policies.
+- Retrieving inline policy details.
+- Simulating permissions before rollout.
 
 Operational notes:
 
-- requires AWS credentials
-- supports read-only mode and should default to it for analysis
-- mutating operations exist, so treat them as explicit-change tools, not as default exploration tools
+- Requires AWS credentials.
+- Supports read-only mode and should default to it for analysis.
+- Mutating operations exist, so treat them as explicit-change tools, not as
+  default exploration tools.
 
 ## Recommended split of responsibilities
 

@@ -5,15 +5,21 @@ placement and rollout result.
 
 ## Core boundary
 
-- **Management account**: reserve for AWS Organizations control, billing and payer responsibilities, trusted access activation, and only those actions that AWS requires there.
-- **Delegated administrator accounts**: prefer for day-to-day operation of integrated AWS services when supported.
-- **Member accounts**: keep workload execution, service ownership, and most resource-level IAM decisions here.
+- **Management account**: reserve for AWS Organizations control, billing and
+  payer responsibilities, trusted access activation, and only those actions
+  that AWS requires there.
+- **Delegated administrator accounts**: prefer for day-to-day operation of
+  integrated AWS services when supported.
+- **Member accounts**: keep workload execution, service ownership, and most
+  resource-level IAM decisions here.
 
 ## Structural review checklist
 
 1. State the platform goal, ownership model, and constraints.
-2. Decide whether the management account must perform the action or whether it can be delegated.
-3. Make the smallest safe rollout unit explicit: one account, one OU, or one region set.
+2. Decide whether the management account must perform the action or whether it
+   can be delegated.
+3. Make the smallest safe rollout unit explicit: one account, one OU, or one
+   region set.
 4. Record the structural blast radius and rollback path.
 5. Name the evidence required before broad rollout.
 
@@ -30,9 +36,12 @@ placement and rollout result.
 ## Important AWS-specific reminders
 
 - SCPs do not affect users or roles in the management account.
-- Delegated administrator accounts are still member accounts, so SCPs still apply to them.
-- StackSets with service-managed permissions do not deploy stacks into the management account.
-- Global IAM or S3 naming collisions matter more in multi-region StackSets than they do in single-account templates.
+- Delegated administrator accounts are still member accounts, so SCPs still
+  apply to them.
+- StackSets with service-managed permissions do not deploy stacks into the
+  management account.
+- Global IAM or S3 naming collisions matter more in multi-region StackSets than
+  they do in single-account templates.
 
 ## Starter account and OU patterns
 

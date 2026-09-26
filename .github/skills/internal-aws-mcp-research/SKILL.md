@@ -14,10 +14,20 @@ live observation, or inference.
 Use this lane for current AWS documentation, regional availability, service
 behavior, IAM observations, and policy-simulation evidence.
 
+## Core rules
+
+- Treat IAM MCP as read-only by default.
+- Do not create, delete, attach, detach, or rotate IAM resources unless the
+  user explicitly asks and blast radius is understood.
+- Prefer `simulate_principal_policy` before proposing policy rollout.
+- Distinguish documentation-backed statements from observations of a real AWS
+  account.
+
 ## Source priority
 
-1. AWS Knowledge MCP — current docs, latest guidance, regional availability.
-2. AWS IAM MCP (read-only) — account-specific IAM inspection and policy simulation.
+1. AWS Knowledge MCP: current docs, latest guidance, regional availability.
+2. AWS IAM MCP (read-only): account-specific IAM inspection and policy
+   simulation.
 3. Official AWS documentation when MCP is unavailable or insufficient.
 
 ## Server identities
@@ -25,40 +35,41 @@ behavior, IAM observations, and policy-simulation evidence.
 - AWS Knowledge MCP: `aws-knowledge-mcp-server`
 - AWS IAM MCP: `awslabs.iam-mcp-server` or `iam-mcp-server`
 
-Exact configured name can vary by client.
+The exact configured name can vary by client.
 
 ## Workflow
 
 1. Classify the question.
    - Docs, best practices, service behavior, regional support → Knowledge MCP.
-   - Real IAM state, principals, attached policies, permission testing → IAM MCP.
+   - Real IAM state, principals, attached policies, permission testing → IAM
+     MCP.
    - Mixed → Knowledge MCP first, IAM MCP for confirmation.
 2. Detect available AWS MCP servers in the current environment.
-3. Use the safest tool path first (Knowledge MCP for docs; IAM MCP read-only for inspection and `simulate_principal_policy`).
-4. If AWS MCP is unavailable, use `references/official-source-map.md`.
-5. Summarize with source type labeled: AWS docs / Knowledge MCP guidance / live IAM observation / inferred recommendation.
+3. Use the safest tool path first: Knowledge MCP for docs; IAM MCP read-only
+   for inspection and `simulate_principal_policy`.
+4. If AWS MCP is unavailable, use
+   [references/official-source-map.md](references/official-source-map.md).
+5. Summarize with the source type labeled: AWS docs, Knowledge MCP guidance,
+   live IAM observation, or inferred recommendation.
 
-Load `references/mcp-capabilities.md` for capability splits and tool patterns
-when selecting an AWS MCP server or tool.
+## Output
 
-## Safety rules
+- Research question and scope.
+- MCP availability used or missing.
+- Sources consulted.
+- What is confirmed by AWS docs or MCP.
+- What remains an architectural recommendation or inference.
+- Safe next steps.
 
-- Treat IAM MCP as read-only by default.
-- Do not create, delete, attach, detach, or rotate IAM resources unless the user explicitly asks and blast radius is understood.
-- Prefer `simulate_principal_policy` before proposing policy rollout.
-- Distinguish documentation-backed statements from observations of a real AWS account.
+## References
 
-## Output contract
+- [references/mcp-capabilities.md](references/mcp-capabilities.md): load for
+  capability splits and tool patterns when selecting an AWS MCP server or tool.
+- [references/official-source-map.md](references/official-source-map.md): load
+  when AWS MCP is unavailable or insufficient.
 
-- Research question and scope
-- MCP availability used or missing
-- Sources consulted
-- What is confirmed by AWS docs or MCP
-- What remains an architectural recommendation or inference
-- Safe next steps
+## Completion criteria
 
-## Validation
-
-- Source type (docs / live IAM / inference) is labeled for every claim.
+- Source type (docs, live IAM, or inference) is labeled for every claim.
 - IAM MCP usage stayed read-only unless an explicit change was requested.
 - Unresolved freshness gaps are stated beside the affected conclusion.
