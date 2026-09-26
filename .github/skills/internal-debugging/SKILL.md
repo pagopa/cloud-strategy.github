@@ -7,7 +7,7 @@ description: Use when a bug, test, build, validator, sync, workflow, or catalog-
 
 Use this skill as the repository-owned owner for root-cause diagnosis. The
 baseline below is self-contained and applies on its own.
-`/mattpocock-diagnosing-bugs` adds optional technique depth. This file is a
+`mattpocock-diagnosing-bugs` adds optional technique depth. This file is a
 wrapper-owned contract; it cannot govern a session that loads the core without
 this skill.
 
