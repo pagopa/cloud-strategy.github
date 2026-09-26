@@ -10,6 +10,7 @@ Use this format for new updates:
 
 ## 2026-09-26
 
+- Extended `.github/skills/internal-bash/references/review-anti-patterns.md` with conditioned rows `SH-C04`, `SH-C05`, `SH-M09` to `SH-M12`, and `SH-m08`; added an optional, declared `Compatibility target: Bash 3.2` to `internal-bash` and `internal-bash-script`; added eval cases with purpose-built defective fixtures and a shared dialect-parity case to both packs; added a download-and-execute check to `.github/instructions/internal-bash.instructions.md`.
 - Rebuilt `.github/skills/internal-gateway-writing-plans/` and `.github/skills/internal-gateway-execute-plans/` as thin overlays on `superpowers-writing-plans`, `superpowers-executing-plans`, and `superpowers-subagent-driven-development`; retired the Execution Manifest v3, its parser, structural checker, bundled runtime, YAML status sibling, fixtures, and v3 tests, including `tests/internal_gateway/test_bundle_alignment.py` and `tests/internal_gateway/test_execute_plans_v3_contract.py`.
 - Execution now runs in the current checkout without commits, records `START` in the superpowers ledger, and stops when `HEAD` moves, a task file was dirty at start, or a change leaves the plan's `Files:` perimeter.
 - `internal-gateway-execute-plans` now records object-only checkpoint trees (`CP0..CPn`) for resume, per-task and fix-round review diffs, perimeter checks, and `CP0`-based final attribution; resume continues on partial state inside the first incomplete task and otherwise stops for reconciliation.
