@@ -1,0 +1,163 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-python-script",
+  "requirements": [
+    {
+      "id": "R-CONTRACT",
+      "text": "Name the entrypoints, arguments, exit codes, outputs, and runner that consumers depend on before editing.",
+      "source": "internal-python-script SKILL.md: Workflow step 1"
+    },
+    {
+      "id": "R-ROUTE",
+      "text": "Keep toolkits here only when direct execution is the primary contract; route package code and its CLI adapters to /internal-python-project and unresolved mixed work to /internal-python.",
+      "source": "internal-python-script SKILL.md: When to use"
+    },
+    {
+      "id": "R-ENTRYPOINT",
+      "text": "Keep entrypoints thin and importable through main() -> int and raise SystemExit(main()), with parsing and configuration at the entrypoint boundary.",
+      "source": "internal-python-script SKILL.md: Script contract"
+    },
+    {
+      "id": "R-OUTPUT",
+      "text": "Keep human rendering out of reusable helpers, keep machine output plain, and add rich or new formats only for an accepted consumer.",
+      "source": "internal-python-script SKILL.md: Script contract"
+    },
+    {
+      "id": "R-DEPS",
+      "text": "Keep dependencies in the declared manager with exact pins and hashes or its canonical lock, without vendoring, and avoid per-run bootstrap unless the declared runner owns it.",
+      "source": "internal-python-script SKILL.md: Dependency policy and Script contract"
+    },
+    {
+      "id": "R-VALIDATE",
+      "text": "Cover the public CLI or stable helper seam and run focused tests and syntax checks only over changed paths with the declared interpreter.",
+      "source": "internal-python-script SKILL.md: Testing and validation"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-NEW-CLI",
+      "family": "first-creation",
+      "kind": "rubric",
+      "requirement_ids": ["R-CONTRACT", "R-ENTRYPOINT", "R-VALIDATE"],
+      "prompt": "Write a script that reads a CSV export of users and lists accounts with no login in the last 90 days.",
+      "initial_state": "A repository with a scripts folder, a declared interpreter, and pytest configured.",
+      "expected_output": "Operators can run the tool with a CSV path and day threshold, get a non-zero exit code on bad input, and a focused test proves the filtering.",
+      "files": [],
+      "assertions": [
+        {"id": "A-MAIN-GUARD", "text": "The script exposes main() -> int and ends with raise SystemExit(main()) under a __main__ guard.", "critical": true},
+        {"id": "A-TESTED", "text": "A focused test runs and its result is reported.", "critical": true}
+      ],
+      "forbidden_actions": ["Running compileall over the whole repository."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Paths and thresholds are arguments rather than hardcoded values."],
+        "fail": ["Logic executes at import time.", "Validation is claimed without output."]
+      }
+    },
+    {
+      "id": "C-JSON-OUTPUT",
+      "family": "neighbor-regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-OUTPUT"],
+      "prompt": "Add pretty colored tables to the script, which also has a --format json mode consumed by a CI job.",
+      "initial_state": "A script with text and JSON output modes and a CI consumer of the JSON.",
+      "expected_output": "Humans see colored tables; the CI job receives byte-identical JSON structure.",
+      "files": [],
+      "assertions": [
+        {"id": "A-JSON-PLAIN", "text": "The JSON mode emits no ANSI styling or schema changes.", "critical": true}
+      ],
+      "forbidden_actions": ["Changing the JSON schema consumed by CI."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The rich dependency decision is recorded at the lock boundary."],
+        "fail": ["Helpers print styled text or JSON gains styling."]
+      }
+    },
+    {
+      "id": "C-LAUNCHER",
+      "family": "neighbor-regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-DEPS"],
+      "prompt": "Add a run.sh that creates a virtualenv and pip installs requirements every time the tool starts.",
+      "initial_state": "A toolkit with a shared runner that already owns environment setup and a hash-locked requirements file.",
+      "expected_output": "The tool starts through the existing shared runner, and startup no longer installs anything.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-BOOTSTRAP", "text": "No new launcher creates a virtualenv or installs packages on each run.", "critical": true}
+      ],
+      "forbidden_actions": ["Cloning environment bootstrap into a new launcher."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The response explains why the shared runner owns setup."],
+        "fail": ["A launcher installs dependencies on every execution."]
+      }
+    },
+    {
+      "id": "C-LIB-SHARED",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE"],
+      "prompt": "Add a fifth tool to our operator toolkit. It needs a new parse_ledger() helper in lib/, and that lib/ package is also imported by the billing service.",
+      "initial_state": "A multi-entrypoint toolkit whose lib/ is a dependency of a separate service, and a request that requires a lib/ change.",
+      "expected_output": "The shared lib/ contract is recognized before any edit, and ownership of the lib/ change is settled as mixed before the new tool is added.",
+      "files": [],
+      "assertions": [
+        {"id": "A-LIB-MIXED", "text": "The toolkit is not claimed as pure direct execution while its lib/ has an external importer.", "critical": true}
+      ],
+      "forbidden_actions": ["Changing lib/ signatures without checking the billing service."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The billing-service importer is named as evidence."],
+        "fail": ["lib/ is modified as script-private code."]
+      }
+    },
+    {
+      "id": "C-PROJECT-ROUTE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE"],
+      "prompt": "Add response caching to the client class in our installable SDK package.",
+      "initial_state": "An installable package imported by several services.",
+      "expected_output": "Caching lands behind the SDK's public client API with package-level tests, without entrypoint or launcher changes.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ROUTED-PROJECT", "text": "The project owner handles the change, and the importing services are cited as evidence.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Routing cites the importing services."],
+        "fail": ["Script entrypoint rules are imposed on the SDK."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "I need a quick tool that walks a directory tree and reports duplicate files by content hash.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Add a --max-age option to the nightly purge script that CI calls.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Create a click CLI that syncs files from an S3 bucket to a local folder.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Our operator toolkit has three Python entrypoints and a private lib folder; add a fourth tool.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Add rich progress output and a final summary to this long-running migration script.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Make this CI helper script return a non-zero exit code on validation failures.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-07", "query": "Pin and hash the requirements for this standalone Python tool.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Refactor this one-off data-processing script so its logic can be tested.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Add a SQLAlchemy repository method to the accounts service package.", "should_trigger": false, "split": "train", "competing_owner": "internal-python-project"},
+      {"id": "Q-10", "query": "This change touches a shared module used by a service and by two scripts; who owns it?", "should_trigger": false, "split": "train", "competing_owner": "internal-python"},
+      {"id": "Q-11", "query": "Write a standalone Bash script that rotates log files.", "should_trigger": false, "split": "train", "competing_owner": "internal-bash-script"},
+      {"id": "Q-12", "query": "Add a GitHub Actions job that runs our Python linter.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-actions"},
+      {"id": "Q-13", "query": "Add a Makefile target that runs the Python tests.", "should_trigger": false, "split": "train", "competing_owner": "internal-makefile"},
+      {"id": "Q-14", "query": "Add connection pooling to the database client in our shared Python library.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-python-project"},
+      {"id": "Q-15", "query": "Convert this Excel workbook to CSV and clean the header rows.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-excel"},
+      {"id": "Q-16", "query": "Find the root cause of this intermittent script crash before fixing it.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-debugging"},
+      {"id": "Q-17", "query": "Add pytest coverage for scripts/export_users.py, which operators run by hand.", "should_trigger": true, "split": "train"},
+      {"id": "Q-18", "query": "Write a standalone job that downloads yesterday's invoices and uploads a summary CSV; it runs from cron.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-19", "query": "Add a Pydantic settings class to our web service package and wire it into the app factory.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-python-project"},
+      {"id": "Q-20", "query": "Our release helper script assumes it runs from the repo root; make it work from any directory.", "should_trigger": true, "split": "train"}
+    ]
+  }
+}

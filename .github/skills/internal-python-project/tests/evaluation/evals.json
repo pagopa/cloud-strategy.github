@@ -1,0 +1,158 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-python-project",
+  "requirements": [
+    {
+      "id": "R-CONTRACT",
+      "text": "Name the imported contract the change touches and its consumers before editing.",
+      "source": "internal-python-project SKILL.md: Workflow step 1"
+    },
+    {
+      "id": "R-ROUTE",
+      "text": "Keep thin CLI adapters over package code here, route standalone direct-execution work to /internal-python-script, and route unresolved mixed work to /internal-python.",
+      "source": "internal-python-project SKILL.md: When to use"
+    },
+    {
+      "id": "R-CONFIG-BOUNDARY",
+      "text": "Pass configuration through settings, parameters, or the composition boundary rather than reading deployment defaults inside reusable code.",
+      "source": "internal-python-project SKILL.md: Project contract"
+    },
+    {
+      "id": "R-OUTPUT-BOUNDARY",
+      "text": "Return typed results from core code, keep logs neutral, keep machine output plain, and render human output only in an adapter.",
+      "source": "internal-python-project SKILL.md: Project contract"
+    },
+    {
+      "id": "R-TESTING",
+      "text": "Cover the changed public seam with focused tests that mock only true external boundaries, and report syntax, test, lint, and lock validation results.",
+      "source": "internal-python-project SKILL.md: Testing and validation"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-SERVICE-CHANGE",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-CONTRACT", "R-TESTING"],
+      "prompt": "Add a volume-discount rule to the pricing module used by the checkout API and the invoicing worker.",
+      "initial_state": "An importable pricing module with two importing consumers and an existing pytest suite.",
+      "expected_output": "Both consumers get the discount through the unchanged public pricing function, new tests fail before and pass after the change, and results are shown.",
+      "files": [],
+      "assertions": [
+        {"id": "A-CONSUMERS-NAMED", "text": "Both importing consumers are identified before the edit.", "critical": true},
+        {"id": "A-SEAM-TESTED", "text": "New tests exercise the public pricing function without mocking internal pricing helpers.", "critical": true}
+      ],
+      "forbidden_actions": ["Mocking internal business logic to make tests pass."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Tests fail without the rule and pass with it, and results are observed."],
+        "fail": ["Tests mock the function under change.", "Validation is claimed without output."]
+      }
+    },
+    {
+      "id": "C-CONFIG",
+      "family": "neighbor-regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-CONFIG-BOUNDARY"],
+      "prompt": "Make the library's API timeout configurable per environment.",
+      "initial_state": "A reusable client class with a hardcoded timeout and an application factory that builds it.",
+      "expected_output": "Operators set the timeout per environment through the application's settings, and the client accepts it as a typed argument.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-ENV-IN-LIB", "text": "The reusable client does not read environment variables or deployment defaults directly.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Configuration enters at the composition boundary and is typed."],
+        "fail": ["os.environ is read inside the library client."]
+      }
+    },
+    {
+      "id": "C-OUTPUT",
+      "family": "neighbor-regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-OUTPUT-BOUNDARY"],
+      "prompt": "Show a colored progress table when the import service runs.",
+      "initial_state": "An importable service function called by an HTTP API and by a thin CLI adapter.",
+      "expected_output": "CLI users see the colored table; the HTTP API response is unchanged plain JSON.",
+      "files": [],
+      "assertions": [
+        {"id": "A-CORE-PLAIN", "text": "No rich, emoji, or print calls are added to the service module.", "critical": true}
+      ],
+      "forbidden_actions": ["Adding terminal styling to the service or its API response."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The API response stays plain data."],
+        "fail": ["The service prints or styles output directly."]
+      }
+    },
+    {
+      "id": "C-CLI-ADAPTER",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE", "R-CONTRACT"],
+      "prompt": "Add an `export` subcommand to the click CLI declared under [project.scripts]; it should call the existing export_records() package function.",
+      "initial_state": "An installable package whose console script is a thin click adapter over package functions.",
+      "expected_output": "The subcommand parses options and delegates to export_records(); package logic and its tests stay in the package.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ADAPTER-THIN", "text": "The change stays with the project owner and adds no business logic to the CLI adapter.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The adapter only translates arguments and results."],
+        "fail": ["The work is handed to the script owner, or export logic is duplicated in the CLI."]
+      }
+    },
+    {
+      "id": "C-SCRIPT-ROUTE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE"],
+      "prompt": "Add a --since option to cleanup.py, the standalone script CI runs nightly.",
+      "initial_state": "A directly executed script with no importers besides its tests.",
+      "expected_output": "The option lands under direct-execution rules without introducing package layers, services, or adapters.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ROUTED-SCRIPT", "text": "The script owner handles the change, and the CI entrypoint is cited as evidence.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Routing cites the CI entrypoint."],
+        "fail": ["Project layering is imposed on the standalone script."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Add a new FastAPI endpoint and service method to our orders package, with tests for the service.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Refactor the repository layer of our Django billing app and update its tests.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Add a retry policy with backoff to the HTTP client class exported by our internal SDK.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Split this 900-line Python service module into domain and persistence modules without changing its public API.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Make the Celery task handler in our worker package idempotent.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Add structured logging to our Python SDK without printing to the console.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-07", "query": "Write pytest coverage for the public API of our parsing library.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Our Flask app reads env vars deep in a service; move config to the app factory.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Add a --verbose switch to the one-file log-rotation script in tools/.", "should_trigger": false, "split": "train", "competing_owner": "internal-python-script"},
+      {"id": "Q-10", "query": "Rename a helper used by both our package and the release scripts; first figure out which side owns it.", "should_trigger": false, "split": "train", "competing_owner": "internal-python"},
+      {"id": "Q-11", "query": "Design the bounded contexts for our payments domain.", "should_trigger": false, "split": "train", "competing_owner": "internal-ddd"},
+      {"id": "Q-12", "query": "Add a Node.js Express route for orders.", "should_trigger": false, "split": "train", "competing_owner": "internal-nodejs-project"},
+      {"id": "Q-13", "query": "Write a Dockerfile for our Python service.", "should_trigger": false, "split": "train", "competing_owner": "internal-docker"},
+      {"id": "Q-14", "query": "Write a new two-command maintenance CLI kept in ops/ that is run directly and never installed as a package.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-python-script"},
+      {"id": "Q-15", "query": "Profile the slow endpoint in our FastAPI app.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-performance-optimization"},
+      {"id": "Q-16", "query": "Review the pull request that refactors our orders package.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"},
+      {"id": "Q-17", "query": "Add a subcommand to the Typer CLI that our package installs as a console script; it wraps an existing service call.", "should_trigger": true, "split": "train"},
+      {"id": "Q-18", "query": "Introduce a Protocol so our library's storage backend can be swapped in tests.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-19", "query": "Add a GitHub Actions job that runs our package tests.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-actions"},
+      {"id": "Q-20", "query": "Bump pydantic in our service's lock file and fix the model validators that break.", "should_trigger": true, "split": "held-out"}
+    ]
+  }
+}

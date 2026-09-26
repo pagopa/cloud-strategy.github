@@ -1,38 +1,43 @@
 ---
 name: internal-python-project
-description: Use when Python work primarily changes reusable imported behavior in importable packages, libraries, applications, services, or framework-owned flows; do not use when the primary contract is direct execution.
+description: Use when Python work changes reusable imported code, such as packages, libraries, SDKs, services, framework handlers, thin CLI adapters over package code, or their tests. Route standalone scripts and automation entrypoints to /internal-python-script, and mixed or unclear ownership to /internal-python.
 ---
 
 # Python Project Skill
 
-## Boundary
-
-This skill owns reusable imported behavior in Python packages, libraries,
-applications, services, and framework-owned flows. It applies the complete
-project baseline directly and does not require another skill.
-
 ## When to use
 
-- Imported packages, libraries, applications, services, and framework-owned
-  behavior whose primary contract is reusable code.
-- Thin CLI or transport adapters whose stable contract remains imported
-  project behavior.
-- A CLI or toolkit with a `lib/` folder is judged by its primary contract: when
-  the primary contract is reusable imported behavior, keep it here; when the
-  primary contract is direct execution through multiple entrypoints, route to
-  `/internal-python-script`.
+This skill owns Python work whose primary contract is reusable imported
+behavior:
 
-## When not to use
+- packages, libraries, applications, services, and framework-owned flows;
+- thin CLI or transport adapters whose stable contract remains the imported
+  project behavior;
+- a CLI or toolkit with a `lib/` folder when its primary contract is reusable
+  imported behavior.
 
-- Do not use when the primary contract is direct execution through a standalone
-  script, CLI, automation entrypoint, or operator-facing toolkit.
-- Do not use for an unresolved mixed change until repository evidence
-  establishes reusable imported behavior as the primary contract.
+It applies the complete project baseline itself. Route direct execution
+through standalone scripts, standalone CLIs, automation entrypoints, or
+multi-entrypoint operator toolkits to `/internal-python-script`. Route a mixed
+change whose primary contract is still unresolved to `/internal-python`.
+
+## Workflow
+
+1. **Confirm the contract.** Identify the public API, service boundary,
+   adapter, or framework seam that the change touches. **Complete when:** the
+   imported contract and its consumers are named.
+2. **Apply the project contract.** Follow the rules below and the repository's
+   existing conventions. **Complete when:** each changed module satisfies
+   every contract rule, applying repository conventions only where a rule
+   defers to them.
+3. **Validate.** Run the checks in
+   [Testing and validation](#testing-and-validation). **Complete when:** each
+   check has an observed result or a named evidence gap.
 
 ## Project contract
 
-- Follow the repository's existing framework, dependency manager, test naming,
-  module layout, and validation commands before introducing optional patterns.
+- Follow the repository's existing framework, test naming, module layout, and
+  validation commands before introducing optional patterns.
 - For new test conventions, prefer behavior-oriented names that describe the
   observable contract; match existing test naming when it is already defined.
 - Keep public APIs and data contracts typed and explicit. Pass configuration
@@ -41,7 +46,8 @@ project baseline directly and does not require another skill.
   reusable code.
 - Choose async only when the workload is I/O-bound and the surrounding stack
   supports it cleanly; keep async flows end-to-end.
-- Separate domain, service, persistence, transport, or framework concerns when separation improves observable coupling, reuse, or testability. Do not impose
+- Separate domain, service, persistence, transport, or framework concerns when
+  separation improves observable coupling, reuse, or testability. Do not impose
   a fixed folder tree or generic catch-all modules without that evidence.
 - Keep imported-module logs neutral, structured, or framework-native. Return
   typed results, events, DTOs, or framework responses from core code.

@@ -13,10 +13,9 @@ repo-root/
 ├── {script_path}/
 │   ├── {script_name}.py
 │   ├── requirements.txt  # only for pip-managed external packages
-│   └── run.sh            # only when a launcher contract requires it
-└── tests/
-    └── {script_path}/
-        └── test_{script_name}.py
+│   ├── run.sh            # only when a launcher contract requires it
+│   └── tests/
+│       └── test_{script_name}.py
 ```
 
 For several operator-facing entrypoints with shared dependencies, follow the
@@ -24,20 +23,21 @@ repository's existing toolkit layout. One common shape is:
 
 ```text
 repo-root/
-├── .github/scripts/
+├── {toolkit_path}/
 │   ├── run.sh
 │   ├── requirements.txt  # shared pip lock
 │   ├── {tool_a}.py
 │   ├── {tool_b}.py
-│   └── lib/
-│       ├── __init__.py
-│       ├── shared.py
-│       └── {helper_module}.py
-└── tests/
-    └── test_{toolkit_behavior}.py
+│   ├── lib/
+│   │   ├── __init__.py
+│   │   ├── shared.py
+│   │   └── {helper_module}.py
+│   └── tests/
+│       └── test_{toolkit_behavior}.py
 ```
 
-Keep entrypoints thin and mirror coverage under repository-root `tests/`.
+Keep entrypoints thin. Place tests in the repository's native test location
+for the toolkit; the trees above show one colocated option.
 
 ## Minimal importable entrypoint
 
