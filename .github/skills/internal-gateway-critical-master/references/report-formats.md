@@ -1,5 +1,12 @@
 # Critical Master Report Formats
 
+## Lens Line
+
+Directly after the conclusion line, write `🔎`, the localized label, and the
+applied lenses in order, separated by `·`; append `— pre-mortem` when one
+ran. Example:
+`🔎 **Lenses:** first principles · scope compression · reverse assumption — pre-mortem`.
+
 ## Finding Block
 
 Each finding is one compact block:
@@ -16,7 +23,9 @@ Severity is `high`, `medium`, or `low`, with stable dots: 🔴 high, 🟡 medium
 🟢 low. Confidence reuses the finding's evidence quality: `strong`, `partial`,
 or `weak`. Each field must identify
 the relevant file, decision, or mechanism without requiring the investigation
-transcript. A defense belongs in the subject's rationale, not in a finding.
+transcript. A defense belongs in the subject's rationale, not in a finding,
+with one exception: a material finding the defense resolves renders as one
+non-blocking line, `**N. ⚪ <short title>** — rejected-with-reason: <reason>.`
 Keep `Fix owner` and `Expected verification` in the caller-owned ledger.
 
 ## Residuals

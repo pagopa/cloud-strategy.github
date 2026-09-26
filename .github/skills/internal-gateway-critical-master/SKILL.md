@@ -7,17 +7,10 @@ metadata:
 
 # Critical Master
 
-## Referenced skills
+## When to use
 
 This skill is self-contained. It needs no caller protocol, fixed metadata,
-repository workflow, or machine-readable input. The entries below are
-competing owners for routing only, not dependencies.
-
-- `/internal-review-high-level`: independent, evidence-first, report-only
-  assurance review of an existing non-code artifact or change.
-- `/internal-review-code`: review of a branch, pull request, or code diff.
-
-## When to use
+repository workflow, or machine-readable input.
 
 - Challenge a plan, proposal, decision, design, workflow, requirement,
   document, architecture, or assumption set before someone acts on it.
@@ -29,8 +22,8 @@ Route away when the primary deliverable is:
 - a report-only assurance review of an existing artifact: use
   `/internal-review-high-level`;
 - a review of code, a diff, or a pull request: use `/internal-review-code`;
-- the remedy itself, such as a redesign, plan, or implementation: this skill
-  challenges and reports; the subject's owner builds the remedy.
+- a redesign, plan, or implementation as the main work: its owner builds it;
+  `Authority` covers explicit follow-up actions.
 
 ## Context intake
 
@@ -47,9 +40,9 @@ If several subjects are possible, use the latest user focus and state the
 chosen scope in the report.
 
 There is only one failure case: no analysable subject, request, decision, or
-evidence is available at all. In that case, emit the failure report described
-under `No-context failure` and stop. Do not fail merely because metadata,
-files, revision numbers, or a preferred artifact format are absent.
+evidence is available at all (see `No-context failure`). Do not fail merely
+because metadata, files, revision numbers, or a preferred artifact format are
+absent.
 
 ## Operating posture
 
@@ -61,28 +54,30 @@ files, revision numbers, or a preferred artifact format are absent.
 - Recommend the smallest change that preserves the intended value when the
   current direction is overbuilt or unsafe.
 - Do not pad the report with trivial findings.
-- Analysis and recommendations are the default. If the user explicitly asks
-  for an action, adapt when the available tools, authority, and safety
-  conditions permit it; do not treat read-only behavior as an absolute ban.
 
 ## Authority
 
-- Critical Master challenges and reports. It never acquires subject routing,
-  scope, or acceptance authority.
+- Critical Master never acquires subject routing, scope, or acceptance
+  authority.
 - The subject's active primary owner, identified by current responsibility
   rather than by an upstream skill or producer, retains subject scope and
   decisions.
 - A calling skill retains routing, final finding disposition, plan expansion,
-  and lifecycle. On direct invocation, the user retains acceptance.
+  and lifecycle. Under a caller, stay report-only: put every remedy under
+  `## ✅ Next` and make no edit or mutating command.
+- On direct invocation, the user retains acceptance and analysis is the
+  default. On an explicit user request for an action, such as an edit or a
+  command, act within the request and the available tools, authority, and
+  safety conditions, and report what was done.
 
 ## Analysis units and reruns
 
 An analysis unit is the bounded subject, evidence snapshot, assumptions,
 scope, and acceptance under review. Track each pass with: unit identity, pass
 type (`full` or `delta`), evidence snapshot or digest, changed claims or
-assumptions, rerun reason, and outcome. When a caller owns a ledger, supply
-these details to it and keep no competing record. On direct invocation, keep
-an equivalent record in the conversation.
+assumptions, rerun reason, and outcome. Supply these details to a
+caller-owned ledger instead of a competing record; on direct invocation, keep
+the record in the conversation.
 
 - Run one full pass per analysis unit by default.
 - After a materially supported change, run a delta pass limited to changed
@@ -96,7 +91,7 @@ an equivalent record in the conversation.
 ## Finding classification
 
 Propose exactly one classification for every finding before it can change the
-current plan. The caller owns the final disposition.
+current plan.
 
 | Classification | Blocking | Meaning |
 | --- | --- | --- |
@@ -151,6 +146,7 @@ Run a pre-mortem when failure modes are material and not already covered. This
 applies when the subject involves coordination across teams or systems, a
 missed assumption could cause an incident or governance breach, a new owner or
 handoff is introduced, or the change affects a hard-to-reverse production path.
+A pre-mortem is an annotation, never a lens.
 
 Record every material finding from the full challenge. Lead with the strongest
 supported objection, but do not stop there if other material findings exist.
@@ -159,21 +155,20 @@ Surface it under the report's open-questions section instead of pausing the
 analysis. Treat mitigations as conditions for continuing, not as
 implementation designs that silently rescue a weak proposal.
 
-Completion criterion: at least three lenses were applied, the third is lateral,
-all material findings are represented, and material failure modes appear in a
-finding or residual risk.
+Completion criterion: the lens rule above holds, all material findings are
+represented, and material failure modes appear in a finding or residual risk.
 
 ### Phase 3: Synthesize
 
-- Run a final consistency check and name the strongest supported objection.
+- Run a final consistency check.
 - Classify material claims as `confirmed`, `inference`, or `estimate` and
   evidence quality as `strong`, `partial`, or `weak`.
 - Test each material finding against the steelman defense, the strongest
   argument for the subject as proposed. Classify the defense as `none`,
-  `resolves`, `narrows`, `accepts-risk`, or `unanswered`. Drop a finding the
-  defense `resolves`; otherwise keep its remaining vulnerability.
-- Select one conclusion. A blocking finding is one classified `blocking-now`
-  or `acceptance-required`.
+  `resolves`, `narrows`, `accepts-risk`, or `unanswered`. Reclassify a finding
+  the defense `resolves` as non-blocking `rejected-with-reason`; otherwise
+  keep its remaining vulnerability.
+- Select one conclusion from the blocking findings:
   - `accepted`: no blocking finding remains;
   - `reopen-analysis`: a blocking finding reopens assumptions or scope;
   - `needs-clarification`: a blocking finding depends on an unresolved user
@@ -181,7 +176,6 @@ finding or residual risk.
   - `revise-design`: a blocking finding requires a design or proposal remedy.
   When several apply, select the first in this order: `reopen-analysis`,
   `needs-clarification`, `revise-design`.
-- Use `failure-no-context` only when the sole failure condition applies.
 
 Do not conceal a material risk just to reach `accepted`. Do not use a numeric
 precision that the available evidence cannot support.
@@ -193,9 +187,8 @@ must fit one mental screen: every section is brief but self-contained, and no
 item may be reduced to a bare phrase the reader cannot interpret without the
 conversation.
 
-The report language must always follow the language of the current chat, in
-headings, findings, residuals, open questions, and next actions alike. Keep
-the three finding field names stable per language (English: `Problem` /
+The report language must follow the current chat language in every section.
+Keep the three finding field names stable per language (English: `Problem` /
 `Suggestion` / `Why`; Italian: `Problema` / `Suggerimento` / `Perché`); add a
 stable equivalent when a new language first appears.
 
@@ -206,28 +199,29 @@ Use exactly this order and these anchors:
 1. `# 🔍 Critical Analysis` — title.
 2. `🎯` conclusion line — the exact outcome plus a blocking/non-blocking count,
    then the strongest supported objection as a one-sentence blockquote.
-3. Optional single Mermaid diagram (rules below).
-4. `## 🧾 Findings` — numbered finding blocks (shape below).
-5. `## ⚠️ Residuals` — only when material (shape below).
-6. `## ❓ Open` — only when a material open question remains (shape below).
-7. `## ✅ Next` — numbered concrete actions.
+3. `🔎` lens line — the applied lenses in order.
+4. Optional single Mermaid diagram.
+5. `## 🧾 Findings` — numbered finding blocks.
+6. `## ⚠️ Residuals` — only when material.
+7. `## ❓ Open` — only when a material open question remains.
+8. `## ✅ Next` — numbered concrete actions.
 
-Omit empty sections; never pad. Do not repeat the same fact in the conclusion
+Omit empty sections. Do not repeat the same fact in the conclusion
 line, a finding, and `Next`.
 
 ### Section shapes
 
 Before rendering any report, load
-[`references/report-formats.md`](references/report-formats.md). It owns the
-finding, residual, open-question, next-action, Mermaid, and no-context shapes,
-and the severity and confidence vocabularies.
+[`references/report-formats.md`](references/report-formats.md). It owns every
+section shape and the severity and confidence vocabularies.
 
 ### Delta passes
 
 A delta pass keeps the same layout and emits only changed evidence, findings,
-classifications, conclusion, and residual blockers. Preserve every material
-finding, compacting by grouping rather than deleting. A full pass includes the
-scope only when it changes interpretation.
+classifications, conclusion, and residual blockers; it shows the lens line only
+when the lenses change. Preserve every material finding, compacting by
+grouping rather than deleting. A full pass includes the scope only when it
+changes interpretation.
 
 ## No-context failure
 

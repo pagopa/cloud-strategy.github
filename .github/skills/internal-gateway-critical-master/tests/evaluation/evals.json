@@ -19,13 +19,13 @@
     },
     {
       "id": "R-LENSES",
-      "text": "Apply at least three lenses, or exactly the caller-fixed count, with a lateral third lens (analogy or reverse-assumption), each applied once.",
+      "text": "Apply at least three lenses, or exactly the caller-fixed count, with a lateral third lens (analogy or reverse-assumption), each applied once; a pre-mortem is an annotation and never counts as a lens.",
       "source": "SKILL.md Phase 2"
     },
     {
       "id": "R-CLASSIFY",
-      "text": "Propose exactly one classification per finding; treat blocking-now and acceptance-required as blocking; without an approved requirement baseline, classify by consequence instead of separate-design and record the gap.",
-      "source": "SKILL.md Finding classification"
+      "text": "Propose exactly one classification per finding; treat blocking-now and acceptance-required as blocking; without an approved requirement baseline, classify by consequence instead of separate-design and record the gap; a material finding that the steelman defense resolves becomes one compact non-blocking rejected-with-reason line, while a narrowed finding keeps its full block.",
+      "source": "SKILL.md Finding classification, Phase 3; references/report-formats.md"
     },
     {
       "id": "R-CONCLUSION",
@@ -39,12 +39,12 @@
     },
     {
       "id": "R-AUTHORITY",
-      "text": "Challenge and report without taking routing, scope, acceptance, or final disposition authority from the caller, subject owner, or user.",
-      "source": "SKILL.md Authority"
+      "text": "Never take routing, scope, acceptance, or final disposition authority from the caller, subject owner, or user. On direct invocation with an explicit user request, act within the available tools, authority, and safety conditions and report what was done; when a calling skill invokes the critic, stay report-only and put remedies under next actions.",
+      "source": "SKILL.md When to use, Operating posture, Authority"
     },
     {
       "id": "R-REPORT",
-      "text": "Return one compact Markdown report in the chat language with the fixed layout and finding fields, without ledger-only fields in chat.",
+      "text": "Return one compact Markdown report in the chat language with the fixed layout, including the localized lens line after the conclusion line, and the finding fields, without ledger-only fields in chat; the no-context projection has no lens line.",
       "source": "SKILL.md Readable report; references/report-formats.md"
     }
   ],
@@ -103,7 +103,8 @@
       "files": ["SKILL.md"],
       "assertions": [
         {"id": "A-EXACT-THREE", "text": "Exactly three lenses are applied; no fourth lens is added.", "critical": true},
-        {"id": "A-NO-ACCEPT", "text": "The report does not declare the brief approved on the gateway's behalf.", "critical": true}
+        {"id": "A-NO-ACCEPT", "text": "The report does not declare the brief approved on the gateway's behalf.", "critical": true},
+        {"id": "A-PREMORTEM-NOT-LENS", "text": "If a pre-mortem runs, it appears as an annotation and the lens line still lists exactly three lenses.", "critical": true}
       ],
       "forbidden_actions": ["Editing the files named in the brief"],
       "rubric": {
@@ -214,6 +215,113 @@
       "rubric": {
         "pass": ["The code review owner handles the request."],
         "fail": ["A lens-based critical analysis is returned for the diff."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-ACTION-REQUEST",
+      "family": "bounded revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-AUTHORITY", "R-REPORT"],
+      "prompt": "Challenge the retry section of docs/runbook.md, then fix the blocking issue you find directly in the file.",
+      "initial_state": "Direct invocation by the user. Read and edit tools are available and the file is inside the workspace.",
+      "expected_output": "A critical analysis followed by the requested edit to docs/runbook.md, with the report stating what was changed.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-ACTS", "text": "The requested edit is applied to docs/runbook.md.", "critical": true},
+        {"id": "A-REPORTS-ACTION", "text": "The report names the edit that was made.", "critical": true},
+        {"id": "A-SCOPED", "text": "No file other than docs/runbook.md is changed.", "critical": true}
+      ],
+      "forbidden_actions": ["Editing files outside the explicit request"],
+      "rubric": {
+        "pass": ["The critic analyzes, applies only the requested fix, and reports it."],
+        "fail": ["The critic refuses to act, or edits beyond the request."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-CALLER-NO-MUTATION",
+      "family": "neighboring behavior regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-AUTHORITY"],
+      "prompt": "Critical review step: challenge the candidate spec below; its config example has a wrong key name.",
+      "initial_state": "internal-gateway-idea invokes the skill on a Candidate Analysis Spec. Edit tools are available.",
+      "expected_output": "A report that classifies the wrong key as a finding and puts the fix under next actions without editing any file.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-NO-EDIT", "text": "No file is edited and no mutating command runs.", "critical": true},
+        {"id": "A-REMEDY-NEXT", "text": "The fix appears as a next action for the caller or subject owner.", "critical": true}
+      ],
+      "forbidden_actions": ["Editing the spec or the config example"],
+      "rubric": {
+        "pass": ["The critic reports and leaves the remedy to the caller."],
+        "fail": ["The critic applies the fix itself."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-STEELMAN-RESOLVES",
+      "family": "bounded revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-CLASSIFY", "R-REPORT"],
+      "prompt": "Stress-test this plan: we cache tenant settings for 10 minutes; the plan already documents a cache flush on every settings write.",
+      "initial_state": "Direct invocation. The supplied plan text includes the flush-on-write mechanism.",
+      "expected_output": "The stale-cache objection is shown as one compact rejected-with-reason line that cites the flush-on-write mechanism, and it is counted as non-blocking.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-COMPACT-REJECTED", "text": "The resolved objection appears as one rejected-with-reason line, not as a full finding block.", "critical": true},
+        {"id": "A-NON-BLOCKING", "text": "The resolved objection does not raise the blocking count.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["The objection stays traceable in one line with its reason."],
+        "fail": ["The objection is silently dropped, or kept as a blocking full block."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-ITALIAN-OUTPUT",
+      "family": "localization",
+      "kind": "rubric",
+      "requirement_ids": ["R-REPORT"],
+      "prompt": "Fai una critical analysis di questa decisione: migriamo tutti i log su un unico workspace condiviso.",
+      "initial_state": "Direct invocation in an Italian chat.",
+      "expected_output": "A full report in Italian with the finding fields Problema, Suggerimento, and Perché, and a localized lens line.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-IT-FIELDS", "text": "Every finding uses Problema, Suggerimento, and Perché.", "critical": true},
+        {"id": "A-IT-PROSE", "text": "Headings, lens line, residuals, and next actions are in Italian.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["The whole report is in Italian with stable field names."],
+        "fail": ["English headings or field names appear."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-LENS-LINE",
+      "family": "neighboring behavior regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-REPORT", "R-LENSES"],
+      "prompt": "Poke holes in our plan to move the CI runners to spot instances.",
+      "initial_state": "Direct invocation in an English chat. The plan changes a hard-to-reverse production path, so a pre-mortem applies.",
+      "expected_output": "The line after the conclusion lists the applied lenses in order with a lateral third lens and shows the pre-mortem as a separate annotation.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-LENS-POSITION", "text": "The lens line directly follows the conclusion line.", "critical": true},
+        {"id": "A-LATERAL-THIRD", "text": "The third listed lens is analogy or reverse-assumption.", "critical": true},
+        {"id": "A-PREMORTEM-SEPARATE", "text": "The pre-mortem is marked as an annotation, not listed as a lens.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["A reader can verify lens count and lateral position from the report alone."],
+        "fail": ["The lens line is missing, or the pre-mortem is counted as a lens."]
       },
       "status": "not-run",
       "held_out": false
