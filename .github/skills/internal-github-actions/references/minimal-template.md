@@ -1,6 +1,7 @@
 # Minimal Composite Action Template
 
-Use this reference when you need a safe starter template for a reusable composite action under `.github/actions/`.
+Use this reference when you need a safe starter template for a reusable
+composite action under `.github/actions/`.
 
 ```yaml
 name: Validate Input
@@ -24,9 +25,6 @@ runs:
         echo "✅ input validated"
 ```
 
-Use this template as the smallest safe starting point:
-
-- validate required inputs before the main logic
-- pass expressions through `env:`
-- keep `shell: bash` explicit
-- extract longer logic into a sibling script instead of inflating `run:`
+This template implements the
+[composite-action authoring rules](../SKILL.md#composite-action-authoring-rules)
+as the smallest safe starting point.

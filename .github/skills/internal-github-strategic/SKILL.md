@@ -31,25 +31,24 @@ options, material tradeoffs, or a need for more than one decision lens.
 
 Use only the lenses that can change the recommendation:
 
-- security and identity and access
-- organization and repo model
+- security, identity, and access
+- organization and repository model
 - governance and compliance
 - operations and runner model
-- rollout and rollback and blast radius
+- rollout, rollback, and blast radius
 - Copilot, FinOps, BC/DR, or maintainability
 
 Activate BC/DR when the choice affects delivery continuity, runner resilience,
 backup, recovery, or failover. Activate current documentation only when a
 fresh platform fact can change the outcome.
 
-Load `references/strategic-framing.md` when worked lens combinations or a
-decision-note shape will improve the analysis.
+## Reference map
 
-## Adaptive output modes
-
-Load `references/output-modes.md` when selecting the response depth for a routed
-strategic request; the three modes are quick answer, decision note, and deep
-analysis.
+- Load [strategic framing](references/strategic-framing.md) when worked lens
+  combinations or a decision-note shape will improve the analysis.
+- Load [output modes](references/output-modes.md) when selecting the response
+  depth for a routed strategic request: quick answer, decision note, or deep
+  analysis.
 
 ## Completion criteria
 

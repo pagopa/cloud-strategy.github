@@ -40,8 +40,10 @@ runner or workflow health, audit evidence, reporting, or drift validation.
   `-f state=open` without an explicit GET can produce misleading `404`
   responses.
 
-Load `references/validation-and-evidence.md` when a deeper checklist is
-needed.
+## Reference map
+
+- Load [validation and evidence](references/validation-and-evidence.md) when a
+  deeper checklist is needed.
 
 ## Completion criteria
 

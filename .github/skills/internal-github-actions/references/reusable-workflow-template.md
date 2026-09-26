@@ -1,6 +1,7 @@
 # Reusable Workflow Template
 
-Use this starter when multiple workflows in one repository need the same job orchestration through `workflow_call`.
+Use this starter when multiple workflows in one repository need the same job
+orchestration through `workflow_call`.
 
 ```yaml
 name: reusable-validate
@@ -50,8 +51,9 @@ jobs:
 
 Use a reusable workflow when:
 
-- the unit of reuse is one or more jobs rather than a step sequence
-- the callee needs its own `permissions`, `runs-on`, or `concurrency`
-- the caller should pass typed inputs or consume workflow outputs
+- The unit of reuse is one or more jobs rather than a step sequence.
+- The callee needs its own `permissions`, `runs-on`, or `concurrency`.
+- The caller should pass typed inputs or consume workflow outputs.
 
-Prefer a composite action instead when the reusable unit is step-level logic inside a job.
+Prefer a composite action instead when the reusable unit is step-level logic
+inside a job.

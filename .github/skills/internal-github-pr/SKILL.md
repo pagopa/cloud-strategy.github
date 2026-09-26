@@ -13,13 +13,13 @@ fresh validation evidence.
 
 Use when the requested deliverable is pull-request content, review readiness,
 merge execution, or repository-scoped terminal-state proof. A technical code
-review remains owned by `/internal-review-code`; use this skill when the PR
+review remains owned by `internal-review-code`; use this skill when the PR
 itself is the requested lifecycle or readiness deliverable.
 
 ## PR workflow
 
-1. Resolve one repository pull-request template and preserve its headings and
-   order.
+1. Resolve one repository pull-request template as described in
+   [Template resolution](#template-resolution).
 2. Extract specification outcomes and map them to the actual diff. Identify
    gaps instead of inventing completion.
 3. Draft or update concise PR content with relevant scope, changes, risk,
@@ -42,7 +42,7 @@ itself is the requested lifecycle or readiness deliverable.
 Check these paths in order and use the first existing template:
 
 1. `.github/PULL_REQUEST_TEMPLATE.md`
-2. the lowercase filename under `.github/`
+2. `.github/pull_request_template.md`
 3. `PULL_REQUEST_TEMPLATE.md`
 4. `pull_request_template.md`
 
