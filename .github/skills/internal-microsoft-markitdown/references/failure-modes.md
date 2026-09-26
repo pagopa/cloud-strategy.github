@@ -5,8 +5,8 @@ these; changing the environment or waiting does.
 
 ## Empty transcript body
 
-- Symptom: `xml.etree.ElementTree.ParseError: no element found: line 1, column 0`
-  during transcript fetch, with per-attempt retry failures printed.
+- Symptom: `xml.etree.ElementTree.ParseError: no element found: line 1,
+  column 0` during transcript fetch, with per-attempt retry failures printed.
 - Cause: the YouTube timedtext endpoint returned an empty body, typically bot
   detection or throttling. The video page and caption listing still work.
 - Recovery: retry later; a CLI attempt may succeed where an API attempt failed

@@ -8,10 +8,9 @@ without changing the repository:
 pipx install yamllint==1.38.0
 ```
 
-The checker is read-only and returns `0` when checks passed within supported
-scope, `1` when the tool reports findings, and `2` for usage, dependency,
-file, or internal failures. It bounds emitted findings to 100 and supports
-`--self-test`, which runs every bundled valid and invalid fixture.
+The checker is read-only, uses the exit codes defined in `SKILL.md`, bounds
+emitted findings to 100, and supports `--self-test`, which runs every bundled
+valid and invalid fixture.
 
 Supported checks are YAML parser syntax, duplicate mapping keys including the
 configured duplicate-merge-key behavior, implicit boolean scalars, and implicit

@@ -12,7 +12,8 @@ description: Use when generating, modifying, validating, reviewing, or troublesh
 
 ## When not to use
 
-- The work concerns prose, policy, or another diagram language rather than Mermaid.
+- The work concerns prose, policy, or another diagram language rather than
+  Mermaid.
 - A visual editor or renderer is the primary task.
 
 ## Theme-neutral communication
@@ -37,24 +38,27 @@ description: Use when generating, modifying, validating, reviewing, or troublesh
 ## Generate
 
 - Clarify the purpose and audience first.
-- Pick the smallest diagram type that fits: flowchart, sequence, state, class, ER, or journey.
+- Pick the smallest diagram type that fits: flowchart, sequence, state,
+  class, ER, or journey.
 - Quote node labels, especially labels containing punctuation.
-- Apply Theme-neutral communication.
+- Apply [Theme-neutral communication](#theme-neutral-communication).
 - Keep the diagram minimal. Include only relationships that serve its purpose.
 
 ## Modify
 
 - Preserve existing node IDs, edge directions, and shape semantics.
 - Produce the minimal diff needed for the requested change.
-- Apply Theme-neutral communication.
+- Apply [Theme-neutral communication](#theme-neutral-communication).
 - Preserve compatible existing styling. Remove an explicit fill from any
   text-bearing box touched by the requested change.
 - Keep unaffected labels, ordering, and relationships stable.
 
 ## Validate
 
-- Check the diagram with an available renderer such as `mmdc` or the Mermaid Live Editor.
-- Without an available renderer, report the diagram as unverified. Never claim validity from inspection alone.
+- Check the diagram with an available renderer such as `mmdc` or the Mermaid
+  Live Editor.
+- Without an available renderer, report the diagram as unverified. Never
+  claim validity from inspection alone.
 - Audit every explicit fill target and confirm that its rendered box contains
   no visible content. Audit the remaining source for explicit colors, themes,
   and appearance styling.
@@ -70,12 +74,14 @@ description: Use when generating, modifying, validating, reviewing, or troublesh
 - Treat an explicit fill on a text-bearing box as a readability defect. Treat
   other explicit colors, themes, or appearance styling as a theme-compatibility
   risk.
-- Confirm that removing emoji or line styling would not remove essential meaning.
+- Confirm that removing emoji or line styling would not remove essential
+  meaning.
 - Reject decorative diagrams that do not communicate a needed relationship.
 
 ## Troubleshoot
 
-- Reduce the diagram to the smallest failing snippet, then add parts back one at a time.
+- Reduce the diagram to the smallest failing snippet, then add parts back one
+  at a time.
 - Treat a text-bearing box with an explicit fill as the first likely cause of
   light/dark contrast failures. Isolate other explicit colors, themes, or
   appearance styling while diagnosing.

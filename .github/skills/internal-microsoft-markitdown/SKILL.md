@@ -7,22 +7,25 @@ description: Use when converting any file, URL, or YouTube video to Markdown wit
 
 ## When to use
 
-- Any request to convert a document, page, or media source to Markdown with markitdown.
+- Any request to convert a document, page, or media source to Markdown with
+  markitdown.
 - YouTube transcript extraction through markitdown.
 - Choosing between the markitdown CLI, the Python API, and plugins.
 
 ## When not to use
 
-- Markdown structure, fence, or link review: that is `internal-markdown`.
-- Workbook or tabular data integrity: that is `internal-excel`.
-- Summarizing or rewriting a transcript after conversion; the contract ends at Markdown output.
+- Markdown structure, fence, or link review; route it to `/internal-markdown`.
+- Workbook or tabular data integrity; route it to `/internal-excel`.
+- Summarizing or rewriting a transcript after conversion; the contract ends
+  at Markdown output.
 
 ## Environment map
 
 Two installs coexist; name the install target before debugging.
 
-- CLI: `markitdown` from pipx (`~/.local/bin/markitdown`, isolated venv). Install
-  missing extras into that venv with `pipx inject markitdown <package>`. Inject
+- CLI: `markitdown` from pipx (`~/.local/bin/markitdown`, isolated venv).
+  Install missing extras into that venv with
+  `pipx inject markitdown <package>`. Inject
   the dependency package directly (for example `youtube-transcript-api`), not an
   extra-spec string.
 - Python API: `from markitdown import MarkItDown` resolves against the global
@@ -31,7 +34,7 @@ Two installs coexist; name the install target before debugging.
 - A missing extra in one install is not a missing feature; verify the serving
   install first.
 
-## Direct playbook
+## Commands
 
 - File: `markitdown FILE -o OUT.md`.
 - URL: `markitdown 'URL' -o OUT.md`. For YouTube use the canonical form
@@ -43,15 +46,17 @@ Two installs coexist; name the install target before debugging.
 - Plugins: `--list-plugins` to enumerate, `-p` to enable.
 - Always save with `-o`; do not rely on truncated console output as evidence.
 
-## Boundary
+## Execution rules
 
 - Use the smallest command that yields the artifact; do not re-read the source.
 - Prefer the CLI for one-shot conversions and file outputs; prefer the Python
   API when the result feeds code: `from markitdown import MarkItDown;
   MarkItDown().convert(source, **kwargs).text_content`, where source is a path,
   URI, or stream and kwargs include `youtube_transcript_languages`.
-- On a conversion error, read `references/failure-modes.md` before retrying;
-  most observed failures are environmental and flags will not fix them.
+- On a conversion error, read
+  [`references/failure-modes.md`](references/failure-modes.md) before
+  retrying; most observed failures are environmental and flags will not fix
+  them.
 
 ## Validation
 
