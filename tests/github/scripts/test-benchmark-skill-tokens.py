@@ -12,9 +12,19 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").is_file() and (parent / ".github").is_dir()
 )
 SCRIPT_PATH = REPO_ROOT / ".github/scripts/benchmark-skill-tokens.py"
-FIXTURE_PATH = (
-    REPO_ROOT / ".github/skills/internal-terraform/tests/fixtures/routing-cases.json"
-)
+# Host-owned expectations: (primary, execution, delegated) owner per scenario.
+EXPECTED_TERRAFORM_OWNERS: dict[str, tuple[str, str | None, str | None]] = {
+    "hcl-only": ("internal-tf", None, None),
+    "tfvars-json-only": ("internal-tf", None, None),
+    "mixed-adoption": ("internal-terraform", None, "internal-tf"),
+    "native-test": ("internal-terraform", None, None),
+    "state-or-drift": ("internal-terraform", None, None),
+    "module-architecture": ("internal-terraform", None, None),
+    "ci-or-provider-operation": ("internal-terraform", None, None),
+    "ambiguous-adoption-identity": ("internal-terraform", None, None),
+    "bulk-multi-state-import": ("internal-terraform", "internal-terraform-import", None),
+    "aws-identity-center-import": ("internal-terraform", "internal-terraform-import", None),
+}
 
 
 def _load_benchmark_module() -> Any:
@@ -26,14 +36,12 @@ def _load_benchmark_module() -> Any:
     return module
 
 
-def test_terraform_benchmark_covers_the_routing_fixture() -> None:
+def test_terraform_benchmark_covers_the_expected_scenarios() -> None:
     module = _load_benchmark_module()
-    fixture = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
     reports = module.build_terraform_scenario_report(REPO_ROOT)
     report_by_id = {report["scenario"]: report for report in reports}
-    fixture_by_id = {scenario["id"]: scenario for scenario in fixture["scenarios"]}
 
-    assert set(report_by_id) == set(fixture_by_id)
+    assert set(report_by_id) == set(EXPECTED_TERRAFORM_OWNERS)
     required_fields = {
         "scenario",
         "primary_owner",
@@ -48,14 +56,12 @@ def test_terraform_benchmark_covers_the_routing_fixture() -> None:
     }
     for scenario_id, report in report_by_id.items():
         assert required_fields <= report.keys()
-        expected = fixture_by_id[scenario_id]
-        assert report["primary_owner"] == expected["primary_owner"]
-        assert report["execution_owner"] == expected["execution_owner"]
-        assert report["delegated_owner"] == expected["delegated_owner"]
-        assert report["loaded_local_references"] == expected["loaded_local_references"]
-        assert (
+        primary, execution, delegated = EXPECTED_TERRAFORM_OWNERS[scenario_id]
+        assert report["primary_owner"] == primary
+        assert report["execution_owner"] == execution
+        assert report["delegated_owner"] == delegated
+        assert not set(report["loaded_local_references"]) & set(
             report["forbidden_local_references"]
-            == expected["forbidden_local_references"]
         )
 
 

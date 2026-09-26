@@ -13,18 +13,18 @@ logic remains in consumer-supplied adapters.
 ## When to use
 
 Use only for an approved import assessment or execution after the wrapper has
-provided the required handoff. Do not use this skill as a general Terraform
-entrypoint.
+provided the required handoff. Route every other Terraform request to
+`/internal-terraform`.
 
 ## Handoff gate
 
 Require an explicit wrapper handoff with these fields: `Primary`, `Execution
-owner`, `Reason`, `Context`, `Safety evidence`, and `Validation`. The execution
-owner must be `/internal-terraform-import`, and the handoff must identify the
-consumer root, selected mode, scopes, identity, ownership, state, runner,
-mutation, convergence, and recovery evidence. Protocol v2 is mandatory for
-live execution; protocol v1 is assessment-only and is never converted
-implicitly.
+owner`, `Reason`, `Context`, `Safety evidence`, and `Validation`. `Primary`
+must be `/internal-terraform`, the execution owner must be
+`/internal-terraform-import`, and the handoff must identify the consumer root,
+selected mode, scopes, identity, ownership, state, runner, mutation,
+convergence, and recovery evidence. Protocol v2 is mandatory for live
+execution; protocol v1 is assessment-only and is never converted implicitly.
 
 The machine-readable handoff projects these fields as `primary_owner`,
 `execution_owner`, `reason`, `context`, `safety_evidence`, and `validation`.
@@ -60,35 +60,78 @@ runtime results. The receipt links the authorization and evidence digests, the
 applied plan, final state identities, live verification, post-apply plan, and
 recovery evidence.
 
-## Validation and testing
+## Run
 
-Run the focused bundle tests and syntax checks after changes:
+Before any run, load
+[`references/import-orchestration.md`](references/import-orchestration.md)
+for the JSONL record shape, dispositions, modes, resume, generated HCL, plan
+safety, and records. Load
+[`references/aws-identity-center-import.md`](references/aws-identity-center-import.md)
+only for the AWS Identity Center adapter path.
+
+Invoke `scripts/import-manifest-runner.sh` from this bundle:
 
 ```text
-python -m pytest .github/skills/internal-terraform-import/tests -q
-python -m py_compile .github/skills/internal-terraform-import/scripts/adoption_protocol.py
-bash -n .github/skills/internal-terraform-import/scripts/import-manifest-runner.sh
-shellcheck -s bash .github/skills/internal-terraform-import/scripts/import-manifest-runner.sh
+Usage: import-manifest-runner.sh --manifest FILE --mode script|hcl --root DIR --handoff FILE --runner-adapter FILE --resource-adapter FILE [options]
+Options: --runner FILE --scope SCOPE --dry-run --continue-on-error --live
 ```
 
-The runner remains a single operator entrypoint by design. Runner and resource
-adapters are sourced into the same Bash process, and the live lifecycle shares
-trap cleanup, fail-closed exits, plan artifacts, authorization, evidence, and
-receipt state. Splitting those stages would require a new cross-file state
-contract and would make adapter injection and immutable-record ordering less
-explicit. Keep the exception bounded: new provider or resource behavior must
-remain in adapters, and a future lifecycle helper extraction must preserve the
-bundle-local portability contract.
+- Pass `--mode` and `--root` explicitly; they default to `script` and the
+  current directory, and must match the handoff.
+- `hcl` mode requires exactly one `--scope` authorized by the handoff.
+- Without `--live`, a run performs no import, apply, or state mutation. `hcl`
+  mode still writes the scoped `imports.generated.tf`.
+- `--dry-run` reports candidates only and cannot be combined with `--live`.
+- `--continue-on-error` is opt-in and still exits non-zero when any record
+  fails.
+- `--live` requires a protocol v2 handoff with `decision=execute` and complete
+  safety evidence.
 
-The live protocol tests must cover protocol-v2 handoff validation, complete
-plan-action classification, import and state-move adoption, exact saved-plan
-application, immutable records, and bundle portability.
+The consumer root's executable `./terraform.sh` is the mandatory default
+runner. An absent, unexecutable, or capability-incomplete runner is a
+fail-closed stop. The runner never falls back to direct `terraform import`.
+An explicit `--runner`, and every live run, must use exactly the runner path
+authorized in the handoff; `--runner` cannot replace that authorization.
 
-Load `references/import-orchestration.md` for bulk or multi-state imports.
-Load `references/aws-identity-center-import.md` only for the AWS Identity
-Center adapter path.
+The runner and resource adapters are sourced Bash files. The runner checks
+these functions before use:
 
-Route general Terraform semantics to `antonbabenko-terraform-skill`,
+| Function | Required when |
+| --- | --- |
+| `runner_preflight` | Every run |
+| `runner_state_identity` | Every run |
+| `runner_plan` | Every run |
+| `resolve_import_record` | Every run (resource adapter) |
+| `runner_destination_exists` | `hcl` mode |
+| `runner_plan_json` | Live runs |
+| `runner_plan_saved` | Live runs |
+| `runner_apply_saved` | Live runs |
+| `runner_move` | Live adoption of a `moved_candidate` record by state move |
+
+**Complete when:** the run exits zero with every record in a terminal status,
+or it stops fail-closed with the failing record, reason, and retained recovery
+evidence reported.
+
+## Final report
+
+Report, in this order:
+
+1. Run ID, mode, consumer root, scopes, and whether the run was live.
+2. Per-record status as emitted by the runner (`imported`, `moved`,
+   `skipped_already_managed`, `excluded_by_disposition`, `not_found`,
+   `ambiguous`, `aws_error`, or `terraform_error`) and the runner summary
+   counts.
+3. Plan classification and the saved plan artifact, for live runs.
+4. Paths of the authorization, evidence, recovery, and receipt records under
+   `.terraform-import-adoption/`.
+5. Exit status, unresolved evidence gaps, and the next required action.
+
+## Boundaries
+
+Route general Terraform semantics to `/antonbabenko-terraform-skill`,
 language-only HCL to `/internal-tf`, and independent cloud design or governance
-to the relevant cloud owner. This skill does not own adoption policy,
-general operational validation, or cloud governance.
+to the relevant cloud owner. This skill does not own adoption policy, general
+operational validation, or cloud governance.
+
+When changing this bundle, load
+[`references/maintenance.md`](references/maintenance.md).

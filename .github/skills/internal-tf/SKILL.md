@@ -5,12 +5,6 @@ description: Use when Terraform/OpenTofu language-only HCL is the immediate conc
 
 # Terraform/OpenTofu Language
 
-## Reference files
-
-- `references/common-mistakes.md`: Load when reviewing HCL, typed-interface, or file-level readability mistakes.
-- `references/structure-standard.md`: Load when choosing the default root file or environment layout.
-- `references/template-examples.md`: Load when a minimal typed HCL example is useful.
-
 ## When to use
 
 Use this skill when the immediate deliverable is language-only Terraform/OpenTofu
@@ -21,13 +15,12 @@ HCL:
 - Define or revise variables, outputs, locals, provider blocks, data blocks, resource blocks, or module block syntax.
 - Choose typed input contracts, validation blocks, optional attributes, sensitive values, or nullable behavior.
 - Choose names, file layout, or formatting for language-level configuration.
-- Format or validate configuration without needing state, provider installation, a plan, an apply, or a cloud operation.
+- Format or validate configuration without backend access, state, a plan, an apply, or a cloud operation.
+
+This skill owns HCL shape, typed configuration, and readability, not the
+operational meaning of the infrastructure.
 
 ## Scope
-
-This is the lightweight language-only owner for Terraform/OpenTofu. It owns
-HCL shape, typed configuration, and readability, not the operational meaning
-of the infrastructure.
 
 ### Language and syntax
 
@@ -45,36 +38,48 @@ of the infrastructure.
 - Keep environment-specific values in the established `.tfvars` layout and keep secrets out of committed configuration.
 - Disclose the Terraform/OpenTofu version floor when using a language feature that requires one.
 
+## Conditional references
+
+- [`references/common-mistakes.md`](references/common-mistakes.md): load when reviewing HCL, typed-interface, or file-level readability mistakes.
+- [`references/structure-standard.md`](references/structure-standard.md): load when choosing the default root file or environment layout.
+- [`references/template-examples.md`](references/template-examples.md): load when a minimal typed HCL example is useful.
+
 ## Validation
 
-The maximum local validation boundary is:
+The local validation boundary is:
 
 ```bash
 terraform fmt -check -recursive
+terraform init -backend=false
 terraform validate
 ```
 
-Use `tofu fmt` and `tofu validate` when the repository standardizes on OpenTofu. If validation requires provider installation, backend access, state inspection, a plan, an apply, credentials, native test execution, CI behavior, or cloud operation, hand the operational part to `/internal-terraform`.
+Use the `tofu` equivalents when the repository standardizes on OpenTofu.
+`init -backend=false` installs providers without configuring a backend, so it
+reads no state and needs no cloud credentials. Hand the operational part to
+`/internal-terraform` when validation needs backend access, state inspection,
+a plan, an apply, credentials, native test execution, CI behavior, or a cloud
+operation.
 
 ## Routing boundaries
 
 | Immediate request | Owner |
 | --- | --- |
-| HCL syntax, expressions, types, variables, outputs, `.tfvars`, `.tfvars.json`, or formatting | `/internal-tf` |
+| HCL syntax, expressions, types, variables, outputs, `.tfvars`, `.tfvars.json`, or formatting | `internal-tf` |
 | Native `.tftest.hcl` or `.tftest.json`, `run`, `assert`, mock providers, or `terraform test`/`tofu test` | `/internal-terraform` |
 | Module architecture, state, drift, plan/apply, provider operation, cloud topology, CI, scans, upgrades, recovery, or risk diagnosis | `/internal-terraform` |
 
 A `module` block syntax correction belongs here. Choosing module boundaries,
-migrating consumers, or protecting resource identity belongs to Anton through
+migrating consumers, or protecting resource identity belongs to
 `/internal-terraform`.
 
-## Handoff rules
+## Handoff
 
 - State the Terraform/OpenTofu runtime and version when a language feature has a version floor.
 - Name the files and configuration constructs in scope.
-- Do not invent provider schemas or cloud behavior from HCL syntax alone.
-- Do not preload state, provider-operation, plan/apply, native-test, CI, or cloud-operation guidance for a language-only task.
-- When the request crosses a boundary, return the language finding and identify `/internal-terraform` as the owner of the remaining work.
+- Derive provider schemas and cloud behavior from provider documentation or validation output, not from HCL syntax alone.
+- Load only language guidance for a language-only task; state, provider-operation, plan/apply, native-test, CI, and cloud-operation guidance belongs to `/internal-terraform`.
+- When the request crosses a boundary, return the language finding and route the remaining work to `/internal-terraform`.
 
 ## Output contract
 
@@ -85,3 +90,7 @@ Return:
 3. The smallest valid edit, preserving local layout and contracts.
 4. The focused formatting or validation result.
 5. A handoff to `/internal-terraform` when the remaining issue is operational, test-related, or provider-specific.
+
+**Complete when:** the edit is the smallest valid change, the validation
+boundary above was run or its gap is stated, and every out-of-boundary concern
+is handed to `/internal-terraform`.

@@ -2,8 +2,8 @@
 
 Use this reference only when `/internal-terraform` selects an operational,
 mixed, testing, CI, provider, state, recovery, or infrastructure-diagnosis
-branch. It supplies repository-specific gates; Anton remains primary for
-unoverridden Terraform/OpenTofu operational depth.
+branch. It supplies repository-specific gates; `antonbabenko-terraform-skill`
+remains authoritative for unoverridden Terraform/OpenTofu operational depth.
 
 ## Root Runner and CI Reachability
 
@@ -51,11 +51,13 @@ every managed object at once.
 
 Editing correct configuration until the delta disappears converts an expected
 divergence into a real defect. Where neither reading is supported, report the
-delta as undecided rather than choosing the cheaper one. Anton owns the
-reconciliation mechanics once the delta is classified.
+delta as undecided rather than choosing the cheaper one. Route the
+reconciliation mechanics to `/antonbabenko-terraform-skill` once the delta is
+classified.
 
 ## Handoff
 
 State the selected primary owner, the repository-specific gate being applied,
-the evidence context, and the narrowest validation. Anton remains the owner of
-general Terraform/OpenTofu provider procedures and operational depth.
+the evidence context, and the narrowest validation.
+`antonbabenko-terraform-skill` remains the owner of general Terraform/OpenTofu
+provider procedures and operational depth.

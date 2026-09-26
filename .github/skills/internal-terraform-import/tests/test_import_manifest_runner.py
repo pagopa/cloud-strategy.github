@@ -8,13 +8,9 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").is_file() and (parent / ".github").is_dir()
-)
-RUNNER = REPO_ROOT / ".github/skills/internal-terraform-import/scripts/import-manifest-runner.sh"
-FIXTURE = REPO_ROOT / ".github/skills/internal-terraform-import/tests/fixtures/imports.valid.jsonl"
+BUNDLE_ROOT = Path(__file__).resolve().parents[1]
+RUNNER = BUNDLE_ROOT / "scripts/import-manifest-runner.sh"
+FIXTURE = BUNDLE_ROOT / "tests/fixtures/imports.valid.jsonl"
 
 
 def _write_executable(path: Path, text: str) -> None:
@@ -283,7 +279,7 @@ def _run_runner(
             _write_handoff(handoff, root=root, **payload)
         args.extend(["--handoff", str(handoff)])
     args.extend(extra)
-    return subprocess.run(args, cwd=REPO_ROOT, env=env, text=True, capture_output=True)
+    return subprocess.run(args, cwd=BUNDLE_ROOT, env=env, text=True, capture_output=True)
 
 
 def _write_manifest(path: Path, records: list[dict[str, object]]) -> None:
@@ -867,7 +863,7 @@ def test_live_script_mode_requires_complete_execute_evidence(
             str(handoff),
             "--live",
         ],
-        cwd=REPO_ROOT,
+        cwd=BUNDLE_ROOT,
         env={**os.environ, "CAPABILITY_PROOF": "yes", "STATE_FILE": str(root / "state.tsv")},
         text=True,
         capture_output=True,

@@ -1,0 +1,138 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-tf",
+  "requirements": [
+    {
+      "id": "R-LANG-ONLY",
+      "text": "Own only language-level Terraform/OpenTofu HCL: syntax, expressions, types, typed interfaces, formatting, and file layout.",
+      "source": "internal-tf SKILL.md: When to use, Scope"
+    },
+    {
+      "id": "R-INTERFACES",
+      "text": "Require an explicit description and type on variables, a description on outputs, validation close to the constrained variable, and preserved module input and output names.",
+      "source": "internal-tf SKILL.md: Configuration interfaces"
+    },
+    {
+      "id": "R-VALIDATION",
+      "text": "Validate with fmt, init -backend=false, and validate, and hand off anything needing backend access, state, plan, apply, credentials, native tests, CI, or cloud operations.",
+      "source": "internal-tf SKILL.md: Validation"
+    },
+    {
+      "id": "R-ROUTE-OUT",
+      "text": "Route native tests, module architecture, state, drift, plan or apply, provider operation, CI, scans, upgrades, recovery, and risk diagnosis to /internal-terraform, returning only the separable language finding.",
+      "source": "internal-tf SKILL.md: Routing boundaries, Handoff"
+    },
+    {
+      "id": "R-OUTPUT",
+      "text": "Return the controlling assumption, the construct changed, the smallest valid edit, the validation result, and any handoff.",
+      "source": "internal-tf SKILL.md: Output contract"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-INTERFACE-REVIEW",
+      "family": "bounded-revision",
+      "kind": "deterministic",
+      "requirement_ids": ["R-INTERFACES", "R-OUTPUT"],
+      "prompt": "Review this variables and outputs file before I commit it.",
+      "initial_state": "A single .tf file with one variable and one output is provided.",
+      "expected_output": "Accept the valid file; for the defective file, flag the missing type and description, the empty-string default for an optional value, and the undescribed output, and propose the smallest edit.",
+      "files": ["tests/evaluation/fixtures/variables-valid.tf", "references/common-mistakes.md"],
+      "assertions": [
+        {"id": "A-TYPE-DESCRIPTION", "text": "The missing variable type and description are both reported.", "critical": true},
+        {"id": "A-OUTPUT-DESCRIPTION", "text": "The output without a description is reported.", "critical": true},
+        {"id": "A-NULL-DEFAULT", "text": "The empty-string default is replaced by null or a required input.", "critical": false}
+      ],
+      "forbidden_actions": ["Rename the variable or output while fixing it."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/variables-defective.tf"
+    },
+    {
+      "id": "C-VALIDATE-BOUNDARY",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-VALIDATION", "R-OUTPUT"],
+      "prompt": "I changed a for_each expression in network.tf. Check that the configuration is still valid.",
+      "initial_state": "A root with a remote backend block and an uninitialized .terraform directory.",
+      "expected_output": "Run fmt, init -backend=false, and validate, report the result, and do not initialize the remote backend or run a plan.",
+      "files": [],
+      "assertions": [
+        {"id": "A-BACKEND-FALSE", "text": "Initialization skips the backend.", "critical": true},
+        {"id": "A-NO-PLAN", "text": "No plan, apply, or state command is run.", "critical": true}
+      ],
+      "forbidden_actions": ["Run terraform init with the backend.", "Run terraform plan."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript shows init -backend=false followed by validate and a reported result."],
+        "fail": ["The transcript initializes the remote backend or runs a plan to check validity."]
+      }
+    },
+    {
+      "id": "C-NATIVE-TEST-HANDOFF",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE-OUT"],
+      "prompt": "Add a .tftest.hcl run block that asserts the bucket name output for this module.",
+      "initial_state": "A module with typed variables and outputs.",
+      "expected_output": "Identify native test authoring as outside the language lane and route it to /internal-terraform, contributing at most an output-shape note.",
+      "files": [],
+      "assertions": [
+        {"id": "A-HANDOFF", "text": "The native test work is handed to /internal-terraform.", "critical": true}
+      ],
+      "forbidden_actions": ["Author and run terraform test inside the language lane."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The answer names /internal-terraform as owner of the .tftest.hcl work."],
+        "fail": ["The answer writes the test suite and runs terraform test as a language task."]
+      }
+    },
+    {
+      "id": "C-MIXED-STATE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE-OUT", "R-LANG-ONLY"],
+      "prompt": "Rename resource aws_s3_bucket.logs to aws_s3_bucket.audit_logs without destroying it.",
+      "initial_state": "The resource exists in remote state.",
+      "expected_output": "Give the moved block syntax as the language finding and route identity protection and plan verification to /internal-terraform.",
+      "files": [],
+      "assertions": [
+        {"id": "A-MOVED-SYNTAX", "text": "The moved block shape is correct.", "critical": false},
+        {"id": "A-IDENTITY-HANDOFF", "text": "Resource identity and plan verification are routed to /internal-terraform.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim the rename is safe without a plan."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The answer separates the moved block syntax from the operational verification owned by /internal-terraform."],
+        "fail": ["The answer declares the rename complete from syntax alone."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Add a validation block so var.environment only accepts dev, uat, or prod.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Why does this for_each over a list of objects fail with an invalid key type?", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Convert this terraform.tfvars file to terraform.tfvars.json with the same values.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Make the tags input an object with optional attributes and sane defaults.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Run terraform fmt on the network module and fix the indentation it reports.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Review outputs.tf: are the descriptions and sensitive flags correct?", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Write the moved block syntax for renaming module.app to module.web.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Is nullable = false needed on this string variable with a default?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Replace the count on this resource with for_each keyed by name.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-10", "query": "Order the arguments in these variable blocks according to the style guide.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-11", "query": "Our terraform plan wants to replace the database; figure out why.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-12", "query": "Write a .tftest.hcl suite with mock providers for this module.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-13", "query": "Import the existing S3 buckets into state for the logging root.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-14", "query": "Upgrade the AWS provider from 5.x to 6.x across all roots.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-15", "query": "Set up the GitHub Actions workflow that runs terraform plan on pull requests.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-actions"},
+      {"id": "Q-16", "query": "Decide whether networking should be split into its own module and state.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-terraform"},
+      {"id": "Q-17", "query": "State is locked after a failed apply; how do we recover safely?", "should_trigger": false, "split": "held-out", "competing_owner": "internal-terraform"},
+      {"id": "Q-18", "query": "Write the SCP that denies leaving the organization.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-cloud-policy"},
+      {"id": "Q-19", "query": "Fix the YAML indentation in this CloudFormation template.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-yaml"},
+      {"id": "Q-20", "query": "Detect drift between prod state and the live account.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-terraform"}
+    ]
+  }
+}

@@ -1,8 +1,16 @@
 # Portable Import Orchestration
 
-Use this reference after `/internal-terraform` hands off a bulk or multi-state
-adoption import. The selected consumer repository remains responsible for its
-root, wrapper contract, identity, scope catalogue, and mutation authority.
+Use this reference before any import run after `/internal-terraform` hands off
+an approved import. The selected consumer repository remains responsible for
+its root, wrapper contract, identity, scope catalogue, and mutation authority.
+
+## Contents
+
+- [Input and adapters](#input-and-adapters)
+- [Modes and resume](#modes-and-resume)
+- [Generated HCL lifecycle](#generated-hcl-lifecycle)
+- [Plan safety](#plan-safety)
+- [Records and recovery](#records-and-recovery)
 
 ## Input and adapters
 
@@ -44,12 +52,10 @@ This bundle validates a separate `convergence_authority` when a handoff names
 `converge`, but the current entrypoint rejects convergence execution; route
 that operation back through the convergence owner.
 
-When the selected consumer root has `./terraform.sh`, it is the required
-default runner. An absent, unexecutable, or capability-incomplete wrapper is a
-fail-closed stop. The orchestrator never invokes `terraform import` directly as
-a fallback and never infers a profile, account, region, backend, alias, or
-scope. For live execution, the selected runner path must also exactly match
-the path authorized in the handoff; `--runner` cannot replace that authorization.
+The runner selection rule (`./terraform.sh` default, fail-closed, handoff-bound
+runner path) is defined in the `## Run` section of `SKILL.md`. The
+orchestrator never infers a profile, account, region, backend, alias, or
+scope.
 
 ## Modes and resume
 

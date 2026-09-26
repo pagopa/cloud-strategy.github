@@ -8,12 +8,8 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").is_file() and (parent / ".github").is_dir()
-)
-RUNNER = REPO_ROOT / ".github/skills/internal-terraform-import/scripts/import-manifest-runner.sh"
+BUNDLE_ROOT = Path(__file__).resolve().parents[1]
+RUNNER = BUNDLE_ROOT / "scripts/import-manifest-runner.sh"
 
 
 def _write_executable(path: Path, text: str) -> None:
@@ -260,7 +256,7 @@ def _run_hcl(
     args.extend(extra)
     env = os.environ.copy()
     env["APPLIED_MARKER"] = str(root / "applied")
-    return subprocess.run(args, cwd=REPO_ROOT, env=env, text=True, capture_output=True)
+    return subprocess.run(args, cwd=BUNDLE_ROOT, env=env, text=True, capture_output=True)
 
 
 def _group_record(address: str, key: str, canonical: str, scope: str = "interop") -> dict[str, object]:
@@ -861,7 +857,7 @@ def test_script_mode_rejects_record_selected_for_hcl(tmp_path: Path) -> None:
             "--runner-adapter", str(runner_adapter), "--resource-adapter", str(resource_adapter),
             "--handoff", str(handoff),
         ],
-        cwd=REPO_ROOT, text=True, capture_output=True,
+        cwd=BUNDLE_ROOT, text=True, capture_output=True,
     )
     assert result.returncode != 0
     assert "mode" in result.stderr

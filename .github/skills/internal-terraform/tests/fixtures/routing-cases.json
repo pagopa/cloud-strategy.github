@@ -5,7 +5,7 @@
       "primary_owner": "internal-tf",
       "execution_owner": null,
       "delegated_owner": null,
-      "loaded_local_references": ["references/common-mistakes.md"],
+      "loaded_local_references": [],
       "forbidden_local_references": [
         "references/existing-infrastructure-adoption.md",
         "references/operational-validation.md"
@@ -17,7 +17,7 @@
       "primary_owner": "internal-tf",
       "execution_owner": null,
       "delegated_owner": null,
-      "loaded_local_references": ["references/structure-standard.md"],
+      "loaded_local_references": [],
       "forbidden_local_references": [
         "references/existing-infrastructure-adoption.md",
         "references/operational-validation.md"
@@ -29,10 +29,7 @@
       "primary_owner": "internal-terraform",
       "execution_owner": null,
       "delegated_owner": "internal-tf",
-      "loaded_local_references": [
-        "references/existing-infrastructure-adoption.md",
-        "references/structure-standard.md"
-      ],
+      "loaded_local_references": ["references/existing-infrastructure-adoption.md"],
       "forbidden_local_references": ["references/operational-validation.md"],
       "fail_closed_on_unknown": true
     },
@@ -91,8 +88,7 @@
       "delegated_owner": null,
       "loaded_local_references": [
         "references/existing-infrastructure-adoption.md",
-        "references/operational-validation.md",
-        "references/import-orchestration.md"
+        "references/operational-validation.md"
       ],
       "forbidden_local_references": [],
       "fail_closed_on_unknown": true
@@ -104,42 +100,10 @@
       "delegated_owner": null,
       "loaded_local_references": [
         "references/existing-infrastructure-adoption.md",
-        "references/operational-validation.md",
-        "references/import-orchestration.md",
-        "references/aws-identity-center-import.md"
+        "references/operational-validation.md"
       ],
       "forbidden_local_references": [],
       "fail_closed_on_unknown": true
     }
-  ],
-  "metadata_contract": {
-    "internal-tf": {
-      "required_terms": ["language-only", ".tfvars.json", "$internal-tf"],
-      "forbidden_primary_markers": ["$internal-terraform"]
-    },
-    "internal-terraform": {
-      "required_terms": [
-        "$internal-terraform",
-        "operational",
-        "mixed",
-        "adoption",
-        "state",
-        "native test",
-        "CI",
-        "provider",
-        "recovery",
-        "infrastructure-diagnosis"
-      ],
-      "forbidden_primary_markers": []
-    }
-  },
-  "language_boundary": {
-    "reference": "references/structure-standard.md",
-    "forbidden_terms": [
-      "backend configuration",
-      "state migration",
-      "provider-lock remediation",
-      "live import guard"
-    ]
-  }
+  ]
 }

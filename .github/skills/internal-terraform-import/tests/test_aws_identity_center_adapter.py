@@ -8,12 +8,8 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").is_file() and (parent / ".github").is_dir()
-)
-RESOLVER = REPO_ROOT / ".github/skills/internal-terraform-import/scripts/resolve-aws-identity-center-import.sh"
+BUNDLE_ROOT = Path(__file__).resolve().parents[1]
+RESOLVER = BUNDLE_ROOT / "scripts/resolve-aws-identity-center-import.sh"
 
 
 def _write_executable(path: Path, text: str) -> None:
@@ -67,7 +63,7 @@ def _run_resolver(
             env.pop(key, None)
         else:
             env[key] = value
-    result = subprocess.run([str(RESOLVER)], cwd=REPO_ROOT, env=env, input=json.dumps(record) + "\n", text=True, capture_output=True)
+    result = subprocess.run([str(RESOLVER)], cwd=BUNDLE_ROOT, env=env, input=json.dumps(record) + "\n", text=True, capture_output=True)
     return result, log
 
 

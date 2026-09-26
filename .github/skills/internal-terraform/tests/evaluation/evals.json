@@ -1,0 +1,163 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-terraform",
+  "requirements": [
+    {
+      "id": "R-ENTRY",
+      "text": "Act as the first owner for any Terraform/OpenTofu request that is not clearly language-only.",
+      "source": "internal-terraform SKILL.md: description, When to use"
+    },
+    {
+      "id": "R-LANG-ROUTE",
+      "text": "Route positive language-only HCL, .tfvars, or .tfvars.json work to /internal-tf and load no wrapper reference.",
+      "source": "internal-terraform SKILL.md: Intent classification and routing"
+    },
+    {
+      "id": "R-SINGLE-PRIMARY",
+      "text": "Keep the wrapper as the single primary owner for operational, mixed, adoption, and ambiguous requests, delegating Terraform depth to /antonbabenko-terraform-skill and only separable language findings to /internal-tf.",
+      "source": "internal-terraform SKILL.md: Intent classification and routing; ADR 0001"
+    },
+    {
+      "id": "R-FAIL-CLOSED",
+      "text": "Mark missing or conflicting identity, ownership, mutation, or recovery facts unknown and fail closed without inferring identity or permission.",
+      "source": "internal-terraform SKILL.md: Intent classification and routing, Context collection"
+    },
+    {
+      "id": "R-CONDITIONAL-REFS",
+      "text": "Load the adoption reference only for adoption work and the operational reference only for operational branches.",
+      "source": "internal-terraform SKILL.md: Conditional references"
+    },
+    {
+      "id": "R-IMPORT-HANDOFF",
+      "text": "Hand off an approved import with Primary = /internal-terraform, Execution owner = /internal-terraform-import, and complete root, mode, scope, identity, ownership, runner, mutation, convergence, and recovery evidence; missing evidence blocks live execution.",
+      "source": "internal-terraform SKILL.md: Handoff"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-ROUTING-FIXTURE",
+      "family": "regression",
+      "kind": "deterministic",
+      "requirement_ids": ["R-LANG-ROUTE", "R-SINGLE-PRIMARY", "R-CONDITIONAL-REFS", "R-FAIL-CLOSED"],
+      "prompt": "Check that the routing fixture still encodes the wrapper's ownership and reference-loading rules.",
+      "initial_state": "The bundle routing fixture and its native tests are present.",
+      "expected_output": "The native bundle tests pass on the valid fixture and fail on the defective fixture, where a language-only scenario loads a wrapper reference and an import names the execution owner as primary without failing closed.",
+      "files": ["tests/fixtures/routing-cases.json", "tests/test_bundle_contract.py"],
+      "assertions": [
+        {"id": "A-LANG-NO-REFS", "text": "A language-only scenario that loads a wrapper reference is rejected.", "critical": true},
+        {"id": "A-IMPORT-PRIMARY", "text": "An import scenario whose primary owner is not the wrapper is rejected.", "critical": true}
+      ],
+      "forbidden_actions": ["Relax the tests to accept the defective fixture."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/routing-cases-defective.json"
+    },
+    {
+      "id": "C-AMBIGUOUS-IDENTITY",
+      "family": "missing-dependency",
+      "kind": "rubric",
+      "requirement_ids": ["R-FAIL-CLOSED", "R-SINGLE-PRIMARY", "R-CONDITIONAL-REFS"],
+      "prompt": "Adopt the existing prod VPCs into Terraform; there are two VPCs tagged main and I'm not sure which one the config means.",
+      "initial_state": "Configuration exists; live inventory shows two candidate VPCs; no ownership record.",
+      "expected_output": "Keep the wrapper primary, load the adoption reference, record the identity ambiguity as unknown, and stop before any import or plan with the missing facts listed.",
+      "files": ["references/existing-infrastructure-adoption.md"],
+      "assertions": [
+        {"id": "A-STOP", "text": "No import, plan, or apply is proposed before identity is resolved.", "critical": true},
+        {"id": "A-UNKNOWN", "text": "The ambiguity is recorded as an unknown fact.", "critical": true}
+      ],
+      "forbidden_actions": ["Pick one VPC by guess.", "Hand off to /internal-terraform-import."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The answer names the two candidates, marks identity unknown, and stops at the identity gate."],
+        "fail": ["The answer selects a VPC and writes import blocks."]
+      }
+    },
+    {
+      "id": "C-MIXED-HCL-ADOPTION",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-SINGLE-PRIMARY", "R-LANG-ROUTE"],
+      "prompt": "Fix the type error in variables.tf and then import the three existing IAM roles it describes.",
+      "initial_state": "A root with a typed variable error and unmanaged IAM roles.",
+      "expected_output": "Keep the wrapper as single primary, delegate only the type fix to /internal-tf, and keep the import under the wrapper's adoption gates.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ONE-PRIMARY", "text": "Exactly one primary owner is named: internal-terraform.", "critical": true},
+        {"id": "A-LANG-DELEGATION", "text": "Only the separable type fix is delegated to /internal-tf.", "critical": false}
+      ],
+      "forbidden_actions": ["Route the whole request to /internal-tf."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The handoff lists internal-terraform as Primary and internal-tf as a delegated language finding."],
+        "fail": ["Ownership is split or the import is treated as a language task."]
+      }
+    },
+    {
+      "id": "C-IMPORT-HANDOFF",
+      "family": "downstream",
+      "kind": "rubric",
+      "requirement_ids": ["R-IMPORT-HANDOFF"],
+      "prompt": "The identity-center import manifest is approved for the interop scope. Prepare the handoff to run it.",
+      "initial_state": "Approved decision record, manifest, consumer root with an executable terraform.sh, recovery evidence ready.",
+      "expected_output": "A handoff with Primary = /internal-terraform, Execution owner = /internal-terraform-import, and every required evidence field present or explicitly unknown.",
+      "files": [],
+      "assertions": [
+        {"id": "A-PROTOCOL-OWNERS", "text": "Primary and Execution owner use the protocol values.", "critical": true},
+        {"id": "A-RUNNER-EVIDENCE", "text": "The runner path and verified capability evidence are included.", "critical": true}
+      ],
+      "forbidden_actions": ["Name /antonbabenko-terraform-skill as Primary in an import handoff."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The handoff would pass the import protocol owner check and lists runner evidence."],
+        "fail": ["The handoff omits runner evidence or names a primary the protocol rejects."]
+      }
+    },
+    {
+      "id": "C-NATIVE-TEST",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-ENTRY", "R-CONDITIONAL-REFS"],
+      "prompt": "Our terraform test run fails on the assert for the subnet count after the provider upgrade.",
+      "initial_state": "A root with .tftest.hcl files and a recent provider lockfile change.",
+      "expected_output": "Keep the wrapper primary, load only the operational reference, and delegate test depth to /antonbabenko-terraform-skill.",
+      "files": ["references/operational-validation.md"],
+      "assertions": [
+        {"id": "A-OPERATIONAL-ONLY", "text": "Only the operational reference is loaded.", "critical": true}
+      ],
+      "forbidden_actions": ["Load the adoption reference.", "Route to /internal-tf."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The answer treats the failure as native-test and lockfile evidence under the operational branch."],
+        "fail": ["The answer treats the failure as an HCL syntax issue."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "terraform plan shows the RDS instance being replaced after I changed the parameter group; is that expected?", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Adopt the existing Route53 zones into our dns root without recreating them.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Our .tftest.hcl suite started failing after the provider upgrade.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "State is locked after a crashed apply in prod; how do we recover?", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Wire the new root into the CI workflow and prove the runner reaches it.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Should the networking resources move into their own module and state file?", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Look at this Terraform change and tell me what needs doing.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Detect drift between the shared-services state and the live account.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Bulk import 40 identity-center groups across three states.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-10", "query": "Fix the variable type and then import the roles it describes.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-11", "query": "Re-lock providers for darwin_arm64 and linux_amd64 after adding a hook.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-12", "query": "Add a validation block so var.region only accepts eu-west-1 or eu-central-1.", "should_trigger": false, "split": "train", "competing_owner": "internal-tf"},
+      {"id": "Q-13", "query": "Convert terraform.tfvars to terraform.tfvars.json.", "should_trigger": false, "split": "train", "competing_owner": "internal-tf"},
+      {"id": "Q-14", "query": "Fix the indentation that terraform fmt reports in outputs.tf.", "should_trigger": false, "split": "train", "competing_owner": "internal-tf"},
+      {"id": "Q-15", "query": "Design the Azure management-group hierarchy for the new landing zone.", "should_trigger": false, "split": "train", "competing_owner": "internal-azure"},
+      {"id": "Q-16", "query": "Write the SCP that restricts regions for the sandbox OU.", "should_trigger": false, "split": "train", "competing_owner": "internal-cloud-policy"},
+      {"id": "Q-17", "query": "Review the Dockerfile for the terraform runner image.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-docker"},
+      {"id": "Q-18", "query": "Make the tags variable an object with optional attributes.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-tf"},
+      {"id": "Q-19", "query": "Fix the Makefile target that calls terraform.sh.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-makefile"},
+      {"id": "Q-20", "query": "Harden the GitHub Actions OIDC trust for the deploy role.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-github"}
+    ]
+  }
+}
