@@ -4,4 +4,4 @@ interface:
   brand_color: "#0E7490"
   icon_small: "./assets/icon-small.svg"
   icon_large: "./assets/icon.svg"
-  default_prompt: "Use $internal-skill-creator to create, materially revise, replace, or retire a repository-owned skill bundle under .github/skills/. Route Copilot agents under .github/agents/ to /internal-agent-creator. Apply /mattpocock-writing-for-agents as the core method, prefix cross-skill invocations with `/`, and keep always-loaded surfaces cache-stable and within the budgets in `references/cache-and-token-efficiency.md`. Follow the creator classes, delegation gate, retry rule, and worker write limits in `references/authoring-and-evaluation.md`; keep trivial, unresolved, incomplete, unverifiable, and competing-owner work local or blocked."
+  default_prompt: "Use $internal-skill-creator to create, revise, replace, or retire a repository skill. Deliver the skill, an updated eval pack, and run evidence or an explicit evidence gap."

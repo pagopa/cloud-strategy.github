@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import ast
+import json
 import re
+import subprocess
 from collections.abc import Iterable
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 import yaml
@@ -76,6 +79,306 @@ PLACEHOLDER_INTERFACE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"for this task and follow the repository-owned workflow", re.IGNORECASE),
 )
 EXTERNAL_URL_PATTERN = re.compile(r"https?://\S+")
+EVAL_PACK_SCHEMA = "skill-eval-pack/v1"
+EVAL_RUN_SCHEMA = "skill-eval-run/v1"
+EVAL_ID_PATTERNS = {
+    "requirement": re.compile(r"^R-[A-Z0-9-]+$"),
+    "case": re.compile(r"^C-[A-Z0-9-]+$"),
+    "query": re.compile(r"^Q-[A-Z0-9-]+$"),
+}
+
+
+class _DuplicateJSONKey(ValueError):
+    pass
+
+
+def _eval_unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise _DuplicateJSONKey(key)
+        result[key] = value
+    return result
+
+
+def _eval_read_json(path: Path) -> object:
+    return json.loads(
+        path.read_text(encoding="utf-8"), object_pairs_hook=_eval_unique_object
+    )
+
+
+def _eval_finding(code: str, path: Path | None, message: str) -> Finding:
+    return Finding(
+        severity="blocking",
+        code=code,
+        path=path.as_posix() if path is not None else "",
+        message=message,
+        suggestion="Correct the eval pack or run record to match Schema v1.",
+    )
+
+
+def _eval_fields(
+    value: object, required: set[str], optional: set[str] | None = None
+) -> bool:
+    if not isinstance(value, dict):
+        return False
+    keys = set(value)
+    return required <= keys and keys <= required | (optional or set())
+
+
+def _eval_nonempty(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _eval_safe_path(bundle_root: Path, value: object) -> bool:
+    if not isinstance(value, str) or not value or "\\" in value:
+        return False
+    candidate = Path(value)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        return False
+    try:
+        root = bundle_root.resolve(strict=True)
+        resolved = (root / candidate).resolve(strict=True)
+        resolved.relative_to(root)
+    except (OSError, RuntimeError, ValueError):
+        return False
+    return True
+
+
+def _validate_eval_pack_data(
+    pack: object, bundle_root: Path, skill_name: str, source: Path | None
+) -> list[Finding]:
+    findings: list[Finding] = []
+    pack_fields = {"schema", "skill", "requirements", "cases", "triggers"}
+    if (
+        not _eval_fields(pack, pack_fields)
+        or pack.get("schema") != EVAL_PACK_SCHEMA
+        or pack.get("skill") != skill_name
+    ):
+        return [_eval_finding("eval-pack-schema", source, "Pack fields, schema, or skill name are invalid.")]
+    requirements = pack["requirements"]
+    cases = pack["cases"]
+    triggers = pack["triggers"]
+    if not isinstance(requirements, list) or not requirements or not isinstance(cases, list) or not cases:
+        return [_eval_finding("eval-pack-schema", source, "Requirements and cases must be non-empty lists.")]
+    if not _eval_fields(triggers, {"queries"}) or not isinstance(triggers["queries"], list):
+        return [_eval_finding("eval-pack-schema", source, "Triggers must contain a queries list.")]
+
+    findings = []
+    all_ids: set[str] = set()
+    requirement_ids: set[str] = set()
+    case_ids: set[str] = set()
+    query_ids: set[str] = set()
+    covered: set[str] = set()
+
+    def add_id(value: object, category: str, seen: set[str]) -> bool:
+        pattern = EVAL_ID_PATTERNS[category]
+        if not isinstance(value, str) or not pattern.fullmatch(value):
+            findings.append(_eval_finding("eval-pack-schema", source, f"Invalid {category} identifier: {value}"))
+            return False
+        if value in all_ids or value in seen:
+            findings.append(_eval_finding("eval-pack-duplicate-id", source, f"Duplicate identifier: {value}"))
+            return False
+        all_ids.add(value)
+        seen.add(value)
+        return True
+
+    for item in requirements:
+        if not _eval_fields(item, {"id", "text", "source"}) or not all(
+            _eval_nonempty(item.get(key)) for key in ("id", "text", "source")
+        ):
+            findings.append(_eval_finding("eval-pack-schema", source, "Requirement fields are invalid."))
+            continue
+        add_id(item["id"], "requirement", requirement_ids)
+
+    for case in cases:
+        if not isinstance(case, dict):
+            findings.append(_eval_finding("eval-pack-schema", source, "Case entries must be objects."))
+            continue
+        kind = case.get("kind")
+        case_fields = {
+            "id", "family", "kind", "requirement_ids", "prompt", "initial_state",
+            "expected_output", "files", "assertions", "forbidden_actions", "status", "held_out",
+        }
+        optional = {"defective_fixture"} if kind == "deterministic" else {"rubric"}
+        if kind not in {"deterministic", "rubric"} or not _eval_fields(case, case_fields, optional):
+            findings.append(_eval_finding("eval-pack-schema", source, "Case fields or kind are invalid."))
+            continue
+        add_id(case["id"], "case", case_ids)
+        if any(not _eval_nonempty(case.get(key)) for key in ("family", "prompt", "initial_state", "expected_output")):
+            findings.append(_eval_finding("eval-pack-schema", source, "Case text values must be non-empty."))
+        references = case["requirement_ids"]
+        if not isinstance(references, list) or not references:
+            findings.append(_eval_finding("eval-pack-schema", source, "Cases need requirement IDs."))
+        else:
+            for ref in references:
+                if ref not in requirement_ids:
+                    findings.append(_eval_finding("eval-pack-unresolved-requirement", source, f"Unknown requirement: {ref}"))
+                else:
+                    covered.add(ref)
+        if not isinstance(case["files"], list) or any(not _eval_safe_path(bundle_root, path) for path in case["files"]):
+            findings.append(_eval_finding("eval-pack-unsafe-path", source, "Case has an unsafe or missing file path."))
+        assertions = case["assertions"]
+        if not isinstance(assertions, list) or not assertions:
+            findings.append(_eval_finding("eval-pack-schema", source, "Cases need assertions."))
+        else:
+            assertion_ids: set[str] = set()
+            for assertion in assertions:
+                if not _eval_fields(assertion, {"id", "text", "critical"}) or not _eval_nonempty(assertion.get("id")) or not _eval_nonempty(assertion.get("text")) or not isinstance(assertion.get("critical"), bool):
+                    findings.append(_eval_finding("eval-pack-schema", source, "Assertion fields are invalid."))
+                elif assertion["id"] in assertion_ids:
+                    findings.append(_eval_finding("eval-pack-duplicate-id", source, f"Duplicate assertion ID: {assertion['id']}"))
+                else:
+                    assertion_ids.add(assertion["id"])
+        if not isinstance(case["forbidden_actions"], list) or any(not _eval_nonempty(item) for item in case["forbidden_actions"]):
+            findings.append(_eval_finding("eval-pack-schema", source, "Forbidden actions must be non-empty strings."))
+        if case["status"] not in {"generated", "not-run", "blocked"}:
+            findings.append(_eval_finding("eval-pack-invalid-status", source, "Case evidence status is invalid."))
+        if not isinstance(case["held_out"], bool):
+            findings.append(_eval_finding("eval-pack-schema", source, "held_out must be boolean."))
+        if kind == "deterministic":
+            if "defective_fixture" not in case:
+                findings.append(_eval_finding("eval-pack-missing-defective-fixture", source, "Deterministic case has no defective fixture."))
+            elif not _eval_safe_path(bundle_root, case["defective_fixture"]):
+                findings.append(_eval_finding("eval-pack-unsafe-path", source, "Defective fixture is unsafe or missing."))
+        elif "rubric" not in case:
+            findings.append(_eval_finding("eval-pack-missing-rubric", source, "Rubric case has no rubric."))
+        elif not _eval_fields(case["rubric"], {"pass", "fail"}) or any(
+            not isinstance(case["rubric"].get(key), list)
+            or not case["rubric"][key]
+            or any(not _eval_nonempty(anchor) for anchor in case["rubric"][key])
+            for key in ("pass", "fail")
+        ):
+            findings.append(_eval_finding("eval-pack-missing-rubric", source, "Rubric needs pass and fail anchors."))
+
+    if requirement_ids - covered:
+        findings.append(_eval_finding("eval-pack-uncovered-requirement", source, "One or more requirements have no case coverage."))
+
+    polarities: set[bool] = set()
+    splits: set[str] = set()
+    for query in triggers["queries"]:
+        query_fields = {"id", "query", "should_trigger", "split"}
+        if not _eval_fields(query, query_fields, {"competing_owner"}) or not _eval_nonempty(query.get("query")) or not isinstance(query.get("should_trigger"), bool) or query.get("split") not in {"train", "held-out"}:
+            findings.append(_eval_finding("eval-pack-trigger-coverage", source, "Trigger fields are invalid."))
+            continue
+        if add_id(query["id"], "query", query_ids):
+            polarities.add(query["should_trigger"])
+            splits.add(query["split"])
+        if "competing_owner" in query and not _eval_nonempty(query["competing_owner"]):
+            findings.append(_eval_finding("eval-pack-schema", source, "competing_owner must be non-empty when present."))
+    if polarities != {True, False} or splits != {"train", "held-out"}:
+        findings.append(_eval_finding("eval-pack-trigger-coverage", source, "Triggers need both polarities and both splits."))
+    return findings
+
+
+def validate_eval_pack_file(pack_path: Path, bundle_root: Path, skill_name: str) -> list[Finding]:
+    try:
+        pack = _eval_read_json(pack_path)
+    except (OSError, UnicodeError, json.JSONDecodeError, _DuplicateJSONKey) as error:
+        return [_eval_finding("eval-pack-invalid-json", pack_path, f"Pack is not strict JSON: {error}")]
+    return _validate_eval_pack_data(pack, bundle_root, skill_name, pack_path)
+
+
+def validate_eval_run_record(record_path: Path, bundle_root: Path, pack: dict[str, object]) -> list[Finding]:
+    try:
+        record = _eval_read_json(record_path)
+    except (OSError, UnicodeError, json.JSONDecodeError, _DuplicateJSONKey) as error:
+        return [_eval_finding("eval-run-unbacked-result", record_path, f"Run record is not strict JSON: {error}")]
+    try:
+        valid_date = isinstance(record, dict) and date.fromisoformat(record.get("date", "")).isoformat() == record.get("date")
+    except (TypeError, ValueError):
+        valid_date = False
+    if not _eval_fields(record, {"schema", "skill", "date", "host", "model", "configuration", "case_results"}) or record.get("schema") != EVAL_RUN_SCHEMA or record.get("skill") != pack.get("skill") or not valid_date or not _eval_nonempty(record.get("host")) or not _eval_nonempty(record.get("model")) or record.get("configuration") not in {"with-skill", "baseline-none", "baseline-previous"} or not isinstance(record.get("case_results"), list):
+        return [_eval_finding("eval-run-unbacked-result", record_path, "Run metadata or fields are invalid.")]
+    cases = {case["id"]: case for case in pack.get("cases", []) if isinstance(case, dict) and isinstance(case.get("id"), str)}
+    findings: list[Finding] = []
+    for result in record["case_results"]:
+        if not isinstance(result, dict) or not {"case_id", "status", "assertions"} <= result.keys() or result.keys() - {"case_id", "status", "transcript_ref", "assertions"}:
+            findings.append(_eval_finding("eval-run-unbacked-result", record_path, "Run case result fields are invalid."))
+            continue
+        case = cases.get(result.get("case_id"))
+        status = result.get("status")
+        if case is None or status not in {"executed", "passed", "failed", "blocked"}:
+            findings.append(_eval_finding("eval-run-unbacked-result", record_path, "Run result is not backed by a pack case."))
+            continue
+        if status in {"executed", "passed", "failed"} and not _eval_nonempty(result.get("transcript_ref")):
+            findings.append(_eval_finding("eval-run-unbacked-result", record_path, "Run result has no transcript reference."))
+        declared = {item.get("id"): item for item in case.get("assertions", []) if isinstance(item, dict)}
+        assertions = result.get("assertions")
+        if not isinstance(assertions, list) or any(not isinstance(item, dict) or set(item) != {"id", "passed", "evidence"} or not isinstance(item.get("passed"), bool) for item in assertions):
+            findings.append(_eval_finding("eval-run-assertion-mismatch", record_path, "Run assertion fields are invalid."))
+            continue
+        ids = [item["id"] for item in assertions]
+        if len(ids) != len(set(ids)) or set(ids) != set(declared):
+            findings.append(_eval_finding("eval-run-assertion-mismatch", record_path, "Run assertion IDs do not match the case."))
+            continue
+        if status == "passed" and any(not item["passed"] or not _eval_nonempty(item["evidence"]) for item in assertions):
+            findings.append(_eval_finding("eval-run-unbacked-result", record_path, "Passed run is missing passing assertion evidence."))
+        if status == "passed" and any(declared[item["id"]].get("critical") and not item["passed"] for item in assertions):
+            findings.append(_eval_finding("eval-run-unbacked-result", record_path, "Passed run has a failed critical assertion."))
+    return findings
+
+
+def validate_eval_pack(skill_dir: Path) -> list[Finding]:
+    pack_path = skill_dir / "tests/evaluation/evals.json"
+    if not pack_path.exists():
+        return []
+    findings = validate_eval_pack_file(pack_path, skill_dir, skill_dir.name)
+    if findings:
+        return findings
+    try:
+        pack = _eval_read_json(pack_path)
+    except (OSError, UnicodeError, json.JSONDecodeError, _DuplicateJSONKey):
+        return findings
+    run_dir = skill_dir / "tests/evaluation/runs"
+    if run_dir.is_dir():
+        for record_path in sorted(run_dir.glob("*.json")):
+            findings.extend(validate_eval_run_record(record_path, skill_dir, pack))
+    return findings
+
+
+def detect_eval_pack_scope_findings(
+    root: Path, changed_paths: Iterable[str], base_ref: str | None
+) -> list[Finding]:
+    """Require packs for changed internal skills, blocking newly added gaps."""
+    bundles = {
+        parts[2]
+        for value in changed_paths
+        if (parts := value.split("/"))[:2] == [".github", "skills"]
+        and len(parts) >= 4
+        and parts[2].startswith("internal-")
+    }
+    findings: list[Finding] = []
+    reference = base_ref or "HEAD"
+    for name in sorted(bundles):
+        skill_dir = root / ".github" / "skills" / name
+        if not (skill_dir / "SKILL.md").is_file():
+            continue
+        pack_path = skill_dir / "tests/evaluation/evals.json"
+        if pack_path.exists():
+            findings.extend(validate_eval_pack(skill_dir))
+            continue
+        try:
+            subprocess.run(
+                ["git", "cat-file", "-e", f"{reference}:.github/skills/{name}/SKILL.md"],
+                cwd=root,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            existed = True
+        except (OSError, subprocess.SubprocessError, ValueError):
+            existed = False
+        findings.append(
+            Finding(
+                severity="non-blocking" if existed else "blocking",
+                code="eval-pack-missing-touched-skill" if existed else "eval-pack-missing-new-skill",
+                path=f".github/skills/{name}",
+                message=("Touched internal skill does not have an eval pack." if existed else "New internal skill does not have an eval pack."),
+                suggestion="Add tests/evaluation/evals.json for this internal skill.",
+            )
+        )
+    return findings
 
 
 def _find_repo_root(start: Path) -> Path:
@@ -626,6 +929,7 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
     findings.extend(validate_local_references(root, skill_dir))
     findings.extend(validate_token_hygiene(skill_dir, skill_md, body))
     findings.extend(detect_bundle_security_findings(skill_dir))
+    findings.extend(validate_eval_pack(skill_dir))
     return findings
 
 

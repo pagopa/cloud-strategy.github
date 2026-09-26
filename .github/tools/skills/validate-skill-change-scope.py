@@ -18,6 +18,7 @@ from common.command import find_repo_root, run_finding_cli, should_fail
 from common.findings import Finding
 from common.output import log_success, log_warn
 
+from skills.rules import detect_eval_pack_scope_findings
 from skills.scope import (
     collect_changed_paths,
     detect_protected_skill_changes,
@@ -27,7 +28,7 @@ from skills.scope import (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Fail when the worktree changes a protected external skill bundle."
+        description="Validate protected skill authorization and touched internal skill eval packs."
     )
     parser.add_argument(
         "--root", default=".", help="Repository root or any path inside it."
@@ -62,13 +63,13 @@ def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
         "finding_counts": {
             "total": len(findings),
             "blocking": severity_counts.get("blocking", 0),
-            "notice": severity_counts.get("notice", 0),
+            "notice": severity_counts.get("non-blocking", 0),
         },
         "finding_sample": [finding.to_dict() for finding in findings[:10]],
         "next_action": (
-            "Review protected-skill authorization and exact allowlist entries."
+            "Review protected-skill authorization and internal skill eval-pack findings."
             if findings
-            else "Validation passed without protected-skill findings."
+            else "Validation passed without protected-skill or eval-pack findings."
         ),
     }
 
@@ -85,7 +86,10 @@ def main() -> int:
         ) from error
 
     findings = run_finding_cli(
-        detect_fn=lambda: detect_protected_skill_changes(changed_paths, allowed),
+        detect_fn=lambda: [
+            *detect_protected_skill_changes(changed_paths, allowed),
+            *detect_eval_pack_scope_findings(root, changed_paths, args.base_ref),
+        ],
         format_name=args.format,
         render_text=render_text,
         compact_builder=build_compact_payload,

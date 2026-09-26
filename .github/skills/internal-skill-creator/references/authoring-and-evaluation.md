@@ -72,11 +72,6 @@ exists. A session started before the change keeps the previous snapshot; prove
 the new contract from a newly started session. Prefer the smallest
 deterministic proof and record unavailable proof as a gap.
 
-## Self-review risk
-
-When this skill revises its own contract, name the rationalization risk and
-prefer evidence from external consumers and focused tests.
-
 ## Evaluation selection
 
 Classify each candidate branch as applicable, skipped, or blocked. Objective
@@ -89,18 +84,22 @@ writing, design, and judgment work use human review.
 | Script, CLI, parser, generator | Executable test with fixtures |
 | Stable public output | Producer and consumer test |
 | LLM routing or trigger | Executable resolver or concrete evaluation cases |
+| Mandatory rule moved behind a conditional reference | Treat as behavioral reachability change and evaluate the affected branch |
 | Subjective instructional prose | Human review with an explicit evidence gap when runtime evaluation is unavailable |
-| Editorial wording or reorganization | Markdown and token validation only |
+| Editorial wording that preserves behavior | Markdown and token validation only |
 
 Raw instructional wording is not an executable or evaluable seam. Do not
 manufacture wording tests when a change has no parser, executable consumer,
 public protocol, or concrete evaluation case.
 
-## Baselines
+## Evaluation packs and baselines
 
-For a material revision, compare with the previous version. For a new skill,
-compare with the same task without it when isolation is available. Otherwise,
-record the gap and use the closest focused validator plus human review.
+Use [`eval-packs.md`](eval-packs.md) to define requirements, cases, trigger
+queries, frozen criteria, and evidence states. Use
+[`grading-and-analysis.md`](grading-and-analysis.md) to grade artifacts and
+interpret comparisons. For a new skill, compare with the same task without it
+when the host can isolate that condition. For a material revision, compare
+with a frozen snapshot under `tmp/`.
 
 ## Evidence and human review
 
@@ -109,11 +108,13 @@ behavior, review method, and status. Present subjective outputs to the user
 before changing them from agent judgment alone. Generalize feedback; do not
 optimize only for sampled prompts.
 
-## Description trigger checks
+## Self-revision
 
-Test realistic should-trigger and near-miss prompts. Include the main branch
-and a competing-owner case. When tuning against enough cases, reserve a holdout
-set. Record a gap when the runtime cannot measure invocation.
+Freeze the baseline and criteria before revising this skill. Adding cases is
+allowed. Removing, weakening, or reinterpreting a criterion requires user
+confirmation, a rationale, and evidence. Preserve the create-or-revise,
+replace, and retire lifecycles. Retirement removes entrypoints and references
+without parsing a deleted skill or recreating it.
 
 ## Iteration stop conditions
 
@@ -128,10 +129,3 @@ and `compatibility`. Invocation policy goes to `agents/openai.yaml` under
 `policy.allow_implicit_invocation`. Provenance fields (`source`, `risk`,
 `date_added`, and `revision`) go under `metadata`. The validator blocks
 non-portable fields.
-
-## Skill evaluation harness
-
-A new skill requires at least three realistic scenario prompts, should-trigger
-and should-not-trigger cases (including one competing-owner near-miss), and a
-baseline comparison without the skill. A material revision re-runs trigger
-checks only when the description changed.

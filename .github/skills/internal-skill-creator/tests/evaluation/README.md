@@ -1,25 +1,35 @@
 # Internal Skill Creator Evaluation
 
-This evaluation records fixed human-review cases for creator admission and
-near-miss handling. The repository has no executable skill resolver, so runtime
-invocation cannot be measured here. Static review is recorded as an observed
-classification, never as runtime invocation evidence.
+`evals.json` is the fixed structural and behavioral case pack for the creator.
+Case specifications are generated; no runtime run records exist. `generated`,
+`not-run`, and `blocked` describe specification evidence state. `passed` is
+only available in a separate run record after an observed, graded run.
+The pack migrates all six delegation cases: three eligible modes, two local or
+parent-owned near-misses, and the Copilot agent competing-owner route.
 
-Review each case in `cases.md` against the creator matrix, the caller-owned
-admission rules, and the structured fixtures. Confirm that delegation requires
-a complete, bounded, materially leveraged brief and that parent-owned decisions
-remain with the creator parent.
+## Validate
 
-Human review outcome: the positive and near-miss classifications are accepted
-against the revised contract. Runtime routing evidence remains unavailable and
-is an explicit residual gap.
-Review status: accepted with a runtime evidence gap.
+From the repository root, run:
 
-No diagram is provided because this README records review cases and evidence
-limits rather than a component or data-flow relationship.
+```bash
+python3 .github/skills/internal-skill-creator/scripts/check_eval_pack.py \
+  .github/skills/internal-skill-creator/tests/evaluation/evals.json \
+  --bundle-root .github/skills/internal-skill-creator \
+  --skill-name internal-skill-creator --format compact
+```
 
-## Validation
+The host validator may check the same pack when the host provides that gate.
+The bundle checker remains usable without the host tool.
 
-Validation is review-only: compare each case with `cases.md` and the creator
-matrix, then retain the explicit runtime-evidence gap because this repository
-does not provide an executable skill resolver for the evaluation.
+## Runtime plan and current gap
+
+No runtime run record is included. A runtime pilot requires explicit user
+approval. Start with GPT-6 and pin the host, model, tools, inputs, and budget
+before comparing isolated with-skill and baseline sessions. Keep each case's
+criteria fixed, include held-out tasks, inspect artifacts and transcripts, and
+record every result separately. Three repeats per case and variant are a pilot,
+not statistical proof.
+
+Runtime invocation and downstream effectiveness remain unmeasured because no
+executable skill resolver or approved model run is available in this repository.
+The cases provide structural coverage and a reviewable run plan only.
