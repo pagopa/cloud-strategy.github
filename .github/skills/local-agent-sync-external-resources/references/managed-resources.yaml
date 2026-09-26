@@ -385,7 +385,7 @@ watchlist:
   - source_family: mattpocock/skills
     upstream_id: diagnose
     local_owner: internal-debugging
-    reason: Root-cause diagnosis loop was extracted into a repository-owned owner.
+    reason: Root-cause diagnosis is owned by a repository wrapper over mattpocock-diagnosing-bugs.
   - source_family: mattpocock/skills
     upstream_id: improve-codebase-architecture
     local_owner: unmanaged
