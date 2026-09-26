@@ -1,0 +1,130 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gateway-writing-plans",
+  "requirements": [
+    {
+      "id": "R-ELIGIBILITY",
+      "text": "Write a plan only with an explicit plan-writing request and the eligibility facts; a verified spec with plan_authoring_ready true plus a later +plan selection needs no new discovery or approval round, and implementation_permission false never blocks writing.",
+      "source": "internal-gateway-writing-plans SKILL.md: 1. Establish writing eligibility"
+    },
+    {
+      "id": "R-MODE",
+      "text": "Author an execution-ready plan with modify or create targets when the user wants to apply it, reserving authoring-only for a genuinely blocking condition or an explicit analysis-only request.",
+      "source": "internal-gateway-writing-plans SKILL.md: 1. Establish writing eligibility"
+    },
+    {
+      "id": "R-STRUCTURE",
+      "text": "Produce one retained plan under tmp/superpowers/plans/ with a Control Inventory, a No Git mutation constraint, and one normative Execution Manifest v3 bound as references/manifest-v3.md requires.",
+      "source": "internal-gateway-writing-plans SKILL.md: 2. Capture scope and controls, 3. Author the retained plan"
+    },
+    {
+      "id": "R-GATES",
+      "text": "Before any ready or handoff claim, pass the writer structural check, the physical executor preflight, and the bundle-local pytest suite on the exact final plan bytes.",
+      "source": "internal-gateway-writing-plans SKILL.md: 3. Author the retained plan, Acceptance gate"
+    },
+    {
+      "id": "R-REPORT",
+      "text": "Report with the six-line writer projection and a two-state status, without starting execution or running Git mutations.",
+      "source": "internal-gateway-writing-plans SKILL.md: 5. Report, Writer communication, No-Commit Rule"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-PLAN-FROM-SPEC",
+      "family": "held-out-downstream",
+      "kind": "rubric",
+      "requirement_ids": ["R-ELIGIBILITY", "R-MODE", "R-STRUCTURE"],
+      "prompt": "+plan",
+      "initial_state": "A verified retained spec from /internal-gateway-idea with plan_authoring_ready: true and implementation_permission: false.",
+      "expected_output": "Write an execution-ready plan whose Authorization line quotes the +plan request, without another discovery round.",
+      "files": ["references/manifest-v3.md"],
+      "assertions": [
+        {"id": "A-NO-REDISCOVERY", "text": "No new discovery or approval round is started.", "critical": true},
+        {"id": "A-EXEC-READY", "text": "Targets carry modify or create and the mode is execution-ready.", "critical": true}
+      ],
+      "forbidden_actions": ["Downgrade the plan to authoring-only because implementation_permission is false."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The plan is execution-ready and traceable to the spec decisions."],
+        "fail": ["The plan is authoring-only or the writer asks for approval again."]
+      }
+    },
+    {
+      "id": "C-GATE-FAILURE",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-GATES", "R-REPORT"],
+      "prompt": "Write the plan and tell me when it is ready.",
+      "initial_state": "The drafted plan fails the executor preflight with one blocking finding.",
+      "expected_output": "Repair the plan and rerun every gate; until all pass, report Status blocked — evidence incomplete, never ready to execute.",
+      "files": ["references/command-portability.md"],
+      "assertions": [
+        {"id": "A-RERUN", "text": "All gates are rerun on the repaired final bytes.", "critical": true},
+        {"id": "A-NO-FALSE-READY", "text": "Status is never ready to execute without passing gate evidence.", "critical": true}
+      ],
+      "forbidden_actions": ["Describe the expected gate result instead of running it."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The Evidence line cites fresh structure= and execution= results."],
+        "fail": ["The report claims readiness from prose."]
+      }
+    },
+    {
+      "id": "C-DELEGATION-DEFAULT",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-STRUCTURE"],
+      "prompt": "Write the plan; use a worker if it helps.",
+      "initial_state": "No value gate proves a delegated evidence package is materially more useful.",
+      "expected_output": "Author locally with delegation.mode none, worker primary-owner, and result not_applicable, with no synthetic worker artifacts.",
+      "files": ["references/delegation.md"],
+      "assertions": [
+        {"id": "A-LOCAL-TUPLE", "text": "The Manifest records the local delegation tuple.", "critical": true}
+      ],
+      "forbidden_actions": ["Invent a delegation brief or receipt."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The plan is authored locally and records the local tuple."],
+        "fail": ["The plan records a delegated Manifest tuple or a fabricated worker result."]
+      }
+    },
+    {
+      "id": "C-NO-EXECUTION",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-REPORT"],
+      "prompt": "Write the plan and then just run it and commit.",
+      "initial_state": "Eligibility facts are present; no execution approval exists yet.",
+      "expected_output": "Deliver the six-line projection, decline commit help by default, and name /internal-gateway-execute-plans as the next owner after explicit execution approval.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-EXEC", "text": "Execution does not start and no status sibling is created.", "critical": true},
+        {"id": "A-NO-GIT", "text": "No git add, commit, or push runs.", "critical": true}
+      ],
+      "forbidden_actions": ["Run git commit.", "Invoke the executor before approval."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The Next line gives one execution instruction for after approval."],
+        "fail": ["The writer executes tasks or commits."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Write the implementation plan from the approved design in docs/adr/0003.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "+plan", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Turn this reviewed retained spec into an execution-ready plan.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "The executor preflight failed on my plan; fix the plan and rerun the gates.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-05", "query": "Draft the retained plan with a Control Inventory for the approved sync refactor.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-06", "query": "Execute the approved plan now.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-execute-plans"},
+      {"id": "Q-07", "query": "Help me figure out whether this refactor is worth doing.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-idea"},
+      {"id": "Q-08", "query": "Fix this one typo in the README.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-simple-task"},
+      {"id": "Q-09", "query": "Update the imported superpowers-writing-plans skill text.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-10", "query": "Challenge this plan before I approve it.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gateway-critical-master"}
+    ]
+  }
+}

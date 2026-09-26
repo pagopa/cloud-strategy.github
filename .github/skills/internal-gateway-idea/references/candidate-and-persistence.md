@@ -1,6 +1,6 @@
-# Candidate And Persistence
+# Candidate and Persistence
 
-## Chat Projection
+## Chat projection
 
 Present one compact Candidate using these sections when they contain material:
 
@@ -25,8 +25,8 @@ and `Success criteria`; `Scope` and `Anti-scope`; `Facts`, `Reports`,
 
 Present the Candidate before acceptance. After critical review, show exactly:
 
-1. `✅ Accept as the Consolidated Analysis Spec + spec`
-2. `✅ Accept as the Consolidated Analysis Spec + plan`
+1. `✅ Accept as the Consolidated Analysis Spec +spec`
+2. `✅ Accept as the Consolidated Analysis Spec +plan`
 3. `💾 Save the analysis`
 4. `⏹️ Close without a file or plan`
 
@@ -36,13 +36,13 @@ verification. Option 2 authorizes only the plan-authoring handoff, either from
 the Candidate or a retained plan-ready spec. `Implementation permission: false`
 does not block option 2. Neither option authorizes implementation or execution.
 
-## Artifact Authoring
+## Artifact authoring
 
-After `+ spec` or `+ plan`, load and apply
+After `+spec` or `+plan`, load and apply
 [`artifact-authoring.md`](artifact-authoring.md). It owns conditional delegation
 admission and retained owner responsibilities for the selected artifact.
 
-## Critical Review Integration
+## Critical review integration
 
 The `CRITICAL REVIEW` gate is mandatory before close or promotion. Pass the
 Candidate and `Specific critical focus` to `/internal-gateway-critical-master`.

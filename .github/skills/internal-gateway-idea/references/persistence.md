@@ -2,12 +2,14 @@
 
 Conversation-only analysis is the default. On pause, return this compact state:
 
+```markdown
 ## ⏸️ Resume from here
 
 - `❓ Active decision block`
 - `🔎 Key unknown`
 - `➡️ Next branch`
 - `🔒 Closed decisions`
+```
 
 The pause view is a readable projection of the current state capsule. Rebuild
 it from the capsule after context compaction, a subject change, or a mode
@@ -46,18 +48,16 @@ On reconstruction, reject a missing or contradictory gate/menu projection and
 preserve the last valid record. Never infer that a recommendation, checkpoint,
 status, or recovery event completed a gate.
 
-Create an analysis file only when the user explicitly selects `💾 Save the
-analysis`, selects the `+ spec` acceptance action, or asks to continue in
-another conversation. Write at most one Markdown artifact at the supplied
-path. When no path is supplied for the analysis artifact, use
+Create an analysis file only when the user explicitly selects
+`💾 Save the analysis`, selects the `+spec` acceptance action, or asks to
+continue in another conversation. Write at most one Markdown artifact at the
+supplied path. When no path is supplied for the analysis artifact, use
 `tmp/superpowers/specs/YYYY-MM-DD-<topic>-analysis.md`, disclose that `tmp/` is
 disposable, and update that same file in place.
 
-`Save the analysis` is a non-promoting checkpoint and may occur before or
-after critical review. A pre-review checkpoint records
-`critical_review: pending` in this same canonical projection. Saving does not
-make `+spec` or `+plan` available, does not dispose of findings, does not close
-the review gate, and does not authorize implementation or execution.
+`Save the analysis` follows the save checkpoint rules in the skill's
+[Phase menu and gate](../SKILL.md#phase-menu-and-gate) section. Saving also
+does not close the review gate.
 
 The artifact must contain the current Candidate or Consolidated Analysis Spec,
 its state capsule, evidence anchors, next action, and the one canonical
@@ -67,15 +67,15 @@ acceptance conditions, and residual risks. It must also preserve the gate
 state, menu locks, finding classifications, and any named-action
 `accepted-risk` override. This keeps planning replay lossless without the
 transcript. Do not create a separate critical report or transcript and do not
-save twice as separate analysis artifacts. A verified `+ spec` artifact records
-`plan_authoring_ready: true`. A later `+ plan` acceptance uses the retained
+save twice as separate analysis artifacts. A verified `+spec` artifact records
+`plan_authoring_ready: true`. A later `+plan` acceptance uses the retained
 spec as its source and the single plan path locked by
 `/internal-gateway-writing-plans`; this gateway does not create or structure
 that plan directly.
 
-After `+ spec` acceptance, state that the verified artifact is plan-ready and
-that plan authoring remains available through a later explicit `+ plan`
+After `+spec` acceptance, state that the verified artifact is plan-ready and
+that plan authoring remains available through a later explicit `+plan`
 selection. `Implementation permission: false` is not a plan-writing blocker.
-After `+ plan` acceptance, state that execution remains a separate action
+After `+plan` acceptance, state that execution remains a separate action
 requiring explicit approval. Do not invoke execution or imply that artifact
 acceptance authorizes it.

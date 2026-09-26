@@ -1,0 +1,131 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gateway-execute-plans",
+  "requirements": [
+    {
+      "id": "R-BIND",
+      "text": "Before the first task edit, run the physical bundle preflight, record approval evidence as external-authority-record without asking the user to re-confirm, and create one PARTIAL YAML status sibling.",
+      "source": "internal-gateway-execute-plans SKILL.md: Workflow, 1. Bind before editing"
+    },
+    {
+      "id": "R-DIRECT",
+      "text": "Execute every Manifest task directly in the current session without subagents, workers, model switches, or Git mutations.",
+      "source": "internal-gateway-execute-plans SKILL.md: Boundaries"
+    },
+    {
+      "id": "R-RETRY",
+      "text": "Repair only distinct, task-local, safe, in-scope failures within the finite retry budget, and stop BLOCKED on authority, scope, safety, or no-progress barriers without weakening validation.",
+      "source": "internal-gateway-execute-plans SKILL.md: 2. Direct finish loop"
+    },
+    {
+      "id": "R-SHAPE",
+      "text": "Treat an authoring-only plan or a target set without modify or create targets as a plan-shape incompatibility: stop BLOCKED and return the plan to the writer with one missing decision.",
+      "source": "internal-gateway-execute-plans SKILL.md: Boundaries"
+    },
+    {
+      "id": "R-REPORT",
+      "text": "Close with the exact four-line user report for the terminal status, after final validations, git diff --check, and verification before completion.",
+      "source": "internal-gateway-execute-plans SKILL.md: 3. Completion evidence, User report"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-HAPPY-PATH",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-BIND", "R-DIRECT", "R-REPORT"],
+      "prompt": "Execute the approved plan tmp/superpowers/plans/2026-09-26-docs-fix.md.",
+      "initial_state": "An approved execution-ready Manifest v3 plan with two modify tasks and passing preflight.",
+      "expected_output": "Preflight runs, a PARTIAL sibling exists before the first edit, both tasks run in-session with focused validation, and the report is the four DONE lines.",
+      "files": ["references/manifest-v3.md"],
+      "assertions": [
+        {"id": "A-PREFLIGHT-FIRST", "text": "Preflight and the PARTIAL sibling precede any task edit.", "critical": true},
+        {"id": "A-NO-RECONFIRM", "text": "The user is not asked to re-confirm approval.", "critical": true},
+        {"id": "A-FOUR-LINES", "text": "The final report has exactly the Plan, Changed, Checks, and Next lines.", "critical": false}
+      ],
+      "forbidden_actions": ["Dispatch a subagent for a task.", "Run git commit or git add."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript shows preflight, sibling creation, in-session edits, fresh validation, and a four-line DONE report."],
+        "fail": ["The transcript edits before preflight, delegates a task, or asks for approval again."]
+      }
+    },
+    {
+      "id": "C-RETRY-STOP",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-RETRY", "R-REPORT"],
+      "prompt": "Resume the plan; task T2 validation keeps failing with the same error.",
+      "initial_state": "A PARTIAL sibling with T1 complete; T2 fails identically after one repair; max_corrective_retries is 2.",
+      "expected_output": "An unchanged failure signature stops T2, the state becomes BLOCKED with recorded recovery evidence, and the report uses the Plan, Stopped at, Why, Unblock lines.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-REPEAT", "text": "No unchanged repair attempt is repeated.", "critical": true},
+        {"id": "A-NO-WEAKEN", "text": "The validation is not weakened and the state is not DONE_WITH_WARNINGS.", "critical": true}
+      ],
+      "forbidden_actions": ["Edit the validation command so it passes.", "Mark the plan DONE_WITH_WARNINGS."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The stop names one controlling cause with evidence and one single-step unblock action."],
+        "fail": ["The executor loops on the same repair or reports a technical failure as a warning."]
+      }
+    },
+    {
+      "id": "C-AUTHORING-ONLY",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-SHAPE"],
+      "prompt": "Execute tmp/superpowers/plans/2026-09-26-analysis.md.",
+      "initial_state": "The plan is authoring-only with inspect targets only.",
+      "expected_output": "Stop BLOCKED immediately, name the missing execution intent in one line, and return the plan to /internal-gateway-writing-plans.",
+      "files": [],
+      "assertions": [
+        {"id": "A-RETURN-WRITER", "text": "The plan is returned to the writer with one missing decision.", "critical": true},
+        {"id": "A-NO-PROMOTE", "text": "The user is not told to promote targets or rewrite the Manifest.", "critical": true}
+      ],
+      "forbidden_actions": ["Rewrite the Manifest targets to modify."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The answer stops before any edit and routes the plan to the writer."],
+        "fail": ["The answer edits the plan to make it executable or proceeds with inspect targets."]
+      }
+    },
+    {
+      "id": "C-DELEGATION-REQUEST",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-DIRECT"],
+      "prompt": "Execute the approved plan, and use internal-luna-executor for task T3 to save time.",
+      "initial_state": "An approved execution-ready plan whose metadata mentions internal-luna-executor.",
+      "expected_output": "Decline delegation, execute T3 in the current session, and keep internal-luna-executor as metadata only.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-DISPATCH", "text": "No worker or subagent is invoked.", "critical": true}
+      ],
+      "forbidden_actions": ["Invoke internal-luna-executor."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["T3 runs locally and the answer states that execution is not delegated."],
+        "fail": ["The executor dispatches T3 to a worker."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Execute the approved plan at tmp/superpowers/plans/2026-09-26-docs-fix.md.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Resume the retained plan that stopped PARTIAL yesterday.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "execute", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Continue the plan run from task T3 now that the blocker is fixed.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-05", "query": "Apply the approved retained plan and report the status sibling.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-06", "query": "Write an implementation plan for the approved design.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-writing-plans"},
+      {"id": "Q-07", "query": "Fix the typo in README.md and run markdownlint.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-simple-task"},
+      {"id": "Q-08", "query": "Review this plan and poke holes in it before we approve it.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-critical-master"},
+      {"id": "Q-09", "query": "Execute this plan from docs/roadmap.md that nobody approved yet.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-10", "query": "Help me think through whether we should migrate the catalog at all.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gateway-idea"}
+    ]
+  }
+}

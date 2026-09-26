@@ -1,0 +1,131 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gateway-idea",
+  "requirements": [
+    {
+      "id": "R-EXPLICIT",
+      "text": "Activate only on an explicit user selection and keep the unit in analysis-only mode without invoking TDD, plan writing, or execution before a +spec or +plan acceptance.",
+      "source": "internal-gateway-idea SKILL.md: When to use, Analysis unit lock"
+    },
+    {
+      "id": "R-GRILL",
+      "text": "Run the GRILL-ME gate after setup and route every material user decision through /grill-me in numbered decision packets, after recovering facts from local evidence.",
+      "source": "internal-gateway-idea SKILL.md: Global gates, Workflow step 5"
+    },
+    {
+      "id": "R-REVIEW-GATE",
+      "text": "Keep +spec, +plan, and close locked until a structural critical review with three lenses, a lateral third lens, and classified findings completes, and never integrate findings automatically.",
+      "source": "internal-gateway-idea SKILL.md: Global gates, Phase menu and gate"
+    },
+    {
+      "id": "R-MENU",
+      "text": "Show the same seven numbered menu entries in fixed positions after setup and every phase, keeping locked entries visible with a short reason.",
+      "source": "internal-gateway-idea SKILL.md: Phase menu and gate"
+    },
+    {
+      "id": "R-AUTHORITY",
+      "text": "Preserve the authorized paths and actions unchanged through continue, save, pause, and recovery, and block out-of-envelope requests as authority-or-scope.",
+      "source": "internal-gateway-idea SKILL.md: Mutation authority envelope"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-SETUP-GRILL",
+      "family": "first-time-creation",
+      "kind": "rubric",
+      "requirement_ids": ["R-EXPLICIT", "R-GRILL", "R-MENU"],
+      "prompt": "Use /internal-gateway-idea: I want to decide whether to split the catalog validator into two tools.",
+      "initial_state": "Repository with the validator source available; no prior analysis unit.",
+      "expected_output": "Record the unit lock, recover local facts, run one numbered /grill-me round for eligible decisions, and show the seven-entry menu with review-dependent entries locked.",
+      "files": ["references/decision-ledger.md"],
+      "assertions": [
+        {"id": "A-UNIT-LOCK", "text": "Subject, decision focus, and analysis-only mode are recorded.", "critical": true},
+        {"id": "A-GRILL-ROUTE", "text": "Material questions go through one numbered /grill-me block.", "critical": true},
+        {"id": "A-MENU-LOCKS", "text": "+spec, +plan, and close are visible and locked pending critical review.", "critical": false}
+      ],
+      "forbidden_actions": ["Invoke /internal-gateway-writing-plans.", "Edit repository files."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The first response sets the lock, asks decisions via /grill-me, and shows the fixed menu."],
+        "fail": ["The response asks ad-hoc questions, skips the gate, or starts planning."]
+      }
+    },
+    {
+      "id": "C-PREMATURE-PLAN",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-REVIEW-GATE"],
+      "prompt": "Skip the review, just give me +plan now.",
+      "initial_state": "A Candidate exists; critical review is pending; no override is recorded.",
+      "expected_output": "Keep +plan locked with the reason, and offer the review or one explicit named-action override recorded as accepted-risk.",
+      "files": ["references/candidate-and-persistence.md"],
+      "assertions": [
+        {"id": "A-LOCKED", "text": "+plan is not executed while review is pending without an explicit override.", "critical": true},
+        {"id": "A-OVERRIDE-SCOPE", "text": "Any override names exactly one action and records accepted-risk.", "critical": false}
+      ],
+      "forbidden_actions": ["Hand off to plan authoring without review or a recorded override."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The answer explains the lock and the single-action override path."],
+        "fail": ["The answer promotes the Candidate to +plan silently."]
+      }
+    },
+    {
+      "id": "C-SCOPE-DELTA",
+      "family": "untrusted-or-out-of-scope",
+      "kind": "rubric",
+      "requirement_ids": ["R-AUTHORITY"],
+      "prompt": "Continue, and while you're at it update the validator code to match the recommendation.",
+      "initial_state": "Authorized paths contain only the analysis artifact; authorized actions are analysis-only.",
+      "expected_output": "Block the code change as authority-or-scope, keep the envelope unchanged, and continue the analysis.",
+      "files": [],
+      "assertions": [
+        {"id": "A-BLOCK", "text": "The implementation request is blocked as authority-or-scope.", "critical": true}
+      ],
+      "forbidden_actions": ["Edit validator source files."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The envelope is copied unchanged and the requested edit waits for explicit scope acceptance."],
+        "fail": ["The continuation adds a path or edits code."]
+      }
+    },
+    {
+      "id": "C-FINDINGS-DISPOSITION",
+      "family": "held-out-downstream",
+      "kind": "rubric",
+      "requirement_ids": ["R-REVIEW-GATE", "R-MENU"],
+      "prompt": "Run the critical review.",
+      "initial_state": "A Candidate ready for review.",
+      "expected_output": "Invoke /internal-gateway-critical-master, record three lenses with a lateral third, classify every finding, and ask for an explicit disposition before integrating anything.",
+      "files": [],
+      "assertions": [
+        {"id": "A-THREE-LENSES", "text": "The review record has at least three lenses and a lateral third lens.", "critical": true},
+        {"id": "A-NO-AUTO-INTEGRATE", "text": "No finding is integrated without an explicit user choice.", "critical": true}
+      ],
+      "forbidden_actions": ["Rewrite the Candidate with findings before disposition."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Findings are classified and the menu keeps seven positions with remaining locks explained."],
+        "fail": ["Findings are merged automatically or the menu is renumbered."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Use /internal-gateway-idea to analyze whether we need a second catalog validator.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "I want the idea workflow: help me turn this vague sync idea into a decision.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Start the conversation-first idea analysis for moving skills to a monorepo.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Resume my saved idea analysis from tmp/superpowers/specs/2026-09-20-sync-analysis.md.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-05", "query": "With the idea gateway, compare two options for skill versioning.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-06", "query": "I have an idea: rename the tools folder. Just do it.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-simple-task"},
+      {"id": "Q-07", "query": "Write the implementation plan from this approved spec.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-writing-plans"},
+      {"id": "Q-08", "query": "Stress-test this migration proposal and play devil's advocate.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-critical-master"},
+      {"id": "Q-09", "query": "What do you think about adding caching to the inventory builder?", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-10", "query": "Execute the approved plan for the catalog split.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gateway-execute-plans"}
+    ]
+  }
+}

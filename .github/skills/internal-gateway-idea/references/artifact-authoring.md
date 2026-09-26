@@ -19,7 +19,7 @@ recovery record, transcript, or critical-review artifact. If the record is
 incomplete or its projections disagree, stop authoring and preserve the last
 valid record.
 
-## Consolidated Analysis Spec + spec
+## Consolidated Analysis Spec +spec
 
 Local authoring is the default for the one canonical analysis Markdown
 artifact: record `delegation.mode: none`, `worker: primary-owner`, and
@@ -36,10 +36,10 @@ analysis artifact; do not create a parallel transcript or critical report.
 
 After verifying the spec, record `plan_authoring_ready: true` in its canonical
 recovery projection. Do not invoke `/internal-gateway-writing-plans` until the
-user later selects `+ plan`. Keep `Implementation permission` separate: a
+user later selects `+plan`. Keep `Implementation permission` separate: a
 `false` value prevents implementation or execution, not plan authoring.
 
-## Consolidated Analysis Spec + plan
+## Consolidated Analysis Spec +plan
 
 Route to `/internal-gateway-writing-plans` for plan eligibility, structure,
 review, validation, and handoff. That owner uses the same local-first route:
@@ -49,7 +49,7 @@ one bounded delegated evidence package. A delegated plan authoring route uses
 `internal-luna-executor` through `/internal-subagent-contract` with one
 bounded `DelegationBrief`; final synthesis remains parent-owned.
 
-The user's explicit `+ plan` selection supplies the caller-owned route choice
+The user's explicit `+plan` selection supplies the caller-owned route choice
 for this handoff. A retained spec with `plan_authoring_ready: true` satisfies
 the source-readiness requirement without another discovery or approval round.
 The selection does not override plan eligibility, review, validation, or safety
@@ -61,8 +61,8 @@ execution.
 
 `internal-luna-executor` is authoring metadata only. The primary owner and
 caller retain eligibility, classification, routing, authority, lifecycle,
-independent result verification, acceptance, closeout, and the sole post-
-approval handoff to `/internal-gateway-execute-plans`.
+independent result verification, acceptance, closeout, and the sole
+post-approval handoff to `/internal-gateway-execute-plans`.
 
 If an explicitly selected worker is unavailable, record a caller-owned
 `LifecycleRecord` and stop as blocked. A local or manual continuation requires

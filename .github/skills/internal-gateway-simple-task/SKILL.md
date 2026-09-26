@@ -8,6 +8,25 @@ description: Use when a concrete repository-owned low-to-medium-risk task can fi
 Use this skill as the short, linear route for concrete repository work. It owns
 scope selection, bounded execution, repair, validation, and the final report.
 
+## When to use
+
+Use only when the target, intended outcome, anti-scope, and validation signal
+are concrete enough to finish in one bounded session. This includes small code
+changes, metadata or documentation edits, diagnosis, and focused validation.
+
+- The request is repository-owned and the target can be identified from local
+  evidence.
+- The smallest coherent action and its focused validation are clear.
+- The work can finish without staged workflow changes or external
+  coordination.
+
+## When not to use
+
+Do not use this route for brainstorming, architecture selection, multi-phase
+rollouts, production operations, approval-bound work, unsafe changes, or work
+that cannot be checked locally. Route those requests to their named owner or
+stop with the exact boundary and required decision.
+
 ## Referenced skills
 
 This section is an audit index, not a preload bundle. Load each owner only when
@@ -20,8 +39,8 @@ the condition below is proved by local evidence.
 - `/internal-tdd`: posture selection for executable or evaluable behavior.
 - `/internal-subagent-contract`: brief and receipt shapes for conditional
   `internal-luna-executor` delegation.
-- `/superpowers-verification-before-completion`: required before any completion,
-  passing, fixed, or no-gap claim.
+- `/superpowers-verification-before-completion`: required before any
+  completion, passing, fixed, or no-gap claim.
 - `/addyosmani-code-simplification`: explicit simplification work only.
 - `/internal-gateway-idea` and `/internal-gateway-writing-plans`: handoff owners
   when this route stops or the work is promoted.
@@ -51,42 +70,33 @@ implementation:
 
 The brief is task-instance working data. It is not a new skill format, design
 or state machine, second implementation plan, or separate approval gate. Use
-the self-contained `references/execution-brief-template.md` as a reusable
-shape without turning it into persisted state or a competing contract.
+the self-contained
+[`references/execution-brief-template.md`](references/execution-brief-template.md)
+as a reusable shape without turning it into persisted state or a competing
+contract.
 
-Keep a same-session brief in working context. On pause or resume, materialize
-at most one uncommitted disposable `tmp/briefs/<slug>.md`. When promotion
-creates a retained implementation plan, authority transfers to
-`/internal-gateway-writing-plans` and the brief retires as authority.
-Supporting skills may contribute evidence, but may not create competing
-briefs. `/internal-gateway-idea` owns conversation-first idea analysis and
-`/internal-gateway-writing-plans` owns retained-plan work.
+Brief lifecycle and ownership:
 
-Before any live provider or external operation, require explicit authority.
-Use a safe local fallback when the brief permits one; otherwise stop
-fail-closed. Keep this boundary provider-neutral. Close out through one
-canonical evidence ledger with fresh focused and broader validation evidence;
-do not claim completion before those checks pass, and do not introduce numeric
-tool-call or read thresholds.
+- Keep a same-session brief in working context. On pause or resume,
+  materialize at most one uncommitted disposable `tmp/briefs/<slug>.md`.
+- When promotion creates a retained implementation plan, authority transfers
+  to `/internal-gateway-writing-plans` and the brief retires as authority.
+- Supporting skills may contribute evidence, but may not create competing
+  briefs. `/internal-gateway-idea` owns conversation-first idea analysis and
+  `/internal-gateway-writing-plans` owns retained-plan work.
 
-## Scope
+Authority and closeout:
 
-Use only when the target, intended outcome, anti-scope, and validation signal
-are concrete enough to finish in one bounded session. This includes small code
-changes, metadata or documentation edits, diagnosis, and focused validation.
+- Before any live provider or external operation, require and record explicit
+  authority. Use a safe local fallback when the brief permits one, and record
+  it; otherwise stop fail-closed. Keep this boundary provider-neutral.
+- Close out through one canonical evidence ledger with fresh focused and
+  broader validation evidence; do not claim completion before those checks
+  pass, and do not introduce numeric tool-call or read thresholds.
 
-Do not use this route for brainstorming, architecture selection, multi-phase
-rollouts, production operations, approval-bound work, unsafe changes, or work
-that cannot be checked locally. Route those requests to their named owner or
-stop with the exact boundary and required decision.
+## Workflow
 
-## When to use
-
-- The request is repository-owned and the target can be identified from local evidence.
-- The smallest coherent action and its focused validation are clear.
-- The work can finish without staged workflow changes or external coordination.
-
-## Local evidence first
+### 1. Local evidence first
 
 1. Inspect the nearest owner, target files, relevant callers, repository policy,
    current worktree state, and the closest executable validation.
@@ -101,7 +111,7 @@ stop with the exact boundary and required decision.
    round. Stop and request the required decision when an answer changes scope,
    ownership, or an approval boundary.
 
-## Route decision
+### 2. Route decision
 
 Classify the work as `trivial` or `non-trivial`.
 
@@ -120,16 +130,20 @@ Classify the work as `trivial` or `non-trivial`.
 **Downgrade:** After classification, when recovered local evidence shows that
 the task satisfies the trivial criteria, downgrade to `trivial` instead of
 continuing the non-trivial route. This is permitted only when all three fences
-hold: (a) a deterministic local validator is identified; (b) no contract or
-consumer changes; and (c) the downgrade rationale is recorded in the Internal
-Execution Brief. Always notify the user of the downgrade in the report. If the
-downgrade would touch any contract or consumer, require explicit user
-confirmation before execution.
+hold:
+
+1. A deterministic local validator is identified.
+2. No contract or consumer changes.
+3. The downgrade rationale is recorded in the Internal Execution Brief.
+
+Always notify the user of the downgrade in the report. If the downgrade would
+touch any contract or consumer, require explicit user confirmation before
+execution.
 
 Stop when the task becomes multi-phase, materially ambiguous, approval-bound,
 unsafe, too costly for the session, or not locally verifiable.
 
-## Critical challenge
+### 3. Critical challenge
 
 Before non-trivial action, run `/internal-gateway-critical-master` with exactly
 three lenses; the third lens must be lateral (`analogy` or
@@ -141,7 +155,7 @@ new evidence changes the plan, then run the challenge once more. Otherwise
 stop. The gateway retains scope, critique resolution, acceptance, repair,
 validation, and final reporting.
 
-## Execution posture
+### 4. Execution posture
 
 - Trivial work executes directly after local evidence is sufficient.
 - Non-trivial work may use `internal-luna-executor` only after the caller's
@@ -169,7 +183,7 @@ validation, and final reporting.
   request or an already-approved simplification remediation, after a passing
   behavior baseline exists. Preserve behavior, local conventions, and scope.
 
-## Execute and validate
+### 5. Execute and validate
 
 Keep one coherent in-scope change per task. Do not add speculative machinery,
 hidden routing, duplicate validators, or other structure that does not serve
@@ -180,6 +194,14 @@ the canonical evidence ledger. Check that every changed requirement has fresh
 evidence. Classify failures as task-local, pre-existing, unrelated/external,
 environmental, or unknown. Repair once only when the repair is safe, in scope,
 and produces new evidence; rerun the authoritative command.
+
+Before any completion, passing, fixed, or no-gap claim, load
+`/superpowers-verification-before-completion`, run the full required checks,
+read their exit status and output, and compare the result with the baseline.
+Record pending human judgment or unavailable external evidence as follow-up
+only when no material feature failure remains.
+
+## Final report
 
 After successful validation, report these fields in this order:
 
@@ -194,12 +216,6 @@ Within `Outcome`, strongly prefer the smallest useful Mermaid diagram only
 when the completed result spans a material multi-component relationship. Keep
 the controlling conclusion in text; simple results remain prose-only.
 
-Before any completion, passing, fixed, or no-gap claim, load
-`/superpowers-verification-before-completion`, run the full required checks,
-read their exit status and output, and compare the result with the baseline.
-Record pending human judgment or unavailable external evidence as follow-up
-only when no material feature failure remains.
-
 ## Exact stop reasons
 
 Stop immediately for an unexpected consumer, out-of-scope path, owner conflict,
@@ -209,7 +225,9 @@ repair whose next action would cross scope or authority.
 
 Use this form and keep it concise:
 
-`Stop: <violated condition>. Evidence: <bounded fact or command result>. Next: <required authority, user decision, or named owner>.`
+```text
+Stop: <violated condition>. Evidence: <bounded fact or command result>. Next: <required authority, user decision, or named owner>.
+```
 
 Do not continue by inventing facts, weakening a requirement into a manual
 attestation, or replacing a missing validator with narrative confidence.

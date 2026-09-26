@@ -5,29 +5,34 @@ description: Use when the user explicitly selects a conversation-first workflow 
 
 # Internal Gateway Idea
 
+Turn an early, unclear, or anchored idea into a decision-ready analysis while
+keeping the working material in the conversation by default.
+
 ## When to use
 
-Use this skill only when the user explicitly selects it. Turn an early,
-unclear, or anchored idea into a decision-ready analysis while keeping the
-working material in the conversation by default. Do not infer invocation from
-an idea-shaped request.
+- Use this skill only when the user explicitly selects it.
+- Do not infer invocation from an idea-shaped request.
 
 ## Analysis unit lock
 
 At the start of each analysis unit, record:
 
-- `Subject`: one canonical subject for the analysis and any optional critical review;
+- `Subject`: one canonical subject for the analysis and any optional critical
+  review;
 - `Decision focus`: the decision the analysis must make possible;
-- `Mode`: the current analysis mode; the only defined value is `analysis-only`;
-- `Desired artifact`: none or the one Markdown artifact the user explicitly requests;
+- `Mode`: the current analysis mode; the only defined value is
+  `analysis-only`;
+- `Desired artifact`: none or the one Markdown artifact the user explicitly
+  requests;
 - `Implementation permission`: whether later implementation or execution has
   been explicitly requested.
 
 The latest explicit subject or mode instruction wins. On a `subject-change` or
 `mode-change`, park the prior unit with its capsule, start the new unit, and do
-not silently reuse open decisions. In `analysis-only` mode, do not invoke
-`/internal-tdd`, `/internal-gateway-writing-plans`, or
-`/internal-gateway-execute-plans` before
+not silently reuse open decisions.
+
+In `analysis-only` mode, do not invoke `/internal-tdd`,
+`/internal-gateway-writing-plans`, or `/internal-gateway-execute-plans` before
 the user explicitly selects a `+spec` or `+plan` Candidate acceptance action.
 A `+spec` action authorizes only the selected spec artifact and records it as
 `plan_authoring_ready: true` after verification. A later `+plan` action
@@ -35,16 +40,28 @@ authorizes only the plan-authoring handoff. `Implementation permission: false`
 does not block plan authoring because neither action authorizes implementation
 or execution.
 
-## Autonomous route contract
+## Autonomous route contract and ownership
 
 This gateway owns one explicit, conversation-first route. Its owner is
 `/internal-gateway-idea` and its default mode is `analysis-only`. The gateway
 owns the analysis unit, evidence classification, decision eligibility,
 recovery record, Candidate lifecycle, critical-review gate, finding
-disposition, artifact selection, and authority envelope. A bounded interview
-utility or critical-review procedure may provide its own mechanics, but
-neither may replace this gateway's lifecycle, state, authority, acceptance, or
-handoff decisions.
+disposition, artifact selection, and authority envelope. It also owns the
+analysis lifecycle, evidence discipline, option comparison, recommendation,
+decision state, and one canonical Analysis Spec.
+
+It does not own:
+
+- interview mechanics or question formatting, which belong to `/grill-me`;
+- critical-review procedure or report shape, which belong to
+  `/internal-gateway-critical-master`;
+- implementation-oriented design and design-spec writing, which require a
+  separate explicit user-selected route;
+- implementation planning or execution.
+
+A bounded interview utility or critical-review procedure may provide its own
+mechanics, but neither may replace this gateway's lifecycle, state, authority,
+acceptance, or handoff decisions.
 
 Before the user explicitly accepts a Candidate with `+spec` or `+plan`, do not
 route to implementation-oriented design, TDD, plan authoring, or execution.
@@ -56,10 +73,10 @@ route, invocation, or handoff.
 
 ## Global gates
 
-This lifecycle has exactly two global gate types: `GRILL-ME` and `CRITICAL
-REVIEW`. Recommendation, `save`, realignment, status, recovery, and the
-four-option acceptance choice are actions or projections, not additional gate
-types.
+This lifecycle has exactly two global gate types: `GRILL-ME` and
+`CRITICAL REVIEW`. Recommendation, `save`, realignment, status, recovery, and
+the four-option acceptance choice are actions or projections, not additional
+gate types.
 
 `GRILL-ME` is mandatory immediately after setup. Route every material doubt,
 ambiguity, missing decision, or user-input question through `/grill-me`; do not
@@ -114,12 +131,12 @@ action, artifact, route, or handoff to repair the gap.
 
 ## Mutation authority envelope
 
-Record two explicit sets for each unit: `Authorized paths` and `Authorized
-actions`; an absent item is not authorized. The default is analysis-only:
-reads, evidence recovery, non-mutating checks, and disposable temporary output
-do not expand the grant, and writes are limited to the one explicitly selected
-artifact path. This gateway has no standing grant for implementation, planning,
-execution, or unrelated paths.
+Record two explicit sets for each unit: `Authorized paths` and
+`Authorized actions`; an absent item is not authorized. The default is
+analysis-only: reads, evidence recovery, non-mutating checks, and disposable
+temporary output do not expand the grant, and writes are limited to the one
+explicitly selected artifact path. This gateway has no standing grant for
+implementation, planning, execution, or unrelated paths.
 
 `continue`, `finish`, pause, compaction, and recovery preserve both sets and
 may not add a path or action. Protected workflow status is separate from user
@@ -132,19 +149,6 @@ Copy the authority envelope unchanged into every continuation and recovery
 projection. A status marker, resumed capsule, or recovered decision does not
 grant mutation authority.
 
-## Ownership boundary
-
-This gateway owns the analysis lifecycle, evidence discipline, option
-comparison, recommendation, decision state, and one canonical Analysis Spec.
-It does not own:
-
-- interview mechanics or question formatting, which belong to `/grill-me`;
-- critical-review procedure or report shape, which belong to
-  `/internal-gateway-critical-master`;
-- implementation-oriented design and design-spec writing, which require a
-  separate explicit user-selected route;
-- implementation planning or execution.
-
 ## Evidence posture
 
 Begin by naming the decision the analysis should make possible. Keep the depth
@@ -156,15 +160,16 @@ option until the user resolves the decision.
 
 ## Decision ledger and eligibility
 
-Load [`references/decision-ledger.md`](references/decision-ledger.md) before building or updating the ledger; it owns states, priority, batching, and reopen rules.
+Load [`references/decision-ledger.md`](references/decision-ledger.md) before
+building or updating the ledger; it owns states, priority, batching, and
+reopen rules.
 
 ## State capsule
 
-Maintain one compact state capsule with exactly:
-
-`Subject`; `Mode` and decision focus; accepted, rejected, deferred, and
-accepted-risk IDs; eligible-now IDs; blocked-later IDs with prerequisites;
-evidence anchors; and next action.
+Maintain one compact state capsule with exactly `Subject`, `Mode` and
+decision focus, plus the `state_capsule` fields of the canonical recovery
+record: accepted, rejected, deferred, and accepted-risk IDs; eligible-now IDs;
+blocked-later IDs with prerequisites; evidence anchors; and next action.
 
 Update the ledger and capsule before and after `/grill-me`, on pause, context
 compaction, `subject-change`, or `mode-change`, and before presenting a
@@ -217,7 +222,11 @@ evidence, a user decision, or a supported critical finding.
    resolved, visibly deferred, or explicitly accepted as risk, and the
    recommendation is traceable to accepted decisions and labeled evidence.
 
-### Post-Candidate menu and gate
+**Complete when:** the recommendation is traceable to resolved decisions and
+labeled evidence, every material uncertainty is resolved, deferred, or
+accepted as visible risk, and the latest state capsule is current.
+
+## Phase menu and gate
 
 After setup and after every named analysis phase, present the same seven
 numbered semantic entries in the same positions. Keep locked entries visible
@@ -252,9 +261,7 @@ the one canonical recovery/artifact projection. Save never makes `+spec` or
 `+plan` available, closes a finding, authorizes implementation or execution,
 or creates a second artifact.
 
-Completion criterion: the recommendation is traceable to resolved decisions and labeled evidence, every material uncertainty is resolved/deferred/accepted as visible risk, and the latest state capsule is current.
-
-## Chat layout
+## Candidate, review, and persistence
 
 Before presenting a Candidate, opening acceptance, running critical review,
 authoring an accepted artifact, or persisting state, load
@@ -262,20 +269,11 @@ authoring an accepted artifact, or persisting state, load
 It owns the compact chat projection, stable Analysis Spec fields, acceptance
 gate, review integration, artifact handoff, and persistence route.
 
-## Candidate Analysis Spec
-
-Use the field set and promotion rules in
-`references/candidate-and-persistence.md`; the Candidate remains unaccepted
-until critical review and an explicit promotion choice complete.
-
-## Critical review procedure
-
-Invoke `/internal-gateway-critical-master` with the Candidate as canonical
-subject. Apply the disposition and realignment rules in
-`references/candidate-and-persistence.md`; this gateway retains lifecycle and
-authority ownership.
-
-## Pause and persistence
-
-Use the persistence route in `references/candidate-and-persistence.md` for
-pause, save, cross-chat continuation, or accepted artifact creation.
+- **Candidate Analysis Spec.** Use its field set and promotion rules. The
+  Candidate remains unaccepted until critical review and an explicit
+  promotion choice complete.
+- **Critical review.** Invoke `/internal-gateway-critical-master` with the
+  Candidate as canonical subject. Apply the reference's disposition and
+  realignment rules; this gateway retains lifecycle and authority ownership.
+- **Pause and persistence.** Use its persistence route for pause, save,
+  cross-chat continuation, or accepted artifact creation.
