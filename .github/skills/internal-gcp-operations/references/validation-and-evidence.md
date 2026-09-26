@@ -1,14 +1,18 @@
 # GCP Operations Validation And Evidence
 
-When an evidence path needs deeper detail, load this reference for operational comparison and stage-aware proof.
+Preflight, monitoring, inventory, recovery, and stage-aware rollout evidence
+for Google Cloud operational validation.
 
 ## Preflight and rollout evidence
 
 - Confirm scope, rollout unit, rollback trigger, and owner.
 - Confirm monitoring, alerting, and logging signals for the affected surface.
-- Confirm backup or recovery expectations when stateful services are involved.
-- Confirm identity, Org Policy, and shared-network assumptions before widening rollout.
-- Validate the first safe unit, then record success signals and unexpected deny, drift, or connectivity regressions.
+- Confirm backup or recovery expectations when stateful services are
+  involved.
+- Confirm identity, Org Policy, and shared-network assumptions before widening
+  rollout.
+- Validate the first safe unit, then record success signals and unexpected
+  deny, drift, or connectivity regressions.
 - Record what was observed and what remains expected.
 
 ## Monitoring and inventory evidence patterns

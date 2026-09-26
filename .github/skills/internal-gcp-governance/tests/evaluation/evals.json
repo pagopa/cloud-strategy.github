@@ -1,0 +1,180 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gcp-governance",
+  "requirements": [
+    {
+      "id": "R-SCOPE",
+      "text": "Establish the control objective, affected scope, principals, workloads, ownership boundaries, and blast radius.",
+      "source": "internal-gcp-governance SKILL.md: Workflow step 1"
+    },
+    {
+      "id": "R-SEPARATE",
+      "text": "Separate preventive guardrails, authorization, and workload trust into explicit decision areas.",
+      "source": "internal-gcp-governance SKILL.md: Workflow step 2"
+    },
+    {
+      "id": "R-STACK",
+      "text": "Select a control stack across Org Policy, inheritance, IAM, workload identity federation, and service-account boundaries.",
+      "source": "internal-gcp-governance SKILL.md: Workflow step 3"
+    },
+    {
+      "id": "R-EXCEPTIONS",
+      "text": "Define each governed exception with an owner, reason, scope, compensating controls, review date, and closure condition.",
+      "source": "internal-gcp-governance SKILL.md: Workflow step 4"
+    },
+    {
+      "id": "R-VERIFY",
+      "text": "Name staged control verification, rollback triggers, and evidence required before widening a high-blast-radius change.",
+      "source": "internal-gcp-governance SKILL.md: Workflow step 5"
+    },
+    {
+      "id": "R-OUTPUT",
+      "text": "Return one governance control-stack decision for the requested Google Cloud identity, authorization, guardrail, workload-trust, or exception change.",
+      "source": "internal-gcp-governance SKILL.md: Output"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-CONTROL-STACK",
+      "family": "first-time-skill-creation",
+      "kind": "rubric",
+      "requirement_ids": ["R-SCOPE", "R-SEPARATE", "R-STACK", "R-VERIFY", "R-OUTPUT"],
+      "prompt": "An external CI provider needs short-lived access to deploy into three GCP projects. Define the governance control stack and the staged verification before expanding access.",
+      "initial_state": "The affected projects are known, the CI workload is external, and the request has a meaningful but bounded blast radius.",
+      "expected_output": "One control-stack decision distinguishes guardrails, authorization, and workload trust, then gives staged checks, rollback triggers, and evidence.",
+      "files": ["references/guardrail-map.md"],
+      "assertions": [
+        {"id": "A-BOUNDED-SCOPE", "text": "The decision names the projects, CI workload, ownership boundary, and access blast radius.", "critical": true},
+        {"id": "A-THREE-AREAS", "text": "Preventive guardrails, authorization, and workload trust are treated as distinct decision areas.", "critical": true},
+        {"id": "A-STACK", "text": "The recommendation selects appropriate combinations of IAM, federation, and service-account boundaries instead of one undifferentiated permission.", "critical": true},
+        {"id": "A-STAGED-PROOF", "text": "The output names staged verification, rollback triggers, and evidence before widening the deployment scope.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Grant broad long-lived credentials without a bounded trust decision.",
+        "Treat IAM authorization as the complete workload-trust design."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The output is one coherent governance decision with explicit scope and separated control areas.",
+          "The output provides a staged proof and rollback condition tied to the access blast radius."
+        ],
+        "fail": [
+          "The output recommends a single broad IAM grant without trust or guardrail analysis.",
+          "The output widens access without verification evidence or a rollback trigger."
+        ]
+      }
+    },
+    {
+      "id": "C-GOVERNED-EXCEPTION",
+      "family": "held-out-downstream-work",
+      "kind": "rubric",
+      "requirement_ids": ["R-SCOPE", "R-STACK", "R-EXCEPTIONS", "R-VERIFY", "R-OUTPUT"],
+      "prompt": "A legacy project must temporarily use a location excluded by the organization guardrail. Define the governed exception and the control decision around it.",
+      "initial_state": "The exception is limited to one project and needs temporary approval while the workload is migrated.",
+      "expected_output": "A control-stack decision records the affected scope, the exception owner and reason, compensating controls, review and closure dates, and staged revalidation.",
+      "files": ["references/guardrail-map.md"],
+      "assertions": [
+        {"id": "A-EXCEPTION-FIELDS", "text": "The exception names an owner, reason, scope, compensating controls, review date, and closure condition.", "critical": true},
+        {"id": "A-BASELINE-CONTROL", "text": "The output identifies the underlying preventive guardrail and how the exception remains bounded.", "critical": true},
+        {"id": "A-REVALIDATION", "text": "The output includes staged verification, evidence, and a rollback or closure trigger before broader use.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Describe an exception without an owner or closure condition.",
+        "Convert a project-scoped exception into a permanent organization-wide policy change."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The exception is explicitly temporary, scoped, owned, and evidence-backed.",
+          "The recommendation preserves the guardrail and states how the exception closes."
+        ],
+        "fail": [
+          "The output grants an unbounded exception or omits the review and closure path.",
+          "The output does not say what proof is needed before widening or retaining the exception."
+        ]
+      }
+    },
+    {
+      "id": "C-WORKLOAD-TRUST",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-SCOPE", "R-SEPARATE", "R-STACK", "R-VERIFY", "R-OUTPUT"],
+      "prompt": "Reduce service-account sprawl for a shared automation platform while preserving deployments in a production folder. Recommend the governance control stack.",
+      "initial_state": "Several workloads currently share credentials and the production folder has a high blast radius.",
+      "expected_output": "The output separates human access, workload trust, and resource authorization; recommends bounded service-account and IAM changes; and stages validation.",
+      "files": [],
+      "assertions": [
+        {"id": "A-BOUNDARIES", "text": "Human, workload, and resource-authorization boundaries are explicitly distinguished.", "critical": true},
+        {"id": "A-ATTRIBUTABLE", "text": "The recommendation improves workload attribution through scoped identities or service-account boundaries.", "critical": true},
+        {"id": "A-HIGH-BLAST", "text": "The production-folder change has staged checks and a rollback trigger before expansion.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Solve service-account sprawl by granting a single unrestricted account.",
+        "Skip staged validation because the change is an identity refactor."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The response makes identity mechanism, trust, and resource authorization separate review points.",
+          "The response ties the proposed boundaries to production blast radius and verification."
+        ],
+        "fail": [
+          "The response collapses workload trust and resource authorization into one broad grant.",
+          "The response has no rollback trigger or evidence plan."
+        ]
+      }
+    },
+    {
+      "id": "C-COMPETING-OWNER",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-OUTPUT", "R-STACK"],
+      "prompt": "Author the exact raw GCP Org Policy JSON payloads for a policy-as-code repository and validate their API schema.",
+      "initial_state": "The requested artifact is policy definition source, not a governance control-stack decision.",
+      "expected_output": "The response recognizes the concrete raw-policy authoring deliverable and routes it to internal-cloud-policy instead of inventing a governance decision.",
+      "files": [],
+      "assertions": [
+        {"id": "A-RAW-POLICY-ROUTE", "text": "The response routes raw Org Policy definition authoring to internal-cloud-policy.", "critical": true},
+        {"id": "A-NO-FALSE-DECISION", "text": "The response does not claim that a control-stack decision has been completed when only JSON schema authoring was requested.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Present raw policy JSON as a complete governance control-stack decision.",
+        "Create a broad IAM or workload identity recommendation that the prompt did not request."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The output identifies policy-definition authoring as the competing owner boundary.",
+          "The output preserves the distinction between API payload syntax and governance design."
+        ],
+        "fail": [
+          "The output proceeds as if a full governance control stack were requested.",
+          "The output silently broadens the task beyond raw policy definition validation."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Define the IAM, workload identity federation, and service-account boundaries for an external CI system deploying to GCP.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Design an Org Policy guardrail with a narrowly governed exception for a small project set.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Reduce long-lived service-account credentials for shared automation and preserve attributable workload access.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Choose the GCP control stack for a new folder that needs preventive restrictions and explicit IAM ownership.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Define a temporary broader IAM binding for a migration, including approval, expiration, and rollback conditions.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Set up a time-bounded emergency human-access path with approval, logging, and closure evidence.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-07", "query": "Recommend how to separate external identity trust from resource authorization for GCP workloads.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Roll out an inherited GCP guardrail in stages and define what evidence is required before widening it.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Author the raw GCP Org Policy JSON payloads for a policy-as-code repository.", "should_trigger": false, "split": "train", "competing_owner": "internal-cloud-policy"},
+      {"id": "Q-10", "query": "Design AWS IAM roles and trust policies for a multi-account deployment system.", "should_trigger": false, "split": "train", "competing_owner": "internal-aws"},
+      {"id": "Q-11", "query": "Configure Azure RBAC and management-group policy assignments for the platform team.", "should_trigger": false, "split": "train", "competing_owner": "internal-azure"},
+      {"id": "Q-12", "query": "Write Terraform code for the GCP service accounts, bindings, and organization policies.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-terraform"},
+      {"id": "Q-13", "query": "Validate the monitoring and recovery evidence for a GCP Org Policy rollout.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gcp-operations"},
+      {"id": "Q-14", "query": "Compare GCP folder and project placement models before selecting one.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gcp-organization-structure"}
+    ]
+  }
+}
