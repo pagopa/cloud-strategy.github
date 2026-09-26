@@ -857,6 +857,35 @@ This repository-owned contract overrides any earlier instruction to ask one ques
   question remains, present it as a numbered one-item block.
 {_GUIDED_QUESTION_CONTRACT_END}"""
 
+_SUPERPOWERS_SOURCE = "obra-superpowers"
+_SUPERPOWERS_NO_COMMIT_CONTRACT_START = "<!-- local-sync:no-commit:start -->"
+_SUPERPOWERS_NO_COMMIT_CONTRACT_END = "<!-- local-sync:no-commit:end -->"
+_SUPERPOWERS_NO_COMMIT_CONTRACT_RE = re.compile(
+    re.escape(_SUPERPOWERS_NO_COMMIT_CONTRACT_START)
+    + r".*?"
+    + re.escape(_SUPERPOWERS_NO_COMMIT_CONTRACT_END),
+    re.DOTALL,
+)
+_SUPERPOWERS_NO_COMMIT_CONTRACT = f"""\
+{_SUPERPOWERS_NO_COMMIT_CONTRACT_START}
+## Local no-commit contract
+
+This repository-owned contract overrides any earlier instruction in this skill,
+its bundled prompts, or its scripts to create Git commits.
+
+- Do not create, amend, squash, or push Git commits. Do not run `git commit`,
+  `git merge`, `git rebase`, `git cherry-pick`, or `git push`.
+- Leave every change uncommitted in the working tree. The user owns staging,
+  commits, and integration.
+- Where a step says to commit, run that step's validation instead, then report
+  the changed files and the `git status --short` summary.
+- Where a step or script needs a commit range such as `BASE..HEAD`, review the
+  uncommitted changes with `git diff <BASE>` instead.
+- Include this contract in every subagent brief dispatched from this skill.
+- Only an explicit user request in the current conversation authorizes a
+  commit, and only for that request.
+{_SUPERPOWERS_NO_COMMIT_CONTRACT_END}"""
+
 _TEACH_WORKSPACE_SKILL = "mattpocock-teach"
 _TEACH_WORKSPACE_CONTRACT_START = "<!-- local-sync:teach-workspace:start -->"
 _TEACH_WORKSPACE_CONTRACT_END = "<!-- local-sync:teach-workspace:end -->"
@@ -923,6 +952,14 @@ def _enforce_guided_question_contract(content: str) -> str:
         content,
         _GUIDED_QUESTION_CONTRACT_RE,
         _GUIDED_QUESTION_CONTRACT,
+    )
+
+
+def _enforce_superpowers_no_commit_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _SUPERPOWERS_NO_COMMIT_CONTRACT_RE,
+        _SUPERPOWERS_NO_COMMIT_CONTRACT,
     )
 
 
@@ -1239,7 +1276,7 @@ def normalize_candidate(
                 content = _FRONTMATTER_NAME_RE.sub(
                     rf"\g<1>{asset.canonical_name}", content, count=1
                 )
-                if asset.source == "obra-superpowers":
+                if asset.source == _SUPERPOWERS_SOURCE:
                     content = _SUPERPOWERS_SKILL_REF_RE.sub(
                         r"superpowers-\1", content
                     )
@@ -1280,6 +1317,11 @@ def normalize_candidate(
                 and file_path == asset_dir / "SKILL.md"
             ):
                 content = _enforce_guided_question_contract(content)
+            if (
+                asset.source == _SUPERPOWERS_SOURCE
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_superpowers_no_commit_contract(content)
             if (
                 asset.canonical_name == _TEACH_WORKSPACE_SKILL
                 and file_path == asset_dir / "SKILL.md"

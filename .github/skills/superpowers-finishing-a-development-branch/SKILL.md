@@ -223,3 +223,22 @@ place. If your platform provides a workspace-exit tool, use it.
 | "The merged-result failure is probably flaky" | A failing merged result stops everything. Branch and worktree stay put while you investigate. |
 | "The base branch is obviously main" | Confirm the fork point or ask. Merging into the wrong base is expensive to undo. |
 | "The push was rejected — force-push will fix it" | A rejected push means the remote moved. Investigate; force-push only on your human partner's explicit request. |
+
+<!-- local-sync:no-commit:start -->
+## Local no-commit contract
+
+This repository-owned contract overrides any earlier instruction in this skill,
+its bundled prompts, or its scripts to create Git commits.
+
+- Do not create, amend, squash, or push Git commits. Do not run `git commit`,
+  `git merge`, `git rebase`, `git cherry-pick`, or `git push`.
+- Leave every change uncommitted in the working tree. The user owns staging,
+  commits, and integration.
+- Where a step says to commit, run that step's validation instead, then report
+  the changed files and the `git status --short` summary.
+- Where a step or script needs a commit range such as `BASE..HEAD`, review the
+  uncommitted changes with `git diff <BASE>` instead.
+- Include this contract in every subagent brief dispatched from this skill.
+- Only an explicit user request in the current conversation authorizes a
+  commit, and only for that request.
+<!-- local-sync:no-commit:end -->

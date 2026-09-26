@@ -69,7 +69,7 @@ overrides:
   reason: Limit activation to direct invocation only, preventing unintended automatic
     triggers before creative work.
   patch_path: patches/superpowers-brainstorming-description.patch
-  expected_content_hash: 76175adb7e88aa17b3cfba121d2d764b73dbdda2130fce4484b918b89e3ed904
+  expected_content_hash: 600aeb2d44474d1f0b5c666b8fc6c0c09eb249209b27562532aae07d1caa5fc0
   baseline_repo_commit: e28cd84
   validation_note: Stop the refresh if the patch does not apply cleanly; verify description
     remains trigger-first and limited to direct invocation.

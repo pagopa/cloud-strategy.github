@@ -70,6 +70,24 @@ declared source.
   remaining blocker is a numbered one-item block.
 - Use a marker-based idempotent append, never a context-sensitive replay patch.
 
+## Superpowers No-Commit Contract
+
+- Append the repository-owned no-commit contract to the `SKILL.md` of every
+  asset from the `obra-superpowers` source, between the
+  `local-sync:no-commit` markers.
+- The contract overrides upstream commit steps in the skill, its bundled
+  prompts, and its scripts. Agents leave changes uncommitted, replace commit
+  steps with validation and a `git status --short` report, and review
+  `git diff <BASE>` instead of commit ranges.
+- Every subagent brief dispatched from these skills must carry the contract.
+  Only an explicit user request in the current conversation authorizes a
+  commit.
+- Leave bundled prompts and scripts byte-identical to upstream; the `SKILL.md`
+  contract controls them.
+- Adding or changing this block changes the
+  `superpowers-brainstorming` override `expected_content_hash`; recompute it in
+  the same change.
+
 ## Repository-Owned Skill Contracts
 
 - Express additive behavior, workspace, and output-path requirements as

@@ -692,6 +692,72 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     assert "overrides any earlier instruction to ask one question at a time" in content
 
 
+def test_normalization_enforces_no_commit_contract_for_superpowers_skills(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/superpowers-writing-plans"
+    skill = candidate / local / "SKILL.md"
+    prompt = candidate / local / "implementer-prompt.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: superpowers-writing-plans\n---\nCommit after each task.\n",
+        encoding="utf-8",
+    )
+    prompt.write_text("Commit your work.\n", encoding="utf-8")
+    other_local = ".github/skills/example"
+    other_skill = candidate / other_local / "SKILL.md"
+    other_skill.parent.mkdir(parents=True)
+    other_skill.write_text("---\nname: example\n---\nCommit.\n", encoding="utf-8")
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="obra-superpowers",
+                repository="https://github.com/obra/superpowers.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(
+                    ManagedAsset(
+                        source="obra-superpowers",
+                        upstream="skills/writing-plans",
+                        local=local,
+                        canonical_name="superpowers-writing-plans",
+                    ),
+                ),
+            ),
+            ManagedSource(
+                source_id="test",
+                repository="https://example.com/test.git",
+                ref="b" * 40,
+                advertised_ref=None,
+                assets=(
+                    ManagedAsset(
+                        source="test",
+                        upstream="skills/example",
+                        local=other_local,
+                        canonical_name="example",
+                    ),
+                ),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    content = skill.read_text(encoding="utf-8")
+    assert f"{local}/SKILL.md" in first_changed
+    assert second_changed == ()
+    assert content.count("<!-- local-sync:no-commit:start -->") == 1
+    assert "## Local no-commit contract" in content
+    assert "Do not create, amend, squash, or push Git commits" in content
+    assert "every subagent brief" in content
+    assert prompt.read_text(encoding="utf-8") == "Commit your work.\n"
+    assert "local-sync:no-commit" not in other_skill.read_text(encoding="utf-8")
+
+
 def _policy_driven_resources(canonical_name: str, local: str) -> ManagedResources:
     asset = ManagedAsset(
         source="upstream",
