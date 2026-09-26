@@ -1,0 +1,369 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-microsoft-markitdown",
+  "requirements": [
+    {
+      "id": "R-ROUTE-CONVERSION",
+      "text": "Use this skill for converting files, URLs, or media to Markdown and for YouTube transcript extraction; route Markdown structure, fences, and links to /internal-markdown and workbook or tabular integrity to /internal-excel.",
+      "source": "internal-microsoft-markitdown SKILL.md: When to use; When not to use"
+    },
+    {
+      "id": "R-SERVING-INSTALL",
+      "text": "Before installing extras, identify the serving installation: inspect the CLI with command -v markitdown and pipx list, and inspect the Python API with a python3 import that prints markitdown.__file__ and sys.executable.",
+      "source": "internal-microsoft-markitdown SKILL.md: Environment map"
+    },
+    {
+      "id": "R-INSTALL-MODE",
+      "text": "For a pipx CLI, inject the dependency package directly with pipx inject markitdown <package>, not an extra-spec string; for the API or a non-pipx CLI, install the markitdown extra into the interpreter that serves it.",
+      "source": "internal-microsoft-markitdown SKILL.md: Environment map"
+    },
+    {
+      "id": "R-FEATURE-SCOPE",
+      "text": "A missing extra in one install is not evidence that the feature is missing; verify the serving CLI or API installation before diagnosing or reinstalling.",
+      "source": "internal-microsoft-markitdown SKILL.md: Environment map"
+    },
+    {
+      "id": "R-SAVE-OUTPUT",
+      "text": "Always save conversions with -o and validate the resulting output file and expected anchors instead of relying on truncated console output as evidence.",
+      "source": "internal-microsoft-markitdown SKILL.md: Commands; Validation"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-CONVERT-SAVE",
+      "family": "conversion-output",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE-CONVERSION", "R-SAVE-OUTPUT"],
+      "prompt": "Convert https://example.com/guide into Markdown and leave a file that another tool can inspect.",
+      "initial_state": "The requested deliverable is Markdown produced from a URL. There is no request to rewrite the resulting Markdown after conversion.",
+      "expected_output": "Use markitdown for the URL conversion, save with an explicit -o path such as guide.md, confirm the output exists, and report relevant anchors rather than relying on console truncation.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-CONVERSION-OWNER",
+          "text": "The response selects markitdown for converting the URL to Markdown.",
+          "critical": true
+        },
+        {
+          "id": "A-EXPLICIT-OUTPUT",
+          "text": "The command or workflow uses -o with a declared output file and validates that file.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Rely on truncated terminal output instead of saving the Markdown artifact."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The URL is converted by markitdown and the result is saved with -o.",
+          "The output path and a file or anchor validation are reported."
+        ],
+        "fail": [
+          "The answer prints the conversion to the console without -o.",
+          "The answer routes the conversion itself to a Markdown formatting owner."
+        ]
+      }
+    },
+    {
+      "id": "C-CLI-YOUTUBE-EXTRA",
+      "family": "serving-install",
+      "kind": "rubric",
+      "requirement_ids": ["R-SERVING-INSTALL", "R-INSTALL-MODE", "R-FEATURE-SCOPE", "R-SAVE-OUTPUT"],
+      "prompt": "The pipx-installed markitdown CLI cannot extract a YouTube transcript. Diagnose the install, enable the feature, and save the transcript to transcript.md.",
+      "initial_state": "The host may also have a separate Python environment with markitdown installed. The CLI path and its isolated pipx environment are the serving target until evidence says otherwise.",
+      "expected_output": "First run command -v markitdown and pipx list, then inject the direct dependency package youtube-transcript-api into the pipx markitdown environment rather than using an extra-spec string, retry the canonical YouTube URL, and save with -o transcript.md. Do not infer that the feature is missing from another install's state.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-IDENTIFY-CLI",
+          "text": "The response identifies the serving CLI and its pipx environment before changing dependencies.",
+          "critical": true
+        },
+        {
+          "id": "A-DIRECT-INJECT",
+          "text": "The response uses pipx inject markitdown youtube-transcript-api or an equivalent direct dependency package, not markitdown[youtube-transcription] as the injected package.",
+          "critical": true
+        },
+        {
+          "id": "A-FEATURE-NOT-GLOBAL",
+          "text": "The response treats the feature as install-specific and does not call it missing based on another interpreter.",
+          "critical": true
+        },
+        {
+          "id": "A-SAVE-TRANSCRIPT",
+          "text": "The retry saves the transcript with -o transcript.md.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Inject markitdown[youtube-transcription] as an extra-spec string into pipx.",
+        "Install into an unverified interpreter before identifying the serving CLI."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The serving CLI is identified before dependency changes, and the direct package is injected into its pipx environment.",
+          "The answer separates install-specific feature availability and saves the retry output with -o."
+        ],
+        "fail": [
+          "The answer injects an extra-spec string or installs into the wrong interpreter.",
+          "The answer claims YouTube support is unavailable without checking the serving install."
+        ]
+      }
+    },
+    {
+      "id": "C-API-EXTRA",
+      "family": "serving-install",
+      "kind": "rubric",
+      "requirement_ids": ["R-SERVING-INSTALL", "R-INSTALL-MODE", "R-FEATURE-SCOPE"],
+      "prompt": "A Python program using MarkItDown cannot extract YouTube captions. Check which API install serves it and install the required extra in that interpreter.",
+      "initial_state": "The machine has multiple Python interpreters and a separate pipx CLI. The failing caller is a Python API program, not necessarily the CLI.",
+      "expected_output": "Use a python3 import check that prints markitdown.__file__ and sys.executable, then install markitdown[youtube-transcription] with that serving interpreter's -m pip. Treat the separate CLI's package state as unrelated evidence.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-IDENTIFY-API",
+          "text": "The response identifies the API module path and interpreter before installing an extra.",
+          "critical": true
+        },
+        {
+          "id": "A-API-INSTALL",
+          "text": "The response installs the markitdown extra through the interpreter that serves the API, rather than using pipx inject for that API process.",
+          "critical": true
+        },
+        {
+          "id": "A-SEPARATE-INSTALLS",
+          "text": "The response does not treat a missing feature in the pipx CLI as proof that the API install lacks it, or vice versa.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Use the pipx CLI environment as a substitute for the failing API interpreter without evidence.",
+        "Declare the feature missing before identifying the imported module and executable."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The API import path and executable are printed before the extra is installed.",
+          "The extra is installed in the serving API interpreter and install boundaries are kept separate."
+        ],
+        "fail": [
+          "The answer installs into an arbitrary Python or the pipx CLI environment.",
+          "The answer generalizes one install's missing extra into a global feature failure."
+        ]
+      }
+    },
+    {
+      "id": "C-POST-CONVERSION-OWNER",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE-CONVERSION", "R-SAVE-OUTPUT"],
+      "prompt": "Convert report.html to report.md, then fix the Markdown headings and links in the generated file.",
+      "initial_state": "The request has two phases: conversion and a separate post-conversion Markdown-structure edit.",
+      "expected_output": "Use markitdown for the first phase and save it with -o report.md; route the second phase to /internal-markdown rather than extending markitdown past its Markdown output contract.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-SPLIT-PHASES",
+          "text": "The response assigns conversion to markitdown and heading/link repair to /internal-markdown.",
+          "critical": true
+        },
+        {
+          "id": "A-CONVERSION-SAVED",
+          "text": "The conversion phase uses -o report.md and does not rely on console output.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Claim that markitdown owns the post-conversion Markdown structure review."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The answer has a clear conversion handoff and a Markdown-owner handoff.",
+          "The initial conversion artifact is explicitly saved with -o."
+        ],
+        "fail": [
+          "The answer routes both phases to markitdown without an ownership boundary.",
+          "The answer leaves the conversion only in terminal output."
+        ]
+      }
+    },
+    {
+      "id": "C-STDIN-OUTPUT",
+      "family": "conversion-output",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE-CONVERSION", "R-SAVE-OUTPUT"],
+      "prompt": "Pipe HTML from stdin into markitdown, provide the correct extension hint, and produce a Markdown file whose expected section anchors can be checked.",
+      "initial_state": "There is no usable source filename, so detection needs an extension hint. The output must be a durable artifact for downstream validation.",
+      "expected_output": "Use stdin with -x html, save with -o to a declared Markdown path, then confirm the file exists and contains the expected anchors.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-STDIN-HINT",
+          "text": "The response supplies -x html because stdin has no usable filename.",
+          "critical": false
+        },
+        {
+          "id": "A-DURABLE-OUTPUT",
+          "text": "The response always uses -o and validates the resulting Markdown file and expected anchors.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Treat truncated standard output as the durable conversion result."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The stdin detection hint is supplied and a named output file is written with -o.",
+          "The validation checks file existence and content anchors."
+        ],
+        "fail": [
+          "The answer omits the stdin type hint or output file and calls console text sufficient.",
+          "The answer claims anchors were checked without an output artifact."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-01",
+        "query": "Convert this PDF to Markdown with markitdown and save the result as report.md.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-02",
+        "query": "Use markitdown to download this web page into a Markdown file for another tool to inspect.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-03",
+        "query": "Extract the transcript from this YouTube URL with markitdown and save it with -o.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-04",
+        "query": "Use the markitdown CLI to convert handbook.docx to handbook.md.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-05",
+        "query": "Use the MarkItDown Python API to convert a document inside a data-processing pipeline.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-06",
+        "query": "Pipe HTML into markitdown from stdin with an extension hint and write the output file.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-07",
+        "query": "List the available markitdown plugins and enable one for this conversion.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-08",
+        "query": "The pipx markitdown CLI cannot extract a YouTube transcript; identify its install and add the missing dependency.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-09",
+        "query": "Convert this XLSX to Markdown with markitdown, then keep workbook integrity review as a separate concern.",
+        "should_trigger": true,
+        "split": "held-out",
+        "competing_owner": "internal-excel"
+      },
+      {
+        "id": "Q-10",
+        "query": "Validate that the Markdown file produced by markitdown exists and contains the expected section anchors.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-11",
+        "query": "Fix the headings and code fences in an already-converted Markdown report.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-12",
+        "query": "Repair broken links in the Markdown output; no conversion is needed.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-13",
+        "query": "Clean customer.xlsx while preserving leading-zero IDs and row counts; do not convert it to Markdown.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-excel"
+      },
+      {
+        "id": "Q-14",
+        "query": "Reconcile sales.csv with returns.csv and explain duplicate rows; this is a data-integrity task, not conversion.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-excel"
+      },
+      {
+        "id": "Q-15",
+        "query": "Explain what MarkItDown is in a short paragraph without converting a source.",
+        "should_trigger": false,
+        "split": "train"
+      },
+      {
+        "id": "Q-16",
+        "query": "Write a blog post about YouTube transcripts; do not extract or convert any transcript.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-17",
+        "query": "Review README link references around a converted file without changing or rerunning the conversion.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-18",
+        "query": "Inspect workbook formulas, styles, and duplicate keys in report.xlsx; no Markdown output is wanted.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-excel"
+      },
+      {
+        "id": "Q-19",
+        "query": "Rewrite and summarize a transcript that has already been converted to Markdown.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-20",
+        "query": "Choose a deduplication strategy for this TSV and report row-count reconciliation; do not create Markdown.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-excel"
+      }
+    ]
+  }
+}

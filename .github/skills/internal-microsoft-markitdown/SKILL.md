@@ -21,16 +21,16 @@ description: Use when converting any file, URL, or YouTube video to Markdown wit
 
 ## Environment map
 
-Two installs coexist; name the install target before debugging.
+The CLI and the Python API can resolve to different installs. Identify the
+serving install before debugging: `command -v markitdown` and `pipx list` for
+the CLI, and `python3 -c 'import markitdown, sys; print(markitdown.__file__,
+sys.executable)'` for the API.
 
-- CLI: `markitdown` from pipx (`~/.local/bin/markitdown`, isolated venv).
-  Install missing extras into that venv with
-  `pipx inject markitdown <package>`. Inject
-  the dependency package directly (for example `youtube-transcript-api`), not an
-  extra-spec string.
-- Python API: `from markitdown import MarkItDown` resolves against the global
-  `python3` environment; install its extras there with
-  `python3 -m pip install 'markitdown[<extra>]'`.
+- CLI installed with pipx: it runs in an isolated venv. Install missing extras
+  with `pipx inject markitdown <package>`. Inject the dependency package
+  directly (for example `youtube-transcript-api`), not an extra-spec string.
+- Python API or a CLI outside pipx: install extras into the interpreter that
+  serves it with `<python> -m pip install 'markitdown[<extra>]'`.
 - A missing extra in one install is not a missing feature; verify the serving
   install first.
 
