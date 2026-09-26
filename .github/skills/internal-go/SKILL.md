@@ -8,8 +8,9 @@ description: Use when creating, editing, or reviewing Go files, modules, or depe
 ## Referenced skills
 
 Treat the referenced skill below as an on-demand owner. Do not preload it for
-routine Go edits; load it only when architecture, concurrency, profiling, CLI
-shape, or production readiness becomes the real problem.
+routine Go edits. Use /antigravity-golang-pro only when goroutine lifecycle,
+channel design, memory profile, API surface, CLI structure, service
+architecture, or production failure modes become the real problem.
 
 - `antigravity-golang-pro`: advanced Go architecture, concurrency, profiling, CLIs, services, and production readiness.
 
@@ -21,7 +22,6 @@ shape, or production readiness becomes the real problem.
 
 ## When not to use
 
-- Deep concurrency design, service architecture, profiling, or production-readiness work; use /antigravity-golang-pro.
 - Generic YAML, Docker, Terraform, or CI changes that merely invoke Go tooling.
 
 ## Baseline
@@ -33,10 +33,6 @@ shape, or production readiness becomes the real problem.
 - Use the standard library before adding dependencies unless a mature library clearly reduces complexity.
 - Run `gofmt`; use `goimports` when imports change and the tool is available.
 - Keep tests deterministic and close to public behavior.
-
-## Escalation
-
-Use /antigravity-golang-pro when goroutine lifecycle, channel design, memory profile, API surface, CLI structure, or production failure modes become the real problem.
 
 ## Validation
 
