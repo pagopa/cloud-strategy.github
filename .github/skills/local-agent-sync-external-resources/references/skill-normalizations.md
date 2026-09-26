@@ -32,6 +32,10 @@ declared source.
   preserving `/skill-name` references.
 - Remove `disable-model-invocation` by default because it is not standard Codex
   skill metadata.
+- Remove upstream `policy.allow_implicit_invocation` from `agents/openai.yaml`
+  by default when the asset declares no `codex.allow_implicit_invocation`.
+  Keep other `policy` fields, drop an empty `policy`, and leave metadata
+  without that field byte-identical.
 - Apply `invocation_policy` generically per asset. Its fields are
   `copilot.disable_model_invocation` and `codex.allow_implicit_invocation`;
   do not hardcode per-asset exceptions.
@@ -43,8 +47,10 @@ declared source.
 - `superpowers-brainstorming` remains an independently declared exception:
   keep `disable-model-invocation: true` in `SKILL.md` and set
   `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
-- After refresh, manually verify that no policy-managed skill is implicitly
-  selected in either runtime.
+- `tests/test_external_resource_catalog_contract.py` verifies that committed
+  invocation metadata matches the manifest in both runtimes: declared skills
+  carry their policy, and undeclared skills carry none. It checks metadata,
+  not observed runtime selection.
 
 ## Executable Python Normalization
 

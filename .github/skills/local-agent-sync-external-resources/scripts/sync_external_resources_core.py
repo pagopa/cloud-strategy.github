@@ -1126,6 +1126,38 @@ def _ensure_codex_invocation_metadata(
     return yaml.safe_dump(parsed, sort_keys=False)
 
 
+def _strip_undeclared_codex_invocation_policy(
+    content: str,
+    asset: ManagedAsset,
+) -> str:
+    parsed = yaml.safe_load(content) if content.strip() else None
+    if parsed is None:
+        return content
+    if not isinstance(parsed, dict):
+        raise ValueError(
+            f"{asset.canonical_name} agents/openai.yaml must be a mapping."
+        )
+    if "policy" not in parsed:
+        return content
+
+    policy = parsed["policy"]
+    if policy is None:
+        policy = {}
+    if not isinstance(policy, dict):
+        raise ValueError(
+            f"{asset.canonical_name} agents/openai.yaml policy must be a mapping."
+        )
+    if policy and "allow_implicit_invocation" not in policy:
+        return content
+
+    policy.pop("allow_implicit_invocation", None)
+    if policy:
+        parsed["policy"] = policy
+    else:
+        del parsed["policy"]
+    return yaml.safe_dump(parsed, sort_keys=False)
+
+
 def _ensure_copilot_disable_model_invocation(
     content: str,
     asset: ManagedAsset,
@@ -1312,6 +1344,18 @@ def normalize_candidate(
                 metadata_path.parent.mkdir(parents=True, exist_ok=True)
                 metadata_path.write_text(metadata, encoding="utf-8")
                 changed.append(metadata_path.relative_to(candidate).as_posix())
+        else:
+            metadata_path = asset_dir / "agents/openai.yaml"
+            if metadata_path.is_file():
+                original_metadata = metadata_path.read_text(encoding="utf-8")
+                metadata = _strip_undeclared_codex_invocation_policy(
+                    original_metadata, asset
+                )
+                if metadata != original_metadata:
+                    metadata_path.write_text(metadata, encoding="utf-8")
+                    relative = metadata_path.relative_to(candidate).as_posix()
+                    if relative not in changed:
+                        changed.append(relative)
 
     for merged_path in _merge_mattpocock_grilling_into_grill_me(
         resources, candidate

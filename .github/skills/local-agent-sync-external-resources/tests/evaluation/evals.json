@@ -1,0 +1,137 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "local-agent-sync-external-resources",
+  "requirements": [
+    {
+      "id": "R-CODEX-DEFAULT-STRIP",
+      "text": "For a managed asset that declares no codex.allow_implicit_invocation, the candidate agents/openai.yaml carries no upstream allow_implicit_invocation; other policy fields are kept and an empty policy is dropped.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-CODEX-DECLARED",
+      "text": "A declared codex.allow_implicit_invocation overrides the upstream value in agents/openai.yaml.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-METADATA-STABLE",
+      "text": "Codex metadata without an undeclared allow_implicit_invocation stays byte-identical, and a second normalization pass reports no changes.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-REFRESH-GATE",
+      "text": "A refresh judges repository impact from the candidate-versus-repository diff, not the normalization change summary, and stops when paths outside the authorized set would change.",
+      "source": "SKILL.md: Workflow, Safety"
+    },
+    {
+      "id": "R-PINNED-OFFLINE",
+      "text": "Network access happens only through the pinned prepare flow; no pull, argumentless fetch, remote update, or package manager is used.",
+      "source": "SKILL.md: Pinned Content Only"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-STRIP-UNDECLARED",
+      "family": "bounded-revision",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CODEX-DEFAULT-STRIP"],
+      "prompt": "Refresh the Matt source; upstream grill-me ships policy.allow_implicit_invocation: false.",
+      "initial_state": "grill-me has no invocation_policy in managed-resources.yaml; the upstream snapshot contains fixtures/upstream-restricted-openai.yaml.",
+      "expected_output": "The candidate grill-me agents/openai.yaml equals fixtures/expected-unrestricted-openai.yaml.",
+      "files": [
+        "tests/evaluation/fixtures/upstream-restricted-openai.yaml",
+        "tests/evaluation/fixtures/expected-unrestricted-openai.yaml"
+      ],
+      "assertions": [
+        {"id": "A-NO-POLICY", "text": "The candidate metadata has no policy key.", "critical": true},
+        {"id": "A-INTERFACE-KEPT", "text": "display_name and short_description keep the upstream values.", "critical": true}
+      ],
+      "forbidden_actions": ["Hand-edit the committed file instead of normalizing the candidate."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/defective-retained-policy-openai.yaml"
+    },
+    {
+      "id": "C-DECLARED-POLICY",
+      "family": "neighboring-regression",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CODEX-DECLARED"],
+      "prompt": "Refresh the Matt source and confirm grilling stays user-invoked in Codex.",
+      "initial_state": "grilling declares codex.allow_implicit_invocation: false; upstream grilling metadata has no policy.",
+      "expected_output": "The candidate grilling agents/openai.yaml contains policy.allow_implicit_invocation: false.",
+      "files": ["tests/evaluation/fixtures/upstream-restricted-openai.yaml"],
+      "assertions": [
+        {"id": "A-DECLARED-VALUE", "text": "The declared value is present after normalization.", "critical": true}
+      ],
+      "forbidden_actions": ["Strip a policy that the manifest declares."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/defective-overwritten-declared-openai.yaml"
+    },
+    {
+      "id": "C-STABLE-METADATA",
+      "family": "neighboring-regression",
+      "kind": "deterministic",
+      "requirement_ids": ["R-METADATA-STABLE"],
+      "prompt": "Run plan twice on an unchanged source.",
+      "initial_state": "A managed asset whose upstream metadata already lacks allow_implicit_invocation.",
+      "expected_output": "The metadata stays byte-identical and the second pass reports no normalization changes.",
+      "files": ["tests/evaluation/fixtures/expected-unrestricted-openai.yaml"],
+      "assertions": [
+        {"id": "A-BYTE-IDENTICAL", "text": "The file content is unchanged.", "critical": true},
+        {"id": "A-IDEMPOTENT", "text": "A second normalization pass reports no changed paths.", "critical": true}
+      ],
+      "forbidden_actions": ["Re-serialize metadata that needs no change."],
+      "status": "generated",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-restricted-openai.yaml"
+    },
+    {
+      "id": "C-REFRESH-REPORT",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-REFRESH-GATE", "R-PINNED-OFFLINE"],
+      "prompt": "Regenerate only the Matt source metadata fix; only grill-me and setup metadata may change.",
+      "initial_state": "The pinned SHA and pin ref exist in the workspace cache; the plan summary lists many normalization changes.",
+      "expected_output": "The agent compares the candidate with the repository, finds only the two authorized paths, applies with network protocols blocked, and reports any extra path as a stop condition.",
+      "files": [],
+      "assertions": [
+        {"id": "A-REAL-DIFF", "text": "Repository impact is taken from the candidate-versus-repository diff.", "critical": true},
+        {"id": "A-OFFLINE", "text": "Plan and apply run without a mutable or unpinned fetch.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Treat the normalization change summary as the repository change set.",
+        "Run git pull, an argumentless git fetch, or git remote update."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The transcript shows a candidate-versus-repository diff limited to the two authorized files before or after apply.",
+          "Commands run with network protocols blocked or only through pinned prepare."
+        ],
+        "fail": [
+          "The agent approves the refresh from the 48-path normalization summary alone.",
+          "The agent fetches upstream outside pinned prepare."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Audit the external skill manifest and tell me which managed targets are dirty.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Plan a refresh of the mattpocock-skills source into the external workspace.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Apply the pinned obra-superpowers refresh and rebuild inventory.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Prepare snapshots for the pinned sources without applying anything.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Why does the sync keep re-adding policy.allow_implicit_invocation to grill-me?", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Re-pin github-awesome-copilot to a new commit and record its commit_date.", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Add a replay override for an imported skill line the normalizer cannot handle.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Run the sync plan in TSV and show provenance rows for sickn33-antigravity.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Install our internal skills into ~/.codex and ~/.copilot.", "should_trigger": false, "split": "train", "competing_owner": "local-agent-sync-install-ai-resources"},
+      {"id": "Q-10", "query": "Align the consumer repository's managed instructions with this baseline.", "should_trigger": false, "split": "train", "competing_owner": "local-sync-repos"},
+      {"id": "Q-11", "query": "Rewrite the description of internal-bash to narrow its trigger.", "should_trigger": false, "split": "train", "competing_owner": "internal-skill-creator"},
+      {"id": "Q-12", "query": "Why is the pytest job failing in GitHub Actions on this PR?", "should_trigger": false, "split": "train", "competing_owner": "openai-gh-fix-ci"},
+      {"id": "Q-13", "query": "Find a community skill for Grafana dashboards I could install.", "should_trigger": false, "split": "held-out", "competing_owner": "vercel-find-skills"},
+      {"id": "Q-14", "query": "Sync my AGENTS.md baseline to the local home runtime.", "should_trigger": false, "split": "held-out", "competing_owner": "local-agent-sync-install-ai-resources"}
+    ]
+  }
+}

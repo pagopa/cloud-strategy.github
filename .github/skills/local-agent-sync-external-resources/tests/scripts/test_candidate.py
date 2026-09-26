@@ -791,6 +791,174 @@ def test_normalization_without_invocation_policy_creates_no_codex_metadata(
     assert "disable-model-invocation" not in skill.read_text(encoding="utf-8")
 
 
+_UPSTREAM_RESTRICTED_METADATA = (
+    "interface:\n"
+    '  display_name: "Example"\n'
+    '  short_description: "Upstream text"\n'
+    "policy:\n"
+    "  allow_implicit_invocation: false\n"
+)
+
+
+def _single_asset_resources(
+    local: str, invocation_policy: InvocationPolicy | None = None
+) -> ManagedResources:
+    asset = ManagedAsset(
+        source="upstream",
+        upstream="skills/example",
+        local=local,
+        canonical_name="example",
+        invocation_policy=invocation_policy,
+    )
+    source = ManagedSource(
+        source_id="upstream",
+        repository="https://example.com/upstream.git",
+        ref="a" * 40,
+        advertised_ref=None,
+        assets=(asset,),
+    )
+    return ManagedResources(sources=(source,), replacements=(), watchlist=())
+
+
+def _write_asset(candidate: Path, local: str, metadata: str | None) -> Path:
+    skill = candidate / local / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text("---\nname: example\n---\nBody.\n", encoding="utf-8")
+    metadata_path = candidate / local / "agents/openai.yaml"
+    if metadata is not None:
+        metadata_path.parent.mkdir(parents=True)
+        metadata_path.write_text(metadata, encoding="utf-8")
+    return metadata_path
+
+
+@pytest.mark.parametrize(
+    "invocation_policy",
+    [None, InvocationPolicy(copilot_disable_model_invocation=True)],
+    ids=["undeclared", "copilot-only"],
+)
+def test_normalization_strips_undeclared_upstream_codex_policy(
+    tmp_path: Path, invocation_policy: InvocationPolicy | None
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example"
+    metadata_path = _write_asset(candidate, local, _UPSTREAM_RESTRICTED_METADATA)
+    resources = _single_asset_resources(local, invocation_policy)
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    assert f"{local}/agents/openai.yaml" in first_changed
+    assert second_changed == ()
+    metadata = yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+    assert "policy" not in metadata
+    assert metadata["interface"] == {
+        "display_name": "Example",
+        "short_description": "Upstream text",
+    }
+
+
+def test_normalization_keeps_non_invocation_codex_policy_fields(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example"
+    metadata_path = _write_asset(
+        candidate,
+        local,
+        "interface:\n  display_name: Example\n"
+        "policy:\n  allow_implicit_invocation: false\n  other: kept\n",
+    )
+
+    normalize_candidate(_single_asset_resources(local), candidate)
+
+    metadata = yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+    assert metadata["policy"] == {"other": "kept"}
+
+
+def test_normalization_removes_empty_upstream_codex_policy(tmp_path: Path) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example"
+    metadata_path = _write_asset(
+        candidate, local, "interface:\n  display_name: Example\npolicy: {}\n"
+    )
+
+    changed = normalize_candidate(_single_asset_resources(local), candidate)
+
+    assert changed == (f"{local}/agents/openai.yaml",)
+    assert "policy" not in yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize(
+    "metadata",
+    [
+        'interface:\n  display_name: "Example"\n',
+        "# upstream comment\ninterface:\n  display_name: 'Example'\n",
+    ],
+    ids=["quoted", "commented"],
+)
+def test_normalization_leaves_unrestricted_codex_metadata_byte_identical(
+    tmp_path: Path, metadata: str
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example"
+    metadata_path = _write_asset(candidate, local, metadata)
+
+    changed = normalize_candidate(_single_asset_resources(local), candidate)
+
+    assert changed == ()
+    assert metadata_path.read_text(encoding="utf-8") == metadata
+
+
+@pytest.mark.parametrize("declared", [True, False])
+def test_normalization_applies_explicit_codex_policy_over_upstream(
+    tmp_path: Path, declared: bool
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example"
+    metadata_path = _write_asset(candidate, local, _UPSTREAM_RESTRICTED_METADATA)
+
+    normalize_candidate(
+        _single_asset_resources(
+            local, InvocationPolicy(codex_allow_implicit_invocation=declared)
+        ),
+        candidate,
+    )
+
+    metadata = yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+    assert metadata["policy"]["allow_implicit_invocation"] is declared
+
+
+def test_normalization_without_upstream_metadata_creates_none(tmp_path: Path) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example"
+    metadata_path = _write_asset(candidate, local, None)
+
+    changed = normalize_candidate(_single_asset_resources(local), candidate)
+
+    assert changed == ()
+    assert not metadata_path.exists()
+
+
+@pytest.mark.parametrize(
+    "metadata",
+    [
+        "interface:\n  display_name: Example\npolicy: false\n",
+        "interface:\n  display_name: Example\npolicy:\n  - allow_implicit_invocation\n",
+        "- not-a-mapping\n",
+    ],
+    ids=["scalar-policy", "list-policy", "non-mapping"],
+)
+def test_normalization_rejects_malformed_upstream_codex_metadata(
+    tmp_path: Path, metadata: str
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/example"
+    _write_asset(candidate, local, metadata)
+
+    with pytest.raises(ValueError, match="agents/openai.yaml"):
+        normalize_candidate(_single_asset_resources(local), candidate)
+
+
 def test_normalization_enforces_teach_workspace_without_upstream_text_coupling(
     tmp_path: Path,
 ) -> None:

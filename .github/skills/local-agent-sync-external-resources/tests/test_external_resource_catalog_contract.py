@@ -9,11 +9,15 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 sys.path.insert(0, str(REPO_ROOT / ".github/tools"))
+sys.path.insert(
+    0, str(REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts")
+)
 
 from catalog.rules import (  # noqa: E402
     check_external_resource_manifest,
     check_superpowers_import_naming,
 )
+from sync_external_resources_core import load_managed_resources  # noqa: E402
 
 
 def _write_valid_managed_resources(root: Path) -> None:
@@ -145,3 +149,39 @@ def test_internal_grill_me_is_retired() -> None:
 
     assert not bundle.exists(), "the legacy bulk-interview bundle must stay retired"
     assert "internal-grill-me" not in inventory
+
+
+def test_managed_skill_invocation_metadata_matches_manifest() -> None:
+    resources = load_managed_resources(
+        REPO_ROOT
+        / ".github/skills/local-agent-sync-external-resources"
+        / "references/managed-resources.yaml"
+    )
+    mismatches: list[str] = []
+    for asset in resources.assets:
+        bundle = REPO_ROOT / asset.local
+        skill = bundle / "SKILL.md"
+        if not skill.is_file():
+            continue
+        policy = asset.invocation_policy
+        frontmatter = yaml.safe_load(
+            skill.read_text(encoding="utf-8").split("---", 2)[1]
+        )
+        expected_copilot = policy.copilot_disable_model_invocation if policy else None
+        if frontmatter.get("disable-model-invocation") != (
+            True if expected_copilot else None
+        ):
+            mismatches.append(f"{asset.canonical_name}: SKILL.md invocation")
+
+        metadata_path = bundle / "agents/openai.yaml"
+        metadata = (
+            yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+            if metadata_path.is_file()
+            else {}
+        )
+        actual_codex = (metadata.get("policy") or {}).get("allow_implicit_invocation")
+        expected_codex = policy.codex_allow_implicit_invocation if policy else None
+        if actual_codex != expected_codex:
+            mismatches.append(f"{asset.canonical_name}: agents/openai.yaml policy")
+
+    assert mismatches == []
