@@ -4,6 +4,16 @@ This reference describes the portable protocol behind the compact skill
 surface. It is guidance for producers and consumers; the Python validator is
 the executable boundary.
 
+## Contents
+
+- [DelegationBrief](#delegationbrief)
+- [WorkerResult](#workerresult)
+- [LifecycleRecord v1](#lifecyclerecord-v1)
+- [VerificationReceipt v1](#verificationreceipt-v1)
+- [Progress and retry eligibility](#progress-and-retry-eligibility)
+- [Stable prompt order and telemetry](#stable-prompt-order-and-telemetry)
+- [Migration notes](#migration-notes)
+
 ## DelegationBrief
 
 The producer writes one JSON object with exactly these top-level fields:
@@ -175,11 +185,11 @@ telemetry is `unavailable`; it is never invented. The caller decision is
 separate and is exactly `accepted`, `rejected`, or `not_decided`.
 
 The caller or adapter persists `result_path` outside worker `write_scope` and
-stores the receipt at its deterministic `.receipt.json` sibling. `value_verified`
-belongs only to the receipt and can be true only after caller acceptance and
-verified attestations. V1 validates one brief/result pair; `retry`, `attempts`,
-`context_refills`, and `progress_signature` remain compatibility fields, while
-retry eligibility is not a new lifecycle owner.
+stores the receipt at its deterministic `.receipt.json` sibling.
+`value_verified` belongs only to the receipt and can be true only after caller
+acceptance and verified attestations. V1 validates one brief/result pair;
+`retry`, `attempts`, `context_refills`, and `progress_signature` remain
+compatibility fields, while retry eligibility is not a new lifecycle owner.
 
 ## Progress and retry eligibility
 
