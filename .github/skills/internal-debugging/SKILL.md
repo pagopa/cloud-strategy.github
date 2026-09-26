@@ -41,7 +41,7 @@ When an unexpected failure appears, stop adjacent feature work, preserve the cur
   governance prose edits unless a validator or generated artifact is actually
   failing.
 
-## Diagnostic Loop
+## Diagnostic loop
 
 1. Build the fastest credible pass/fail loop before changing code or policy.
    Prefer the closest existing validator, test, CLI invocation, fixture replay,
@@ -57,12 +57,12 @@ When an unexpected failure appears, stop adjacent feature work, preserve the cur
    flaky, raise the reproduction rate with controlled repetition or narrowed
    timing before guessing.
 6. Add or update a regression test at the correct seam when executable behavior
-    changed. Use `/internal-tdd` for the red-green-refactor loop when the seam is
+   changed. Use `/internal-tdd` for the red-green-refactor loop when the seam is
    meaningful.
 7. Apply the root-cause fix, rerun the original loop, rerun the regression test
    or validator, and confirm all temporary probes are gone.
 
-## Completion Requirements
+## Completion requirements
 
 - Name the feedback loop and the exact failure it reproduced.
 - State the root cause, the winning hypothesis, and the change that fixed it.
