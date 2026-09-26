@@ -24,7 +24,7 @@ The bundle checker remains usable without the host tool.
 ## Runtime plan and current gap
 
 No runtime run record is included. A runtime pilot requires explicit user
-approval. Start with GPT-6 and pin the host, model, tools, inputs, and budget
+approval. Use the approved model and pin the host, model, tools, inputs, and budget
 before comparing isolated with-skill and baseline sessions. Keep each case's
 criteria fixed, include held-out tasks, inspect artifacts and transcripts, and
 record every result separately. Three repeats per case and variant are a pilot,

@@ -8,9 +8,8 @@ success criteria, validation path, and anti-scope.
 
 ## Creator delegation matrix
 
-Delegate only after the parent fixes the complete task-specific objective,
-value gate, bounded evidence, constraints, write scope, expected output,
-acceptance, validation, and budget.
+Apply the delegation gate in `SKILL.md` first. This matrix maps eligible
+creator tasks to a mode.
 
 | Creator task | Mode | Expected output | Write scope | Parent acceptance |
 | --- | --- | --- | --- | --- |
@@ -19,11 +18,6 @@ acceptance, validation, and budget.
 | Draft after outline, metadata, acceptance, and validation are fixed | `plan` | one artifact at one exact path | one exact draft path | Parent reviews semantic content and applies or accepts it. |
 | One bounded implementation artifact | `write` | one artifact | one exact file or artifact path | Parent runs independent validation and accepts the result. |
 | Bounded validation set with multiple observable checks | `read` | validation evidence | empty | All declared checks and pass signals are present. |
-
-A single command, one obvious edit, unresolved policy, boundary, authority, or
-acceptance, incomplete acceptance, and unverifiable prose stay local or blocked.
-A competing-owner request stays with its owner; a Copilot agent under
-`.github/agents/` routes to `/internal-agent-creator`.
 
 Use one worker, one brief, and one result. Default to one attempt. A corrective
 retry requires new evidence and a concrete correction target, and it must carry
@@ -68,9 +62,8 @@ hollow references or unmanaged catalog fallout.
 Name each affected inventory, sync, validator, and test surface. A report or
 output-contract change propagates to three surfaces: the SKILL.md contract,
 `agents/openai.yaml`, and the paired `.github/agents/<name>.agent.md` when one
-exists. A session started before the change keeps the previous snapshot; prove
-the new contract from a newly started session. Prefer the smallest
-deterministic proof and record unavailable proof as a gap.
+exists. Prefer the smallest deterministic proof and record unavailable proof
+as a gap.
 
 ## Evaluation selection
 
@@ -108,14 +101,6 @@ behavior, review method, and status. Present subjective outputs to the user
 before changing them from agent judgment alone. Generalize feedback; do not
 optimize only for sampled prompts.
 
-## Self-revision
-
-Freeze the baseline and criteria before revising this skill. Adding cases is
-allowed. Removing, weakening, or reinterpreting a criterion requires user
-confirmation, a rationale, and evidence. Preserve the create-or-revise,
-replace, and retire lifecycles. Retirement removes entrypoints and references
-without parsing a deleted skill or recreating it.
-
 ## Iteration stop conditions
 
 Stop when the accepted prompts and validators pass, the user accepts subjective
@@ -125,7 +110,8 @@ evidence gaps blocked.
 ## Portability and invocation contract
 
 `SKILL.md` frontmatter allows only `name`, `description`, `metadata`, `license`,
-and `compatibility`. Invocation policy goes to `agents/openai.yaml` under
+and `compatibility`. `name` matches the bundle directory name. Invocation
+policy goes to `agents/openai.yaml` under
 `policy.allow_implicit_invocation`. Provenance fields (`source`, `risk`,
 `date_added`, and `revision`) go under `metadata`. The validator blocks
 non-portable fields.

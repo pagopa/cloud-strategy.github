@@ -51,7 +51,3 @@ When repeat runs are needed, bundle a helper that invokes the same native
 runner with fixed inputs and records each run separately. A fallback that
 cannot use subagents or the intended host has narrower evidence; label it less
 rigorous and do not treat it as baseline-grade.
-
-Every runtime run requires explicit user approval. Pin the model, host, tools,
-inputs, and budget in advance. Until that approval and the run exist, report
-runtime evidence as unavailable or not run.

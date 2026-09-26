@@ -149,8 +149,9 @@ missing-pack notice.
 
 ## Runtime run plan
 
-Obtain explicit user approval before any model or paid runtime run. Start with
-GPT-6, then keep host, model, tools, inputs, and budget fixed across variants.
+Obtain explicit user approval before any model or paid runtime run. Use the
+model the user approves, then keep host, model, tools, inputs, and budget fixed
+across variants.
 Use isolated sessions. A pilot of three runs per case and variant can expose
 obvious issues but is not statistical proof. Include held-out cases, read the
 transcripts, and blind and reorder output review where practical. Compare with
@@ -160,7 +161,8 @@ gap rather than inferring a win.
 
 ## Validation
 
-Run `scripts/check_eval_pack.py` with the bundle root and skill name. It checks
-the portable pack and may also check a run record. A host validator is an
+Run `scripts/check_eval_pack.py` from this bundle with the target pack path,
+`--bundle-root`, and `--skill-name`; add `--run-record` to check a run record
+and `--format compact` for machine-readable output. A host validator is an
 additional consumer when the host provides one; the bundle checker must not
 depend on it.

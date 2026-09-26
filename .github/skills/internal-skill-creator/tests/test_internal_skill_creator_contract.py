@@ -1,6 +1,9 @@
+import re
 from pathlib import Path
 
 import yaml
+
+LINK_TARGET = re.compile(r"\]\(([^)#\s]+)(?:#[^)]*)?\)")
 
 REPO_ROOT = next(
     parent
@@ -28,6 +31,34 @@ def test_bundle_metadata_has_typed_interface_fields() -> None:
     assert isinstance(interface["display_name"], str)
     assert isinstance(interface["short_description"], str)
     assert isinstance(interface["default_prompt"], str)
+
+
+def _relative_link_targets(markdown_path: Path) -> set[Path]:
+    text = markdown_path.read_text(encoding="utf-8")
+    return {
+        (markdown_path.parent / target).resolve()
+        for target in LINK_TARGET.findall(text)
+        if "://" not in target
+    }
+
+
+def test_every_reference_is_linked_from_skill_md() -> None:
+    linked = _relative_link_targets(BUNDLE_ROOT / "SKILL.md")
+    references = {
+        path.resolve() for path in (BUNDLE_ROOT / "references").glob("*.md")
+    }
+
+    assert sorted(p.name for p in references - linked) == []
+
+
+def test_relative_markdown_links_resolve_inside_bundle() -> None:
+    sources = [BUNDLE_ROOT / "SKILL.md", *(BUNDLE_ROOT / "references").glob("*.md")]
+    bundle = BUNDLE_ROOT.resolve()
+
+    for source in sources:
+        for target in _relative_link_targets(source):
+            assert target.is_file(), f"{source.name} -> {target}"
+            assert target.is_relative_to(bundle), f"{source.name} -> {target}"
 
 
 def test_bundle_contains_declared_local_siblings() -> None:

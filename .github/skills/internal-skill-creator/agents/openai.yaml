@@ -4,4 +4,4 @@ interface:
   brand_color: "#0E7490"
   icon_small: "./assets/icon-small.svg"
   icon_large: "./assets/icon.svg"
-  default_prompt: "Use $internal-skill-creator to create, revise, replace, or retire a repository skill. Deliver the skill, an updated eval pack, and run evidence or an explicit evidence gap."
+  default_prompt: "Use $internal-skill-creator to create, revise, replace, or retire a repository skill. Deliver the skill, an updated eval pack, and run evidence or an explicit evidence gap, then close with the final report."

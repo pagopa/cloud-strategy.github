@@ -12,13 +12,18 @@ description: Use when creating, materially revising, replacing, or retiring repo
   `assets/`, and `agents/openai.yaml`.
 - Route a Copilot agent under `.github/agents/` to `/internal-agent-creator`.
 - Keep analysis-only review and prose editing with their own owners.
+- Treat an imported or third-party bundle as read-only. Stop and ask unless
+  an explicit instruction in the current conversation names that exact bundle
+  or path.
 
 ## Core method
 
 Write for the skill's user. Use trigger-first descriptions with one narrow
 activation condition per branch. Put information every branch needs in the
 main workflow and disclose branch-specific detail through local references.
-Define demanding completion criteria that can be checked against outputs.
+Keep the bundle self-contained: every reference, script, fixture, and asset it
+needs resolves inside the bundle directory. Define demanding completion
+criteria that can be checked against outputs.
 Describe the intended result positively; use prohibitions as focused guardrails.
 Keep each rule in one authoritative place and remove instruction sediment.
 Test a disputed no-op by running the skill against a concrete task. Enforce
@@ -58,17 +63,22 @@ dependencies, and failure handling. Map existing coverage and identify gaps.
 Freeze criteria before reviewing generated outputs. For self-revision, retain
 the baseline and existing criteria; add cases by default. Weakening or
 reinterpreting a criterion requires user confirmation, a rationale, and
-evidence.
+evidence. Preserve the create-or-revise, replace, and retire lifecycles.
 
 **Complete when:** every requirement maps to a check or an explicit evidence
 gap.
 
 ### 3. Author or revise
 
-Draft the smallest coherent bundle. Keep routing trigger-first, apply portable
-frontmatter, and preserve the repository's invocation rules. Classify a wording
-edit as editorial only when behavior and reachability stay the same. Moving a
-mandatory rule behind a conditional reference is a behavioral change.
+Draft the smallest coherent bundle. Keep routing trigger-first, apply the
+portability and invocation contract in
+[`references/authoring-and-evaluation.md`](references/authoring-and-evaluation.md),
+and keep always-loaded surfaces within the budgets and sediment review in
+[`references/cache-and-token-efficiency.md`](references/cache-and-token-efficiency.md).
+Link every reference from `SKILL.md`; an unlinked reference is unreachable.
+Classify a wording edit as editorial only when behavior and reachability stay
+the same. Moving a mandatory rule behind a conditional reference is a
+behavioral change.
 
 **Complete when:** the skill, metadata, and applicable projections agree with
 the accepted requirements.
@@ -79,7 +89,13 @@ Deliver an eval pack for every skill created or behaviorally changed. Derive
 cases from the frozen requirements, include a defective fixture for
 deterministic cases or anchored rubrics for judgment cases, and record the
 evidence state honestly. Follow [`references/eval-packs.md`](references/eval-packs.md)
-and run `scripts/check_eval_pack.py`.
+and run the checker shipped in this bundle:
+
+```bash
+python3 <this-bundle>/scripts/check_eval_pack.py \
+  <target>/tests/evaluation/evals.json \
+  --bundle-root <target> --skill-name <target-name> --format compact
+```
 
 **Complete when:** the pack covers each requirement and the checker passes, or
 the specific unresolved gap is recorded.
@@ -97,8 +113,10 @@ evidence gap.
 
 ### 6. Close the lifecycle
 
-- **Create or revise:** sync public projections, validate the bundle, check
-  routing fallout, and record before/after always-loaded measurements.
+- **Create or revise:** sync public projections, run the bundle's native tests
+  and the host's skill validators when the host provides them, check routing
+  fallout, and record before/after always-loaded measurements as described in
+  the value measurement section of the cache and token reference.
 - **Replace:** validate the successor and remove hollow references to the old
   skill.
 - **Retire:** remove entrypoints and references without parsing or recreating
@@ -112,6 +130,17 @@ to measure evaluation behavior.
 **Complete when:** projections and structure validate, routing fallout is
 resolved, measurements are recorded when required, and remaining evidence gaps
 are explicit.
+
+## Final report
+
+Close with, in this order:
+
+1. Outcome and lifecycle: create, revise, replace, or retire.
+2. Changed paths and the requirement each change serves.
+3. Evidence per requirement: `passed`, `failed`, `not-run`, or `blocked`, with
+   the command or review that produced it.
+4. Before/after always-loaded measurements when required.
+5. Routing fallout, remaining evidence gaps, and the next required action.
 
 ## Delegation
 
