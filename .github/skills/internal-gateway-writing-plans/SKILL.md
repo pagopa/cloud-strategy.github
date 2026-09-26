@@ -103,8 +103,8 @@ description: Use when repository-owned work needs an approved implementation pla
    Global Constraints carry no execution-gating prose and no scope-limiting
    bullet that contradicts a declared `modify` target.
    Classify each executable or evaluable task through `/internal-tdd`. Map
-   every posture to focused and broad validation; require observed
-   red-first evidence only for `mandatory-test-first`, while
+   every posture to focused and broad validation; require observed red-first evidence only
+   for `mandatory-test-first` (characterization for its behavior-preserving refactors), while
    `feature-first` retains validation before production-ready completion.
    After eligibility, the control inventory, plan structure, locked decisions, and acceptance
    are complete, use local authoring as the default route: record `delegation.mode: none`,

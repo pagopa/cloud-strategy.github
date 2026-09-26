@@ -12,7 +12,9 @@ Each finding is one compact block:
 - **<Why>:** why it matters, one to two sentences.
 ```
 
-Severity dots are stable: 🔴 high, 🟡 medium, 🟢 low. Each field must identify
+Severity is `high`, `medium`, or `low`, with stable dots: 🔴 high, 🟡 medium,
+🟢 low. Confidence reuses the finding's evidence quality: `strong`, `partial`,
+or `weak`. Each field must identify
 the relevant file, decision, or mechanism without requiring the investigation
 transcript. A defense belongs in the subject's rationale, not in a finding.
 Keep `Fix owner` and `Expected verification` in the caller-owned ledger.
@@ -40,14 +42,14 @@ yellow fills. Preserve the controlling conclusion in adjacent prose.
 
 ## No-Context Failure
 
-When no subject or evidence can be recovered, emit only:
+When no subject or evidence can be recovered, emit only this projection,
+translated into the current chat language:
 
 ```markdown
-# Critical Analysis
+# 🔍 Critical Analysis
 
-## Status
-Failure: no analysable context was available.
+🎯 **failure-no-context**: no analysable context was available.
 
-## Required Context
-Provide a subject, decision, proposal, design, document, or evidence to critique.
+## ✅ Next
+1. Provide a subject, decision, proposal, design, document, or evidence to critique.
 ```

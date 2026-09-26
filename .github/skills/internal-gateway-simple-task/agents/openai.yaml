@@ -28,9 +28,8 @@ interface:
     when a deterministic local validator exists, no contract or consumer
     changes, and the rationale is recorded; always report the downgrade and
     confirm with the user first when any contract or consumer is touched.
-    Under /internal-tdd record exactly one posture per task and use the owning
-    format's native validator as the seam where one exists; reserve
-    validation-only for tasks with no useful executable or evaluable seam. Load
+    Under /internal-tdd record exactly one posture per task; that skill owns
+    posture and seam selection. Load
     /addyosmani-code-simplification only for explicit simplification work.
     After the caller locks value, scope, authority, objective, expected output,
     acceptance, and validation, it may invoke internal-luna-executor through

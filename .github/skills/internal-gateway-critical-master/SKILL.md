@@ -1,29 +1,36 @@
 ---
 name: internal-gateway-critical-master
-description: Use when any plan, proposal, decision, design, workflow, requirement, or assumption set needs a thorough critical challenge before action.
+description: Use when a plan, proposal, decision, design, workflow, requirement, or assumption set must be challenged before action, including requests to stress-test it, poke holes in it, play devil's advocate, or run a pre-mortem. Route report-only assurance reviews of existing artifacts to /internal-review-high-level and code or diff reviews to /internal-review-code.
 metadata:
-  revision: 2026-08-17
+  revision: 2026-09-26
 ---
 
 # Critical Master
 
 ## Referenced skills
 
-- None.
+This skill is self-contained. It needs no caller protocol, fixed metadata,
+repository workflow, or machine-readable input. The entries below are
+competing owners for routing only, not dependencies.
 
-This skill is self-contained. It does not require a caller protocol, fixed
-metadata, another skill, a repository workflow, or a machine-readable output
-contract.
+- `/internal-review-high-level`: independent, evidence-first, report-only
+  assurance review of an existing non-code artifact or change.
+- `/internal-review-code`: review of a branch, pull request, or code diff.
 
 ## When to use
 
-Receive and analyze whatever relevant context is available, identify the most
-important weaknesses and risks, and return a useful critical assessment. The
-subject may be a plan, proposal, decision, design, workflow, requirement,
-document, architecture, or another action context.
-For an independent, evidence-first, report-only assurance review of an existing
-non-code artifact or change, use `internal-review-high-level` instead; use this
-skill for an interactive critical challenge before action.
+- Challenge a plan, proposal, decision, design, workflow, requirement,
+  document, architecture, or assumption set before someone acts on it.
+- Serve as the critical-review step that a gateway or another caller invokes
+  on one bounded subject.
+
+Route away when the primary deliverable is:
+
+- a report-only assurance review of an existing artifact: use
+  `/internal-review-high-level`;
+- a review of code, a diff, or a pull request: use `/internal-review-code`;
+- the remedy itself, such as a redesign, plan, or implementation: this skill
+  challenges and reports; the subject's owner builds the remedy.
 
 ## Context intake
 
@@ -58,43 +65,51 @@ files, revision numbers, or a preferred artifact format are absent.
   for an action, adapt when the available tools, authority, and safety
   conditions permit it; do not treat read-only behavior as an absolute ban.
 
+## Authority
+
+- Critical Master challenges and reports. It never acquires subject routing,
+  scope, or acceptance authority.
+- The subject's active primary owner, identified by current responsibility
+  rather than by an upstream skill or producer, retains subject scope and
+  decisions.
+- A calling skill retains routing, final finding disposition, plan expansion,
+  and lifecycle. On direct invocation, the user retains acceptance.
+
 ## Analysis units and reruns
 
-An analysis unit is the bounded subject, evidence snapshot, assumptions, scope,
-and acceptance under review. The caller owns one invocation ledger for each
-unit. Each entry records the unit identity, pass type (`full` or `delta`),
-evidence snapshot or digest, changed claims or assumptions, rerun reason, and
-outcome. Critical Master supplies those pass details and does not create a
-competing ledger.
+An analysis unit is the bounded subject, evidence snapshot, assumptions,
+scope, and acceptance under review. Track each pass with: unit identity, pass
+type (`full` or `delta`), evidence snapshot or digest, changed claims or
+assumptions, rerun reason, and outcome. When a caller owns a ledger, supply
+these details to it and keep no competing record. On direct invocation, keep
+an equivalent record in the conversation.
 
-When no caller-owned ledger exists because the user invoked this skill directly,
-the critic maintains an equivalent in-conversation unit record for the current
-analysis unit: unit identity, pass type, evidence snapshot digest, rerun reason,
-and outcome. The same rerun rules apply against that record.
-
-- Run one full challenge pass per analysis unit by default.
-- Use a delta review after a materially supported change, limited to changed
+- Run one full pass per analysis unit by default.
+- After a materially supported change, run a delta pass limited to changed
   claims, evidence, assumptions, acceptance, and residual blockers.
-- Do not rerun on unchanged evidence. Reject or suppress a request whose unit
-  and evidence snapshot are unchanged, and record that decision in the ledger.
-- Permit a second full pass only when the ledger records one of these reasons:
-  an open blocker remains, new evidence changes a controlling assumption, or
-  scope changes. The entry must identify the changed evidence or scope.
-- The critic challenges and reports. The subject's active primary owner is
-  identified by current responsibility, not by an upstream skill or producer;
-  that owner retains subject scope and decisions. A caller retains routing,
-  finding classification, plan-expansion, and lifecycle responsibilities
-  outside the review, and the user retains acceptance on direct invocation.
-  Critical Master does not acquire subject routing or acceptance authority.
+- Suppress a request whose unit and evidence snapshot are unchanged, and
+  record the suppression.
+- Allow a second full pass only for a recorded reason that names the changed
+  evidence or scope: an open blocker remains, new evidence changes a
+  controlling assumption, or the scope changed.
 
-Classify every finding exactly once before it can change the current plan:
-`blocking-now`, `acceptance-required`, `follow-up`, `separate-design`, or
-`rejected-with-reason`. A finding that is not traceable to an approved
-requirement is `separate-design`. When the subject has no approved requirement
-baseline, do not deflect a finding to `separate-design` merely for missing
-traceability; classify it by consequence as `blocking-now`,
-`acceptance-required`, or `follow-up`, and record the missing baseline as an
-evidence gap.
+## Finding classification
+
+Propose exactly one classification for every finding before it can change the
+current plan. The caller owns the final disposition.
+
+| Classification | Blocking | Meaning |
+| --- | --- | --- |
+| `blocking-now` | yes | The subject must not proceed until the finding is resolved. |
+| `acceptance-required` | yes | Proceeding needs an explicit decision to accept the risk. |
+| `follow-up` | no | Material, but safe to resolve after the current step. |
+| `separate-design` | no | Valid, but not traceable to the approved requirement baseline. |
+| `rejected-with-reason` | no | Examined and dismissed; the report states the reason. |
+
+When the subject has no approved requirement baseline, classify by
+consequence as `blocking-now`, `acceptance-required`, or `follow-up`; do not
+use `separate-design` for missing traceability alone. Record the missing
+baseline as an evidence gap.
 
 ## Critical procedure
 
@@ -114,10 +129,10 @@ criteria, anti-scope, and evidence gaps are understood well enough to critique.
 
 ### Phase 2: Challenge
 
-Select at least three lenses based on the highest-risk gaps. The third lens must
-still be lateral (`analogy` or `reverse-assumption`). Each additional lens
-beyond three is permitted only when it covers a material gap the first three do
-not. Apply each selected lens once.
+Select at least three lenses based on the highest-risk gaps. When a caller
+fixes the lens count, use exactly that count. The third lens must be lateral
+(`analogy` or `reverse-assumption`). Add a lens beyond three only when it
+covers a material gap the first three do not. Apply each selected lens once.
 
 | Lens | Question | Use when |
 | --- | --- | --- |
@@ -139,9 +154,10 @@ handoff is introduced, or the change affects a hard-to-reverse production path.
 
 Record every material finding from the full challenge. Lead with the strongest
 supported objection, but do not stop there if other material findings exist.
-Ask at most one root question internally when its answer could change the
-critique. Treat mitigations as conditions for continuing, not as implementation
-designs that silently rescue a weak proposal.
+Identify at most one root question whose answer could change the critique.
+Surface it under the report's open-questions section instead of pausing the
+analysis. Treat mitigations as conditions for continuing, not as
+implementation designs that silently rescue a weak proposal.
 
 Completion criterion: at least three lenses were applied, the third is lateral,
 all material findings are represented, and material failure modes appear in a
@@ -152,15 +168,19 @@ finding or residual risk.
 - Run a final consistency check and name the strongest supported objection.
 - Classify material claims as `confirmed`, `inference`, or `estimate` and
   evidence quality as `strong`, `partial`, or `weak`.
-- Classify the internal defense as `none`, `resolves`, `narrows`,
-  `accepts-risk`, or `unanswered`; retain its remaining vulnerability when it
-  is not `none`.
-- Select one conclusion:
+- Test each material finding against the steelman defense, the strongest
+  argument for the subject as proposed. Classify the defense as `none`,
+  `resolves`, `narrows`, `accepts-risk`, or `unanswered`. Drop a finding the
+  defense `resolves`; otherwise keep its remaining vulnerability.
+- Select one conclusion. A blocking finding is one classified `blocking-now`
+  or `acceptance-required`.
   - `accepted`: no blocking finding remains;
-  - `revise-design`: a finding requires a design or proposal remedy;
   - `reopen-analysis`: a blocking finding reopens assumptions or scope;
   - `needs-clarification`: a blocking finding depends on an unresolved user
-    decision.
+    decision, including every open `acceptance-required` finding;
+  - `revise-design`: a blocking finding requires a design or proposal remedy.
+  When several apply, select the first in this order: `reopen-analysis`,
+  `needs-clarification`, `revise-design`.
 - Use `failure-no-context` only when the sole failure condition applies.
 
 Do not conceal a material risk just to reach `accepted`. Do not use a numeric
@@ -195,11 +215,12 @@ Use exactly this order and these anchors:
 Omit empty sections; never pad. Do not repeat the same fact in the conclusion
 line, a finding, and `Next`.
 
-### Finding block shape
+### Section shapes
 
-Before rendering a report, load
+Before rendering any report, load
 [`references/report-formats.md`](references/report-formats.md). It owns the
-finding, residual, open-question, next-action, Mermaid, and no-context shapes.
+finding, residual, open-question, next-action, Mermaid, and no-context shapes,
+and the severity and confidence vocabularies.
 
 ### Delta passes
 
@@ -210,5 +231,5 @@ scope only when it changes interpretation.
 
 ## No-context failure
 
-Use the exact no-context projection in `references/report-formats.md` when no
-subject or evidence can be recovered.
+When no subject or evidence can be recovered, emit the no-context projection
+in [`references/report-formats.md`](references/report-formats.md) and stop.

@@ -44,7 +44,8 @@ interface:
     the current migration plan is the sole exact compatibility projection.
     Require
     posture classification through /internal-tdd for executable or evaluable
-    tasks; require red-first evidence only for mandatory-test-first and retain
+    tasks; require red-first evidence only for mandatory-test-first, or
+    characterization evidence for its behavior-preserving refactors, and retain
     focused and broad validation for feature-first completion. Do not impose a
     universal test language or layout.
     Require an explicit - No Git mutation. bullet in ## Global Constraints.

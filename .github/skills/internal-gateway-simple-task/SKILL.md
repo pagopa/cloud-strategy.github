@@ -162,15 +162,9 @@ validation, and final reporting.
   `WorkerResult` or `VerificationReceipt`. Perform work locally only after the
   locked brief permits that fallback and the caller starts a new local route.
 - For executable or evaluable behavior, load `/internal-tdd` before editing and
-  record exactly one selected posture for the current task. For deterministic
-  configuration or infrastructure-template edits where the owning format
-  provides a native validator, such as `terraform fmt` and `terraform test`,
-  that native validator is the selected validation seam; recording it in the
-  brief satisfies the TDD posture requirement. Use `validation-only` only when
-  that task has no useful executable or evaluable seam; record the seam gap and
-  alternate validation. Do not pre-classify all prompt or skill work as
-  `validation-only`, and do not require an additional wording test, harness,
-  or manufactured TDD ceremony for such edits.
+  record exactly one selected posture for the current task. `/internal-tdd`
+  owns posture and seam selection, including native format validators and
+  `validation-only`.
 - Load `/addyosmani-code-simplification` only for an explicit simplification
   request or an already-approved simplification remediation, after a passing
   behavior baseline exists. Preserve behavior, local conventions, and scope.

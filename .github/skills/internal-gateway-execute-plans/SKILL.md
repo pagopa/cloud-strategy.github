@@ -105,7 +105,8 @@ For each Manifest task, in order:
 
 1. Apply the task posture and load `/internal-tdd` when executable or
    evaluable behavior changes. Establish red evidence only for
-   `mandatory-test-first` tasks.
+   `mandatory-test-first` tasks, or characterization evidence when that task
+   is a behavior-preserving refactor.
 2. Execute the approved task in the current session. Preserve task IDs and
    dependencies; do not invent a parallel execution API.
 3. Run the task's focused validation and record the command, result, and
