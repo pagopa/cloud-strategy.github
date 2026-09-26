@@ -56,7 +56,10 @@ never replace `ref`.
 - The manifest full commit SHA is the sole accepted source identity.
 - Only manifest-declared `upstream` paths are materialized.
 - No tags, submodules, local branches, or remote-tracking branches.
-- No `git pull`, argumentless `git fetch`, or `git remote update`.
+- Network access happens only in the pinned `prepare` flow, including the
+  automatic `prepare` inside `plan` and `apply`.
+- No `git pull`, argumentless `git fetch`, `git remote update`, or other
+  mutable branch updates in any mode.
 - No package managers (`pip`, `uv`, `npm`, `brew`, `yarn`, `pnpm`) are allowed.
 
 ## Skill Normalizations
@@ -125,13 +128,18 @@ in-place overrides in `references/imported-asset-overrides.yaml`.
 
 ## Canonical Commands
 
+Run from the repository root: `--repo-root` defaults to `.`, and
+`--workspace` resolves against the current directory.
+
 ```bash
-python3 scripts/sync_external_resources.py prepare --workspace ../cloud-strategy.github-external-refresh --format tsv
-python3 scripts/sync_external_resources.py audit --format tsv
-python3 scripts/sync_external_resources.py plan --workspace ../cloud-strategy.github-external-refresh --format tsv
-python3 scripts/sync_external_resources.py apply --workspace ../cloud-strategy.github-external-refresh --format tsv
-python3 scripts/sync_external_resources.py plan --source mattpocock-skills --workspace ../cloud-strategy.github-external-refresh --format tsv
-python3 scripts/sync_external_resources.py apply --source mattpocock-skills --workspace ../cloud-strategy.github-external-refresh --format tsv
+CLI=.github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py
+WS=../cloud-strategy.github-external-refresh
+python3 "$CLI" prepare --workspace "$WS" --format tsv
+python3 "$CLI" audit --format tsv
+python3 "$CLI" plan --workspace "$WS" --format tsv
+python3 "$CLI" apply --workspace "$WS" --format tsv
+python3 "$CLI" plan --source mattpocock-skills --workspace "$WS" --format tsv
+python3 "$CLI" apply --source mattpocock-skills --workspace "$WS" --format tsv
 ```
 
 ## Live Network Benchmark (Separate Authorization Required)
@@ -144,7 +152,7 @@ separate authorization.
 
 ## Validation
 
-- `python3 -m compileall scripts`
+- `python3 -m compileall .github/skills/local-agent-sync-external-resources/scripts`
 - `python3 -m pytest -q .github/skills/local-agent-sync-external-resources/tests/scripts`
 - `./.github/tools/run.sh validate-internal-skills --skill local-agent-sync-external-resources --strict`
 - `make inventory-build`
@@ -160,6 +168,5 @@ override results, provenance rows, source metrics, validation, and blockers.
 - Do not refresh or modify imported skills while implementing sync tooling.
 - Do not add a plugin system, concurrency, compatibility aliases, legacy
   fallback paths, or a generic sync framework.
-- Do not perform network refreshes outside the declared pinned prepare flow.
-- The live benchmark requires separate authorization.
-- Do not use mutable branch updates in any sync mode.
+- Network access and source identity follow Pinned Content Only; the live
+  benchmark follows its own authorization rule.
