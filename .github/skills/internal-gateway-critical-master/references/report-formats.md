@@ -26,7 +26,10 @@ the relevant file, decision, or mechanism without requiring the investigation
 transcript. A defense belongs in the subject's rationale, not in a finding,
 with one exception: a material finding the defense resolves renders as one
 non-blocking line, `**N. ⚪ <short title>** — rejected-with-reason: <reason>.`
-Keep `Fix owner` and `Expected verification` in the caller-owned ledger.
+The same line renders a finding closed by new evidence in a delta pass.
+Keep `Fix owner` in the caller-owned ledger. Supply `Expected verification` to
+that ledger in caller mode; on direct invocation, state it inside the matching
+`Next` item.
 
 ## Residuals
 
@@ -42,12 +45,27 @@ consequences and mark one suggested option with `💡` plus a one-sentence reaso
 
 Number each concrete action and identify the finding or residual it closes.
 
+## Rerun Suppression
+
+In caller mode, when the unit and evidence snapshot are unchanged, emit only
+this projection, translated into the current chat language:
+
+```markdown
+# 🔍 Critical Analysis
+
+🎯 **suppressed-unchanged**: <unit> has no changed claim, evidence, assumption, or scope since the last completed pass; its conclusion `<previous conclusion>` stands.
+
+## ✅ Next
+1. Supply the changed evidence or scope that would justify a delta or full pass.
+```
+
 ## Mermaid
 
 Use at most one top-down flowchart when it clarifies at least three material
 causal, dependency, ownership, or state relationships. Use one node per
-finding or effect, short `\n`-broken labels, and semantic red, amber, and
-yellow fills. Preserve the controlling conclusion in adjacent prose.
+finding or effect and short `\n`-broken labels that include the severity word.
+Fills are optional and never the only carrier of meaning. Preserve the
+controlling conclusion in adjacent prose.
 
 ## No-Context Failure
 

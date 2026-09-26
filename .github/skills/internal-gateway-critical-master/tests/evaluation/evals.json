@@ -19,7 +19,7 @@
     },
     {
       "id": "R-LENSES",
-      "text": "Apply at least three lenses, or exactly the caller-fixed count, with a lateral third lens (analogy or reverse-assumption), each applied once; a pre-mortem is an annotation and never counts as a lens.",
+      "text": "Apply at least three lenses, or exactly the caller-fixed count but never below three, with a lateral third lens (analogy or reverse-assumption), each applied once; a pre-mortem is an annotation and never counts as a lens.",
       "source": "SKILL.md Phase 2"
     },
     {
@@ -34,17 +34,17 @@
     },
     {
       "id": "R-RERUN",
-      "text": "Run one full pass per analysis unit, suppress requests with an unchanged unit and evidence snapshot, and limit delta passes to changed claims, evidence, assumptions, acceptance, and residual blockers.",
-      "source": "SKILL.md Analysis units and reruns"
+      "text": "Run one full pass per analysis unit; in caller mode, suppress requests with an unchanged unit and evidence snapshot using the rerun-suppression projection; on direct invocation, run a full pass for an explicit user rerun request and record the reason; limit delta passes to changed claims, evidence, assumptions, acceptance, and residual blockers, and render a finding closed by new evidence as a compact rejected-with-reason line citing that evidence.",
+      "source": "SKILL.md Analysis units and reruns, Delta passes; references/report-formats.md"
     },
     {
       "id": "R-AUTHORITY",
-      "text": "Never take routing, scope, acceptance, or final disposition authority from the caller, subject owner, or user. On direct invocation with an explicit user request, act within the available tools, authority, and safety conditions and report what was done; when a calling skill invokes the critic, stay report-only and put remedies under next actions.",
-      "source": "SKILL.md When to use, Operating posture, Authority"
+      "text": "Never take routing, scope, acceptance, or final disposition authority from the caller, subject owner, or user. Stay report-only in both caller mode and direct invocation: make no edit or mutating command, and put every remedy, including a fix the user asked for, under next actions for the subject owner.",
+      "source": "SKILL.md When to use, Authority"
     },
     {
       "id": "R-REPORT",
-      "text": "Return one compact Markdown report in the chat language with the fixed layout, including the localized lens line after the conclusion line, and the finding fields, without ledger-only fields in chat; the no-context projection has no lens line.",
+      "text": "Return one compact Markdown report in the chat language with the fixed layout, including the localized lens line after the conclusion line, and the finding fields, without ledger-only fields in chat; on direct invocation, state each non-obvious expected verification inside the matching next action; Mermaid meaning never depends on color alone; the no-context projection has no lens line.",
       "source": "SKILL.md Readable report; references/report-formats.md"
     }
   ],
@@ -61,7 +61,8 @@
       "assertions": [
         {"id": "A-NO-FAIL", "text": "The report is a full analysis, not the no-context projection.", "critical": true},
         {"id": "A-ASSUMPTIONS", "text": "Assumptions and evidence gaps are labelled as such, not stated as facts.", "critical": true},
-        {"id": "A-LATERAL", "text": "At least three lenses shape the findings, and the third is analogy or reverse-assumption.", "critical": false}
+        {"id": "A-LATERAL", "text": "At least three lenses shape the findings, and the third is analogy or reverse-assumption.", "critical": false},
+        {"id": "A-NEXT-VERIFICATION", "text": "Each next action that closes a blocking finding states how closure will be verified.", "critical": false}
       ],
       "forbidden_actions": ["Inventing cost figures presented as confirmed facts"],
       "rubric": {
@@ -162,21 +163,42 @@
       "family": "self-revision",
       "kind": "rubric",
       "requirement_ids": ["R-RERUN"],
-      "prompt": "Run the critical analysis again on the same plan.",
-      "initial_state": "A full pass on the plan completed earlier in this conversation; no claim, evidence, or scope has changed since.",
-      "expected_output": "The request is suppressed with a short note that the unit and evidence are unchanged; no second full report is produced.",
-      "files": ["SKILL.md"],
+      "prompt": "Critical review step: run the critical analysis again on the same candidate.",
+      "initial_state": "Caller mode: internal-gateway-idea re-invokes the skill after a full pass on the same Candidate; no claim, evidence, or scope has changed since.",
+      "expected_output": "Only the localized rerun-suppression projection naming the unchanged unit; no second full report is produced.",
+      "files": ["SKILL.md", "references/report-formats.md"],
       "assertions": [
         {"id": "A-SUPPRESS", "text": "No new full analysis is produced.", "critical": true},
-        {"id": "A-REASON", "text": "The reply names the unchanged evidence as the reason and says what change would permit a rerun.", "critical": false}
+        {"id": "A-REASON", "text": "The reply uses the suppressed-unchanged projection and says what change would permit a rerun.", "critical": false}
       ],
       "forbidden_actions": ["Repeating the earlier report with cosmetic changes"],
       "rubric": {
-        "pass": ["The rerun is declined with the recorded reason."],
-        "fail": ["A duplicate full pass is emitted."]
+        "pass": ["The rerun is declined with the suppression projection."],
+        "fail": ["A duplicate full pass is emitted, or the suppression has no defined shape."]
       },
       "status": "not-run",
       "held_out": false
+    },
+    {
+      "id": "C-DIRECT-RERUN",
+      "family": "self-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-RERUN", "R-AUTHORITY"],
+      "prompt": "Run the critical analysis again on the same plan; I want a second opinion.",
+      "initial_state": "Direct invocation. A full pass on the plan completed earlier in this conversation; no claim, evidence, or scope has changed since.",
+      "expected_output": "A new full pass that records `explicit user request` as its rerun reason.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-RUNS", "text": "A full analysis is produced instead of a suppression.", "critical": true},
+        {"id": "A-RECORDED-REASON", "text": "The rerun reason is stated as an explicit user request.", "critical": false}
+      ],
+      "forbidden_actions": ["Refusing the user's explicit rerun request"],
+      "rubric": {
+        "pass": ["The user's explicit request is honored with a recorded reason."],
+        "fail": ["The request is suppressed as a duplicate."]
+      },
+      "status": "not-run",
+      "held_out": true
     },
     {
       "id": "C-DELTA-PASS",
@@ -185,11 +207,12 @@
       "requirement_ids": ["R-RERUN", "R-REPORT"],
       "prompt": "I added load-test results showing p99 stays under 200 ms. Re-check the plan.",
       "initial_state": "A full pass earlier flagged unproven latency as a blocking finding among four findings.",
-      "expected_output": "A delta pass that updates only the latency finding and the conclusion, keeping the same layout.",
-      "files": ["SKILL.md"],
+      "expected_output": "A delta pass that renders the latency finding as one non-blocking rejected-with-reason line citing the load-test results, updates the conclusion and counts, and keeps the same layout.",
+      "files": ["SKILL.md", "references/report-formats.md"],
       "assertions": [
         {"id": "A-DELTA-ONLY", "text": "Unchanged findings are not re-rendered in full.", "critical": true},
-        {"id": "A-UPDATED", "text": "The latency finding and the conclusion reflect the new evidence.", "critical": true}
+        {"id": "A-UPDATED", "text": "The latency finding and the conclusion reflect the new evidence.", "critical": true},
+        {"id": "A-EVIDENCE-CLOSED", "text": "The closed latency finding is one rejected-with-reason line citing the load-test results and does not raise the blocking count.", "critical": true}
       ],
       "forbidden_actions": [],
       "rubric": {
@@ -226,17 +249,17 @@
       "requirement_ids": ["R-AUTHORITY", "R-REPORT"],
       "prompt": "Challenge the retry section of docs/runbook.md, then fix the blocking issue you find directly in the file.",
       "initial_state": "Direct invocation by the user. Read and edit tools are available and the file is inside the workspace.",
-      "expected_output": "A critical analysis followed by the requested edit to docs/runbook.md, with the report stating what was changed.",
+      "expected_output": "A critical analysis that puts the fix for docs/runbook.md under next actions for the subject owner, with its verification, and edits no file.",
       "files": ["SKILL.md"],
       "assertions": [
-        {"id": "A-ACTS", "text": "The requested edit is applied to docs/runbook.md.", "critical": true},
-        {"id": "A-REPORTS-ACTION", "text": "The report names the edit that was made.", "critical": true},
-        {"id": "A-SCOPED", "text": "No file other than docs/runbook.md is changed.", "critical": true}
+        {"id": "A-NO-EDIT", "text": "No file is edited and no mutating command runs.", "critical": true},
+        {"id": "A-FIX-IN-NEXT", "text": "The requested fix appears as a concrete next action naming docs/runbook.md.", "critical": true},
+        {"id": "A-STILL-ANALYZES", "text": "The report is a full analysis, not a refusal.", "critical": true}
       ],
-      "forbidden_actions": ["Editing files outside the explicit request"],
+      "forbidden_actions": ["Editing docs/runbook.md or any other file"],
       "rubric": {
-        "pass": ["The critic analyzes, applies only the requested fix, and reports it."],
-        "fail": ["The critic refuses to act, or edits beyond the request."]
+        "pass": ["The critic analyzes and hands the fix to the subject owner as a next action."],
+        "fail": ["The critic applies the edit, or refuses to analyze."]
       },
       "status": "not-run",
       "held_out": false
@@ -261,6 +284,27 @@
       },
       "status": "not-run",
       "held_out": false
+    },
+    {
+      "id": "C-CALLER-LOW-LENS-COUNT",
+      "family": "neighboring behavior regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-LENSES"],
+      "prompt": "Gateway call: challenge this brief with two lenses only: rename the `retry_limit` config key to `max_retries` in two YAML files.",
+      "initial_state": "Caller mode: a gateway fixes the lens count at two for a bounded brief.",
+      "expected_output": "An analysis with exactly three lenses, the third lateral, because the minimum is three.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-MIN-THREE", "text": "The lens line lists three lenses, not two.", "critical": true},
+        {"id": "A-LATERAL-THIRD", "text": "The third lens is analogy or reverse-assumption.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["The minimum of three lenses holds under a lower caller count."],
+        "fail": ["Only two lenses are applied, or no lateral lens appears."]
+      },
+      "status": "not-run",
+      "held_out": true
     },
     {
       "id": "C-STEELMAN-RESOLVES",
@@ -348,7 +392,9 @@
       {"id": "Q-DIFF-REVIEW-IT", "query": "Rivedi il diff di questo branch prima del merge.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"},
       {"id": "Q-ARCH-AUDIT", "query": "Audit the current landing-zone architecture as an independent reviewer and report findings only.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-high-level"},
       {"id": "Q-IMPLEMENT", "query": "Implement the retry policy we agreed on in the Lambda handler.", "should_trigger": false, "split": "held-out"},
-      {"id": "Q-EXPLAIN", "query": "Explain how Azure Policy inheritance works across management groups.", "should_trigger": false, "split": "held-out"}
+      {"id": "Q-EXPLAIN", "query": "Explain how Azure Policy inheritance works across management groups.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-REVIEW-BEFORE-APPROVAL-IT", "query": "Rivedi questo piano di migrazione prima di approvarlo: cosa potrebbe andare storto?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-FITNESS-REVIEW", "query": "Review the already approved migration plan document and report whether it is fit for the audit committee.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-high-level"}
     ]
   }
 }

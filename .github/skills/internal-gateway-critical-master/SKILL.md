@@ -22,8 +22,8 @@ Route away when the primary deliverable is:
 - a report-only assurance review of an existing artifact: use
   `/internal-review-high-level`;
 - a review of code, a diff, or a pull request: use `/internal-review-code`;
-- a redesign, plan, or implementation as the main work: its owner builds it;
-  `Authority` covers explicit follow-up actions.
+- a redesign, plan, implementation, or edit as the main work: its owner
+  builds it from this skill's `Next` actions.
 
 ## Context intake
 
@@ -63,12 +63,14 @@ absent.
   rather than by an upstream skill or producer, retains subject scope and
   decisions.
 - A calling skill retains routing, final finding disposition, plan expansion,
-  and lifecycle. Under a caller, stay report-only: put every remedy under
-  `## ✅ Next` and make no edit or mutating command.
-- On direct invocation, the user retains acceptance and analysis is the
-  default. On an explicit user request for an action, such as an edit or a
-  command, act within the request and the available tools, authority, and
-  safety conditions, and report what was done.
+  and lifecycle. On direct invocation, the user retains acceptance.
+- Caller mode applies when a skill or gateway workflow delegates this skill
+  through a brief. A user who invokes this skill or selects its agent directly
+  is direct invocation.
+- Critical Master is always report-only, in both modes. Put every remedy under
+  `## ✅ Next` and make no edit or mutating command. When the user also asks
+  for a fix, deliver the analysis and name the fix as a `Next` action for the
+  subject owner.
 
 ## Analysis units and reruns
 
@@ -82,11 +84,13 @@ the record in the conversation.
 - Run one full pass per analysis unit by default.
 - After a materially supported change, run a delta pass limited to changed
   claims, evidence, assumptions, acceptance, and residual blockers.
-- Suppress a request whose unit and evidence snapshot are unchanged, and
-  record the suppression.
-- Allow a second full pass only for a recorded reason that names the changed
-  evidence or scope: an open blocker remains, new evidence changes a
-  controlling assumption, or the scope changed.
+- In caller mode, suppress a request whose unit and evidence snapshot are
+  unchanged and emit the rerun-suppression note. On direct invocation, an
+  explicit user request for a rerun runs a full pass with the recorded reason
+  `explicit user request`.
+- Allow a second full pass only for a recorded reason: an explicit user
+  request on direct invocation, an open blocker remains, new evidence changes
+  a controlling assumption, or the scope changed.
 
 ## Finding classification
 
@@ -125,7 +129,8 @@ criteria, anti-scope, and evidence gaps are understood well enough to critique.
 ### Phase 2: Challenge
 
 Select at least three lenses based on the highest-risk gaps. When a caller
-fixes the lens count, use exactly that count. The third lens must be lateral
+fixes the lens count, use exactly that count, never below three. The third
+lens must be lateral
 (`analogy` or `reverse-assumption`). Add a lens beyond three only when it
 covers a material gap the first three do not. Apply each selected lens once.
 
@@ -219,8 +224,9 @@ section shape and the severity and confidence vocabularies.
 
 A delta pass keeps the same layout and emits only changed evidence, findings,
 classifications, conclusion, and residual blockers; it shows the lens line only
-when the lenses change. Preserve every material finding, compacting by
-grouping rather than deleting. A full pass includes the scope only when it
+when the lenses change. Reclassify a finding closed by new evidence as
+non-blocking `rejected-with-reason`, citing that evidence as the reason.
+Preserve every material finding, compacting by grouping rather than deleting. A full pass includes the scope only when it
 changes interpretation.
 
 ## No-context failure
