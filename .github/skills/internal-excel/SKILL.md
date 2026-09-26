@@ -1,6 +1,6 @@
 ---
 name: internal-excel
-description: Use when any task reads, creates, edits, validates, converts, or mentions an Excel workbook or an XLSX, XLSM, CSV, or TSV file. Use alongside /anthropic-xlsx when rendered fidelity, charts, cached recalculation, or polished presentation are first-class.
+description: Use when a task reads, creates, edits, validates, converts, profiles, reconciles, or transforms data in an Excel workbook or an XLSX, XLSM, CSV, or TSV file, including casual requests that name such a file as input or output. Use alongside /anthropic-xlsx when rendered fidelity, charts, cached recalculation, or polished presentation are first-class.
 ---
 
 # Internal Excel
@@ -10,12 +10,21 @@ contract while adjacent owners join.
 
 ## Referenced skills
 
-- `anthropic-xlsx`
+Keep this skill active and add a narrower owner only when its concern becomes
+material:
+
+- `anthropic-xlsx`: add `/anthropic-xlsx` for charts, rendered review, cached
+  recalculation, or polished workbook presentation.
+- For single-language implementation work, add the narrower file or runtime
+  owner while this skill retains the spreadsheet integrity contract.
+- For database or warehouse design, add the relevant data-platform owner; keep
+  this skill active only while local CSV, TSV, or Excel artifacts remain in
+  scope.
 
 ## When to use
 
-- Any request that reads, creates, edits, validates, converts, or mentions an
-  Excel workbook or an XLSX, XLSM, CSV, or TSV file.
+- Any read, write, conversion, profiling, or reconciliation of XLSX, XLSM,
+  CSV, or TSV data, including casual requests that name such a file.
 - Tabular data quality, profiling, schema choices, normalization, joins,
   dedupe, reconciliation, conversion, or large-file processing.
 - Tool selection for scale, memory use, or integrity tradeoffs across local
@@ -25,16 +34,6 @@ contract while adjacent owners join.
   requirement.
 - Copying a workbook tab contract into generated tabs, or keeping derived
   columns as Excel formulas over atomic source values.
-
-## When to add adjacent skills
-
-- For charts, rendered review, cached recalculation, or polished workbook
-  presentation, keep this skill active and add `/anthropic-xlsx`.
-- For single-language implementation work, add the narrower file or runtime
-  owner while this skill retains the spreadsheet integrity contract.
-- For database or warehouse design, add the relevant data-platform owner; keep
-  this skill active only while local CSV, TSV, or Excel artifacts remain in
-  scope.
 
 ## Integrity boundary
 
@@ -66,18 +65,16 @@ contract while adjacent owners join.
 
 ## Discovery and binary artifacts
 
-- In discovery commands, exclude `.venv`, `__pycache__`, `.pytest_cache`,
-  dependency directories, generated outputs, and binary exports that are not
-  the active evidence target.
+- Start from the named workbook, writer modules, and source files. In
+  discovery, exclude `.venv`, `__pycache__`, `.pytest_cache`, dependency
+  directories, generated outputs, and binary exports that are not the active
+  evidence target.
 - Exclude Excel and LibreOffice lock files such as `~$*` and `.~lock.*` from
   discovery, validation, diffs, and deliverables.
-- Prefer targeted `rg` queries on source files, writer modules, and the named
-  workbook path. Do not start with broad repo scans when the target file or
-  owner path is already known.
 - Do not modify sample workbooks, generated exports, or other binary artifacts
   unless the user explicitly asks for that edit.
-- If output validation needs a generated workbook, write it to `tmp/` or
-  another declared controlled path and report that path.
+- If output validation needs a generated workbook, write it to a declared
+  controlled path and report that path.
 
 ## Workflow
 
