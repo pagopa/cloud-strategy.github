@@ -13,13 +13,16 @@ behavior:
 - packages, libraries, applications, services, and framework-owned flows;
 - thin CLI or transport adapters whose stable contract remains the imported
   project behavior;
-- a CLI or toolkit with a `lib/` folder when its primary contract is reusable
-  imported behavior.
+- a toolkit `lib/` that code outside the toolkit imports or that is published
+  as a package.
 
 It applies the complete project baseline itself. Route direct execution
 through standalone scripts, standalone CLIs, automation entrypoints, or
-multi-entrypoint operator toolkits to `/internal-python-script`. Route a mixed
-change whose primary contract is still unresolved to `/internal-python`.
+multi-entrypoint operator toolkits, including a `lib/` imported only by the
+toolkit's own entrypoints, to `/internal-python-script`. Route a change that
+touches both kinds of importer, or whose contract is still unresolved, to
+`/internal-python`. For new files, decide from packaging metadata or the
+consumer named in the request.
 
 ## Workflow
 
@@ -54,6 +57,7 @@ change whose primary contract is still unresolved to `/internal-python`.
 - Keep human-facing rendering at a CLI adapter boundary and keep JSON, API
   responses, events, and exported files as plain data. Use `rich` only when a
   human-facing CLI contract owns that dependency.
+- Keep comments, docstrings, logs, exceptions, and CLI output in English.
 - Preserve the repository's declared dependency manager. For pip-managed
   requirements, keep exact pins and hashes in the owning lock artifact; use the
   other manager's canonical frozen or locked validation when applicable.
@@ -76,3 +80,5 @@ change whose primary contract is still unresolved to `/internal-python`.
 - Run the repository-declared syntax check, focused pytest command, and
   configured linter for changed behavior. For dependency changes, run the
   declared manager's canonical frozen or locked validation.
+- Remove unused imports that the linter reports; do not suppress them with
+  `noqa` or broader exclusions.

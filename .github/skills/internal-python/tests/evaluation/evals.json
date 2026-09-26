@@ -31,6 +31,16 @@
       "id": "R-VALIDATE",
       "text": "Run declared runtime, focused pytest, and lint checks on changed files, remove unused imports instead of suppressing them, and report each check result or gap.",
       "source": "internal-python SKILL.md: Validation"
+    },
+    {
+      "id": "R-IMPORT-EVIDENCE",
+      "text": "Decide ownership from importers: code imported only by its own entrypoints is direct execution, code imported outside its toolkit or published as a package is imported, a change touching both is mixed, and new files use packaging metadata or the consumer named in the request.",
+      "source": "internal-python SKILL.md: Workflow step 1"
+    },
+    {
+      "id": "R-ENGLISH",
+      "text": "Keep comments, docstrings, logs, exceptions, and CLI output in English.",
+      "source": "internal-python SKILL.md: Cross-cutting baseline"
     }
   ],
   "cases": [
@@ -214,6 +224,47 @@
         "pass": ["The report distinguishes observed results from gaps."],
         "fail": ["Lint is reported as passing without output."]
       }
+    },
+    {
+      "id": "C-UNINFERABLE-FIX",
+      "family": "material-ambiguity",
+      "kind": "rubric",
+      "requirement_ids": ["R-CLASSIFY", "R-IMPORT-EVIDENCE", "R-MIXED"],
+      "prompt": "Fix the off-by-one in helpers/dates.py so the failing test passes.",
+      "initial_state": "A new single Python file with no importers, no __main__ guard, and no packaging metadata or request text naming its consumer, plus one failing pytest test.",
+      "expected_output": "The test passes, and the report states that the contract could not be inferred from imports, entrypoints, or metadata, so the cross-cutting baseline was applied directly.",
+      "files": [],
+      "assertions": [
+        {"id": "A-UNINFERABLE-STATED", "text": "The response names the missing importers, entrypoint, and metadata as the reason the change stays with this owner.", "critical": true},
+        {"id": "A-FIX-VALIDATED", "text": "The focused pytest result is reported.", "critical": true}
+      ],
+      "forbidden_actions": ["Guessing a narrower owner without import, entrypoint, or metadata evidence."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Classification evidence, including its absence, is explicit."],
+        "fail": ["The file is routed to the project or script owner without evidence."]
+      }
+    },
+    {
+      "id": "C-ENGLISH-MESSAGES",
+      "family": "neighbor-regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-ENGLISH", "R-MIXED"],
+      "prompt": "Add clear log and exception messages to the config loader shared by our settings package and the ops scripts.",
+      "initial_state": "A config loader imported by a package and by independently executed scripts, with existing English messages.",
+      "expected_output": "New log and exception messages are in English and consistent with existing messages in both consumers.",
+      "files": [],
+      "assertions": [
+        {"id": "A-MESSAGES-ENGLISH", "text": "Every added comment, log, and exception message is in English.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Messages are English and actionable."],
+        "fail": ["Added messages are in another language."]
+      }
     }
   ],
   "triggers": {
@@ -237,7 +288,10 @@
       {"id": "Q-17", "query": "Diagnose why this pytest run fails only in CI.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-debugging"},
       {"id": "Q-18", "query": "Review my branch diff for Python and Terraform issues.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"},
       {"id": "Q-19", "query": "Our lint config and pytest rootdir disagree between the package and the scripts folder; align the Python tooling for both.", "should_trigger": true, "split": "train"},
-      {"id": "Q-20", "query": "Add a dataclass shared by the ingest service and the nightly export script, and update both callers.", "should_trigger": true, "split": "held-out"}
+      {"id": "Q-20", "query": "Add a dataclass shared by the ingest service and the nightly export script, and update both callers.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-21", "query": "Fix the bug in this new helpers.py; nothing imports it yet and no pyproject entry mentions it.", "should_trigger": true, "split": "train"},
+      {"id": "Q-22", "query": "Change a lib/ helper and, in the same change, update the toolkit entrypoints and the external billing service that both import it.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-23", "query": "Add a helper to our toolkit's lib/ that only the toolkit's own entrypoints import.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-python-script"}
     ]
   }
 }

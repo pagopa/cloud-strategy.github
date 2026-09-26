@@ -11,14 +11,16 @@ This skill owns Python work whose primary contract is direct execution:
 
 - new or changed standalone scripts, CLIs, automation, or data-processing
   entrypoints;
-- small multi-entrypoint toolkits whose primary contract is direct execution,
-  even when they have tests, a `lib/` folder, or several maintained files.
+- small multi-entrypoint toolkits with tests or several maintained files,
+  including a `lib/` imported only by the toolkit's own entrypoints.
 
 It applies the complete script baseline itself. Route reusable imported
 behavior in a package, library, application, service, or framework-owned flow,
-including a thin CLI adapter over package code, to `/internal-python-project`.
-Route a mixed change whose primary contract is still unresolved to
-`/internal-python`.
+including a thin CLI adapter over package code or a `lib/` imported outside
+the toolkit or published as a package, to `/internal-python-project`. Route a
+change that touches both kinds of importer, or whose contract is still
+unresolved, to `/internal-python`. For new files, decide from packaging
+metadata or the consumer named in the request.
 
 ## Workflow
 
@@ -74,9 +76,10 @@ For pip requirements, generate the lock output with
 `pip-compile --generate-hashes` and validate it with
 `pip install --require-hashes -r requirements.txt`.
 
-Keep a short dependency decision note when choosing between stdlib and an
-external library. Record the decision once at a shared toolkit lock boundary
-when several entrypoints use the same dependency set.
+When choosing between stdlib and an external library, record a short decision
+note in the pull request or commit description that introduces the
+dependency. Record it once per shared toolkit lock when several entrypoints
+use the same dependency set.
 
 ## References
 
@@ -92,3 +95,5 @@ human lifecycle output, bounded diagnostics, redaction, or final summaries.
   seam for changed behavior.
 - Use the declared interpreter or shared runner for focused tests and syntax
   checks. Run `py_compile` or `compileall` only over changed source paths.
+- Run the declared linter on changed files. Remove unused imports it reports;
+  do not suppress them with `noqa` or broader exclusions.

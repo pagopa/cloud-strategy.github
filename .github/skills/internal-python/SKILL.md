@@ -14,8 +14,9 @@ This skill owns Python work without one clear primary contract:
   helpers;
 - cross-cutting control flow, typing, configuration, runtime, dependency, test,
   or output concerns;
-- small fixes, or Python-specific review depth requested by a review owner,
-  before the primary contract is known.
+- single-file fixes whose contract cannot be inferred from importers,
+  entrypoints, or packaging metadata;
+- Python-specific review depth requested by a review owner.
 
 It completes mixed and cross-cutting work itself. When repository evidence
 shows one primary contract, route reusable imported behavior to
@@ -25,8 +26,12 @@ Route a whole diff, branch, or pull-request review to `/internal-review-code`.
 ## Workflow
 
 1. **Classify the primary contract.** Inspect entrypoints, import sites,
-   packaging metadata, and tests. **Complete when:** the change is labeled
-   imported, direct-execution, or mixed, and the deciding evidence is named.
+   packaging metadata, and tests. Decide from importers: code imported only by
+   its own entrypoints is direct execution; code imported outside its toolkit
+   or published as a package is imported; a change touching both is mixed. For
+   new files, use packaging metadata or the consumer named in the request.
+   **Complete when:** the change is labeled imported, direct-execution, or
+   mixed, and the deciding evidence is named.
 2. **Route or apply the baseline.** Route a clear contract to its owner. For
    mixed or cross-cutting work, apply the baseline below to every changed file.
    **Complete when:** each changed file satisfies every baseline rule, or the
@@ -57,6 +62,7 @@ linter-owned diagnostics to the configured tooling.
   fallback dependency mirrors.
 - Keep machine-readable output plain data and keep human-facing rendering at an
   entrypoint or adapter boundary.
+- Keep comments, docstrings, logs, exceptions, and CLI output in English.
 - Add focused `pytest` coverage for new or changed behavior and use the nearest
   repository-owned syntax or runtime check for syntax-only changes.
 

@@ -26,6 +26,21 @@
       "id": "R-TESTING",
       "text": "Cover the changed public seam with focused tests that mock only true external boundaries, and report syntax, test, lint, and lock validation results.",
       "source": "internal-python-project SKILL.md: Testing and validation"
+    },
+    {
+      "id": "R-IMPORT-EVIDENCE",
+      "text": "Own a toolkit lib/ imported outside the toolkit or published as a package, route a lib/ imported only by its own entrypoints to /internal-python-script and a change touching both to /internal-python, and use packaging metadata or the named consumer for new files.",
+      "source": "internal-python-project SKILL.md: When to use"
+    },
+    {
+      "id": "R-ENGLISH",
+      "text": "Keep comments, docstrings, logs, exceptions, and CLI output in English.",
+      "source": "internal-python-project SKILL.md: Project contract"
+    },
+    {
+      "id": "R-DEAD-IMPORTS",
+      "text": "Remove unused imports reported by the declared linter instead of suppressing them with noqa or broader exclusions.",
+      "source": "internal-python-project SKILL.md: Testing and validation"
     }
   ],
   "cases": [
@@ -129,6 +144,47 @@
         "pass": ["Routing cites the CI entrypoint."],
         "fail": ["Project layering is imposed on the standalone script."]
       }
+    },
+    {
+      "id": "C-LIB-EXTERNAL",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE", "R-IMPORT-EVIDENCE", "R-CONTRACT"],
+      "prompt": "Add a retry parameter to fetch_rates() in tools/fx/lib/; the pricing service imports it through the published fx-tools package.",
+      "initial_state": "An operator toolkit whose lib/ is published as a package and imported by a separate pricing service.",
+      "expected_output": "fetch_rates() gains a typed, backward-compatible retry parameter covered by tests at the lib API, and the pricing service keeps working unchanged.",
+      "files": [],
+      "assertions": [
+        {"id": "A-EXTERNAL-IMPORTER-CITED", "text": "The pricing service importer or the published package is cited as the reason this owner handles the change.", "critical": true}
+      ],
+      "forbidden_actions": ["Treating the published lib/ as script-private code."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Backward compatibility for the external importer is addressed."],
+        "fail": ["The change is handed to the script owner because the code sits in a toolkit folder."]
+      }
+    },
+    {
+      "id": "C-LINT-MESSAGES",
+      "family": "neighbor-regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-ENGLISH", "R-DEAD-IMPORTS", "R-TESTING"],
+      "prompt": "Add a validation error to create_order() in the orders package and make lint pass; the edit leaves an unused import behind.",
+      "initial_state": "An importable orders package with a declared linter and pytest suite.",
+      "expected_output": "create_order() raises a clear English validation error, the unused import is gone, and lint and pytest results are reported.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ERROR-ENGLISH", "text": "The new exception message is in English.", "critical": true},
+        {"id": "A-IMPORT-REMOVED", "text": "The unused import is removed rather than suppressed with noqa or an exclusion.", "critical": true}
+      ],
+      "forbidden_actions": ["Adding noqa or broadening lint exclusions."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The lint rerun result is reported."],
+        "fail": ["The diagnostic is suppressed."]
+      }
     }
   ],
   "triggers": {
@@ -152,7 +208,10 @@
       {"id": "Q-17", "query": "Add a subcommand to the Typer CLI that our package installs as a console script; it wraps an existing service call.", "should_trigger": true, "split": "train"},
       {"id": "Q-18", "query": "Introduce a Protocol so our library's storage backend can be swapped in tests.", "should_trigger": true, "split": "held-out"},
       {"id": "Q-19", "query": "Add a GitHub Actions job that runs our package tests.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-actions"},
-      {"id": "Q-20", "query": "Bump pydantic in our service's lock file and fix the model validators that break.", "should_trigger": true, "split": "held-out"}
+      {"id": "Q-20", "query": "Bump pydantic in our service's lock file and fix the model validators that break.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-21", "query": "Extend the helper in our toolkit's lib/ that the reporting service installs and imports as the ops-common package.", "should_trigger": true, "split": "train"},
+      {"id": "Q-22", "query": "Add a helper to the toolkit's lib/ that only the toolkit's own three entrypoints import.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-python-script"},
+      {"id": "Q-23", "query": "Change a lib/ helper and, in the same change, the toolkit entrypoints and the external service that both import it.", "should_trigger": false, "split": "train", "competing_owner": "internal-python"}
     ]
   }
 }

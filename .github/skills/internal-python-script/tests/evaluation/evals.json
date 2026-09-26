@@ -31,6 +31,21 @@
       "id": "R-VALIDATE",
       "text": "Cover the public CLI or stable helper seam and run focused tests and syntax checks only over changed paths with the declared interpreter.",
       "source": "internal-python-script SKILL.md: Testing and validation"
+    },
+    {
+      "id": "R-IMPORT-EVIDENCE",
+      "text": "Own a toolkit lib/ imported only by the toolkit's own entrypoints, route a lib/ imported outside the toolkit or published as a package to /internal-python-project and a change touching both to /internal-python, and use packaging metadata or the named consumer for new files.",
+      "source": "internal-python-script SKILL.md: When to use"
+    },
+    {
+      "id": "R-DEP-NOTE",
+      "text": "Record the stdlib-versus-external-library decision in the pull request or commit description that introduces the dependency, once per shared lock.",
+      "source": "internal-python-script SKILL.md: Dependency policy"
+    },
+    {
+      "id": "R-DEAD-IMPORTS",
+      "text": "Remove unused imports reported by the declared linter instead of suppressing them with noqa or broader exclusions.",
+      "source": "internal-python-script SKILL.md: Testing and validation"
     }
   ],
   "cases": [
@@ -59,7 +74,7 @@
       "id": "C-JSON-OUTPUT",
       "family": "neighbor-regression",
       "kind": "rubric",
-      "requirement_ids": ["R-OUTPUT"],
+      "requirement_ids": ["R-OUTPUT", "R-DEP-NOTE"],
       "prompt": "Add pretty colored tables to the script, which also has a --format json mode consumed by a CI job.",
       "initial_state": "A script with text and JSON output modes and a CI consumer of the JSON.",
       "expected_output": "Humans see colored tables; the CI job receives byte-identical JSON structure.",
@@ -71,7 +86,7 @@
       "status": "not-run",
       "held_out": false,
       "rubric": {
-        "pass": ["The rich dependency decision is recorded at the lock boundary."],
+        "pass": ["The rich dependency decision is recorded in the pull request or commit description."],
         "fail": ["Helpers print styled text or JSON gains styling."]
       }
     },
@@ -99,7 +114,7 @@
       "id": "C-LIB-SHARED",
       "family": "competing-owner",
       "kind": "rubric",
-      "requirement_ids": ["R-ROUTE"],
+      "requirement_ids": ["R-ROUTE", "R-IMPORT-EVIDENCE"],
       "prompt": "Add a fifth tool to our operator toolkit. It needs a new parse_ledger() helper in lib/, and that lib/ package is also imported by the billing service.",
       "initial_state": "A multi-entrypoint toolkit whose lib/ is a dependency of a separate service, and a request that requires a lib/ change.",
       "expected_output": "The shared lib/ contract is recognized before any edit, and ownership of the lib/ change is settled as mixed before the new tool is added.",
@@ -134,6 +149,46 @@
         "pass": ["Routing cites the importing services."],
         "fail": ["Script entrypoint rules are imposed on the SDK."]
       }
+    },
+    {
+      "id": "C-LIB-PRIVATE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE", "R-IMPORT-EVIDENCE", "R-ENTRYPOINT"],
+      "prompt": "Add a parse_window() helper to the toolkit's lib/ and use it from the existing purge tool; nothing outside the toolkit imports lib/.",
+      "initial_state": "A multi-entrypoint operator toolkit whose lib/ is imported only by its own entrypoints and is not published.",
+      "expected_output": "The helper lands in lib/ with explicit parameters, the purge tool keeps its main() -> int entrypoint, and a focused test covers the helper.",
+      "files": [],
+      "assertions": [
+        {"id": "A-PRIVATE-IMPORTERS-CITED", "text": "The absence of importers outside the toolkit is cited as the reason this owner handles the change.", "critical": true}
+      ],
+      "forbidden_actions": ["Introducing package layers or services for a toolkit-private lib/."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Routing cites the importer check."],
+        "fail": ["The change is handed to the project owner only because a lib/ folder exists."]
+      }
+    },
+    {
+      "id": "C-LINT",
+      "family": "neighbor-regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-DEAD-IMPORTS", "R-VALIDATE"],
+      "prompt": "The linter flags an unused import in the entrypoint you just edited; make the check pass.",
+      "initial_state": "A changed script entrypoint with one unused import and a declared linter.",
+      "expected_output": "The import is gone and a lint rerun on the changed file passes.",
+      "files": [],
+      "assertions": [
+        {"id": "A-IMPORT-REMOVED", "text": "The import is removed rather than suppressed with noqa or an exclusion.", "critical": true}
+      ],
+      "forbidden_actions": ["Adding noqa or broadening lint exclusions."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The lint rerun result is reported."],
+        "fail": ["The diagnostic is suppressed."]
+      }
     }
   ],
   "triggers": {
@@ -157,7 +212,10 @@
       {"id": "Q-17", "query": "Add pytest coverage for scripts/export_users.py, which operators run by hand.", "should_trigger": true, "split": "train"},
       {"id": "Q-18", "query": "Write a standalone job that downloads yesterday's invoices and uploads a summary CSV; it runs from cron.", "should_trigger": true, "split": "held-out"},
       {"id": "Q-19", "query": "Add a Pydantic settings class to our web service package and wire it into the app factory.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-python-project"},
-      {"id": "Q-20", "query": "Our release helper script assumes it runs from the repo root; make it work from any directory.", "should_trigger": true, "split": "train"}
+      {"id": "Q-20", "query": "Our release helper script assumes it runs from the repo root; make it work from any directory.", "should_trigger": true, "split": "train"},
+      {"id": "Q-21", "query": "Add a helper to our toolkit's lib/ that only its own entrypoints import, and use it in the export tool.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-22", "query": "Change the toolkit's lib/ module that our billing service installs and imports as a package.", "should_trigger": false, "split": "train", "competing_owner": "internal-python-project"},
+      {"id": "Q-23", "query": "Edit a lib/ function used by both the toolkit's entrypoints and an external service, and update both callers in one change.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-python"}
     ]
   }
 }
