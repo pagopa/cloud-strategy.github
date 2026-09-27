@@ -313,7 +313,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Scope:
   - `.github/skills/internal-github-pr/SKILL.md`
   - `CODEOWNERS`
-  - `.github/skills/internal-github-governance/SKILL.md`
+  - `.github/skills/internal-github-platform/SKILL.md`
 - Expected behavior:
   - self-authored PRs under required reviews are not treated as mergeable from green checks alone
   - the GitHub PR skill tells operators to verify a qualifying non-author approval before merge

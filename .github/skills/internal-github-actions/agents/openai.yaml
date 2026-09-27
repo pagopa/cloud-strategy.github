@@ -1,6 +1,6 @@
 interface:
   display_name: "internal-github-actions"
-  short_description: "GitHub Actions workflow and composite authoring"
-  default_prompt: "Use /internal-github to route GitHub Actions workflow, reusable-workflow, or composite-action work to $internal-github-actions."
+  short_description: "GitHub Actions workflows, composites, and failed runs"
+  default_prompt: "Use /internal-github-actions to create, edit, or debug a GitHub Actions workflow, reusable workflow, or composite action with SHA pins, least-privilege permissions, and validated inputs; diagnose a failed run from its first failed step; hand diff review to /internal-review-code, failing PR-check triage to /openai-gh-fix-ci, and runner fleets or org policy to /internal-github-platform."
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

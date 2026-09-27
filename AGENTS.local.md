@@ -21,8 +21,10 @@
 
 - Route executable or evaluable behavior changes through `/internal-tdd` before
   implementation; that skill owns test posture and sequencing.
-- Route GitHub requests through `/internal-github`, which selects the
-  governance, actions, operations, PR, or strategic lane.
+- Route GitHub work by deliverable: workflows, composite actions, and failed
+  runs to `/internal-github-actions`; pull-request lifecycle to
+  `/internal-github-pr`; repository and organization controls, identity,
+  runners, and rollout evidence to `/internal-github-platform`.
 - Route current Copilot or MCP platform documentation needs to
   `/internal-copilot-docs-research`.
 

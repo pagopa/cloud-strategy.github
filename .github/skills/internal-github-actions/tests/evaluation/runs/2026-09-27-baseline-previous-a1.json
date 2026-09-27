@@ -1,0 +1,27 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "internal-github-actions",
+  "date": "2026-09-27",
+  "host": "VS Code GitHub Copilot Chat; isolated read-only subagents with skill text supplied by path and assertions withheld (less rigorous than a clean-catalog run)",
+  "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+  "configuration": "baseline-previous",
+  "case_results": [
+    {
+      "case_id": "C-RUN-TOKEN-SCOPE",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 5094548d-863d-4434-93c5-7ee097630583, subagent 'Case pilot baseline actions'",
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "passed": true,
+          "evidence": "Cites the Report coverage error line and grants pull-requests: write on the build job, or comment: false."
+        },
+        {
+          "id": "A-Q1",
+          "passed": true,
+          "evidence": "States Upload artifact was skipped only because the step before it failed."
+        }
+      ]
+    }
+  ]
+}
