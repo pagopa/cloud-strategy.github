@@ -1,0 +1,121 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "internal-aws-lambda",
+  "date": "2026-09-27",
+  "host": "VS Code GitHub Copilot Chat; isolated read-only subagents given the skill entrypoint by path, no web or MCP tools, assertions withheld; several cases per subagent (less rigorous than one clean session per case)",
+  "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+  "configuration": "with-skill",
+  "case_results": [
+    {
+      "case_id": "C-SQS-WHOLE-BATCH",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases with-skill lambda'",
+      "assertions": [
+        {
+          "id": "A-PER-RECORD",
+          "passed": true,
+          "evidence": "Per-record try/except returning only failed itemIdentifiers."
+        },
+        {
+          "id": "A-IDEMPOTENT",
+          "passed": true,
+          "evidence": "Makes process_message idempotent."
+        }
+      ]
+    },
+    {
+      "case_id": "C-S3-RECURSION",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases with-skill lambda'",
+      "assertions": [
+        {
+          "id": "A-RECURSION",
+          "passed": true,
+          "evidence": "OUTPUT_PREFIX uploads/ matches the notification filter; recursive trigger."
+        }
+      ]
+    },
+    {
+      "case_id": "C-TIMEOUT-MISMATCH",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases with-skill lambda'",
+      "assertions": [
+        {
+          "id": "A-VISIBILITY",
+          "passed": true,
+          "evidence": "Visibility timeout must be well above the function timeout."
+        }
+      ]
+    },
+    {
+      "case_id": "C-THIN-HANDLER",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases with-skill lambda'",
+      "assertions": [
+        {
+          "id": "A-THIN",
+          "passed": true,
+          "evidence": "Validation and persistence in orders.py, testable without Lambda."
+        },
+        {
+          "id": "A-VALIDATE",
+          "passed": true,
+          "evidence": "Malformed JSON and ValidationError return 400."
+        }
+      ]
+    },
+    {
+      "case_id": "C-SECRET-ENV",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases with-skill lambda'",
+      "assertions": [
+        {
+          "id": "A-SECRET-STORE",
+          "passed": true,
+          "evidence": "Secrets Manager or SSM SecureString fetched at init."
+        },
+        {
+          "id": "A-NO-RAW-LOG",
+          "passed": true,
+          "evidence": "Log stable identifiers, not the raw request."
+        }
+      ]
+    },
+    {
+      "case_id": "C-VPC-DEFAULT",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases with-skill lambda'",
+      "assertions": [
+        {
+          "id": "A-VPC-NEED",
+          "passed": true,
+          "evidence": "Attach only with a concrete private dependency; name subnets, DNS, egress."
+        }
+      ]
+    },
+    {
+      "case_id": "C-LIMIT-FRESHNESS",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases with-skill lambda'",
+      "assertions": [
+        {
+          "id": "A-SOURCED",
+          "passed": true,
+          "evidence": "Numbers explicitly marked unverified with the sources to check."
+        }
+      ]
+    },
+    {
+      "case_id": "C-TRUST-HANDOFF",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases with-skill lambda'",
+      "assertions": [
+        {
+          "id": "A-HANDOFF",
+          "passed": true,
+          "evidence": "Hands trust and permissions to /internal-aws."
+        }
+      ]
+    }
+  ]
+}
