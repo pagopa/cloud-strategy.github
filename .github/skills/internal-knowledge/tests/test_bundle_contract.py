@@ -13,10 +13,13 @@ BUNDLE_REFERENCES = {
     "references/adr-maintenance.md",
     "references/architecture-maintenance.md",
     "references/knowledge-audit.md",
+    "references/knowledge-navigation.md",
+    "references/knowledge-report.md",
     "references/knowledge-scope.md",
     "references/knowledge-topology.md",
     "references/madr-minimal.md",
     "references/managerial-maintenance.md",
+    "references/mermaid-contract.md",
     "references/project-memory-maintenance.md",
     "references/readme-maintenance.md",
     "references/standards-maintenance.md",
@@ -92,8 +95,10 @@ def test_architecture_reference_is_reader_proportional() -> None:
 
 def test_readme_reference_does_not_require_diagram_boilerplate() -> None:
     reference = read_bundle_text("references/readme-maintenance.md")
+    linked_targets = re.findall(r"\[[^]]+\]\(([^)]+)\)", reference)
 
-    assert "Use Mermaid only when at least three material evidenced relationships" in reference
+    assert "mermaid-contract.md" in linked_targets
+    assert re.search(r"(?m)^ {0,3}`{3,}[ \t]*mermaid(?:[ \t].*)?$", reference) is None
     assert "No diagram is provided" not in reference
     assert "a README carrying neither outcome is incomplete" not in reference
 
@@ -419,9 +424,9 @@ def test_cross_file_contract_preserves_reference_boundaries() -> None:
 
     assert "Automated enforcement does not change the semantic category" in standards
     assert "Use only the sections needed for the stated reader outcome" in architecture
-    assert "Use Mermaid only when at least three material evidenced relationships" in readme
+    assert "mermaid-contract.md" in re.findall(r"\[[^]]+\]\(([^)]+)\)", readme)
     assert "accepted ADR bodies" in skill
-    assert "accepted ADR body is immutable" in adr
+    assert "Accepted decision content is immutable" in adr
     assert "generated block byte-for-byte" in readme
 
 
