@@ -1,7 +1,19 @@
-# Azure Governance Guardrail Map
+# Azure Governance
 
-Use this reference for Azure control patterns, identity examples, and exception
-evidence.
+Use this reference for authorization, workload identity, privileged access,
+Policy guardrails, and governed exceptions.
+
+## Governance patterns
+
+- Distinguish grants, preventive controls, detective controls, workload
+  identity, and privileged elevation.
+- Use Azure Policy and initiatives for preventive or detective guardrails.
+- Use RBAC role assignments for authorization with explicit scope.
+- Use managed identities or federation for workload access and keep runtime
+  identity separate from human access grants.
+- Use PIM or PAM for time-bound, approved, and reviewable elevation.
+- Use naming and tagging controls when metadata consistency is part of the
+  governance objective.
 
 ## Control patterns
 
@@ -13,7 +25,7 @@ evidence.
 | Remove long-lived credentials from workloads | Managed identity or federation | Trust configuration, scoped RBAC, and runtime evidence. |
 | Standardize metadata expectations | Naming and tagging controls | Coverage, exemptions, and revalidation. |
 
-## Workload identity and federation examples
+## Workload identity and federation
 
 | Need | Pattern | Review evidence |
 | --- | --- | --- |
@@ -21,7 +33,7 @@ evidence.
 | External CI deployment into Azure | Federation plus narrow RBAC scope | Token trust and resource authorization as separate controls. |
 | Human production elevation | PIM-backed role path | Approval, duration, activity record, and revocation. |
 
-## Exception evidence
+## Exception records
 
 | Exception type | Required record |
 | --- | --- |
@@ -33,4 +45,5 @@ evidence.
 
 Before widening a high-blast-radius change, collect scope confirmation,
 compliance or access results, intended-operation evidence, exception records,
-and the rollback trigger.
+and the rollback trigger. Use the staged-rollout table in
+[`operations.md`](operations.md#staged-rollout).

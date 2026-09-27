@@ -1,47 +1,72 @@
 ---
 name: internal-azure
-description: Use first for every Azure request. Classify the primary deliverable and select the minimum specialist lane for governance, DevOps pipelines, operations, organization structure, or strategic decisions.
+description: Use when designing, evaluating, or validating Azure platform and control-plane work, such as management groups, subscriptions, landing zones, network topology, RBAC, managed identity, PIM, Azure Policy guardrails, exceptions, rollout evidence, monitoring, recovery proof, or Azure option comparison. Route Azure DevOps pipelines to /internal-azure-devops.
 ---
 
 # Internal Azure
 
-The Azure platform entry point. Select the smallest specialist workflow for the
-user's immediate deliverable and invoke it with its `/skill-name`.
-
 ## When to use
 
-Use for Azure platform and control-plane requests where the next deliverable
-belongs to an Azure family specialist.
+- Place Azure resources and platform boundaries across tenant, management
+  groups, subscriptions, landing zones, regions, and network topology.
+- Design authorization, workload identity, privileged access, Policy
+  guardrails, and governed exceptions.
+- Define preflight, observability, rollout evidence, and backup, restore, or
+  DR proof for an Azure change.
+- Compare viable Azure options when the choice is the deliverable.
 
-## Destinations
+Route concrete artifacts to their owners through
+[`references/adjacent-owners.md`](references/adjacent-owners.md). Hosting on
+Azure alone does not make application code an Azure platform task.
 
-| Immediate deliverable | Invoke |
-| --- | --- |
-| Hierarchy, subscriptions, landing zones, residency, or platform topology | `/internal-azure-organization-structure` |
-| RBAC, workload identity, PIM/PAM, Policy, tagging, guardrails, or exceptions | `/internal-azure-governance` |
-| Preflight, observability, rollout evidence, backup/restore proof, continuity validation, or reporting | `/internal-azure-operations` |
-| Azure DevOps pipelines, environments, or project automation | `/internal-azure-devops` |
-| Explicit Azure decision framing, options, proportional lenses, or recommendation | `/internal-azure-strategic` |
+## Baseline
+
+Apply these rules to every recommendation. A deviation needs the typed
+exception record from the governance reference.
+
+- Do not grant Owner or User Access Administrator at subscription or wider
+  scope without a justified, time-bound path such as PIM.
+- Scope every role assignment and Policy assignment to the narrowest effective
+  target, and name that scope.
+- Prefer managed identity or workload identity federation over service
+  principal secrets or certificates.
+- Keep workload identity separate from human access.
 
 ## Workflow
 
-1. Identify the immediate deliverable: organization structure, governance,
-   operations evidence, Azure DevOps delivery, or strategic decision framing.
-2. Ask one clarifying question only when the answer changes the owner.
-3. Invoke one primary specialist from the destination table with
-   `/skill-name`. Add another specialist only for a second independently owned
-   deliverable.
-4. Verify every item in Completion criteria before finishing.
+1. Classify the primary concern and load its reference: structure
+   Keep confirmed evidence separate from inferred evidence. Treat backup,
+   restore, and DR proof as distinct.
+7  supporting reference only when the same deliverable uses it.
+2. State the objective and the scope: tenant, management group, subscription
+   set, subscription, or resource, with the affected principals and workloads.
+3. Choose the Azure mechanism from the loaded reference and state why it fits.
+4. When cost or recovery is material, apply the FinOps or BC/DR lens from
+   [`references/decision-mode.md`](references/decision-mode.md), even with one
+   viable option. Write a comparative decision note only when two or more
+   viable options remain, and state reversibility.
+5. For changes with shared blast radius, name the first safe unit, the
+   widening condition, and the rollback trigger.
+6. Give every exception the typed record from the governance reference.
+7. Keep confirmed evidence separate from inferred evidence. Treat backup,
+   restore, and DR proof as distinct.
+8. Hand off artifact work, such as Policy JSON, Terraform code, pricing, role
+   selection, or incident diagnosis, to its owner.
 
-## References
+## Freshness
 
-- [`references/routing-matrix.md`](references/routing-matrix.md): load when
-  lane choice is not obvious, including adjacent-owner cases and
-  multi-deliverable order.
+Verify RBAC semantics, Policy effects, managed identity support, landing-zone
+guidance, service limits, and regional capability against current Microsoft
+documentation. Use the Microsoft Learn MCP server when it is available;
+otherwise state the evidence gap.
 
-## Completion criteria
+## Output
 
-- The selected specialist owns the requested deliverable.
-- Any secondary owner is independently justified.
-- The response includes the specialist's required validation or evidence
-  conditions.
+Always return:
+
+1. Recommendation.
+2. Material risk.
+3. Next validation action.
+
+Add scope, options, reversibility, rollout unit, or exception record only when
+the request makes them material.

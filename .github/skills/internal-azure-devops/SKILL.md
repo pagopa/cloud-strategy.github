@@ -1,6 +1,6 @@
 ---
 name: internal-azure-devops
-description: Use when /internal-azure selects Azure DevOps pipeline YAML, project automation, triggers, environments, approvals, or artifact-flow work.
+description: Use when creating, reviewing, or changing Azure DevOps pipeline YAML, templates, triggers, environments, approvals, service connections, variable groups, or project automation. Route Azure DevOps CLI execution to /awesome-copilot-azure-devops-cli and tool-neutral delivery strategy to /internal-devops-core-principles.
 ---
 
 # Internal Azure DevOps
@@ -10,49 +10,49 @@ review.
 
 ## When to use
 
-Use when `/internal-azure` selects the DevOps lane: Azure DevOps pipeline
-YAML, environment promotion, triggers, approvals, artifact flow, or project
-automation.
+- Author or review `azure-pipelines*.yml`, pipeline templates, and their
+  triggers, stages, jobs, parameters, and variables.
+- Design environment promotion, approvals and checks, service connections,
+  variable groups, and artifact flow.
+- Automate Azure DevOps project configuration through pipelines.
+
+Hand off:
+
+- CLI command execution: `/awesome-copilot-azure-devops-cli`;
+- tool-neutral delivery strategy: `/internal-devops-core-principles`;
+- Azure RBAC, landing-zone, or Policy design behind a service connection:
+  `/internal-azure`;
+- Terraform code deployed by the pipeline: `/internal-terraform`.
 
 ## Workflow
 
-1. Perform request classification: identify pipeline authoring, pipeline review,
-   project automation, deployment flow, or repository integration.
-2. Complete repository convention discovery: inspect existing pipeline files,
-   templates, agent images, validation commands, variables, environments, and
-   deployment conventions.
-3. Produce the pipeline or automation design with intentional triggers,
-   stages, jobs, dependencies, templates, parameters, variables, environments,
-   approvals, and artifact flow.
-4. Define security controls: least-privilege service connections, approved
-   secret stores, protected environments, and safe logging.
-5. Make rollback, health checks, and promotion gates explicit whenever
-   deployment is in scope.
-6. Run focused validation for YAML syntax, repository checks, pipeline linting,
-   dry runs, or Azure DevOps validation commands available in the repository.
-7. Verify every item in Completion criteria before finishing.
-
-## Pipeline principles
-
-- Keep build, test, package, and deploy responsibilities clear enough that
-  failures point to the owning stage.
-- Use parameters for caller-controlled choices and variable groups for shared
-  configuration.
-- Publish test results and artifacts with recognizable names.
-- Preserve repository conventions before introducing new pipeline structure.
+1. Classify the request: pipeline authoring, pipeline review, project
+   automation, deployment flow, or repository integration.
+2. Discover repository conventions: existing pipelines, templates, agent
+   pools and images, variables, environments, and validation commands. Reuse
+   them before adding structure.
+3. Design triggers, stages, jobs, dependencies, templates, parameters,
+   variables, environments, and artifact flow on purpose.
+4. Apply security controls: least-privilege service connections with workload
+   identity federation, secrets in secret variables or Key Vault-linked
+   variable groups, protected environments, and no secret output in logs.
+5. When deployment is in scope, make promotion gates, health checks, and
+   rollback explicit.
+6. Run the focused validation available in the repository, such as YAML
+   linting or pipeline validation, and name any check that stays unverified.
 
 ## References
 
-- [`references/pipelines.md`](references/pipelines.md): load for the deeper
-  authoring and review baseline.
+- [`references/pipelines.md`](references/pipelines.md): load for the Azure
+  DevOps authoring and review baseline.
 
-## Completion criteria
+## Output
 
-Return, in this order:
+Always return:
 
-1. Classified request.
-2. Discovered conventions.
-3. Pipeline or automation design.
-4. Security controls.
-5. Rollback posture.
-6. Focused validation result.
+1. Design or review findings.
+2. Material risk.
+3. Next validation action, with the focused validation result when run.
+
+Add security controls and rollback posture when the change touches secrets,
+service connections, or deployment.

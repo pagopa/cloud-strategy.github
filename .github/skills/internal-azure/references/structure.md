@@ -1,7 +1,19 @@
-# Azure Organization Structure Topology Map
+# Azure Structure
 
-Use this reference for structural mappings, placement heuristics, and safe
-rollout examples.
+Use this reference for tenant, management-group, subscription, landing-zone,
+residency, and platform-topology placement.
+
+## Structure patterns
+
+- Use management groups for enterprise segmentation and inheritance scope.
+- Use subscriptions for workload, platform, environment, or residency
+  boundaries with explicit purpose and ownership.
+- Use landing zones to package platform capabilities, connectivity, and
+  operating-model expectations.
+- Keep hub-spoke, Virtual WAN, private connectivity, and regional placement
+  visible when they shape the platform topology.
+- Separate platform subscriptions from workload subscriptions when shared
+  services need stable ownership.
 
 ## Structural mappings
 
@@ -21,11 +33,9 @@ rollout examples.
 | Does residency or regulated access change the operating model? | Dedicated hierarchy or landing-zone segment | Connectivity, sovereignty, and approval assumptions remain explicit. |
 | Does the change affect many subscriptions? | Management-group placement with staged rollout | Inheritance and blast radius are observable before expansion. |
 
-## Safe rollout examples
+## Rollout
 
-| Structural change | Start with | Widen after |
-| --- | --- | --- |
-| New management-group branch | One low-risk subscription family | Inheritance, policy scope, and operational ownership are confirmed. |
-| Landing-zone baseline update | One landing zone or environment slice | Connectivity, automation, and rollback behavior are observed. |
-| Platform subscription introduction | One shared capability with named consumers | Ownership, dependencies, and routing impact are validated. |
-| Region or residency split | One workload set with explicit fallback | Connectivity, sovereignty, and continuity assumptions are proven. |
+Stage structural changes with the staged-rollout table in
+[`operations.md`](operations.md#staged-rollout). Validate inheritance,
+connectivity, automation, ownership, and continuity assumptions before
+widening.

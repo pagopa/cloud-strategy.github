@@ -1,6 +1,6 @@
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true
 interface:
   display_name: "internal-azure-devops"
   short_description: "Azure DevOps pipeline and automation delivery"
-  default_prompt: "Use /internal-azure for an Azure DevOps request, then apply $internal-azure-devops for pipeline or project-automation delivery."
+  default_prompt: "Use $internal-azure-devops to author or review this Azure DevOps pipeline, environment, service connection, or project automation."
