@@ -1,0 +1,528 @@
+{
+  "schema": "knowledge-eval-bindings/v1",
+  "cases": {
+    "C-MODE-HELP": {
+      "fixture": "F1",
+      "gold": "tests/evaluation/gold/F1.gold.json",
+      "profile": "audit",
+      "graders": [
+        "zero_writes",
+        "trace_complete",
+        "report_schema"
+      ],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {
+        "expected_mode": "help"
+      }
+    },
+    "C-MODE-TARGETED": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "writes_within_allowlist",
+        "no_transient_writes",
+        "report_truthful",
+        "report_schema"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "expected_mode": "targeted"
+      }
+    },
+    "C-MODE-SETUP": {
+      "fixture": "F1",
+      "gold": "tests/evaluation/gold/F1.gold.json",
+      "profile": "author",
+      "graders": [
+        "must_write",
+        "taxonomy_placement",
+        "report_schema",
+        "no_invented_paths"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "expected_mode": "setup"
+      }
+    },
+    "C-MODE-SYNC": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "writes_within_allowlist",
+        "report_truthful",
+        "report_schema"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "expected_mode": "sync"
+      }
+    },
+    "C-AUDIT-FILE": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "audit",
+      "graders": [
+        "zero_writes",
+        "trace_complete",
+        "report_schema"
+      ],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {
+        "expected_mode": "audit"
+      }
+    },
+    "C-AUDIT-FIX-MENTION": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "audit",
+      "graders": [
+        "zero_writes",
+        "trace_complete"
+      ],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {
+        "expected_mode": "audit"
+      }
+    },
+    "C-IDEM-RERUN": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "idempotent",
+        "report_truthful"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-INDEX-GENERATED": {
+      "fixture": "F3",
+      "gold": "tests/evaluation/gold/F3.gold.json",
+      "profile": "protected",
+      "graders": [
+        "generated_untouched",
+        "protected_bytes_per_step"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "generated_paths": [
+          "docs/README.md"
+        ],
+        "protected_paths": [
+          "docs/README.md"
+        ]
+      }
+    },
+    "C-TAX-PLACE": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "author",
+      "graders": [
+        "taxonomy_placement",
+        "writes_within_allowlist"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-SPLIT-MIXED": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "author",
+      "graders": [
+        "mode_split",
+        "must_contain_facts"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "expected_placements": {
+          "docs/ci-ux.md": "docs/guides/maintain-ci-ux.md"
+        },
+        "sections": [
+          {
+            "marker": "## Procedure",
+            "dest": "docs/guides/maintain-ci-ux.md"
+          },
+          {
+            "marker": "## History",
+            "dest": "docs/guides/ci-ux-history.md"
+          },
+          {
+            "marker": "## Active obligation",
+            "dest": "docs/guides/maintain-ci-ux.md"
+          }
+        ],
+        "facts": [
+          {
+            "path": "docs/guides/maintain-ci-ux.md",
+            "text": "Update the compatibility matrix with each contract change."
+          }
+        ]
+      }
+    },
+    "C-SPLIT-SIGNAL-ONLY": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "mode_split",
+        "protected_bytes"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "sections": [
+          {
+            "marker": "## Error family 001",
+            "dest": "docs/reference/api-errors.md"
+          }
+        ],
+        "protected_paths": [
+          "docs/reference/api-errors.md"
+        ]
+      }
+    },
+    "C-PROT-ADR": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "protected",
+      "graders": [
+        "adr_format",
+        "protected_bytes_per_step"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-PROT-GENERATED": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "protected",
+      "graders": [
+        "generated_untouched",
+        "protected_bytes_per_step"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "protected_paths": [
+          "docs/testing-inventory.md"
+        ]
+      }
+    },
+    "C-PROT-LEDGER": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "protected",
+      "graders": [
+        "ledger_records_immutable"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-NOCODE-BREAKREFS": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "author",
+      "graders": [
+        "no_code_edits",
+        "no_invented_paths",
+        "report_truthful"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-ROUTER-ATTESTED": {
+      "fixture": "F3",
+      "gold": "tests/evaluation/gold/F3.gold.json",
+      "profile": "protected",
+      "graders": [
+        "router_block_only",
+        "protected_bytes_per_step"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "AGENTS.local.md",
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-ROUTER-CENTRAL-COPY": {
+      "fixture": "F3",
+      "gold": "tests/evaluation/gold/F3.gold.json",
+      "profile": "protected",
+      "graders": [
+        "router_ownership_gap",
+        "router_block_only"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "AGENTS.local.md",
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "router": {
+          "path": "AGENTS.md",
+          "ownership": "central-copy"
+        }
+      }
+    },
+    "C-README-OPENING": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "readme_opening",
+        "readme_links",
+        "must_contain_facts"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "services/billing/**"
+      ],
+      "gold_overrides": {
+        "readme_paths": [
+          "services/billing/README.md"
+        ],
+        "owner_links": [
+          {
+            "source": "services/billing/README.md",
+            "target": "services/api/README.md"
+          }
+        ]
+      }
+    },
+    "C-README-TINY-LIB": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "diagram_warranted",
+        "readme_opening"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "libs/tiny/**"
+      ],
+      "gold_overrides": {
+        "readme_paths": [
+          "libs/tiny/README.md"
+        ]
+      }
+    },
+    "C-MERMAID-DEPS": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "diagram_relations",
+        "mermaid_static",
+        "mermaid_parse"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-MERMAID-LIFECYCLE": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "diagram_warranted",
+        "mermaid_static",
+        "must_contain_facts",
+        "diagram_relations"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "services/billing/**"
+      ],
+      "gold_overrides": {
+        "facts": [
+          {
+            "path": "services/billing/README.md",
+            "text": "Billing moves through draft, active, and retired states."
+          }
+        ],
+        "diagram_edges": {
+          "docs/architecture.md": [
+            [
+              "api",
+              "auth"
+            ],
+            [
+              "billing",
+              "api"
+            ],
+            [
+              "api",
+              "tiny"
+            ]
+          ],
+          "services/billing/README.md": [
+            [
+              "draft",
+              "active"
+            ],
+            [
+              "active",
+              "retired"
+            ]
+          ]
+        },
+        "diagram_triggers": [
+          {
+            "doc": "services/billing/README.md",
+            "required": true
+          }
+        ]
+      }
+    },
+    "C-MERMAID-OMIT-LINKED": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [
+        "diagram_warranted",
+        "readme_links"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-GLOSSARY-BOLD": {
+      "fixture": "F3",
+      "gold": "tests/evaluation/gold/F3.gold.json",
+      "profile": "protected",
+      "graders": [
+        "protected_bytes_per_step",
+        "must_contain_facts"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-FM-OPTIN": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "author",
+      "graders": [
+        "adr_format",
+        "generated_untouched",
+        "ledger_records_immutable"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-README-USEFUL": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-HOLD-SETUP": {
+      "fixture": "FH",
+      "gold": "tests/evaluation/gold/FH.gold.json",
+      "profile": "author",
+      "graders": [
+        "must_write",
+        "taxonomy_placement",
+        "readme_opening",
+        "report_schema"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "README.md",
+        "docs/**"
+      ],
+      "gold_overrides": {
+        "expected_mode": "setup",
+        "must_write": [
+          "README.md",
+          "docs/index.md",
+          "docs/domain/ingest/README.md",
+          "docs/domain/transform/README.md",
+          "docs/domain/publish/README.md",
+          "docs/domain/jobs/README.md"
+        ],
+        "expected_placements": {
+          "jobs/README.md": "docs/domain/jobs/README.md"
+        },
+        "readme_paths": [
+          "README.md",
+          "docs/index.md",
+          "docs/domain/ingest/README.md",
+          "docs/domain/transform/README.md",
+          "docs/domain/publish/README.md",
+          "docs/domain/jobs/README.md"
+        ]
+      }
+    },
+    "C-HOLD-MERMAID": {
+      "fixture": "FH",
+      "gold": "tests/evaluation/gold/FH.gold.json",
+      "profile": "author",
+      "graders": [
+        "diagram_relations",
+        "diagram_warranted",
+        "mermaid_static"
+      ],
+      "runs": 3,
+      "allowlist": [
+        "README.md"
+      ],
+      "gold_overrides": {}
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "taxonomy_placement",
+  "gold": "tests/evaluation/grader-fixtures/gold/taxonomy_placement.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {
+          "docs/flat.md": "api"
+        },
+        "after": {
+          "docs/reference/api.md": "api"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/reference/api.md": "api"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "source-retained",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {
+          "docs/flat.md": "api"
+        },
+        "after": {
+          "docs/flat.md": "api",
+          "docs/reference/api.md": "api"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/flat.md": "api",
+          "docs/reference/api.md": "api"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "wrong-placement"
+    },
+    {
+      "name": "destination-missing",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {
+          "docs/flat.md": "api"
+        },
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "wrong-placement"
+    }
+  ]
+}

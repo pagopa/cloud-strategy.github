@@ -1,0 +1,1208 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-knowledge",
+  "requirements": [
+    {
+      "id": "R-MODE",
+      "text": "Resolve exactly one supported skill mode and report it.",
+      "source": "SKILL workflow 1; DL-18"
+    },
+    {
+      "id": "R-AUDIT",
+      "text": "Audit and help modes must not write, including transient writes.",
+      "source": "DL-26; CR3-2"
+    },
+    {
+      "id": "R-ALLOWLIST",
+      "text": "Writes stay within approved destinations, including every intermediate snapshot.",
+      "source": "DL-21; DL-26"
+    },
+    {
+      "id": "R-IDEMPOTENT",
+      "text": "A second run on the current repository produces no further changes.",
+      "source": "Scenario: Leave a current repository unchanged"
+    },
+    {
+      "id": "R-TAXONOMY",
+      "text": "Place documents by type and use the reference/<area> threshold.",
+      "source": "DL-13"
+    },
+    {
+      "id": "R-SPLIT",
+      "text": "Split by mode, authority and time validity; length alone is only a signal.",
+      "source": "DL-10; DL-28"
+    },
+    {
+      "id": "R-PROTECTED",
+      "text": "Preserve ADR format, generated outputs and immutable ledger records.",
+      "source": "DL-25"
+    },
+    {
+      "id": "R-NO-CODE",
+      "text": "Never edit non-documentation files and report affected code references.",
+      "source": "DL-21"
+    },
+    {
+      "id": "R-ROUTER",
+      "text": "Write only an authorized router block; otherwise report an ownership gap.",
+      "source": "DL-24; CR3-1"
+    },
+    {
+      "id": "R-REPORT",
+      "text": "Emit a truthful knowledge-report/v1 summary.",
+      "source": "DL-18"
+    },
+    {
+      "id": "R-README",
+      "text": "Keep README openings useful, links valid and length proportional.",
+      "source": "DL-22; DL-30"
+    },
+    {
+      "id": "R-MERMAID",
+      "text": "Use only warranted diagrams with correct relations and static constraints.",
+      "source": "DL-23; CR3-4"
+    },
+    {
+      "id": "R-GLOSSARY",
+      "text": "Read both glossary formats without rewriting an external-format context.",
+      "source": "DL-29"
+    },
+    {
+      "id": "R-FRONTMATTER",
+      "text": "Use opt-in front matter only when enabled and never on protected document types.",
+      "source": "DL-12; DL-25"
+    },
+    {
+      "id": "R-INDEX",
+      "text": "Write an index only when it is not marked as generated.",
+      "source": "DL-19"
+    },
+    {
+      "id": "R-TRIGGER",
+      "text": "Trigger on knowledge authoring, not generic Markdown, Mermaid, CI or chat-only requests.",
+      "source": "SKILL description"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-MODE-HELP",
+      "family": "mode",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MODE",
+        "R-AUDIT",
+        "R-TRIGGER"
+      ],
+      "prompt": "Explain how this repository should organize durable knowledge documents; do not change files.",
+      "initial_state": "Fixture F1 is the starting repository state.",
+      "expected_output": "Report help mode and answer with a concise documentation-structure explanation; make no writes.",
+      "files": [
+        "tests/evaluation/fixtures/F1.tree.json",
+        "tests/evaluation/gold/F1.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "zero_writes",
+          "text": "The output confirms audit runs have no write event or changed snapshot for this case.",
+          "critical": true
+        },
+        {
+          "id": "trace_complete",
+          "text": "The output blocks when write/shell snapshots do not cover the trace for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_schema",
+          "text": "The output checks report syntax, field values and expected mode for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/zero_writes.json"
+    },
+    {
+      "id": "C-MODE-TARGETED",
+      "family": "mode",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MODE",
+        "R-ALLOWLIST"
+      ],
+      "prompt": "Update the API reference for the latest contract while limiting writes to approved documentation paths and reporting the exact changes.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Report targeted mode, change only approved documentation paths, and list each changed path truthfully.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "writes_within_allowlist",
+          "text": "The output rejects changed or deleted paths outside approved globs for this case.",
+          "critical": true
+        },
+        {
+          "id": "no_transient_writes",
+          "text": "The output rejects intermediate out-of-scope changes even after restoration for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_truthful",
+          "text": "The output compares reported writes and unchanged/failed paths to snapshots for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_schema",
+          "text": "The output checks report syntax, field values and expected mode for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/writes_within_allowlist.json"
+    },
+    {
+      "id": "C-MODE-SETUP",
+      "family": "mode",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MODE",
+        "R-TAXONOMY"
+      ],
+      "prompt": "Set up a concise documentation structure for the new application and identify the files that need to be created.",
+      "initial_state": "Fixture F1 is the starting repository state.",
+      "expected_output": "Report setup mode and identify the required index and component README destinations.",
+      "files": [
+        "tests/evaluation/fixtures/F1.tree.json",
+        "tests/evaluation/gold/F1.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "must_write",
+          "text": "The output requires each critical destination to exist and change for this case.",
+          "critical": true
+        },
+        {
+          "id": "taxonomy_placement",
+          "text": "The output checks destinations and removal of source documents for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_schema",
+          "text": "The output checks report syntax, field values and expected mode for this case.",
+          "critical": true
+        },
+        {
+          "id": "no_invented_paths",
+          "text": "The output rejects report paths absent from both repository snapshots for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/must_write.json"
+    },
+    {
+      "id": "C-MODE-SYNC",
+      "family": "mode",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MODE",
+        "R-ALLOWLIST"
+      ],
+      "prompt": "Align repository knowledge with the service topology and report any code references that would break.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Report sync mode, keep all writes in scope, and list observed changes.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "writes_within_allowlist",
+          "text": "The output rejects changed or deleted paths outside approved globs for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_truthful",
+          "text": "The output compares reported writes and unchanged/failed paths to snapshots for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_schema",
+          "text": "The output checks report syntax, field values and expected mode for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/writes_within_allowlist.json"
+    },
+    {
+      "id": "C-AUDIT-FILE",
+      "family": "audit",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-AUDIT",
+        "R-REPORT"
+      ],
+      "prompt": "Audit the specified legacy documentation and report findings without editing any file.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Report audit mode and findings without any write or shell mutation.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "zero_writes",
+          "text": "The output confirms audit runs have no write event or changed snapshot for this case.",
+          "critical": true
+        },
+        {
+          "id": "trace_complete",
+          "text": "The output blocks when write/shell snapshots do not cover the trace for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_schema",
+          "text": "The output checks report syntax, field values and expected mode for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/zero_writes.json"
+    },
+    {
+      "id": "C-AUDIT-FIX-MENTION",
+      "family": "audit",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-AUDIT"
+      ],
+      "prompt": "Audit the legacy CI documentation. It mentions possible fixes, but do not apply them during this read-only audit.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Report audit mode and do not apply any suggested fix.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "zero_writes",
+          "text": "The output confirms audit runs have no write event or changed snapshot for this case.",
+          "critical": true
+        },
+        {
+          "id": "trace_complete",
+          "text": "The output blocks when write/shell snapshots do not cover the trace for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/zero_writes.json"
+    },
+    {
+      "id": "C-IDEM-RERUN",
+      "family": "idem",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-IDEMPOTENT"
+      ],
+      "prompt": "The repository is already current. Re-run the knowledge refresh and leave it unchanged.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Report that the current tree is unchanged and produce an identical second snapshot.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "idempotent",
+          "text": "The output compares the first and second final snapshots for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_truthful",
+          "text": "The output compares reported writes and unchanged/failed paths to snapshots for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/idempotent.json"
+    },
+    {
+      "id": "C-INDEX-GENERATED",
+      "family": "index",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-INDEX"
+      ],
+      "prompt": "Review the generated documentation index and preserve its generated bytes.",
+      "initial_state": "Fixture F3 is the starting repository state.",
+      "expected_output": "Leave generated index bytes unchanged.",
+      "files": [
+        "tests/evaluation/fixtures/F3.tree.json",
+        "tests/evaluation/gold/F3.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "generated_untouched",
+          "text": "The output checks that generated paths keep their original bytes for this case.",
+          "critical": true
+        },
+        {
+          "id": "protected_bytes_per_step",
+          "text": "The output checks protected paths at every observed step for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/generated_untouched.json"
+    },
+    {
+      "id": "C-TAX-PLACE",
+      "family": "tax",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-TAXONOMY"
+      ],
+      "prompt": "Move the mixed CI/UX document into its correct type-based owner and update references.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Place the guide at its expected type-based destination and remove the flat source.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "taxonomy_placement",
+          "text": "The output checks destinations and removal of source documents for this case.",
+          "critical": true
+        },
+        {
+          "id": "writes_within_allowlist",
+          "text": "The output rejects changed or deleted paths outside approved globs for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/taxonomy_placement.json"
+    },
+    {
+      "id": "C-SPLIT-MIXED",
+      "family": "split",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-SPLIT"
+      ],
+      "prompt": "Separate procedure and history content while keeping the active obligation in its owner.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Place each section in its designated owner and preserve required facts.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "mode_split",
+          "text": "The output checks that sections appear only in their assigned document for this case.",
+          "critical": true
+        },
+        {
+          "id": "must_contain_facts",
+          "text": "The output checks required facts in the designated document for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/mode_split.json"
+    },
+    {
+      "id": "C-SPLIT-SIGNAL-ONLY",
+      "family": "split",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-SPLIT"
+      ],
+      "prompt": "The API reference is long but coherent. Decide whether its length alone warrants a split.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Keep the coherent long API reference together absent a semantic split reason.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "mode_split",
+          "text": "The output checks that sections appear only in their assigned document for this case.",
+          "critical": true
+        },
+        {
+          "id": "protected_bytes",
+          "text": "The output checks protected paths in the final snapshot for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/mode_split.json"
+    },
+    {
+      "id": "C-PROT-ADR",
+      "family": "prot",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-PROTECTED",
+        "R-FRONTMATTER"
+      ],
+      "prompt": "Update links around the accepted ADR without changing its first-line house format or adding front matter.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Keep ADR format valid and protected bytes unchanged.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "adr_format",
+          "text": "The output checks the first line of changed ADRs for this case.",
+          "critical": true
+        },
+        {
+          "id": "protected_bytes_per_step",
+          "text": "The output checks protected paths at every observed step for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/adr_format.json"
+    },
+    {
+      "id": "C-PROT-GENERATED",
+      "family": "prot",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-PROTECTED"
+      ],
+      "prompt": "Refresh neighboring docs while leaving the generated testing inventory untouched.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Leave generated output unchanged at every observed step.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "generated_untouched",
+          "text": "The output checks that generated paths keep their original bytes for this case.",
+          "critical": true
+        },
+        {
+          "id": "protected_bytes_per_step",
+          "text": "The output checks protected paths at every observed step for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/generated_untouched.json"
+    },
+    {
+      "id": "C-PROT-LEDGER",
+      "family": "prot",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-PROTECTED"
+      ],
+      "prompt": "Update the traceability introduction while preserving every existing record and order.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Preserve the exact ordered ledger records.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "ledger_records_immutable",
+          "text": "The output checks original ledger records remain ordered and exact for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/ledger_records_immutable.json"
+    },
+    {
+      "id": "C-NOCODE-BREAKREFS",
+      "family": "nocode",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-NO-CODE",
+        "R-REPORT"
+      ],
+      "prompt": "Reorganize the CI/UX documentation without editing tools/check_docs.py; report any stale reference.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Do not edit code; report stale code references instead.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "no_code_edits",
+          "text": "The output rejects changed paths that are not Markdown for this case.",
+          "critical": true
+        },
+        {
+          "id": "no_invented_paths",
+          "text": "The output rejects report paths absent from both repository snapshots for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_truthful",
+          "text": "The output compares reported writes and unchanged/failed paths to snapshots for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/no_code_edits.json"
+    },
+    {
+      "id": "C-ROUTER-ATTESTED",
+      "family": "router",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-ROUTER"
+      ],
+      "prompt": "Update only the attested Change-Type Routing block in AGENTS.local.md and keep surrounding bytes unchanged.",
+      "initial_state": "Fixture F3 is the starting repository state.",
+      "expected_output": "Change only the authorized router block.",
+      "files": [
+        "tests/evaluation/fixtures/F3.tree.json",
+        "tests/evaluation/gold/F3.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "router_block_only",
+          "text": "The output checks router block boundaries and positive ownership for this case.",
+          "critical": true
+        },
+        {
+          "id": "protected_bytes_per_step",
+          "text": "The output checks protected paths at every observed step for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/router_block_only.json"
+    },
+    {
+      "id": "C-ROUTER-CENTRAL-COPY",
+      "family": "router",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-ROUTER"
+      ],
+      "prompt": "The central AGENTS.md copy has no repository ownership marker. Leave it unchanged and report router: gap.",
+      "initial_state": "Fixture F3 is the starting repository state.",
+      "expected_output": "Keep the central router unchanged and report router: gap.",
+      "files": [
+        "tests/evaluation/fixtures/F3.tree.json",
+        "tests/evaluation/gold/F3.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "router_ownership_gap",
+          "text": "The output requires unchanged router and router: gap when ownership is uncertain for this case.",
+          "critical": true
+        },
+        {
+          "id": "router_block_only",
+          "text": "The output checks router block boundaries and positive ownership for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/router_ownership_gap.json"
+    },
+    {
+      "id": "C-README-OPENING",
+      "family": "readme",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-README"
+      ],
+      "prompt": "Refresh the service README with a clear title, short summary and valid link to its owner document.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Provide a titled README with a nearby summary and resolving owner link.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "readme_opening",
+          "text": "The output checks README title and nearby prose summary for this case.",
+          "critical": true
+        },
+        {
+          "id": "readme_links",
+          "text": "The output checks relative links and required owner links for this case.",
+          "critical": true
+        },
+        {
+          "id": "must_contain_facts",
+          "text": "The output checks required facts in the designated document for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/readme_opening.json"
+    },
+    {
+      "id": "C-README-TINY-LIB",
+      "family": "readme",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-README",
+        "R-MERMAID"
+      ],
+      "prompt": "Improve the tiny library README; its simple single responsibility does not need a new diagram.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Keep the README useful and omit an unwarranted diagram.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "diagram_warranted",
+          "text": "The output checks required diagram triggers and omission reasons for this case.",
+          "critical": true
+        },
+        {
+          "id": "readme_opening",
+          "text": "The output checks README title and nearby prose summary for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/diagram_warranted.json"
+    },
+    {
+      "id": "C-MERMAID-DEPS",
+      "family": "mermaid",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MERMAID"
+      ],
+      "prompt": "Document the existing API, auth and billing dependencies with accurate, accessible Mermaid relations.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Draw only gold-supported directed edges and meet static accessibility rules.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "diagram_relations",
+          "text": "The output compares directed Mermaid edges with fixture gold for this case.",
+          "critical": true
+        },
+        {
+          "id": "mermaid_static",
+          "text": "The output checks diagram types, accessibility, styling, ids, size and cap for this case.",
+          "critical": true
+        },
+        {
+          "id": "mermaid_parse",
+          "text": "The output runs mmdc when present; records not-run when unavailable for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/diagram_relations.json"
+    },
+    {
+      "id": "C-MERMAID-LIFECYCLE",
+      "family": "mermaid",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MERMAID"
+      ],
+      "prompt": "Explain the billing lifecycle with a warranted state diagram and the required facts.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Use a warranted valid diagram and state required lifecycle facts.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "diagram_warranted",
+          "text": "The output checks required diagram triggers and omission reasons for this case.",
+          "critical": true
+        },
+        {
+          "id": "mermaid_static",
+          "text": "The output checks diagram types, accessibility, styling, ids, size and cap for this case.",
+          "critical": true
+        },
+        {
+          "id": "must_contain_facts",
+          "text": "The output checks required facts in the designated document for this case.",
+          "critical": true
+        },
+        {
+          "id": "diagram_relations",
+          "text": "The output checks lifecycle transitions and existing architecture relations for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/diagram_warranted.json"
+    },
+    {
+      "id": "C-MERMAID-OMIT-LINKED",
+      "family": "mermaid",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MERMAID",
+        "R-REPORT"
+      ],
+      "prompt": "The architecture flow already exists in its owner document. Link to it and give a reason if omitting another diagram.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "Link to the existing architecture owner and give an omission reason.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "diagram_warranted",
+          "text": "The output checks required diagram triggers and omission reasons for this case.",
+          "critical": true
+        },
+        {
+          "id": "readme_links",
+          "text": "The output checks relative links and required owner links for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/diagram_warranted.json"
+    },
+    {
+      "id": "C-GLOSSARY-BOLD",
+      "family": "glossary",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-GLOSSARY"
+      ],
+      "prompt": "Read the billing context using its bold-term glossary format and preserve the external document bytes.",
+      "initial_state": "Fixture F3 is the starting repository state.",
+      "expected_output": "Preserve the external glossary format and required glossary facts.",
+      "files": [
+        "tests/evaluation/fixtures/F3.tree.json",
+        "tests/evaluation/gold/F3.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "protected_bytes_per_step",
+          "text": "The output checks protected paths at every observed step for this case.",
+          "critical": true
+        },
+        {
+          "id": "must_contain_facts",
+          "text": "The output checks required facts in the designated document for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/protected_bytes_per_step.json"
+    },
+    {
+      "id": "C-FM-OPTIN",
+      "family": "fm",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-FRONTMATTER"
+      ],
+      "prompt": "Add front matter only to eligible maintained guides; preserve ADR, generated and ledger files.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Use front matter only where enabled; preserve protected types.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "adr_format",
+          "text": "The output checks the first line of changed ADRs for this case.",
+          "critical": true
+        },
+        {
+          "id": "generated_untouched",
+          "text": "The output checks that generated paths keep their original bytes for this case.",
+          "critical": true
+        },
+        {
+          "id": "ledger_records_immutable",
+          "text": "The output checks original ledger records remain ordered and exact for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/adr_format.json"
+    },
+    {
+      "id": "C-README-USEFUL",
+      "family": "readme",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-README"
+      ],
+      "prompt": "Review the service README for practical usefulness to a new maintainer; assess the opening, validation path, owner link and proportional detail.",
+      "initial_state": "Fixture F2 is the starting repository state.",
+      "expected_output": "A reviewer can locate purpose, safe validation, detail owner and proportional information from the opening and links.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "The README gives a new maintainer a clear path to understand and validate the component.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "The README avoids unsupported detail and directs readers to one owner for depth.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The opening identifies purpose and component use in plain language.",
+          "A reader can locate validation and the owning document without duplicated detail."
+        ],
+        "fail": [
+          "The README lacks a useful title or nearby summary.",
+          "It omits a safe validation path or required owner link, or copies detail without proportional value."
+        ]
+      }
+    },
+    {
+      "id": "C-HOLD-SETUP",
+      "family": "held-out-downstream",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MODE",
+        "R-TAXONOMY",
+        "R-README"
+      ],
+      "prompt": "Set up durable documentation for the ingest/transform/publish repository and its job lifecycle.",
+      "initial_state": "Fixture FH is the starting repository state.",
+      "expected_output": "Report setup mode and provide correct documentation destinations and a useful README opening.",
+      "files": [
+        "tests/evaluation/fixtures/FH.tree.json",
+        "tests/evaluation/gold/FH.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "must_write",
+          "text": "The output requires each critical destination to exist and change for this case.",
+          "critical": true
+        },
+        {
+          "id": "taxonomy_placement",
+          "text": "The output checks destinations and removal of source documents for this case.",
+          "critical": true
+        },
+        {
+          "id": "readme_opening",
+          "text": "The output checks README title and nearby prose summary for this case.",
+          "critical": true
+        },
+        {
+          "id": "report_schema",
+          "text": "The output checks report syntax, field values and expected mode for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/grader-fixtures/must_write.json"
+    },
+    {
+      "id": "C-HOLD-MERMAID",
+      "family": "held-out-downstream",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-MERMAID"
+      ],
+      "prompt": "Explain the ingest-to-publish dependency flow with a warranted, accurate and accessible diagram.",
+      "initial_state": "Fixture FH is the starting repository state.",
+      "expected_output": "Draw only the holdout gold edges, with an accessibility description, for the required trigger.",
+      "files": [
+        "tests/evaluation/fixtures/FH.tree.json",
+        "tests/evaluation/gold/FH.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "diagram_relations",
+          "text": "The output compares directed Mermaid edges with fixture gold for this case.",
+          "critical": true
+        },
+        {
+          "id": "diagram_warranted",
+          "text": "The output checks required diagram triggers and omission reasons for this case.",
+          "critical": true
+        },
+        {
+          "id": "mermaid_static",
+          "text": "The output checks diagram types, accessibility, styling, ids, size and cap for this case.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/grader-fixtures/diagram_relations.json"
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-T-README",
+        "query": "Refresh the READMEs for all maintained components after checking their current purpose, validation commands and owner links.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-T-REORG",
+        "query": "Reorganize the flat docs folder by document type and move history and procedures to their proper owners.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-T-AUDIT",
+        "query": "Audit documentation drift and protected files, then report findings without changing the repository.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-T-CONTEXT",
+        "query": "Create a domain CONTEXT.md from evidenced code ownership and existing domain vocabulary.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-T-ARCH",
+        "query": "Update docs/architecture.md after new services changed the dependency relationships.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-T-SYNC",
+        "query": "Align durable READMEs and architecture docs with the current code after a completed refactor.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-T-ADR",
+        "query": "Record this accepted architecture decision as an ADR using the repository decision format.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-T-SETUP",
+        "query": "Set up a useful knowledge documentation structure for a new repository with one service.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-T-STANDARDS",
+        "query": "Write a durable engineering standard and identify its authoritative owner and validation path.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-T-HELP",
+        "query": "Explain how readers should navigate and maintain this repository\u2019s knowledge documents.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-N-MARKDOWN",
+        "query": "Fix the broken table alignment in README.md without changing its documentation structure.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-N-MERMAID",
+        "query": "Fix the Mermaid syntax error in this existing diagram; do not reorganize knowledge docs.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-mermaid"
+      },
+      {
+        "id": "Q-N-DOCX",
+        "query": "Produce a Word status report for the last delivery and share it with the team.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "anthropic-docx"
+      },
+      {
+        "id": "Q-N-LESSON",
+        "query": "Record this incident as a retained lesson learned for future agent runs.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-lesson-codification"
+      },
+      {
+        "id": "Q-N-AGENTS",
+        "query": "Tighten one rule in AGENTS.md so contributors follow the required branch naming convention.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "mattpocock-writing-for-agents"
+      },
+      {
+        "id": "Q-N-DOCSTRINGS",
+        "query": "Add docstrings to the public functions in this Python module.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-python"
+      },
+      {
+        "id": "Q-N-CI",
+        "query": "Add a GitHub Actions workflow that checks relative links in Markdown on pull requests.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-github-actions"
+      },
+      {
+        "id": "Q-N-CHAT",
+        "query": "Explain the architecture in chat only; do not inspect or edit repository documentation.",
+        "should_trigger": false,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-N-SKILL",
+        "query": "Create a SKILL.md for a new specialized agent skill and validate its metadata.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-skill-creator"
+      },
+      {
+        "id": "Q-N-CHANGELOG",
+        "query": "Automate release notes from merged pull requests and tags.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-changelog-automation"
+      }
+    ]
+  }
+}

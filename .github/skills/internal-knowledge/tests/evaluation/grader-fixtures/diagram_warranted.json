@@ -1,0 +1,81 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "diagram_warranted",
+  "gold": "tests/evaluation/grader-fixtures/gold/diagram_warranted.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/service/README.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n",
+          "libs/tiny/README.md": "# Tiny\n\nSmall."
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/service/README.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n",
+          "libs/tiny/README.md": "# Tiny\n\nSmall."
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "required-without-diagram-or-reason",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/service/README.md": "# Service"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/service/README.md": "# Service"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "critical-omission"
+    },
+    {
+      "name": "unrequired-tiny-diagram",
+      "kind": "false-relation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/service/README.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n",
+          "libs/tiny/README.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "libs/tiny/README.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "unwarranted-diagram"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "F1",
+  "description": "Greenfield repository with one-line README, project metadata and one application component.",
+  "files": {
+    "README.md": "A small service.",
+    "pyproject.toml": "[project]\nname = \"sample-app\"\n",
+    "src/app/main.py": "def main():\n    return \"ready\"\n",
+    "AGENTS.md": "Repository instructions for this sample.\n"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "idempotent",
+  "gold": "tests/evaluation/grader-fixtures/gold/idempotent.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/a.md": "x"
+        },
+        "after": {
+          "docs/a.md": "x"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/a.md": "x"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "changed-on-second-run",
+      "kind": "no-op",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/a.md": "x"
+        },
+        "after": {
+          "docs/a.md": "y"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/a.md": "z"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "not-idempotent"
+    },
+    {
+      "name": "missing-second-run",
+      "kind": "no-op",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/a.md": "x"
+        },
+        "after": {
+          "docs/a.md": "x"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": null
+      },
+      "expected_status": "blocked",
+      "expected_code": "missing-second-run"
+    }
+  ]
+}

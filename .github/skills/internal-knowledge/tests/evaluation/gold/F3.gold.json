@@ -1,0 +1,43 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "fixture": "F3",
+  "components": [
+    "billing"
+  ],
+  "edges": [],
+  "lifecycle_states": {},
+  "protected_paths": [
+    "docs/domain/billing/CONTEXT.md"
+  ],
+  "generated_paths": [
+    "docs/README.md"
+  ],
+  "adr_dir": null,
+  "ledger": null,
+  "router": {
+    "path": "AGENTS.local.md",
+    "ownership": "attested"
+  },
+  "expected_placements": {},
+  "sections": [],
+  "must_write": [],
+  "facts": [
+    {
+      "path": "docs/domain/billing/CONTEXT.md",
+      "text": "**Settlement** means final account reconciliation."
+    }
+  ],
+  "readme_paths": [
+    "docs/README.md",
+    "docs/domain/billing/README.md"
+  ],
+  "owner_links": [
+    {
+      "source": "docs/domain/billing/README.md",
+      "target": "docs/domain/billing/CONTEXT.md"
+    }
+  ],
+  "diagram_edges": {},
+  "aliases": {},
+  "diagram_triggers": []
+}

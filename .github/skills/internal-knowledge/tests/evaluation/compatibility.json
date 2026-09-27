@@ -1,0 +1,735 @@
+{
+  "schema": "knowledge-eval-compat/v1",
+  "scenarios": [
+    {
+      "heading": "Refresh README directories",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Refresh an explicit README path",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Refresh a cloud account README",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Refresh repository architecture",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MERMAID-DEPS"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Reject an ambiguous architecture root",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MERMAID-DEPS"
+      ],
+      "reason": "Offline case does not yet cover this exact boundary; retain until Plan B adds equivalent coverage."
+    },
+    {
+      "heading": "Reject an unsafe README target batch",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Offline case does not yet cover this exact boundary; retain until Plan B adds equivalent coverage."
+    },
+    {
+      "heading": "Preserve a generated README block",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-INDEX-GENERATED"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Record an architectural decision",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Supersede an accepted ADR",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-PROT-ADR"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Guide an unclear request",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Align repository knowledge from scratch",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Refresh after a new component appears",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep targeted writes closed",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Leave a current repository unchanged",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-IDEM-RERUN"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Treat a material omission as a refresh trigger",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Refuse an unevidenced domain",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Resist domain promotion from tooling differences",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep evidence coverage from becoming an artifact quota",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Discover a standard and a principle during setup",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SETUP"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Author a component README with a diagram",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Justify a wave below the ceiling",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep a short README proportional",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Extend an existing document for a material omission",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep a standard semantic when a check is added",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Guide a recovery or troubleshooting task",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep architecture structure proportional",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MERMAID-DEPS"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Keep public projections aligned",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Check ownership before excluding a managed path",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-ROUTER-CENTRAL-COPY"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Distrust a declaration that names nothing",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Escalate a sync that understates the repository",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep a context document to its external format",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-GLOSSARY-BOLD"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Separate a standard from a rule",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Report the enforcement gap",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Update only the docs bucket",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Update only the README bucket",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Stop when sync means the sync contract",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Re-run setup when drift reappears",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SETUP"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Map the old mode vocabulary to the new one",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Audit an explicit file without authoring",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Report partial audit coverage",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Keep semantic contradictions as findings",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Retain selective project memory",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Audit a README-only request without authoring",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Standalone technical setup",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SETUP"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Standalone managerial setup",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SETUP"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Mixed-lane realignment",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Route a missing instruction owner",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep proposal and approval separate",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep public projections aligned across lanes",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Ordinary documentation edit",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Documentation enforcement",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Architecture analysis without authoring",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MERMAID-DEPS"
+      ],
+      "reason": "Offline case does not yet cover this exact boundary; retain until Plan B adds equivalent coverage."
+    },
+    {
+      "heading": "Application implementation",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    }
+  ],
+  "tests": [
+    {
+      "name": "test_all_bundle_markdown_links_resolve",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_architecture_reference_is_reader_proportional",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MERMAID-DEPS"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_bundle_includes_concrete_evaluation_scenarios",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_bundle_owners_keep_audit_and_memory_contracts_local",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_coherent_batches_do_not_use_a_fixed_ten_document_quota",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_cross_file_contract_preserves_reference_boundaries",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_evals_cover_under_delivery_branches",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_evaluations_cover_audit_memory_and_projection_cases",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_evaluations_cover_lane_setup_alignment_audit_and_proposals",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_evaluations_cover_the_public_contract_projection",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_guides_cover_evidenced_reader_work_beyond_declaration_effects",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_lane_scenarios_have_standalone_prompts_and_expected_boundaries",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_lane_selection_is_not_a_runtime_profile",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_managerial_contract_preserves_proposal_and_approval_states",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_missing_instruction_routes_use_a_bounded_owner_handoff",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_public_prompt_projects_scope_without_host_dependencies",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_readme_reference_does_not_require_diagram_boilerplate",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_readme_reference_guards_generated_block_interaction",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-INDEX-GENERATED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_readme_reference_keeps_omission_reporting_discipline",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_scope_accepts_considered_not_evidenced_without_creating_an_artifact",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_scope_defines_the_bucket_mechanism",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_scope_extends_omission_discipline_beyond_directories",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_scope_keeps_waves_from_partitioning_obligations",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_scope_reference_keeps_write_gates_mechanical",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_scope_requires_ownership_evidence_and_non_vacuous_counts",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-ROUTER-CENTRAL-COPY"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_skill_declares_only_authoring_references",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_skill_defines_common_core_and_two_authoring_lanes",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_skill_frontmatter_is_portable",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_skill_loads_authoring_references_before_the_plan",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_skill_projection_names_one_detailed_contract_owner",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_skill_resolves_one_mode_before_writing",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_standards_reference_classifies_by_semantics_not_enforcement",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_targeted_scope_has_no_implicit_root_write",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_topology_distinguishes_indexes_extensions_generated_and_history",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-INDEX-GENERATED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_topology_enumerates_signals_before_the_layout_decision",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_topology_promotion_requires_a_semantic_or_ownership_boundary",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-ROUTER-CENTRAL-COPY"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_topology_reference_keeps_documentation_mode_anti_scope",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    },
+    {
+      "name": "test_unchanged_requires_the_stated_reader_outcome",
+      "disposition": "keep-structural",
+      "case_ids": [
+        "C-IDEM-RERUN"
+      ],
+      "reason": "Retained as a structural contract test; this pack adds independent behavioral evaluation."
+    }
+  ]
+}
