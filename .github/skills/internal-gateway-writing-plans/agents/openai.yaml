@@ -8,8 +8,11 @@ interface:
     tmp/superpowers/plans/, set the Spec header, replace the imported executor
     header line with /internal-gateway-execute-plans, record one /internal-tdd
     posture per task, keep every touched path in Files: blocks, and write no
-    commit steps. Re-author a legacy plan only on explicit request, into a new
-    file, without manifest authority. Close with the imported handoff: offer
-    Subagent-driven or Native unless a method was supplied, and route every
-    answer to /internal-gateway-execute-plans. Report Plan, Scope, and Next
-    only.
+    commit steps. Declare each upstream plan in a Depends on header line with
+    its repository root, path or unresolved, required output, and read-only
+    check result. Re-author a legacy plan only on explicit request, into a new
+    file, without manifest authority. Close with the imported handoff only
+    when every Depends on check passed: offer Subagent-driven or Native unless
+    a method was supplied, and route every answer to
+    /internal-gateway-execute-plans; otherwise name the upstream action in
+    Next. Report Plan, Scope, and Next only.

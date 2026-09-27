@@ -36,6 +36,31 @@
       "id": "R-REPORT",
       "text": "Keep the ledger and report with the four Plan, Changed, Checks, and Next lines plus the rulings and deferred-minor lists.",
       "source": "internal-gateway-execute-plans SKILL.md: 5. Finish, Report"
+    },
+    {
+      "id": "R-PREFLIGHT",
+      "text": "On first start, check task-file cleanliness, every Depends on check, and Git object write access by writing and reading a new object before any ledger or task edit exists; a successful CP0 over reused objects is not proof, and denied writes stop the run without changing permissions or sandbox policy.",
+      "source": "internal-gateway-execute-plans SKILL.md: Workflow, 2. Set up"
+    },
+    {
+      "id": "R-LEDGER-PUBLISH",
+      "text": "Publish the plan path, START, initial status, and a readable CP0 together through a temporary file renamed to the ledger path, never replace an existing ledger, and stop for reconciliation when an existing ledger lacks a readable checkpoint.",
+      "source": "internal-gateway-execute-plans SKILL.md: Workflow, 2. Set up"
+    },
+    {
+      "id": "R-CHECKPOINT-SCOPE",
+      "text": "Exclude .superpowers/ and tmp/ from every checkpoint through pathspecs, independent of ignore rules, without touching the real index.",
+      "source": "internal-gateway-execute-plans SKILL.md: Checkpoints"
+    },
+    {
+      "id": "R-PREREQ-FRESH",
+      "text": "Rerun every Depends on check at first start and on resume; results recorded at authoring time are not current evidence, and a failing or unrunnable check stops the run.",
+      "source": "internal-gateway-execute-plans SKILL.md: Workflow, 2. Set up, 4. Stop"
+    },
+    {
+      "id": "R-NEXT",
+      "text": "The Next line names one action that removes the controlling blocker: reconcile the ledger, rerun with writable Git object storage, execute an existing plan by its path, or write a missing plan through /internal-gateway-writing-plans; never a plan named by label alone.",
+      "source": "internal-gateway-execute-plans SKILL.md: Report"
     }
   ],
   "cases": [
@@ -224,6 +249,130 @@
       "rubric": {
         "pass": ["Changed lists only paths the run modified."],
         "fail": ["The unrelated file appears in Changed or in the review package."]
+      }
+    },
+    {
+      "id": "C-READONLY-REUSE",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-PREFLIGHT", "R-NEXT"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "The working tree is clean, so read-tree and write-tree reuse existing objects and succeed, but the host denies writes to the Git object store; no ledger exists.",
+      "expected_output": "The write-and-read preflight fails, the run stops before any ledger or task edit, and Next asks to rerun with writable Git object storage.",
+      "files": [],
+      "assertions": [
+        {"id": "A-WRITE-PROBE", "text": "Write access is proven by writing a new object, not by the CP0 result.", "critical": true},
+        {"id": "A-NO-LEDGER-ON-DENY", "text": "No ledger file and no task edit exist after the stop.", "critical": true}
+      ],
+      "forbidden_actions": ["Treat a successful clean-tree CP0 as proof of write access.", "Change file permissions or sandbox policy."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["BLOCKED with Next: rerun with writable Git object storage."],
+        "fail": ["The run continues to Task 1 or leaves a partial ledger."]
+      }
+    },
+    {
+      "id": "C-SETUP-FAILURE",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-LEDGER-PUBLISH", "R-PREFLIGHT"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "No ledger exists; the preflight passes, but git add -A fails while creating CP0.",
+      "expected_output": "Stop without publishing a ledger, so a later run is still a first start.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-PARTIAL-LEDGER", "text": "No ledger records START without CP0.", "critical": true}
+      ],
+      "forbidden_actions": ["Publish START before CP0 is readable."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The ledger path does not exist and Checks names the CP0 failure."],
+        "fail": ["A ledger with START and no CP0 remains."]
+      }
+    },
+    {
+      "id": "C-MISSING-CP0",
+      "family": "authority-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-LEDGER-PUBLISH", "R-RESUME", "R-NEXT"],
+      "prompt": "Resume the plan.",
+      "initial_state": "An older run left a ledger that names this plan and records START but no CP0.",
+      "expected_output": "Stop for reconciliation, keep the ledger unchanged, and ask the user to reconcile or remove it.",
+      "files": [],
+      "assertions": [
+        {"id": "A-KEEP-LEDGER", "text": "The ledger is neither reinitialized nor overwritten.", "critical": true},
+        {"id": "A-NEXT-RECONCILE", "text": "Next names ledger reconciliation, not plan writing.", "critical": true}
+      ],
+      "forbidden_actions": ["Treat the ledger as a first start and record a new START or CP0."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["BLOCKED; the ledger path is named for reconciliation."],
+        "fail": ["The run silently restarts or deletes the ledger."]
+      }
+    },
+    {
+      "id": "C-UNIGNORED-SCRATCH",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-CHECKPOINT-SCOPE"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "The repository does not ignore .superpowers/ or tmp/; the workspace holds cp.idx and the ledger.",
+      "expected_output": "Every checkpoint excludes .superpowers/ and tmp/ through pathspecs.",
+      "files": [],
+      "assertions": [
+        {"id": "A-SCRATCH-EXCLUDED", "text": "No checkpoint tree contains cp.idx, the ledger, or tmp/ files.", "critical": true},
+        {"id": "A-REAL-INDEX", "text": "The real index is unchanged.", "critical": true}
+      ],
+      "forbidden_actions": ["Run git add -A without the scratch exclusions."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["git diff --name-only between checkpoints lists no scratch path."],
+        "fail": ["A checkpoint captures workspace files."]
+      }
+    },
+    {
+      "id": "C-STALE-PREREQ",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-PREREQ-FRESH", "R-NEXT"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "The plan header has a Depends on line that passed at authoring time and names an existing upstream plan path; the check now fails.",
+      "expected_output": "Stop before any ledger or task edit and name the upstream plan by path in Next.",
+      "files": [],
+      "assertions": [
+        {"id": "A-RECHECK", "text": "The Depends on check is rerun instead of trusting the recorded result.", "critical": true},
+        {"id": "A-NEXT-PATH", "text": "Next names the upstream plan path and /internal-gateway-execute-plans.", "critical": true}
+      ],
+      "forbidden_actions": ["Trust the authoring-time result.", "Name the upstream plan by label alone."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["BLOCKED with Next: execute <root>:<path> through /internal-gateway-execute-plans."],
+        "fail": ["Task 1 starts or Next says only 'execute Plan B'."]
+      }
+    },
+    {
+      "id": "C-UNRESOLVED-PRODUCER",
+      "family": "held-out-downstream",
+      "kind": "rubric",
+      "requirement_ids": ["R-NEXT", "R-PREREQ-FRESH"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "The Depends on line marks its producer as unresolved and its check fails.",
+      "expected_output": "Stop and route Next to writing the missing plan through /internal-gateway-writing-plans.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NEXT-WRITER", "text": "Next asks to write the missing producer plan through /internal-gateway-writing-plans.", "critical": true}
+      ],
+      "forbidden_actions": ["Invent a producer plan path."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Next names the writer and the required output."],
+        "fail": ["Next names a nonexistent plan."]
       }
     }
   ],

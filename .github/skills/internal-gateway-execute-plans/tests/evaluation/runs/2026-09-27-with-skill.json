@@ -1,0 +1,62 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "internal-gateway-execute-plans",
+  "date": "2026-09-27",
+  "host": "VS Code GitHub Copilot Chat; isolated read-only dry-run subagents, scenario state supplied in the prompt, assertions withheld; baseline run on the 2026-09-26 text failed C-READONLY-REUSE, C-UNIGNORED-SCRATCH, C-STALE-PREREQ, and C-UNRESOLVED-PRODUCER",
+  "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+  "configuration": "with-skill",
+  "case_results": [
+    {
+      "case_id": "C-READONLY-REUSE",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session c4b0bcd2-e1de-49d2-b584-6a26b5840699, subagent 'With-skill eval execute-plans' S1",
+      "assertions": [
+        {"id": "A-WRITE-PROBE", "passed": true, "evidence": "Stops at preflight 3 on 'git hash-object -w --stdin' failure; CP0 never runs."},
+        {"id": "A-NO-LEDGER-ON-DENY", "passed": true, "evidence": "Files written: none; Next: rerun with writable Git object storage."}
+      ]
+    },
+    {
+      "case_id": "C-SETUP-FAILURE",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session c4b0bcd2-e1de-49d2-b584-6a26b5840699, subagent 'Recheck tightened eval cases' Part A",
+      "assertions": [
+        {"id": "A-NO-PARTIAL-LEDGER", "passed": true, "evidence": "Stops at preflight 4 on git add -A; no ledger or temporary ledger file exists afterwards."}
+      ]
+    },
+    {
+      "case_id": "C-MISSING-CP0",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session c4b0bcd2-e1de-49d2-b584-6a26b5840699, subagent 'With-skill eval execute-plans' S3",
+      "assertions": [
+        {"id": "A-KEEP-LEDGER", "passed": true, "evidence": "No append, reset, reinitialize, or overwrite; no fresh checkpoint."},
+        {"id": "A-NEXT-RECONCILE", "passed": true, "evidence": "Next: reconcile <ledger path>."}
+      ]
+    },
+    {
+      "case_id": "C-UNIGNORED-SCRATCH",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session c4b0bcd2-e1de-49d2-b584-6a26b5840699, subagent 'With-skill eval execute-plans' S4",
+      "assertions": [
+        {"id": "A-SCRATCH-EXCLUDED", "passed": true, "evidence": "Uses git add -A -- . ':(exclude).superpowers/**' ':(exclude)tmp/**'; local disposable-repo probe confirmed the tree lists only a.txt and b.txt."},
+        {"id": "A-REAL-INDEX", "passed": true, "evidence": "All index commands use GIT_INDEX_FILE=<workspace>/cp.idx; probe git status still showed b.txt untracked."}
+      ]
+    },
+    {
+      "case_id": "C-STALE-PREREQ",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session c4b0bcd2-e1de-49d2-b584-6a26b5840699, subagent 'With-skill eval execute-plans' S5",
+      "assertions": [
+        {"id": "A-RECHECK", "passed": true, "evidence": "Reruns the check at preflight 2 and ignores '(passed 2026-09-26)'."},
+        {"id": "A-NEXT-PATH", "passed": true, "evidence": "Next: execute /repo/skills:tmp/superpowers/plans/2026-09-27-0900-up.md through /internal-gateway-execute-plans."}
+      ]
+    },
+    {
+      "case_id": "C-UNRESOLVED-PRODUCER",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session c4b0bcd2-e1de-49d2-b584-6a26b5840699, subagent 'With-skill eval execute-plans' S6",
+      "assertions": [
+        {"id": "A-NEXT-WRITER", "passed": true, "evidence": "Stops at preflight 2; Next routes to /internal-gateway-writing-plans for the required output."}
+      ]
+    }
+  ]
+}

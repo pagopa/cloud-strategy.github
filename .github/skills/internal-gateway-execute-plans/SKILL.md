@@ -30,10 +30,13 @@ skills own the task loop, ledger, TDD cycle, rulings, and final review.
 
 ## Checkpoints
 
-Without commits, a checkpoint records the whole working state as a Git tree.
-Run `git read-tree HEAD`, `git add -A`, and `git write-tree` in order, each
-with `GIT_INDEX_FILE=<workspace>/cp.idx`. This writes objects only: no commit,
-ref, real-index, or working-tree change.
+Without commits, a checkpoint records the working state, minus scratch paths,
+as a Git tree. Run `git read-tree HEAD`,
+`git add -A -- . ':(exclude).superpowers/**' ':(exclude)tmp/**'`, and
+`git write-tree` in order, from the repository root, each with
+`GIT_INDEX_FILE=<workspace>/cp.idx`. The exclusions apply even when ignore
+rules do not cover these paths. This writes objects only: no commit, ref,
+real-index, or working-tree change.
 
 Ledger it as `CP<n>: <tree>`: `CP0` at first start, then one after every
 completed task and fix round, in the same append as its completion line.
@@ -47,15 +50,32 @@ imported review-package script.
    `/superpowers-subagent-driven-development` for `Subagent-driven`.
 2. **Set up.** The current checkout is the workspace: do not create a branch or
    worktree, and skip `/superpowers-using-git-worktrees`.
-   - First start (no ledger for this plan): record
-     `START: <git rev-parse HEAD>`, the `git status --short` output, and `CP0`
-     before Task 1. Stop when a `Files:` path already has uncommitted changes.
-   - Resume (the ledger names this plan): reuse `START` and the checkpoints.
+   - First start (no ledger for this plan): create the workspace
+     `.superpowers/sdd/<plan file name without .md>/` if needed, then run the
+     preflight before any ledger write or task edit. A plan without a
+     `**Depends on:**` line has no dependency. Stop on the first failure:
+     1. A `Files:` path already has uncommitted changes.
+     2. A `**Depends on:**` check in the plan fails, cannot run, or is
+        `none`.
+     3. Git object storage rejects a new object: run `git hash-object -w
+        --stdin` on unique input, then `git cat-file -e` on the result. A
+        successful CP0 is not proof, because a clean tree reuses existing
+        objects. Never change permissions or sandbox policy to pass.
+     4. CP0 cannot be created, or `git cat-file -t <CP0>` is not `tree`.
+
+     Then write the plan path, `START: <git rev-parse HEAD>`, the preflight
+     `git status --short` output, and `CP0` to a temporary file in the
+     workspace and rename it to the ledger path. Never replace an existing
+     ledger.
+   - Resume (the ledger names this plan): rerun every `**Depends on:**`
+     check first; a recorded result is not current evidence. Reuse `START`
+     and the checkpoints.
      Diff a fresh checkpoint against the latest one, ignoring scratch paths.
      Continue when they match, or when every difference is inside the first
      incomplete task's `Files:` paths; then resume that task and ledger
      `Task <N>: resumed on partial state`. Otherwise, or when a checkpoint is
-     missing or unreadable, stop for reconciliation; never reset or overwrite.
+     missing or unreadable, including a ledger without `CP0`, stop for
+     reconciliation; never reset, reinitialize, or overwrite.
 3. **Run the executor unchanged, with these overrides:**
    - Git: follow the no-commit contract carried by the imported skills. Never
      commit. Review a task with `git diff CP<n-1> CP<n>` and a fix round with
@@ -69,6 +89,7 @@ imported review-package script.
      not commits.
 4. **Stop** on any of the imported stop conditions, and also when:
    - `HEAD` differs from `START`;
+   - a `**Depends on:**` check fails or cannot run;
    - a change outside the perimeter is required, or
      `git diff --name-only CP<n-1> CP<n>` shows one;
    - a protected imported skill path would change;
@@ -90,6 +111,21 @@ Changed: <files or no changes>
 Checks: <commands and results, or the controlling cause of the stop>
 Next: <one action or none>
 ```
+
+`Next:` names one action that removes the controlling blocker:
+
+- reconcile `<ledger path>`;
+- rerun with writable Git object storage;
+- execute `<repository root>:<plan path>` through
+  `/internal-gateway-execute-plans`, for an existing upstream plan;
+- write a plan that delivers `<required output>` through
+  `/internal-gateway-writing-plans`, when the producer is `unresolved` or its
+  path does not exist;
+- supply a read-only check for `<required output>`, when the check is `none`;
+- for any other stop, the decision that clears its cause, such as
+  `resolve <failing command or dirty path>, then rerun`.
+
+Never name a plan by label alone.
 
 Then add the imported "Rulings I made" and "Deferred minors" lists from the
 ledger. Omit an empty list.

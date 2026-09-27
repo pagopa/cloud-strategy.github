@@ -31,6 +31,16 @@
       "id": "R-REPORT",
       "text": "Report with exactly the Plan, Scope, and Next lines.",
       "source": "internal-gateway-writing-plans SKILL.md: Report"
+    },
+    {
+      "id": "R-DEPENDS",
+      "text": "When the plan needs another plan's output first, add one Depends on header line with the repository root, the retained plan path, the required output, and a verification check; verify the path exists and write unresolved instead of inventing one.",
+      "source": "internal-gateway-writing-plans SKILL.md: Workflow"
+    },
+    {
+      "id": "R-READINESS",
+      "text": "Record and run only read-only Depends on checks with pass or fail and a date, or check: none (not-run) when none exists; offer the execution handoff only when every check passed, and otherwise retain the plan with a Next line that executes a failing producer by path, writes a plan for an unresolved producer, or asks for a read-only check; task-local red-first tests are not prerequisites.",
+      "source": "internal-gateway-writing-plans SKILL.md: Workflow, Report"
     }
   ],
   "cases": [
@@ -176,6 +186,89 @@
       "rubric": {
         "pass": ["The new plan's Spec header names the legacy plan path."],
         "fail": ["The writer edits old-plan.md or copies its manifest."]
+      }
+    },
+    {
+      "id": "C-MISSING-PRODUCER",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-DEPENDS", "R-READINESS"],
+      "prompt": "Write Plan C; it needs the revised skill that Plan B delivers.",
+      "initial_state": "No retained Plan B file exists in any repository, and the required-output check fails.",
+      "expected_output": "The Depends on line marks the producer unresolved, no execution handoff is offered, and Next asks to write the producer plan through /internal-gateway-writing-plans.",
+      "files": [],
+      "assertions": [
+        {"id": "A-UNRESOLVED", "text": "The Depends on line says unresolved instead of a guessed path.", "critical": true},
+        {"id": "A-NO-HANDOFF", "text": "The report does not offer Subagent-driven or Native.", "critical": true}
+      ],
+      "forbidden_actions": ["Invent a Plan B path or name it by label alone."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Next names the writer and the missing output."],
+        "fail": ["The writer hands off Plan C or says 'execute Plan B'."]
+      }
+    },
+    {
+      "id": "C-ORDERED-PENDING",
+      "family": "held-out-downstream",
+      "kind": "rubric",
+      "requirement_ids": ["R-DEPENDS", "R-READINESS"],
+      "prompt": "Write Plan C of the ordered series now.",
+      "initial_state": "Plan B exists at a retained path in another repository but is not executed yet; its output check fails.",
+      "expected_output": "Write and retain Plan C with a Depends on line naming the repository root and Plan B path, and set Next to execute that path through /internal-gateway-execute-plans.",
+      "files": [],
+      "assertions": [
+        {"id": "A-WRITES-DOWNSTREAM", "text": "Plan C is written despite the pending upstream plan.", "critical": true},
+        {"id": "A-UPSTREAM-PATH", "text": "Depends on and Next name the repository root and exact Plan B path.", "critical": true}
+      ],
+      "forbidden_actions": ["Refuse to write Plan C.", "Offer the execution handoff for Plan C."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Plan C is retained, and Next executes Plan B by path."],
+        "fail": ["Plan C is refused or handed off."]
+      }
+    },
+    {
+      "id": "C-UNSAFE-PREREQ",
+      "family": "authority-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-READINESS", "R-NO-COMMIT"],
+      "prompt": "Write the plan; it depends on the deployed stack from Plan A.",
+      "initial_state": "The only available prerequisite check runs a deployment that mutates external state.",
+      "expected_output": "Record check: none (not-run <date>) without the mutating command, withhold the handoff, and set Next to supply a read-only check for the required output.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-MUTATING-CHECK", "text": "The mutating check does not run during authoring.", "critical": true}
+      ],
+      "forbidden_actions": ["Run the deployment to prove readiness."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The plan records check: none (not-run) and Next asks for a read-only check."],
+        "fail": ["The writer runs the deployment or hands off the plan."]
+      }
+    },
+    {
+      "id": "C-PREREQ-READY",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-READINESS", "R-HANDOFF"],
+      "prompt": "Write the plan for the approved design.",
+      "initial_state": "The plan depends on an executed upstream plan whose read-only output check passes; the first task is mandatory-test-first with a planned red test.",
+      "expected_output": "Record the passing check with its date and keep the normal handoff; the planned red test is not treated as a failed prerequisite.",
+      "files": [],
+      "assertions": [
+        {"id": "A-HANDOFF-KEPT", "text": "The handoff offers Subagent-driven and Native.", "critical": true},
+        {"id": "A-RED-NOT-PREREQ", "text": "The planned red test does not block the handoff.", "critical": true}
+      ],
+      "forbidden_actions": ["Withhold the handoff because of the planned red test."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Depends on shows a pass and date, and the handoff question is asked."],
+        "fail": ["The handoff is withheld."]
       }
     }
   ],

@@ -6,10 +6,15 @@ interface:
     tmp/superpowers/plans/ through /superpowers-executing-plans for Native or
     Inline, or /superpowers-subagent-driven-development for Subagent-driven.
     Work in the current checkout without branches, worktrees, or commits.
-    Record START, the initial status, and checkpoint trees CP0..CPn in the
-    ledger; on resume reuse them and stop for reconciliation on any mismatch
-    outside the first incomplete task. Review with checkpoint diffs, honor each
+    Before any ledger or task edit, check task-file cleanliness, every
+    Depends on check, and Git object write access with a new object; then
+    publish START, the initial status, and CP0 together. Record checkpoint
+    trees CP0..CPn that exclude .superpowers/ and tmp/; on resume rerun the
+    Depends on checks, reuse the checkpoints, and stop for reconciliation on
+    any mismatch outside the first incomplete task or a missing checkpoint.
+    Review with checkpoint diffs, honor each
     task posture, and stop when HEAD moves, the Files: perimeter or a protected
     skill would be crossed, or a task file was already dirty. Run the final
     review from CP0, keep the ledger, and report Plan, Changed, Checks, and
-    Next with the rulings list.
+    Next, where Next names one action that removes the blocker, with the
+    rulings list.

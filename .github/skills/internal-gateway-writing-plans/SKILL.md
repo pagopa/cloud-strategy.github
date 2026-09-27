@@ -69,16 +69,33 @@ permissions, and obsolete workflow text carry no authority.
      tool exists before you write its command; never invent a command.
    - Write no commit steps. Replace each one with the task validation and
      `git status --short`.
-3. Close with the imported handoff question. Without a supplied method, offer
+   - When the plan needs another plan's output first, add one header line
+     per producer:
+     `**Depends on:** <repository root>:<retained plan path> — <required output>; check: <command> (<result> <date>)`.
+     Verify that the path exists; when it does not, write `unresolved` in
+     place of `<repository root>:<retained plan path>` and never guess a
+     path. Record only a read-only check, and run it; `<result>` is `pass`
+     or `fail`. When no read-only check exists, write `check: none
+     (not-run <date>)`. A task's planned red test is not a prerequisite.
+3. Close with the imported handoff question only when every
+   `**Depends on:**` check passed. Without a supplied method, offer
    `Subagent-driven` and `Native` with its one-line recommendation; with one,
    ask only for plan confirmation. Route every approved answer to
    `/internal-gateway-execute-plans`, never to an imported executor. The answer
-   is the execution approval; do not start execution here.
+   is the execution approval; do not start execution here. Otherwise retain
+   the plan without the handoff and set `Next:` to the upstream action for
+   the first dependency that did not pass:
+   - `fail` with a path: execute `<repository root>:<plan path>` through
+     `/internal-gateway-execute-plans`;
+   - `unresolved`: write a plan that delivers `<required output>` through
+     `/internal-gateway-writing-plans`;
+   - `check: none`: supply a read-only check for `<required output>`.
 
 ## Boundaries
 
 - No Git mutation while writing or handing off a plan.
-- No execution, runtime status file, or ledger creation.
+- No execution, runtime status file, or ledger creation. Read-only
+  `**Depends on:**` checks are allowed.
 - A plan that still needs a user decision stays unfinished; do not hand it off.
 
 ## Report
@@ -88,5 +105,5 @@ Use exactly three lines, in the user's language, with canonical labels:
 ```text
 Plan: <retained path>
 Scope: <target; anti-scope>
-Next: <answer the handoff question, or the one missing decision>
+Next: <answer the handoff question, the one missing decision, or the upstream action>
 ```
