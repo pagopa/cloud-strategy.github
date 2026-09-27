@@ -173,7 +173,7 @@
       "forbidden_finding_ids": ["F_CODE_IMPLEMENTATION"],
       "expected_routes": [
         {"surface": "skill-contract", "owner": "internal-review-high-level", "via": "direct"},
-        {"surface": "implementation-code", "owner": "internal-review-code", "via": "internal-github"}
+        {"surface": "implementation-code", "owner": "internal-review-code", "via": "direct"}
       ]
     },
     {
@@ -186,7 +186,7 @@
       "forbidden_finding_ids": ["F_CODE_IMPLEMENTATION"],
       "expected_routes": [
         {"surface": "migration-document", "owner": "internal-review-high-level", "via": "direct"},
-        {"surface": "actions-yaml", "owner": "internal-review-code", "via": "internal-github"}
+        {"surface": "actions-yaml", "owner": "internal-review-code", "via": "direct"}
       ]
     },
     {

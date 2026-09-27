@@ -26,8 +26,9 @@ The hard boundary is non-code, report-only assurance.
   primary request, state that the review is outside this boundary and identify
   the accepted non-code limit.
 - For GitHub Actions YAML and implementation correctness, route to
-  `/internal-review-code` through `/internal-github`.
-- Route live evidence to the operations owner and PR state to the PR owner.
+  `/internal-review-code`.
+- Route live runner or rollout evidence to `/internal-github-platform` and PR
+  state to `/internal-github-pr`.
 - For an interactive pre-action critical challenge of a plan, proposal,
   decision, or design, use `/internal-gateway-critical-master`.
 

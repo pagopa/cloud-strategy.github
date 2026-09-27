@@ -7,7 +7,7 @@
     {"id": "R-REPORT-ONLY", "text": "Keep the review report-only: no file edits, fixes, or plans during the review; state-changing follow-ups need a separate explicit request.", "source": "SKILL.md Boundaries"},
     {"id": "R-PREFLIGHT", "text": "Resolve a concrete non-empty target and load the engine from its resolved source; record target identity, fingerprint, engine identity, and source; stop with REVIEW BLOCKED and name the missing evidence when the target is empty or the engine cannot be confirmed.", "source": "SKILL.md Review preflight"},
     {"id": "R-SEQUENCE", "text": "Run the ordered repository review: target and fingerprint, Standards and Spec sources or to confirm, engine pass, spec comparison, adversarial probes, green-test anchoring, and coverage counter-analysis before approval.", "source": "SKILL.md Ordered repository review"},
-    {"id": "R-ACTIONS", "text": "For workflow or composite-action targets, invoke internal-github with the minimal envelope, never the specialist directly; contributors return bounded observations only and no verdict, severity, approval, or remediation; static review does not establish runtime behavior.", "source": "SKILL.md GitHub Actions contributors; references/actions-contributor-protocol.md"},
+    {"id": "R-ACTIONS", "text": "For workflow or composite-action targets, invoke internal-github-actions directly with the minimal envelope; the contributor never routes back to the parent; contributors return bounded observations only and no verdict, severity, approval, or remediation; static review does not establish runtime behavior.", "source": "SKILL.md GitHub Actions contributors; references/actions-contributor-protocol.md"},
     {"id": "R-PROJECTION", "text": "Open with the four emoji fields in order and follow the emoji-structured skeleton, use exactly MERGE READY, CHANGES REQUIRED, or REVIEW BLOCKED, map engine categories through the table, number findings by label, preserve every blocking and important finding, and state that no changes were applied.", "source": "SKILL.md Public projection"},
     {"id": "R-ENGINE-DRIFT", "text": "After an engine refresh, run scripts/check_engine_contract.py and treat reported drift as REVIEW BLOCKED until the mapping is realigned.", "source": "SKILL.md Public projection"},
     {"id": "R-COMPLETION", "text": "Before reporting, verify the completion checklist, including source-backed claims or explicit evidence gaps and exactly one boundary-safe next action.", "source": "SKILL.md Completion criteria"}
@@ -86,10 +86,10 @@
       "requirement_ids": ["R-ACTIONS", "R-PROJECTION"],
       "prompt": "Review this PR that changes .github/workflows/release.yml and .github/actions/publish/action.yml.",
       "initial_state": "The diff links a workflow to a composite action and a repository script; no runtime logs are available.",
-      "expected_output": "The review routes contributor work through internal-github, keeps contributor output to observations, traces the static chain, and records runtime behavior as an evidence gap.",
+      "expected_output": "The review invokes internal-github-actions directly as the contributor, keeps contributor output to observations, traces the static chain, and records runtime behavior as an evidence gap.",
       "files": ["SKILL.md", "references/actions-contributor-protocol.md", "tests/fixtures/actions-review-target/spec.md"],
       "assertions": [
-        {"id": "A-GATEWAY", "text": "Contributor routing goes through internal-github, not directly to the specialist.", "critical": true},
+        {"id": "A-GATEWAY", "text": "Contributor work goes directly to internal-github-actions with the parent envelope and does not route back to the review.", "critical": true},
         {"id": "A-BOUNDED", "text": "The contributor emits no verdict, severity, approval, or remediation plan.", "critical": true},
         {"id": "A-RUNTIME-GAP", "text": "Runner health or runtime success is recorded as an evidence gap, not inferred from YAML.", "critical": true}
       ],
@@ -160,11 +160,11 @@
       {"id": "Q-STRESS-PLAN", "query": "Stress-test our migration plan before we start.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-critical-master"},
       {"id": "Q-MERGE-PR", "query": "Merge PR 88 once checks are green.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-pr"},
       {"id": "Q-FIX-TEST", "query": "This test fails intermittently; find the root cause.", "should_trigger": false, "split": "train", "competing_owner": "internal-debugging"},
-      {"id": "Q-WRITE-WORKFLOW", "query": "Write a new GitHub Actions workflow that runs pytest on push.", "should_trigger": false, "split": "train", "competing_owner": "internal-github"},
+      {"id": "Q-WRITE-WORKFLOW", "query": "Write a new GitHub Actions workflow that runs pytest on push.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-actions"},
       {"id": "Q-ARCH-AUDIT", "query": "Audit the landing-zone architecture document and report findings only.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-high-level"},
-      {"id": "Q-ADDRESS-COMMENTS", "query": "Address the review comments left on my open PR.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-github-pr"},
+      {"id": "Q-ADDRESS-COMMENTS", "query": "Address the review comments left on my open PR.", "should_trigger": false, "split": "held-out", "competing_owner": "openai-gh-address-comments"},
       {"id": "Q-SLOW-ENDPOINT", "query": "Profile why the orders endpoint got slower.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-performance-optimization"},
-      {"id": "Q-RUNNER-HEALTH", "query": "Check why our self-hosted runners keep going offline.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-github"},
+      {"id": "Q-RUNNER-HEALTH", "query": "Check why our self-hosted runners keep going offline.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-github-platform"},
       {"id": "Q-REFACTOR", "query": "Refactor this class to remove the long switch statement.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-oop-design-patterns"}
     ]
   }

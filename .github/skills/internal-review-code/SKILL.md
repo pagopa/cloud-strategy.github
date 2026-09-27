@@ -66,13 +66,12 @@ Run this sequence after the review preflight:
 ## GitHub Actions contributors
 
 When the read-only target includes `.github/workflows/**` or
-`.github/actions/**/action.y*ml`, invoke `/internal-github` with the minimal
-envelope in
-[the contributor protocol](references/actions-contributor-protocol.md). The
-gateway selects `internal-github-actions` as the single domain contributor.
-Do not invoke the specialist directly. Keep workflow and composite-action
-observations scoped to the changed surfaces; unrelated code invokes no
-contributor.
+`.github/actions/**/action.y*ml`, invoke `/internal-github-actions` directly
+with the minimal envelope in
+[the contributor protocol](references/actions-contributor-protocol.md). It is
+the single domain contributor, and it never routes back to this skill. Keep
+workflow and composite-action observations scoped to the changed surfaces;
+unrelated code invokes no contributor.
 
 Contributors are bounded observers inside this review flow. They may return
 domain observations, changed contract surfaces, execution-chain probes,
@@ -87,13 +86,14 @@ For workflow and composite targets, inspect linked static evidence from the
 event through the workflow, reusable workflow or job permissions/environment,
 composite action, repository script, artifact, or external-system boundary
 when those links are present. Static review does not establish live runner
-health or runtime behavior; route that evidence to the appropriate operations
-owner and record the gap.
+health or runtime behavior; route that evidence to `internal-github-platform`
+and record the gap.
 
-For a separate non-review GitHub follow-up, invoke `/internal-github` with the
-same envelope and the follow-up as `deliverable`. Keep that follow-up
-report-only and separate from this review's verdict. The gateway owns
-destination selection and parent exclusion; do not add a second routing table.
+For a separate non-review GitHub follow-up, invoke the owner of that
+deliverable directly: `/internal-github-actions` for workflow changes,
+`/internal-github-pr` for PR state, or `/internal-github-platform` for
+controls and runner evidence. Keep that follow-up report-only and separate
+from this review's verdict.
 
 ## Public projection
 

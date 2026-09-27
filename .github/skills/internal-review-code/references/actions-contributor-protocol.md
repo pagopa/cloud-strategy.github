@@ -18,9 +18,10 @@ the declared review engine.
   ```
 
 - The envelope fields are the caller-owned contract. The caller invokes
-  `/internal-github` with this envelope; the gateway selects and invokes the
-  specialist, which returns exactly the contributor record schema defined
-  here. Invoke no contributor for unrelated code.
+  `/internal-github-actions` directly with this envelope. Because `parent`
+  names the caller, the contributor returns exactly the contributor record
+  schema defined here and never routes back to the parent. Invoke no
+  contributor for unrelated code.
 
 ## Contributor record
 
