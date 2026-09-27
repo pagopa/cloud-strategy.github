@@ -2,19 +2,16 @@ interface:
   display_name: "internal-gateway-execute-plans"
   short_description: "Approved retained-plan execution"
   default_prompt: >-
-    Use /internal-gateway-execute-plans to run one approved plan under
-    tmp/superpowers/plans/ through /superpowers-executing-plans for Native or
-    Inline, or /superpowers-subagent-driven-development for Subagent-driven.
-    Work in the current checkout without branches, worktrees, or commits.
-    Before any ledger or task edit, check task-file cleanliness, every
-    Depends on check, and Git object write access with a new object; then
-    publish START, the initial status, and CP0 together. Record checkpoint
-    trees CP0..CPn that exclude .superpowers/ and tmp/; on resume rerun the
-    Depends on checks, reuse the checkpoints, and stop for reconciliation on
-    any mismatch outside the first incomplete task or a missing checkpoint.
-    Review with checkpoint diffs, honor each
-    task posture, and stop when HEAD moves, the Files: perimeter or a protected
-    skill would be crossed, or a task file was already dirty. Run the final
-    review from CP0, keep the ledger, and report Plan, Changed, Checks, and
-    Next, where Next names one action that removes the blocker, with the
-    rulings list.
+    Use /internal-gateway-execute-plans to execute, resume, or query an
+    approved plan under tmp/superpowers/plans/. Run Native through
+    /superpowers-executing-plans in the current checkout, without commits,
+    branches, worktrees, or imported helper scripts. Load the run protocol and
+    chat templates. Before publishing a ledger or editing tasks, validate
+    legacy and prose dependencies, rerun Depends on checks, resolve branch
+    and dirty-file consent, prove new Git object access, and create a readable
+    CP0 tree. Record approvals, derived status, checkpoints, task validations,
+    repair attempts, stop codes, and final review in the ledger. On resume,
+    verify approval and all checkpoint objects; never reset or overwrite state.
+    Run status queries read-only. Use native-only execution even when another
+    method is requested. Report localized chat status in at most five lines
+    with one final bold action.

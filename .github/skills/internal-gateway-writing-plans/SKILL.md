@@ -5,111 +5,73 @@ description: Use when repository-owned work needs an approved implementation pla
 
 # Internal Gateway Writing Plans
 
-Write one retained implementation plan through `/superpowers-writing-plans`
-and hand it to `/internal-gateway-execute-plans`. This gateway adds only the
-repository deltas: eligibility, plan location, test posture, authority, and the
-report. The imported skill owns plan structure and self-review.
+Write one retained implementation plan and hand it to /internal-gateway-execute-plans only after its contract and read-only handoff gate pass. Load /superpowers-writing-plans and references/plan-contract.md before writing. The imported skill owns plan structure and self-review; this skill owns the repository-specific rules below.
 
 ## When to use
 
-- The user asks for an implementation plan from an approved design, a reviewed
-  retained spec, or concrete direct requirements.
-- `/internal-gateway-idea` hands off a `+plan` selection, with or without a
-  retained spec marked `plan_authoring_ready: true`.
-- `/internal-gateway-execute-plans` returns a legacy plan for re-authoring.
+- The user asks for an implementation plan from an approved design, a reviewed retained spec, or concrete direct requirements.
+- /internal-gateway-idea hands off a +plan selection, with or without a retained spec marked plan_authoring_ready: true.
+- /internal-gateway-execute-plans returns a legacy plan for re-authoring.
 
 ## When not to use
 
-- Early or unclear ideas belong to `/internal-gateway-idea`.
-- Bounded one-session work belongs to `/internal-gateway-simple-task`.
-- Plan execution belongs to `/internal-gateway-execute-plans`.
-- Edits to imported `superpowers-*` skills are out of scope.
+- Early or unclear ideas belong to /internal-gateway-idea.
+- Bounded one-session work belongs to /internal-gateway-simple-task.
+- Plan execution belongs to /internal-gateway-execute-plans.
+- Edits to imported superpowers-* skills are out of scope.
 
 ## Eligibility
 
 Write only when all three conditions hold:
 
 1. The current conversation contains an explicit request to write a plan.
-2. A source exists: a retained spec path, an approved design, a reviewed
-   retained spec, concrete direct requirements, or a legacy plan.
+2. A source exists: a retained spec path, an approved design, a reviewed retained spec, concrete direct requirements, or a legacy plan.
 3. The target and the anti-scope are known.
 
-A `+plan` selection satisfies conditions 1 and 2 without another discovery or
-approval round. `implementation_permission: false` never blocks plan writing.
-When a condition is missing, stop and name the one decision that unblocks it.
+A +plan selection satisfies conditions 1 and 2 without another discovery or approval round. implementation_permission: false never blocks plan writing. When a condition is missing, stop and name the one decision that unblocks it.
 
 ## Legacy plans
 
-A retained plan with a legacy `## Execution Manifest` is conversion input only
-after an explicit re-authoring request. Leave it unchanged and write a new
-plan. Set `**Spec:**` to its Spec when that names a path; otherwise, including
-`direct requirements`, use the legacy plan path. Its manifest, execution
-permissions, and obsolete workflow text carry no authority.
+A retained plan with a legacy ## Execution Manifest is conversion input only after an explicit re-authoring request. Leave it unchanged and write a new plan. Set **Spec:** to its Spec when that names a path; otherwise, including direct requirements, use the legacy plan path. Its manifest, execution permissions, and obsolete workflow text carry no authority.
 
 ## Workflow
 
-1. Load `/superpowers-writing-plans` and follow it for file structure, task
-   right-sizing, step content, Interfaces, Global Constraints, Review Focus,
-   and self-review.
-2. Apply these repository deltas while writing:
-   - Save the plan to `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<topic>.md`.
-   - Set the header `**Spec:**` to the source path. For direct requirements,
-     write `direct requirements` and copy them into Global Constraints.
-   - Write every path outside this repository as
-     `<repository root>:<path>`. Such sources are read-only context; the
-     plan's `Files:` paths and commands stay inside this repository.
-   - Replace the imported `For agentic workers` header line with one that
-     names `/internal-gateway-execute-plans` as the required executor.
-   - Classify every executable or evaluable task through `/internal-tdd`.
-     Record one `Posture:` line per task and order its steps to match: red
-     first for `mandatory-test-first`, a passing characterization check first
-     for a behavior-preserving refactor, and implementation before validation
-     for `feature-first`.
-   - List every path a task may touch in its `Files:` block. The union of
-     these blocks is the execution perimeter. Never list a protected imported
-     skill path unless the user named that exact path in this conversation.
-   - Write native, directly executable validation commands. Check that each
-     tool exists before you write its command; never invent a command.
-   - Write no commit steps. Replace each one with the task validation and
-     `git status --short`.
-   - When the plan needs another plan's output first, add one header line
-     per producer:
-     `**Depends on:** <repository root>:<retained plan path> — <required output>; check: <command> (<result> <date>)`.
-     State every plan dependency in this form. Prose may describe the
-     upstream output, but the executor treats a prose-only dependency as a
-     malformed plan.
-     Verify that the path exists; when it does not, write `unresolved` in
-     place of `<repository root>:<retained plan path>` and never guess a
-     path. Record only a read-only check, and run it; `<result>` is `pass`
-     or `fail`. When no read-only check exists, write `check: none
-     (not-run <date>)`. A task's planned red test is not a prerequisite.
-3. Close with the imported handoff question only when every
-   `**Depends on:**` check passed. Without a supplied method, offer
-   `Subagent-driven` and `Native` with its one-line recommendation; with one,
-   ask only for plan confirmation. Route every approved answer to
-   `/internal-gateway-execute-plans`, never to an imported executor. The answer
-   is the execution approval; do not start execution here. Otherwise retain
-   the plan without the handoff and set `Next:` to the upstream action for
-   the first dependency that did not pass:
-   - `fail` with a path: execute `<repository root>:<plan path>` through
-     `/internal-gateway-execute-plans`;
-   - `unresolved`: write a plan that delivers `<required output>` through
-     `/internal-gateway-writing-plans`;
-   - `check: none`: supply a read-only check for `<required output>`.
+1. Load /superpowers-writing-plans and follow it for file structure, task right-sizing, step content, Interfaces, Global Constraints, Review Focus, and self-review.
+2. Apply the repository deltas:
+   - Save the plan to tmp/superpowers/plans/YYYY-MM-DD-HHMM-<topic>.md.
+   - Use the shared protocol:plan-header block in references/plan-contract.md. Set **Spec:** to the source path; for direct requirements, write direct requirements and copy them into Global Constraints. Set **Status:** to tmp/superpowers/plans/<plan name>/status.md.
+   - Write every path outside this repository as <repository root>:<path>. Such sources are read-only context; plan Files paths and commands stay inside this repository.
+   - Replace the imported For agentic workers header line with one naming /internal-gateway-execute-plans as the required executor.
+   - Classify every executable or evaluable task through /internal-tdd. Record exactly one Posture line per task and order steps to match it: red first for mandatory-test-first, a passing characterization check first for a behavior-preserving refactor, and implementation before validation for feature-first.
+   - List every path a task may touch in its Files block. The union of these blocks is the execution perimeter. Apply the shared protocol:files-globs rules. Never list a protected imported skill path unless the user named that exact path in this conversation.
+   - Write native, directly executable validation commands. Check that each tool exists before writing its command; never invent a command.
+   - Write no commit steps or Git mutations.
+   - When another retained plan must deliver an output first, add one Depends on header line per producer, using the shared plan-header syntax. Verify that its path exists. If it does not, write unresolved instead of guessing. Record and run only a read-only check; use pass or fail with a date, or check: none (not-run <date>) when no read-only check exists. A task's planned red test is not a prerequisite.
+3. Run every item in the Plan lint checklist in references/plan-contract.md. Fix failures inline and lint again. If an item needs a user decision, retain the unfinished plan and do not hand it off.
+4. When lint passes, perform one read-only handoff gate:
+   - Read the current branch with git symbolic-ref --quiet --short HEAD.
+   - Resolve the default branch with git symbolic-ref --quiet --short refs/remotes/origin/HEAD.
+   - Re-run each read-only Depends on check and report its result.
+   - Read changes to every path in all Files blocks with git status --porcelain -- <Files paths>.
+   - If detached or the default branch is unresolved, withhold handoff and ask to resolve the branch. Require branch consent when the current branch equals the resolved default branch or is main or master. When there is no branch consent requirement, offer execute. When consent is required, offer execute on <branch>. If any Files path is dirty, also offer execute with dirty files. Show current/default branch, dependency results, and all dirty Files paths together in one gate message, and offer only the needed commands.
+   - A supplied Subagent-driven or Inline preference gets one short native-only note. Never ask the user to choose an execution method.
+   - Route every valid approval to /internal-gateway-execute-plans. The approval is permission to execute; do not start execution in this skill.
+5. Keep the writer read-only with respect to Git mutations and runtime records. Do not create a ledger, status file, or other executor state.
 
 ## Boundaries
 
-- No Git mutation while writing or handing off a plan.
-- No execution, runtime status file, or ledger creation. Read-only
-  `**Depends on:**` checks are allowed.
+- No Git mutation while writing or handing off a plan. Read-only branch, dependency, and dirty-path checks are allowed.
+- No execution, runtime status file, or ledger creation.
 - A plan that still needs a user decision stays unfinished; do not hand it off.
 
 ## Report
 
-Use exactly three lines, in the user's language, with canonical labels:
+After the plan and handoff gate are ready, use at most five localized lines:
 
-```text
-Plan: <retained path>
-Scope: <target; anti-scope>
-Next: <answer the handoff question, the one missing decision, or the upstream action>
-```
+📋 PLAN READY · <plan name>
+🎯 Goal: <target>
+🚫 Out of scope: <anti-scope>
+🌿 <current branch> / default <default branch> · 🧪 dependencies: <results> · 📂 dirty Files: <paths or none>
+🛠️ **Action:** <only the needed execute command or commands>
+
+Keep the final action on the last line and make it the only bold action. When no handoff is allowed, the action names the missing decision or upstream step. If the user supplied Subagent-driven or Inline, include the native-only note in that one action line. Localize the report to the user's language. Do not include the pointing-hand emoji in user-visible output.

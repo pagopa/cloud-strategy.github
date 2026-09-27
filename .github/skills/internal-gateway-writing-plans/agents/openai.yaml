@@ -2,17 +2,16 @@ interface:
   display_name: "internal-gateway-writing-plans"
   short_description: "Approved implementation-plan writing"
   default_prompt: >-
-    Use /internal-gateway-writing-plans to write one retained plan through
-    /superpowers-writing-plans once eligibility holds: an explicit plan
-    request, a source, and a known target and anti-scope. Save it under
-    tmp/superpowers/plans/, set the Spec header, replace the imported executor
-    header line with /internal-gateway-execute-plans, record one /internal-tdd
-    posture per task, keep every touched path in Files: blocks, and write no
-    commit steps. Declare each upstream plan in a Depends on header line with
-    its repository root, path or unresolved, required output, and read-only
-    check result. Re-author a legacy plan only on explicit request, into a new
-    file, without manifest authority. Close with the imported handoff only
-    when every Depends on check passed: offer Subagent-driven or Native unless
-    a method was supplied, and route every answer to
-    /internal-gateway-execute-plans; otherwise name the upstream action in
-    Next. Report Plan, Scope, and Next only.
+    Use /internal-gateway-writing-plans to write one retained plan only after
+    an explicit request, a source, and a known target and anti-scope. Load
+    /superpowers-writing-plans and references/plan-contract.md. Save the plan
+    under tmp/superpowers/plans/, use Spec and Status headers, name
+    /internal-gateway-execute-plans, record one /internal-tdd posture per
+    task, keep Files paths inside the validated perimeter, and write no Git
+    mutations. Run plan lint before one read-only handoff gate showing the
+    current and default branches, dependency results, and dirty Files paths.
+    Offer only the execute consent commands needed by those results. Execute
+    natively through /internal-gateway-execute-plans; never ask for an
+    execution-method choice or start execution here. Keep unresolved
+    dependencies or user decisions unfinished. Report the plan in at most
+    five localized lines with one final bold action.
