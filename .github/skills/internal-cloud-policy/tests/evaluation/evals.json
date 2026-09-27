@@ -1,0 +1,64 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-cloud-policy",
+  "requirements": [
+    {"id": "R-SCOPE", "text": "Keep the policy scope explicit at organization, folder, subscription, project, or management-group level.", "source": "SKILL.md: Mandatory rules"},
+    {"id": "R-ROLLBACK", "text": "Document the rollback path and non-production validation before production rollout.", "source": "SKILL.md: Mandatory rules; Validation"},
+    {"id": "R-GCP-BOUNDARY", "text": "Own Google Cloud constraint content and route control choice, scope, dry-run staging, and rollout evidence to internal-gcp.", "source": "SKILL.md: Boundary"}
+  ],
+  "cases": [
+    {
+      "id": "C-GCP-CONSTRAINT",
+      "family": "policy-definition",
+      "kind": "rubric",
+      "requirement_ids": ["R-SCOPE", "R-ROLLBACK"],
+      "prompt": "Write a custom Org Policy constraint that blocks Cloud SQL instances with public IP in one GCP folder.",
+      "initial_state": "The folder ID is known; the rollout decision was already made.",
+      "expected_output": "A readable custom constraint definition with explicit folder scope, a non-production validation step, and a rollback path.",
+      "files": [],
+      "assertions": [
+        {"id": "A-SCOPE", "text": "The definition names the folder scope explicitly.", "critical": true},
+        {"id": "A-ROLLBACK", "text": "The response documents how to disable or remove the policy.", "critical": true}
+      ],
+      "forbidden_actions": ["Apply the constraint at organization scope without stating it."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Explicit scope and readable condition.", "Rollback and non-production validation named."],
+        "fail": ["Implicit scope.", "No rollback path."]
+      }
+    },
+    {
+      "id": "C-GCP-HANDOFF",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-GCP-BOUNDARY"],
+      "prompt": "Which GCP controls should stop data exfiltration from our analytics folder, and how do we roll them out?",
+      "initial_state": "The deliverable is control choice and rollout, not a policy definition.",
+      "expected_output": "The response routes control choice, scope, staging, and evidence to internal-gcp and offers to write constraint content afterwards.",
+      "files": [],
+      "assertions": [
+        {"id": "A-GCP-OWNER", "text": "The response names internal-gcp as the owner of control choice and rollout.", "critical": true}
+      ],
+      "forbidden_actions": ["Design the full GCP control stack inside this skill."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Routes the design and rollout to internal-gcp."],
+        "fail": ["Answers the control-stack design here."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Write an AWS SCP that denies actions outside eu-west-1.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Author an Azure Policy definition that audits missing cost-center tags.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Write a custom GCP Org Policy constraint that blocks public Cloud SQL IPs.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Compare SCP, Azure Policy, and Org Policy definitions for region restriction.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-05", "query": "Which GCP controls should stop data exfiltration from our analytics folder?", "should_trigger": false, "split": "train", "competing_owner": "internal-gcp"},
+      {"id": "Q-06", "query": "Plan the staged dry-run rollout of an Org Policy across GCP folders.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gcp"},
+      {"id": "Q-07", "query": "Fix the Terraform plan error in our policy module.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-08", "query": "Design the AWS permission-boundary operating model for platform teams.", "should_trigger": false, "split": "train", "competing_owner": "internal-aws"}
+    ]
+  }
+}

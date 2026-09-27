@@ -157,7 +157,8 @@
       {"id": "Q-17", "query": "Review the Dockerfile for the terraform runner image.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-docker"},
       {"id": "Q-18", "query": "Make the tags variable an object with optional attributes.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-tf"},
       {"id": "Q-19", "query": "Fix the Makefile target that calls terraform.sh.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-makefile"},
-      {"id": "Q-20", "query": "Harden the GitHub Actions OIDC trust for the deploy role.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-github"}
+      {"id": "Q-20", "query": "Harden the GitHub Actions OIDC trust for the deploy role.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-github-platform"},
+      {"id": "Q-21", "query": "Decide whether our GCP analytics projects need a VPC Service Controls perimeter.", "should_trigger": false, "split": "train", "competing_owner": "internal-gcp"}
     ]
   }
 }

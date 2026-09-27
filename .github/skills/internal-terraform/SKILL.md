@@ -91,5 +91,7 @@ complete.
   unoverridden Terraform depth.
 - Coordinate with `/internal-azure` only for an independent Azure design or
   governance decision.
+- Coordinate with `/internal-gcp` only for an independent Google Cloud design
+  or governance decision.
 - Route non-Terraform requests to the actual artifact owner.
 - Retain local guidance only when it is uniquely repository-specific.
