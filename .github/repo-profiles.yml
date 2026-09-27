@@ -30,16 +30,18 @@ profiles:
       - skills/internal-markdown/SKILL.md
       - skills/internal-yaml/SKILL.md
       - skills/internal-json/SKILL.md
-      - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-github-pr/SKILL.md
+      - skills/internal-github-platform/SKILL.md
 
   backend-java:
     description: Java service repositories.
     recommended_skills:
       - skills/internal-java/SKILL.md
       - skills/internal-java-project/SKILL.md
-      - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-github-pr/SKILL.md
+      - skills/internal-github-platform/SKILL.md
       - skills/internal-markdown/SKILL.md
 
   backend-java-spring:
@@ -48,8 +50,9 @@ profiles:
       - skills/internal-java/SKILL.md
       - skills/internal-java-project/SKILL.md
       - skills/internal-java-spring-boot-development/SKILL.md
-      - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-github-pr/SKILL.md
+      - skills/internal-github-platform/SKILL.md
       - skills/internal-markdown/SKILL.md
 
   backend-nodejs:
@@ -57,8 +60,9 @@ profiles:
     recommended_skills:
       - skills/internal-nodejs/SKILL.md
       - skills/internal-nodejs-project/SKILL.md
-      - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-github-pr/SKILL.md
+      - skills/internal-github-platform/SKILL.md
       - skills/internal-markdown/SKILL.md
 
   backend-python:
@@ -66,8 +70,9 @@ profiles:
     recommended_skills:
       - skills/internal-python/SKILL.md
       - skills/internal-python-project/SKILL.md
-      - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-github-pr/SKILL.md
+      - skills/internal-github-platform/SKILL.md
       - skills/internal-markdown/SKILL.md
 
   document-heavy:
@@ -86,8 +91,9 @@ profiles:
       - skills/internal-terraform/SKILL.md
       - skills/internal-terraform-import/SKILL.md
       - skills/internal-tf/SKILL.md
-      - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-github-pr/SKILL.md
+      - skills/internal-github-platform/SKILL.md
       - skills/internal-yaml/SKILL.md
       - skills/internal-cloud-policy/SKILL.md
 
@@ -100,11 +106,7 @@ profiles:
       - skills/internal-yaml/SKILL.md
       - skills/internal-markdown/SKILL.md
       - skills/internal-azure/SKILL.md
-      - skills/internal-azure-organization-structure/SKILL.md
-      - skills/internal-azure-governance/SKILL.md
-      - skills/internal-azure-operations/SKILL.md
       - skills/internal-azure-devops/SKILL.md
-      - skills/internal-azure-strategic/SKILL.md
       - skills/awesome-copilot-azure-pricing/SKILL.md
 
   mixed-platform:
@@ -114,8 +116,9 @@ profiles:
       - skills/internal-java-project/SKILL.md
       - skills/internal-nodejs/SKILL.md
       - skills/internal-nodejs-project/SKILL.md
-      - skills/internal-github/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-github-pr/SKILL.md
+      - skills/internal-github-platform/SKILL.md
       - skills/internal-terraform/SKILL.md
       - skills/internal-terraform-import/SKILL.md
       - skills/internal-tf/SKILL.md

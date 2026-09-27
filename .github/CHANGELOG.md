@@ -8,6 +8,35 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-09-27
+
+- Consolidated the five Google Cloud skills into `.github/skills/internal-gcp/`: the router became the single implicit owner with an always-on GCP baseline, a decision mode, a freshness rule, and explicit handoffs; retired `internal-gcp-governance`, `internal-gcp-operations`, `internal-gcp-organization-structure`, and `internal-gcp-strategic` into `references/governance.md`, `references/operations.md`, and `references/structure.md`, with sourced facts for Org Policy dry-run support, IAM deny and Principal Access Boundary composition, VPC Service Controls dry-run, Privileged Access Manager, Data Access audit defaults, Network Connectivity Center, and Backup and DR.
+- Replaced the five GCP eval packs with one pack (14 requirements, 10 cases, 3 fixtures, 20 trigger queries) and added `.github/skills/internal-gcp/tests/test_eval_pack_boundaries.py`; added a minimal eval pack to `.github/skills/internal-cloud-policy/` and GCP boundary lines to `internal-cloud-policy` and `internal-terraform`.
+- Consolidated the six Azure skills into two: `.github/skills/internal-azure/` became the single implicit Azure control-plane owner with an always-on baseline, a shared workflow, a freshness rule, a three-field output, and `references/structure.md`, `references/governance.md`, `references/operations.md`, `references/decision-mode.md`, and `references/adjacent-owners.md`; retired `internal-azure-governance`, `internal-azure-operations`, `internal-azure-organization-structure`, and `internal-azure-strategic` and removed the Terraform fixtures from the old routing matrix. Migration: invoke `/internal-azure` for every retired lane.
+- `.github/skills/internal-azure-devops/` now triggers directly and implicitly, keeps only Azure DevOps-specific guidance in `references/pipelines.md`, and hands off CLI execution and tool-neutral delivery strategy; added eval packs for both Azure skills (12 and 10 requirements, 10 and 6 cases, 20 and 16 trigger queries) and the defective fixture `internal-azure-devops/fixtures/pipeline-secret-inline.yml`.
+- Consolidated the seven AWS skills into two: `.github/skills/internal-aws/` became the single implicit AWS platform owner with nine core rules, two output modes, explicit handoffs, and `references/organization.md`, `references/governance.md`, `references/evidence.md`, `references/current-facts.md`, and `references/decisions.md`; retired `internal-aws-governance`, `internal-aws-mcp-research`, `internal-aws-operations`, `internal-aws-organization-structure`, and `internal-aws-strategic` and removed the router `references/routing-matrix.md`. Added sourced guidance for RCPs (scope, exclusions, `RCPFullAWSAccess`), declarative policies, data perimeters, Control Tower control implementations, and mechanism-specific validation. Migration: invoke `/internal-aws` for every retired lane.
+- `.github/skills/internal-aws-lambda/` now triggers directly and implicitly, hands off trust and language-only work, adds VPC and freshness rules, and merges `references/common-mistakes.md` into `references/sharp-edges.md`; added eval packs for both AWS skills (14 and 10 requirements, 14 and 8 cases, 21 and 20 trigger queries), four defective fixtures, and `.github/skills/internal-aws/tests/test_eval_pack_boundaries.py`.
+- Consolidated the six GitHub skills into three implicit owners without a
+  router: `.github/skills/internal-github-actions/` (workflows, composite
+  actions, failed-run root cause; references reduced from 15 to 9, including
+  new `references/run-debugging.md`), `.github/skills/internal-github-pr/`
+  (template, readiness from fresh `reviewDecision` and check evidence, squash,
+  terminal state), and new `.github/skills/internal-github-platform/` (decide,
+  control, and prove modes with sourced references for rulesets, CODEOWNERS,
+  environments, tokens and OIDC including immutable subject claims, runners,
+  audit evidence, and security-feature rollout). Retired `internal-github`,
+  `internal-github-governance`, `internal-github-operations`, and
+  `internal-github-strategic`. Migration: invoke the deliverable owner
+  directly; `internal-review-code` now invokes `/internal-github-actions` as
+  its observer-only contributor.
+- Added eval packs for the three GitHub skills (12, 9, and 15 requirements;
+  8, 9, and 12 cases; 22, 21, and 25 trigger queries; 12 defective fixtures)
+  and `tests/test_github_skill_routing_consistency.py`, which checks
+  identical-prompt sibling near-misses and retired-name references.
+- Fixed the ordering check in
+  `.github/instructions/internal-codeowners.instructions.md`: GitHub applies
+  the last matching pattern, so catch-alls come first.
+
 ## 2026-09-26
 
 - Extended `.github/skills/internal-bash/references/review-anti-patterns.md` with conditioned rows `SH-C04`, `SH-C05`, `SH-M09` to `SH-M12`, and `SH-m08`; added an optional, declared `Compatibility target: Bash 3.2` to `internal-bash` and `internal-bash-script`; added eval cases with purpose-built defective fixtures and a shared dialect-parity case to both packs; added a download-and-execute check to `.github/instructions/internal-bash.instructions.md`.
