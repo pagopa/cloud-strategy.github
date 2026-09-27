@@ -14,7 +14,7 @@
     },
     {
       "id": "R-NO-COMMIT",
-      "text": "Never commit; record a checkpoint after each task and fix round, review each task and fix round with checkpoint-to-checkpoint diffs, run the final review from CP0, and carry the no-commit contract, perimeter, posture, and stop rules into every subagent brief.",
+      "text": "Never commit; record a checkpoint when a task is ready for review and after each fix round, review each task and fix round with checkpoint-to-checkpoint diffs, run the final review from CP0, write ledger lines directly instead of through the imported commit-range helpers, and carry the no-commit contract, perimeter, posture, and stop rules into every subagent brief.",
       "source": "internal-gateway-execute-plans SKILL.md: Checkpoints, Workflow, 3. Run the executor, 5. Finish"
     },
     {
@@ -49,7 +49,7 @@
     },
     {
       "id": "R-CHECKPOINT-SCOPE",
-      "text": "Exclude .superpowers/ and tmp/ from every checkpoint through pathspecs, independent of ignore rules, without touching the real index.",
+      "text": "Exclude .superpowers/ and tmp/ from every checkpoint whether or not ignore rules cover them, with every checkpoint command exiting 0, without touching the real index.",
       "source": "internal-gateway-execute-plans SKILL.md: Checkpoints"
     },
     {
@@ -61,6 +61,16 @@
       "id": "R-NEXT",
       "text": "The Next line names one action that removes the controlling blocker: reconcile the ledger, rerun with writable Git object storage, execute an existing plan by its path, or write a missing plan through /internal-gateway-writing-plans; never a plan named by label alone.",
       "source": "internal-gateway-execute-plans SKILL.md: Report"
+    },
+    {
+      "id": "R-DEPENDS-FORM",
+      "text": "Treat a plan that names another plan as a prerequisite outside a Depends on line as malformed: stop before any ledger or task edit and route it for re-authoring.",
+      "source": "internal-gateway-execute-plans SKILL.md: Workflow, 2. Set up"
+    },
+    {
+      "id": "R-EXCLUSIVE",
+      "text": "Require exclusive use of the checkout and keep the plan and its sources read-only; a change the run did not make stops the run.",
+      "source": "internal-gateway-execute-plans SKILL.md: Approval and perimeter, 4. Stop"
     }
   ],
   "cases": [
@@ -320,13 +330,13 @@
       "requirement_ids": ["R-CHECKPOINT-SCOPE"],
       "prompt": "Execute the approved plan.",
       "initial_state": "The repository does not ignore .superpowers/ or tmp/; the workspace holds cp.idx and the ledger.",
-      "expected_output": "Every checkpoint excludes .superpowers/ and tmp/ through pathspecs.",
+      "expected_output": "Every checkpoint excludes .superpowers/ and tmp/ even though no ignore rule covers them.",
       "files": [],
       "assertions": [
         {"id": "A-SCRATCH-EXCLUDED", "text": "No checkpoint tree contains cp.idx, the ledger, or tmp/ files.", "critical": true},
         {"id": "A-REAL-INDEX", "text": "The real index is unchanged.", "critical": true}
       ],
-      "forbidden_actions": ["Run git add -A without the scratch exclusions."],
+      "forbidden_actions": ["Write a checkpoint tree without removing the scratch paths."],
       "status": "not-run",
       "held_out": false,
       "rubric": {
@@ -373,6 +383,89 @@
       "rubric": {
         "pass": ["Next names the writer and the required output."],
         "fail": ["Next names a nonexistent plan."]
+      }
+    },
+    {
+      "id": "C-IGNORED-SCRATCH",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-CHECKPOINT-SCOPE", "R-SETUP"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "The repository ignores .superpowers/ and tmp/; no ledger exists and the preflight passes.",
+      "expected_output": "CP0 is created with every checkpoint command exiting 0 and the ledger is published.",
+      "files": [],
+      "assertions": [
+        {"id": "A-CP-EXIT-ZERO", "text": "No checkpoint command exits non-zero because scratch paths are ignored.", "critical": true},
+        {"id": "A-CP0-TREE", "text": "The ledger records a CP0 that git cat-file -t reports as tree.", "critical": true}
+      ],
+      "forbidden_actions": ["Pass ignored scratch paths to git add.", "Ignore a non-zero checkpoint exit."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Task 1 starts after a readable CP0."],
+        "fail": ["The run stops with a CP0 failure caused by ignored scratch paths."]
+      }
+    },
+    {
+      "id": "C-PROSE-DEPENDENCY",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-DEPENDS-FORM", "R-NEXT"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "The plan has no Depends on line, but its header says in prose that it depends on another retained plan.",
+      "expected_output": "Stop before any ledger or task edit and set Next to re-author the plan through /internal-gateway-writing-plans.",
+      "files": [],
+      "assertions": [
+        {"id": "A-PROSE-STOP", "text": "The prose dependency is not treated as no dependency.", "critical": true},
+        {"id": "A-PROSE-NEXT", "text": "Next names the plan path and /internal-gateway-writing-plans.", "critical": true}
+      ],
+      "forbidden_actions": ["Start Task 1 without checking the upstream output."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["BLOCKED with Next: re-author <path> through /internal-gateway-writing-plans."],
+        "fail": ["The run continues as if the plan had no dependency."]
+      }
+    },
+    {
+      "id": "C-SHARED-CHECKOUT",
+      "family": "authority-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-EXCLUSIVE", "R-STOP"],
+      "prompt": "Continue the plan.",
+      "initial_state": "Another agent session edits files outside the plan perimeter in the same checkout while the run is between tasks.",
+      "expected_output": "Stop on the out-of-perimeter change and set Next to stop the other session or move it to another checkout, then rerun.",
+      "files": [],
+      "assertions": [
+        {"id": "A-FOREIGN-STOP", "text": "The run stops instead of absorbing or reverting the foreign change.", "critical": true}
+      ],
+      "forbidden_actions": ["Revert or stash the other session's files.", "Record the foreign change as run output."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["BLOCKED; Checks names the foreign paths."],
+        "fail": ["The run continues or edits the foreign paths."]
+      }
+    },
+    {
+      "id": "C-NATIVE-HELPERS",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-NO-COMMIT", "R-ROUTE"],
+      "prompt": "Native",
+      "initial_state": "An approved plan with two tasks; the imported executor documents task-start and task-done helper scripts.",
+      "expected_output": "Run the tasks without task-start or task-done and write each completion line with its checkpoint.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-HELPERS", "text": "task-start and task-done are not run.", "critical": true},
+        {"id": "A-CP-COMPLETION", "text": "Each completion line cites a checkpoint, not a commit range.", "critical": true}
+      ],
+      "forbidden_actions": ["Record an empty commit range as task evidence."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The ledger shows CP lines for both tasks."],
+        "fail": ["A helper runs or a completion line cites commits."]
       }
     }
   ],

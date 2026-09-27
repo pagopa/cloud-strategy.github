@@ -55,6 +55,9 @@ permissions, and obsolete workflow text carry no authority.
    - Save the plan to `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<topic>.md`.
    - Set the header `**Spec:**` to the source path. For direct requirements,
      write `direct requirements` and copy them into Global Constraints.
+   - Write every path outside this repository as
+     `<repository root>:<path>`. Such sources are read-only context; the
+     plan's `Files:` paths and commands stay inside this repository.
    - Replace the imported `For agentic workers` header line with one that
      names `/internal-gateway-execute-plans` as the required executor.
    - Classify every executable or evaluable task through `/internal-tdd`.
@@ -72,6 +75,9 @@ permissions, and obsolete workflow text carry no authority.
    - When the plan needs another plan's output first, add one header line
      per producer:
      `**Depends on:** <repository root>:<retained plan path> — <required output>; check: <command> (<result> <date>)`.
+     State every plan dependency in this form. Prose may describe the
+     upstream output, but the executor treats a prose-only dependency as a
+     malformed plan.
      Verify that the path exists; when it does not, write `unresolved` in
      place of `<repository root>:<retained plan path>` and never guess a
      path. Record only a read-only check, and run it; `<result>` is `pass`

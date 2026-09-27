@@ -26,22 +26,26 @@ skills own the task loop, ledger, TDD cycle, rulings, and final review.
   explicit request to execute. Do not ask for it again.
 - The perimeter is the union of the plan's `Files:` paths, plus scratch writes
   under `.superpowers/` and `tmp/`. A ruling never widens it.
-- Assume exclusive use of the checkout during execution.
+- The plan file and its sources stay read-only during execution.
+- The run requires exclusive use of the checkout. A change that the run did
+  not make, such as another session's edits, is a stop, never run output.
 
 ## Checkpoints
 
 Without commits, a checkpoint records the working state, minus scratch paths,
-as a Git tree. Run `git read-tree HEAD`,
-`git add -A -- . ':(exclude).superpowers/**' ':(exclude)tmp/**'`, and
+as a Git tree. Run `git read-tree HEAD`, `git add -A`,
+`git rm -r -q --cached --ignore-unmatch -- .superpowers tmp`, and
 `git write-tree` in order, from the repository root, each with
-`GIT_INDEX_FILE=<workspace>/cp.idx`. The exclusions apply even when ignore
-rules do not cover these paths. This writes objects only: no commit, ref,
-real-index, or working-tree change.
+`GIT_INDEX_FILE=<workspace>/cp.idx`. Every command must exit 0. The removal
+step drops scratch paths whether or not ignore rules cover them. Never name
+ignored paths in `git add`: it then exits non-zero. This writes objects only:
+no commit, ref, real-index, or working-tree change.
 
-Ledger it as `CP<n>: <tree>`: `CP0` at first start, then one after every
-completed task and fix round, in the same append as its completion line.
-Checkpoints replace the imported commit ranges, `git log` recovery, and the
-imported review-package script.
+Ledger it as `CP<n>: <tree>` when it is created: `CP0` at first start, then
+one when a task is ready for review and one after every fix round. A
+completion line cites the reviewed checkpoint. Checkpoints replace the
+imported commit ranges, `git log` recovery, and the imported review-package
+script.
 
 ## Workflow
 
@@ -53,20 +57,24 @@ imported review-package script.
    - First start (no ledger for this plan): create the workspace
      `.superpowers/sdd/<plan file name without .md>/` if needed, then run the
      preflight before any ledger write or task edit. A plan without a
-     `**Depends on:**` line has no dependency. Stop on the first failure:
+     `**Depends on:**` line has no dependency unless its text names another
+     plan as a prerequisite. Stop on the first failure:
      1. A `Files:` path already has uncommitted changes.
-     2. A `**Depends on:**` check in the plan fails, cannot run, or is
+     2. The plan names a prerequisite plan outside a `**Depends on:**` line.
+     3. A `**Depends on:**` check in the plan fails, cannot run, or is
         `none`.
-     3. Git object storage rejects a new object: run `git hash-object -w
+     4. Git object storage rejects a new object: run `git hash-object -w
         --stdin` on unique input, then `git cat-file -e` on the result. A
         successful CP0 is not proof, because a clean tree reuses existing
         objects. Never change permissions or sandbox policy to pass.
-     4. CP0 cannot be created, or `git cat-file -t <CP0>` is not `tree`.
+     5. CP0 cannot be created, or `git cat-file -t <CP0>` is not `tree`.
 
-     Then write the plan path, `START: <git rev-parse HEAD>`, the preflight
-     `git status --short` output, and `CP0` to a temporary file in the
-     workspace and rename it to the ledger path. Never replace an existing
-     ledger.
+     A setup stop is report-only: publish no ledger and write no notes file.
+     Otherwise write the imported first line
+     `# SDD ledger — plan: <plan path>`,
+     `START: <git rev-parse HEAD>`, the preflight `git status --short`
+     output, and `CP0` to a temporary file in the workspace and rename it to
+     `<workspace>/progress.md`. Never replace an existing ledger.
    - Resume (the ledger names this plan): rerun every `**Depends on:**`
      check first; a recorded result is not current evidence. Reuse `START`
      and the checkpoints.
@@ -80,7 +88,12 @@ imported review-package script.
    - Git: follow the no-commit contract carried by the imported skills. Never
      commit. Review a task with `git diff CP<n-1> CP<n>` and a fix round with
      `git diff <reviewed CP> <new CP>`, saved in the workspace; earlier changes
-     are context only.
+     are context only. Fill the imported base and head placeholders with
+     checkpoint trees and pass the saved diff file.
+   - Helpers: do not run the imported `task-start` and `task-done` scripts.
+     They record commit ranges. Write ledger lines directly. When another
+     imported helper fails on a path or environment, stop and report it;
+     never improvise a replacement.
    - Test posture: the task's recorded `/internal-tdd` posture is the agreed
      TDD exception. `feature-first` and `validation-only` tasks do not need a
      red-first run.
@@ -116,6 +129,9 @@ Next: <one action or none>
 
 - reconcile `<ledger path>`;
 - rerun with writable Git object storage;
+- re-author `<plan path>` through `/internal-gateway-writing-plans`, for a
+  prose dependency;
+- stop the other session in this checkout, then rerun, for foreign changes;
 - execute `<repository root>:<plan path>` through
   `/internal-gateway-execute-plans`, for an existing upstream plan;
 - write a plan that delivers `<required output>` through

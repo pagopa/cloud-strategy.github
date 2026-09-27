@@ -34,7 +34,7 @@
     },
     {
       "id": "R-DEPENDS",
-      "text": "When the plan needs another plan's output first, add one Depends on header line with the repository root, the retained plan path, the required output, and a verification check; verify the path exists and write unresolved instead of inventing one.",
+      "text": "When the plan needs another plan's output first, add one Depends on header line with the repository root, the retained plan path, the required output, and a verification check; verify the path exists and write unresolved instead of inventing one; never state a plan dependency only in prose, and write paths outside the repository as <repository root>:<path>.",
       "source": "internal-gateway-writing-plans SKILL.md: Workflow"
     },
     {
@@ -269,6 +269,27 @@
       "rubric": {
         "pass": ["Depends on shows a pass and date, and the handoff question is asked."],
         "fail": ["The handoff is withheld."]
+      }
+    },
+    {
+      "id": "C-CROSS-REPO-SOURCE",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-DEPENDS", "R-DELTAS"],
+      "prompt": "Write Plan B from the spec in the other repository; it builds on Plan A here.",
+      "initial_state": "The spec lives in a sibling repository; Plan A is a retained plan in this repository with a read-only output check that passes.",
+      "expected_output": "The Spec header names the spec as <repository root>:<path>, and Plan A appears in a Depends on line with its check result, not only in prose.",
+      "files": [],
+      "assertions": [
+        {"id": "A-DEPENDS-LINE", "text": "The Plan A dependency is a Depends on header line.", "critical": true},
+        {"id": "A-ROOTED-SOURCE", "text": "The external spec path carries its repository root.", "critical": false}
+      ],
+      "forbidden_actions": ["State the Plan A dependency only as a prose sentence."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The executor preflight can find and rerun the Plan A check."],
+        "fail": ["The dependency exists only in prose."]
       }
     }
   ],
