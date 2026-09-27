@@ -33,14 +33,16 @@ Create durable repository documentation from bounded, on-disk evidence.
    - `docs/architecture.md` with [architecture maintenance](references/architecture-maintenance.md);
    - decisions with [ADR maintenance](references/adr-maintenance.md);
    - standards, principles, and guides with [standards maintenance](references/standards-maintenance.md);
+   - diagrams with [the Mermaid contract](references/mermaid-contract.md);
    - context documents with `/mattpocock-domain-modeling`, whose format this skill follows without adding to it.
 6. Recheck each destination immediately before writing, apply the unchanged predicate, and treat a material omission that blocks the stated reader outcome as a refresh trigger. Resolve each normative rule through its one detailed owner, confirm the owning reference's obligations inside the document itself, then write at most one wave.
 7. Run applicable Markdown and repository validators. Report changed paths, evidence used, what each validator actually covered, the exclusion ledger, the enforcement gap, and the next wave.
+8. Format the completion report with [knowledge report](references/knowledge-report.md), including `breaking_refs` for affected non-documentation consumers.
 
 ## Boundaries
 
 - This skill authors documents. It never writes workflows, composite actions, validators, documentation generators, coverage manifests, or repository policy files, and never installs a check. Report the enforcement gap instead of closing it.
-- `CONTEXT.md` and `CONTEXT-MAP.md` follow an external context format. Never add a section that format does not define; content that does not fit belongs to another artifact. When the external skill is unavailable, author the rest and report the vocabulary layer as a gap.
+- `CONTEXT.md` and `CONTEXT-MAP.md` follow the repository's declared context format. Use `/mattpocock-domain-modeling` when available; otherwise use the self-contained fallback in [knowledge topology](references/knowledge-topology.md). Keep content that does not fit the selected format in another artifact.
 - A declaration states intent, not fact. Never let a declared layout override the domain set the repository evidences.
 - The repository declares its own knowledge layout. Read that declaration; never substitute a central preference for it, and change it only inside an approved plan.
 - `targeted` uses exactly the normalized destinations supplied by the user and never widens into a repository-wide sync. Report the wider gap instead of acting on it.
@@ -49,6 +51,7 @@ Create durable repository documentation from bounded, on-disk evidence.
 - Audit is read-only and bounded. It reports evidence, impact, actual coverage, exclusions, unknowns, and next actions without mutating files, persisting output by default, invoking authoring, or claiming repository-wide completeness. Do not implement audit findings or promote them into repository policy without a separate explicit request and owner review.
 - Write only destinations the approved plan or the explicit request authorizes. Evidence discovered while drafting produces a reported gap, never an unplanned write.
 - Preserve accepted ADR bodies; use the supersession flow for a changed accepted decision.
+- Apply [knowledge navigation](references/knowledge-navigation.md) before proposing a router or index write; discovery does not prove ownership, and generated indexes remain with their generator.
 - Preserve existing generated blocks and repository-owned documentation markers byte-for-byte. Never introduce a new marker, profile mechanism, or coverage manifest.
 - Keep this skill self-contained: use `SKILL.md` and its bundle-local references, and do not depend on host-specific paths, maps, parsers, or scripts.
 - The technical lane and managerial lane are authoring choices within the five modes, not a runtime profile. The topology reference owns the profile prohibition and the managerial reference owns its detailed state vocabulary.

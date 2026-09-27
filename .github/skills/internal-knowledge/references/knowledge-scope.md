@@ -11,6 +11,7 @@ Use this reference to decide **what the skill may touch** before any drafting st
 - [Layout declaration and drift](#layout-declaration-and-drift)
 - [Significant components](#significant-components)
 - [Write allowlist](#write-allowlist)
+- [Protected paths and metadata](#protected-paths-and-metadata)
 - [Unchanged predicate](#unchanged-predicate)
 - [Preflight plan](#preflight-plan)
 - [Waves](#waves)
@@ -144,9 +145,33 @@ Account for every discovered directory and evidence-table row as `planned`, `exi
 - In `sync` and `setup`, the allowlist is exactly the approved plan intersected with the requested bucket. Approval is what authorizes a write, not discovery.
 - A row outside the requested bucket is reported as excluded with the reason `outside the requested bucket`; it never produces an unplanned write.
 - The allowlist never grows after approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
+- The allowlist contains documentation targets only, including README files. Do not edit source code, configuration, policy, workflows, tests, validators, or generators. When a needed correction belongs to a code or configuration owner, leave it untouched and report its path and reason in `breaking_refs`.
 - Repository governance and contribution files are evidence, never targets. Read them, cite them, place them in the reading order, and leave them untouched.
 - A path is generated or externally synchronized only when its own generator or manifest lists that path. A directory pattern is not evidence of ownership: read the entries, because a manifest covering a tree normally enumerates exact paths, and excluding a repository-owned document as managed drops it from the plan without anyone noticing.
 - `targeted` has no implicit root-layout exception. If the layout root is not a supplied destination, report any gap it creates and leave the root untouched.
+
+## Protected Paths And Metadata
+
+Front matter is opt-in. Add `doc_type`, `doc_lifecycle` (`active` or
+`history`), or `doc_owner` only when an authoritative local standard enables
+that field. Avoid keys reserved by the repository's documentation framework.
+Never add front matter to ADRs, generated documents, or append-only ledger
+records.
+
+Keep protected document edits within their owner's contract:
+
+- An accepted ADR's decision body is immutable. A changed decision needs a
+  superseding ADR; path-only link maintenance may update links without changing
+  the decision. See [ADR maintenance](adr-maintenance.md).
+- Generated documents remain with their authoritative generator. Do not edit
+  an output directly; if its generator or required source, invocation, or test
+  changes are outside the documentation allowlist, report the owner and gap.
+- Append-only ledgers keep existing records immutable. Their introductions or
+  commands may be refreshed only when the approved wave preserves every
+  record.
+
+When the owner, generator, or preservation boundary is uncertain, leave the
+path unchanged and report it as a gap or exclusion rather than guessing.
 
 ## Unchanged predicate
 
@@ -199,7 +224,12 @@ This block is a report, not a change. Never create or modify workflows, actions,
 
 ## Completion report
 
-Report every target exactly once as `created`, `refreshed`, `unchanged`, `excluded`, or `failed`. Include the evidence used, the validators run and their scope, the exclusion ledger, the enforcement gap, unresolved conflicts, and the next wave.
+Use the grammar and field meanings in [knowledge report](knowledge-report.md).
+Report every target exactly once as `created`, `refreshed`, `unchanged`,
+`excluded`, or `failed`. Include the evidence used, the validators run and
+their actual scope, the exclusion ledger, the enforcement gap, unresolved
+conflicts, and the next wave. Report affected non-documentation consumers in
+`breaking_refs` without editing them.
 
 When a bucket excludes material gaps, such as a missing `RULES.md` for an evidenced domain, elevate them above the ledger boilerplate: name each one with its evidence and the follow-up that would author it.
 

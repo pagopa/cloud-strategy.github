@@ -14,6 +14,10 @@ The imported skill informs the decision. This skill retains ownership of reposit
 
 Read the nearest `docs/adr/README.md` before writing and treat it as authoritative. Use [minimal MADR](madr-minimal.md) only when no local contract exists.
 
+Do not add front matter to ADRs. Preserve their local format and metadata
+contract; generated documents and append-only ledgers remain governed by
+[knowledge scope](knowledge-scope.md).
+
 When ADRs already exist and no local contract is stated anywhere the author would read it, create `docs/adr/README.md` from the format those records already share: the index, the naming rule, the section order they use, the status vocabulary, and the supersession rule. Describe the practice the repository has; never impose a format the existing records do not follow.
 
 Choose the ADR directory for the affected architectural scope. Use a root ADR directory for repository-wide decisions and a context-local ADR directory only when existing context documentation establishes one. Scan that directory for the highest number and create the next `NNNN-<slug>.md`; never reuse a number for another accepted decision.
@@ -32,7 +36,7 @@ than inventing a metadata field or registry.
 ## Status and Immutability
 
 - A proposed ADR may be revised before acceptance.
-- An accepted ADR body is immutable.
+- Accepted decision content is immutable. A path-only link update may maintain references without changing the decision, its rationale, or its consequences.
 - A changed accepted decision requires a new ADR that supersedes it. Modify only the old ADR's status line when the local contract permits that transition, and link both records.
 - Do not mark an ADR accepted unless the user or repository authority explicitly establishes acceptance.
 

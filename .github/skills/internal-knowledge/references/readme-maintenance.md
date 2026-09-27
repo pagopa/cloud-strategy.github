@@ -10,6 +10,18 @@ Use this reference to create or refresh README files for repository-relative dir
 4. Read outside a target only for bounded evidence. Never expand the write allowlist while drafting: in `targeted` it is the supplied set, and in `sync` and `setup` it is the approved plan. A component or manifest entry discovered after approval produces a reported gap, not a write.
 5. When the repository serves a profile README from `.github/README.md`, treat it as the displayed entry point and the root `README.md` as the in-repository entry point. State which is which, and stop before writing when the two contradict each other.
 
+## Reader Contract
+
+Open with a title and one or two sentences that say what the component is and
+when a reader should use it. Within the first screen (about 40 non-blank
+lines), provide a useful next step or link. When the target has behavior,
+include safe usage and validation guidance. Let the README summarize and link
+to one detailed owner instead of copying its full contract. Organize sections
+around the target's nature and reader task; around 150 lines is a signal to
+check whether details belong with an owner, not a size limit. In the completion
+report, account for each README as created, refreshed, unchanged, or failed,
+and record each intentional omission with a reason.
+
 ## Evidence and Content
 
 Apply repository instructions and the nearest documentation contract. Derive claims from source, configuration, interfaces, manifests, tests, workflows, scripts, ADRs, and existing documentation. Treat general technology knowledge as guidance, not evidence of repository behavior.
@@ -47,16 +59,20 @@ When declarative source drives a runtime effect, explain the phases separately: 
 
 Preserve still-valid facts, links, commands, badges, and generated blocks. Keep every existing generated block byte-for-byte; the skill must preserve generated blocks byte-for-byte and report conflicts instead of rewriting or regenerating them. Authored prose and diagrams go before the opening marker of a generated block: content placed after it sits in territory the generator owns and disappears on its next run, which the current diff never shows. Never include secrets, personal data, state content, sensitive output, or unnecessary live identifiers.
 
-Use Mermaid only when at least three material evidenced relationships are clearer as a diagram. Prefer stable `flowchart` and `sequenceDiagram` syntax. Include `accTitle` and `accDescr`, use stable ASCII identifiers, and explain the diagram in adjacent prose. Forbidden features unless a compatible renderer is verified: beta diagram types, icon packs, HTML labels, `click`, themes, and custom styling. Create at most two diagrams.
-
-Include a diagram only when the threshold is met and it improves the stated reader outcome. Otherwise omit it; when the omission needs explanation, record `omitted-with-reason` in the completion report. If another document already draws the relationship, link to it in the report or surrounding prose rather than redrawing a diagram a second document owns. Do not add fixed in-document diagram boilerplate merely to account for an omission.
+Use [the Mermaid contract](mermaid-contract.md) to decide, author, and report
+diagrams. Link to an existing owner instead of redrawing a relationship it
+already owns. When an expected diagram is omitted, report the
+`omitted-with-reason` disposition through the report's `omitted` field as
+`<path>: <reason>`.
 
 During a read-only audit, a README is evidence within the named perimeter. Its
 length, link set, or absence of a section does not authorize a refresh, widen
 the audit, or prove ownership of another artifact. Report the observed reader
 gap or unknown and leave authoring to a separate explicit request.
 
-Verify each diagram before writing it, by rendering it or by parsing it offline when no renderer is reachable. An unreachable renderer neither excuses the verification nor justifies dropping a warranted diagram. Write the arrows as literal `-->` and `->>`: an editing tool that emits `&gt;` or `&lt;` inside the fence produces a block that reads correctly in the diff and fails to parse.
+Verify each diagram by rendering or parsing it when a renderer is available.
+When parsing cannot run, record that evidence gap; do not claim validation.
+Write arrows as literal `-->` and `->>` so source remains parseable.
 
 ## Validation and Completion
 

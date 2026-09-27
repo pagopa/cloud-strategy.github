@@ -42,6 +42,20 @@ Treat generated files as protected evidence, not as authored replacements.
 
 Every repository has at least one knowledge domain. The evidenced domain count selects the layout; a declaration proposes a layout and never overrides the evidence.
 
+Organize the top level by artifact type. Use L0-L3 only as navigation depth in
+the plan: L0 is the repository index, L1 is repository orientation, L2 is the
+owning domain or document type, and L3 is a specialist reference. These labels
+do not require directories, metadata, or a fixed document at every level.
+Group `reference/<area>/` when an area has about three or more reference
+documents; with fewer, use flat `reference/<area>-<topic>.md` paths. The count
+is a placement signal, not a quota.
+
+Split a document only when it mixes reader modes or independent contracts or
+consumers that materially change the reader path. A length near 250 lines is
+a signal to inspect, not a split threshold. Split content by authority and
+time validity, not by its current position: move dated observations to a
+`*-history.md` owner, while current obligations stay with their active owner.
+
 | Domains evidenced | Root document | Domain documents |
 | --- | --- | --- |
 | One | Root `CONTEXT.md` | `docs/domain/<slug>/RULES.md` when normative rules exist |
@@ -99,9 +113,24 @@ record the gap as `considered, not evidenced` and do not create a placeholder.
 
 ## Context documents
 
-`CONTEXT.md` and `CONTEXT-MAP.md` belong to the external context format. Draft them with `/mattpocock-domain-modeling` and follow that format exactly.
+`CONTEXT.md` and `CONTEXT-MAP.md` follow the repository's declared context
+format. When available, draft them with `/mattpocock-domain-modeling` and
+follow that format exactly. Recognize both `## Terms` with `### <term>` entries
+and `## Language` with bold `**<term>**:` entries; preserve the existing form
+instead of normalizing it.
 
-Never add a section the external format does not define, and never relocate one it does. A context document is a glossary; content that does not fit it belongs to another artifact:
+When the external format owner is unavailable, use this bundle's minimal
+fallback: context documents define repository-specific terms; `RULES.md`
+contains only evidenced normative obligations. Cite the source path for each
+term or rule, distinguish current obligations from historical observations,
+and follow the repository's declared authority precedence. If sources conflict
+and that precedence does not resolve them, report the conflict instead of
+inventing a universal order or silently changing the vocabulary.
+
+When using the external format, never add a section it does not define or
+relocate one it does. Under the fallback, keep context terms separate from
+normative rules. Content that does not fit either contract belongs to another
+artifact:
 
 | Content | Owner |
 | --- | --- |
@@ -111,7 +140,10 @@ Never add a section the external format does not define, and never relocate one 
 | Decisions index | `docs/adr/README.md` |
 | Rules and invariants | `docs/domain/<slug>/RULES.md` |
 
-When the external skill is unavailable, author the artifacts this skill owns, report the vocabulary layer as a gap, and state the unavailability in the plan before approval. Never substitute a local format for the missing one.
+When the external skill is unavailable, use the self-contained fallback above
+and state that choice in the plan before approval. Do not report the vocabulary
+layer as a gap solely because the external skill is unavailable; unresolved
+source conflicts remain gaps.
 
 ## Relationships
 
