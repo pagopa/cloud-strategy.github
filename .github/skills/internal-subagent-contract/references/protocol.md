@@ -64,8 +64,9 @@ For `mode: plan`, `value_gate` has exactly two additional required fields:
 `off_critical_path` explains why the worker package is not required to unblock
 the next handoff. The validator requires both values to be non-empty and
 leaves their semantic truth and routing decision with the caller. If the
-comparison is not substantive, the caller uses local authoring with
-`mode: none`; provider or model identity is never admission evidence. Read and
+comparison is not substantive, the primary owner does the work locally and
+writes no brief; `mode` has no `none` value. Provider or model identity is
+never admission evidence. Read and
 write briefs retain the three-field value gate shown above.
 
 Evidence references use a deterministic v1 convention: `fact:<text>` is an
@@ -79,8 +80,18 @@ resolved root and caller limits.
 
 ## WorkerResult
 
-The worker returns one structured object. The result ID must equal the brief
-ID, and `brief_sha256` must hash the exact brief bytes supplied to the worker.
+The worker returns only the ten semantic fields: `schema_version`,
+`delegation_id`, `status`, `value_delivered`, `summary`, `artifacts` (each
+`path` and `kind`, optional `sha256`), `evidence`, `non_blocking_findings`,
+`remaining`, and `retry`. `fixtures/valid-result.json` is a valid worker
+payload. The adapter adds `brief_sha256`, `progress_signature`, and
+`budgets_used`, fills artifact hashes from disk, and rejects a worker payload
+that supplies any of those three fields. Check a raw payload with the
+`worker-payload` CLI command before composition.
+
+The composed result is one structured object. The result ID must equal the
+brief ID, and `brief_sha256` must hash the exact brief bytes supplied to the
+worker.
 
 ```json
 {
@@ -174,7 +185,8 @@ optional raw-payload reference. Its fixed top-level shape is:
     "caller_acceptance": {"state": "unavailable", "source": "caller", "evidence_ref": "..."}
   },
   "caller_decision": {"decision": "not_decided", "source": "caller", "evidence_ref": "..."},
-  "value_verified": false
+  "value_verified": false,
+  "final_artifact": null
 }
 ```
 
@@ -187,7 +199,10 @@ separate and is exactly `accepted`, `rejected`, or `not_decided`.
 The caller or adapter persists `result_path` outside worker `write_scope` and
 stores the receipt at its deterministic `.receipt.json` sibling.
 `value_verified` belongs only to the receipt and can be true only after caller
-acceptance and verified attestations. V1 validates one brief/result pair;
+acceptance and verified attestations. When the result has artifacts, a
+verified receipt also needs `final_artifact` (`path`, `sha256`,
+`semantic_fingerprint`), set by `bind_final_artifact()` against the current
+final bytes; a later material edit invalidates it. V1 validates one brief/result pair;
 `retry`, `attempts`, `context_refills`, and `progress_signature` remain
 compatibility fields, while retry eligibility is not a new lifecycle owner.
 

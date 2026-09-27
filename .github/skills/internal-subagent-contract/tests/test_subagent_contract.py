@@ -24,6 +24,7 @@ from subagent_contract import (  # noqa: E402
     compare_progress,
     compute_progress_signature,
     evidence_path_allowed,
+    main,
     receipt_path_for,
     resolve_evidence_refs,
     retry_eligible,
@@ -114,6 +115,49 @@ def test_brief_evidence_separates_inline_facts_from_resolved_paths() -> None:
     assert evidence_path_allowed(BUNDLE / "references/protocol.md", resolved)
     assert not evidence_path_allowed(BUNDLE / "SKILL.md", resolved)
     assert validate_brief(brief, repo_root=REPO_ROOT) == []
+
+
+def test_brief_cli_rejects_mode_none_fixture(capsys: pytest.CaptureFixture[str]) -> None:
+    code = main(
+        ["brief", str(FIXTURES / "invalid-mode-none.json"), "--repo-root", str(REPO_ROOT)]
+    )
+
+    assert code == 1
+    assert "mode" in capsys.readouterr().out
+
+
+def test_worker_payload_cli_accepts_semantic_fixture(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    code = main(
+        [
+            "worker-payload",
+            str(FIXTURES / "valid-result.json"),
+            str(FIXTURES / "valid-brief.json"),
+            "--repo-root",
+            str(REPO_ROOT),
+        ]
+    )
+
+    assert code == 0
+    assert capsys.readouterr().out.strip() == "valid"
+
+
+def test_worker_payload_cli_rejects_adapter_owned_fields(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    code = main(
+        [
+            "worker-payload",
+            str(FIXTURES / "invalid-worker-payload.json"),
+            str(FIXTURES / "valid-brief.json"),
+            "--repo-root",
+            str(REPO_ROOT),
+        ]
+    )
+
+    assert code == 1
+    assert "deterministic fields" in capsys.readouterr().out
 
 
 def test_invalid_value_fixture_fails_closed() -> None:
