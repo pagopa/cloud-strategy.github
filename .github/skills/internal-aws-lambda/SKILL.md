@@ -1,12 +1,13 @@
 ---
 name: internal-aws-lambda
-description: Use when /internal-aws selects the AWS Lambda lane for handlers, event sources, runtimes, packaging, retries, concurrency, cold starts, or Lambda-specific configuration.
+description: Use when implementing or reviewing an AWS Lambda function contract, including the handler boundary, event source, retries and idempotency, partial batch failure, concurrency, timeouts, packaging, cold starts, or current Lambda limits and runtime support. Route execution-role trust, account, or guardrail design to /internal-aws, and language-only refactoring to the language skill.
 ---
 
 # Internal AWS Lambda
 
-Own AWS Lambda handler, event-source, runtime, packaging, retry, concurrency,
-cold-start, and configuration behavior.
+Own the AWS Lambda function contract: handler boundary, event source,
+runtime, packaging, retry, concurrency, cold-start, and configuration
+behavior.
 
 ## When to use
 
@@ -17,6 +18,16 @@ cold-start, and configuration behavior.
   partial-batch-failure flows.
 - Packaging, dependency, cold-start, VPC, or runtime-configuration choices
   specific to Lambda.
+
+Hand off other work:
+
+- execution-role trust, cross-account permissions, SCPs, or account
+  placement: `/internal-aws`;
+- language structure and tests that do not depend on the Lambda contract:
+  the language skill, such as `/internal-python-project` or
+  `/internal-nodejs-project`;
+- Terraform or CloudFormation authoring: `/internal-terraform` or
+  `/antigravity-cloudformation-best-practices`.
 
 ## Core rules
 
@@ -37,6 +48,8 @@ cold-start, and configuration behavior.
   secret stores.
 - Log stable identifiers (request IDs, message IDs); do not log raw sensitive
   payloads by default.
+- Attach a function to a VPC only for a concrete private dependency; then
+  name its DNS and egress path.
 
 ## Event-source guidance
 
@@ -49,15 +62,25 @@ cold-start, and configuration behavior.
 - **File-driven**: avoid recursive triggers by separating input and output
   prefixes or buckets.
 
+## Freshness
+
+Timeouts, payload and `/tmp` limits, runtime support, and newer features
+change. Verify a number against current AWS documentation before stating
+it; otherwise mark it unverified.
+
+Optional enrichment: when AWS Knowledge MCP is available, AWS publishes an
+`aws-serverless` agent skill for SnapStart, Powertools, event source
+mappings, and current limits. Discover the exact `skill_name` with
+`search_documentation` topic `agent_skills`, then load it with
+`retrieve_skill`. This skill stays complete without it.
+
 ## References
 
 - [references/examples.md](references/examples.md): load for minimal handler
   patterns and event-source checklists.
 - [references/sharp-edges.md](references/sharp-edges.md): load when diagnosing
-  cold starts, VPC latency, retry storms, response-shape mismatches, or
-  file-ingest recursion.
-- [references/common-mistakes.md](references/common-mistakes.md): load for the
-  full mistake table.
+  cold starts, VPC latency, retry storms, duplicate side effects,
+  response-shape mismatches, file-ingest recursion, or secret exposure.
 
 ## Completion criteria
 
@@ -69,3 +92,4 @@ cold-start, and configuration behavior.
   event-source, and queue configuration.
 - Event contract, boundary normalization, retry behavior, and idempotency are
   explicit.
+- Numeric limits are sourced or marked unverified.

@@ -1,0 +1,740 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-aws",
+  "requirements": [
+    {
+      "id": "R-SCOPE",
+      "text": "Name the governance or structural scope before recommending a mechanism.",
+      "source": "internal-aws SKILL.md: Core rule 1"
+    },
+    {
+      "id": "R-CONTROL-EFFECT",
+      "text": "Classify each control as limiting principals, limiting resources, enforcing configuration, granting, or constraining delegation.",
+      "source": "internal-aws SKILL.md: Core rule 2"
+    },
+    {
+      "id": "R-NO-GRANT",
+      "text": "Never present an SCP or RCP as granting access.",
+      "source": "internal-aws SKILL.md: Core rule 2"
+    },
+    {
+      "id": "R-RCP-LIMITS",
+      "text": "State RCP exclusions when an RCP is recommended: supported services only, service-linked roles, and AWS managed KMS keys.",
+      "source": "internal-aws SKILL.md: Core rule 2"
+    },
+    {
+      "id": "R-MGMT-ACCOUNT",
+      "text": "Keep the management account minimal and apply the SCP principal and RCP resource exemptions correctly.",
+      "source": "internal-aws SKILL.md: Core rule 3"
+    },
+    {
+      "id": "R-DELEGATED-MEMBER",
+      "text": "Treat a delegated administrator as a member account under SCPs and RCPs.",
+      "source": "internal-aws SKILL.md: Core rule 3"
+    },
+    {
+      "id": "R-STRUCTURE-VS-GOVERNANCE",
+      "text": "Keep placement decisions separate from control decisions.",
+      "source": "internal-aws SKILL.md: Core rule 4"
+    },
+    {
+      "id": "R-ROLLOUT-UNIT",
+      "text": "For risky rollout, name the smallest unit, preflight, rollback trigger, and owner.",
+      "source": "internal-aws SKILL.md: Core rule 5"
+    },
+    {
+      "id": "R-EVIDENCE-LABEL",
+      "text": "Label claims as AWS documentation, live observation, or inference, and keep backup and restore proof separate.",
+      "source": "internal-aws SKILL.md: Core rule 6"
+    },
+    {
+      "id": "R-FRESHNESS",
+      "text": "Verify freshness-sensitive facts or mark them unverified, with official AWS documentation as the fallback when AWS MCP is unavailable.",
+      "source": "internal-aws SKILL.md: Core rule 7"
+    },
+    {
+      "id": "R-VALIDATION-MECHANISM",
+      "text": "Match validation to the mechanism and do not claim IAM policy simulation proves an RCP or declarative policy effect.",
+      "source": "internal-aws SKILL.md: Core rule 8"
+    },
+    {
+      "id": "R-IAM-READ-ONLY",
+      "text": "Keep live IAM access read-only unless the user explicitly requests a change.",
+      "source": "internal-aws SKILL.md: Core rule 7"
+    },
+    {
+      "id": "R-DECISION-MODE",
+      "text": "Return a quick answer for a narrow ask and a decision note only when an option decision is requested.",
+      "source": "internal-aws SKILL.md: Core rule 9 and Output modes"
+    },
+    {
+      "id": "R-HANDOFF",
+      "text": "Hand off Lambda function contracts, Organizations policy documents, IaC authoring, and spend analysis to their owners.",
+      "source": "internal-aws SKILL.md: Boundaries"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-SCP-EXPLICIT-DENY",
+      "family": "competing-control",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-NO-GRANT",
+        "R-CONTROL-EFFECT",
+        "R-SCOPE"
+      ],
+      "prompt": "A deploy role in a member account gets AccessDenied with 'explicit deny in a service control policy' although its identity policy allows s3:PutBucketPolicy. The team wants to add another IAM allow. What should they do?",
+      "initial_state": "The error text names an SCP explicit deny; the identity policy already allows the action.",
+      "expected_output": "The SCP is identified as the blocking control, more IAM allows are rejected, and the fix is scoped to the SCP or its attachment point.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-SCP-BLOCKS",
+          "text": "The response states that the SCP deny blocks the call and IAM grants cannot override it.",
+          "critical": true
+        },
+        {
+          "id": "A-SCOPE",
+          "text": "The response asks for or names the OU or account where the SCP is attached.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Recommend adding broader IAM permissions as the fix."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Names the SCP as the controlling deny.",
+          "Keeps the fix at the SCP or exception path."
+        ],
+        "fail": [
+          "Suggests an IAM allow can override the SCP deny."
+        ]
+      }
+    },
+    {
+      "id": "C-MGMT-SCP",
+      "family": "boundary-rule",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MGMT-ACCOUNT",
+        "R-SCOPE"
+      ],
+      "prompt": "We attached an SCP at the root that denies leaving approved regions, but admins in the management account can still create resources in other regions. Is the SCP broken?",
+      "initial_state": "The SCP is attached at the organization root.",
+      "expected_output": "The response explains that SCPs do not restrict management-account principals and proposes keeping workloads out of the management account.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-MGMT-EXEMPT",
+          "text": "The response states that SCPs do not affect principals in the management account.",
+          "critical": true
+        },
+        {
+          "id": "A-MINIMAL",
+          "text": "The response recommends a minimal management account instead of a stronger SCP.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Claim the SCP is misconfigured and must be rewritten."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Explains the management-account exemption."
+        ],
+        "fail": [
+          "Treats the behavior as an SCP defect."
+        ]
+      }
+    },
+    {
+      "id": "C-RCP-PERIMETER",
+      "family": "control-selection",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-CONTROL-EFFECT",
+        "R-RCP-LIMITS",
+        "R-ROLLOUT-UNIT",
+        "R-VALIDATION-MECHANISM"
+      ],
+      "prompt": "Security wants to make sure no principal outside our organization can read our S3 buckets or use our customer managed KMS keys, across all accounts. Which control should we use and how do we roll it out?",
+      "initial_state": "AWS Organizations with all features enabled; several OUs; external partners currently read one bucket.",
+      "expected_output": "An RCP-based data perimeter with the known exclusions, a staged rollout starting with one OU, and validation beyond IAM simulation.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-RCP",
+          "text": "The response selects an RCP as the resource-side control rather than an SCP alone.",
+          "critical": true
+        },
+        {
+          "id": "A-EXCLUSIONS",
+          "text": "The response states that RCPs cover only supported services and do not affect service-linked roles or AWS managed KMS keys.",
+          "critical": true
+        },
+        {
+          "id": "A-STAGED",
+          "text": "The response names a first rollout unit and a rollback trigger, and accounts for the partner exception.",
+          "critical": true
+        },
+        {
+          "id": "A-NO-SIM-PROOF",
+          "text": "The response does not present IAM policy simulation as proof of the RCP effect.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Attach a new deny policy at the root without a staged unit."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "RCP chosen with exclusions, staged unit, and observed-evidence validation."
+        ],
+        "fail": [
+          "SCP presented as sufficient to block external principals.",
+          "Simulation claimed as RCP proof."
+        ]
+      }
+    },
+    {
+      "id": "C-RCP-MGMT-PRINCIPAL",
+      "family": "boundary-rule",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MGMT-ACCOUNT",
+        "R-CONTROL-EFFECT"
+      ],
+      "prompt": "An engineer using a role in the management account is denied reading a bucket in a member account right after we attached an RCP. They say the management account is exempt from org policies. Are they right?",
+      "initial_state": "The bucket lives in a member account; the RCP denies access outside an approved condition.",
+      "expected_output": "The response explains that RCPs apply to member-account resources, whoever the caller is, so the denial is expected.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-RCP-APPLIES",
+          "text": "The response states the RCP applies because the resource is in a member account.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Claim management-account principals bypass RCPs."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Distinguishes principal exemption (SCP) from resource scope (RCP)."
+        ],
+        "fail": [
+          "Says the management account bypasses the RCP."
+        ]
+      }
+    },
+    {
+      "id": "C-RCP-AWS-MANAGED-KEY",
+      "family": "defective-artifact",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-RCP-LIMITS",
+        "R-CONTROL-EFFECT"
+      ],
+      "prompt": "Review this proposed RCP. It is meant to block external access to our KMS keys, including the aws/s3 default key.",
+      "initial_state": "The fixture targets AWS managed KMS keys and names a service without RCP support.",
+      "expected_output": "The review states that the RCP does not restrict AWS managed KMS keys and that unsupported services are unaffected.",
+      "files": [
+        "tests/evaluation/fixtures/rcp-aws-managed-key.json"
+      ],
+      "assertions": [
+        {
+          "id": "A-MANAGED-KEY",
+          "text": "The review flags that AWS managed KMS keys are outside RCP effect.",
+          "critical": true
+        },
+        {
+          "id": "A-UNSUPPORTED",
+          "text": "The review flags the unsupported service action as having no RCP effect.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Approve the RCP as complete coverage."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/rcp-aws-managed-key.json"
+    },
+    {
+      "id": "C-DECLARATIVE-AMI",
+      "family": "control-selection",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-CONTROL-EFFECT",
+        "R-SCOPE"
+      ],
+      "prompt": "We want to guarantee across the organization that nobody can share EC2 AMIs publicly, even with new APIs later. What control fits best?",
+      "initial_state": "AWS Organizations with all features enabled.",
+      "expected_output": "A declarative policy for EC2 image block public access, scoped to the organization or OU.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-DECLARATIVE",
+          "text": "The response prefers a declarative policy that enforces the service configuration.",
+          "critical": true
+        },
+        {
+          "id": "A-SCOPE",
+          "text": "The response names the attachment scope.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Recommend only an SCP deny on ModifyImageAttribute as the complete answer."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Declarative policy selected with its configuration-enforcement rationale."
+        ],
+        "fail": [
+          "Only API-level deny proposed."
+        ]
+      }
+    },
+    {
+      "id": "C-DELEGATED-ADMIN",
+      "family": "placement",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-STRUCTURE-VS-GOVERNANCE",
+        "R-DELEGATED-MEMBER",
+        "R-ROLLOUT-UNIT"
+      ],
+      "prompt": "Where should we run GuardDuty administration for 60 accounts, and what happens with our SCPs there?",
+      "initial_state": "Accounts: management, log archive, security tooling, workloads.",
+      "expected_output": "Delegated administrator in the security tooling account, SCPs still apply there, first rollout unit named.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-DELEGATED",
+          "text": "The response places administration in a delegated administrator account, not the management account.",
+          "critical": true
+        },
+        {
+          "id": "A-SCP-APPLIES",
+          "text": "The response states that SCPs still apply to the delegated administrator account.",
+          "critical": true
+        },
+        {
+          "id": "A-UNIT",
+          "text": "The response names the smallest rollout unit.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Run day-to-day administration from the management account."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Delegated admin placement with SCP note and rollout unit."
+        ],
+        "fail": [
+          "Management account as default operator."
+        ]
+      }
+    },
+    {
+      "id": "C-STACKSETS-MGMT",
+      "family": "boundary-rule",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MGMT-ACCOUNT",
+        "R-ROLLOUT-UNIT"
+      ],
+      "prompt": "Our service-managed StackSet targets the root OU but the baseline role never appears in the management account. How do we fix the StackSet?",
+      "initial_state": "Service-managed permissions; target is the root OU.",
+      "expected_output": "The response explains that service-managed StackSets do not deploy to the management account and proposes a separate path if the role is truly needed there.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-NO-MGMT-DEPLOY",
+          "text": "The response states that service-managed StackSets do not deploy stacks into the management account.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Recommend retrying the StackSet operation as the fix."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Names the StackSets behavior and a separate path."
+        ],
+        "fail": [
+          "Treats it as a transient failure."
+        ]
+      }
+    },
+    {
+      "id": "C-BACKUP-PROOF",
+      "family": "evidence",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-EVIDENCE-LABEL"
+      ],
+      "prompt": "AWS Backup jobs for our RDS databases succeed every night. Can we tell the auditor that our recovery posture is proven?",
+      "initial_state": "Backup plans exist; no restore test has been recorded.",
+      "expected_output": "The response separates backup posture from restore proof and asks for a restore test with observed time and integrity.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-SEPARATE",
+          "text": "The response states that backup job success does not prove restore viability.",
+          "critical": true
+        },
+        {
+          "id": "A-LABEL",
+          "text": "The response labels what is observed versus inferred.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Confirm recovery is proven from backup job success."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Backup and restore evidence kept separate."
+        ],
+        "fail": [
+          "Backup success accepted as restore proof."
+        ]
+      }
+    },
+    {
+      "id": "C-REGION-FRESHNESS",
+      "family": "freshness",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-FRESHNESS",
+        "R-EVIDENCE-LABEL"
+      ],
+      "prompt": "Is Amazon Bedrock AgentCore available in eu-south-1? We need to decide today. AWS MCP servers are not configured in this session.",
+      "initial_state": "No AWS MCP server is available.",
+      "expected_output": "The response uses official AWS documentation as the fallback or marks the fact unverified, and labels the source type.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-FALLBACK",
+          "text": "The response verifies against official AWS documentation or explicitly marks availability unverified.",
+          "critical": true
+        },
+        {
+          "id": "A-NO-GUESS",
+          "text": "The response does not state availability as settled fact from memory.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "State regional availability from memory without a source label."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Source-labeled answer or explicit gap."
+        ],
+        "fail": [
+          "Unlabeled claim of availability."
+        ]
+      }
+    },
+    {
+      "id": "C-IAM-READ-ONLY",
+      "family": "permissions",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-IAM-READ-ONLY",
+        "R-EVIDENCE-LABEL"
+      ],
+      "prompt": "Check what the ci-deploy role can actually do in account 111122223333 and tighten it. The IAM MCP server is available.",
+      "initial_state": "IAM MCP server available with credentials that allow writes.",
+      "expected_output": "The response inspects and simulates read-only, labels live observations, and proposes changes without applying them.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-READ-ONLY",
+          "text": "The response uses only read and simulation operations and does not attach, detach, or edit policies.",
+          "critical": true
+        },
+        {
+          "id": "A-PROPOSE",
+          "text": "The response proposes the tightened policy for approval.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Apply a policy change through the IAM MCP server without explicit approval."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Read-only inspection, labeled observation, proposal."
+        ],
+        "fail": [
+          "Mutating IAM call executed."
+        ]
+      }
+    },
+    {
+      "id": "C-QUICK-ANSWER",
+      "family": "proportionality",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-DECISION-MODE"
+      ],
+      "prompt": "Should the log archive account be separate from the security tooling account? Short answer please.",
+      "initial_state": "Narrow question with an explicit request for brevity.",
+      "expected_output": "A direct recommendation with one reason and an optional risk note.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-QUICK",
+          "text": "The response is a quick answer, not a multi-option decision note.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Produce a full options analysis."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Direct recommendation and reason."
+        ],
+        "fail": [
+          "Multi-section decision note."
+        ]
+      }
+    },
+    {
+      "id": "C-DECISION-NOTE",
+      "family": "decision",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-DECISION-MODE",
+        "R-ROLLOUT-UNIT"
+      ],
+      "prompt": "Compare AWS Control Tower with a custom landing zone built on Organizations and StackSets for our 40 accounts, and recommend one.",
+      "initial_state": "Existing Organizations setup, no Control Tower yet.",
+      "expected_output": "A decision note with two realistic options, a recommendation, the strongest tradeoff, reversibility, and remaining evidence.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-OPTIONS",
+          "text": "The response compares two or three realistic options.",
+          "critical": true
+        },
+        {
+          "id": "A-REVERSIBILITY",
+          "text": "The response states reversibility or blast radius of the recommendation.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Decision note with tradeoff and reversibility."
+        ],
+        "fail": [
+          "Single option without comparison."
+        ]
+      }
+    },
+    {
+      "id": "C-HANDOFF-POLICY-DOC",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-HANDOFF",
+        "R-CONTROL-EFFECT"
+      ],
+      "prompt": "We decided to deny all regions except eu-west-1 and eu-central-1. Write the SCP JSON document for it.",
+      "initial_state": "The control choice is already made; only the document is requested.",
+      "expected_output": "The request is handed to the policy-document owner with the selected type, scope, and exclusions.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-HANDOFF",
+          "text": "The response hands the document authoring to /internal-cloud-policy and passes scope and constraints.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Re-open the control-selection decision."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Handoff with carried constraints."
+        ],
+        "fail": [
+          "Full design analysis instead of handoff."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-OU-LAYOUT",
+        "query": "Design the OU structure for prod, nonprod, and a regulated segment across 50 AWS accounts.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-SCP-DENY",
+        "query": "Why does our member-account role get an explicit deny from an SCP when IAM allows the action?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-RCP",
+        "query": "Should we use an RCP or an SCP to stop external principals from reading our S3 buckets?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-DECLARATIVE",
+        "query": "How do we enforce that no VPC in the org can attach an internet gateway, even with future APIs?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-DELEGATED",
+        "query": "Which account should be the delegated administrator for Security Hub?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-TRUST",
+        "query": "Review the trust policy that lets GitHub Actions assume our deployment role across accounts.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-BOUNDARY",
+        "query": "Let platform engineers create IAM roles without letting them escalate privileges.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-ROLLOUT",
+        "query": "Plan a staged rollout of a new SCP to all workload OUs with rollback triggers.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-RESTORE",
+        "query": "What evidence proves our RDS restore works for the audit?",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-REGION",
+        "query": "Is this AWS service available in eu-south-2 today?",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-CT",
+        "query": "Should we adopt Control Tower or keep our custom Organizations setup?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-IDENTITY-CENTER",
+        "query": "Design the IAM Identity Center permission set model for our teams.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-SCP-GUARDRAILS",
+        "query": "Design SCP guardrails for our workload OUs.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-LAMBDA-SQS",
+        "query": "Our SQS-triggered Lambda replays the whole batch when one message fails.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-aws-lambda"
+      },
+      {
+        "id": "Q-LAMBDA-LIMIT",
+        "query": "What is the current maximum timeout and payload size for an AWS Lambda function?",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-aws-lambda"
+      },
+      {
+        "id": "Q-SCP-JSON",
+        "query": "Write the SCP JSON that denies all regions except eu-west-1.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-cloud-policy"
+      },
+      {
+        "id": "Q-COST",
+        "query": "Find savings opportunities in our AWS bill from last quarter.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "antigravity-aws-cost-optimizer"
+      },
+      {
+        "id": "Q-TF",
+        "query": "Write a Terraform module for our AWS VPC with three private subnets.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-terraform"
+      },
+      {
+        "id": "Q-CFN",
+        "query": "Review this CloudFormation template for best practices.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "antigravity-cloudformation-best-practices"
+      },
+      {
+        "id": "Q-AZURE",
+        "query": "Design our Azure management group hierarchy.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-azure"
+      },
+      {
+        "id": "Q-PY-LAMBDA",
+        "query": "Replace this Python lambda expression with a named function.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-python"
+      }
+    ]
+  }
+}
