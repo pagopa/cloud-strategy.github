@@ -23,8 +23,10 @@ DONE ✅ -> DONE
 - The first line includes the state emoji, localized state, plan name, Task n/tot, progress bar, checkpoint, and 🧭 Reason. This combines the header and reason to meet the five-line limit.
 - Follow with 🔍 Evidence, 📂 So far, and 🧪 Checks, in that order.
 - Put one bold 🛠️ Action on the final line, except STARTED and RESUMED have no action line.
-- Show changed paths in inline code. When pre-existing dirty files were included, list them as Preexisting in the 📂 So far line.
+- Show changed paths in inline code. List included pre-existing files as Preexisting and unrelated changes as Foreign in the 📂 So far line; omit empty categories. Identify unattributed anomalies in Evidence or Rulings, never as proven authorship.
 - Use one action that matches the current ledger or preflight result. Do not imply that resume grants approval or that a chat-only stop was persisted.
+- A dirty-consent offer identifies the paths and current content identities, with the delta visible in the accompanying evidence. Renew it when content changes. For a conflicting run, name its plan and overlap and offer reconciliation of inactivity and pending writes, not a dirty-consent bypass or unconditional resume.
+- Checks describe the observed checkout. Keep Foreign-related test failures visible; a passing check does not establish isolated-patch reproducibility.
 
 ## Progress bar
 
@@ -137,10 +139,10 @@ A plan must contain at least one task. The bar has one cell per task up to ten t
 
 ```text
 ✅ <localized done> · <plan name> · Task <tot>/<tot> <bar> · CP<n> · 🧭 all planned tasks and final review passed
-🔍 <final review evidence> · 📂 Changed: <paths or none> · Preexisting: <paths when included>
+🔍 <final review evidence> · 📂 Changed: <paths or none> · Preexisting: <paths when included> · Foreign: <unrelated paths>
 🧪 Checks: <commands and results> · Review: fresh <model> or self (weaker)
 ⚖️ Rulings: <ledger rulings or none> · 🧹 Deferred minors: <items or none>
 🛠️ **Action:** <one final action or none>
 ```
 
-The final message combines Evidence and So far on one line, preserving the ordered facts and the five-line limit. Omit Preexisting when no dirty files were included. The Checks line always names the review kind; a self-review is marked weaker than a fresh review. Use the bold final action even when the action is none.
+The final message combines Evidence and So far on one line, preserving the ordered facts and the five-line limit. Omit empty Preexisting and Foreign categories. The Checks line always names the review kind; a self-review is marked weaker than a fresh review. Use the bold final action even when the action is none.

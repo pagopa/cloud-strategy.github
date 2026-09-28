@@ -52,8 +52,8 @@ A retained plan with a legacy ## Execution Manifest is conversion input only aft
    - Read the current branch with git symbolic-ref --quiet --short HEAD.
    - Resolve the default branch with git symbolic-ref --quiet --short refs/remotes/origin/HEAD.
    - Re-run each read-only Depends on check and report its result.
-   - Read changes to every path in all Files blocks with git status --porcelain -- <Files paths>.
-   - If detached or the default branch is unresolved, withhold handoff and ask to resolve the branch. Require branch consent when the current branch equals the resolved default branch or is main or master. When there is no branch consent requirement, offer execute. When consent is required, offer execute on <branch>. If any Files path is dirty, also offer execute with dirty files. Show current/default branch, dependency results, and all dirty Files paths together in one gate message, and offer only the needed commands.
+   - Apply Handoff in references/plan-contract.md: classify relevant dirty content, verified upstream output, Foreign paths and conflicting runs. Disjoint work does not block; protected-input changes and relevant pending writes need reconciliation.
+   - Show current/default branch, dependency results, relevant dirty Files, Foreign paths and conflicts in one gate message. Offer only the branch and content-bound dirty commands required by that gate; never offer execution while a relevant conflict remains. Preserve per-file evidence for the executor's fresh checks.
    - A supplied Subagent-driven or Inline preference gets one short native-only note. Never ask the user to choose an execution method.
    - Route every valid approval to /internal-gateway-execute-plans. The approval is permission to execute; do not start execution in this skill.
 5. Keep the writer read-only with respect to Git mutations and runtime records. Do not create a ledger, status file, or other executor state.
@@ -71,7 +71,7 @@ After the plan and handoff gate are ready, use at most five localized lines:
 📋 PLAN READY · <plan name>
 🎯 Goal: <target>
 🚫 Out of scope: <anti-scope>
-🌿 <current branch> / default <default branch> · 🧪 dependencies: <results> · 📂 dirty Files: <paths or none>
+🌿 <current branch> / default <default branch> · 🧪 dependencies: <results> · 📂 dirty Files: <paths or none> · Preexisting: <verified upstream paths> · Foreign: <unrelated paths> · Conflicts: <plan and overlap or none>
 🛠️ **Action:** <only the needed execute command or commands>
 
-Keep the final action on the last line and make it the only bold action. When no handoff is allowed, the action names the missing decision or upstream step. If the user supplied Subagent-driven or Inline, include the native-only note in that one action line. Localize the report to the user's language. Do not include the pointing-hand emoji in user-visible output.
+Keep the final action on the last line and make it the only bold action. Omit empty Preexisting and Foreign categories; retain the content-bound delta evidence with the handoff so the offer is inspectable. When no handoff is allowed, name the missing decision, conflicting plan reconciliation or upstream step. If the user supplied Subagent-driven or Inline, include the native-only note in that one action line. Localize the report to the user's language. Do not include the pointing-hand emoji in user-visible output.

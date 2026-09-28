@@ -12,6 +12,10 @@ interface:
     CP0 tree. Record approvals, derived status, checkpoints, task validations,
     repair attempts, stop codes, and final review in the ledger. On resume,
     verify approval and all checkpoint objects; never reset or overwrite state.
+    Apply scoped checkout classification: disclose Foreign state outside output
+    diffs, require content-bound inclusion or verified upstream attribution,
+    and reconcile relevant run conflicts. Adopt only unrelated same-branch
+    descendant commits; no whole-tree equality or global exclusivity gate.
     Run status queries read-only. Use native-only execution even when another
     method is requested. Report localized chat status in at most five lines
     with one final bold action.

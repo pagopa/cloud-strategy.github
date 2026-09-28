@@ -10,6 +10,9 @@ interface:
     task, keep Files paths inside the validated perimeter, and write no Git
     mutations. Run plan lint before one read-only handoff gate showing the
     current and default branches, dependency results, and dirty Files paths.
+    Disclose Foreign paths without blocking; distinguish verified upstream
+    output from content-bound dirty consent. Reconcile relevant run overlaps
+    and changed protected inputs before offering execution commands.
     Offer only the execute consent commands needed by those results. Execute
     natively through /internal-gateway-execute-plans; never ask for an
     execution-method choice or start execution here. Keep unresolved

@@ -8,7 +8,6 @@ from typing import Mapping
 
 import pytest
 
-
 BUNDLE_ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_PATH = BUNDLE_ROOT / "references" / "run-protocol.md"
 OBJECT_BLOCKS = (
@@ -41,9 +40,10 @@ def run_block(
     cwd: Path,
     env: Mapping[str, str],
     suffix: str = "",
+    paths: tuple[str, ...] = (),
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["sh", "-c", protocol_block(marker) + suffix],
+        ["sh", "-c", protocol_block(marker) + suffix, "protocol", *paths],
         cwd=cwd,
         env={**os.environ, **env},
         text=True,
@@ -55,9 +55,7 @@ def run_block(
 def init_repo(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True)
     subprocess.run(["git", "init", "-q"], cwd=path, check=True)
-    subprocess.run(
-        ["git", "config", "user.name", "Plan Test"], cwd=path, check=True
-    )
+    subprocess.run(["git", "config", "user.name", "Plan Test"], cwd=path, check=True)
     subprocess.run(
         ["git", "config", "user.email", "plan-test@example.invalid"],
         cwd=path,
@@ -65,9 +63,7 @@ def init_repo(path: Path) -> Path:
     )
     (path / "README.md").write_text("initial\n", encoding="utf-8")
     subprocess.run(["git", "add", "README.md"], cwd=path, check=True)
-    subprocess.run(
-        ["git", "commit", "-q", "-m", "initial"], cwd=path, check=True
-    )
+    subprocess.run(["git", "commit", "-q", "-m", "initial"], cwd=path, check=True)
     return path
 
 
@@ -133,7 +129,9 @@ def restore_modes(modes: dict[Path, int]) -> None:
         path.chmod(mode)
 
 
-def test_checkpoint_captures_worktree_without_touching_real_index(tmp_path: Path) -> None:
+def test_checkpoint_captures_worktree_without_touching_real_index(
+    tmp_path: Path,
+) -> None:
     repo = init_repo(tmp_path / "repo")
     run_dir = run_dir_for(repo)
     (repo / "README.md").write_text("unstaged edit\n", encoding="utf-8")
@@ -212,7 +210,7 @@ def test_protocol_runs_with_read_only_git_dir(tmp_path: Path) -> None:
         head = run_block("cmd:head-tree", repo, env)
         kind = run_block("cmd:checkpoint-type", repo, env)
         changed = run_block("cmd:changed-paths", repo, env)
-        diff = run_block("cmd:task-diff", repo, env)
+        diff = run_block("cmd:task-diff", repo, env, paths=("README.md",))
     finally:
         restore_modes(modes)
 
@@ -276,7 +274,9 @@ def test_object_blocks_share_the_store_prelude(marker: str) -> None:
 
 
 @pytest.mark.parametrize("marker", OBJECT_BLOCKS)
-def test_object_blocks_do_not_leak_into_caller_shell(tmp_path: Path, marker: str) -> None:
+def test_object_blocks_do_not_leak_into_caller_shell(
+    tmp_path: Path, marker: str
+) -> None:
     repo = init_repo(tmp_path / "repo")
     (repo / "src").mkdir()
     run_dir = run_dir_for(repo)
@@ -290,10 +290,10 @@ def test_object_blocks_do_not_leak_into_caller_shell(tmp_path: Path, marker: str
     }
     suffix = (
         "\nprintf '%s|%s|%s\\n' \"${GIT_OBJECT_DIRECTORY-unset}\" "
-        "\"${GIT_ALTERNATE_OBJECT_DIRECTORIES-unset}\" \"$PWD\""
+        '"${GIT_ALTERNATE_OBJECT_DIRECTORIES-unset}" "$PWD"'
     )
 
-    result = run_block(marker, repo / "src", env, suffix=suffix)
+    result = run_block(marker, repo / "src", env, suffix=suffix, paths=("README.md",))
 
     assert result.returncode == 0, result.stderr
     assert result.stdout.splitlines()[-1] == f"unset|unset|{repo / 'src'}"
@@ -464,6 +464,7 @@ def test_task_diff_preserves_binary_content(tmp_path: Path) -> None:
             "CP_B": cp_b,
             "DIFF_NAME": diff_path.name,
         },
+        paths=("payload.bin",),
     )
     assert result.returncode == 0, result.stderr
     assert b"GIT binary patch" in diff_path.read_bytes()
@@ -481,3 +482,105 @@ def test_task_diff_preserves_binary_content(tmp_path: Path) -> None:
     )
 
     assert applied.returncode == 0
+
+
+@pytest.mark.parametrize(
+    "filename", ["README.md", "odd\nname.txt", "literal*.txt", ":(exclude)note"]
+)
+def test_task_diff_selects_only_literal_paths(tmp_path: Path, filename: str) -> None:
+    repo = init_repo(tmp_path / "repo")
+    run_dir = run_dir_for(repo)
+    cp_a = checkpoint(repo, run_dir)
+    (repo / filename).write_text("task output\n", encoding="utf-8")
+    (repo / "foreign.txt").write_text("foreign output\n", encoding="utf-8")
+    (repo / "literal-other.txt").write_text(
+        "foreign wildcard match\n", encoding="utf-8"
+    )
+    cp_b = checkpoint(repo, run_dir)
+
+    result = run_block(
+        "cmd:task-diff",
+        repo,
+        {
+            "RUN_DIR": str(run_dir),
+            "CP_A": cp_a,
+            "CP_B": cp_b,
+            "DIFF_NAME": "scoped.diff",
+        },
+        paths=(filename,),
+    )
+
+    assert result.returncode == 0, result.stderr
+    diff = (run_dir / "scoped.diff").read_text(encoding="utf-8")
+    assert "+task output" in diff
+    assert "foreign output" not in diff
+    assert "foreign wildcard match" not in diff
+
+
+def test_task_diff_without_paths_fails_closed(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path / "repo")
+    run_dir = run_dir_for(repo)
+    cp_a = checkpoint(repo, run_dir)
+    (repo / "foreign.txt").write_text("foreign output\n", encoding="utf-8")
+    cp_b = checkpoint(repo, run_dir)
+
+    result = run_block(
+        "cmd:task-diff",
+        repo,
+        {
+            "RUN_DIR": str(run_dir),
+            "CP_A": cp_a,
+            "CP_B": cp_b,
+            "DIFF_NAME": "empty.diff",
+        },
+    )
+
+    assert result.returncode != 0
+    assert not (run_dir / "empty.diff").exists()
+
+
+def test_head_changes_reports_foreign_commit_with_dirty_task(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path / "repo")
+    base = command("rev-parse", "HEAD", cwd=repo).stdout.strip()
+    (repo / "README.md").write_text("uncommitted task\n", encoding="utf-8")
+    (repo / "foreign.txt").write_text("other work\n", encoding="utf-8")
+    command("add", "foreign.txt", cwd=repo)
+    command("commit", "-q", "-m", "foreign", cwd=repo)
+    index_before = (repo / ".git" / "index").read_bytes()
+
+    result = run_block("cmd:head-changes", repo, {"HEAD_BASE": base})
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.split("\0") == ["A", "foreign.txt", ""]
+    assert (repo / "README.md").read_text() == "uncommitted task\n"
+    assert (repo / ".git" / "index").read_bytes() == index_before
+
+
+def test_head_changes_retains_reverted_path_and_rename_endpoints(
+    tmp_path: Path,
+) -> None:
+    repo = init_repo(tmp_path / "repo")
+    base = command("rev-parse", "HEAD", cwd=repo).stdout.strip()
+    (repo / "README.md").write_text("pertinent commit\n", encoding="utf-8")
+    command("add", "README.md", cwd=repo)
+    command("commit", "-q", "-m", "pertinent", cwd=repo)
+    command("revert", "--no-edit", "HEAD", cwd=repo)
+    command("mv", "README.md", "foreign.md", cwd=repo)
+    command("commit", "-q", "-m", "rename", cwd=repo)
+
+    result = run_block("cmd:head-changes", repo, {"HEAD_BASE": base})
+
+    assert result.returncode == 0, result.stderr
+    records = result.stdout.split("\0")
+    assert records.count("M") == 2
+    assert records[:3] == ["R100", "README.md", "foreign.md"]
+
+
+def test_head_changes_rejects_rewritten_history(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path / "repo")
+    base = command("rev-parse", "HEAD", cwd=repo).stdout.strip()
+    command("commit", "--amend", "-q", "-m", "rewritten", cwd=repo)
+
+    result = run_block("cmd:head-changes", repo, {"HEAD_BASE": base})
+
+    assert result.returncode != 0

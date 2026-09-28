@@ -19,7 +19,7 @@
     },
     {
       "id": "R-HANDOFF",
-      "text": "Replace the imported executor header line with /internal-gateway-execute-plans; run one read-only handoff gate showing branch, default branch, Depends on results, and dirty Files paths; offer only the commands required by those results; run Native only and route every approved answer to /internal-gateway-execute-plans.",
+      "text": "Replace the imported executor header line with /internal-gateway-execute-plans; run one read-only handoff gate showing branches, dependencies, relevant dirty content and Foreign paths. Check declared run conflicts, bind consent to content, and distinguish verified upstream output. Only pertinent blockers withhold approval; run Native through the gateway.",
       "source": "internal-gateway-writing-plans SKILL.md: Workflow"
     },
     {
@@ -44,6 +44,42 @@
     }
   ],
   "cases": [
+    {
+      "id": "C-FOREIGN-DIRT", "family": "regression", "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF"], "prompt": "Write and hand off the plan.",
+      "initial_state": "Branch and dependency checks pass. Only notes.txt is dirty, outside Files and protected inputs. A running plan writes another disjoint subtree.",
+      "expected_output": "Offer execute without dirty consent and disclose notes.txt as Foreign; do not block on the disjoint run.",
+      "files": [], "assertions": [{"id": "A-HANDOFF", "text": "Unrelated dirt and disjoint runs do not withhold approval.", "critical": true}],
+      "forbidden_actions": ["Stash unrelated edits or create runtime records."], "status": "not-run", "held_out": false,
+      "rubric": {"pass": ["The handoff reports Foreign and offers execute."], "fail": ["Global cleanliness or checkout exclusivity is required."]}
+    },
+    {
+      "id": "C-CONFLICTING-HANDOFF", "family": "authority-boundary", "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF"], "prompt": "Hand off the plan; I approve dirty files.",
+      "initial_state": "Another incomplete run in this checkout declares a future write to this plan's spec or a path in its Files. Nothing has been modified yet.",
+      "expected_output": "Withhold execute commands, name the conflicting plan and overlap, and request reconciliation that resolves pending writes. Dirty consent cannot bypass the conflict.",
+      "files": [], "assertions": [{"id": "A-BLOCK", "text": "Future write/write and write/input overlaps block before handoff.", "critical": true}],
+      "forbidden_actions": ["Treat clean status or dirty consent as release of another run."], "status": "not-run", "held_out": true,
+      "rubric": {"pass": ["A concrete conflict-resolution action replaces execution approval."], "fail": ["Execute is offered despite the relevant conflict."]}
+    },
+    {
+      "id": "C-CONTENT-BOUND-HANDOFF", "family": "authority-boundary", "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF"], "prompt": "execute with dirty files",
+      "initial_state": "The handoff displayed src/cache.go at blob A, but current content is B; no attributable upstream or run write explains it.",
+      "expected_output": "Renew consent for the displayed current delta instead of treating approval for A as approval for B.",
+      "files": [], "assertions": [{"id": "A-CONTENT", "text": "Changed content invalidates the old inclusion choice.", "critical": true}],
+      "forbidden_actions": ["Start execution or create a ledger in the writer."], "status": "not-run", "held_out": true,
+      "rubric": {"pass": ["The current delta is offered for a fresh answer."], "fail": ["The old path-only approval is forwarded as valid for B."]}
+    },
+    {
+      "id": "C-UPSTREAM-HANDOFF", "family": "regression", "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF", "R-DEPENDS"], "prompt": "Hand off the downstream plan.",
+      "initial_state": "A declared completed upstream run has passing fresh checks and exact attributable output matching dirty src/cache.go in this plan's Files. Another dirty Files path has uncertain origin. No overlapping pending run exists.",
+      "expected_output": "Identify src/cache.go as verified upstream output and offer content-bound consent only for the uncertain file. Snapshot presence alone would not suffice for attribution.",
+      "files": [], "assertions": [{"id": "A-UPSTREAM", "text": "Verified output and uncertain edits have distinct inclusion evidence.", "critical": true}],
+      "forbidden_actions": ["Automatically include every dirty file because one upstream dependency is DONE."], "status": "not-run", "held_out": false,
+      "rubric": {"pass": ["The handoff gives per-file provenance or consent evidence."], "fail": ["All dirty paths are automatically included or verified output is blocked solely as dirt."]}
+    },
     {
       "id": "C-PLAN-FROM-SPEC",
       "family": "held-out-downstream",

@@ -3,6 +3,79 @@
 This reference owns the marked shell commands used by the native plan executor.
 Each block uses only the environment variables named in its task interface.
 
+- [Checkout classification](#checkout-classification)
+- [Commands](#commands)
+- [Records](#records)
+
+## Checkout classification
+
+Apply this classification at preflight, before each task, on resume, and before
+completion. Whole-repository checkpoints are observations, not ownership proof.
+
+- Writable scope is the full union of task `Files`, including future files and
+  allowed globs. An individual task may write only its own `Files`.
+- Relevant paths include writable scope and protected inputs: the plan, spec,
+  declared dependency plans and explicitly declared input/output paths. A
+  dependency output is read-only unless this plan explicitly lists it in
+  `Files`; the plan and spec remain read-only. Record input content identities
+  at approval in a `Ruling` and compare them at subsequent gates, including
+  sources under scratch paths excluded from checkpoints. A changed protected
+  input requires reevaluation; dirty consent cannot authorize it.
+- Inspect other retained plan ledgers under `tmp/superpowers/plans/` in this
+  checkout, excluding this run. Compare declared writable scopes against each
+  other's writable scopes and protected inputs, not just current dirty paths.
+  Read/read overlap is harmless. `RUNNING`, `PARTIAL`, or `BLOCKED` with pending
+  overlapping writes is a conflict. A malformed relevant ledger requires
+  reconciliation, not an assumption that it is inactive. Disjoint runs do not
+  block. Use `CHECKOUT_CHANGED/foreign-edit` for a relevant conflict and name
+  the plan, overlap and pending work. Dirty consent never overrides it.
+- An old timestamp does not release a conflict. Reconciliation by the run's
+  owner or an explicit user decision must establish that it is inactive and
+  resolve its pending writes and current content before a fresh check. Record
+  the evidence in a `Ruling`; never delete or rewrite another run's ledger.
+  These checks detect observed conflicts, not atomic concurrent exclusion.
+- Audit the full `cmd:changed-paths` output before filtering, checking both
+  rename endpoints and protected paths first. A proven executor write outside
+  the active task is `OUT_OF_PERIMETER/file`, or `/protected` where applicable.
+  A required out-of-scope write also stops; never hide either as Foreign.
+- Changes outside relevant paths with no evidence of an executor violation
+  are Foreign: preserve them, record paths and evidence in a `Ruling`, disclose
+  them in chat and reviewer context, and exclude them from run-output diffs.
+  When origin is unknown, label the anomaly as unattributed rather than
+  inventing ownership. Such an unrelated anomaly alone does not block.
+- A relevant uncertain-origin delta needs targeted consent. Show its paths and
+  delta and bind the offered `execute with dirty files` command to the current
+  per-file content, type, mode and deletion state. Hash file bytes with read-only
+  `git hash-object`; for symlinks identify the link target, not its referent.
+  Recheck before consuming consent. Changed evidence invalidates that offer.
+  Record inclusion in `APPROVAL` at first start and in a `Ruling` on later
+  inclusion, preserving the old record and identifying the compared checkpoints
+  or saved delta. Quote unusual filenames unambiguously. Consent includes
+  content; it grants neither overwrite permission nor a wider task perimeter.
+- Auto-include an upstream delta only when a declared producer has `END: DONE`,
+  readable checkpoints, fresh passing dependency checks and evidence attributing
+  that exact delta to its completed work. Current content, type and mode must
+  match and no conflicting run may remain. Record producer, checkpoint and
+  content identities as Preexisting. Mere presence in a whole-tree checkpoint,
+  timestamps or matching paths does not establish authorship; otherwise use
+  targeted consent. Never infer a missing producer or silently adopt changed
+  output. Reevaluate read-only dependency outputs rather than including them.
+
+Existing approved or attributable run output is not new dirty work just because
+it remains uncommitted. On resume, compare against its latest evidenced state,
+not the initial approval blob after legitimate task writes. Automatic partial
+resume needs write evidence matching the current delta in the started task;
+path containment, same-session identity and a post-test snapshot alone are
+insufficient. For accepted edits to completed work, reconcile affected validation
+and downstream assumptions before resuming; consent alone does not keep earlier
+test results valid.
+
+Use `cmd:task-diff` with exact selected output paths after this audit. Final
+review also receives all Foreign and unattributed `Ruling` entries and inclusion
+evidence. A selected file can contain included preexisting work; do not claim
+sole authorship. Required checks run on the observed checkout: Foreign-caused
+failures still fail, and passing checks do not prove isolated-patch reproducibility.
+
 ## Commands
 
 ### Object store
@@ -129,6 +202,27 @@ During preflight, the executor runs this block to identify the current branch, r
 git symbolic-ref --quiet --short HEAD 2>/dev/null || printf 'detached\n'
 ```
 
+For moved HEAD, set `HEAD_BASE` to the last adopted commit or START. After
+checking branch identity, inspect every new commit, including merge parents;
+a net range diff can hide a relevant edit followed by a revert. Nonzero exit
+means ancestry or inspection failed and adoption is withheld. Successful output
+is unfiltered NUL-delimited name/status records for scope classification.
+Recheck HEAD before recording adoption; retry inspection if it changed.
+
+<!-- cmd:head-changes -->
+```sh
+(
+  set -eu
+  unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  cd "$(git rev-parse --show-toplevel)"
+  git merge-base --is-ancestor "$HEAD_BASE" HEAD
+  commits=$(git rev-list "$HEAD_BASE..HEAD")
+  for commit in $commits; do
+    git diff-tree --no-commit-id --root -m -r --name-status -z --find-renames "$commit"
+  done
+)
+```
+
 After each task checkpoint, the executor runs this block for the perimeter check without losing rename endpoints or unusual filename bytes.
 
 <!-- cmd:changed-paths -->
@@ -148,7 +242,16 @@ After each task checkpoint, the executor runs this block for the perimeter check
 )
 ```
 
-During the per-task review-package step and the final review, the executor runs this block to save binary-safe evidence for a checkpoint range. `CP_A` may also be the START commit.
+During the per-task review-package step and the final review, the executor runs
+this block to save binary-safe evidence for a checkpoint range. `CP_A` may also
+be the START commit. Pass the selected repository-relative file paths as
+quoted positional parameters (`set -- 'src/file' 'tests/file'` before the
+block). Select exact changed files only after the full changed-path audit,
+including both rename endpoints. Never pass directories or unexpanded globs.
+An absent selection fails closed; when the audited selection is empty, create
+an empty review file explicitly and record that no run output changed.
+Renames render as deletion/addition so path filtering cannot pull in Foreign
+content through rename detection. Literal path handling preserves unusual names.
 
 <!-- cmd:task-diff -->
 ```sh
@@ -163,7 +266,8 @@ During the per-task review-package step and the final review, the executor runs 
   GIT_OBJECT_DIRECTORY="$RUN_DIR/objects"
   GIT_ALTERNATE_OBJECT_DIRECTORIES="$common/objects"
   export GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
-  git diff --binary "$CP_A" "$CP_B" > "$RUN_DIR/$DIFF_NAME"
+  [ "$#" -gt 0 ] || exit 2
+  git --literal-pathspecs diff --binary --no-renames "$CP_A" "$CP_B" -- "$@" > "$RUN_DIR/$DIFF_NAME"
 )
 ```
 
@@ -227,8 +331,8 @@ DEPENDS_FAILED/<plan> -> execute <plan> first
 NEEDS_CONSENT/default-branch -> execute on <branch>
 NEEDS_CONSENT/dirty -> execute with dirty files
 NEEDS_CONSENT/safety -> type the exact confirmation offered in the message
-CHECKOUT_CHANGED/foreign-commit -> undo or confirm the commit, then resume
-CHECKOUT_CHANGED/foreign-edit -> stop the other session, then resume
+CHECKOUT_CHANGED/foreign-commit -> reconcile the relevant commits, branch or ancestry and reevaluate before resume
+CHECKOUT_CHANGED/foreign-edit -> reconcile the named conflicting run or relevant delta before resume
 CHECKOUT_CHANGED/ledger-mismatch -> reconcile
 CHECKOUT_CHANGED/approval-stale -> reconcile, then approve again
 OUT_OF_PERIMETER/file -> rewrite plan or undo the change
