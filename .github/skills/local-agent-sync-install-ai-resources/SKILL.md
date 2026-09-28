@@ -5,10 +5,6 @@ description: Use when planning, auditing, or applying repository-owned AI resour
 
 # Local Agent Sync Home AI Resources
 
-## Referenced skills
-
-- internal-knowledge
-
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 The repository is the only source of truth for managed resources. Home is a
 runtime projection: a write through a managed skill link writes the repository
@@ -42,6 +38,7 @@ Use `scripts/run.sh`.
 
 | Request | Command |
 | --- | --- |
+| Refresh all repository-managed resources under `~/.agents/` | `sync --targets skills,agents.md` |
 | Update the global `AGENTS.md` baseline | `sync --targets agents.md` |
 | Default repository-to-home sync | `sync --targets skills` |
 | Sync skills and native runtime agents | `sync --targets skills,copilot,codex` |
@@ -54,7 +51,8 @@ Use `scripts/run.sh`.
 `./.github/tools/run.sh sync_home_ai_resources ...` remains a delegating
 compatibility entrypoint.
 
-When the user calls this skill with an `agents.md` request, `agents.md` means `sync --targets agents.md`.
+When the user asks to update `.agents` as a whole, use `sync --targets skills,agents.md`.
+When the request names only `agents.md`, use `sync --targets agents.md`.
 Accept `agents-md` as a CLI alias for the same target.
 
 `scripts/run.sh` bootstraps its own environment: on first run it creates a skill-local `.venv` under `scripts/` and installs `requirements.txt` with `pip --require-hashes` behind a recorded requirements hash, re-installing only when that hash changes. `PYTHON_BIN` overrides the default `python3` interpreter. No manual environment setup is required.
