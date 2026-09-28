@@ -11,6 +11,14 @@ import pytest
 
 BUNDLE_ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_PATH = BUNDLE_ROOT / "references" / "run-protocol.md"
+OBJECT_BLOCKS = (
+    "cmd:object-probe",
+    "cmd:checkpoint",
+    "cmd:head-tree",
+    "cmd:checkpoint-type",
+    "cmd:changed-paths",
+    "cmd:task-diff",
+)
 
 
 def extract_block(text: str, marker: str) -> str:
@@ -23,15 +31,19 @@ def extract_block(text: str, marker: str) -> str:
     return match.group(1)
 
 
+def protocol_block(marker: str) -> str:
+    assert PROTOCOL_PATH.is_file(), "run-protocol.md does not exist"
+    return extract_block(PROTOCOL_PATH.read_text(encoding="utf-8"), marker)
+
+
 def run_block(
     marker: str,
     cwd: Path,
     env: Mapping[str, str],
+    suffix: str = "",
 ) -> subprocess.CompletedProcess[str]:
-    assert PROTOCOL_PATH.is_file(), "run-protocol.md does not exist"
-    text = PROTOCOL_PATH.read_text(encoding="utf-8")
     return subprocess.run(
-        ["sh", "-c", extract_block(text, marker)],
+        ["sh", "-c", protocol_block(marker) + suffix],
         cwd=cwd,
         env={**os.environ, **env},
         text=True,
@@ -85,16 +97,40 @@ def tree_for(result: subprocess.CompletedProcess[str]) -> str:
     return result.stdout.strip()
 
 
-def checkpoint(repo: Path, run_dir: Path) -> str:
-    result = run_block("cmd:checkpoint", repo, {"RUN_DIR": str(run_dir)})
+def store_env(repo: Path, run_dir: Path) -> dict[str, str]:
+    return {
+        "GIT_OBJECT_DIRECTORY": str(run_dir / "objects"),
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES": str(repo / ".git" / "objects"),
+    }
+
+
+def checkpoint(repo: Path, run_dir: Path, cwd: Path | None = None) -> str:
+    result = run_block("cmd:checkpoint", cwd or repo, {"RUN_DIR": str(run_dir)})
     return tree_for(result)
 
 
-def loose_object_count(repo: Path) -> int:
-    result = command("count-objects", "-v", cwd=repo)
-    match = re.search(r"^count: (\d+)$", result.stdout, re.MULTILINE)
-    assert match is not None, result.stdout
-    return int(match.group(1))
+def tree_paths(repo: Path, run_dir: Path, tree: str) -> list[str]:
+    return command(
+        "ls-tree", "-r", "--name-only", tree, cwd=repo, env=store_env(repo, run_dir)
+    ).stdout.splitlines()
+
+
+def file_count(root: Path) -> int:
+    return sum(1 for path in root.rglob("*") if path.is_file())
+
+
+def set_writable(root: Path, writable: bool) -> dict[Path, int]:
+    modes = {path: path.stat().st_mode & 0o777 for path in [root, *root.rglob("*")]}
+    for path, mode in modes.items():
+        path.chmod(mode | 0o200 if writable else mode & ~0o222)
+    return modes
+
+
+def restore_modes(modes: dict[Path, int]) -> None:
+    for path, mode in sorted(
+        modes.items(), key=lambda item: len(item[0].parts), reverse=True
+    ):
+        path.chmod(mode)
 
 
 def test_checkpoint_captures_worktree_without_touching_real_index(tmp_path: Path) -> None:
@@ -109,7 +145,7 @@ def test_checkpoint_captures_worktree_without_touching_real_index(tmp_path: Path
 
     result = run_block("cmd:checkpoint", repo, {"RUN_DIR": str(run_dir)})
     tree = tree_for(result)
-    paths = command("ls-tree", "-r", "--name-only", tree, cwd=repo).stdout.splitlines()
+    paths = tree_paths(repo, run_dir, tree)
 
     assert set(paths) == {"README.md", "staged.txt", "untracked.txt"}
     assert index_path.read_bytes() == index_before
@@ -128,7 +164,7 @@ def test_checkpoint_excludes_scratch_even_when_tracked(tmp_path: Path) -> None:
     run_dir = run_dir_for(repo)
 
     tree = checkpoint(repo, run_dir)
-    paths = command("ls-tree", "-r", "--name-only", tree, cwd=repo).stdout.splitlines()
+    paths = tree_paths(repo, run_dir, tree)
 
     assert not any(path.startswith(("tmp/", ".superpowers/")) for path in paths)
 
@@ -142,44 +178,158 @@ def test_checkpoint_fails_outside_repository(tmp_path: Path) -> None:
     assert result.returncode != 0
 
 
-def test_object_probe_writes_new_object(tmp_path: Path) -> None:
+def test_object_probe_writes_new_object_to_run_dir_only(tmp_path: Path) -> None:
     repo = init_repo(tmp_path / "repo")
     run_dir = run_dir_for(repo)
-    before = loose_object_count(repo)
+    git_files = file_count(repo / ".git" / "objects")
 
     first = run_block("cmd:object-probe", repo, {"RUN_DIR": str(run_dir)})
-    after_first = loose_object_count(repo)
+    after_first = file_count(run_dir / "objects")
     second = run_block("cmd:object-probe", repo, {"RUN_DIR": str(run_dir)})
-    after_second = loose_object_count(repo)
+    after_second = file_count(run_dir / "objects")
 
     assert first.returncode == 0, first.stderr
     assert second.returncode == 0, second.stderr
-    assert after_first == before + 1
-    assert after_second == after_first + 1
+    assert after_first == 1
+    assert after_second == 2
+    assert file_count(repo / ".git" / "objects") == git_files
 
 
-def test_object_probe_fails_on_read_only_object_store(tmp_path: Path) -> None:
+def test_protocol_runs_with_read_only_git_dir(tmp_path: Path) -> None:
     if os.geteuid() == 0:
         pytest.skip("root can write through read-only mode bits")
 
     repo = init_repo(tmp_path / "repo")
     run_dir = run_dir_for(repo)
-    object_root = repo / ".git" / "objects"
-    permissions = {
-        path: path.stat().st_mode & 0o777
-        for path in [object_root, *object_root.rglob("*")]
-    }
+    cp_a = checkpoint(repo, run_dir)
+    (repo / "README.md").write_text("edited under read-only git\n", encoding="utf-8")
+    env = {"RUN_DIR": str(run_dir), "CP_A": cp_a, "DIFF_NAME": "ro.diff"}
+    modes = set_writable(repo / ".git", writable=False)
     try:
-        for path, mode in permissions.items():
-            path.chmod(mode & ~0o222)
+        probe = run_block("cmd:object-probe", repo, env)
+        cp_b = checkpoint(repo, run_dir)
+        env["CP_B"] = env["CP"] = cp_b
+        head = run_block("cmd:head-tree", repo, env)
+        kind = run_block("cmd:checkpoint-type", repo, env)
+        changed = run_block("cmd:changed-paths", repo, env)
+        diff = run_block("cmd:task-diff", repo, env)
+    finally:
+        restore_modes(modes)
+
+    assert probe.returncode == 0, probe.stderr
+    assert head.returncode == 0, head.stderr
+    assert kind.stdout == "tree\n", kind.stderr
+    assert changed.stdout.split("\0") == ["M", "README.md", ""], changed.stderr
+    assert diff.returncode == 0, diff.stderr
+    assert b"edited under read-only git" in (run_dir / "ro.diff").read_bytes()
+
+
+def test_object_probe_fails_when_run_dir_is_read_only(tmp_path: Path) -> None:
+    if os.geteuid() == 0:
+        pytest.skip("root can write through read-only mode bits")
+
+    repo = init_repo(tmp_path / "repo")
+    run_dir = run_dir_for(repo)
+    modes = set_writable(run_dir, writable=False)
+    try:
         result = run_block("cmd:object-probe", repo, {"RUN_DIR": str(run_dir)})
     finally:
-        for path, mode in sorted(
-            permissions.items(), key=lambda item: len(item[0].parts), reverse=True
-        ):
-            path.chmod(mode)
+        restore_modes(modes)
 
     assert result.returncode != 0
+
+
+def test_checkpoint_from_subdirectory_captures_whole_repository(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path / "repo")
+    (repo / "src").mkdir()
+    (repo / "src" / "a.txt").write_text("a\n", encoding="utf-8")
+    (repo / "README.md").write_text("edited outside cwd\n", encoding="utf-8")
+    run_dir = run_dir_for(repo)
+    (run_dir / "scratch.txt").write_text("scratch\n", encoding="utf-8")
+
+    tree = checkpoint(repo, run_dir, cwd=repo / "src")
+    changed = command(
+        "diff", "--name-only", "HEAD", tree, cwd=repo, env=store_env(repo, run_dir)
+    ).stdout.splitlines()
+
+    assert changed == ["README.md", "src/a.txt"]
+
+
+def test_relative_run_dir_resolves_from_repository_root(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path / "repo")
+    (repo / "src").mkdir()
+    run_dir = run_dir_for(repo)
+
+    result = run_block("cmd:object-probe", repo / "src", {"RUN_DIR": "tmp/run"})
+
+    assert result.returncode == 0, result.stderr
+    assert file_count(run_dir / "objects") == 1
+    assert not (repo / "src" / "tmp").exists()
+
+
+@pytest.mark.parametrize("marker", OBJECT_BLOCKS)
+def test_object_blocks_share_the_store_prelude(marker: str) -> None:
+    prelude = protocol_block("cmd:object-probe").splitlines()[:11]
+
+    assert protocol_block(marker).splitlines()[:11] == prelude
+    assert protocol_block(marker).splitlines()[-1] == ")"
+
+
+@pytest.mark.parametrize("marker", OBJECT_BLOCKS)
+def test_object_blocks_do_not_leak_into_caller_shell(tmp_path: Path, marker: str) -> None:
+    repo = init_repo(tmp_path / "repo")
+    (repo / "src").mkdir()
+    run_dir = run_dir_for(repo)
+    cp = checkpoint(repo, run_dir)
+    env = {
+        "RUN_DIR": str(run_dir),
+        "CP": cp,
+        "CP_A": cp,
+        "CP_B": cp,
+        "DIFF_NAME": "leak.diff",
+    }
+    suffix = (
+        "\nprintf '%s|%s|%s\\n' \"${GIT_OBJECT_DIRECTORY-unset}\" "
+        "\"${GIT_ALTERNATE_OBJECT_DIRECTORIES-unset}\" \"$PWD\""
+    )
+
+    result = run_block(marker, repo / "src", env, suffix=suffix)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines()[-1] == f"unset|unset|{repo / 'src'}"
+
+
+def test_object_blocks_ignore_a_leaked_redirect(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path / "repo")
+    run_dir = run_dir_for(repo)
+    leaked = {
+        "RUN_DIR": str(run_dir),
+        "GIT_OBJECT_DIRECTORY": str(tmp_path / "missing" / "objects"),
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES": str(tmp_path / "missing" / "alt"),
+    }
+
+    result = run_block("cmd:checkpoint", repo, leaked)
+
+    assert result.returncode == 0, result.stderr
+
+
+def test_checkpoint_does_not_hash_unignored_scratch(tmp_path: Path) -> None:
+    repo = init_repo(tmp_path / "repo")
+    run_dir = run_dir_for(repo)
+    scratch = run_dir / "unique-scratch.txt"
+    scratch.write_text("never hash this scratch payload\n", encoding="utf-8")
+    blob = command("hash-object", str(scratch), cwd=repo).stdout.strip()
+
+    checkpoint(repo, run_dir)
+    probe = subprocess.run(
+        ["git", "cat-file", "-e", blob],
+        cwd=repo,
+        env={**os.environ, **store_env(repo, run_dir)},
+        capture_output=True,
+        check=False,
+    )
+
+    assert probe.returncode != 0
 
 
 def test_default_branch_resolves_origin_head(tmp_path: Path) -> None:
@@ -268,7 +418,7 @@ def test_changed_paths_reports_both_rename_endpoints(tmp_path: Path) -> None:
     result = run_block(
         "cmd:changed-paths",
         repo,
-        {"CP_A": cp_a, "CP_B": cp_b},
+        {"RUN_DIR": str(run_dir), "CP_A": cp_a, "CP_B": cp_b},
     )
 
     assert result.returncode == 0, result.stderr
@@ -287,7 +437,7 @@ def test_changed_paths_survives_newline_in_filename(tmp_path: Path) -> None:
     result = run_block(
         "cmd:changed-paths",
         repo,
-        {"CP_A": cp_a, "CP_B": cp_b},
+        {"RUN_DIR": str(run_dir), "CP_A": cp_a, "CP_B": cp_b},
     )
 
     assert result.returncode == 0, result.stderr
@@ -319,19 +469,15 @@ def test_task_diff_preserves_binary_content(tmp_path: Path) -> None:
     assert b"GIT binary patch" in diff_path.read_bytes()
 
     temporary_index = run_dir / "apply.index"
-    command(
-        "read-tree",
-        cp_a,
-        cwd=repo,
-        env={"GIT_INDEX_FILE": str(temporary_index)},
-    )
+    apply_env = {"GIT_INDEX_FILE": str(temporary_index), **store_env(repo, run_dir)}
+    command("read-tree", cp_a, cwd=repo, env=apply_env)
     applied = command(
         "apply",
         "--check",
         "--cached",
         str(diff_path),
         cwd=repo,
-        env={"GIT_INDEX_FILE": str(temporary_index)},
+        env=apply_env,
     )
 
     assert applied.returncode == 0

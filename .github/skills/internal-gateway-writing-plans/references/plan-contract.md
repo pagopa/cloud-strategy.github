@@ -34,6 +34,7 @@ Before handoff, check every item:
 - No dependency appears only in prose. A missing producer path is marked unresolved; never guess a path.
 - No task contains a commit step or Git mutation.
 - Every executable or evaluable task has its required /internal-tdd posture and matching step order.
+- The imported /superpowers-writing-plans self-review Step scan and Proportion items have run. A plan several times longer than its spec or dominated by code blocks is revised before handoff, and test assertions stay as code.
 - A failing lint item is fixed inline and lint runs again. If a user decision is needed, keep the plan unfinished and withhold handoff.
 
 ## Handoff

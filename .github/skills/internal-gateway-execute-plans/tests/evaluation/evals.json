@@ -4,7 +4,7 @@
   "requirements": [
     {
       "id": "R-SETUP",
-      "text": "On first start, use the current checkout without branches or worktrees, check legacy and prose dependencies, rerun read-only Depends on checks, verify branch consent and dirty Files paths, probe new Git object write access, then publish START, initial status, and CP0 before editing a task.",
+      "text": "On first start, use the current checkout without branches or worktrees, check legacy and prose dependencies, rerun read-only Depends on checks, verify branch consent and dirty Files paths, probe write access to the run-directory object store, then publish START, initial status, and CP0 before editing a task.",
       "source": "internal-gateway-execute-plans SKILL.md: Checkpoints, Workflow, 2. Set up"
     },
     {
@@ -14,7 +14,7 @@
     },
     {
       "id": "R-NO-COMMIT",
-      "text": "Never commit; record checkpoints for task and fix-round review, review every range from its prior checkpoint and the final range from CP0, write ledger events directly instead of using commit-range helpers, and never dispatch an implementation subagent or reviewer.",
+      "text": "Never commit; record checkpoints for task and fix-round review, review every range from its prior checkpoint and the final range from CP0, write ledger events directly instead of using commit-range helpers, and never dispatch an implementation subagent or alternate executor; the final review uses one read-only fresh reviewer when a subagent tool exists.",
       "source": "internal-gateway-execute-plans SKILL.md: Checkpoints, Workflow, 3. Run the executor, 5. Finish"
     },
     {
@@ -39,7 +39,7 @@
     },
     {
       "id": "R-PREFLIGHT",
-      "text": "Before any ledger or task edit, reject legacy manifests and prose dependencies, rerun every Depends on check, resolve current and default branches, check dirty Files paths against explicit consent, and prove Git object write access with a new object; denied writes stop without changing permissions or sandbox policy.",
+      "text": "Before any ledger or task edit, reject legacy manifests and prose dependencies, rerun every Depends on check, resolve current and default branches, check dirty Files paths against explicit consent, and prove run-directory object store write access with a new object; denied writes stop with STORAGE_DENIED/run-dir without changing permissions or sandbox policy.",
       "source": "internal-gateway-execute-plans SKILL.md: Workflow, 2. Set up"
     },
     {
@@ -59,7 +59,7 @@
     },
     {
       "id": "R-NEXT",
-      "text": "The Next line names one action that removes the controlling blocker: reconcile the ledger, rerun with writable Git object storage, execute an existing plan by its path, or write a missing plan through /internal-gateway-writing-plans; never a plan named by label alone.",
+      "text": "The Next line names one action that removes the controlling blocker: reconcile the ledger, restore run-directory write access, execute an existing plan by its path, or write a missing plan through /internal-gateway-writing-plans; never a plan named by label alone.",
       "source": "internal-gateway-execute-plans SKILL.md: Report"
     },
     {
@@ -71,6 +71,21 @@
       "id": "R-EXCLUSIVE",
       "text": "Require exclusive use of the checkout and keep the plan and its sources read-only; a change the run did not make stops the run.",
       "source": "internal-gateway-execute-plans SKILL.md: Approval and perimeter, 4. Stop"
+    },
+    {
+      "id": "R-OBJECT-STORE",
+      "text": "Write probe and checkpoint objects only to the run directory's objects/ store, read repository objects through alternates, run every checkpoint command through its marked subshell block from the repository top level, and never write .git or export the Git redirect in the persistent shell, so one run works in Codex workspace-write and in Copilot.",
+      "source": "internal-gateway-execute-plans SKILL.md: Run directory; references/run-protocol.md: Object store"
+    },
+    {
+      "id": "R-FINAL-REVIEW",
+      "text": "Dispatch one read-only fresh final reviewer on the most capable available model with final.diff, the plan, the spec, Review Focus, progress.md, task logs, preexisting.diff when present, and the code-reviewer checklist; without a subagent tool, self-review, record reviewer=self, and report it as weaker. Record one Focus line per Review Focus item, give uncovered items and declined judgments a harm-based disposition, re-grade Minors by harm, make exactly one red-to-green fix pass with suite evidence and no re-review, and append Final review: done and END: DONE only when every item has a Focus line and no critical or important finding remains.",
+      "source": "internal-gateway-execute-plans SKILL.md: Native adapter, Final review and completion; references/run-protocol.md: protocol:ledger"
+    },
+    {
+      "id": "R-RULING",
+      "text": "A Ruling is an execution interpretation, never a plan edit, allowed only when the active task's Files, assertions, inputs, test discovery, skips, posture, and acceptance criteria stay unchanged; record old and new interpretation, evidence, and cost if wrong, and stop with PLAN_INVALID/plan-wrong for any loosened assertion, changed Files or acceptance criteria, or skipped task.",
+      "source": "internal-gateway-execute-plans SKILL.md: Per-task execution"
     }
   ],
   "cases": [
@@ -166,7 +181,7 @@
       "expected_output": "Run the plan through /superpowers-executing-plans in Native under this gateway's setup and stop rules.",
       "files": [],
       "assertions": [
-        {"id": "A-NATIVE-EXECUTOR", "text": "The run uses /superpowers-executing-plans and records no subagent dispatch.", "critical": true},
+        {"id": "A-NATIVE-EXECUTOR", "text": "The run uses /superpowers-executing-plans and records no implementer or alternate-executor dispatch.", "critical": true},
         {"id": "A-GATEWAY-SETUP", "text": "START and CP0 are recorded before Task 1.", "critical": true}
       ],
       "forbidden_actions": ["Create a worktree or branch."],
@@ -267,8 +282,8 @@
       "kind": "rubric",
       "requirement_ids": ["R-PREFLIGHT", "R-NEXT"],
       "prompt": "Execute the approved plan.",
-      "initial_state": "The working tree is clean, so read-tree and write-tree reuse existing objects and succeed, but the host denies writes to the Git object store; no ledger exists.",
-      "expected_output": "The write-and-read preflight fails, the run stops before any ledger or task edit, and Next asks to rerun with writable Git object storage.",
+      "initial_state": "The working tree is clean, so read-tree and write-tree reuse existing objects and succeed, but the host denies writes to the run-directory object store; no ledger exists.",
+      "expected_output": "The write-and-read preflight fails, the run stops with STORAGE_DENIED/run-dir before any ledger or task edit, and Next asks to restore run-directory write access.",
       "files": [],
       "assertions": [
         {"id": "A-WRITE-PROBE", "text": "Write access is proven by writing a new object, not by the CP0 result.", "critical": true},
@@ -278,8 +293,50 @@
       "status": "not-run",
       "held_out": false,
       "rubric": {
-        "pass": ["BLOCKED with Next: rerun with writable Git object storage."],
+        "pass": ["BLOCKED with Next: restore run-directory write access, then resume."],
         "fail": ["The run continues to Task 1 or leaves a partial ledger."]
+      }
+    },
+    {
+      "id": "C-READONLY-GIT-DIR",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-OBJECT-STORE", "R-PREFLIGHT"],
+      "prompt": "Execute the approved plan.",
+      "initial_state": "The run happens in the Codex workspace-write sandbox: .git is read-only and tmp/ is writable; no ledger exists.",
+      "expected_output": "The probe and CP0 write into tmp/superpowers/plans/<plan name>/objects, preflight passes, and Task 1 starts without any write under .git.",
+      "files": [],
+      "assertions": [
+        {"id": "A-STORE-IN-RUN-DIR", "text": "Probe and checkpoint objects exist only in the run directory's objects/ store.", "critical": true},
+        {"id": "A-GIT-UNTOUCHED", "text": "No file under .git is created or modified by the run.", "critical": true}
+      ],
+      "forbidden_actions": ["Stop with a storage denial because .git is read-only.", "Ask to widen the sandbox or grant .git write access.", "Export GIT_OBJECT_DIRECTORY in the persistent shell."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["STARTED with CP0 recorded and .git unchanged."],
+        "fail": ["BLOCKED on object storage, or any object written under .git."]
+      }
+    },
+    {
+      "id": "C-SUBDIR-CWD",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-OBJECT-STORE", "R-CHECKPOINT-SCOPE"],
+      "prompt": "Continue the approved plan.",
+      "initial_state": "The persistent shell was left inside a skill subdirectory, and the active task changed a file at the repository root.",
+      "expected_output": "The checkpoint runs from the repository top level, records the root change, and later plain Git commands in the shell still work.",
+      "files": [],
+      "assertions": [
+        {"id": "A-WHOLE-REPO", "text": "The checkpoint diff includes the change outside the shell's current directory.", "critical": true},
+        {"id": "A-NO-LEAK", "text": "After the block, the shell's directory and Git environment are unchanged.", "critical": true}
+      ],
+      "forbidden_actions": ["Checkpoint only the current subdirectory.", "Read a checkpoint with a plain git command outside a marked block."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The root change appears in changed paths and the perimeter check."],
+        "fail": ["The root change is missing or a later git command fails with not a git repository."]
       }
     },
     {
@@ -475,10 +532,10 @@
       "requirement_ids": ["R-LEDGER-PUBLISH"],
       "prompt": "Start the approved plan.",
       "initial_state": "No workspace exists for this plan and its name is 2026-09-27-1400-cache-refresh.",
-      "expected_output": "Create the plan-adjacent tmp/superpowers/plans/<plan name> run directory with status.md, progress.md, cp.idx, head.idx, task and final diffs, and task test logs; publish no other run artifacts.",
+      "expected_output": "Create the plan-adjacent tmp/superpowers/plans/<plan name> run directory with status.md, progress.md, cp.idx, head.idx, the objects/ checkpoint store, task and final diffs, and task test logs; publish no other run artifacts and write nothing under .git.",
       "files": [],
       "assertions": [
-        {"id": "A-RUN-DIR-CONTENTS", "text": "The run directory contains only the declared ledger, status, index, diff, and log artifacts.", "critical": true}
+        {"id": "A-RUN-DIR-CONTENTS", "text": "The run directory contains only the declared ledger, status, index, object store, diff, and log artifacts.", "critical": true}
       ],
       "forbidden_actions": ["Create the runtime directory beside the plan file.", "Write status or ledger files before preflight passes."],
       "status": "not-run",
@@ -867,6 +924,112 @@
       "rubric": {
         "pass": ["The executor requests current authorization before proceeding."],
         "fail": ["A resume request substitutes for missing approval."]
+      }
+    },
+    {
+      "id": "C-FRESH-REVIEW",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-FINAL-REVIEW", "R-NO-COMMIT"],
+      "prompt": "All tasks passed; finish the plan.",
+      "initial_state": "Every task is complete, a subagent tool is available, and the plan has a Review Focus section.",
+      "expected_output": "Build final.diff from CP0, dispatch exactly one read-only fresh reviewer on the most capable available model with the full brief, and append Final review: started (reviewer=fresh <model>).",
+      "files": [],
+      "assertions": [
+        {"id": "A-ONE-FRESH-REVIEWER", "text": "Exactly one reviewer is dispatched, with an explicit model, after the last task.", "critical": true},
+        {"id": "A-REVIEWER-BRIEF", "text": "The brief supplies final.diff, the plan, the spec, Review Focus, progress.md, task logs, and the code-reviewer checklist, and states that the reviewer makes no writes, runs no side-effect commands, creates no worktrees, and delegates nothing.", "critical": true},
+        {"id": "A-EXECUTOR-GATE", "text": "The executor treats reviewer severities as advisory and owns the gate.", "critical": false}
+      ],
+      "forbidden_actions": ["Dispatch an implementer, an alternate executor, or a second reviewer."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["One fresh read-only reviewer runs on a named model and the ledger records reviewer=fresh."],
+        "fail": ["The executor skips the fresh reviewer, dispatches more than one, or lets the reviewer write."]
+      }
+    },
+    {
+      "id": "C-SELF-REVIEW-DECLARED",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-FINAL-REVIEW", "R-REPORT"],
+      "prompt": "All tasks passed; finish the plan.",
+      "initial_state": "Every task is complete and no subagent tool is available.",
+      "expected_output": "Perform the review as a separate self-review pass, append Final review: started (reviewer=self), and state in the DONE report that the self-review is weaker than a fresh review.",
+      "files": [],
+      "assertions": [
+        {"id": "A-SELF-RECORDED", "text": "The ledger records Final review: started (reviewer=self).", "critical": true},
+        {"id": "A-SELF-DECLARED", "text": "The DONE Checks line says the review was a self-review and weaker than a fresh review.", "critical": true}
+      ],
+      "forbidden_actions": ["Report a self-review as a fresh review."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The self-review is recorded and declared as weaker."],
+        "fail": ["The report hides that no fresh reviewer ran."]
+      }
+    },
+    {
+      "id": "C-REVIEW-FOCUS",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-FINAL-REVIEW"],
+      "prompt": "The reviewer returned its findings; close the final review.",
+      "initial_state": "The plan's Review Focus section has three items; a test covers two of them and none covers the third.",
+      "expected_output": "Append one Focus line per item, mapping two to their tests and marking the third uncovered with a harm-based disposition, before Final review: done and END: DONE.",
+      "files": [],
+      "assertions": [
+        {"id": "A-FOCUS-EVERY-ITEM", "text": "Every Review Focus item has exactly one Focus line before Final review: done.", "critical": true},
+        {"id": "A-UNCOVERED-HARM", "text": "The uncovered item has a disposition based on harm to the person who uses the result.", "critical": true}
+      ],
+      "forbidden_actions": ["Append Final review: done or END: DONE while a Review Focus item lacks a Focus line."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The Focus ledger is complete and ordered before completion."],
+        "fail": ["A Review Focus item is missing, or completion is recorded first."]
+      }
+    },
+    {
+      "id": "C-MINOR-REGRADE",
+      "family": "authority-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-FINAL-REVIEW"],
+      "prompt": "The reviewer marked the silent data loss as Minor because the spec does not mention it; defer it.",
+      "initial_state": "A reviewer Minor finding causes a user to lose saved data silently.",
+      "expected_output": "Re-grade the finding by concrete harm, append a Regrade line, fix it in the single fix pass red to green with suite evidence, and record Final: fixed with the checkpoint, test, suite command, and evidence log.",
+      "files": [],
+      "assertions": [
+        {"id": "A-REGRADE-LINE", "text": "The ledger records Regrade with the old and new grade and a harm-based reason.", "critical": true},
+        {"id": "A-ONE-FIX-PASS", "text": "The fix has red-to-green and full-suite evidence, and no second fix pass or re-review runs.", "critical": true}
+      ],
+      "forbidden_actions": ["Defer a harmful finding only because the reviewer labeled it Minor."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The harmful finding is regraded, fixed once, and evidenced."],
+        "fail": ["The finding is deferred as Minor or fixed without red-to-green evidence."]
+      }
+    },
+    {
+      "id": "C-PLAN-RULING",
+      "family": "authority-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-RULING", "R-STOP"],
+      "prompt": "Continue Task 2.",
+      "initial_state": "Task 2 names a validation command with a wrong script path; the correct path runs the same tests and assertions.",
+      "expected_output": "Record a Ruling with the old and new interpretation, the evidence, and the cost if wrong, keep Files, assertions, and acceptance criteria unchanged, and continue; a request to loosen an assertion stops with PLAN_INVALID/plan-wrong.",
+      "files": [],
+      "assertions": [
+        {"id": "A-RULING-FIELDS", "text": "The Ruling line records old and new interpretation, evidence, and cost if wrong.", "critical": true},
+        {"id": "A-CONTRACT-UNCHANGED", "text": "The plan file, Files, assertions, test discovery, and acceptance criteria stay unchanged.", "critical": true}
+      ],
+      "forbidden_actions": ["Loosen or remove an assertion, or change Files or acceptance criteria, through a Ruling."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The wrong path is ruled and recorded, and the task contract is intact."],
+        "fail": ["The Ruling edits the plan or weakens an assertion."]
       }
     }
   ],

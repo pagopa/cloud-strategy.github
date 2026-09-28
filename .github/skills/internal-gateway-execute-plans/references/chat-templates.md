@@ -138,9 +138,9 @@ A plan must contain at least one task. The bar has one cell per task up to ten t
 ```text
 ✅ <localized done> · <plan name> · Task <tot>/<tot> <bar> · CP<n> · 🧭 all planned tasks and final review passed
 🔍 <final review evidence> · 📂 Changed: <paths or none> · Preexisting: <paths when included>
-🧪 Checks: <commands and results>
+🧪 Checks: <commands and results> · Review: fresh <model> or self (weaker)
 ⚖️ Rulings: <ledger rulings or none> · 🧹 Deferred minors: <items or none>
 🛠️ **Action:** <one final action or none>
 ```
 
-The final message combines Evidence and So far on one line, preserving the ordered facts and the five-line limit. Omit Preexisting when no dirty files were included. Use the bold final action even when the action is none.
+The final message combines Evidence and So far on one line, preserving the ordered facts and the five-line limit. Omit Preexisting when no dirty files were included. The Checks line always names the review kind; a self-review is marked weaker than a fresh review. Use the bold final action even when the action is none.

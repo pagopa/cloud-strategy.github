@@ -5,36 +5,114 @@ Each block uses only the environment variables named in its task interface.
 
 ## Commands
 
-During preflight, before publishing a ledger, the executor runs this block to prove that Git can write and read a new object.
+### Object store
+
+Checkpoint and probe objects live in `$RUN_DIR/objects`. Repository objects
+are read through Git alternates, so no block writes `.git`. The same run works
+where `.git` is writable, such as Copilot in VS Code, and where it is read-only,
+such as the Codex `workspace-write` sandbox.
+
+Every block that writes or reads a checkpoint starts with the same store
+prelude:
+
+- The block body is one subshell, so `set -eu`, `cd`, and the Git redirect
+  never leak into the persistent shell. Never export `GIT_OBJECT_DIRECTORY` or
+  `GIT_ALTERNATE_OBJECT_DIRECTORIES` in the caller shell.
+- The block moves to the repository top level. A relative `RUN_DIR` is resolved
+  from there.
+- A checkpoint object exists only through this redirect. Read checkpoints only
+  through a marked block; plain `git cat-file`, `git diff`, or `git ls-tree` on
+  a `CPn` reports a missing object.
+
+Set block inputs as shell variables immediately before the block in the same
+command, for example `RUN_DIR=<run dir> CP=<tree>` followed by the block.
+
+During preflight, before publishing a ledger, the executor runs this block to create the run-directory object store and prove that Git can write and read a new object there.
 
 <!-- cmd:object-probe -->
 ```sh
-set -eu
-oid=$(printf 'probe %s %s\n' "$(date -u +%Y%m%dT%H%M%SZ)" "$$" | git hash-object -w --stdin)
-git cat-file -e "$oid"
+(
+  set -eu
+  unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  top=$(git rev-parse --show-toplevel)
+  cd "$top"
+  common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+  mkdir -p "$RUN_DIR/objects"
+  RUN_DIR=$(cd "$RUN_DIR" && pwd)
+  GIT_OBJECT_DIRECTORY="$RUN_DIR/objects"
+  GIT_ALTERNATE_OBJECT_DIRECTORIES="$common/objects"
+  export GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  oid=$(printf 'probe %s %s\n' "$(date -u +%Y%m%dT%H%M%SZ)" "$$" | git hash-object -w --stdin)
+  git cat-file -e "$oid"
+)
 ```
 
-At first-start setup and after every task or fix round, the executor runs this block to capture a checkpoint without touching the real index.
+At first-start setup and after every task or fix round, the executor runs this block to capture a checkpoint of the whole repository without touching the real index. Scratch paths that ignore rules do not cover are excluded before hashing; tracked scratch entries are removed afterward.
 
 <!-- cmd:checkpoint -->
 ```sh
-set -eu
-idx="$RUN_DIR/cp.idx"
-GIT_INDEX_FILE="$idx" git read-tree HEAD
-GIT_INDEX_FILE="$idx" git add -A -- .
-GIT_INDEX_FILE="$idx" git rm -r -q --cached --ignore-unmatch -f -- .superpowers tmp
-GIT_INDEX_FILE="$idx" git write-tree
+(
+  set -eu
+  unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  top=$(git rev-parse --show-toplevel)
+  cd "$top"
+  common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+  mkdir -p "$RUN_DIR/objects"
+  RUN_DIR=$(cd "$RUN_DIR" && pwd)
+  GIT_OBJECT_DIRECTORY="$RUN_DIR/objects"
+  GIT_ALTERNATE_OBJECT_DIRECTORIES="$common/objects"
+  export GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  idx="$RUN_DIR/cp.idx"
+  set -- ':/'
+  for scratch in .superpowers tmp; do
+    git check-ignore -q --no-index "$scratch/" || set -- "$@" ":(exclude,top)$scratch"
+  done
+  GIT_INDEX_FILE="$idx" git read-tree HEAD
+  GIT_INDEX_FILE="$idx" git add -A -- "$@"
+  GIT_INDEX_FILE="$idx" git rm -r -q --cached --ignore-unmatch -f -- ':/.superpowers' ':/tmp'
+  GIT_INDEX_FILE="$idx" git write-tree
+)
 ```
 
 During resume and HEAD-adoption checks, the executor runs this block to compare HEAD with the latest checkpoint while excluding scratch paths.
 
 <!-- cmd:head-tree -->
 ```sh
-set -eu
-idx="$RUN_DIR/head.idx"
-GIT_INDEX_FILE="$idx" git read-tree HEAD
-GIT_INDEX_FILE="$idx" git rm -r -q --cached --ignore-unmatch -f -- .superpowers tmp
-GIT_INDEX_FILE="$idx" git write-tree
+(
+  set -eu
+  unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  top=$(git rev-parse --show-toplevel)
+  cd "$top"
+  common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+  mkdir -p "$RUN_DIR/objects"
+  RUN_DIR=$(cd "$RUN_DIR" && pwd)
+  GIT_OBJECT_DIRECTORY="$RUN_DIR/objects"
+  GIT_ALTERNATE_OBJECT_DIRECTORIES="$common/objects"
+  export GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  idx="$RUN_DIR/head.idx"
+  GIT_INDEX_FILE="$idx" git read-tree HEAD
+  GIT_INDEX_FILE="$idx" git rm -r -q --cached --ignore-unmatch -f -- ':/.superpowers' ':/tmp'
+  GIT_INDEX_FILE="$idx" git write-tree
+)
+```
+
+At CP0 publication, on resume, and on every status query, the executor runs this block to verify that checkpoint `CP` exists; it prints `tree` for a readable checkpoint.
+
+<!-- cmd:checkpoint-type -->
+```sh
+(
+  set -eu
+  unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  top=$(git rev-parse --show-toplevel)
+  cd "$top"
+  common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+  mkdir -p "$RUN_DIR/objects"
+  RUN_DIR=$(cd "$RUN_DIR" && pwd)
+  GIT_OBJECT_DIRECTORY="$RUN_DIR/objects"
+  GIT_ALTERNATE_OBJECT_DIRECTORIES="$common/objects"
+  export GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  git cat-file -t "$CP"
+)
 ```
 
 During preflight, the executor runs this block to resolve the configured default branch, reporting unresolved when no origin HEAD is available.
@@ -55,14 +133,38 @@ After each task checkpoint, the executor runs this block for the perimeter check
 
 <!-- cmd:changed-paths -->
 ```sh
-git diff --name-status -z --find-renames "$CP_A" "$CP_B"
+(
+  set -eu
+  unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  top=$(git rev-parse --show-toplevel)
+  cd "$top"
+  common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+  mkdir -p "$RUN_DIR/objects"
+  RUN_DIR=$(cd "$RUN_DIR" && pwd)
+  GIT_OBJECT_DIRECTORY="$RUN_DIR/objects"
+  GIT_ALTERNATE_OBJECT_DIRECTORIES="$common/objects"
+  export GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  git diff --name-status -z --find-renames "$CP_A" "$CP_B"
+)
 ```
 
-During the per-task review-package step, the executor runs this block to save binary-safe evidence for the checkpoint range.
+During the per-task review-package step and the final review, the executor runs this block to save binary-safe evidence for a checkpoint range. `CP_A` may also be the START commit.
 
 <!-- cmd:task-diff -->
 ```sh
-git diff --binary "$CP_A" "$CP_B" > "$RUN_DIR/$DIFF_NAME"
+(
+  set -eu
+  unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  top=$(git rev-parse --show-toplevel)
+  cd "$top"
+  common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+  mkdir -p "$RUN_DIR/objects"
+  RUN_DIR=$(cd "$RUN_DIR" && pwd)
+  GIT_OBJECT_DIRECTORY="$RUN_DIR/objects"
+  GIT_ALTERNATE_OBJECT_DIRECTORIES="$common/objects"
+  export GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+  git diff --binary "$CP_A" "$CP_B" > "$RUN_DIR/$DIFF_NAME"
+)
 ```
 
 ## Records
@@ -93,11 +195,16 @@ Updated: <YYYY-MM-DDTHH:MM:SSZ>
 <YYYY-MM-DDTHH:MM:SSZ> HEAD adopted: <old> -> <new>
 <YYYY-MM-DDTHH:MM:SSZ> Ruling: <text>
 <YYYY-MM-DDTHH:MM:SSZ> RESUME: from CP<n>
-<YYYY-MM-DDTHH:MM:SSZ> Final review: started
-<YYYY-MM-DDTHH:MM:SSZ> Final: fixed <summary> (CP<n>)
+<YYYY-MM-DDTHH:MM:SSZ> Final review: started (reviewer=fresh <model>)
+<YYYY-MM-DDTHH:MM:SSZ> Final review: started (reviewer=self)
+<YYYY-MM-DDTHH:MM:SSZ> Focus: <item> -> <test>
+<YYYY-MM-DDTHH:MM:SSZ> Focus: <item> -> uncovered - <disposition>
+<YYYY-MM-DDTHH:MM:SSZ> Regrade: <finding> <old>-><new> - <reason>
+<YYYY-MM-DDTHH:MM:SSZ> Final: fixed <summary> (CP<n>, red->green: <test>, suite: <command> -> exit 0, evidence: <log>)
 <YYYY-MM-DDTHH:MM:SSZ> Final review: done (CP<n>)
 <YYYY-MM-DDTHH:MM:SSZ> STOP: code=<CODE> cause=<cause> evidence=<text> next=<action>
-<YYYY-MM-DDTHH:MM:SSZ> END: DONE|PARTIAL
+<YYYY-MM-DDTHH:MM:SSZ> END: DONE
+<YYYY-MM-DDTHH:MM:SSZ> END: PARTIAL
 ```
 
 <!-- protocol:derivation -->
@@ -128,8 +235,7 @@ OUT_OF_PERIMETER/file -> rewrite plan or undo the change
 OUT_OF_PERIMETER/protected -> authorize <path> explicitly or choose another approach
 TEST_FAILED/exhausted -> read <log> and say whether the test or the code is wrong
 CHECKPOINT_MISSING/<CPn> -> reconcile
-STORAGE_DENIED/git-objects -> grant write access, then resume
-STORAGE_DENIED/run-dir -> grant write access, then resume
+STORAGE_DENIED/run-dir -> grant write access to the run directory, then resume
 ```
 
 <!-- protocol:plan-header -->
@@ -175,4 +281,23 @@ Checkpoint: CP1 c1ffee
 Blocker: TEST_FAILED/exhausted: tmp/logs/task-2.log
 Next: read tmp/logs/task-2.log and say whether the test or the code is wrong
 Updated: 2026-09-27T12:00:08Z
+```
+
+<!-- example:final-ledger -->
+```text
+# Run ledger - plan: tmp/superpowers/plans/one-task-example.md
+2026-09-27T13:00:00Z START: abcdef branch=feature
+2026-09-27T13:00:01Z APPROVAL: plan=abc123 branch=feature default=main consent=none dirty=none choice=none
+2026-09-27T13:00:02Z CP0: c0ffee
+2026-09-27T13:00:03Z Task 1: started
+2026-09-27T13:00:04Z Task 1: complete (CP1, tests: pytest -q -> exit 0)
+2026-09-27T13:00:05Z CP1: c1ffee
+2026-09-27T13:00:06Z Final review: started (reviewer=fresh gpt-5)
+2026-09-27T13:00:07Z Focus: empty title -> test_empty_title_rejected
+2026-09-27T13:00:08Z Focus: unicode title -> uncovered - low harm: every current caller sends ASCII titles; deferred as a minor
+2026-09-27T13:00:09Z Regrade: blank title saved Minor->Important - a user silently loses the record title
+2026-09-27T13:00:10Z Final: fixed blank title saved (CP2, red->green: test_blank_title_rejected, suite: pytest -q -> exit 0, evidence: tmp/superpowers/plans/one-task-example/final-fix-tests.log)
+2026-09-27T13:00:11Z CP2: c2ffee
+2026-09-27T13:00:12Z Final review: done (CP2)
+2026-09-27T13:00:13Z END: DONE
 ```

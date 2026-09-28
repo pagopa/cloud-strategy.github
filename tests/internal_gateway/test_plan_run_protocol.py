@@ -25,7 +25,10 @@ TASK_TWO_MARKERS = (
     "protocol:files-globs",
     "example:ledger",
     "example:status",
+    "example:final-ledger",
 )
+
+FINAL_EXAMPLE_FOCUS_ITEMS = {"empty title", "unicode title"}
 
 EXPECTED_EVENT_PREFIXES = {
     "START",
@@ -39,6 +42,8 @@ EXPECTED_EVENT_PREFIXES = {
     "Ruling",
     "RESUME",
     "Final review: started",
+    "Focus",
+    "Regrade",
     "Final: fixed",
     "Final review: done",
     "STOP",
@@ -58,7 +63,7 @@ EXPECTED_STOP_CAUSES = {
     "OUT_OF_PERIMETER": {"file", "protected"},
     "TEST_FAILED": {"exhausted"},
     "CHECKPOINT_MISSING": {"<CPn>"},
-    "STORAGE_DENIED": {"git-objects", "run-dir"},
+    "STORAGE_DENIED": {"run-dir"},
 }
 
 
@@ -144,6 +149,40 @@ def parse_ledger(ledger: list[str]) -> list[tuple[str, str]]:
         assert match is not None, f"invalid ledger timestamp: {line}"
         events.append((match.group(1), match.group(2)))
     return events
+
+
+def final_review_complete(focus_items: set[str], ledger: list[str]) -> bool:
+    events = [event for _, event in parse_ledger(ledger)]
+    focus_positions: dict[str, list[int]] = {}
+    closing = [
+        index
+        for index, event in enumerate(events)
+        if event.startswith("Final review: done") or event == "END: DONE"
+    ]
+    if not any(event.startswith("Final review: done") for event in events):
+        return False
+
+    for index, event in enumerate(events):
+        focus = re.fullmatch(r"Focus: (.+?) -> .+", event)
+        if focus:
+            focus_positions.setdefault(focus.group(1), []).append(index)
+        if event.startswith("Final: fixed") and not (
+            "suite:" in event and "evidence:" in event
+        ):
+            return False
+
+    if set(focus_positions) != focus_items:
+        return False
+    if any(len(positions) != 1 for positions in focus_positions.values()):
+        return False
+    first_close = min(closing)
+    return all(
+        positions[0] < first_close for positions in focus_positions.values()
+    )
+
+
+def final_example_ledger() -> list[str]:
+    return extract_block(protocol_text(), "example:final-ledger").splitlines()[1:]
 
 
 def derive_status(ledger: list[str]) -> dict[str, str]:
@@ -283,6 +322,62 @@ def test_example_ledger_lines_match_grammar() -> None:
         assert any(grammar.fullmatch(match.group(2)) for grammar in grammars), line
 
 
+def test_example_final_ledger_lines_match_grammar() -> None:
+    example = extract_block(protocol_text(), "example:final-ledger").splitlines()
+    grammars = [grammar_regex(line) for line in ledger_event_grammars()]
+
+    assert example[0].startswith("# Run ledger - plan: ")
+    for line in example[1:]:
+        match = TIMESTAMP.fullmatch(line)
+        assert match is not None, line
+        assert any(grammar.fullmatch(match.group(2)) for grammar in grammars), line
+
+
+def test_final_example_review_is_complete() -> None:
+    ledger = final_example_ledger()
+
+    assert final_review_complete(FINAL_EXAMPLE_FOCUS_ITEMS, ledger)
+    assert ledger[-1].endswith("END: DONE")
+
+
+def test_final_review_incomplete_without_every_focus_item() -> None:
+    ledger = final_example_ledger()
+    focus_lines = [line for line in ledger if " Focus: " in line]
+    missing = [line for line in ledger if line != focus_lines[0]]
+
+    assert not final_review_complete(FINAL_EXAMPLE_FOCUS_ITEMS, missing)
+
+
+def test_final_review_incomplete_with_unknown_focus_item() -> None:
+    ledger = final_example_ledger()
+    unknown = [
+        line.replace("Focus: empty title", "Focus: invented item")
+        for line in ledger
+    ]
+
+    assert unknown != ledger
+    assert not final_review_complete(FINAL_EXAMPLE_FOCUS_ITEMS, unknown)
+
+
+def test_final_review_incomplete_when_done_precedes_focus() -> None:
+    ledger = final_example_ledger()
+    focus_line = next(line for line in ledger if " Focus: " in line)
+    reordered = [line for line in ledger if line != focus_line] + [focus_line]
+
+    assert not final_review_complete(FINAL_EXAMPLE_FOCUS_ITEMS, reordered)
+
+
+def test_final_review_incomplete_when_fix_lacks_suite_evidence() -> None:
+    ledger = final_example_ledger()
+    stripped = [
+        re.sub(r", suite: .+\)$", ")", line) if " Final: fixed " in line else line
+        for line in ledger
+    ]
+
+    assert stripped != ledger
+    assert not final_review_complete(FINAL_EXAMPLE_FOCUS_ITEMS, stripped)
+
+
 def test_example_status_derives_from_example_ledger() -> None:
     example_ledger = extract_block(protocol_text(), "example:ledger").splitlines()[1:]
     example_status = extract_block(protocol_text(), "example:status")
@@ -310,6 +405,7 @@ def test_stored_records_are_emoji_free() -> None:
         "protocol:stop-codes",
         "example:ledger",
         "example:status",
+        "example:final-ledger",
     ):
         assert emoji.search(extract_block(protocol_text(), marker)) is None
 
@@ -404,10 +500,16 @@ def test_checkpoint_handles_ignored_scratch_directories(tmp_path: Path) -> None:
         "cmd:head-tree", repo, {"RUN_DIR": str(run_dir)}
     )
     assert head_tree.returncode == 0, head_tree.stderr
+    store_env = {
+        **os.environ,
+        "GIT_OBJECT_DIRECTORY": str(run_dir / "objects"),
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES": str(repo / ".git" / "objects"),
+    }
 
     checkpoint_paths = subprocess.run(
         ["git", "ls-tree", "-r", "--name-only", checkpoint.stdout.strip()],
         cwd=repo,
+        env=store_env,
         check=True,
         capture_output=True,
         text=True,
@@ -415,6 +517,7 @@ def test_checkpoint_handles_ignored_scratch_directories(tmp_path: Path) -> None:
     head_paths = subprocess.run(
         ["git", "ls-tree", "-r", "--name-only", head_tree.stdout.strip()],
         cwd=repo,
+        env=store_env,
         check=True,
         capture_output=True,
         text=True,
