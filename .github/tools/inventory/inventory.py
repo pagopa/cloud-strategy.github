@@ -8,9 +8,7 @@ from common.constants import INVENTORY_PATH
 from common.files import write_text
 from common.paths import path_list
 
-MANAGED_RESOURCES_RELATIVE_PATH = (
-    ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
-)
+MANAGED_RESOURCES_RELATIVE_PATH = ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
 SECTION_ORDER = (
     "Instructions",
     "Skills",
@@ -88,8 +86,12 @@ def _manifest_provenance_groups(root: Path) -> list[dict[str, object]]:
             {
                 "repository": _repo_display(repository),
                 "ref": ref[:12],
-                "tag": str(source.get("advertised_ref")) if source.get("advertised_ref") else None,
-                "commit_date": str(source.get("commit_date")) if source.get("commit_date") else None,
+                "tag": str(source.get("advertised_ref"))
+                if source.get("advertised_ref")
+                else None,
+                "commit_date": str(source.get("commit_date"))
+                if source.get("commit_date")
+                else None,
                 "paths": paths,
             }
         )
@@ -109,9 +111,7 @@ def _format_provenance_heading(group: dict[str, object]) -> str:
 def collect_inventory_sections(root: Path) -> dict[str, list[str]]:
     skills = path_list(root, ".github/skills/**/SKILL.md")
     imported = {
-        path
-        for group in _manifest_provenance_groups(root)
-        for path in group["paths"]
+        path for group in _manifest_provenance_groups(root) for path in group["paths"]
     }
     provenance = sorted(set(skills) & imported)
     return {

@@ -22,8 +22,16 @@ EXPECTED_TERRAFORM_OWNERS: dict[str, tuple[str, str | None, str | None]] = {
     "module-architecture": ("internal-terraform", None, None),
     "ci-or-provider-operation": ("internal-terraform", None, None),
     "ambiguous-adoption-identity": ("internal-terraform", None, None),
-    "bulk-multi-state-import": ("internal-terraform", "internal-terraform-import", None),
-    "aws-identity-center-import": ("internal-terraform", "internal-terraform-import", None),
+    "bulk-multi-state-import": (
+        "internal-terraform",
+        "internal-terraform-import",
+        None,
+    ),
+    "aws-identity-center-import": (
+        "internal-terraform",
+        "internal-terraform-import",
+        None,
+    ),
 }
 
 
@@ -77,8 +85,14 @@ def test_terraform_benchmark_keeps_language_and_operational_owners_distinct() ->
     assert reports["mixed-adoption"]["primary_owner"] == "internal-terraform"
     assert reports["mixed-adoption"]["delegated_owner"] == "internal-tf"
     assert reports["mixed-adoption"]["execution_owner"] is None
-    assert reports["bulk-multi-state-import"]["execution_owner"] == "internal-terraform-import"
-    assert reports["aws-identity-center-import"]["execution_owner"] == "internal-terraform-import"
+    assert (
+        reports["bulk-multi-state-import"]["execution_owner"]
+        == "internal-terraform-import"
+    )
+    assert (
+        reports["aws-identity-center-import"]["execution_owner"]
+        == "internal-terraform-import"
+    )
     assert reports["mixed-adoption"]["delegated_core_tokens"] > 0
     assert reports["hcl-only"]["delegated_core_tokens"] == 0
     assert reports["native-test"]["delegated_core_tokens"] > 0

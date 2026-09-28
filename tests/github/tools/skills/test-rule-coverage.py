@@ -400,7 +400,9 @@ def test_router_phrasing_is_accepted_as_a_trigger_prefix(tmp_path: Path) -> None
     )
 
     assert [
-        finding for finding in findings if finding.code == "description-not-trigger-first"
+        finding
+        for finding in findings
+        if finding.code == "description-not-trigger-first"
     ] == []
 
 

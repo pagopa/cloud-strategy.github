@@ -63,7 +63,9 @@ def test_render_inventory_groups_imported_skills_by_source() -> None:
     rendered = render_inventory_markdown(_base_sections(), groups)
 
     assert "## Imported Skill Provenance" in rendered
-    assert "### anthropics/skills — ref b29e7cf65e5c · 2026-07-24 · 2 skills" in rendered
+    assert (
+        "### anthropics/skills — ref b29e7cf65e5c · 2026-07-24 · 2 skills" in rendered
+    )
     assert "- `.github/skills/anthropic-docx/SKILL.md`" in rendered
     assert "- `.github/skills/anthropic-pdf/SKILL.md`" in rendered
 

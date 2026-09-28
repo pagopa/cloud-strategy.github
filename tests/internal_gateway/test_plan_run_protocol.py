@@ -5,11 +5,8 @@ import re
 import subprocess
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
-EXECUTOR_ROOT = (
-    REPO_ROOT / ".github" / "skills" / "internal-gateway-execute-plans"
-)
+EXECUTOR_ROOT = REPO_ROOT / ".github" / "skills" / "internal-gateway-execute-plans"
 WRITER_ROOT = REPO_ROOT / ".github" / "skills" / "internal-gateway-writing-plans"
 PROTOCOL_PATH = EXECUTOR_ROOT / "references" / "run-protocol.md"
 CHAT_TEMPLATES_PATH = EXECUTOR_ROOT / "references" / "chat-templates.md"
@@ -176,9 +173,7 @@ def final_review_complete(focus_items: set[str], ledger: list[str]) -> bool:
     if any(len(positions) != 1 for positions in focus_positions.values()):
         return False
     first_close = min(closing)
-    return all(
-        positions[0] < first_close for positions in focus_positions.values()
-    )
+    return all(positions[0] < first_close for positions in focus_positions.values())
 
 
 def final_example_ledger() -> list[str]:
@@ -232,9 +227,7 @@ def derive_status(ledger: list[str]) -> dict[str, str]:
         "Tasks": f"{len(completed_tasks)}/3",
         "Current": f"Task {current_task} <title>" if current_task else "none",
         "Checkpoint": (
-            f"CP{checkpoints[-1][0]} {checkpoints[-1][1]}"
-            if checkpoints
-            else "none"
+            f"CP{checkpoints[-1][0]} {checkpoints[-1][1]}" if checkpoints else "none"
         ),
         "Blocker": blocker,
         "Next": next_action,
@@ -351,8 +344,7 @@ def test_final_review_incomplete_without_every_focus_item() -> None:
 def test_final_review_incomplete_with_unknown_focus_item() -> None:
     ledger = final_example_ledger()
     unknown = [
-        line.replace("Focus: empty title", "Focus: invented item")
-        for line in ledger
+        line.replace("Focus: empty title", "Focus: invented item") for line in ledger
     ]
 
     assert unknown != ledger
@@ -457,9 +449,7 @@ def test_checkpoint_handles_ignored_scratch_directories(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
-    subprocess.run(
-        ["git", "config", "user.name", "Plan Test"], cwd=repo, check=True
-    )
+    subprocess.run(["git", "config", "user.name", "Plan Test"], cwd=repo, check=True)
     subprocess.run(
         ["git", "config", "user.email", "plan-test@example.invalid"],
         cwd=repo,
@@ -468,9 +458,7 @@ def test_checkpoint_handles_ignored_scratch_directories(tmp_path: Path) -> None:
     (repo / "README.md").write_text("initial\n", encoding="utf-8")
     (repo / ".gitignore").write_text("/tmp/\n/.superpowers/\n", encoding="utf-8")
     subprocess.run(["git", "add", "README.md", ".gitignore"], cwd=repo, check=True)
-    subprocess.run(
-        ["git", "commit", "-q", "-m", "initial"], cwd=repo, check=True
-    )
+    subprocess.run(["git", "commit", "-q", "-m", "initial"], cwd=repo, check=True)
     (repo / "tmp").mkdir()
     (repo / ".superpowers").mkdir()
     (repo / "tmp" / "tracked.txt").write_text("scratch\n", encoding="utf-8")
@@ -480,9 +468,7 @@ def test_checkpoint_handles_ignored_scratch_directories(tmp_path: Path) -> None:
         cwd=repo,
         check=True,
     )
-    subprocess.run(
-        ["git", "commit", "-q", "-m", "track scratch"], cwd=repo, check=True
-    )
+    subprocess.run(["git", "commit", "-q", "-m", "track scratch"], cwd=repo, check=True)
     (repo / "tmp" / "tracked.txt").write_text("edited scratch\n", encoding="utf-8")
     (repo / ".superpowers" / "tracked.txt").write_text(
         "edited scratch\n", encoding="utf-8"
@@ -492,13 +478,9 @@ def test_checkpoint_handles_ignored_scratch_directories(tmp_path: Path) -> None:
     real_index = repo / ".git" / "index"
     index_before = real_index.read_bytes()
 
-    checkpoint = run_protocol_command(
-        "cmd:checkpoint", repo, {"RUN_DIR": str(run_dir)}
-    )
+    checkpoint = run_protocol_command("cmd:checkpoint", repo, {"RUN_DIR": str(run_dir)})
     assert checkpoint.returncode == 0, checkpoint.stderr
-    head_tree = run_protocol_command(
-        "cmd:head-tree", repo, {"RUN_DIR": str(run_dir)}
-    )
+    head_tree = run_protocol_command("cmd:head-tree", repo, {"RUN_DIR": str(run_dir)})
     assert head_tree.returncode == 0, head_tree.stderr
     store_env = {
         **os.environ,
