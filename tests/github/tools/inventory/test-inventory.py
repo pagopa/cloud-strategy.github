@@ -9,6 +9,7 @@ REPO_ROOT = next(
 sys.path.insert(0, str(REPO_ROOT / ".github/tools"))
 
 from inventory.inventory import (  # noqa: E402
+    build_inventory_markdown,
     parse_inventory_markdown,
     render_inventory_markdown,
 )
@@ -117,3 +118,37 @@ def test_render_inventory_empty_provenance_uses_placeholder() -> None:
         "No imported skill provenance is available; declare sources in the "
         "external resource manifest." in rendered
     )
+
+
+def test_manifest_support_file_is_not_listed_as_an_imported_skill(
+    tmp_path: Path,
+) -> None:
+    skill_dir = tmp_path / ".github/skills/vendor-planning"
+    reference = skill_dir / "references/definition-of-done.md"
+    reference.parent.mkdir(parents=True)
+    reference.write_text("# Definition of Done\n", encoding="utf-8")
+    (skill_dir / "SKILL.md").write_text("# Planning\n", encoding="utf-8")
+    manifest = tmp_path / (
+        ".github/skills/local-agent-sync-external-resources/"
+        "references/managed-resources.yaml"
+    )
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text(
+        "version: 1\n"
+        "sources:\n"
+        "  vendor-skills:\n"
+        "    repository: https://github.com/vendor/skills.git\n"
+        "    ref: " + "a" * 40 + "\n"
+        "    assets:\n"
+        "      - local: .github/skills/vendor-planning\n"
+        "      - local: .github/skills/vendor-planning/references/definition-of-done.md\n",
+        encoding="utf-8",
+    )
+
+    rendered = build_inventory_markdown(tmp_path)
+    sections = parse_inventory_markdown(rendered)
+
+    assert sections["Imported Skill Provenance"] == {
+        ".github/skills/vendor-planning/SKILL.md"
+    }
+    assert "1 skills" in rendered

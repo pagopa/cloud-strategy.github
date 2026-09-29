@@ -34,6 +34,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 - `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
 - `.github/skills/addyosmani-code-simplification/SKILL.md`
+- `.github/skills/addyosmani-idea-refine/SKILL.md`
+- `.github/skills/addyosmani-planning-and-task-breakdown/SKILL.md`
 - `.github/skills/anthropic-docx/SKILL.md`
 - `.github/skills/anthropic-pdf/SKILL.md`
 - `.github/skills/anthropic-pptx/SKILL.md`
@@ -166,10 +168,12 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Imported Skill Provenance
 
-### addyosmani/agent-skills — ref 84ee50673804 · tag 0.6.9 · 2026-09-04 · 2 skills
+### addyosmani/agent-skills — ref 84ee50673804 · tag 0.6.9 · 2026-09-04 · 4 skills
 
 - `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
 - `.github/skills/addyosmani-code-simplification/SKILL.md`
+- `.github/skills/addyosmani-idea-refine/SKILL.md`
+- `.github/skills/addyosmani-planning-and-task-breakdown/SKILL.md`
 
 ### anthropics/skills — ref 41bbe19d1a1a · 2026-09-03 · 4 skills
 

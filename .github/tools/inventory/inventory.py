@@ -78,7 +78,9 @@ def _manifest_provenance_groups(root: Path) -> list[dict[str, object]]:
         paths = sorted(
             f"{asset['local']}/SKILL.md"
             for asset in raw_assets
-            if isinstance(asset, dict) and asset.get("local")
+            if isinstance(asset, dict)
+            and asset.get("local")
+            and not (root / asset["local"]).is_file()
         )
         if not repository or not ref or not paths:
             continue
