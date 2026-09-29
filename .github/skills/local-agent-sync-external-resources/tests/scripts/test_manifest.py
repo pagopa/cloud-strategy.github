@@ -21,9 +21,7 @@ from sync_external_resources_core import (  # noqa: E402
 
 _COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-_MANIFEST_PATH = (
-    ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
-)
+_MANIFEST_PATH = ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
 _SUMMARY_START = "# managed-sources-summary:start"
 _SUMMARY_END = "# managed-sources-summary:end"
 
@@ -382,8 +380,39 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 68
-    assert len(manifest.watchlist) == 11
+    assert len(manifest.assets) == 71
+    assert len(manifest.watchlist) == 10
+    addyosmani_source = next(
+        source
+        for source in manifest.sources
+        if source.source_id == "addyosmani-agent-skills"
+    )
+    assert any(
+        asset.upstream == "skills/planning-and-task-breakdown"
+        and asset.local == ".github/skills/addyosmani-planning-and-task-breakdown"
+        and asset.canonical_name == "addyosmani-planning-and-task-breakdown"
+        for asset in addyosmani_source.assets
+    )
+    assert any(
+        asset.upstream == "references/definition-of-done.md"
+        and asset.local
+        == (
+            ".github/skills/addyosmani-planning-and-task-breakdown/"
+            "references/definition-of-done.md"
+        )
+        for asset in addyosmani_source.assets
+    )
+    assert any(
+        asset.upstream == "skills/idea-refine"
+        and asset.local == ".github/skills/addyosmani-idea-refine"
+        and asset.canonical_name == "addyosmani-idea-refine"
+        for asset in addyosmani_source.assets
+    )
+    assert not any(
+        item.source_family == "addyosmani/agent-skills"
+        and item.upstream_id == "idea-refine"
+        for item in manifest.watchlist
+    )
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
     )
@@ -514,6 +543,9 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
     } == {
         ".github/skills/addyosmani-code-review-and-quality",
         ".github/skills/addyosmani-code-simplification",
+        ".github/skills/addyosmani-idea-refine",
+        ".github/skills/addyosmani-planning-and-task-breakdown",
+        ".github/skills/addyosmani-planning-and-task-breakdown/references/definition-of-done.md",
     }
 
 

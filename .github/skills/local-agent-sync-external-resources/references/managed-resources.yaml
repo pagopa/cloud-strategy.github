@@ -6,7 +6,7 @@ version: 1
 # managed-sources-summary:start
 # | source | repository | ref (sha) | tag | commit_date | skills |
 # |---|---|---|---|---|---|
-# | addyosmani-agent-skills | addyosmani/agent-skills | 84ee50673804 | 0.6.9 | 2026-09-04 | 2 |
+# | addyosmani-agent-skills | addyosmani/agent-skills | 84ee50673804 | 0.6.9 | 2026-09-04 | 5 |
 # | anthropic-skills | anthropics/skills | 41bbe19d1a1a | - | 2026-09-03 | 4 |
 # | antonbabenko-terraform-skill | antonbabenko/terraform-skill | 0a3a4a66e990 | - | 2026-07-03 | 1 |
 # | atlassian-mcp-server | atlassian/atlassian-mcp-server | 798f8138c976 | - | 2026-09-03 | 1 |
@@ -31,6 +31,15 @@ sources:
       - upstream: skills/code-review-and-quality
         local: .github/skills/addyosmani-code-review-and-quality
         canonical_name: addyosmani-code-review-and-quality
+      - upstream: skills/planning-and-task-breakdown
+        local: .github/skills/addyosmani-planning-and-task-breakdown
+        canonical_name: addyosmani-planning-and-task-breakdown
+      - upstream: references/definition-of-done.md
+        local: .github/skills/addyosmani-planning-and-task-breakdown/references/definition-of-done.md
+        canonical_name: addyosmani-planning-definition-of-done
+      - upstream: skills/idea-refine
+        local: .github/skills/addyosmani-idea-refine
+        canonical_name: addyosmani-idea-refine
   anthropic-skills:
     repository: https://github.com/anthropics/skills.git
     ref: 41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f
@@ -362,6 +371,9 @@ sources:
         local: .github/skills/vercel-find-skills
         canonical_name: vercel-find-skills
 normalizations:
+  - source: addyosmani-agent-skills
+    from: ../../references/definition-of-done.md
+    to: references/definition-of-done.md
   - source: obra-superpowers
     from: docs/superpowers
     to: tmp/superpowers
@@ -406,7 +418,3 @@ watchlist:
     upstream_id: caveman
     local_owner: retired
     reason: The previously retained caveman import was retired from the managed catalog by explicit user scope reduction. Do not reimport unless the user re-approves the retained import.
-  - source_family: addyosmani/agent-skills
-    upstream_id: idea-refine
-    local_owner: internal-gateway-idea
-    reason: Useful shaping frameworks and evaluation criteria were extracted into the repository-owned idea gateway; the competing autonomous workflow was retired.
