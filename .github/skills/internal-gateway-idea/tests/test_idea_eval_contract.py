@@ -1143,6 +1143,8 @@ def test_public_wrapper_declares_the_canonical_route_contract() -> None:
     assert metadata["route_contract"] == {
         "owner": "/internal-gateway-idea",
         "mode": "analysis-only",
+        "spec_handoff": "/mattpocock-to-spec",
+        "plan_handoff": "/internal-gateway-writing-plans",
         "execution_handoff": "/internal-gateway-execute-plans",
         "forbidden_pre_acceptance_routes": [
             "/internal-tdd",

@@ -55,22 +55,27 @@ change. Mark the decision of any unrecoverable field `open`.
 
 ## Artifact
 
-Create an analysis file only when the user selects `save` or `+spec`, or asks
-to continue in another conversation. Write at most one Markdown artifact at the
-supplied path. Without a path, use
-`tmp/superpowers/specs/YYYY-MM-DD-<topic>-analysis.md`, disclose that `tmp/` is
-disposable, and update that same file in place. Saving does not close the
-review gate.
+`save` is a non-promoting analysis checkpoint. Write at most one Markdown
+artifact when the user selects `save` or explicitly authorizes a continuation
+checkpoint at the supplied path. Without a path, use
+`tmp/superpowers/specs/YYYY-MM-DD-<topic>-analysis.md`, disclose disposable
+`tmp/`, and update that file in place. It holds the Candidate and recovery
+record, including classifications and `accepted-risk`.
+Saving does not close the review gate.
 
-The artifact holds the current Candidate or Consolidated Analysis Spec and the
-full recovery record, including finding classifications and any named-action
-`accepted-risk` override, so planning replay is lossless without the
-transcript. Never create a separate critical report, transcript, or second
-analysis artifact.
+`+spec` is a separate specialist handoff. It does not create or update the
+analysis checkpoint or authorize another path/action. The specialist owns the
+work spec and tracker publication. Bind its spec reference and accepted
+decision IDs in the existing recovery record's artifact event; persist only
+when its authority envelope allows it. No report, transcript, recovery record,
+state, gate, or second artifact.
 
-After a verified `+spec`, record `plan_authoring_ready: true` and state that
-plan authoring stays available through a later explicit `+plan`. `+plan` uses
-the retained spec and the single plan path locked by
-`/internal-gateway-writing-plans`; this gateway does not create or structure
-that plan. After `+plan`, state that execution is a separate action that needs
-explicit approval.
+When the producer exposes content identity or version, bind and recheck it on
+replay or `+plan`. Otherwise compare observable accepted contents with the
+active unit and decision IDs; record only that comparison, never an invented
+identity, hash, or strong guarantee. Unavailable or uncomparable content is
+not-ready until reverified. After verified `+spec`, record
+`plan_authoring_ready: true`; later explicit `+plan` uses the retained spec
+and the single path returned by `/internal-gateway-writing-plans`. This
+gateway does not create that plan, and execution still needs explicit
+approval.

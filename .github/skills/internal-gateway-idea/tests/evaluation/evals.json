@@ -26,6 +26,26 @@
       "id": "R-AUTHORITY",
       "text": "Preserve the authorized paths and actions unchanged through continue, save, pause, and recovery, and block out-of-envelope requests as authority-or-scope.",
       "source": "internal-gateway-idea SKILL.md: Mutation authority envelope"
+    },
+    {
+      "id": "R-SPEC-ROUTE",
+      "text": "After explicit +spec acceptance, send accepted decisions, labeled evidence, scope, anti-scope, review dispositions, and exact authority directly to /mattpocock-to-spec, which owns the template and tracker publication.",
+      "source": "internal-gateway-idea SKILL.md: Analysis unit lock; references/artifact-authoring.md: +spec"
+    },
+    {
+      "id": "R-SPEC-BINDING",
+      "text": "Bind an exposed content identity or version to the existing recovery record and accepted decisions; when none is exposed, compare observable accepted contents with the active unit and decision IDs without inventing identity or hash. Recheck on replay or +plan and do not inherit readiness for changed, unavailable, or uncomparable source.",
+      "source": "references/artifact-authoring.md: +spec; references/persistence.md: Artifact"
+    },
+    {
+      "id": "R-SPEC-NEW-DECISION",
+      "text": "Pass accepted Testing Decisions and boundaries directly; route a materially new test or specification decision through existing /grill-me eligibility and corresponding reevaluation without a redundant interview or extra gate.",
+      "source": "references/artifact-authoring.md: +spec"
+    },
+    {
+      "id": "R-PLAN-ROUTE",
+      "text": "After explicit +plan acceptance, route to /internal-gateway-writing-plans, which wraps /addyosmani-planning-and-task-breakdown, without authorizing implementation or execution.",
+      "source": "references/artifact-authoring.md: +plan"
     }
   ],
   "cases": [
@@ -111,6 +131,111 @@
       "rubric": {
         "pass": ["Findings are classified and the menu keeps seven positions with remaining locks explained."],
         "fail": ["Findings are merged automatically or the menu is renumbered."]
+      }
+    },
+    {
+      "id": "C-SPEC-DIRECT",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-ROUTE", "R-AUTHORITY"],
+      "prompt": "+spec",
+      "initial_state": "Critical review is complete; the canonical recovery record contains accepted decisions, labeled evidence, scope, anti-scope, and an unchanged authority envelope.",
+      "expected_output": "Preflight exact tracker publication and ready-for-agent label authority, then invoke /mattpocock-to-spec directly with the accepted context. The specialist owns the spec template and tracker publication; no planner or executor is invoked.",
+      "files": ["references/artifact-authoring.md"],
+      "assertions": [
+        {"id": "A-DIRECT-SPEC", "text": "The spec producer is the direct next route and receives the accepted context without a new design round.", "critical": true},
+        {"id": "A-AUTHORITY-PASSED", "text": "Authorized paths and actions are passed unchanged.", "critical": true}
+      ],
+      "forbidden_actions": ["Invoke /internal-gateway-writing-plans before +plan.", "Create a worker brief or parallel recovery record."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The direct spec route is explicit and the producer owns template and tracker work."],
+        "fail": ["The gateway writes a duplicate spec, asks a new design question, or routes directly to planning."]
+      }
+    },
+    {
+      "id": "C-SPEC-NEW-TEST-DECISION",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-ROUTE", "R-SPEC-NEW-DECISION", "R-GRILL"],
+      "prompt": "+spec after the specialist raises a new test boundary",
+      "initial_state": "Testing Decisions and boundaries were already accepted and passed to /mattpocock-to-spec; the returned work spec introduces a materially new test or specification decision.",
+      "expected_output": "Do not repeat the accepted interview. Return only the new decision through existing /grill-me eligibility and targeted reevaluation, then recheck the work spec before readiness; add no gate.",
+      "files": ["references/artifact-authoring.md"],
+      "assertions": [
+        {"id": "A-ACCEPTED-CONTEXT", "text": "Already accepted Testing Decisions and boundaries are passed without a redundant interview.", "critical": true},
+        {"id": "A-NEW-DECISION", "text": "A material new test or specification decision returns through /grill-me and reevaluation before readiness.", "critical": true}
+      ],
+      "forbidden_actions": ["Re-ask accepted decisions.", "Accept the new decision without reevaluation.", "Create an extra gate or runtime record."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Only the new material decision is re-routed and the existing route remains the owner."],
+        "fail": ["The gateway repeats the interview, bypasses /grill-me, or invents a new gate."]
+      }
+    },
+    {
+      "id": "C-SPEC-COHERENCE",
+      "family": "authority-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-BINDING"],
+      "prompt": "Resume the saved analysis and choose +plan.",
+      "initial_state": "The saved recovery record binds accepted decisions to a returned spec reference. Current source content changed, is unavailable, or cannot be compared with the active unit and decision IDs.",
+      "expected_output": "Recheck the source and keep plan_authoring_ready false or blocked until the spec is reverified; do not invent identity or hash or create a second recovery record.",
+      "files": ["references/persistence.md"],
+      "assertions": [
+        {"id": "A-RECHECK", "text": "Replay or +plan revalidates source coherence against the existing binding.", "critical": true},
+        {"id": "A-FAIL-CLOSED", "text": "Changed or unverifiable source does not inherit readiness.", "critical": true}
+      ],
+      "forbidden_actions": ["Assume the old readiness flag remains valid.", "Synthesize a content hash that was not exposed."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The response fails closed on changed or unverifiable source and preserves the single recovery record."],
+        "fail": ["The response promotes a stale or unidentifiable spec."]
+      }
+    },
+    {
+      "id": "C-SPEC-CONTENT-COMPARISON",
+      "family": "authority-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-BINDING"],
+      "prompt": "+spec from a producer without an exposed version",
+      "initial_state": "The producer exposes no content identity or version, but its observable returned contents match the active unit and accepted decision IDs.",
+      "expected_output": "Record the observable-content comparison in the existing recovery record, without inventing identity, hash, or a strong guarantee; readiness may follow only after that comparison passes.",
+      "files": ["references/artifact-authoring.md", "references/persistence.md"],
+      "assertions": [
+        {"id": "A-COMPARE", "text": "Observable accepted contents are compared with the active unit and accepted decision IDs.", "critical": true},
+        {"id": "A-NO-INVENTION", "text": "No identity, hash, parallel record, or stronger guarantee is invented.", "critical": true}
+      ],
+      "forbidden_actions": ["Treat missing identity as an automatic permanent block.", "Synthesize a content hash."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The comparison is recorded and readiness follows only from comparable accepted contents."],
+        "fail": ["The response invents evidence or blocks comparable content solely because no version was exposed."]
+      }
+    },
+    {
+      "id": "C-PLAN-ROUTE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-PLAN-ROUTE"],
+      "prompt": "+plan",
+      "initial_state": "A verified spec is ready and critical review is complete; implementation permission is false.",
+      "expected_output": "Route to /internal-gateway-writing-plans, which invokes /addyosmani-planning-and-task-breakdown. Do not implement or execute.",
+      "files": ["references/artifact-authoring.md"],
+      "assertions": [
+        {"id": "A-PLAN-ROUTE", "text": "The existing writer and planner are the next owners.", "critical": true},
+        {"id": "A-NO-EXEC", "text": "The route grants no implementation or execution authority.", "critical": true}
+      ],
+      "forbidden_actions": ["Invoke /mattpocock-implement from the idea gateway.", "Start execution automatically."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Planning is handed off without changing the idea state machine or authority envelope."],
+        "fail": ["The idea gateway writes tasks or starts implementation."]
       }
     }
   ],

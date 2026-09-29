@@ -29,10 +29,12 @@ not silently reuse open decisions.
 In `analysis-only` mode, do not invoke `/internal-tdd`,
 `/internal-gateway-writing-plans`, `/internal-gateway-execute-plans`, or
 implementation-oriented design before the user explicitly selects `+spec` or
-`+plan`. `+spec` authorizes only the selected spec artifact and records
-`plan_authoring_ready: true` after verification. A later `+plan` authorizes
-only the plan-authoring handoff. `Implementation permission: false` does not
-block plan authoring; neither action authorizes implementation or execution.
+`+plan`. `+spec` invokes `/mattpocock-to-spec` with accepted context and records
+`plan_authoring_ready: true` only after verification. `+plan` invokes
+`/internal-gateway-writing-plans`, wrapping
+`/addyosmani-planning-and-task-breakdown`. `Implementation permission: false`
+does not block plan authoring; neither action authorizes implementation or
+execution.
 
 ## Autonomous route contract and ownership
 
@@ -45,13 +47,14 @@ authority envelope.
 
 It does not own interview mechanics (`/grill-me`), critical-review procedure
 or report shape (`/internal-gateway-critical-master`), implementation-oriented
-design (a separate user-selected route), or planning and execution. A utility
-may supply mechanics but never replaces this gateway's lifecycle, state,
-authority, acceptance, or handoff decisions. After `+plan`, the caller owns the
-plan-authoring handoff; after explicit execution approval,
-`/internal-gateway-execute-plans` is the sole execution handoff. The public
-`route_contract` must match these boundaries and add no alternate route,
-dependency, or handoff.
+design (a separate user-selected route), planning, or execution. A utility
+may supply mechanics but never replaces lifecycle, state, authority,
+acceptance, or handoff decisions. `/mattpocock-to-spec` owns the spec template
+and tracker publication after `+spec`.
+`/internal-gateway-writing-plans` owns the planner handoff after `+plan`;
+`/internal-gateway-execute-plans` is the sole handoff after explicit execution
+approval. The `route_contract` must match boundaries and add no alternate
+route, dependency, or handoff.
 
 ## Global gates
 

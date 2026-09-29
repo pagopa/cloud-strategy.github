@@ -4,19 +4,25 @@ interface:
   default_prompt: >-
     Use $internal-gateway-idea only when explicitly selected. It is one
     autonomous route that turns an early or unclear idea into a
-    decision-ready Analysis Spec in analysis-only mode, keeping the work in
-    the conversation by default. Follow SKILL.md: record the unit lock,
+    decision-ready Analysis Spec in analysis-only mode, keeping the work in the
+    conversation by default. Follow SKILL.md: record the unit lock,
     recover local evidence first, route every material decision through the
     mandatory GRILL-ME gate with /grill-me, and require the CRITICAL REVIEW
-    gate with /internal-gateway-critical-master before close, +spec, or
-    +plan. Show the seven-entry phase menu with visible lock reasons, never
-    integrate findings automatically, keep Authorized paths and Authorized
-    actions unchanged, and block anything outside them as authority-or-scope.
-    Implementation and execution stay separate and user-gated; the caller
-    keeps the sole post-approval handoff to /internal-gateway-execute-plans.
+    gate with /internal-gateway-critical-master before close, +spec, or +plan.
+    Show the seven-entry menu with lock reasons, never auto-integrate findings,
+    preserve Authorized paths/actions, and block anything outside them as
+    authority-or-scope. +spec preflights exact tracker publication/label
+    authority, then invokes
+    /mattpocock-to-spec directly; +plan invokes
+    /internal-gateway-writing-plans, which wraps
+    /addyosmani-planning-and-task-breakdown. Implementation and execution stay
+    separate and user-gated; the caller keeps sole post-approval handoff
+    to /internal-gateway-execute-plans.
 route_contract:
   owner: "/internal-gateway-idea"
   mode: "analysis-only"
+  spec_handoff: "/mattpocock-to-spec"
+  plan_handoff: "/internal-gateway-writing-plans"
   execution_handoff: "/internal-gateway-execute-plans"
   forbidden_pre_acceptance_routes:
     - "/internal-tdd"

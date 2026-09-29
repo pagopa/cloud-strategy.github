@@ -2,19 +2,14 @@ interface:
   display_name: "internal-gateway-writing-plans"
   short_description: "Approved implementation-plan writing"
   default_prompt: >-
-    Use /internal-gateway-writing-plans to write one retained plan only after
-    an explicit request, a source, and a known target and anti-scope. Load
-    /superpowers-writing-plans and references/plan-contract.md. Save the plan
-    under tmp/superpowers/plans/, use Spec and Status headers, name
-    /internal-gateway-execute-plans, record one /internal-tdd posture per
-    task, keep Files paths inside the validated perimeter, and write no Git
-    mutations. Run plan lint before one read-only handoff gate showing the
-    current and default branches, dependency results, and dirty Files paths.
-    Disclose Foreign paths without blocking; distinguish verified upstream
-    output from content-bound dirty consent. Reconcile relevant run overlaps
-    and changed protected inputs before offering execution commands.
-    Offer only the execute consent commands needed by those results. Execute
-    natively through /internal-gateway-execute-plans; never ask for an
-    execution-method choice or start execution here. Keep unresolved
-    dependencies or user decisions unfinished. Report the plan in at most
-    five localized lines with one final bold action.
+    Use /internal-gateway-writing-plans only after an explicit request, a
+    source, and a known target and anti-scope. Preflight exact authority for
+    every selected planner output and pass explicit destination overrides;
+    defaults do not grant extra artifacts. Pass accepted decisions, the
+    verified source comparison, repository deltas, and the unchanged authority
+    envelope to /addyosmani-planning-and-task-breakdown. Let that planner own
+    decomposition, template, checkpoints, and quality. Return the exact plan
+    path and every actual task target with criteria, dependencies, verification,
+    and human checkpoints. Do not reconstruct missing tasks, mutate Git, create
+    runtime state, or start execution. Route explicit approval to
+    /internal-gateway-execute-plans and preserve user work.

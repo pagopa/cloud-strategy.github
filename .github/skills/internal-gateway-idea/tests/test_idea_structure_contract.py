@@ -96,15 +96,13 @@ SAVE_INVARIANTS = (
 )
 
 SPEC_INVARIANTS = (
-    "delegation.mode: none",
-    "worker: primary-owner",
-    "result: not_applicable",
-    "value gate",
-    "/internal-subagent-contract",
-    "internal-luna-executor",
-    "DelegationBrief",
-    "LifecycleRecord",
-    "no-Git-mutation",
+    "/mattpocock-to-spec",
+    "/internal-gateway-writing-plans",
+    "/addyosmani-planning-and-task-breakdown",
+    "plan_authoring_ready: true",
+    "spec reference",
+    "content identity",
+    "authority envelope",
 )
 
 STALE_PATTERNS = (

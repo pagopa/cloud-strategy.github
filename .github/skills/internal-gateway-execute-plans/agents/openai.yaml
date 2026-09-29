@@ -2,20 +2,15 @@ interface:
   display_name: "internal-gateway-execute-plans"
   short_description: "Approved retained-plan execution"
   default_prompt: >-
-    Use /internal-gateway-execute-plans to execute, resume, or query an
-    approved plan under tmp/superpowers/plans/. Run Native through
-    /superpowers-executing-plans in the current checkout, without commits,
-    branches, worktrees, or imported helper scripts. Load the run protocol and
-    chat templates. Before publishing a ledger or editing tasks, validate
-    legacy and prose dependencies, rerun Depends on checks, resolve branch
-    and dirty-file consent, prove new Git object access, and create a readable
-    CP0 tree. Record approvals, derived status, checkpoints, task validations,
-    repair attempts, stop codes, and final review in the ledger. On resume,
-    verify approval and all checkpoint objects; never reset or overwrite state.
-    Apply scoped checkout classification: disclose Foreign state outside output
-    diffs, require content-bound inclusion or verified upstream attribution,
-    and reconcile relevant run conflicts. Adopt only unrelated same-branch
-    descendant commits; no whole-tree equality or global exclusivity gate.
-    Run status queries read-only. Use native-only execution even when another
-    method is requested. Report localized chat status in at most five lines
-    with one final bold action.
+    Use /internal-gateway-execute-plans only after explicit approval of the
+    exact retained plan path and actual task target from the writer. Verify the
+    approved criteria, dependencies, verification, human checkpoints, source
+    coherence, and writable scope before invoking /mattpocock-implement.
+    Preserve user work and stop on unresolved references, conflicts, material
+    changes, or out-of-scope writes. Never commit, create branches or
+    worktrees, infer tasks from a spec, or start automatically from readiness.
+    A plan with a legacy Execution Manifest and all historical run files remain
+    read-only; never auto-resume or migrate them. Ordinary current-task resume
+    still requires current approval and source coherence, and never uses a
+    custom old runtime. Report plan, task, changed paths, checks, checkpoints,
+    and residual approval gaps.
