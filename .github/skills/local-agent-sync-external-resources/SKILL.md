@@ -68,8 +68,16 @@ Imported-skill normalization policy (reference rewriting, invocation
 frontmatter, Python shebangs, guided questions, and repository-owned skill
 contracts) lives in
 [`references/skill-normalizations.md`](references/skill-normalizations.md).
-Reserve replay patches for irreducible upstream-line edits; register approved
-in-place overrides in `references/imported-asset-overrides.yaml`.
+Do not create new Git replay patches for imported-skill customizations.
+Append approved instruction overrides as one marked note at the end of each
+affected `SKILL.md`, explicitly overriding conflicting upstream information.
+For paths, search the declared target bundle and apply bounded path
+replacements without depending on surrounding prose or line numbers. Record
+the scope, search rule, destination, and checks in the normalization reference
+and candidate normalizer so every later refresh reapplies them.
+The override registry and replay engine support existing legacy entries only;
+do not add new entries or extend their scope. The generated apply diff is a
+transport for a validated candidate, not a retained customization patch.
 
 ## Workspace And Snapshot Flow
 

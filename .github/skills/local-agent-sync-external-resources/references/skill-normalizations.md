@@ -116,10 +116,35 @@ declared source.
 - After composition, apply one marker-based scope-and-convergence guardrail to
   canonical `grill-me`; preserve the imported body, rounds, frontier,
   formatting, and invocation policy.
-- Reserve replay patches for irreducible upstream-line edits. Record why a
-  normalization is insufficient before registering an exception.
-- Register each approved in-place override in
-  `references/imported-asset-overrides.yaml` with a replay patch and expected
-  content hash.
-- Replay runs clean `git apply --check` first, then `--3way --check` only when
-  declared. Stop for review if neither applies.
+- Do not create or register new Git replay patches for imported-skill
+  customizations. Keep existing legacy entries supported without extending
+  their scope; incompatible legacy replay still stops for review.
+- Append instruction overrides at the end of the affected `SKILL.md` in one
+  marked note that explicitly supersedes earlier conflicting information.
+  Preserve unrelated upstream content and replace the note idempotently.
+- For path changes, search only the declared target bundle and rewrite matched
+  path boundaries in text files, including executable scripts. Do not match
+  surrounding prose, line numbers, or a full-file hash. Record the target,
+  search rule, destination, and behavioral validation here and implement it
+  in the candidate normalizer for every refresh.
+- If the upstream path or producer changes beyond the recorded rule, inspect
+  the new producer and update the bounded search and behavioral check. Do not
+  silently assume that the old rule proves the new producer's destination.
+
+## Idea Refine Output Override
+
+- Target only the canonical `addyosmani-idea-refine` bundle.
+- Search every UTF-8 text file, including scripts and nested references, for
+  the project-root path `docs/ideas` or `./docs/ideas`, and replace it with
+  `tmp/ideas`. Preserve suffixes, unrelated text, paths such as
+  `docs/ideas-archive`, and nested paths such as `other/docs/ideas`.
+- Append or move one `local-sync:idea-refine-workspace` marked override to the
+  end of `SKILL.md`. It keeps every idea artifact inside `tmp/ideas/` and
+  retains user confirmation before saving the final one-pager.
+- No replay patch or expected full-file hash owns this override. The native
+  candidate tests execute the initialized script after normalization, check
+  repeated runs and retained artifacts, simulate changed upstream wording and
+  variable names, and verify scope and idempotence.
+- Run `tests/scripts/test_candidate.py -k idea_refine` and the full native sync
+  test suite before accepting changes to this rule. Keep test workspaces under
+  repository-local `tmp/`.

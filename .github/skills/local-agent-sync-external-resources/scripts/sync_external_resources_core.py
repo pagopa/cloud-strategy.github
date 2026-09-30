@@ -937,6 +937,34 @@ instructions.
 - Do not create codebase-improvement artifacts outside the active workspace.
 {_CODEBASE_IMPROVE_CONTRACT_END}"""
 
+_IDEA_REFINE_SKILL = "addyosmani-idea-refine"
+_IDEA_REFINE_PATH_RE = re.compile(
+        r"(?<![A-Za-z0-9_./-])(?:\./)?docs/ideas(?=$|[^A-Za-z0-9_.-])"
+)
+_IDEA_REFINE_CONTRACT_START = "<!-- local-sync:idea-refine-workspace:start -->"
+_IDEA_REFINE_CONTRACT_END = "<!-- local-sync:idea-refine-workspace:end -->"
+_IDEA_REFINE_CONTRACT_RE = re.compile(
+        re.escape(_IDEA_REFINE_CONTRACT_START)
+        + r".*?"
+        + re.escape(_IDEA_REFINE_CONTRACT_END),
+        re.DOTALL,
+)
+_IDEA_REFINE_CONTRACT = f"""\
+{_IDEA_REFINE_CONTRACT_START}
+## Local idea-workspace override
+
+Apply this local override instead of any earlier conflicting workspace or
+output-path instructions in this skill and its bundled resources.
+
+- Keep every generated artifact under `tmp/ideas/` in the current project root,
+    including drafts, supporting notes, and final one-pagers.
+- Save the final one-pager to `tmp/ideas/[idea-name].md` only after user
+    confirmation. Alternative filenames and subdirectories must stay inside
+    `tmp/ideas/`.
+- Run the initialization script from the project root. Do not create idea
+    artifacts outside `tmp/ideas/`.
+{_IDEA_REFINE_CONTRACT_END}"""
+
 def _enforce_marked_contract(
     content: str,
     contract_re: re.Pattern[str],
@@ -1334,6 +1362,15 @@ def normalize_candidate(
                     file_path.relative_to(asset_dir).as_posix(),
                     content,
                 )
+
+            if asset.canonical_name == _IDEA_REFINE_SKILL:
+                content = _IDEA_REFINE_PATH_RE.sub("tmp/ideas", content)
+                if file_path == asset_dir / "SKILL.md":
+                    content = _enforce_marked_contract(
+                        _IDEA_REFINE_CONTRACT_RE.sub("", content).rstrip(),
+                        _IDEA_REFINE_CONTRACT_RE,
+                        _IDEA_REFINE_CONTRACT,
+                    )
 
             if (
                 asset.canonical_name in _GUIDED_QUESTION_SKILLS

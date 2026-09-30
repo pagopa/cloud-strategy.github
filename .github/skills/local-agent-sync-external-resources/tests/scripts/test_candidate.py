@@ -1,4 +1,5 @@
 import hashlib
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -1634,6 +1635,110 @@ def test_override_applies_cleanly(candidate_repo: Path) -> None:
     assert results[0].override_id == "test-override"
     assert results[0].status == "applied"
     assert "Patched content." in target.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("upstream_changed", [False, True])
+def test_idea_refine_normalization_keeps_tmp_output_after_upstream_changes(
+    tmp_path: Path, upstream_changed: bool,
+) -> None:
+    bundle_root = REPO_ROOT / ".github/skills/local-agent-sync-external-resources"
+    target_root = ".github/skills/addyosmani-idea-refine"
+    candidate = tmp_path / "candidate"
+    candidate.mkdir()
+    resources = load_managed_resources(bundle_root / "references/managed-resources.yaml")
+    overrides = load_overrides(bundle_root / "references/imported-asset-overrides.yaml")
+    assert not any(
+        override.target_path.startswith(target_root + "/")
+        for override in overrides
+    )
+
+    for relative_file in ("SKILL.md", "scripts/idea-refine.sh"):
+        target_path = f"{target_root}/{relative_file}"
+        baseline = subprocess.run(
+            [
+                "git", "show",
+                f"9d75fb4b829f10949215b4916f36a6b3ecc1bc2e:{target_path}",
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        if upstream_changed:
+            baseline = baseline.replace("## Output", "## Updated Deliverables")
+            baseline = baseline.replace("IDEAS_DIR", "OUTPUT_DIRECTORY")
+            baseline += "\n\nUpstream revision adds new guidance.\n"
+            if relative_file.endswith(".sh"):
+                baseline = baseline.replace(
+                    "Upstream revision adds new guidance.",
+                    "# Upstream revision adds new guidance.",
+                )
+        target = candidate / target_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(baseline, encoding="utf-8")
+
+    neighbor = candidate / ".github/skills/addyosmani-code-simplification/SKILL.md"
+    neighbor.parent.mkdir(parents=True)
+    neighbor_content = "---\nname: addyosmani-code-simplification\n---\ndocs/ideas/example.md\n"
+    neighbor.write_text(neighbor_content, encoding="utf-8")
+    notes = candidate / target_root / "references/paths.md"
+    notes.parent.mkdir()
+    notes.write_text(
+        "Write to `./docs/ideas/new.md`; leave `docs/ideas-archive/` and "
+        "`other/docs/ideas/` unchanged.\n",
+        encoding="utf-8",
+    )
+
+    normalize_candidate(resources, candidate)
+
+    for attempt in range(2):
+        result = subprocess.run(
+            ["bash", f"{target_root}/scripts/idea-refine.sh"],
+            cwd=candidate,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert json.loads(result.stdout) == {"status": "ready", "directory": "tmp/ideas"}
+        assert (candidate / "tmp/ideas").is_dir()
+        assert not (candidate / "docs").exists()
+        retained = candidate / "tmp/ideas/retained.md"
+        if attempt == 0:
+            retained.write_text("retained idea\n", encoding="utf-8")
+        assert retained.read_text(encoding="utf-8") == "retained idea\n"
+
+    skill = candidate / target_root / "SKILL.md"
+    content = skill.read_text(encoding="utf-8")
+    end_marker = "<!-- local-sync:idea-refine-workspace:end -->"
+    assert content.rstrip().endswith(end_marker)
+    assert content.count("<!-- local-sync:idea-refine-workspace:start -->") == 1
+    if upstream_changed:
+        assert "Upstream revision adds new guidance." in content
+    assert notes.read_text(encoding="utf-8") == (
+        "Write to `tmp/ideas/new.md`; leave `docs/ideas-archive/` and "
+        "`other/docs/ideas/` unchanged.\n"
+    )
+    assert neighbor.read_text(encoding="utf-8") == neighbor_content
+    assert normalize_candidate(resources, candidate) == ()
+
+    skill.write_text(content + "\nAdditional upstream section.\n", encoding="utf-8")
+    normalize_candidate(resources, candidate)
+    updated = skill.read_text(encoding="utf-8")
+    assert updated.rstrip().endswith(end_marker)
+    assert updated.count("<!-- local-sync:idea-refine-workspace:start -->") == 1
+    assert "Additional upstream section." in updated
+
+
+def test_live_idea_refine_overrides_are_not_git_patches() -> None:
+    bundle_root = REPO_ROOT / ".github/skills/local-agent-sync-external-resources"
+    overrides = tuple(
+        override
+        for override in load_overrides(
+            bundle_root / "references/imported-asset-overrides.yaml"
+        )
+        if override.target_path.startswith(".github/skills/addyosmani-idea-refine/")
+    )
+    assert overrides == ()
 
 
 def test_conflicting_second_override_leaves_candidate_unchanged(
