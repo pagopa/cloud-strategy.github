@@ -5,7 +5,6 @@ from pathlib import Path
 
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SKILLS_ROOT = REPO_ROOT / ".github" / "skills"
 IDEA_ROOT = SKILLS_ROOT / "internal-gateway-idea"
@@ -21,9 +20,7 @@ def _metadata(skill_root: Path) -> dict[str, object]:
 
 def _eval_pack(skill_root: Path) -> dict[str, object]:
     return json.loads(
-        (skill_root / "tests" / "evaluation" / "evals.json").read_text(
-            encoding="utf-8"
-        )
+        (skill_root / "tests" / "evaluation" / "evals.json").read_text(encoding="utf-8")
     )
 
 
@@ -56,9 +53,26 @@ def test_f1_and_f2_cases_bind_the_new_authoring_contracts() -> None:
     idea_cases = _cases(IDEA_ROOT)
     writer_cases = _cases(WRITER_ROOT)
     executor_cases = _cases(EXECUTOR_ROOT)
-    assert {"C-SPEC-DIRECT", "C-SPEC-COHERENCE", "C-SPEC-CONTENT-COMPARISON", "C-SPEC-NEW-TEST-DECISION", "C-PLAN-ROUTE"} <= idea_cases.keys()
-    assert {"C-F1-CONTENT-COMPARISON", "C-F2-MULTI-TARGET", "C-F2-UNRESOLVED", "C-F2-SOURCE-DRIFT"} <= writer_cases.keys()
-    assert {"C-F2-MULTI-TARGET", "C-F2-UNRESOLVED", "C-F2-STALE-APPROVAL", "C-HISTORICAL-RUN", "C-CURRENT-RESUME"} <= executor_cases.keys()
+    assert {
+        "C-SPEC-DIRECT",
+        "C-SPEC-COHERENCE",
+        "C-SPEC-CONTENT-COMPARISON",
+        "C-SPEC-NEW-TEST-DECISION",
+        "C-PLAN-ROUTE",
+    } <= idea_cases.keys()
+    assert {
+        "C-F1-CONTENT-COMPARISON",
+        "C-F2-MULTI-TARGET",
+        "C-F2-UNRESOLVED",
+        "C-F2-SOURCE-DRIFT",
+    } <= writer_cases.keys()
+    assert {
+        "C-F2-MULTI-TARGET",
+        "C-F2-UNRESOLVED",
+        "C-F2-STALE-APPROVAL",
+        "C-HISTORICAL-RUN",
+        "C-CURRENT-RESUME",
+    } <= executor_cases.keys()
     for cases in (idea_cases, writer_cases, executor_cases):
         for case in cases.values():
             assert case["kind"] == "rubric"
