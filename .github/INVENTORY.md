@@ -149,7 +149,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/superpowers-brainstorming/SKILL.md`
 - `.github/skills/superpowers-diagnosing-superpowers/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
-- `.github/skills/superpowers-executing-plans/SKILL.md`
 - `.github/skills/superpowers-finishing-a-development-branch/SKILL.md`
 - `.github/skills/superpowers-receiving-code-review/SKILL.md`
 - `.github/skills/superpowers-requesting-code-review/SKILL.md`
@@ -159,7 +158,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/superpowers-using-git-worktrees/SKILL.md`
 - `.github/skills/superpowers-using-superpowers/SKILL.md`
 - `.github/skills/superpowers-verification-before-completion/SKILL.md`
-- `.github/skills/superpowers-writing-plans/SKILL.md`
 - `.github/skills/vercel-find-skills/SKILL.md`
 
 ### Support-only imported document skills
@@ -231,12 +229,11 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/mattpocock-wizard/SKILL.md`
 - `.github/skills/mattpocock-writing-for-agents/SKILL.md`
 
-### obra/superpowers — ref 8ca22dba9a94 · tag v6.4.2 · 2026-09-25 · 14 skills
+### obra/superpowers — ref 8ca22dba9a94 · tag v6.4.2 · 2026-09-25 · 12 skills
 
 - `.github/skills/superpowers-brainstorming/SKILL.md`
 - `.github/skills/superpowers-diagnosing-superpowers/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
-- `.github/skills/superpowers-executing-plans/SKILL.md`
 - `.github/skills/superpowers-finishing-a-development-branch/SKILL.md`
 - `.github/skills/superpowers-receiving-code-review/SKILL.md`
 - `.github/skills/superpowers-requesting-code-review/SKILL.md`
@@ -246,7 +243,6 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/superpowers-using-git-worktrees/SKILL.md`
 - `.github/skills/superpowers-using-superpowers/SKILL.md`
 - `.github/skills/superpowers-verification-before-completion/SKILL.md`
-- `.github/skills/superpowers-writing-plans/SKILL.md`
 
 ### openai/skills — ref 49f948faa925 · 2026-06-23 · 2 skills
 
