@@ -38,14 +38,14 @@ digraph when_to_use {
     "Tasks mostly independent?" [shape=diamond];
     "Partner chose inline, or no subagent tool?" [shape=diamond];
     "subagent-driven-development" [shape=box];
-    "executing-plans" [shape=box];
+    "internal-gateway-execute-plans" [shape=box];
     "Manual execution or brainstorm first" [shape=box];
 
     "Have implementation plan?" -> "Tasks mostly independent?" [label="yes"];
     "Have implementation plan?" -> "Manual execution or brainstorm first" [label="no"];
     "Tasks mostly independent?" -> "Partner chose inline, or no subagent tool?" [label="yes"];
     "Tasks mostly independent?" -> "Manual execution or brainstorm first" [label="no - tightly coupled"];
-    "Partner chose inline, or no subagent tool?" -> "executing-plans" [label="yes"];
+    "Partner chose inline, or no subagent tool?" -> "internal-gateway-execute-plans" [label="yes"];
     "Partner chose inline, or no subagent tool?" -> "subagent-driven-development" [label="no"];
 }
 ```
@@ -585,3 +585,18 @@ its bundled prompts, or its scripts to create Git commits.
 - Only an explicit user request in the current conversation authorizes a
   commit, and only for that request.
 <!-- local-sync:no-commit:end -->
+
+<!-- local-sync:plan-gateway-routing:start -->
+## Local plan-gateway routing override
+
+This contract supersedes earlier conflicting next-skill and handoff instructions.
+Keep the rest of this skill's workflow unchanged.
+
+- Route an explicit plan request to `/internal-gateway-writing-plans`. Do not
+    treat spec approval alone as an explicit plan request.
+- Route inline execution to `/internal-gateway-execute-plans` only after the
+    user invoked that executor for an identified plan. Passing an internal
+    handoff does not create user approval or widen the plan's writable scope.
+- New implementation plans belong under `tmp/.plans/`. Existing plans and
+    historical runtime records stay where they are; do not migrate them.
+<!-- local-sync:plan-gateway-routing:end -->

@@ -47,7 +47,7 @@ selected path's prerequisites:
 - Architectural: the human partner reviews and approves the written spec,
   then reviews the written implementation plan and selects its execution
   method. Conversational design approval only permits writing the spec;
-  written-spec approval only permits invoking writing-plans.
+  written-spec approval only permits invoking internal-gateway-writing-plans.
 
 A reply approves the stage actually presented. Approval of an idea or
 feature scope does not approve artifacts that do not exist yet. Resume
@@ -82,7 +82,7 @@ override it:
 - **Architectural** — new projects, new subsystems, changes that
   restructure how components fit together or alter interfaces others
   depend on. Follow the full process: questions, approaches, sectioned
-  design, written spec, then the writing-plans skill.
+  design, written spec, then the internal-gateway-writing-plans skill.
 
 When in doubt between two paths, take the heavier one. The ratchet is
 one-way: hidden complexity discovered mid-task upgrades the path —
@@ -136,7 +136,7 @@ your path and complete them in order.
 6. **Write design doc** — save to `tmp/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews written spec** — ask user to review the spec file before proceeding
-9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+9. **Transition to implementation** — invoke internal-gateway-writing-plans skill to create implementation plan
 
 ## Process Flow
 
@@ -157,7 +157,7 @@ digraph brainstorming {
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
-    "Invoke writing-plans skill" [shape=doublecircle];
+    "Invoke internal-gateway-writing-plans skill" [shape=doublecircle];
     "Hidden complexity? Upgrade path" [shape=box];
 
     "Classify: spike / bounded / architectural" -> "Present question + probe (2-3 sentences)" [label="spike"];
@@ -178,12 +178,12 @@ digraph brainstorming {
     "Write design doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
+    "User reviews spec?" -> "Invoke internal-gateway-writing-plans skill" [label="approved"];
 }
 ```
 
 **Terminal states are path-bound.** Architectural: the ONLY skill you
-invoke after brainstorming is writing-plans — never frontend-design,
+invoke after brainstorming is internal-gateway-writing-plans — never frontend-design,
 mcp-builder, or any other implementation skill. Bounded: after
 approval, implementation proceeds directly through the normal
 development workflow; no plan document. Spike: the terminal state is a
@@ -263,8 +263,8 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 **Implementation:**
 
-- Invoke the writing-plans skill to create a detailed implementation plan
-- Do NOT invoke any other skill. writing-plans is the next step.
+- Invoke the internal-gateway-writing-plans skill to create a detailed implementation plan
+- Do NOT invoke any other skill. internal-gateway-writing-plans is the next step.
 
 ## Visual Companion
 
@@ -318,3 +318,18 @@ its bundled prompts, or its scripts to create Git commits.
 - Only an explicit user request in the current conversation authorizes a
   commit, and only for that request.
 <!-- local-sync:no-commit:end -->
+
+<!-- local-sync:plan-gateway-routing:start -->
+## Local plan-gateway routing override
+
+This contract supersedes earlier conflicting next-skill and handoff instructions.
+Keep the rest of this skill's workflow unchanged.
+
+- Route an explicit plan request to `/internal-gateway-writing-plans`. Do not
+    treat spec approval alone as an explicit plan request.
+- Route inline execution to `/internal-gateway-execute-plans` only after the
+    user invoked that executor for an identified plan. Passing an internal
+    handoff does not create user approval or widen the plan's writable scope.
+- New implementation plans belong under `tmp/.plans/`. Existing plans and
+    historical runtime records stay where they are; do not migrate them.
+<!-- local-sync:plan-gateway-routing:end -->
