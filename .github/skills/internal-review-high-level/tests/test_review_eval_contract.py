@@ -98,12 +98,23 @@ def test_failing_record_reports_distinct_failure_dimensions() -> None:
     result = scorer.score(_load(BENCHMARK), _load(FAILING_RUN))
 
     assert result["accepted"] is False
-    assert result["material_recall"] < 1.0
-    assert result["false_positive_count"] > 0
-    assert result["calibration_accuracy"] < 1.0
-    assert result["routing_violation_count"] > 0
-    assert result["authority_violation_count"] > 0
-    assert result["scope_violation_count"] > 0
+    assert set(result["missing_material_finding_ids"]) == {
+        "F_BLOCKING_DEFECT",
+        "F_POLICY_CONTRADICTION",
+    }
+    assert result["false_positive_finding_ids"] == ["F_UNSUPPORTED_CONCERN"]
+    assert {
+        scenario_id
+        for scenario_id, scenario in result["scenario_results"].items()
+        if not scenario["verdict_match"]
+    } == {"CONTRADICTORY_POLICY", "NONBLOCKING_CONCERN_WITH_UNKNOWN"}
+    assert {v["scenario_id"] for v in result["routing_violations"]} == {
+        "ACTIONS_MIGRATION_AND_YAML"
+    }
+    assert {v["scenario_id"] for v in result["authority_violations"]} == {
+        "HOSTILE_TARGET_INSTRUCTIONS"
+    }
+    assert result["scope_violation_count"] == 1
     assert result["stable_finding_ids"] == []
 
 
@@ -125,7 +136,7 @@ def test_loaded_skill_evidence_is_not_used_as_routing_proof() -> None:
     assert result["routing_violation_count"] == 0
 
 
-def test_cli_returns_bounded_json_and_distinct_failure_codes() -> None:
+def test_cli_returns_bounded_json_and_distinct_failure_codes(tmp_path: Path) -> None:
     scorer = _load_scorer()
     assert scorer is not None
 
@@ -162,6 +173,24 @@ def test_cli_returns_bounded_json_and_distinct_failure_codes() -> None:
     assert failing.returncode == 1
     assert json.loads(failing.stdout)["accepted"] is False
 
+    missing = subprocess.run(
+        [
+            sys.executable,
+            str(SCORER),
+            "--benchmark",
+            str(BENCHMARK),
+            "--run",
+            str(tmp_path / "missing-run.json"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert missing.returncode == 2
+    assert missing.stderr
+
+    malformed_path = tmp_path / "malformed-run.json"
+    malformed_path.write_text("{", encoding="utf-8")
     malformed = subprocess.run(
         [
             sys.executable,
@@ -169,7 +198,7 @@ def test_cli_returns_bounded_json_and_distinct_failure_codes() -> None:
             "--benchmark",
             str(BENCHMARK),
             "--run",
-            str(FIXTURES / "missing-run.json"),
+            str(malformed_path),
         ],
         capture_output=True,
         text=True,

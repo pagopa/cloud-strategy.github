@@ -8,13 +8,8 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report"
-FIXTURES_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report/tests/fixtures"
+BUNDLE_ROOT = Path(__file__).resolve().parents[1]
+FIXTURES_ROOT = BUNDLE_ROOT / "tests/fixtures"
 COLLECTOR = BUNDLE_ROOT / "scripts/collect_source_notes.py"
 
 

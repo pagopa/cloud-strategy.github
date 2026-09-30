@@ -37,6 +37,8 @@
     {"id": "Q-05", "query": "Write one implementation plan with embedded tasks under tmp/.plans/", "should_trigger": true, "split": "train"},
     {"id": "Q-06", "query": "Update the identified implementation plan with the accepted API requirement", "should_trigger": true, "split": "held-out"},
     {"id": "Q-07", "query": "Execute all tasks of the active retained plan without checkpoint prompts", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gateway-execute-plans"},
-    {"id": "Q-08", "query": "Compare whether one or two plan files is better before deciding", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-idea"}
+    {"id": "Q-08", "query": "Compare whether one or two plan files is better before deciding", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-idea"},
+    {"id": "Q-09", "query": "Add a --dry-run flag to the sync CLI and cover it with a test", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-simple-task"},
+    {"id": "Q-10", "query": "Scrivimi un piano per migrare i gateway ai prompt brevi", "should_trigger": true, "split": "held-out"}
   ]}
 }

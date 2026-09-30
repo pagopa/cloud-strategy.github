@@ -14,7 +14,8 @@ labeled evidence, subject and decision focus, scope, anti-scope, critical-review
 dispositions, and exact authority envelope. Before invoking, require exact
 authority for the tracker destination, publication, and `ready-for-agent`
 label; otherwise block as `authority-or-scope`. Invoke `/mattpocock-to-spec`
-directly. The specialist owns the template, tracker, and label; do not
+directly; if it is not loaded, stop and ask the user to mention it. The
+specialist owns the template, tracker, and label; do not
 duplicate output or ask a new design question.
 
 When the specialist returns, verify that the spec reference points to the
@@ -43,5 +44,5 @@ template, checkpoints, and planning quality. Pass the verified spec binding,
 accepted decisions, evidence, target, anti-scope, repository deltas, and
 authority unchanged. The writer returns the exact retained plan path and the
 actual task target; unresolved source or task references block the handoff.
-This gateway never starts execution. Explicit approval remains required before
-`/internal-gateway-execute-plans` is invoked.
+This gateway never starts execution. Only the user invokes
+`/internal-gateway-execute-plans`.

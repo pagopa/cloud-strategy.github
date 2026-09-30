@@ -2,7 +2,7 @@ interface:
   display_name: "internal-knowledge"
   short_description: "Evidence-based repository knowledge authoring"
   default_prompt: >-
-    Use $internal-knowledge when creating, aligning, auditing, or materially
+    Use $internal-knowledge when creating, aligning, or materially
     refreshing repository knowledge documents. The five modes are help, audit,
     targeted, sync, and setup. Resolve exactly one mode: help remains
     read-only; explicit audit wins before interpreting paths and is bounded,

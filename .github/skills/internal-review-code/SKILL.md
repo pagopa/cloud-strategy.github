@@ -1,6 +1,6 @@
 ---
 name: internal-review-code
-description: Use when reviewing a branch, pull request, work-in-progress diff, or code-focused change before merge or follow-up action.
+description: Use when reviewing a branch, pull request, work-in-progress diff, or code-focused change before merge or follow-up action. Route non-code artifact reviews to /internal-review-high-level.
 ---
 
 # Internal Review Code

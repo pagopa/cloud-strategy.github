@@ -2,18 +2,9 @@ interface:
   display_name: "internal-gateway-execute-plans"
   short_description: "Approved retained-plan execution"
   default_prompt: >-
-    The user's invocation of /internal-gateway-execute-plans authorizes all
-    tasks of the explicit or unambiguous active plan; ask only if selection is
-    ambiguous. Internal skill calls and writer readiness never grant approval.
-    Verify stable criteria, dependencies, checks, source and exact writable
-    scope. Pass the full authorized task set to /mattpocock-implement, overriding
-    commits and per-task full reviews. Execute continuously with native checks,
-    automatic checkpoints and safe in-scope repair; preserve explicit user gates
-    and real safety, source, conflict or scope blockers. Update only checklist
-    and concise evidence in Progress without changing requirements. Compare
-    start/end state for one final review, including dirty user edits, untracked
-    files, deletion and rename evidence; never stage or commit. Preserve legacy
-    inputs read-only and do not create runtime ledgers. Show short localized
-    emoji-prefixed global plan state, verified completed/total tasks and current
-    task. Incomplete or blocked output names the reason, residual work and next
-    action. Claim CONCLUSO only after required checks and final review finish.
+    Use $internal-gateway-execute-plans to execute the identified retained
+    plan; this explicit invocation approves its declared tasks. Hand them to
+    /mattpocock-implement under the gateway's no-commit, single-final-review
+    contract, and stop if that skill is not loaded.
+policy:
+  allow_implicit_invocation: false

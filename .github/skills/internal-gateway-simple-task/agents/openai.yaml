@@ -2,50 +2,7 @@ interface:
   display_name: "internal-gateway-simple-task"
   short_description: "Fast path for concrete repository tasks"
   default_prompt: >-
-    Use /internal-gateway-simple-task for concrete repository-owned
-    low-to-medium-risk work that can finish in one bounded session. For each
-    concrete non-trivial task, own one canonical Internal Execution Brief with
-    the request/outcome, scope/anti-scope/owner/route,
-    constraints/authority/assumptions/open facts, local evidence/proposed
-    direction/rejected alternative, acceptance/native validation/pass-fail
-    signal, stop conditions/dependencies/handoff, and state/evidence
-    delta/current decisions. Keep same-session briefs in working context;
-    pause/resume may materialize only one uncommitted disposable
-    tmp/briefs/<slug>.md, and promotion transfers authority to
-    /internal-gateway-writing-plans. Supporting skills contribute evidence but
-    do not create competing briefs; /internal-gateway-idea owns
-    conversation-first idea analysis and /internal-gateway-writing-plans owns
-    retained plans. Require explicit
-    authority before live external operations, use a safe local fallback only
-    when the brief permits it, and stop fail-closed otherwise. Close out with
-    one canonical
-    ledger and fresh focused plus broader evidence, without numeric thresholds.
-    Inspect local evidence first; when a material fact cannot be recovered
-    locally, run a bounded /grill-me interview and keep it to the facts that
-    unblock the route. Run
-    /internal-gateway-critical-master before non-trivial
-    action. Allow one evidence-backed reformulation and re-critique when new
-    evidence changes a rejected plan. Downgrade non-trivial to trivial only
-    when a deterministic local validator exists, no contract or consumer
-    changes, and the rationale is recorded; always report the downgrade and
-    confirm with the user first when any contract or consumer is touched.
-    Under /internal-tdd record exactly one posture per task; that skill owns
-    posture and seam selection. Load
-    /addyosmani-code-simplification only for explicit simplification work.
-    After the caller locks value, scope, authority, objective, expected output,
-    acceptance, and validation, it may invoke internal-luna-executor through
-    /internal-subagent-contract with one DelegationBrief v1 and verify the
-    adapter-composed WorkerResult v1 plus caller-owned VerificationReceipt v1;
-    treat unobserved worker validation and budget data as claims. Keep routing,
-    lifecycle, retry choice, independent
-    validation, acceptance, and closeout here; do not branch on producer or model
-    identity. Use one initial attempt, at most one context refill, and at most
-    one corrective retry; repeated progress is stalled and Minor/cosmetic
-    findings never reopen retry. When timeout, interruption, executor
-    unavailability, or missing terminal output prevents a worker payload,
-    record a caller-owned LifecycleRecord and do not fabricate a WorkerResult
-    or VerificationReceipt; local fallback starts a new authorized route. Stop
-    with the exact
-    violated condition, evidence, and required next decision. Report Outcome,
-    Changed, Checks, Risks, and Next in that order. Use
-    /superpowers-verification-before-completion before positive claims.
+    Use $internal-gateway-simple-task to complete this concrete repository
+    task in one bounded session: recover local evidence, challenge non-trivial
+    work before acting, validate with the owning checks, and report Outcome,
+    Changed, Checks, Risks, and Next.

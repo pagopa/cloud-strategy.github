@@ -5,12 +5,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-BUNDLE = REPO_ROOT / ".github/skills/internal-subagent-contract"
+BUNDLE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BUNDLE / "scripts"))
 
 from runtime_evidence import (  # noqa: E402

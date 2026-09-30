@@ -1,6 +1,6 @@
 ---
 name: internal-azure
-description: Use when designing, evaluating, or validating Azure platform and control-plane work, such as management groups, subscriptions, landing zones, network topology, RBAC, managed identity, PIM, Azure Policy guardrails, exceptions, rollout evidence, monitoring, recovery proof, or Azure option comparison. Route Azure DevOps pipelines to /internal-azure-devops.
+description: Use when designing, evaluating, or validating Azure platform and control-plane work, such as management groups, subscriptions, landing zones, network topology, RBAC, managed identity, PIM, Azure Policy guardrails, exceptions, rollout evidence, monitoring, recovery proof, or Azure option comparison. Route Azure DevOps pipelines to /internal-azure-devops, concrete Azure Policy definitions to /internal-cloud-policy, and Terraform code to /internal-terraform.
 ---
 
 # Internal Azure

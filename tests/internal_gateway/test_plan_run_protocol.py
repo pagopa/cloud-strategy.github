@@ -43,10 +43,9 @@ def test_public_route_metadata_has_one_explicit_owner_per_handoff() -> None:
     }
     writer_prompt = _metadata(WRITER_ROOT)["interface"]["default_prompt"]
     executor_prompt = _metadata(EXECUTOR_ROOT)["interface"]["default_prompt"]
-    assert "/addyosmani-planning-and-task-breakdown" in writer_prompt
-    assert "/internal-gateway-execute-plans" in writer_prompt
+    assert "$internal-gateway-writing-plans" in writer_prompt
     assert "/mattpocock-implement" in executor_prompt
-    assert "/internal-gateway-execute-plans" in executor_prompt
+    assert "$internal-gateway-execute-plans" in executor_prompt
 
 
 def test_f1_and_f2_cases_bind_the_new_authoring_contracts() -> None:

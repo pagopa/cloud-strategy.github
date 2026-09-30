@@ -1,16 +1,8 @@
 interface:
   display_name: "internal-gateway-writing-plans"
-  short_description: "Approved implementation-plan writing"
+  short_description: "Retained plan from an approved source"
   default_prompt: >-
-    Use /internal-gateway-writing-plans after an explicit plan request with a
-    source, target and anti-scope. Create one plan under
-    tmp/.plans/YYYY-MM-DD-HHMM-<topic>.md without another destination approval.
-    Pass the exact output override to /addyosmani-planning-and-task-breakdown;
-    embed detailed tasks and progress instead of separate todo files or implicit
-    tracker items. Declare exact writable paths, criteria, dependencies and
-    runnable checks per task. Separate stable contracts from mutable checklist
-    and verification/blocker evidence. Checkpoints are automatic unless the
-    user explicitly requested a human gate. Preserve existing plans and user
-    work. Return the exact path without implementation, Git mutation or runtime
-    records. Only the user's invocation of /internal-gateway-execute-plans
-    authorizes execution; an internal handoff does not.
+    Use $internal-gateway-writing-plans to write one retained implementation
+    plan under tmp/.plans/ from the approved source, target, and anti-scope.
+    Return the plan path, task IDs, and open decisions; only an explicit user
+    invocation starts execution.

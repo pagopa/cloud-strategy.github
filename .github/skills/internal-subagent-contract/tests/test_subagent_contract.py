@@ -5,12 +5,9 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-BUNDLE = REPO_ROOT / ".github/skills/internal-subagent-contract"
+BUNDLE = Path(__file__).resolve().parents[1]
+# Fixture refs are repository-relative to the root that mounts this bundle.
+REPO_ROOT = BUNDLE.parents[2]
 FIXTURES = BUNDLE / "fixtures"
 sys.path.insert(0, str(BUNDLE / "scripts"))
 
@@ -117,9 +114,16 @@ def test_brief_evidence_separates_inline_facts_from_resolved_paths() -> None:
     assert validate_brief(brief, repo_root=REPO_ROOT) == []
 
 
-def test_brief_cli_rejects_mode_none_fixture(capsys: pytest.CaptureFixture[str]) -> None:
+def test_brief_cli_rejects_mode_none_fixture(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     code = main(
-        ["brief", str(FIXTURES / "invalid-mode-none.json"), "--repo-root", str(REPO_ROOT)]
+        [
+            "brief",
+            str(FIXTURES / "invalid-mode-none.json"),
+            "--repo-root",
+            str(REPO_ROOT),
+        ]
     )
 
     assert code == 1
@@ -531,6 +535,7 @@ def test_blocked_authority_result_is_terminal_for_retry() -> None:
 
 
 def test_prompt_prefix_order_is_stable_and_dynamic_sections_are_last() -> None:
+    assert _valid_brief()["cache"]["prefix_version"] == "internal-subagent-contract/v1"
     assert (
         validate_prompt_order(
             ["role", "protocol", "schemas", "mode", "breakpoint", "brief", "retry"]
@@ -541,30 +546,24 @@ def test_prompt_prefix_order_is_stable_and_dynamic_sections_are_last() -> None:
     assert errors
 
 
-def test_cache_prefix_keeps_stable_protocol_before_dynamic_brief_and_retry() -> None:
-    brief = _valid_brief()
-    assert brief["cache"]["prefix_version"] == "internal-subagent-contract/v1"
-    assert (
-        validate_prompt_order(
-            ["role", "protocol", "schemas", "mode", "breakpoint", "brief", "retry"]
-        )
-        == []
-    )
-
-
-def test_protected_compatibility_is_caller_scope_not_provider_identity() -> None:
+def test_protected_compatibility_is_caller_scope_not_provider_identity(
+    tmp_path: Path,
+) -> None:
+    protected = tmp_path / ".github/skills/x-protected/SKILL.md"
+    protected.parent.mkdir(parents=True)
+    protected.write_text("placeholder\n", encoding="utf-8")
     brief = _valid_brief()
     brief["mode"] = "read"
     brief["write_scope"] = []
     brief["expected_output"] = {"kind": "analysis", "path": None, "format": "text"}
     brief["evidence"] = [
         {
-            "ref": ".github/skills/mattpocock-research/SKILL.md",
+            "ref": ".github/skills/x-protected/SKILL.md",
             "purpose": "compatibility input",
         }
     ]
 
-    assert validate_brief(brief, repo_root=REPO_ROOT) == []
+    assert validate_brief(brief, repo_root=tmp_path) == []
 
 
 def test_near_miss_mode_and_owner_prompts_are_rejected_structurally() -> None:

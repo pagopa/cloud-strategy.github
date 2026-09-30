@@ -1,3 +1,5 @@
+"""Cross-bundle protocol test: internal-skill-creator delegation fixtures under internal-subagent-contract."""
+
 import copy
 import json
 import sys
@@ -5,14 +7,11 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-skill-creator"
-FIXTURES = BUNDLE_ROOT / "fixtures"
-sys.path.insert(0, str(REPO_ROOT / ".github/skills/internal-subagent-contract/scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SKILLS_ROOT = REPO_ROOT / ".github" / "skills"
+CREATOR_BUNDLE = SKILLS_ROOT / "internal-skill-creator"
+FIXTURES = CREATOR_BUNDLE / "fixtures"
+sys.path.insert(0, str(SKILLS_ROOT / "internal-subagent-contract" / "scripts"))
 
 from runtime_evidence import compose_handoff  # noqa: E402
 from subagent_contract import (  # noqa: E402
@@ -119,7 +118,7 @@ def test_creator_result_rejects_tampered_binding(tmp_path: Path, tamper: str) ->
         result["artifacts"][0]["sha256"] = "sha256:" + "0" * 64
     else:
         result["artifacts"][0]["path"] = (
-            ".github/skills/internal-skill-creator/SKILL.md"
+            (CREATOR_BUNDLE / "SKILL.md").relative_to(REPO_ROOT).as_posix()
         )
 
     errors = validate_result(

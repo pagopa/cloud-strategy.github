@@ -11,8 +11,8 @@ any live model run.
 - [fixtures](fixtures/F1.tree.json): repository snapshots stored as JSON trees.
 - [gold](gold/F1.gold.json): expected facts and relationships, separate from runtime input.
 - [grader-fixtures](grader-fixtures/adr_format.json): good and mutant grader examples.
-- [compatibility.json](compatibility.json): mapping from prior scenarios and
-  structural contract tests.
+- [compatibility.json](compatibility.json): mapping from prior scenarios to
+  cases.
 - [holdout.sha256](holdout.sha256): integrity seal for the FH holdout inputs.
 
 ## Evidence states

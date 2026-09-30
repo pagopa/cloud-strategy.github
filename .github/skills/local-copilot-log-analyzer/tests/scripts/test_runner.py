@@ -15,7 +15,9 @@ BUNDLE_ROOT = REPO_ROOT / ".github/skills/local-copilot-log-analyzer"
 
 def test_bundle_runner_works_from_unrelated_working_directory(tmp_path: Path) -> None:
     bundle = tmp_path / "local-copilot-log-analyzer"
-    shutil.copytree(BUNDLE_ROOT, bundle)
+    shutil.copytree(
+        BUNDLE_ROOT, bundle, ignore=shutil.ignore_patterns(".venv", "__pycache__")
+    )
     outside = tmp_path / "outside"
     outside.mkdir()
     input_path = tmp_path / "events.jsonl"

@@ -1,6 +1,6 @@
 ---
 name: internal-cloud-policy
-description: Use when authoring, comparing, or reviewing concrete cloud policy definitions such as AWS SCPs, Azure Policy, or GCP Org Policy, especially for cross-cloud policy shape or rollout safety.
+description: Use when authoring, comparing, or reviewing concrete cloud policy definitions such as AWS SCPs, Azure Policy, or GCP Org Policy, especially for cross-cloud policy shape or rollout safety. Route platform structure and guardrail placement to /internal-aws, /internal-azure, or /internal-gcp.
 ---
 
 # Cloud Policy Skill

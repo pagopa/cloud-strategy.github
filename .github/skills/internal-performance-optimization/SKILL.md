@@ -1,6 +1,6 @@
 ---
 name: internal-performance-optimization
-description: Use when performance is the primary problem, such as profiling slowness, reducing latency, improving throughput, or preventing regressions across frontend, backend, or database layers.
+description: Use when performance is the primary problem, such as profiling slowness, reducing latency, improving throughput, or preventing regressions across frontend, backend, or database layers. Route functional failures that need root-cause diagnosis to /internal-debugging.
 ---
 
 # Internal Performance Optimization

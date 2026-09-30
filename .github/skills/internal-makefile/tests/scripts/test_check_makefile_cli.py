@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[5]
-CHECKER = REPO_ROOT / ".github/skills/internal-makefile/scripts/check.sh"
-VALID_FIXTURE = ".github/skills/internal-makefile/fixtures/valid/Makefile"
+BUNDLE = Path(__file__).resolve().parents[2]
+CHECKER = BUNDLE / "scripts/check.sh"
+VALID_FIXTURE = "fixtures/valid/Makefile"
 
 
 @pytest.fixture
@@ -47,7 +47,7 @@ def run_checker(*args: str, **extra_env: str) -> subprocess.CompletedProcess[str
     env.update(extra_env)
     return subprocess.run(
         [str(CHECKER), *args],
-        cwd=REPO_ROOT,
+        cwd=BUNDLE,
         env=env,
         text=True,
         capture_output=True,
@@ -148,9 +148,7 @@ def test_missing_file_is_a_file_failure(fake_checkmake: Path) -> None:
 def test_tool_findings_are_normalized_to_one(
     fake_checkmake: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    result = run_checker(
-        ".github/skills/internal-makefile/fixtures/invalid/missing-phony.mk"
-    )
+    result = run_checker("fixtures/invalid/missing-phony.mk")
 
     assert result.returncode == 1
     assert "fixture finding" in result.stdout
@@ -167,11 +165,23 @@ def test_unexpected_tool_exit_is_normalized_to_two(
     assert "status 7" in result.stderr
 
 
-def test_checker_never_invokes_make_or_eval() -> None:
-    source = CHECKER.read_text(encoding="utf-8").lower()
+def test_checker_never_invokes_make_or_evaluates_file_names(
+    fake_checkmake: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    make_marker = tmp_path / "make-invoked"
+    eval_marker = tmp_path / "name-evaluated"
+    fake_make = tmp_path / "make"
+    fake_make.write_text(f'#!/bin/sh\n: > "{make_marker}"\n', encoding="utf-8")
+    fake_make.chmod(fake_make.stat().st_mode | stat.S_IXUSR)
+    injected = tmp_path / 'x$(touch "$EVAL_MARKER").mk'
+    injected.write_text(".PHONY: all\nall:\n\t@true\n", encoding="utf-8")
+    monkeypatch.setenv("EVAL_MARKER", str(eval_marker))
 
-    assert "eval" not in source
-    assert " make " not in source
+    result = run_checker(VALID_FIXTURE, str(injected))
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert not make_marker.exists()
+    assert not eval_marker.exists()
 
 
 def test_self_test_runs_bundled_fixtures(fake_checkmake: Path) -> None:

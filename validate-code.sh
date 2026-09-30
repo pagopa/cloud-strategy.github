@@ -24,6 +24,9 @@ if [[ -z "${PYTHON_BIN}" ]]; then
   else
     PYTHON_BIN="python3"
   fi
+elif [[ "${PYTHON_BIN}" == */* && "${PYTHON_BIN}" != /* ]]; then
+  # Keep a caller-relative interpreter valid after the cd below.
+  PYTHON_BIN="${PWD}/${PYTHON_BIN}"
 fi
 
 cd -- "${REPOSITORY_ROOT}"

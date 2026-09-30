@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[5]
-CHECKER = REPO_ROOT / ".github/skills/internal-json/scripts/check.py"
-FIXTURE_ROOT = REPO_ROOT / ".github/skills/internal-json/fixtures"
+BUNDLE = Path(__file__).resolve().parents[2]
+CHECKER = BUNDLE / "scripts/check.py"
+FIXTURE_ROOT = BUNDLE / "fixtures"
 EXPECTED_CODES = {
     "JSON_BOM",
     "JSON_ENCODING",
@@ -26,7 +26,7 @@ EXPECTED_CODES = {
 def run_checker(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(CHECKER), *args],
-        cwd=REPO_ROOT,
+        cwd=BUNDLE,
         env=os.environ.copy(),
         text=True,
         capture_output=True,

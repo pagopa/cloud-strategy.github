@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import ast
 import hashlib
 import importlib
 import sys
@@ -46,7 +45,10 @@ GOLD_FIELDS = {
 
 
 def fixture_ids() -> list[str]:
-    return sorted(path.name.removesuffix(".tree.json") for path in (EVALUATION_ROOT / "fixtures").glob("*.tree.json"))
+    return sorted(
+        path.name.removesuffix(".tree.json")
+        for path in (EVALUATION_ROOT / "fixtures").glob("*.tree.json")
+    )
 
 
 def test_fixture_and_gold_schemas_and_paths_are_valid(tmp_path: Path) -> None:
@@ -60,7 +62,10 @@ def test_fixture_and_gold_schemas_and_paths_are_valid(tmp_path: Path) -> None:
         assert tree["schema"] == "knowledge-fixture-tree/v1"
         assert gold["schema"] == "knowledge-fixture-gold/v1"
         assert tree["id"] == gold["fixture"] == fixture_id
-        assert all(isinstance(path, str) and isinstance(content, str) for path, content in tree["files"].items())
+        assert all(
+            isinstance(path, str) and isinstance(content, str)
+            for path, content in tree["files"].items()
+        )
 
         tree_paths = set(tree["files"])
         declared = set(gold["must_write"])
@@ -73,15 +78,28 @@ def test_fixture_and_gold_schemas_and_paths_are_valid(tmp_path: Path) -> None:
         assert all(path in known_paths for path in gold["generated_paths"])
         assert all(path in known_paths for path in gold["readme_paths"])
         assert all(path in known_paths for path in gold["diagram_edges"])
-        assert all(link["source"] in known_paths and link["target"] in known_paths for link in gold["owner_links"])
-        assert all(trigger["doc"] in known_paths for trigger in gold["diagram_triggers"])
+        assert all(
+            link["source"] in known_paths and link["target"] in known_paths
+            for link in gold["owner_links"]
+        )
+        assert all(
+            trigger["doc"] in known_paths for trigger in gold["diagram_triggers"]
+        )
         if gold["ledger"]:
             assert gold["ledger"]["path"] in known_paths
         if gold["router"]:
             assert gold["router"]["path"] in known_paths
         if gold["adr_dir"]:
-            assert any(path.startswith(gold["adr_dir"].rstrip("/") + "/") for path in tree_paths)
-        assert all(not path.startswith("./") and "\\" not in path and ".." not in path.split("/") for path in tree_paths)
+            assert any(
+                path.startswith(gold["adr_dir"].rstrip("/") + "/")
+                for path in tree_paths
+            )
+        assert all(
+            not path.startswith("./")
+            and "\\" not in path
+            and ".." not in path.split("/")
+            for path in tree_paths
+        )
 
         destination = tmp_path / fixture_id
         build_runtime_view(BUNDLE_ROOT, tree_path, destination)
@@ -99,8 +117,19 @@ def test_load_strict_json_rejects_duplicate_nested_keys(tmp_path: Path) -> None:
         load_strict_json(path)
 
 
-def test_fixture_count_is_fixed_for_v0() -> None:
-    assert fixture_ids() == ["F1", "F2", "F3", "F6", "FH"]
+def test_every_fixture_has_gold_and_is_bound_to_a_case() -> None:
+    bindings = load_strict_json(EVALUATION_ROOT / "bindings.json")["cases"]
+    gold_ids = {
+        path.name.removesuffix(".gold.json")
+        for path in (EVALUATION_ROOT / "gold").glob("*.gold.json")
+    }
+
+    assert fixture_ids()
+    assert (
+        set(fixture_ids())
+        == gold_ids
+        == {binding["fixture"] for binding in bindings.values()}
+    )
 
 
 def test_bindings_and_pack_cases_are_bijective() -> None:
@@ -122,7 +151,9 @@ def test_bindings_and_pack_cases_are_bijective() -> None:
             "gold_overrides",
         }
         assert binding["fixture"] in fixture_ids()
-        assert binding["gold"] == f"tests/evaluation/gold/{binding['fixture']}.gold.json"
+        assert (
+            binding["gold"] == f"tests/evaluation/gold/{binding['fixture']}.gold.json"
+        )
         assert binding["profile"] in {"audit", "author", "protected"}
         assert set(binding["graders"]) <= set(knowledge_graders.core.GRADERS)
         assert binding["runs"] >= 1
@@ -130,38 +161,70 @@ def test_bindings_and_pack_cases_are_bijective() -> None:
         assert any(assertion["critical"] for assertion in case["assertions"])
         if case["kind"] == "deterministic":
             assert assertion_ids == set(binding["graders"])
-            assert case["defective_fixture"] == f"tests/evaluation/grader-fixtures/{binding['graders'][0]}.json"
+            assert (
+                case["defective_fixture"]
+                == f"tests/evaluation/grader-fixtures/{binding['graders'][0]}.json"
+            )
         else:
             assert assertion_ids == {"rubric-pass", "rubric-fail"}
             assert binding["graders"] == []
-        expected_family = "held-out-downstream" if case["held_out"] else case["id"].split("-")[1].lower()
+        expected_family = (
+            "held-out-downstream"
+            if case["held_out"]
+            else case["id"].split("-")[1].lower()
+        )
         assert case["family"] == expected_family
-        assert f"tests/evaluation/fixtures/{binding['fixture']}.tree.json" in case["files"]
+        assert (
+            f"tests/evaluation/fixtures/{binding['fixture']}.tree.json" in case["files"]
+        )
         assert binding["gold"] in case["files"]
 
 
 def test_pack_coverage_status_and_holdout_seal() -> None:
     pack = load_strict_json(EVALUATION_ROOT / "evals.json")
     bindings = load_strict_json(EVALUATION_ROOT / "bindings.json")["cases"]
-    requirements = {item["id"] for item in pack["requirements"]}
+    requirement_ids = [item["id"] for item in pack["requirements"]]
+    case_ids = [case["id"] for case in pack["cases"]]
+    assert len(set(requirement_ids)) == len(requirement_ids)
+    assert len(set(case_ids)) == len(case_ids)
     covered = {req for case in pack["cases"] for req in case["requirement_ids"]}
-    assert requirements <= covered
-    assert len(pack["requirements"]) == 21
-    assert len(pack["cases"]) == 31
+    assert set(requirement_ids) == covered
     assert all(case["status"] == "not-run" for case in pack["cases"])
     assert not (EVALUATION_ROOT / "runs").exists()
+
+    case_fixture = {
+        case["id"]: case["fixture"]
+        if "fixture" in case
+        else bindings[case["id"]]["fixture"]
+        for case in pack["cases"]
+    }
+    holdout_fixtures = {
+        case_fixture[case["id"]] for case in pack["cases"] if case["held_out"]
+    }
+    assert holdout_fixtures
     for case in pack["cases"]:
-        is_holdout = case["fixture"] if "fixture" in case else bindings[case["id"]]["fixture"]
-        assert (is_holdout == "FH") == case["held_out"]
+        assert (case_fixture[case["id"]] in holdout_fixtures) == case["held_out"]
         if case["held_out"]:
             assert case["family"] == "held-out-downstream"
+
     queries = pack["triggers"]["queries"]
-    assert len(queries) == 20
-    assert sum(query["should_trigger"] for query in queries) == 10
-    assert sum(query["split"] == "train" for query in queries) == 12
-    assert sum(query["split"] == "held-out" for query in queries) == 8
+    query_ids = [query["id"] for query in queries]
+    assert len(set(query_ids)) == len(query_ids)
+    assert {query["split"] for query in queries} == {"train", "held-out"}
+    for split in ("train", "held-out"):
+        labels = [
+            query["should_trigger"] for query in queries if query["split"] == split
+        ]
+        assert labels.count(True) == labels.count(False) > 0
+
     seal = (EVALUATION_ROOT / "holdout.sha256").read_text(encoding="utf-8").splitlines()
-    assert len(seal) == 2
+    sealed_paths = {line.split("  ", 1)[1] for line in seal}
+    assert len(sealed_paths) == len(seal)
+    assert sealed_paths == {
+        path
+        for fixture in holdout_fixtures
+        for path in (f"fixtures/{fixture}.tree.json", f"gold/{fixture}.gold.json")
+    }
     for line in seal:
         expected, relative = line.split("  ", 1)
         actual = hashlib.sha256((EVALUATION_ROOT / relative).read_bytes()).hexdigest()
@@ -192,20 +255,16 @@ def test_grader_fixtures_and_compatibility_matrix_are_complete() -> None:
     assert required_mutants <= found_mutants
 
     compatibility = load_strict_json(EVALUATION_ROOT / "compatibility.json")
-    assert set(compatibility) == {"schema", "scenarios", "tests"}
+    assert set(compatibility) == {"schema", "scenarios"}
     assert compatibility["schema"] == "knowledge-eval-compat/v1"
     scenario_headings = {
         line[4:].strip()
-        for line in (BUNDLE_ROOT / "evals/evaluation_scenarios.md").read_text(encoding="utf-8").splitlines()
+        for line in (BUNDLE_ROOT / "evals/evaluation_scenarios.md")
+        .read_text(encoding="utf-8")
+        .splitlines()
         if line.startswith("### ")
     }
-    test_names = {
-        node.name
-        for node in ast.walk(ast.parse((BUNDLE_ROOT / "tests/test_bundle_contract.py").read_text(encoding="utf-8")))
-        if isinstance(node, ast.FunctionDef) and node.name.startswith("test_")
-    }
     assert {row["heading"] for row in compatibility["scenarios"]} == scenario_headings
-    assert {row["name"] for row in compatibility["tests"]} == test_names
-    for row in [*compatibility["scenarios"], *compatibility["tests"]]:
+    for row in compatibility["scenarios"]:
         assert row["case_ids"]
         assert set(row["case_ids"]) <= case_ids

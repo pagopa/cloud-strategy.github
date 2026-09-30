@@ -108,11 +108,8 @@ def _shell_targets(root: Path) -> list[Path]:
 def _shell(context: RunContext) -> int:
     targets = _shell_targets(context.root)
     status = _run_many(context, [["bash", "-n", target] for target in targets])
-    if shutil.which("shellcheck") or context.dry_run:
-        status = max(
-            status, run_command(context, ["shellcheck", "-s", "bash", "-x", *targets])
-        )
-    return status
+    shellcheck = shutil.which("shellcheck") or "shellcheck"
+    return max(status, run_command(context, [shellcheck, "-s", "bash", "-x", *targets]))
 
 
 def _python_dependencies(context: RunContext) -> int:
@@ -162,15 +159,13 @@ def _python_lint(context: RunContext) -> int:
 
 def _python_entrypoints(context: RunContext) -> int:
     log_analyzer = ".github/skills/local-copilot-log-analyzer/scripts/run.sh"
-    tools_runner = "./.github/tools/run.sh"
     python = sys.executable
     return _run_many(
         context,
         [
             ["bash", log_analyzer, "prompt-exports", "--help"],
             ["bash", log_analyzer, "debug-logs", "--help"],
-            [tools_runner, "analyze_copilot_debug_log", "--help"],
-            [tools_runner, "benchmark-skill-tokens", "--help"],
+            [python, ".github/scripts/benchmark-skill-tokens.py", "--help"],
             [python, ".github/tools/inventory/build-inventory.py", "--help"],
             [python, ".github/tools/catalog/validate-catalog.py", "--deep", "--help"],
             [python, ".github/tools/tokens/detect-token-risks.py", "--help"],
@@ -462,6 +457,7 @@ def _finish(report: RunReport, output_format: str, result_path: Path | None) -> 
             write_run_result(report, result_path)
         except Exception as error:
             print(f"validation result publication failure: {error}", file=sys.stderr)
+            validation_exit = 1
     try:
         print(render_run(report, output_format))
     except Exception as error:

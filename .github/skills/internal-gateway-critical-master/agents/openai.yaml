@@ -2,6 +2,6 @@ interface:
   display_name: "internal-gateway-critical-master"
   short_description: "Adaptive critical analysis for any decision context"
   default_prompt: >-
-    Use /internal-gateway-critical-master to challenge the current plan,
+    Use $internal-gateway-critical-master to challenge the current plan,
     proposal, decision, or design before action, and return its compact
     critical analysis in the language of the chat.

@@ -32,6 +32,8 @@ ambiguous; never choose the latest file merely by timestamp. The user's
 invocation is approval of every declared task unless they limited the subset.
 Do not ask for another plan approval or confirmation after each task. A writer
 result, readiness flag, or internal skill call is not a user invocation.
+Invocation means an explicit mention of this skill (`$` in Codex, `/` in
+Copilot); a natural-language request such as "procedi" is not plan approval.
 
 Verify source coherence and consume the plan's stable task IDs, criteria,
 dependencies, checks, writable paths, and explicitly selected human gates.
@@ -55,6 +57,8 @@ Pass the identified plan and full authorized task set to
 subordinate to this gateway: no Git mutation, no routine per-task full review,
 and one whole-plan review at the end. Keep `/internal-tdd` posture and native
 checks authoritative. Do not replace it with a parallel executor or widen scope.
+If `/mattpocock-implement` is not loaded, stop before the first write and ask
+the user to mention it explicitly.
 
 Execute in dependency order. After each task, run its checks and record progress;
 count it complete only after required verification passes. Run automatic

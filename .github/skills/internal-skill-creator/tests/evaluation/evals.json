@@ -498,8 +498,7 @@
       "expected_output": "Delegate with mode read.",
       "files": [
         "references/authoring-and-evaluation.md",
-        "fixtures/valid-read-brief.json",
-        "tests/test_delegation_fixtures.py"
+        "fixtures/valid-read-brief.json"
       ],
       "assertions": [
         {
@@ -567,8 +566,7 @@
       "expected_output": "Delegate with mode write.",
       "files": [
         "references/authoring-and-evaluation.md",
-        "fixtures/valid-write-brief.json",
-        "tests/test_delegation_fixtures.py"
+        "fixtures/valid-write-brief.json"
       ],
       "assertions": [
         {
@@ -600,8 +598,7 @@
       "initial_state": "The request, applicable repository policy, creator bundle, and named target evidence are available for inspection.",
       "expected_output": "Complete the work locally without invoking a worker.",
       "files": [
-        "references/authoring-and-evaluation.md",
-        "tests/test_delegation_fixtures.py"
+        "references/authoring-and-evaluation.md"
       ],
       "assertions": [
         {
@@ -634,8 +631,7 @@
       "expected_output": "Keep the decision with the parent or stop for the missing decision.",
       "files": [
         "references/authoring-and-evaluation.md",
-        "fixtures/invalid-incomplete-brief.json",
-        "tests/test_delegation_fixtures.py"
+        "fixtures/invalid-incomplete-brief.json"
       ],
       "assertions": [
         {

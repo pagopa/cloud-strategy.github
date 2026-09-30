@@ -1,6 +1,6 @@
 ---
 name: internal-markdown
-description: Use when editing or reviewing Markdown structure, fences, references, links, paths, or dialect-aware format checks.
+description: Use when editing or reviewing Markdown structure, fences, references, links, paths, or dialect-aware format checks. Route Mermaid diagram content to /internal-mermaid.
 ---
 
 # Internal Markdown

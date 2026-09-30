@@ -1,6 +1,6 @@
 ---
 name: internal-json
-description: Use when editing or reviewing strict JSON grammar, encoding, duplicate names, numeric interoperability, or format-owner routing.
+description: Use when editing or reviewing strict JSON grammar, encoding, duplicate names, numeric interoperability, or format-owner routing. Route Terraform `.tfvars.json` semantics to /internal-tf.
 ---
 
 # Internal JSON

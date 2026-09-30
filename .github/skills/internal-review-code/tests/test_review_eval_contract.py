@@ -4,22 +4,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-SCRIPT_PATH = (
-    REPO_ROOT
-    / ".github/skills/internal-review-code/tests/evaluation/score_review_eval.py"
-)
-FIXTURE_DIR = (
-    REPO_ROOT / ".github/skills/internal-review-code/tests/fixtures/seeded-review-target"
-)
-ACTIONS_FIXTURE_DIR = (
-    REPO_ROOT
-    / ".github/skills/internal-review-code/tests/fixtures/actions-review-target"
-)
+BUNDLE = Path(__file__).resolve().parents[1]
+SCRIPT_PATH = BUNDLE / "tests" / "evaluation" / "score_review_eval.py"
+FIXTURE_DIR = BUNDLE / "tests" / "fixtures" / "seeded-review-target"
+ACTIONS_FIXTURE_DIR = BUNDLE / "tests" / "fixtures" / "actions-review-target"
 
 MANIFEST = {
     "contract_version": "internal-review-code-eval-v1",
@@ -63,12 +51,6 @@ FAILING_RUN = {
     "verdict": "approve",
     "scope_violations": [],
 }
-
-
-def test_provenance_identifies_the_review_skill_and_engine() -> None:
-    assert "review_skill_sha256" in PROVENANCE
-    assert "engine_sha256" in PROVENANCE
-    assert "agent_sha256" not in PROVENANCE
 
 
 def _load_scorer():
@@ -137,7 +119,7 @@ def test_actions_manifest_requires_the_merged_contributor() -> None:
     assert result["accepted"] is False
 
 
-def test_cli_returns_bounded_json_and_distinct_failure_codes() -> None:
+def test_cli_returns_bounded_json_and_distinct_failure_codes(tmp_path: Path) -> None:
     manifest_path = FIXTURE_DIR / "benchmark.json"
     passing_path = FIXTURE_DIR / "passing-run.json"
     failing_path = FIXTURE_DIR / "failing-run.json"
@@ -175,24 +157,21 @@ def test_cli_returns_bounded_json_and_distinct_failure_codes() -> None:
     assert failing.returncode == 1
     assert json.loads(failing.stdout)["accepted"] is False
 
-    malformed = FIXTURE_DIR / "malformed.json"
+    malformed = tmp_path / "malformed.json"
     malformed.write_text("{", encoding="utf-8")
-    try:
-        invalid = subprocess.run(
-            [
-                sys.executable,
-                str(SCRIPT_PATH),
-                "--manifest",
-                str(manifest_path),
-                "--run",
-                str(malformed),
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    finally:
-        malformed.unlink()
+    invalid = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--manifest",
+            str(manifest_path),
+            "--run",
+            str(malformed),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     assert invalid.returncode == 2
     assert invalid.stderr

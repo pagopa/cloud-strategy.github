@@ -29,10 +29,9 @@ not silently reuse open decisions.
 In `analysis-only` mode, do not invoke `/internal-tdd`,
 `/internal-gateway-writing-plans`, `/internal-gateway-execute-plans`, or
 implementation-oriented design before the user explicitly selects `+spec` or
-`+plan`. `+spec` invokes `/mattpocock-to-spec` with accepted context and records
-`plan_authoring_ready: true` only after verification. `+plan` invokes
-`/internal-gateway-writing-plans`, wrapping
-`/addyosmani-planning-and-task-breakdown`. `Implementation permission: false`
+`+plan`. `+spec` invokes `/mattpocock-to-spec` (if unloaded, stop and request a mention)
+with accepted context and records `plan_authoring_ready: true` only after
+verification. `Implementation permission: false`
 does not block plan authoring; neither action authorizes implementation or
 execution.
 
@@ -52,8 +51,8 @@ may supply mechanics but never replaces lifecycle, state, authority,
 acceptance, or handoff decisions. `/mattpocock-to-spec` owns the spec template
 and tracker publication after `+spec`.
 `/internal-gateway-writing-plans` owns the planner handoff after `+plan`;
-`/internal-gateway-execute-plans` is the sole handoff after explicit execution
-approval. The `route_contract` must match boundaries and add no alternate
+`/internal-gateway-execute-plans` is the sole, user-invoked execution route.
+The `route_contract` must match boundaries and add no alternate
 route, dependency, or handoff.
 
 ## Global gates

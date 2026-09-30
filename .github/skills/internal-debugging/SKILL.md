@@ -1,6 +1,6 @@
 ---
 name: internal-debugging
-description: Use when a bug, test, build, validator, sync, workflow, or catalog-drift failure needs a reproducible root-cause diagnosis before a fix. This repository-owned wrapper applies a self-contained diagnosis baseline, uses /mattpocock-diagnosing-bugs as optional technique depth, and routes measured slowness or throughput to /internal-performance-optimization.
+description: Use when a bug, test, build, validator, sync, workflow, or catalog-drift failure needs a reproducible root-cause diagnosis before a fix. Use /mattpocock-diagnosing-bugs for optional technique depth, and route measured slowness or throughput to /internal-performance-optimization.
 ---
 
 # Internal Debugging

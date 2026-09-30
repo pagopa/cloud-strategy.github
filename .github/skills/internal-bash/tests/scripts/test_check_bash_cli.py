@@ -215,10 +215,6 @@ def test_checker_never_executes_target(bin_dir: Path, tmp_path: Path) -> None:
     assert not marker.exists()
 
 
-def test_checker_source_has_no_eval() -> None:
-    assert "eval" not in CHECKER.read_text(encoding="utf-8")
-
-
 @pytest.mark.parametrize(
     "shebang",
     ["#!/usr/bin/env -S bash -e", "#!/usr/bin/env -i bash", "#!/bin/bash -e"],

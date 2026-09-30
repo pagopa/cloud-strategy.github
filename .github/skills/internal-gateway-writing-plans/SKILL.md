@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-writing-plans
-description: Use when an approved design, reviewed spec, or direct requirement needs one retained implementation plan.
+description: Use when the user explicitly requests one retained implementation plan from an approved design, reviewed spec, concrete requirements, or a legacy plan to re-author. Route one-session work to /internal-gateway-simple-task.
 ---
 
 # Internal Gateway Writing Plans

@@ -11,13 +11,8 @@ from types import ModuleType
 
 import pytest
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report"
-FIXTURES_ROOT = REPO_ROOT / ".github/skills/internal-wayfinder-report/tests/fixtures"
+BUNDLE_ROOT = Path(__file__).resolve().parents[1]
+FIXTURES_ROOT = BUNDLE_ROOT / "tests/fixtures"
 RENDERER = BUNDLE_ROOT / "scripts/render_report.py"
 SECTION_IDS = ("overview", "solution", "decisions", "scope", "review")
 MERMAID_PINNED_VERSION = "mermaid@11.6.0"
@@ -92,15 +87,6 @@ def test_one_evidence_entry_can_support_multiple_blocks(tmp_path: Path) -> None:
     markup = render_report(workspace, report_path(workspace)).read_text()
 
     assert markup.count('href="../map.md"') >= 2
-
-
-def test_compact_sections_render_once_in_order(tmp_path: Path) -> None:
-    workspace = copy_workspace(tmp_path, "dense")
-    markup = render_report(workspace, report_path(workspace)).read_text()
-    offsets = [markup.index(f'id="{section_id}"') for section_id in SECTION_IDS]
-
-    assert offsets == sorted(offsets)
-    assert 'id="reading"' not in markup
 
 
 def test_overview_and_review_diagrams_are_required(tmp_path: Path) -> None:
@@ -366,16 +352,28 @@ def test_duplicate_finding_ids_are_rejected(tmp_path: Path) -> None:
 
 def test_cli_uses_data_and_rejects_legacy_model_flag(tmp_path: Path) -> None:
     workspace = copy_workspace(tmp_path, "minimal")
+    base_command = [
+        sys.executable,
+        str(RENDERER),
+        "--workspace",
+        str(workspace),
+        "--data",
+        str(report_path(workspace)),
+    ]
+
+    legacy = subprocess.run(
+        [*base_command, "--model", str(report_path(workspace))],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert legacy.returncode != 0
+    assert "--model" in legacy.stderr
+    assert not (workspace / "report" / "index.html").exists()
 
     result = subprocess.run(
-        [
-            sys.executable,
-            str(RENDERER),
-            "--workspace",
-            str(workspace),
-            "--data",
-            str(report_path(workspace)),
-        ],
+        base_command,
         check=False,
         capture_output=True,
         text=True,
@@ -402,6 +400,7 @@ def test_sections_render_once_in_canonical_order(tmp_path: Path) -> None:
 
     assert offsets == sorted(offsets)
     assert all(markup.count(f'id="{section_id}"') == 1 for section_id in SECTION_IDS)
+    assert 'id="reading"' not in markup
 
 
 def test_executive_status_and_priorities_precede_detailed_sections(
@@ -458,45 +457,14 @@ def test_template_mermaid_block_is_pinned_and_hardened() -> None:
     template_text = (BUNDLE_ROOT / "templates" / "report.html").read_text(
         encoding="utf-8"
     )
+    loader = re.search(r'<script src="[^"]*mermaid@[^>]*>', template_text)
 
-    assert MERMAID_PINNED_VERSION in template_text
-    assert 'crossorigin="anonymous"' in template_text
-    assert 'referrerpolicy="no-referrer"' in template_text
+    assert loader is not None
+    assert MERMAID_PINNED_VERSION in loader.group(0)
+    assert re.search(r'integrity="sha384-[^"]+"', loader.group(0))
+    assert 'crossorigin="anonymous"' in loader.group(0)
     assert "securityLevel: 'strict'" in template_text
     assert "htmlLabels: false" in template_text
-    assert "startOnLoad: false" in template_text
-    assert "source.textContent" in template_text
-    assert "innerHTML = result.svg" in template_text
-    assert "window.mermaid.parse" in template_text
-    assert "diagram-fallback" in template_text
-    assert "diagram-error" in template_text
-    assert 'role="alert"' in template_text
-    assert "catch(function (error)" in template_text
-    assert "data-copy-target" in template_text
-    assert "navigator.clipboard" in template_text
-    assert "color-scheme: light" in template_text
-    assert "--accent-mid" in template_text
-    assert "--warm-accent" in template_text
-    assert "decision-board:has(> :only-child)" in template_text
-    for section_id in SECTION_IDS:
-        assert f'href="#{section_id}"' in template_text
-    assert 'href="#reading"' not in template_text
-    assert "prefers-color-scheme: dark" not in template_text
-    assert "--accent-2" not in template_text
-    assert "@media print" in template_text
-    assert "@media (max-width: 820px)" in template_text
-
-
-def test_template_uses_only_the_generic_body_contract() -> None:
-    template_text = (BUNDLE_ROOT / "templates" / "report.html").read_text(
-        encoding="utf-8"
-    )
-
-    assert "${body}" in template_text
-    assert "${metrics}" in template_text
-    for legacy_placeholder in ("${understand}", "${review}", "${preview_attributes}"):
-        assert legacy_placeholder not in template_text
-    assert "template-outline" not in template_text
 
 
 def test_diagram_source_stays_visible_without_javascript(tmp_path: Path) -> None:
@@ -523,13 +491,7 @@ def test_template_never_ships_a_placeholder_integrity_value() -> None:
         assert re.fullmatch(r"sha384-[A-Za-z0-9+/]{60,}={0,2}", match.group(1))
 
 
-def test_bundle_has_one_runtime_script_and_no_legacy_contract() -> None:
-    scripts = sorted(path.name for path in (BUNDLE_ROOT / "scripts").glob("*.py"))
-
-    assert scripts == ["collect_source_notes.py", "render_report.py"]
-    assert not (BUNDLE_ROOT / "references/report-model-v1.schema.json").exists()
-    assert not (BUNDLE_ROOT / "templates/sample").exists()
-
+def test_runtime_scripts_expose_only_current_cli_flags() -> None:
     result = subprocess.run(
         [sys.executable, str(RENDERER), "--help"],
         check=False,

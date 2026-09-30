@@ -7,15 +7,15 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[5]
-CHECKER = REPO_ROOT / ".github/skills/internal-yaml/scripts/check.sh"
-FIXTURES_DIR = ".github/skills/internal-yaml/fixtures"
+BUNDLE = Path(__file__).resolve().parents[2]
+CHECKER = BUNDLE / "scripts/check.sh"
+FIXTURES_DIR = "fixtures"
 VALID_FIXTURE = f"{FIXTURES_DIR}/valid/pre-commit-like.yaml"
 REQUIRED_VERSION = "yamllint 1.38.0"
 
 
 def _fixture_names(kind: str) -> list[str]:
-    return sorted(path.name for path in (REPO_ROOT / FIXTURES_DIR / kind).glob("*.yaml"))
+    return sorted(path.name for path in (BUNDLE / FIXTURES_DIR / kind).glob("*.yaml"))
 
 
 def _has_pinned_yamllint() -> bool:
@@ -67,7 +67,7 @@ def run_checker(*args: str, **extra_env: str) -> subprocess.CompletedProcess[str
     env.update(extra_env)
     return subprocess.run(
         [str(CHECKER), *args],
-        cwd=REPO_ROOT,
+        cwd=BUNDLE,
         env=env,
         text=True,
         capture_output=True,

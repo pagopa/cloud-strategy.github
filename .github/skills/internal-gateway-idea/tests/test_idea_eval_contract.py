@@ -1131,10 +1131,10 @@ def test_public_wrapper_projects_one_autonomous_route_without_brainstorming_hand
     metadata = yaml.safe_load(PUBLIC_WRAPPER_PATH.read_text(encoding="utf-8"))
     prompt = metadata["interface"]["default_prompt"]
 
-    assert "policy" not in metadata
+    assert metadata["policy"] == {"allow_implicit_invocation": False}
     assert "autonomous route" in prompt
     assert "/superpowers-brainstorming" not in prompt
-    assert prompt.count("/internal-gateway-execute-plans") == 1
+    assert "internal-gateway-execute-plans" not in prompt
 
 
 def test_public_wrapper_declares_the_canonical_route_contract() -> None:

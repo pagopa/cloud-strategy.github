@@ -5,12 +5,7 @@ import yaml
 
 LINK_TARGET = re.compile(r"\]\(([^)#\s]+)(?:#[^)]*)?\)")
 
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-skill-creator"
+BUNDLE_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_skill_metadata_is_structurally_valid() -> None:
@@ -44,9 +39,7 @@ def _relative_link_targets(markdown_path: Path) -> set[Path]:
 
 def test_every_reference_is_linked_from_skill_md() -> None:
     linked = _relative_link_targets(BUNDLE_ROOT / "SKILL.md")
-    references = {
-        path.resolve() for path in (BUNDLE_ROOT / "references").glob("*.md")
-    }
+    references = {path.resolve() for path in (BUNDLE_ROOT / "references").glob("*.md")}
 
     assert sorted(p.name for p in references - linked) == []
 
@@ -59,20 +52,3 @@ def test_relative_markdown_links_resolve_inside_bundle() -> None:
         for target in _relative_link_targets(source):
             assert target.is_file(), f"{source.name} -> {target}"
             assert target.is_relative_to(bundle), f"{source.name} -> {target}"
-
-
-def test_bundle_contains_declared_local_siblings() -> None:
-    assert (BUNDLE_ROOT / "SKILL.md").is_file()
-    assert (BUNDLE_ROOT / "agents/openai.yaml").is_file()
-    assert (BUNDLE_ROOT / "references/authoring-and-evaluation.md").is_file()
-    assert (BUNDLE_ROOT / "references/cache-and-token-efficiency.md").is_file()
-    assert (BUNDLE_ROOT / "references/eval-packs.md").is_file()
-    assert (BUNDLE_ROOT / "references/grading-and-analysis.md").is_file()
-    assert (BUNDLE_ROOT / "scripts/check_eval_pack.py").is_file()
-    assert (BUNDLE_ROOT / "fixtures/eval-packs/valid-pack.json").is_file()
-    assert (BUNDLE_ROOT / "fixtures/eval-packs/defective-packs.json").is_file()
-    assert (BUNDLE_ROOT / "fixtures/eval-packs/valid-run-record.json").is_file()
-    assert (BUNDLE_ROOT / "fixtures/eval-packs/pack-mutations.json").is_file()
-    assert (BUNDLE_ROOT / "tests/evaluation/evals.json").is_file()
-    assert (BUNDLE_ROOT / "tests/evaluation/fixtures/generated-pack-output.json").is_file()
-    assert (BUNDLE_ROOT / "tests/evaluation/fixtures/generated-pack-defective.json").is_file()

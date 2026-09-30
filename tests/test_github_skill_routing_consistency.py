@@ -22,7 +22,15 @@ ACTIVE_ROOT_FILES = (
     "README.md",
     "CONTRIBUTING.md",
 )
-EXCLUDED_PARTS = {"runs", "__pycache__", ".git", "graphify-out", "tmp"}
+EXCLUDED_PARTS = {
+    "runs",
+    "__pycache__",
+    ".git",
+    "graphify-out",
+    "tmp",
+    ".venv",
+    "node_modules",
+}
 TEXT_SUFFIXES = {".md", ".json", ".yaml", ".yml", ".py", ".txt", ".sh"}
 
 

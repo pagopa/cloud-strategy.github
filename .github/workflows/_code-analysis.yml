@@ -33,7 +33,6 @@ jobs:
         leaf:
           - actionlint
           - shell-static-analysis
-          - python-dependencies
           - python-static-analysis
           - python-lint
           - python-entrypoints

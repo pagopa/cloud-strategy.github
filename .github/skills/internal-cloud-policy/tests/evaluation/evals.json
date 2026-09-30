@@ -58,7 +58,8 @@
       {"id": "Q-05", "query": "Which GCP controls should stop data exfiltration from our analytics folder?", "should_trigger": false, "split": "train", "competing_owner": "internal-gcp"},
       {"id": "Q-06", "query": "Plan the staged dry-run rollout of an Org Policy across GCP folders.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gcp"},
       {"id": "Q-07", "query": "Fix the Terraform plan error in our policy module.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
-      {"id": "Q-08", "query": "Design the AWS permission-boundary operating model for platform teams.", "should_trigger": false, "split": "train", "competing_owner": "internal-aws"}
+      {"id": "Q-08", "query": "Design the AWS permission-boundary operating model for platform teams.", "should_trigger": false, "split": "train", "competing_owner": "internal-aws"},
+      {"id": "Q-09", "query": "Decide at which management group our Azure guardrails should be assigned.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-azure"}
     ]
   }
 }
