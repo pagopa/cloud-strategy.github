@@ -1,5 +1,5 @@
 ---
-description: Node.js project standards with DDD-oriented layering, early returns, and deterministic test practices.
+description: Node.js and TypeScript review checks for layering, async errors, contract changes, tests, and dependency drift.
 applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx,**/package.json,**/tsconfig.json"
 excludeAgent: "cloud-agent"
 ---

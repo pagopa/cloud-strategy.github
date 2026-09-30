@@ -1,5 +1,5 @@
 ---
-description: Lambda implementation rules for explicit handlers, input validation, and reusable business logic.
+description: AWS Lambda review checks for handler contracts, input validation, retries and idempotency, limits, IAM scope, and logging.
 applyTo: "**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts,**/lambdas/**/*.tf,**/lambdas/**/*.py,**/lambdas/**/*.js,**/lambdas/**/*.ts,**/functions/**/*.tf,**/functions/**/*.py,**/functions/**/*.js,**/functions/**/*.ts"
 excludeAgent: "cloud-agent"
 ---

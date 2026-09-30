@@ -8,6 +8,26 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-10-01
+
+- Reworked `.github/copilot-instructions.md` and
+  `.github/instructions/copilot-code-review.instructions.md` for GitHub.com
+  Copilot code review: removed comment-format directives that code review
+  ignores, split the always-on content into a review contract (intent check,
+  noise suppression for linter-enforced issues, intentional fixtures, and
+  generated files) and severity anchors plus cross-cutting security checks,
+  and removed the duplicated rules between both files.
+- Replaced bundle-checker directives that code review cannot run in the JSON,
+  YAML, Markdown, and Makefile instructions with concrete review checks;
+  widened `internal-json` to `**/*.json` with a JSONC exception.
+- Made GitHub Actions checks concrete for script injection and
+  `pull_request_target`/`workflow_run` trust, Terraform checks for `moved`,
+  `removed`, and `import` blocks, sensitive outputs, and `default_tags`, and
+  reframed authoring-style `description:` values as review checks.
+- Added `.github/instructions/internal-copilot-skill-authoring.instructions.md`
+  for skill bundles: protected imported bundles, `SKILL.md` frontmatter and
+  triggers, reachability, self-containment, and tests.
+
 ## 2026-09-27
 
 - Reworked .github/skills/internal-gateway-writing-plans/ and .github/skills/internal-gateway-execute-plans/ around shared plan and chat contracts, plan-adjacent run state, read-only handoff checks, native-only execution, bounded repair and stop rules, and checkpoint diffs; added the plan-contract and chat-templates references plus root protocol and ignored-scratch checkpoint tests; removed both retired executor and writer eval-run records. Migration: legacy .superpowers/sdd runs are not resumed; start a new run beside the retained plan.

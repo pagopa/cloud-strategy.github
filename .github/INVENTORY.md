@@ -11,6 +11,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/instructions/internal-codeowners.instructions.md`
 - `.github/instructions/internal-codeql.instructions.md`
 - `.github/instructions/internal-copilot-agent-authoring.instructions.md`
+- `.github/instructions/internal-copilot-skill-authoring.instructions.md`
 - `.github/instructions/internal-copilot-skill-reference-authoring.instructions.md`
 - `.github/instructions/internal-dependabot.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`

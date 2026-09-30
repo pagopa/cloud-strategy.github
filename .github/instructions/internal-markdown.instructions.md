@@ -1,5 +1,5 @@
 ---
-description: Markdown standards for concise, maintainable documentation and explicit command/path formatting.
+description: Markdown review checks for links, fences, references, and technical claims that must match the repository.
 applyTo: "**/*.md"
 excludeAgent: "cloud-agent"
 ---
@@ -8,15 +8,18 @@ excludeAgent: "cloud-agent"
 
 This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-- Use the bundle checker for high-confidence structural findings: MD011 for
-  reversed links, MD042 for empty links, MD051 for invalid fragments, MD052
-  for undefined references, and MD053 for duplicate or unused references.
-- Check fences, local links/fragments, paths, reference definitions, and
-  heading structure without treating a Markdown dialect as universal.
-- Record dialect awareness when CommonMark, GitHub Flavored Markdown, or a
-  tool-specific extension changes the interpretation.
-- Separately review technical claims, commands, paths, and examples against
-  repository evidence; report stale references, contradictory guidance, or
-  behavior presented as enforced without support from code, tests, or validators.
-- Report duplicated policy only when its canonical owner is evident. Leave
-  external targets, editorial judgment, and broader policy ownership to their owners.
+- Flag relative links to files that do not exist in the repository and
+  fragment links to headings that do not exist in the target file.
+- Flag empty links, reversed link syntax such as `(text)[url]`, and undefined
+  reference-style links.
+- Flag unclosed code fences and fence changes that turn prose into code or
+  code into prose.
+- Check commands, paths, file names, and options in changed text against the
+  repository. Flag stale references and guidance that contradicts code, tests,
+  or validators.
+- Flag text that presents a rule as enforced when no validator, test, or CI
+  check in the repository enforces it.
+- Flag policy copied from its canonical owner file when both copies can drift.
+  Name the owner.
+- Assume GitHub Flavored Markdown unless the file targets another renderer.
+- Do not review external link targets or editorial style.

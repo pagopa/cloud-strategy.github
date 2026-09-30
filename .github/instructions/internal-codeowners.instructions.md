@@ -1,5 +1,5 @@
 ---
-description: CODEOWNERS standards for template placeholders and review-enforcement readiness.
+description: CODEOWNERS review checks for valid owners, rule ordering, placeholders, and coverage of critical paths.
 applyTo: "**/CODEOWNERS"
 excludeAgent: "cloud-agent"
 ---

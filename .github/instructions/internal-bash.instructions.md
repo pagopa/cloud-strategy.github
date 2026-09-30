@@ -1,5 +1,5 @@
 ---
-description: Bash scripting standards for safe execution, guard clauses, and consistent runtime logs.
+description: Shell script review checks for strict mode, quoting, input handling, destructive commands, and download verification.
 applyTo: "**/*.sh"
 excludeAgent: "cloud-agent"
 ---
