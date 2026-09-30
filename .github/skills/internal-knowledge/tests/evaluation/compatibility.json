@@ -349,7 +349,8 @@
       "heading": "Standalone technical setup",
       "disposition": "replaced-by",
       "case_ids": [
-        "C-MODE-SETUP"
+        "C-MODE-SETUP",
+        "C-KNOWLEDGE-LAYERS"
       ],
       "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
     },
@@ -357,9 +358,51 @@
       "heading": "Standalone managerial setup",
       "disposition": "replaced-by",
       "case_ids": [
-        "C-MODE-SETUP"
+        "C-MODE-SETUP",
+        "C-PRESERVE-COUNTEREXAMPLES"
       ],
       "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Select optional knowledge from evidence",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-KNOWLEDGE-LAYERS"
+      ],
+      "reason": "Mapped to concrete offline rubric coverage; semantic review remains not-run."
+    },
+    {
+      "heading": "Classify durable knowledge and operating detail",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-KNOWLEDGE-LAYERS",
+        "C-SPLIT-MIXED"
+      ],
+      "reason": "Mapped to concrete offline rubric and grader coverage; semantic review remains not-run."
+    },
+    {
+      "heading": "Gate authored deletions by the allowlist",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-DELETE-APPROVAL"
+      ],
+      "reason": "Mapped to the deletion rubric and existing allowlist grader boundary; semantic review remains not-run."
+    },
+    {
+      "heading": "Report discovered problems to the human",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-PROBLEM-REPORT"
+      ],
+      "reason": "Mapped to concrete offline rubric coverage; semantic review remains not-run."
+    },
+    {
+      "heading": "Preserve evidence-backed counterexamples",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-PRESERVE-COUNTEREXAMPLES"
+      ],
+      "reason": "Mapped to concrete offline rubric coverage; semantic review remains not-run."
     },
     {
       "heading": "Mixed-lane realignment",

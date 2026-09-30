@@ -49,7 +49,10 @@ Project orientation may retain the current purpose, important boundaries,
 reader-facing entry points, and durable vocabulary needed to navigate the
 repository. Each claim needs current evidence and an owner. Do not turn an
 orientation entry into a full architecture document, roadmap, or operating
-plan.
+plan. Keep execution tasks, statuses, and completion conditions with their
+existing owners, and do not disguise implementation defects as open questions.
+Report discovered defects and conflicts to the human instead of placing them in
+project orientation.
 
 ### Selected Specification
 

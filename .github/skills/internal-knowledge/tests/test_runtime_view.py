@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 EVALUATION_ROOT = Path(__file__).parent / "evaluation"
+BUNDLE_ROOT = EVALUATION_ROOT.parent.parent
 if str(EVALUATION_ROOT) not in sys.path:
     sys.path.insert(0, str(EVALUATION_ROOT))
 
@@ -69,6 +70,28 @@ def test_runtime_view_contains_only_runtime_and_fixture_files(tmp_path: Path) ->
         b"# Skill\n"
     ).hexdigest()
     assert all(len(digest) == 64 for digest in manifest.values())
+
+
+def test_runtime_view_copies_public_projection_and_selected_references(tmp_path: Path) -> None:
+    destination = tmp_path / "view"
+    manifest = build_runtime_view(
+        BUNDLE_ROOT,
+        EVALUATION_ROOT / "fixtures/F6.tree.json",
+        destination,
+    )
+    runtime = destination / "skill" / "internal-knowledge"
+    selected = (
+        Path("agents/openai.yaml"),
+        Path("references/knowledge-topology.md"),
+        Path("references/knowledge-report.md"),
+    )
+
+    for relative in selected:
+        source_bytes = (BUNDLE_ROOT / relative).read_bytes()
+        copied = runtime / relative
+        manifest_key = (Path("skill/internal-knowledge") / relative).as_posix()
+        assert copied.read_bytes() == source_bytes
+        assert manifest[manifest_key] == hashlib.sha256(source_bytes).hexdigest()
 
 
 @pytest.mark.parametrize(

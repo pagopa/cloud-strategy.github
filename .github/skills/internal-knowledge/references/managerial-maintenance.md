@@ -7,6 +7,10 @@ technical domain or replacing a technical owner.
 
 Managerial scope covers purpose, priorities, initiatives, proposals, and observed outcomes.
 
+A roadmap is optional. Select one only when evidence supports planned
+initiatives or local policy requires it; otherwise create neither a roadmap nor
+an assumed roadmap owner or link.
+
 ## Scope and self-contained vocabulary
 
 The managerial lane explains why work matters, what is prioritized, which
@@ -29,7 +33,7 @@ Keep one detailed owner for each claim:
 | Claim | Detailed owner | Managerial lane action |
 | --- | --- | --- |
 | Project purpose and durable orientation | `project-memory-maintenance.md` and the repository's canonical orientation owner | Link the owner and retain only eligible durable context. |
-| Roadmap priorities and completion conditions | The common-core roadmap owner | Link the roadmap; do not duplicate its ordering or completion contract. |
+| Roadmap priorities and completion conditions | An evidence-selected roadmap owner | Link the roadmap only when evidence or local policy supports it; do not invent an owner or duplicate its ordering or completion contract. |
 | Initiatives and proposals | This reference and its authorized managerial document | Record the state, evidence, and next decision without treating it as approval. |
 | Accepted decisions | ADR maintenance and the accepted ADR | Link the decision and preserve the accepted body. |
 | Current implementation | Architecture, README, source, or configuration owner | Cite the current evidence; do not infer implementation from approval. |

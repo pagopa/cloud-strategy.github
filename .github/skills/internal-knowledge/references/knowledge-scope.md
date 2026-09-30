@@ -143,6 +143,7 @@ Account for every discovered directory and evidence-table row as `planned`, `exi
   boundary only, and a report is not persisted by default.
 - In `targeted`, the allowlist is the normalized set of user-supplied destinations.
 - In `sync` and `setup`, the allowlist is exactly the approved plan intersected with the requested bucket. Approval is what authorizes a write, not discovery.
+- An authored deletion must name its exact path as a deletion in the proposed allowlist and receive approval. Approval for `targeted`, `sync`, or `setup` does not authorize deleting an unnamed path; generated and protected content remains with its owner.
 - A row outside the requested bucket is reported as excluded with the reason `outside the requested bucket`; it never produces an unplanned write.
 - The allowlist never grows after approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
 - The allowlist contains documentation targets only, including README files. Do not edit source code, configuration, policy, workflows, tests, validators, or generators. When a needed correction belongs to a code or configuration owner, leave it untouched and report its path and reason in `breaking_refs`.
@@ -218,7 +219,7 @@ A wave partitions documents, never the obligations of an authoring reference. Ev
 
 ## Enforcement gap
 
-The skill authors documents and never installs the checks that keep them true. Because that boundary is real, the completion report must name what the repository would need to preserve the result: which properties are worth checking, which existing owner would host the check, and what breaks first without it.
+The skill authors documents and never installs the checks that keep them true. Report an enforcement gap when an evidenced risk warrants one: name the affected property, the existing owner that could address it, and what breaks first without it. Keep recommendations proportional; do not require a new check merely to enforce the documentation contract.
 
 This block is a report, not a change. Never create or modify workflows, actions, validators, coverage manifests, or repository policy files.
 

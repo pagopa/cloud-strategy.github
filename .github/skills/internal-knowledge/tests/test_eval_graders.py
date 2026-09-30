@@ -86,6 +86,23 @@ def test_parse_report_accepts_crlf() -> None:
     assert report.parse_report(crlf) == report.parse_report(lf)
 
 
+def test_parse_report_ignores_problems_section_after_machine_block() -> None:
+    report = importlib.import_module("knowledge_graders.report")
+    machine_block = (
+        "Summary line.\nSecond line.\nknowledge-report/v1\n"
+        "mode: audit\nrouter: gap\n"
+    )
+    with_problems = (
+        machine_block
+        + "\n## Problems found\n\n"
+        + "| Severity | Problem | Location | Impact | Status |\n"
+        + "|---|---|---|---|---|\n"
+        + "| medium | Conflicting guidance | `docs/guide.md#L4` | Reader confusion | verified |\n"
+    )
+
+    assert report.parse_report(with_problems) == report.parse_report(machine_block)
+
+
 def test_parse_report_requires_two_prose_lines() -> None:
     report = importlib.import_module("knowledge_graders.report")
     two = "Summary line.\nSecond line.\nknowledge-report/v1\nmode: audit\n"
@@ -102,6 +119,25 @@ def test_parse_report_rejects_marker_trailing_space() -> None:
 
 def test_changed_paths_includes_deleted() -> None:
     assert core_module().changed_paths({"gone.md": "old"}, {}) == {"gone.md"}
+
+
+def test_allowlist_grader_rejects_unapproved_authored_deletion() -> None:
+    core = core_module()
+    package = grader_package()
+    data = run_payload()
+    data.update({
+        "allowlist": ["docs/README.md"],
+        "before": {"docs/unmaintained.md": "authored content"},
+        "after": {},
+        "steps": [{}],
+        "trace": [{"step": 0, "tool": "write", "kind": "write", "path": "docs/unmaintained.md"}],
+    })
+
+    verdict = package.core.GRADERS["writes_within_allowlist"](
+        core.load_run_input(data), {}
+    )
+
+    assert (verdict.status, verdict.code) == ("fail", "write-outside-allowlist")
 
 
 @pytest.mark.parametrize("status", ["fail", "blocked", "not-run"])
@@ -276,7 +312,12 @@ def test_eval_bindings_authorize_requested_targets_and_define_case_constraints()
     setup = bindings["C-HOLD-SETUP"]["gold_overrides"]
     assert split["sections"] and split["protected_paths"]
     assert lifecycle["facts"] and lifecycle["diagram_edges"]
-    assert mixed["sections"] and mixed["expected_placements"] and mixed["facts"]
+    assert mixed == {}
+    f6_sections = {section["marker"]: section["dest"] for section in gold["F6"]["sections"]}
+    assert f6_sections == {
+        "## Procedure": "docs/guides/maintain-ci-ux.md",
+        "## Active obligation": "docs/guides/maintain-ci-ux.md",
+    }
     assert setup["must_write"] and setup["expected_placements"]
     assert "docs/history/ci-ux-history.md" not in str(gold["F6"]["sections"])
 
@@ -332,13 +373,10 @@ def test_composed_mixed_content_and_holdout_setup_cases_have_required_outputs() 
     mixed = dict(f6)
     del mixed["docs/ci-ux.md"]
     mixed["docs/guides/maintain-ci-ux.md"] = (
-        "# CI and UX guide\n\nRun the docs checker before opening a pull request.\n\n"
-        "## Procedure\nRun the docs checker before opening a pull request.\n\n"
+        "# CI and UX guide\n\n## Procedure\nRun the docs checker before opening a pull request.\n\n"
         "## Active obligation\nUpdate the compatibility matrix with each contract change.\n"
     )
-    mixed["docs/guides/ci-ux-history.md"] = (
-        "# CI and UX history\n\n## History\nOn 2024-01-15 the rollout changed.\n"
-    )
+    assert "docs/guides/ci-ux-history.md" not in mixed
     assert all(v.status == "pass" for v in _bound_verdicts("C-SPLIT-MIXED", f6, mixed))
     holdout = core.load_strict_json(EVALUATION_ROOT / "fixtures/FH.tree.json")["files"]
     setup = {"docs/index.md": "# Documentation index\n\nRepository guide.\n"}

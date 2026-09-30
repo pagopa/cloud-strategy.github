@@ -447,8 +447,6 @@ def test_skill_defines_common_core_and_two_authoring_lanes() -> None:
     for phrase in (
         "README index",
         "project orientation",
-        "roadmap",
-        "maintenance route",
         "evidence-backed technical extension",
     ):
         assert phrase in topology
@@ -489,8 +487,6 @@ def test_missing_instruction_routes_use_a_bounded_owner_handoff() -> None:
     assert "bounded handoff" in audit
     assert "instruction owner" in audit
     assert "report the gap before complete setup" in managerial
-
-
 def test_coherent_batches_do_not_use_a_fixed_ten_document_quota() -> None:
     scope = read_bundle_text("references/knowledge-scope.md")
 

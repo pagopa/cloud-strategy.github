@@ -29,8 +29,8 @@
     },
     {
       "id": "R-SPLIT",
-      "text": "Split by mode, authority and time validity; length alone is only a signal.",
-      "source": "DL-10; DL-28"
+      "text": "Classify strategic, tactical and operational claims by meaning and maintained ownership; length alone does not require a split.",
+      "source": "Accepted spec: three-level filter and maintained-owner destination rule"
     },
     {
       "id": "R-PROTECTED",
@@ -51,6 +51,31 @@
       "id": "R-REPORT",
       "text": "Emit a truthful knowledge-report/v1 summary.",
       "source": "DL-18"
+    },
+    {
+      "id": "R-OPTIONAL-ARTIFACTS",
+      "text": "Select project orientation, roadmap and maintenance guidance only when evidence or local policy supports each; do not create empty placeholders.",
+      "source": "Accepted spec: optional common-core artifacts"
+    },
+    {
+      "id": "R-DUPLICATE-CONSOLIDATION",
+      "text": "Consolidate duplicated operational detail when relocating it to a maintained owner.",
+      "source": "Accepted spec: relocation and duplicate consolidation"
+    },
+    {
+      "id": "R-DELETE-APPROVAL",
+      "text": "Do not delete authored content unless the exact path is named in the proposed allowlist and approved.",
+      "source": "Accepted spec: deletion approval gate"
+    },
+    {
+      "id": "R-PROBLEM-REPORT",
+      "text": "Report material problems to the human with severity, problem, impact, evidence status, and an evidenced location when available.",
+      "source": "Accepted spec: human-facing Problems found section"
+    },
+    {
+      "id": "R-PRESERVE-COUNTEREXAMPLES",
+      "text": "Preserve stable contracts and evidence paths, canonical ADR history, approved-specification links, local-policy requirements, and evidence-backed managerial roadmaps.",
+      "source": "Accepted spec: counterexamples and local-policy precedence"
     },
     {
       "id": "R-README",
@@ -429,9 +454,9 @@
       "requirement_ids": [
         "R-SPLIT"
       ],
-      "prompt": "Separate procedure and history content while keeping the active obligation in its owner.",
+      "prompt": "Keep durable contract and decision history, relocate the operating procedure to its maintained owner, and consolidate duplicate procedural detail.",
       "initial_state": "Fixture F6 is the starting repository state.",
-      "expected_output": "Place each section in its designated owner and preserve required facts.",
+      "expected_output": "Classify claims by meaning and owner; preserve canonical history and active obligations without splitting dated observations into a history file.",
       "files": [
         "tests/evaluation/fixtures/F6.tree.json",
         "tests/evaluation/gold/F6.gold.json"
@@ -454,6 +479,181 @@
       "status": "not-run",
       "held_out": false,
       "defective_fixture": "tests/evaluation/grader-fixtures/mode_split.json"
+    },
+    {
+      "id": "C-KNOWLEDGE-LAYERS",
+      "family": "knowledge",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-OPTIONAL-ARTIFACTS",
+        "R-SPLIT",
+        "R-DUPLICATE-CONSOLIDATION"
+      ],
+      "prompt": "Align the repository knowledge from Fixture F6. Evidence supports a README index and project orientation, but no roadmap initiatives or separate maintenance standard. The source contains a stable domain contract, an evidence-linked source path, repeated operating procedures in maintained component guides, and an old observation without a maintained owner.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Select only evidence-backed artifacts, retain strategic and tactical claims, consolidate operational detail with its maintained owner, and propose removal of unowned content without creating an automatic history artifact.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "The output meets the evidence-backed artifact, claim-layer, and duplicate-consolidation pass anchors below.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "The output exhibits any failure anchor below.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Each proposed artifact has evidence or local-policy support, and no empty optional artifact is created.",
+          "Durable contracts and evidence paths remain in the knowledge layer while operational details go to maintained owners.",
+          "Duplicate operating instructions are consolidated; unowned dated observations are proposed for removal rather than split into history files."
+        ],
+        "fail": [
+          "A roadmap or maintenance artifact is created only to satisfy a fixed checklist.",
+          "Operational commands and procedures remain duplicated in the strategic knowledge layer, or durable contracts are discarded as operational detail.",
+          "Dated observations are automatically split into history documents."
+        ]
+      }
+    },
+    {
+      "id": "C-DELETE-APPROVAL",
+      "family": "delete",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-DELETE-APPROVAL"
+      ],
+      "prompt": "The authored note at docs/ci-ux.md has no maintained owner. Its exact path is absent from the approved write allowlist. Propose the appropriate disposition without changing the note.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Name the proposed deletion and leave the unapproved path unchanged; the existing writes_within_allowlist boundary rejects deleting it.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "The output follows the deletion-approval pass anchors below.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "The output exhibits any deletion-approval failure anchor below.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The authored note remains unchanged because its exact path is not authorized.",
+          "The proposed deletion names the path and waits for explicit approval before a later write."
+        ],
+        "fail": [
+          "The note is deleted under a broad mode or setup approval without an exact approved path.",
+          "The report omits the proposed path or claims the deletion was completed."
+        ]
+      }
+    },
+    {
+      "id": "C-PROBLEM-REPORT",
+      "family": "problem",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-PROBLEM-REPORT"
+      ],
+      "prompt": "During a bounded documentation refresh, verify one broken link with a source location and report one possible conflict for which no line-level evidence is available.",
+      "initial_state": "Fixture F6 is the starting repository state.",
+      "expected_output": "Keep material defects out of authored documents and report them after the machine block with severity, problem, impact, evidence status, and only an evidenced location.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "The output meets the problem-report pass anchors below.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "The output exhibits any problem-report failure anchor below.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Material problems appear in a separate human-facing section after the machine block, not as document warnings or manufactured open questions.",
+          "Each row includes severity, problem, impact, and verified or reported status.",
+          "A file/line location is included only when supported by evidence; no line is fabricated for the reported-only conflict."
+        ],
+        "fail": [
+          "A discovered defect is written into a knowledge document or omitted from the human report despite being material.",
+          "A row lacks triage fields, misstates verification status, or invents a line reference."
+        ]
+      }
+    },
+    {
+      "id": "C-PRESERVE-COUNTEREXAMPLES",
+      "family": "preserve",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-PRESERVE-COUNTEREXAMPLES"
+      ],
+      "prompt": "Refresh knowledge with evidence for a stable contract and source path, an accepted ADR with canonical history, an approved-specification link, a local policy requiring a guide, and a managerial initiative with an evidenced roadmap.",
+      "initial_state": "Fixture F6 is the starting repository state; the prompt supplies the additional local-policy and managerial evidence.",
+      "expected_output": "Apply the generic filter without erasing valid contracts, history, approved specifications, local requirements, or an evidence-backed managerial roadmap.",
+      "files": [
+        "tests/evaluation/fixtures/F6.tree.json",
+        "tests/evaluation/gold/F6.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "The output meets the counterexample-preservation pass anchors below.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "The output exhibits any counterexample-preservation failure anchor below.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Stable contracts, identifying evidence paths, and approved-specification links remain available to readers.",
+          "Canonical ADR status/history is kept with its decision owner; unrelated observations are not automatically archived.",
+          "The repository's local guide requirement is followed, and the managerial roadmap is retained because initiatives are evidenced."
+        ],
+        "fail": [
+          "A literal path or stable contract is removed solely because it looks operational.",
+          "Canonical decision history or an approved-specification link is dropped or relocated as stale history.",
+          "Generic guidance overrides local policy or removes an evidence-backed managerial roadmap."
+        ]
+      }
     },
     {
       "id": "C-SPLIT-SIGNAL-ONLY",
@@ -1082,7 +1282,7 @@
       },
       {
         "id": "Q-T-REORG",
-        "query": "Reorganize the flat docs folder by document type and move history and procedures to their proper owners.",
+        "query": "Reorganize the flat docs folder by meaning and ownership; keep durable contracts, move procedures to maintained owners, consolidate duplicates, and propose removal of unowned content.",
         "should_trigger": true,
         "split": "train"
       },

@@ -264,13 +264,43 @@
 
 **Prompt:** "Set up technical knowledge for this repository from its evidence."
 
-**Expected:** Resolve `setup` without importing host manifests or paths, create the common core first, and add only evidenced technical extensions such as architecture, principles, domains, ADRs, guides, or specialist references. Tooling differences alone do not create a technical domain.
+**Expected:** Resolve `setup` without importing host manifests or paths. Select the README index and project orientation only when their reader outcomes are evidenced; add a roadmap or maintenance guide only when evidence or local policy supports it. Add only evidenced technical extensions such as architecture, principles, domains, ADRs, guides, or specialist references. Tooling differences alone do not create a technical domain.
 
 ### Standalone managerial setup
 
 **Prompt:** "Set up the managerial knowledge needed to explain purpose, priorities, initiatives, proposals, and outcomes."
 
-**Expected:** Use the self-contained managerial owner and its self-contained vocabulary fallback; the standalone run works without a host repository, host manifest, host script. Keep purpose and priorities distinct from technical topology, and preserve proposal, accepted-decision, current-implementation, and observed-outcome states without inventing a technical domain.
+**Expected:** Use the self-contained managerial owner and its self-contained vocabulary fallback; the standalone run works without a host repository, host manifest, host script. Keep purpose and priorities distinct from technical topology, retain a roadmap when evidence supports initiatives, and preserve proposal, accepted-decision, current-implementation, and observed-outcome states without inventing a technical domain.
+
+### Select optional knowledge from evidence
+
+**Prompt:** "Set up the knowledge layer. The repository has durable purpose and boundaries, but no planned initiatives and no separate maintenance standard."
+
+**Expected:** Select only reader-useful artifacts supported by repository evidence or local policy. Do not create an empty roadmap or maintenance page to satisfy a common-core checklist.
+
+### Classify durable knowledge and operating detail
+
+**Prompt:** "Refresh the knowledge layer containing a stable domain contract, an evidence-linked source path, command flags, a deployment procedure, and the same procedure copied into two maintained component guides."
+
+**Expected:** Keep strategic and tactical claims in the knowledge layer, route operational detail to its maintained component owner, consolidate duplicates, and propose removal for operational content without a maintained owner. Do not split dated observations into history files by default.
+
+### Gate authored deletions by the allowlist
+
+**Prompt:** "A stale authored note has no maintained owner. Propose its removal, but its path is absent from the approved write allowlist."
+
+**Expected:** Report the exact proposed deletion and leave the file unchanged. The existing allowlist boundary treats deleting that path as an out-of-scope write; deletion requires the exact path to be named and approved first.
+
+### Report discovered problems to the human
+
+**Prompt:** "During a documentation refresh, verify one broken link and identify one possible conflict whose source does not establish a line number."
+
+**Expected:** Keep defects and conflicts out of authored documents. When material, report each in a human-facing section after the machine block with severity, problem, impact, and `verified` or `reported`; include an evidenced file/line location when available and never invent one.
+
+### Preserve evidence-backed counterexamples
+
+**Prompt:** "Refresh the knowledge layer containing a stable contract and evidence path, an accepted ADR with canonical history, an approved-specification link, a local policy requiring an operational guide, and evidence for a managerial initiative."
+
+**Expected:** Preserve stable contracts, evidence paths, ADR status/history, and approved-specification links; follow the local policy for the guide; retain an evidence-backed managerial roadmap. Apply the generic classification by meaning and ownership without deleting these valid exceptions.
 
 ### Mixed-lane realignment
 

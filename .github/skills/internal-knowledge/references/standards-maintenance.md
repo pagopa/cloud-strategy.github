@@ -18,7 +18,9 @@ Classify by meaning and owner, not by whether a check exists. A standard is a co
 
 Every entry cites the paths that show the repository already practises it. Derive a standard from a shape repeated across unrelated files, from a convention already stated in prose, or from a settled decision that never became a check.
 
-Never invent an entry to fill a section. When an artifact is created with fewer entries than expected, close it with an explicit list of the areas where no convention is established yet. That list is the useful part: it tells the reader the silence is known rather than accidental.
+Never invent an entry to fill a section. When evidence is missing, report the
+gap to the human instead of recording absence as a convention or maintaining a
+list of unestablished areas.
 
 Do not create any of these artifacts empty. A file whose only content is a promise to grow is a placeholder, and a placeholder is a reported gap instead.
 
@@ -34,10 +36,6 @@ Do not create any of these artifacts empty. A file whose only content is a promi
 - Convention: <the statement, in the repository's own vocabulary>
 - Evidence: <paths where the repository already follows it>
 - Exceptions: <the evidenced exceptions, or `none evidenced`>
-
-## Not established yet
-
-- <Area where no convention is evidenced, and what a reader should do meanwhile.>
 ```
 
 ## Principles document
@@ -57,4 +55,4 @@ Write a guide only for an evidenced reader task, recovery, troubleshooting journ
 
 ## Validation and completion
 
-Verify that every entry cites at least one existing path, that no entry duplicates a rule already carrying an identifier, and that every relative link resolves. Report the created or changed artifacts, the entries added, the areas recorded as not yet established, and any convention that should become a rule.
+Verify that every entry cites at least one existing path, that no entry duplicates a rule already carrying an identifier, and that every relative link resolves. Report the created or changed artifacts, the entries added, evidence gaps reported to the human, and any convention that should become a rule.

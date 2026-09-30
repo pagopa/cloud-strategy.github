@@ -29,8 +29,8 @@
       "dest": "docs/guides/maintain-ci-ux.md"
     },
     {
-      "marker": "## History",
-      "dest": "docs/guides/ci-ux-history.md"
+      "marker": "## Active obligation",
+      "dest": "docs/guides/maintain-ci-ux.md"
     }
   ],
   "must_write": [],

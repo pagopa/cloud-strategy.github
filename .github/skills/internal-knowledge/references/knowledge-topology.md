@@ -18,9 +18,11 @@ Load it in `setup`. Load it in `sync` only when the plan introduces an artifact 
 
 ## Common core and lanes
 
-Every realized layout starts with a common core: a README index, project orientation, roadmap, and knowledge-maintenance route. These documents give a
-reader navigation, purpose, priorities, and the procedure for keeping the
-knowledge current without making a technical claim they do not own.
+The common core is a README index and evidence-backed project orientation.
+Select project orientation only when it serves an unmet durable reader outcome;
+an existing owner may already provide it. A roadmap and knowledge-maintenance
+guide are optional: include either only when repository evidence or local policy
+supports it. Do not create empty artifacts to satisfy a checklist.
 
 The technical lane is an evidence-backed technical extension. It may include
 architecture, principles, domain contexts and rules, ADRs, guides, or
@@ -28,15 +30,53 @@ specialist references when the repository supports the reader outcome. A
 legitimate extension has an evidenced owner and lifecycle; tooling or state
 differences alone do not create a technical domain.
 
-The managerial lane covers purpose, priorities, initiatives, proposals, and observed outcomes. It is an authoring lane, not a runtime profile. Never add a profile field, never create a profile directory, and never create a profile registry. The five runtime modes remain the only modes.
-Never create a profile directory or profile registry as a documentation
-convenience.
-Never create a profile registry as a documentation convenience.
+The managerial lane covers purpose, priorities, initiatives, proposals, and
+observed outcomes. It is an authoring lane, not a runtime profile. The five
+runtime modes remain the only modes. Never add a profile field. Never create a profile directory. Never create a profile registry.
 
 README indexes inside the requested docs perimeter are ordinary targets.
-Generated files remain with their generator, and historical records remain with their historical owner. Preserve both boundaries while accounting for
-the evidence row and reporting an unavailable or protected source.
-Treat generated files as protected evidence, not as authored replacements.
+Generated files remain with their generator. Canonical historical records,
+including ADR status and decision history, and records required by local policy
+stay with their existing owners. A date alone does not create a history
+artifact. Treat generated files as protected evidence, not as authored
+replacements.
+
+## Claim classification
+
+Classify each claim by what it means and who maintains it, not by whether it
+contains a path, number, date, status, or command-like name. Use this primary
+question:
+
+> Does this sentence govern a domain or design decision, or describe operating machinery?
+
+For a borderline claim, ask:
+
+> Would it stay true if the component were rewritten with the same behavior?
+
+Strategic claims establish purpose, direction, boundaries, decisions, domain
+language, and rules. Tactical claims express durable UX language, naming
+grammar, high-level policies, ownership boundaries, and stable contract names.
+Operational claims describe how a particular implementation runs, including
+flags, commands, exact expressions, byte or length caps, job wiring,
+implementation inventories, procedures, volatile counts, dated observations,
+and execution history.
+
+| Tactical claim | Operational claim |
+| --- | --- |
+| A request moves through proposed, approved, implemented, and observed states. | Run `deploy --region <name>` from the release job. |
+| The public API preserves the `authorization/v2` contract. | The handler applies this exact retry expression and a 30-second timeout. |
+
+Put operational detail with the nearest maintained component owner, such as its
+README or an authorized guide. When relocating it, consolidate duplicates
+instead of appending every copy. If no maintained owner can usefully hold it,
+propose removal; do not delete it without naming the exact path in the proposed
+allowlist and obtaining approval. Preserve stable contracts, evidence paths,
+approved-specification links, canonical ADR lifecycle/history, safety
+constraints, and guides or records required by local policy. Knowledge
+orientation explains durable intent and boundaries; it does not become an
+execution backlog or completion ledger. Report discovered defects and conflicts
+to the human, not in documents as warnings, disclaimers, invented unknowns, or
+open questions.
 
 ## Supported layouts
 
@@ -52,9 +92,10 @@ is a placement signal, not a quota.
 
 Split a document only when it mixes reader modes or independent contracts or
 consumers that materially change the reader path. A length near 250 lines is
-a signal to inspect, not a split threshold. Split content by authority and
-time validity, not by its current position: move dated observations to a
-`*-history.md` owner, while current obligations stay with their active owner.
+a signal to inspect, not a split threshold. Do not split dated observations into
+history artifacts automatically or split content solely by time validity.
+Preserve canonical ADR status and decision history, plus records required by
+local policy, with their existing owners.
 
 | Domains evidenced | Root document | Domain documents |
 | --- | --- | --- |
@@ -100,7 +141,9 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 | Durable project purpose, boundaries, and current orientation not already owned by an existing knowledge document | A project-orientation entry at the repository's existing canonical owner | The orientation is already complete, or the evidence is only temporary, aspirational, or inferred. |
 | An approved specification selected for durable retention with a canonical owner and stable reader value | A project-memory entry linking to the existing specification | The source is draft, unapproved, a backlog item, or has no identifiable owner. |
 
-Author the last three artifacts with [standards maintenance](standards-maintenance.md).
+Author guides with [standards maintenance](standards-maintenance.md). Author
+project orientation and selected approved specifications with
+[project memory maintenance](project-memory-maintenance.md).
 
 Every evidence-table row ends as one of four outcomes: `planned`, `existing owner covers`, `explicit exclusion`, or `considered, not evidenced`. The last outcome records that the reader outcome and detailed owner were considered but the evidence is insufficient; never create an artifact merely to satisfy a row. The plan accounts for every row. Standards, principles, and guides are the rows most often passed over, because nothing in the repository asks for them by name.
 

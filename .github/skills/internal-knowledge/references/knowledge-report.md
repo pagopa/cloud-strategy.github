@@ -60,3 +60,21 @@ validation, executable checks, human review, and checks not run. Name the
 reason when evidence is unavailable. A `not-run` check is a gap, never a pass.
 For `audit` and `help`, keep the report consistent with their read-only
 contracts and never list authored paths in those reports.
+
+## Problems Found
+
+When material defects or conflicts are discovered, report them to the human in
+an optional `## Problems found` section after the machine block, with a blank
+line separating it from the final `knowledge-report/v1` field. The section is
+required only when material problems were found; omit it otherwise. The blank
+line ends the machine block, so this human-facing section does not add fields to
+or change the `knowledge-report/v1` parser contract.
+
+Use a table with severity, problem, location, impact, and status columns. Set
+status to `verified` or `reported`. Link to an evidenced file location when
+available and include a line fragment only when the exact line is supported by
+evidence; use a file-only location or `not available` otherwise. Never invent a
+path or line number. Do not turn defects into document warnings, disclaimers,
+manufactured unknowns, or open questions. Keep `gaps` for its existing meaning:
+unresolved evidence, ownership, enforcement, or validation gaps; the human
+problem section does not replace it or any required machine field.

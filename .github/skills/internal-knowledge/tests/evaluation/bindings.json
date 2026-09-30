@@ -159,31 +159,51 @@
       "allowlist": [
         "docs/**"
       ],
-      "gold_overrides": {
-        "expected_placements": {
-          "docs/ci-ux.md": "docs/guides/maintain-ci-ux.md"
-        },
-        "sections": [
-          {
-            "marker": "## Procedure",
-            "dest": "docs/guides/maintain-ci-ux.md"
-          },
-          {
-            "marker": "## History",
-            "dest": "docs/guides/ci-ux-history.md"
-          },
-          {
-            "marker": "## Active obligation",
-            "dest": "docs/guides/maintain-ci-ux.md"
-          }
-        ],
-        "facts": [
-          {
-            "path": "docs/guides/maintain-ci-ux.md",
-            "text": "Update the compatibility matrix with each contract change."
-          }
-        ]
-      }
+      "gold_overrides": {}
+    },
+    "C-KNOWLEDGE-LAYERS": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-DELETE-APPROVAL": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "docs/guides/maintain-ci-ux.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-PROBLEM-REPORT": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
+    },
+    "C-PRESERVE-COUNTEREXAMPLES": {
+      "fixture": "F6",
+      "gold": "tests/evaluation/gold/F6.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "docs/**"
+      ],
+      "gold_overrides": {}
     },
     "C-SPLIT-SIGNAL-ONLY": {
       "fixture": "F2",

@@ -60,4 +60,13 @@ root README focused on repository orientation and route readers to the
 knowledge index, context map, or domain owners as supported by evidence. Do
 not duplicate the detail held by linked owners. If an index target is outside
 the requested bucket or approved plan, report it as excluded rather than
-Do not widen the allowlist.
+widening the allowlist.
+
+## Maintained Owners
+
+Route each link to the existing maintained owner supported by repository
+evidence. Do not create or retain a compatibility page solely to preserve an
+older document hierarchy. If an older page contains useful material, link to
+its current owner; propose deletion only through the exact-path approval gate
+in [knowledge scope](knowledge-scope.md). When no maintained owner is evidenced,
+report the ownership gap rather than inventing a destination or broken link.

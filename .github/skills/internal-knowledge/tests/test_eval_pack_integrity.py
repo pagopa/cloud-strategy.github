@@ -146,8 +146,8 @@ def test_pack_coverage_status_and_holdout_seal() -> None:
     requirements = {item["id"] for item in pack["requirements"]}
     covered = {req for case in pack["cases"] for req in case["requirement_ids"]}
     assert requirements <= covered
-    assert len(pack["requirements"]) == 16
-    assert len(pack["cases"]) == 27
+    assert len(pack["requirements"]) == 21
+    assert len(pack["cases"]) == 31
     assert all(case["status"] == "not-run" for case in pack["cases"])
     assert not (EVALUATION_ROOT / "runs").exists()
     for case in pack["cases"]:
