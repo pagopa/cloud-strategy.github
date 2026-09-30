@@ -10,6 +10,7 @@ sys.path.insert(0, str(REPO_ROOT / ".github/tools"))
 
 from inventory.inventory import (  # noqa: E402
     build_inventory_markdown,
+    collect_inventory_sections,
     parse_inventory_markdown,
     render_inventory_markdown,
 )
@@ -152,3 +153,35 @@ def test_manifest_support_file_is_not_listed_as_an_imported_skill(
         ".github/skills/vendor-planning/SKILL.md"
     }
     assert "1 skills" in rendered
+
+
+def test_inventory_excludes_script_runtime_and_fixture_paths(tmp_path: Path) -> None:
+    included_paths = {
+        ".github/scripts/check.py",
+    }
+    excluded_paths = {
+        ".github/tools/catalog/rules.py",
+        ".github/scripts/.venv/lib/tool.py",
+        ".github/scripts/.pytest_cache/cache.py",
+        ".github/scripts/__pycache__/module.py",
+        ".github/scripts/graphify-out/cache.py",
+        ".github/scripts/tests/test_fixture.py",
+        ".github/tools/common/__init__.py",
+    }
+
+    for relative_path in included_paths | excluded_paths:
+        fixture_path = tmp_path / relative_path
+        fixture_path.parent.mkdir(parents=True, exist_ok=True)
+        fixture_path.write_text("# fixture\n", encoding="utf-8")
+
+    scripts = set(collect_inventory_sections(tmp_path)["Scripts"])
+
+    assert included_paths <= scripts
+    assert not scripts & excluded_paths
+    assert not any(
+        any(
+            part in {".venv", ".pytest_cache", "__pycache__", "graphify-out", "tests"}
+            for part in Path(script).parts
+        )
+        for script in scripts
+    )

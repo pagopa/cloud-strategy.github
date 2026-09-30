@@ -28,3 +28,25 @@ def test_github_catalog_validation_uses_the_repository_script_runner() -> None:
 
     assert "$(TOOLS_RUNNER) validate-github-catalog" in makefile
     assert "./validate-github-catalog.sh" not in makefile
+
+
+def test_makefile_markdownlint_version_matches_bundle_checker() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+    checker = (
+        REPO_ROOT / ".github" / "skills" / "internal-markdown" / "scripts" / "check.sh"
+    ).read_text(encoding="utf-8")
+
+    makefile_version = re.search(
+        r"^MARKDOWNLINT_VERSION := ([^\s]+)$",
+        makefile,
+        re.MULTILINE,
+    )
+    checker_version = re.search(
+        r'^required_version="markdownlint-cli2 v([^"]+)"$',
+        checker,
+        re.MULTILINE,
+    )
+
+    assert makefile_version is not None
+    assert checker_version is not None
+    assert makefile_version.group(1) == checker_version.group(1)

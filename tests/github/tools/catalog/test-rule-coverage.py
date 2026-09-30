@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 import sys
 from pathlib import Path
@@ -493,10 +494,24 @@ CATALOG_RULE_CASES: list[tuple[str, RuleCase]] = [
 ]
 
 
-def test_catalog_rule_case_inventory_is_explicit() -> None:
+def _emitted_codes(source_path: Path) -> set[str]:
+    codes: set[str] = set()
+    for node in ast.walk(ast.parse(source_path.read_text(encoding="utf-8"))):
+        if isinstance(node, ast.keyword) and node.arg == "code":
+            assert isinstance(node.value, ast.Constant) and isinstance(
+                node.value.value, str
+            ), f"non-literal finding code at line {node.value.lineno}"
+            codes.add(node.value.value)
+    return codes
+
+
+def test_every_emitted_catalog_rule_code_has_a_triggering_case() -> None:
     codes = [code for code, _ in CATALOG_RULE_CASES]
+    emitted = _emitted_codes(TOOLS_ROOT / "catalog/rules.py")
+
+    assert emitted
     assert len(codes) == len(set(codes))
-    assert len(codes) == 47
+    assert set(codes) == emitted
 
 
 @pytest.mark.parametrize(

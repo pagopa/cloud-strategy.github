@@ -157,6 +157,7 @@ def test_pytest_config_discovers_root_and_skill_test_roots() -> None:
     assert config["pytest"]["testpaths"].split() == [
         "tests",
         ".github/skills",
+        "tools",
     ]
     assert config["pytest"]["python_files"].split() == [
         "test_*.py",

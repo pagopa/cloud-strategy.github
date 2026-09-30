@@ -1419,19 +1419,16 @@ def validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
                 suggestion="Add a deterministic default prompt that shows how to invoke the skill.",
             )
         )
-    elif (
-        f"${skill_name}" not in default_prompt
-        and f"/{skill_name}" not in default_prompt
-    ):
+    elif not re.search(rf"\${re.escape(skill_name)}(?![\w-])", default_prompt):
         findings.append(
             Finding(
                 severity="non-blocking",
                 code="default-prompt-skill-mention",
                 path=openai_yaml.as_posix(),
-                message="interface.default_prompt does not mention the skill identifier explicitly.",
+                message="interface.default_prompt does not mention the skill with its $ entrypoint.",
                 suggestion=(
-                    f"Mention ${skill_name} or /{skill_name} in the default prompt "
-                    "for consistent invocation hints."
+                    f"Mention ${skill_name} in the default prompt; Codex invokes "
+                    "skills with the $ sigil."
                 ),
             )
         )

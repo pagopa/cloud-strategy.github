@@ -53,7 +53,7 @@ def _valid_skill(root: Path, name: str) -> Path:
     )
     _write(
         skill_dir / "agents/openai.yaml",
-        f"interface:\n  display_name: {name}\n  short_description: Eval pack test fixture\n  default_prompt: Use /{name} for this fixture.\n",
+        f"interface:\n  display_name: {name}\n  short_description: Eval pack test fixture\n  default_prompt: Use ${name} for this fixture.\n",
     )
     return skill_dir
 

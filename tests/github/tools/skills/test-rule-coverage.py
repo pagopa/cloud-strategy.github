@@ -54,7 +54,7 @@ def _openai_yaml(
     name: str = "internal-example",
     display_name: str = "Internal Example",
     short_description: str = "Internal example validator fixture",
-    default_prompt: str | None = "Use /internal-example for this fixture.",
+    default_prompt: str | None = "Use $internal-example for this fixture.",
     extra: str = "",
 ) -> str:
     prompt = ""
@@ -435,6 +435,23 @@ def test_placeholder_rule_also_covers_the_default_prompt_template(
     findings = _placeholder_default_prompt(tmp_path)
 
     assert "placeholder-interface-text" in {finding.code for finding in findings}
+
+
+@pytest.mark.parametrize(
+    ("default_prompt", "flagged"),
+    [
+        ("Use $internal-example.", False),
+        ("Use /internal-example for this fixture.", True),
+        ("Use $internal-example-extra for this fixture.", True),
+    ],
+)
+def test_default_prompt_self_mention_requires_exact_dollar_token(
+    tmp_path: Path, default_prompt: str, flagged: bool
+) -> None:
+    findings = _openai_only_case(tmp_path, default_prompt=default_prompt)
+
+    codes = {finding.code for finding in findings}
+    assert ("default-prompt-skill-mention" in codes) is flagged
 
 
 def test_dollar_invocation_scan_allows_the_bundle_own_entrypoint(

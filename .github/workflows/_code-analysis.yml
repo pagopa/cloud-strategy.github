@@ -7,25 +7,305 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
-  group: code-analysis-${{ github.ref }}
+  group: code-analysis-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PIP_NO_PYTHON_VERSION_WARNING: "1"
+
 jobs:
-  code-analysis:
-    name: code-analysis
+  static-analysis:
+    name: "🔎 Static analysis (${{ matrix.leaf }})"
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 10
+    permissions:
+      contents: read
     defaults:
       run:
         shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        leaf:
+          - actionlint
+          - shell-static-analysis
+          - python-dependencies
+          - python-static-analysis
+          - python-lint
+          - python-entrypoints
     env:
-      PIP_DISABLE_PIP_VERSION_CHECK: "1"
-      PIP_NO_PYTHON_VERSION_WARNING: "1"
+      LEAF: ${{ matrix.leaf }}
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0 https://github.com/actions/checkout/releases/tag/v7.0.0
+        with:
+          persist-credentials: false
 
+      - name: 🐍 Set up Python from .python-version
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 https://github.com/actions/setup-python/releases/tag/v6.2.0
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: |
+            .python-version
+            .github/tools/requirements.txt
+
+      - name: 📦 Install tools requirements
+        run: |
+          set -Eeuo pipefail
+          python -m venv "${RUNNER_TEMP}/tools-venv"
+          "${RUNNER_TEMP}/tools-venv/bin/python" -m pip install --require-hashes --only-binary=:all: \
+            --requirement .github/tools/requirements.txt
+          printf 'PYTHON_BIN=%s\n' "${RUNNER_TEMP}/tools-venv/bin/python" >> "${GITHUB_ENV}"
+
+      - name: 🧰 Install actionlint
+        if: ${{ matrix.leaf == 'actionlint' }}
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          set -Eeuo pipefail
+          archive="${RUNNER_TEMP}/actionlint.tar.gz"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
+            --output "${archive}" \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          printf '%s  %s\n' "${ACTIONLINT_SHA256}" "${archive}" | sha256sum --check --strict -
+          mkdir -p "${RUNNER_TEMP}/bin"
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}/bin" actionlint
+          printf '%s\n' "${RUNNER_TEMP}/bin" >> "${GITHUB_PATH}"
+
+      - name: 🧰 Install ShellCheck
+        if: ${{ matrix.leaf == 'shell-static-analysis' }}
+        run: |
+          if command -v shellcheck >/dev/null 2>&1; then
+            shellcheck --version
+            exit 0
+          fi
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck
+
+      - name: 🔎 Run static leaf
+        run: |
+          mkdir -p "${RUNNER_TEMP}/code-analysis-results"
+          ./validate-code.sh static --leaf "${LEAF}" --format ci \
+            --result-path "${RUNNER_TEMP}/code-analysis-results/validation-result-static-${LEAF}.json" \
+            --artifact-dir "${RUNNER_TEMP}/code-analysis-results"
+
+      - name: 📦 Publish validation evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1 https://github.com/actions/upload-artifact/releases/tag/v7.0.1
+        with:
+          name: code-analysis-${{ github.run_id }}-static-${{ matrix.leaf }}
+          path: ${{ runner.temp }}/code-analysis-results
+          if-no-files-found: warn
+
+  python-dependencies:
+    name: "🐍 Python dependencies (${{ matrix.name }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: tools
+            requirements: .github/tools/requirements.txt
+          - name: install-ai-resources
+            requirements: .github/skills/local-agent-sync-install-ai-resources/scripts/requirements.txt
+    env:
+      REQUIREMENTS: ${{ matrix.requirements }}
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0 https://github.com/actions/checkout/releases/tag/v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: 🐍 Set up Python from .python-version
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 https://github.com/actions/setup-python/releases/tag/v6.2.0
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: |
+            .python-version
+            ${{ matrix.requirements }}
+
+      - name: 📦 Install hash-locked requirements
+        run: |
+          set -Eeuo pipefail
+          python -m venv "${RUNNER_TEMP}/dependency-venv"
+          "${RUNNER_TEMP}/dependency-venv/bin/python" -m pip install --require-hashes --only-binary=:all: \
+            --requirement "${REQUIREMENTS}"
+          "${RUNNER_TEMP}/dependency-venv/bin/python" -m pip check
+
+  audit-python-dependencies:
+    name: "🔎 Python dependency audit (${{ matrix.name }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: tools
+            requirements: .github/tools/requirements.txt
+          - name: install-ai-resources
+            requirements: .github/skills/local-agent-sync-install-ai-resources/scripts/requirements.txt
+    env:
+      REQUIREMENTS: ${{ matrix.requirements }}
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0 https://github.com/actions/checkout/releases/tag/v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: 🐍 Set up Python from .python-version
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 https://github.com/actions/setup-python/releases/tag/v6.2.0
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: |
+            .python-version
+            tools/validate_code/requirements/pip-audit.txt
+
+      - name: 📦 Install pip-audit
+        run: |
+          set -Eeuo pipefail
+          python -m venv "${RUNNER_TEMP}/pip-audit-venv"
+          "${RUNNER_TEMP}/pip-audit-venv/bin/python" -m pip install --require-hashes --only-binary=:all: \
+            --requirement tools/validate_code/requirements/pip-audit.txt
+          "${RUNNER_TEMP}/pip-audit-venv/bin/python" -m pip check
+
+      - name: 🔎 Run pip-audit
+        run: |
+          "${RUNNER_TEMP}/pip-audit-venv/bin/pip-audit" \
+            --progress-spinner off \
+            --requirement "${REQUIREMENTS}"
+
+  python-shard-integrity:
+    name: "🛡️ Python shard integrity"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0 https://github.com/actions/checkout/releases/tag/v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: 🐍 Set up Python from .python-version
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 https://github.com/actions/setup-python/releases/tag/v6.2.0
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: |
+            .python-version
+            .github/tools/requirements.txt
+
+      - name: 📦 Install tools requirements
+        run: |
+          set -Eeuo pipefail
+          python -m venv "${RUNNER_TEMP}/tools-venv"
+          "${RUNNER_TEMP}/tools-venv/bin/python" -m pip install --require-hashes --only-binary=:all: \
+            --requirement .github/tools/requirements.txt
+          printf 'PYTHON_BIN=%s\n' "${RUNNER_TEMP}/tools-venv/bin/python" >> "${GITHUB_ENV}"
+
+      - name: 🛡️ Check Python shard integrity
+        run: |
+          mkdir -p "${RUNNER_TEMP}/code-analysis-results"
+          ./validate-code.sh python --integrity-only --format ci \
+            --result-path "${RUNNER_TEMP}/code-analysis-results/validation-result-integrity.json" \
+            --artifact-dir "${RUNNER_TEMP}/code-analysis-results"
+
+      - name: 📦 Publish validation evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1 https://github.com/actions/upload-artifact/releases/tag/v7.0.1
+        with:
+          name: code-analysis-${{ github.run_id }}-python-shard-integrity
+          path: ${{ runner.temp }}/code-analysis-results
+          if-no-files-found: warn
+
+  python-tests:
+    name: "🧪 Python tests (${{ matrix.group }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        group:
+          - repository
+          - skills-internal
+          - skills-terraform-import
+          - skills-local
+    env:
+      GROUP: ${{ matrix.group }}
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0 https://github.com/actions/checkout/releases/tag/v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: 🐍 Set up Python from .python-version
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 https://github.com/actions/setup-python/releases/tag/v6.2.0
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: |
+            .python-version
+            .github/tools/requirements.txt
+
+      - name: 📦 Install tools requirements
+        run: |
+          set -Eeuo pipefail
+          python -m venv "${RUNNER_TEMP}/tools-venv"
+          "${RUNNER_TEMP}/tools-venv/bin/python" -m pip install --require-hashes --only-binary=:all: \
+            --requirement .github/tools/requirements.txt
+          printf 'PYTHON_BIN=%s\n' "${RUNNER_TEMP}/tools-venv/bin/python" >> "${GITHUB_ENV}"
+
+      - name: 🧪 Run Python validation shard
+        run: |
+          mkdir -p "${RUNNER_TEMP}/code-analysis-results"
+          ./validate-code.sh python --group "${GROUP}" --format ci \
+            --result-path "${RUNNER_TEMP}/code-analysis-results/validation-result-${GROUP}.json" \
+            --artifact-dir "${RUNNER_TEMP}/code-analysis-results"
+
+      - name: 📦 Publish validation evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1 https://github.com/actions/upload-artifact/releases/tag/v7.0.1
+        with:
+          name: code-analysis-${{ github.run_id }}-python-tests-${{ matrix.group }}
+          path: ${{ runner.temp }}/code-analysis-results
+          if-no-files-found: warn
+
+  validate-repository:
+    name: "🧪 Repository validation"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0 https://github.com/actions/checkout/releases/tag/v7.0.0
@@ -33,68 +313,68 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: 🧭 Prepare ephemeral virtualenv paths
-        run: |
-          code_analysis_root="${RUNNER_TEMP}/repo-code-analysis"
-          {
-            echo "TEST_VENV=${code_analysis_root}/tests"
-          } >> "${GITHUB_ENV}"
-
       - name: 🐍 Set up Python from .python-version
-        # actions/setup-python@v6.2.0
-        # https://github.com/actions/setup-python/releases/tag/v6.2.0
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 https://github.com/actions/setup-python/releases/tag/v6.2.0
         with:
           python-version-file: .python-version
           cache: pip
           cache-dependency-path: |
             .python-version
             .github/tools/requirements.txt
-            .github/skills/local-copilot-log-analyzer/scripts/requirements.txt
 
-      - name: 🔎 Show Python version
+      - name: 📦 Install tools requirements
         run: |
-          python --version
-          python -m pip --version
+          set -Eeuo pipefail
+          python -m venv "${RUNNER_TEMP}/tools-venv"
+          "${RUNNER_TEMP}/tools-venv/bin/python" -m pip install --require-hashes --only-binary=:all: \
+            --requirement .github/tools/requirements.txt
+          printf 'PYTHON_BIN=%s\n' "${RUNNER_TEMP}/tools-venv/bin/python" >> "${GITHUB_ENV}"
 
-      - name: 📦 Validate tools requirements
+      - name: 🧪 Check direct validation entrypoint
         run: |
-          rm -rf "${TEST_VENV}"
-          python -m venv "${TEST_VENV}"
-          "${TEST_VENV}/bin/python" -m pip install --upgrade pip
-          "${TEST_VENV}/bin/pip" install --require-hashes -r ".github/tools/requirements.txt"
-          "${TEST_VENV}/bin/python" -m pip check
-
-      - name: 🔥 Smoke test Python entry points
-        run: |
-          bash .github/skills/local-copilot-log-analyzer/scripts/run.sh prompt-exports --help
-          bash .github/skills/local-copilot-log-analyzer/scripts/run.sh debug-logs --help
-          ./.github/tools/run.sh analyze_copilot_debug_log --help
-          ./.github/tools/run.sh benchmark-skill-tokens --help
-          "${TEST_VENV}/bin/python" ".github/tools/inventory/build-inventory.py" --help
-          "${TEST_VENV}/bin/python" ".github/tools/catalog/validate-catalog.py" --deep --help
-          "${TEST_VENV}/bin/python" ".github/tools/tokens/detect-token-risks.py" --help
-          "${TEST_VENV}/bin/python" ".github/tools/skills/validate-internal-skills.py" --help
-          "${TEST_VENV}/bin/python" ".github/skills/local-sync-repos/scripts/sync_repos.py" --help
-          "${TEST_VENV}/bin/python" ".github/tools/catalog/validate-github-catalog.py" --help
-
-      - name: 🔥 Smoke test Bash entry points
-        run: |
-          ./.github/tools/run.sh --help || true
-          bash -n .github/tools/run.sh
-          bash -n .github/skills/local-copilot-log-analyzer/scripts/run.sh
-          bash -n .github/scripts/install-graphify-hooks.sh
-          bash -n .github/scripts/graphify-file-change-hook.sh
-          bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh
-
-      - name: ✅ Run pytest
-        run: |
-          "${TEST_VENV}/bin/python" -m pytest -q
+          ./validate-code.sh --help
+          ./validate-code.sh --list
+          ./validate-code.sh python --group repository --compact --format terminal --dry-run
 
       - name: 🧪 Validate eval packs for touched internal skills
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event_name == 'pull_request' }}
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          "${TEST_VENV}/bin/python" ".github/tools/skills/validate-skill-change-scope.py" \
+          "${PYTHON_BIN}" .github/tools/skills/validate-skill-change-scope.py \
             --root . --base-ref "${BASE_SHA}" --check eval-packs --format compact
+
+  code-analysis:
+    name: code-analysis
+    if: ${{ always() }}
+    needs:
+      - static-analysis
+      - python-dependencies
+      - audit-python-dependencies
+      - python-shard-integrity
+      - python-tests
+      - validate-repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: 📋 Summarize validation jobs
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          needs = json.loads(os.environ["NEEDS_JSON"])
+          lines = ["### Code analysis", "", "| Job | Result |", "| --- | --- |"]
+          lines += [f"| {job} | `{data['result']}` |" for job, data in needs.items()]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write("\n".join(lines) + "\n")
+          failed = sorted(job for job, data in needs.items() if data["result"] != "success")
+          if failed:
+              raise SystemExit(f"Code analysis failed or incomplete: {', '.join(failed)}")
+          PY

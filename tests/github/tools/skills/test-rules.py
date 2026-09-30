@@ -46,7 +46,7 @@ description: Use when exercising validator fixtures.
         """interface:
   display_name: Internal Example
   short_description: Internal example validator fixture
-  default_prompt: Use /internal-example for this fixture.
+  default_prompt: Use $internal-example for this fixture.
 """,
         encoding="utf-8",
     )
@@ -240,7 +240,7 @@ disable-model-invocation: true
         """interface:
   display_name: Internal Disabled
   short_description: Internal disabled fixture
-  default_prompt: Use /internal-disabled for this fixture.
+  default_prompt: Use $internal-disabled for this fixture.
 """,
         encoding="utf-8",
     )
@@ -267,7 +267,7 @@ def test_invocations_in_references_and_openai_metadata_are_checked(
         """interface:
   display_name: Internal Example
   short_description: Internal example validator fixture
-  default_prompt: Use /internal-missing-prompt for this fixture.
+  default_prompt: Use $internal-missing-prompt for this fixture.
 """,
         encoding="utf-8",
     )
@@ -483,8 +483,8 @@ def test_missing_reference_path_in_openai_metadata_is_blocking(
     openai_yaml = root / ".github/skills/internal-example/agents/openai.yaml"
     openai_yaml.write_text(
         openai_yaml.read_text(encoding="utf-8").replace(
-            "default_prompt: Use /internal-example for this fixture.",
-            "default_prompt: Use /internal-example and read"
+            "default_prompt: Use $internal-example for this fixture.",
+            "default_prompt: Use $internal-example and read"
             " `references/missing.md` first.",
         ),
         encoding="utf-8",

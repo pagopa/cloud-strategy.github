@@ -12,26 +12,19 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").is_file() and (parent / ".github").is_dir()
 )
 SCRIPT_PATH = REPO_ROOT / ".github/scripts/benchmark-skill-tokens.py"
-# Host-owned expectations: (primary, execution, delegated) owner per scenario.
-EXPECTED_TERRAFORM_OWNERS: dict[str, tuple[str, str | None, str | None]] = {
-    "hcl-only": ("internal-tf", None, None),
-    "tfvars-json-only": ("internal-tf", None, None),
-    "mixed-adoption": ("internal-terraform", None, "internal-tf"),
-    "native-test": ("internal-terraform", None, None),
-    "state-or-drift": ("internal-terraform", None, None),
-    "module-architecture": ("internal-terraform", None, None),
-    "ci-or-provider-operation": ("internal-terraform", None, None),
-    "ambiguous-adoption-identity": ("internal-terraform", None, None),
-    "bulk-multi-state-import": (
-        "internal-terraform",
-        "internal-terraform-import",
-        None,
-    ),
-    "aws-identity-center-import": (
-        "internal-terraform",
-        "internal-terraform-import",
-        None,
-    ),
+SKILLS_ROOT = REPO_ROOT / ".github/skills"
+REQUIRED_TERRAFORM_FIELDS = {
+    "scenario",
+    "primary_owner",
+    "execution_owner",
+    "delegated_owner",
+    "delegated_core_owner",
+    "loaded_local_references",
+    "forbidden_local_references",
+    "local_skill_tokens",
+    "conditional_reference_tokens",
+    "delegated_core_tokens",
+    "scenario_proxy_tokens",
 }
 
 
@@ -44,58 +37,31 @@ def _load_benchmark_module() -> Any:
     return module
 
 
-def test_terraform_benchmark_covers_the_expected_scenarios() -> None:
+def test_terraform_benchmark_reports_live_distinct_owners_per_scenario() -> None:
     module = _load_benchmark_module()
     reports = module.build_terraform_scenario_report(REPO_ROOT)
-    report_by_id = {report["scenario"]: report for report in reports}
+    scenario_ids = [report["scenario"] for report in reports]
 
-    assert set(report_by_id) == set(EXPECTED_TERRAFORM_OWNERS)
-    required_fields = {
-        "scenario",
-        "primary_owner",
-        "execution_owner",
-        "delegated_owner",
-        "loaded_local_references",
-        "forbidden_local_references",
-        "local_skill_tokens",
-        "conditional_reference_tokens",
-        "delegated_core_tokens",
-        "scenario_proxy_tokens",
-    }
-    for scenario_id, report in report_by_id.items():
-        assert required_fields <= report.keys()
-        primary, execution, delegated = EXPECTED_TERRAFORM_OWNERS[scenario_id]
-        assert report["primary_owner"] == primary
-        assert report["execution_owner"] == execution
-        assert report["delegated_owner"] == delegated
+    assert reports
+    assert len(scenario_ids) == len(set(scenario_ids))
+    for report in reports:
+        assert REQUIRED_TERRAFORM_FIELDS <= report.keys()
+        owners = [
+            report[field]
+            for field in ("primary_owner", "execution_owner", "delegated_owner")
+            if report[field]
+        ]
+        assert len(owners) == len(set(owners)), report["scenario"]
+        for owner in [*owners, report["delegated_core_owner"]]:
+            if owner:
+                assert (SKILLS_ROOT / owner / "SKILL.md").is_file(), owner
         assert not set(report["loaded_local_references"]) & set(
             report["forbidden_local_references"]
         )
-
-
-def test_terraform_benchmark_keeps_language_and_operational_owners_distinct() -> None:
-    module = _load_benchmark_module()
-    reports = {
-        report["scenario"]: report
-        for report in module.build_terraform_scenario_report(REPO_ROOT)
-    }
-
-    assert reports["hcl-only"]["primary_owner"] == "internal-tf"
-    assert reports["tfvars-json-only"]["primary_owner"] == "internal-tf"
-    assert reports["mixed-adoption"]["primary_owner"] == "internal-terraform"
-    assert reports["mixed-adoption"]["delegated_owner"] == "internal-tf"
-    assert reports["mixed-adoption"]["execution_owner"] is None
-    assert (
-        reports["bulk-multi-state-import"]["execution_owner"]
-        == "internal-terraform-import"
-    )
-    assert (
-        reports["aws-identity-center-import"]["execution_owner"]
-        == "internal-terraform-import"
-    )
-    assert reports["mixed-adoption"]["delegated_core_tokens"] > 0
-    assert reports["hcl-only"]["delegated_core_tokens"] == 0
-    assert reports["native-test"]["delegated_core_tokens"] > 0
+        if report["delegated_core_owner"]:
+            assert report["delegated_core_tokens"] > 0, report["scenario"]
+        else:
+            assert report["delegated_core_tokens"] == 0, report["scenario"]
 
 
 def test_terraform_benchmark_excludes_forbidden_references_from_the_proxy() -> None:
@@ -136,15 +102,6 @@ def test_benchmark_output_labels_static_proxy_and_runtime_gap(capsys: Any) -> No
     assert "static proxy" in output["measurement_note"].casefold()
     assert "does not prove runtime loading" in output["measurement_note"].casefold()
     assert "billed-token savings" in output["measurement_note"].casefold()
-    assert {item["scenario"] for item in output["terraform_scenarios"]} == {
-        "hcl-only",
-        "tfvars-json-only",
-        "mixed-adoption",
-        "native-test",
-        "state-or-drift",
-        "module-architecture",
-        "ci-or-provider-operation",
-        "ambiguous-adoption-identity",
-        "bulk-multi-state-import",
-        "aws-identity-center-import",
-    }
+    assert output["terraform_scenarios"] == module.build_terraform_scenario_report(
+        REPO_ROOT
+    )

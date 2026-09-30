@@ -1,93 +1,84 @@
-PYTHON_VERSION_FILE := .python-version
-PYTHON_VERSION := $(strip $(shell head -n 1 $(PYTHON_VERSION_FILE) 2>/dev/null))
-PYTHON_MAJOR_MINOR := $(strip $(shell printf '%s' "$(PYTHON_VERSION)" | awk -F. 'NF >= 2 { print $$1 "." $$2 }'))
-PYTHON ?= $(if $(PYTHON_MAJOR_MINOR),python$(PYTHON_MAJOR_MINOR),python3)
-SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh) .github/tools/run.sh
-SKILL_TEST_PATHS := $(wildcard .github/skills/*/tests)
-PYTHON_PATHS := .github/scripts/*.py .github/tools/common .github/tools/inventory .github/tools/catalog .github/tools/skills .github/tools/tokens tests $(SKILL_TEST_PATHS)
+# Maintainer entrypoints. Run `make` to list targets.
+
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c
+.DEFAULT_GOAL := help
+.DELETE_ON_ERROR:
+MAKEFLAGS += --no-builtin-rules --no-print-directory
+
 TOOLS_RUNNER := ./.github/tools/run.sh
-TOOLS_VENV := .github/tools/.venv
-RUFF := $(if $(wildcard $(TOOLS_VENV)/bin/ruff),$(TOOLS_VENV)/bin/ruff,ruff)
+TOOLS_PYTHON := .github/tools/.venv/bin/python
+VALIDATE_CODE := ./validate-code.sh
+TOOLS_READY := .github/tools/.venv/.make-ready
+VALIDATE_CODE_ARGS ?=
 CATALOG_FAST_TESTS := tests/github/tools/inventory/test-inventory.py tests/github/tools/common/test-repository.py tests/github/scripts/test-graphify-hooks.py tests/github/tools/test-runner.py tests/test_repository_test_layout_contract.py
 CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.22.1
-MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
+MARKDOWNLINT_GLOBS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint skill-change-scope docs-lint all
+.PHONY: help all lint catalog-lint docs-lint test validate-code clean \
+	catalog-fast-check catalog-check catalog-audit github-catalog-validation \
+	inventory-build token-risks skill-lint skill-change-scope
 
-help:
-	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint skill-change-scope docs-lint all'
+help: ## List targets
+	@awk 'BEGIN { FS = ":.*## " } /^##@ / { printf "\n%s\n", substr($$0, 5) } /^[a-z-]+:.*## / { printf "  %-26s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-python-version-check:
-	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
-	@$(PYTHON) -c 'import pathlib, sys; required = pathlib.Path("$(PYTHON_VERSION_FILE)").read_text().strip(); expected = ".".join(required.split(".")[:2]); actual = f"{sys.version_info.major}.{sys.version_info.minor}"; raise SystemExit(0 if actual == expected else f"Expected $(PYTHON) to resolve to Python {expected} from $(PYTHON_VERSION_FILE) ({required}), got {actual}.")'
-
-scripts-bootstrap: python-version-check
+# The tools venv is rebuilt only when its pinned inputs change.
+$(TOOLS_READY): .github/tools/requirements.txt .python-version
 	@$(TOOLS_RUNNER) build-inventory --help >/dev/null
+	@touch $@
 
-lint: python-version-check docs-lint
-	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
-	@if command -v shellcheck >/dev/null 2>&1; then shellcheck -s bash $(SHELL_SCRIPTS); else printf '%s\n' 'shellcheck not installed; skipping.'; fi
-	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
-	$(RUFF) check .github/scripts .github/tools tools tests $(SKILL_TEST_PATHS)
+##@ Code
 
-catalog-lint: python-version-check
-	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
-	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
-	$(RUFF) check .github/scripts .github/tools tools tests $(SKILL_TEST_PATHS)
+all: lint test catalog-check ## Run lint, tests, and catalog checks
 
-catalog-fast-check: scripts-bootstrap
+lint: docs-lint catalog-lint ## Run Markdown lint and static code checks
+
+catalog-lint: $(TOOLS_READY) ## Run static code checks (Bash, Python, Ruff, actionlint, entrypoints)
+	@$(VALIDATE_CODE) static --compact
+
+docs-lint: ## Run Markdown lint (skipped without npx)
+	@if command -v npx >/dev/null 2>&1; then \
+		npx --yes --prefer-offline markdownlint-cli2@$(MARKDOWNLINT_VERSION) $(MARKDOWNLINT_GLOBS); \
+	else \
+		echo "npx not found; skipping Markdown lint."; \
+	fi
+
+test: $(TOOLS_READY) ## Run all Python tests in parallel shards
+	@$(VALIDATE_CODE) python --compact
+
+validate-code: $(TOOLS_READY) ## Run validate-code.sh; pass options in VALIDATE_CODE_ARGS
+	@$(VALIDATE_CODE) $(VALIDATE_CODE_ARGS)
+
+clean: ## Remove local validation caches
+	@rm -rf tmp/validate-code .pytest_cache .ruff_cache
+
+##@ Catalog
+
+catalog-fast-check: $(TOOLS_READY) ## Run the quick catalog loop (CATALOG_FAST_INCLUDE_TOKEN_RISKS=1 adds token risks)
 	@$(TOOLS_RUNNER) build-inventory --root . --check
 	@$(TOOLS_RUNNER) validate-catalog --root .
 	@$(TOOLS_RUNNER) validate-internal-skills --root . --strict
-	@$(TOOLS_VENV)/bin/python -m pytest -q $(CATALOG_FAST_TESTS)
-	@if [ "$(CATALOG_FAST_INCLUDE_TOKEN_RISKS)" = "1" ]; then \
-		$(TOOLS_RUNNER) detect-token-risks --root .; \
-	else \
-		printf '%s\n' 'Skipping token-risks; set CATALOG_FAST_INCLUDE_TOKEN_RISKS=1 for always-on or shared-contract changes.'; \
-	fi
+	@$(TOOLS_PYTHON) -m pytest -q $(CATALOG_FAST_TESTS)
+	@if [[ "$(CATALOG_FAST_INCLUDE_TOKEN_RISKS)" == 1 ]]; then $(TOOLS_RUNNER) detect-token-risks --root .; fi
 
-github-catalog-validation: python-version-check
-	@$(TOOLS_RUNNER) validate-github-catalog --root .
-
-test: scripts-bootstrap
-	@$(TOOLS_VENV)/bin/python -m pytest -q
-
-catalog-check: scripts-bootstrap
+catalog-check: $(TOOLS_READY) ## Validate the catalog, including token risks
 	@$(TOOLS_RUNNER) validate-catalog --root . --include-token-risks
 
-catalog-audit: scripts-bootstrap
+catalog-audit: $(TOOLS_READY) ## Run the deep catalog audit
 	@$(TOOLS_RUNNER) validate-catalog --root . --deep
 
-inventory-build: scripts-bootstrap
+github-catalog-validation: $(TOOLS_READY) ## Run the full catalog gate with a compact summary option
+	@$(TOOLS_RUNNER) validate-github-catalog --root .
+
+inventory-build: $(TOOLS_READY) ## Rebuild .github/INVENTORY.md
 	@$(TOOLS_RUNNER) build-inventory --root .
 
-token-risks: scripts-bootstrap
+token-risks: $(TOOLS_READY) ## Scan for token-budget risks
 	@$(TOOLS_RUNNER) detect-token-risks --root .
 
-skill-lint: scripts-bootstrap
+skill-lint: $(TOOLS_READY) ## Validate internal skills (strict)
 	@$(TOOLS_RUNNER) validate-internal-skills --root . --strict
 
-skill-change-scope: scripts-bootstrap
+skill-change-scope: $(TOOLS_READY) ## Check that protected skills are unchanged
 	@$(TOOLS_RUNNER) validate-skill-change-scope --root .
-
-docs-lint:
-	@if command -v npx >/dev/null 2>&1; then \
-		if [ -n "$${CI:-}" ]; then \
-			npx --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) $(MARKDOWNLINT_PATTERNS); \
-		elif npm exec --offline --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) -- --version >/dev/null 2>&1; then \
-			npm exec --offline --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) -- $(MARKDOWNLINT_PATTERNS); \
-		elif command -v markdownlint-cli2 >/dev/null 2>&1 \
-			&& markdownlint-cli2 --version 2>/dev/null | grep -Fq "markdownlint-cli2 v$(MARKDOWNLINT_VERSION)"; then \
-			markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
-		else \
-			printf '%s\n' 'markdownlint-cli2 is not installed or cached; skipping markdown lint outside CI.'; \
-		fi; \
-	elif command -v markdownlint-cli2 >/dev/null 2>&1 \
-		&& markdownlint-cli2 --version 2>/dev/null | grep -Fq "markdownlint-cli2 v$(MARKDOWNLINT_VERSION)"; then \
-		markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
-	else \
-		printf '%s\n' 'npx not installed; skipping markdown lint.'; \
-	fi
-
-all: lint test catalog-check

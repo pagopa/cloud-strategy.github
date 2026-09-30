@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import sys
 from pathlib import Path
 from typing import Callable
@@ -193,10 +194,24 @@ TOKEN_RULE_CASES: list[tuple[str, RuleCase]] = [
 ]
 
 
-def test_token_rule_case_inventory_is_explicit() -> None:
+def _emitted_codes(source_path: Path) -> set[str]:
+    codes: set[str] = set()
+    for node in ast.walk(ast.parse(source_path.read_text(encoding="utf-8"))):
+        if isinstance(node, ast.keyword) and node.arg == "code":
+            assert isinstance(node.value, ast.Constant) and isinstance(
+                node.value.value, str
+            ), f"non-literal finding code at line {node.value.lineno}"
+            codes.add(node.value.value)
+    return codes
+
+
+def test_every_emitted_token_rule_code_has_a_triggering_case() -> None:
     codes = [code for code, _ in TOKEN_RULE_CASES]
+    emitted = _emitted_codes(TOOLS_ROOT / "tokens/rules.py")
+
+    assert emitted
     assert len(codes) == len(set(codes))
-    assert len(codes) == 14
+    assert set(codes) == emitted
 
 
 @pytest.mark.parametrize(

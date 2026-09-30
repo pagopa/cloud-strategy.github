@@ -112,7 +112,7 @@ repos:
           - --hook-config=--create-file-if-not-exist=true
           - --args=--sort-by=required
       - id: terraform_validate # Validate Terraform configuration without remote backends.
-        exclude: '^\.github/skills/(internal-terraform-import/tests/fixtures/generated-import-hcl|internal-tf/tests/evaluation/fixtures)/'
+        exclude: '^\.github/skills/internal-tf/tests/evaluation/fixtures/'
         verbose: true
         args:
           # Keep logs deterministic and readable when validate fails in CI.
@@ -124,7 +124,7 @@ repos:
           # only when it needs structured retry/error matching.
           - --args=-no-color
       - id: terraform_tflint # Lint Terraform code against provider and best-practice rules.
-        exclude: '^\.github/skills/(internal-terraform-import/tests/fixtures/generated-import-hcl|internal-tf/tests/evaluation/fixtures)/'
+        exclude: '^\.github/skills/internal-tf/tests/evaluation/fixtures/'
       # Keep this hook commented to avoid slowing normal pre-commit runs.
       # Treat the platform list below as the canonical `.terraform.lock.hcl` matrix.
       # - id: terraform_providers_lock # Regenerate provider lock files for supported platforms.

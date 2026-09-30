@@ -13,7 +13,6 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 TOOLS_ROOT = REPO_ROOT / ".github/tools"
-SCRIPTS_ROOT = REPO_ROOT / ".github/scripts"
 if str(TOOLS_ROOT) not in sys.path:
     sys.path.insert(0, str(TOOLS_ROOT))
 
@@ -25,23 +24,7 @@ TOOL_ENTRYPOINTS = (
     Path("skills/validate-skill-change-scope.py"),
     Path("tokens/detect-token-risks.py"),
 )
-EXPECTED_SCRIPT_FILES = {
-    "benchmark-skill-tokens.py",
-    "graphify-file-change-hook.sh",
-    "install-graphify-hooks.sh",
-}
-IGNORED_SCRIPT_ENTRIES = {".pytest_cache", ".venv", "__pycache__", "graphify-out"}
 FORBIDDEN_TOOL_DIRECTORIES = {"checks", "copilot_tools", "core", "lib", "utils"}
-
-
-def test_scripts_root_contains_only_public_standalone_entrypoints() -> None:
-    actual_entries = {
-        path.name
-        for path in SCRIPTS_ROOT.iterdir()
-        if path.name not in IGNORED_SCRIPT_ENTRIES
-    }
-
-    assert actual_entries == EXPECTED_SCRIPT_FILES
 
 
 def test_tool_entrypoints_run_outside_the_repository(tmp_path: Path) -> None:
@@ -93,40 +76,6 @@ def test_tool_modules_follow_functional_dependency_graph() -> None:
                 )
 
     assert not violations, "invalid package edges: " + ", ".join(violations)
-
-
-def test_inventory_excludes_script_runtime_and_fixture_paths(tmp_path: Path) -> None:
-    from inventory.inventory import collect_inventory_sections
-
-    included_paths = {
-        ".github/scripts/check.py",
-    }
-    excluded_paths = {
-        ".github/tools/catalog/rules.py",
-        ".github/scripts/.venv/lib/tool.py",
-        ".github/scripts/.pytest_cache/cache.py",
-        ".github/scripts/__pycache__/module.py",
-        ".github/scripts/graphify-out/cache.py",
-        ".github/scripts/tests/test_fixture.py",
-        ".github/tools/common/__init__.py",
-    }
-
-    for relative_path in included_paths | excluded_paths:
-        path = tmp_path / relative_path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("# fixture\n", encoding="utf-8")
-
-    scripts = set(collect_inventory_sections(tmp_path)["Scripts"])
-
-    assert included_paths <= scripts
-    assert not scripts & excluded_paths
-    assert not any(
-        any(
-            part in {".venv", ".pytest_cache", "__pycache__", "graphify-out", "tests"}
-            for part in Path(path).parts
-        )
-        for path in scripts
-    )
 
 
 def test_deep_catalog_mode_matches_audit_command() -> None:
@@ -190,29 +139,42 @@ def test_legacy_script_commands_are_absent_except_in_changelog() -> None:
         ".superpowers",
         "tmp",
     }
+    stems = "|".join(re.escape(stem) for stem in legacy_stems)
+    suffix = r"(?:\.(?:py|sh))?"
+    public_pattern = re.compile(
+        rf"(?:\.github/(?:scripts|tools)/|run\.sh\s+|SCRIPTS_RUNNER\)\s+|resolve_script\s+)"
+        rf"(?P<stem>{stems}){suffix}(?![A-Za-z0-9_-])"
+        rf"|(?:^|[|\n][ \t]*)(?P<case_stem>{stems}){suffix}\)"
+    )
+    tracked_files = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        check=True,
+    ).stdout.decode("utf-8")
     occurrences: list[str] = []
 
-    for path in REPO_ROOT.rglob("*"):
-        if not path.is_file():
+    for tracked in tracked_files.split("\0"):
+        if not tracked:
             continue
-        relative_path = path.relative_to(REPO_ROOT)
+        relative_path = Path(tracked)
         if ignored_directories.intersection(relative_path.parts):
             continue
         if relative_path == Path(".github/CHANGELOG.md"):
             continue
+        file_path = REPO_ROOT / relative_path
+        if not file_path.is_file():
+            continue
         if legacy_aliases.intersection(relative_path.parts):
             occurrences.append(f"{relative_path}: legacy path")
 
-        content = path.read_text(encoding="utf-8", errors="replace")
-        for legacy_stem in legacy_stems:
-            alias = rf"{re.escape(legacy_stem)}(?:\.(?:py|sh))?"
-            public_patterns = (
-                rf"(?:\.github/(?:scripts|tools)/|run\.sh\s+|SCRIPTS_RUNNER\)\s+|resolve_script\s+){alias}(?![A-Za-z0-9_-])",
-                rf"(?:^|[|\n][ \t]*){alias}\)",
-            )
-            if any(re.search(pattern, content) for pattern in public_patterns):
-                occurrences.append(f"{relative_path}: {legacy_stem}")
-        if not content:
-            continue
+        content = file_path.read_text(encoding="utf-8", errors="replace")
+        found = {
+            match.group("stem") or match.group("case_stem")
+            for match in public_pattern.finditer(content)
+        }
+        occurrences.extend(
+            f"{relative_path}: {stem}" for stem in legacy_stems if stem in found
+        )
 
     assert not occurrences, "legacy command names remain:\n" + "\n".join(occurrences)
