@@ -29,7 +29,7 @@ bash skills/idea-refine/scripts/idea-refine.sh
 
 ## Output
 
-The final output is a markdown one-pager saved to `docs/ideas/[idea-name].md` (after user confirmation), containing:
+The final output is a markdown one-pager saved to `tmp/ideas/[idea-name].md` (after user confirmation), containing:
 - Problem Statement
 - Recommended Direction
 - Key Assumptions
@@ -137,7 +137,7 @@ Produce a concrete artifact — a markdown one-pager that moves work forward:
 
 **The "Not Doing" list is arguably the most valuable part.** Focus is about saying no to good ideas. Make the trade-offs explicit.
 
-Ask the user if they'd like to save this to `docs/ideas/[idea-name].md` (or a location of their choosing). Only save if they confirm.
+Ask the user if they'd like to save this to `tmp/ideas/[idea-name].md` (or a location of their choosing). Only save if they confirm.
 
 ### Anti-patterns to Avoid
 
@@ -176,3 +176,18 @@ After completing an ideation session:
 - [ ] A "Not Doing" list makes trade-offs explicit
 - [ ] The output is a concrete artifact (markdown one-pager), not just conversation
 - [ ] The user confirmed the final direction before any implementation work
+
+<!-- local-sync:idea-refine-workspace:start -->
+## Local idea-workspace override
+
+Apply this local override instead of any earlier conflicting workspace or
+output-path instructions in this skill and its bundled resources.
+
+- Keep every generated artifact under `tmp/ideas/` in the current project root,
+   including drafts, supporting notes, and final one-pagers.
+- Save the final one-pager to `tmp/ideas/[idea-name].md` only after user
+   confirmation. Alternative filenames and subdirectories must stay inside
+   `tmp/ideas/`.
+- Run the initialization script from the project root. Do not create idea
+   artifacts outside `tmp/ideas/`.
+<!-- local-sync:idea-refine-workspace:end -->
