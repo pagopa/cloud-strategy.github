@@ -697,12 +697,12 @@ def test_normalization_enforces_no_commit_contract_for_superpowers_skills(
     tmp_path: Path,
 ) -> None:
     candidate = tmp_path / "candidate"
-    local = ".github/skills/superpowers-writing-plans"
+    local = ".github/skills/superpowers-test-driven-development"
     skill = candidate / local / "SKILL.md"
     prompt = candidate / local / "implementer-prompt.md"
     skill.parent.mkdir(parents=True)
     skill.write_text(
-        "---\nname: superpowers-writing-plans\n---\nCommit after each task.\n",
+        "---\nname: superpowers-test-driven-development\n---\nCommit after each task.\n",
         encoding="utf-8",
     )
     prompt.write_text("Commit your work.\n", encoding="utf-8")
@@ -720,9 +720,9 @@ def test_normalization_enforces_no_commit_contract_for_superpowers_skills(
                 assets=(
                     ManagedAsset(
                         source="obra-superpowers",
-                        upstream="skills/writing-plans",
+                        upstream="skills/test-driven-development",
                         local=local,
-                        canonical_name="superpowers-writing-plans",
+                        canonical_name="superpowers-test-driven-development",
                     ),
                 ),
             ),
@@ -763,7 +763,7 @@ def test_normalization_prefixes_superpowers_sibling_paths_in_all_files(
     tmp_path: Path,
 ) -> None:
     candidate = tmp_path / "candidate"
-    executing = ".github/skills/superpowers-executing-plans"
+    executing = ".github/skills/superpowers-receiving-code-review"
     driven = ".github/skills/superpowers-subagent-driven-development"
     script = candidate / executing / "scripts" / "task-done"
     skill = candidate / executing / "SKILL.md"
@@ -780,7 +780,7 @@ def test_normalization_prefixes_superpowers_sibling_paths_in_all_files(
     )
     script.write_text(script_body, encoding="utf-8")
     skill.write_text(
-        "---\nname: superpowers-executing-plans\n---\n"
+        "---\nname: superpowers-receiving-code-review\n---\n"
         "Run `../subagent-driven-development/scripts/sdd-workspace PLAN`.\n",
         encoding="utf-8",
     )
@@ -795,7 +795,7 @@ def test_normalization_prefixes_superpowers_sibling_paths_in_all_files(
             local=f".github/skills/superpowers-{name}",
             canonical_name=f"superpowers-{name}",
         )
-        for name in ("executing-plans", "subagent-driven-development")
+        for name in ("receiving-code-review", "subagent-driven-development")
     )
     resources = ManagedResources(
         sources=(
@@ -1727,6 +1727,87 @@ def test_idea_refine_normalization_keeps_tmp_output_after_upstream_changes(
     assert updated.rstrip().endswith(end_marker)
     assert updated.count("<!-- local-sync:idea-refine-workspace:start -->") == 1
     assert "Additional upstream section." in updated
+
+
+def test_planning_normalization_uses_one_plan_and_preserves_scope(tmp_path: Path) -> None:
+    bundle_root = REPO_ROOT / ".github/skills/local-agent-sync-external-resources"
+    resources = load_managed_resources(bundle_root / "references/managed-resources.yaml")
+    candidate = tmp_path / "candidate"
+    target = candidate / ".github/skills/addyosmani-planning-and-task-breakdown"
+    target.mkdir(parents=True)
+    skill = target / "SKILL.md"
+    skill.write_text(
+        "---\nname: planning-and-task-breakdown\n---\n"
+        "Save `tasks/plan.md` and `./tasks/todo.md`.\n",
+        encoding="utf-8",
+    )
+    notes = target / "references/paths.md"
+    notes.parent.mkdir()
+    notes.write_text(
+        "Use tasks/plan.md; keep other/tasks/plan.md and tasks/plan.md.backup.\n",
+        encoding="utf-8",
+    )
+    neighbor = candidate / ".github/skills/addyosmani-code-simplification/SKILL.md"
+    neighbor.parent.mkdir(parents=True)
+    neighbor_content = "---\nname: addyosmani-code-simplification\n---\ntasks/plan.md\n"
+    neighbor.write_text(neighbor_content, encoding="utf-8")
+
+    normalize_candidate(resources, candidate)
+
+    destination = "tmp/.plans/YYYY-MM-DD-HHMM-<topic>.md"
+    content = skill.read_text(encoding="utf-8")
+    assert f"Save `{destination}` and `{destination}`." in content
+    assert notes.read_text(encoding="utf-8") == (
+        f"Use {destination}; keep other/tasks/plan.md and tasks/plan.md.backup.\n"
+    )
+    marker = "<!-- local-sync:planning-output:end -->"
+    assert content.rstrip().endswith(marker)
+    assert neighbor.read_text(encoding="utf-8") == neighbor_content
+    assert normalize_candidate(resources, candidate) == ()
+    skill.write_text(content + "\nNew upstream section.\n", encoding="utf-8")
+    normalize_candidate(resources, candidate)
+    updated = skill.read_text(encoding="utf-8")
+    assert updated.rstrip().endswith(marker)
+    assert updated.count("<!-- local-sync:planning-output:start -->") == 1
+    assert "New upstream section." in updated
+
+
+@pytest.mark.parametrize(
+    ("name", "legacy", "replacement"),
+    [
+        ("superpowers-brainstorming", "writing-plans", "internal-gateway-writing-plans"),
+        ("superpowers-subagent-driven-development", "executing-plans", "internal-gateway-execute-plans"),
+    ],
+)
+def test_retired_planner_routing_is_normalized(
+    tmp_path: Path, name: str, legacy: str, replacement: str,
+) -> None:
+    bundle_root = REPO_ROOT / ".github/skills/local-agent-sync-external-resources"
+    resources = load_managed_resources(bundle_root / "references/managed-resources.yaml")
+    candidate = tmp_path / "candidate"
+    target = candidate / f".github/skills/{name}"
+    target.mkdir(parents=True)
+    skill = target / "SKILL.md"
+    skill.write_text(
+        f"---\nname: {name}\n---\nInvoke {legacy}; use /superpowers-{legacy}.\n",
+        encoding="utf-8",
+    )
+    notes = target / "references/routing.md"
+    notes.parent.mkdir()
+    notes.write_text(
+        f"/{legacy}; /{replacement}; unrelated-{legacy}-archive\n", encoding="utf-8",
+    )
+
+    normalize_candidate(resources, candidate)
+
+    assert f"Invoke {replacement}; use /{replacement}." in skill.read_text(encoding="utf-8")
+    assert notes.read_text(encoding="utf-8") == (
+        f"/{replacement}; /{replacement}; unrelated-{legacy}-archive\n"
+    )
+    assert skill.read_text(encoding="utf-8").rstrip().endswith(
+        "<!-- local-sync:plan-gateway-routing:end -->"
+    )
+    assert normalize_candidate(resources, candidate) == ()
 
 
 def test_live_idea_refine_overrides_are_not_git_patches() -> None:

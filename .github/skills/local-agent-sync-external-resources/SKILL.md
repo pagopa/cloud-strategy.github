@@ -75,6 +75,10 @@ For paths, search the declared target bundle and apply bounded path
 replacements without depending on surrounding prose or line numbers. Record
 the scope, search rule, destination, and checks in the normalization reference
 and candidate normalizer so every later refresh reapplies them.
+The plan-output normalization keeps implementation plans in `tmp/.plans/`
+with one embedded task list and automatic checkpoints. The two retired
+Superpowers plan skills are no longer imported; their authorized callers route
+through the repository gateways without manufacturing execution approval.
 The override registry and replay engine support existing legacy entries only;
 do not add new entries or extend their scope. The generated apply diff is a
 transport for a validated candidate, not a retained customization patch.

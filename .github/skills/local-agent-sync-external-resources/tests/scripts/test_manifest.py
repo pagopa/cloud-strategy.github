@@ -380,7 +380,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 71
+    assert len(manifest.assets) == 69
     assert len(manifest.watchlist) == 10
     addyosmani_source = next(
         source
@@ -524,7 +524,6 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         ".github/skills/superpowers-brainstorming",
         ".github/skills/superpowers-diagnosing-superpowers",
         ".github/skills/superpowers-dispatching-parallel-agents",
-        ".github/skills/superpowers-executing-plans",
         ".github/skills/superpowers-finishing-a-development-branch",
         ".github/skills/superpowers-receiving-code-review",
         ".github/skills/superpowers-requesting-code-review",
@@ -534,7 +533,6 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         ".github/skills/superpowers-using-git-worktrees",
         ".github/skills/superpowers-using-superpowers",
         ".github/skills/superpowers-verification-before-completion",
-        ".github/skills/superpowers-writing-plans",
     }
     assert {
         item.local

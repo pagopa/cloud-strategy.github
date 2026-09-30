@@ -148,3 +148,45 @@ declared source.
 - Run `tests/scripts/test_candidate.py -k idea_refine` and the full native sync
   test suite before accepting changes to this rule. Keep test workspaces under
   repository-local `tmp/`.
+
+## Single Implementation Plan
+
+- Target only `addyosmani-planning-and-task-breakdown`. In every UTF-8 text
+  file, replace project-root `tasks/plan.md` and `tasks/todo.md` (optionally
+  prefixed by `./`) with `tmp/.plans/YYYY-MM-DD-HHMM-<topic>.md`. Preserve
+  nested paths and filename suffixes such as `.backup`.
+- Append one `local-sync:planning-output` override at the end of `SKILL.md`.
+  It supersedes separate todo files, implicit tracker selection, creation of
+  `tasks/`, and routine human checkpoint prompts. It requires one plan with
+  detailed task contracts and a separate mutable progress section.
+- The user's executor invocation authorizes the identified plan; a writer
+  result or internal call does not. Explicit human gates and real blockers
+  remain authoritative. Never overwrite other incomplete work or migrate plans.
+- New implementation plans always stay under `tmp/.plans/`, including an
+  explicitly requested alternative filename or tracker-backed plan.
+- Test bounded path replacement, nested-path preservation, unchanged neighbors,
+  upstream text additions, trailing override placement, and idempotence through
+  `tests/scripts/test_candidate.py -k planning_normalization`.
+
+## Retired Plan Skills And Gateway Routing
+
+- `superpowers-writing-plans` and `superpowers-executing-plans` are retired:
+  remove their manifest declarations and local bundles. Do not reimport them.
+- Only in `superpowers-brainstorming`, replace complete `writing-plans` or
+  `superpowers-writing-plans` names with `internal-gateway-writing-plans`.
+  Only in `superpowers-subagent-driven-development`, replace `executing-plans`
+  or `superpowers-executing-plans` with `internal-gateway-execute-plans`.
+  Search all UTF-8 text resources in each declared target bundle. Preserve
+  compound identifiers and unrelated content.
+- Append one `local-sync:plan-gateway-routing` note after other normalizations.
+  It overrides conflicting handoff instructions without adopting another
+  workflow. Spec approval alone does not request a plan. Inline routing never
+  manufactures the user's execution approval or widens writable authority.
+- Preserve the legacy brainstorming description patch. Since normalization
+  runs before replay and changes the verified content, recompute that existing
+  override's `expected_content_hash` when its normalized output changes; do
+  not add or extend a replay patch.
+- Run `tests/scripts/test_candidate.py -k retired_planner_routing`, manifest
+  tests, and the full native sync suite. Source snapshot path attestations must
+  be rebuilt when the declared Superpowers import set changes; the pinned SHA
+  does not change. Do not accept a stale attestation by weakening checks.

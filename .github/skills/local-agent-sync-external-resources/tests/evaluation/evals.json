@@ -26,7 +26,9 @@
       "id": "R-PINNED-OFFLINE",
       "text": "Network access happens only through the pinned prepare flow; no pull, argumentless fetch, remote update, or package manager is used.",
       "source": "SKILL.md: Pinned Content Only"
-    }
+    },
+    {"id": "R-SINGLE-PLAN", "text": "Normalize only the Addy planner to one embedded-task plan under tmp/.plans/, preserving nested paths, neighbors, existing work and idempotence.", "source": "references/skill-normalizations.md: Single Implementation Plan"},
+    {"id": "R-RETIRED-ROUTING", "text": "Do not import the two retired Superpowers plan skills; normalize only their authorized caller references to the gateways without creating execution approval, and keep legacy hash replay valid.", "source": "references/skill-normalizations.md: Retired Plan Skills And Gateway Routing"}
   ],
   "cases": [
     {
@@ -115,6 +117,8 @@
         ]
       }
     }
+    ,{"id": "C-PLANNER-UPSTREAM-DRIFT", "family": "normalization-boundary", "kind": "rubric", "requirement_ids": ["R-SINGLE-PLAN", "R-METADATA-STABLE"], "prompt": "Refresh Addy after an upstream section rename and added task-list guidance.", "initial_state": "The pinned candidate has tasks/plan.md, ./tasks/todo.md, a nested other/tasks/plan.md and unrelated neighboring bundles; a previous local override is followed by new upstream text.", "expected_output": "Bounded root-path replacements and one trailing override retain the single-plan contract without modifying nested paths or neighbors; a second pass produces no changes. The candidate test exercises the real normalizer.", "files": ["tests/scripts/test_candidate.py"], "assertions": [{"id": "A-SCOPE", "text": "Only the planner's project-root default outputs are rewritten.", "critical": true}, {"id": "A-CONVERGENCE", "text": "Exactly one effective override remains last and repeated normalization is stable.", "critical": true}], "forbidden_actions": ["Depend on exact upstream prose or line numbers.", "Rewrite neighboring bundles."], "status": "not-run", "held_out": true, "rubric": {"pass": ["Native candidate tests show bounded replacement and stable repeated output."], "fail": ["Upstream text additions restore separate artifacts or the override is duplicated."]}},
+    {"id": "C-RETIRE-AND-REFRESH", "family": "retirement", "kind": "rubric", "requirement_ids": ["R-RETIRED-ROUTING", "R-PINNED-OFFLINE"], "prompt": "Refresh Superpowers after retiring writing-plans and executing-plans.", "initial_state": "The manifest excludes both bundles, caller resources still mention bare and prefixed legacy names, and brainstorming has a legacy description patch with a final content hash.", "expected_output": "Neither bundle is materialized. Only brainstorming and subagent-driven routing references are redirected, internal calls do not create user approval, the updated legacy hash verifies, and repeated normalization remains stable. Stale source-path attestations are rebuilt rather than bypassed.", "files": ["tests/scripts/test_candidate.py", "tests/scripts/test_manifest.py", "references/managed-resources.yaml", "references/imported-asset-overrides.yaml"], "assertions": [{"id": "A-RETIRED", "text": "Retired bundles are absent from declared and materialized assets.", "critical": true}, {"id": "A-HANDOFF", "text": "Routing preserves explicit user authority and unrelated workflow content.", "critical": true}, {"id": "A-REPLAY", "text": "Legacy patch verification remains valid without weakening snapshot identity checks.", "critical": true}], "forbidden_actions": ["Reimport retired skills.", "Treat an internal handoff as user approval.", "Disable hash or source-attestation checks."], "status": "not-run", "held_out": false, "rubric": {"pass": ["Manifest, native candidate tests and offline audit verify the bounded output and existing override hash."], "fail": ["A refresh restores retired entrypoints or needs disabled integrity checks."]}}
   ],
   "triggers": {
     "queries": [

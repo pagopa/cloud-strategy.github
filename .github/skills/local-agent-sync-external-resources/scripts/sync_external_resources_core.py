@@ -965,6 +965,74 @@ output-path instructions in this skill and its bundled resources.
     artifacts outside `tmp/ideas/`.
 {_IDEA_REFINE_CONTRACT_END}"""
 
+_PLANNING_SKILL = "addyosmani-planning-and-task-breakdown"
+_PLANNING_PATH_RE = re.compile(
+        r"(?<![A-Za-z0-9_./-])(?:\./)?tasks/(?:plan|todo)\.md(?=$|[^A-Za-z0-9_.-])"
+)
+_PLANNING_DESTINATION = "tmp/.plans/YYYY-MM-DD-HHMM-<topic>.md"
+_PLANNING_CONTRACT_START = "<!-- local-sync:planning-output:start -->"
+_PLANNING_CONTRACT_END = "<!-- local-sync:planning-output:end -->"
+_PLANNING_CONTRACT_RE = re.compile(
+        re.escape(_PLANNING_CONTRACT_START) + r".*?"
+        + re.escape(_PLANNING_CONTRACT_END), re.DOTALL,
+)
+_PLANNING_CONTRACT = f"""\
+{_PLANNING_CONTRACT_START}
+## Local single-plan override
+
+This contract supersedes all conflicting output, task-list, tracker, directory,
+and human-checkpoint instructions above and in this bundle's resources.
+
+- Create one implementation plan at `{_PLANNING_DESTINATION}` in the project
+    root. Use the creation date and time and a stable dash-case topic. If that
+    filename already exists for different work, choose a distinct topic suffix;
+    never overwrite another incomplete plan. Revise the same plan in place only
+    when explicitly requested.
+- Put the overview, decisions, risks, detailed tasks, checklist, acceptance
+    criteria, dependencies, exact authorized writable paths, and concrete checks
+    in that one file. Do not create a separate todo file or tracker items unless
+    the user explicitly requests them. Even then, keep the plan under `tmp/.plans/`.
+- Create only `tmp/.plans/` for plan output, not `tasks/`. Reading this skill is
+    not permission to write a plan or implement it.
+- Separate stable task contracts from mutable progress. Permit checkbox and
+    concise verification or blocker updates only in the progress section; they
+    do not change approval. Requirement or writable-scope changes need approval.
+- Checkpoints are automatic checks, not human confirmation gates. Require a
+    human checkpoint only when the user explicitly requested that gate. Preserve
+    stops for missing decisions, unsafe actions, conflicts, or out-of-scope work.
+- Planning alone does not start implementation. The user's invocation of
+    `/internal-gateway-execute-plans` approves the identified plan for execution;
+    an internal skill call does not manufacture that authorization.
+{_PLANNING_CONTRACT_END}"""
+_PLAN_GATEWAY_ROUTES = {
+        "superpowers-brainstorming": ("writing-plans", "internal-gateway-writing-plans"),
+        "superpowers-subagent-driven-development": (
+                "executing-plans", "internal-gateway-execute-plans",
+        ),
+}
+_PLAN_ROUTING_CONTRACT_START = "<!-- local-sync:plan-gateway-routing:start -->"
+_PLAN_ROUTING_CONTRACT_END = "<!-- local-sync:plan-gateway-routing:end -->"
+_PLAN_ROUTING_CONTRACT_RE = re.compile(
+        re.escape(_PLAN_ROUTING_CONTRACT_START) + r".*?"
+        + re.escape(_PLAN_ROUTING_CONTRACT_END), re.DOTALL,
+)
+_PLAN_ROUTING_CONTRACT = f"""\
+{_PLAN_ROUTING_CONTRACT_START}
+## Local plan-gateway routing override
+
+This contract supersedes earlier conflicting next-skill and handoff instructions.
+Keep the rest of this skill's workflow unchanged.
+
+- Route an explicit plan request to `/internal-gateway-writing-plans`. Do not
+    treat spec approval alone as an explicit plan request.
+- Route inline execution to `/internal-gateway-execute-plans` only after the
+    user invoked that executor for an identified plan. Passing an internal
+    handoff does not create user approval or widen the plan's writable scope.
+- New implementation plans belong under `tmp/.plans/`. Existing plans and
+    historical runtime records stay where they are; do not migrate them.
+{_PLAN_ROUTING_CONTRACT_END}"""
+
+
 def _enforce_marked_contract(
     content: str,
     contract_re: re.Pattern[str],
@@ -1420,6 +1488,27 @@ def normalize_candidate(
                 ):
                     content = _ensure_copilot_disable_model_invocation(
                         content, asset
+                    )
+
+            if asset.canonical_name == _PLANNING_SKILL:
+                content = _PLANNING_PATH_RE.sub(_PLANNING_DESTINATION, content)
+                if file_path == asset_dir / "SKILL.md":
+                    content = _enforce_marked_contract(
+                        _PLANNING_CONTRACT_RE.sub("", content).rstrip(),
+                        _PLANNING_CONTRACT_RE, _PLANNING_CONTRACT,
+                    )
+            route = _PLAN_GATEWAY_ROUTES.get(asset.canonical_name)
+            if route is not None:
+                legacy, replacement = route
+                route_pattern = re.compile(
+                    r"(?<![A-Za-z0-9-])(?:superpowers-)?"
+                    + re.escape(legacy) + r"(?![A-Za-z0-9-])"
+                )
+                content = route_pattern.sub(replacement, content)
+                if file_path == asset_dir / "SKILL.md":
+                    content = _enforce_marked_contract(
+                        _PLAN_ROUTING_CONTRACT_RE.sub("", content).rstrip(),
+                        _PLAN_ROUTING_CONTRACT_RE, _PLAN_ROUTING_CONTRACT,
                     )
 
             if content != original:
