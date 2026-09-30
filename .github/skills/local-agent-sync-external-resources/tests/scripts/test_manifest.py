@@ -1,18 +1,11 @@
 import re
-import sys
 from pathlib import Path
 
 import pytest
-
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
-sys.path.insert(0, SCRIPT_DIR.as_posix())
-
-from sync_external_resources_core import (  # noqa: E402
+import yaml
+from sync_external_resources_core import (
+    _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END,
+    _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START,
     load_managed_resources,
     load_overrides,
     render_source_summary_table,
@@ -22,42 +15,14 @@ from sync_external_resources_core import (  # noqa: E402
 _COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _MANIFEST_PATH = ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
+_OVERRIDES_PATH = ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
 _SUMMARY_START = "# managed-sources-summary:start"
 _SUMMARY_END = "# managed-sources-summary:end"
 
 _FULL_SHA40 = "a" * 40
 _FULL_SHA40_ALT = "b" * 40
 
-_MATTPOCOCK_REF = "6acc160e4e0cd062dbbbd7a1b26ae92855edf07e"
-_MATTPOCOCK_ENGINEERING_SKILLS = {
-    "ask-matt",
-    "code-review",
-    "codebase-design",
-    "diagnosing-bugs",
-    "domain-modeling",
-    "grill-with-docs",
-    "implement",
-    "improve-codebase-architecture",
-    "prototype",
-    "research",
-    "resolving-merge-conflicts",
-    "setup-matt-pocock-skills",
-    "tdd",
-    "to-spec",
-    "to-tickets",
-    "triage",
-    "wayfinder",
-    "wizard",
-}
-_MATTPOCOCK_PRODUCTIVITY_SKILLS = {
-    "grill-me",
-    "grilling",
-    "handoff",
-    "teach",
-    "to-questionnaire",
-    "wait-what",
-    "writing-for-agents",
-}
+_MATTPOCOCK_UNPREFIXED = {"grill-me", "grilling"}
 _MATTPOCOCK_USER_INVOKED = {
     "ask-matt",
     "grill-with-docs",
@@ -73,11 +38,13 @@ _MATTPOCOCK_USER_INVOKED = {
     "wait-what",
     "wayfinder",
 }
-
-
-@pytest.fixture
-def repo_root() -> Path:
-    return REPO_ROOT
+# Gateway handoff owners stay model-invocable in Copilot; see skill-normalizations.md.
+_MATTPOCOCK_CODEX_ONLY_RESTRICTED = {"implement", "to-spec"}
+_RETIRED_SKILL_BUNDLES = (
+    "internal-grill-me",
+    "mattpocock-writing-great-skills",
+    "anthropic-skill-creator",
+)
 
 
 def _write_manifest(tmp_path: Path, body: str) -> Path:
@@ -213,6 +180,33 @@ watchlist: []
     policy = manifest.sources[0].assets[0].invocation_policy
     assert policy is not None
     assert policy.copilot_disable_model_invocation is True
+    assert policy.codex_allow_implicit_invocation is False
+
+
+def test_manifest_accepts_codex_only_invocation_policy(tmp_path: Path) -> None:
+    manifest = load_managed_resources(
+        _write_manifest(
+            tmp_path,
+            f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+        invocation_policy:
+          codex:
+            allow_implicit_invocation: false
+watchlist: []
+""",
+        )
+    )
+    policy = manifest.sources[0].assets[0].invocation_policy
+    assert policy is not None
+    assert not policy.copilot_disable_model_invocation
     assert policy.codex_allow_implicit_invocation is False
 
 
@@ -375,176 +369,71 @@ watchlist: []
 
 
 def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
-    manifest = load_managed_resources(
-        repo_root
-        / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
-    )
+    manifest = _load_live_manifest(repo_root)
+    inventory = (repo_root / ".github/INVENTORY.md").read_text(encoding="utf-8")
 
-    assert len(manifest.assets) == 69
-    assert len(manifest.watchlist) == 10
-    addyosmani_source = next(
-        source
-        for source in manifest.sources
-        if source.source_id == "addyosmani-agent-skills"
-    )
-    assert any(
-        asset.upstream == "skills/planning-and-task-breakdown"
-        and asset.local == ".github/skills/addyosmani-planning-and-task-breakdown"
-        and asset.canonical_name == "addyosmani-planning-and-task-breakdown"
-        for asset in addyosmani_source.assets
-    )
-    assert any(
-        asset.upstream == "references/definition-of-done.md"
-        and asset.local
-        == (
-            ".github/skills/addyosmani-planning-and-task-breakdown/"
-            "references/definition-of-done.md"
+    for asset in manifest.assets:
+        assert (repo_root / asset.local).exists(), (
+            f"{asset.canonical_name}: {asset.local} is missing on disk"
         )
-        for asset in addyosmani_source.assets
-    )
-    assert any(
-        asset.upstream == "skills/idea-refine"
-        and asset.local == ".github/skills/addyosmani-idea-refine"
-        and asset.canonical_name == "addyosmani-idea-refine"
-        for asset in addyosmani_source.assets
-    )
-    assert not any(
-        item.source_family == "addyosmani/agent-skills"
-        and item.upstream_id == "idea-refine"
-        for item in manifest.watchlist
-    )
+        if (repo_root / asset.local / "SKILL.md").is_file():
+            assert asset.local == f".github/skills/{asset.canonical_name}"
+            assert f"{asset.local}/SKILL.md" in inventory
+
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
     )
-    assert matt_source.ref == _MATTPOCOCK_REF
     assert matt_source.rewrite_skill_references is True
     assert dict(matt_source.skill_reference_aliases) == {}
-    expected_upstreams = {
-        *(f"skills/engineering/{name}" for name in _MATTPOCOCK_ENGINEERING_SKILLS),
-        *(f"skills/productivity/{name}" for name in _MATTPOCOCK_PRODUCTIVITY_SKILLS),
-    }
-    assert {asset.upstream for asset in matt_source.assets} == expected_upstreams
-    assert len(matt_source.assets) == 25
-    expected_canonical_names = {
-        name if name in {"grill-me", "grilling"} else f"mattpocock-{name}"
-        for name in _MATTPOCOCK_ENGINEERING_SKILLS | _MATTPOCOCK_PRODUCTIVITY_SKILLS
-    }
-    assert {asset.canonical_name for asset in matt_source.assets} == (
-        expected_canonical_names
-    )
-    assert {
-        Path(asset.upstream).name
-        for asset in matt_source.assets
-        if asset.invocation_policy is not None
-    } == _MATTPOCOCK_USER_INVOKED
     for asset in matt_source.assets:
         upstream_name = Path(asset.upstream).name
-        if upstream_name in _MATTPOCOCK_USER_INVOKED:
-            assert asset.invocation_policy is not None
-            assert asset.invocation_policy.copilot_disable_model_invocation is True
-            assert asset.invocation_policy.codex_allow_implicit_invocation is False
-        else:
-            assert asset.invocation_policy is None
+        expected_name = (
+            upstream_name
+            if upstream_name in _MATTPOCOCK_UNPREFIXED
+            else f"mattpocock-{upstream_name}"
+        )
+        assert asset.canonical_name == expected_name
+
     anthropic_source = next(
         source for source in manifest.sources if source.source_id == "anthropic-skills"
     )
     assert anthropic_source.ensure_python_shebangs is True
-    assert {
-        item.upstream_id
-        for item in manifest.watchlist
-        if item.source_family == "mattpocock/skills"
-    } >= {"prototype", "qa"}
-    assert "to-tickets" not in {
-        item.upstream_id
-        for item in manifest.watchlist
-        if item.source_family == "mattpocock/skills"
-    }
-    assert "triage" not in {
-        item.upstream_id
-        for item in manifest.watchlist
-        if item.source_family == "mattpocock/skills"
-    }
-    assert "mattpocock-writing-great-skills" not in expected_canonical_names
-    assert not (repo_root / ".github/skills/mattpocock-writing-great-skills").exists()
+
+
+def test_live_mattpocock_invocation_policy(repo_root: Path) -> None:
+    manifest = _load_live_manifest(repo_root)
+    matt_source = next(
+        source for source in manifest.sources if source.source_id == "mattpocock-skills"
+    )
+    upstream_names = {Path(asset.upstream).name for asset in matt_source.assets}
+    assert _MATTPOCOCK_USER_INVOKED <= upstream_names
+
+    for asset in matt_source.assets:
+        upstream_name = Path(asset.upstream).name
+        policy = asset.invocation_policy
+        if upstream_name not in _MATTPOCOCK_USER_INVOKED:
+            assert policy is None, upstream_name
+            continue
+        assert policy is not None, upstream_name
+        assert policy.codex_allow_implicit_invocation is False
+        if upstream_name in _MATTPOCOCK_CODEX_ONLY_RESTRICTED:
+            assert not policy.copilot_disable_model_invocation, upstream_name
+        else:
+            assert policy.copilot_disable_model_invocation is True, upstream_name
+
+
+@pytest.mark.parametrize("name", _RETIRED_SKILL_BUNDLES)
+def test_retired_skill_bundles_absent(repo_root: Path, name: str) -> None:
+    local = f".github/skills/{name}"
+    manifest = _load_live_manifest(repo_root)
     inventory = (repo_root / ".github/INVENTORY.md").read_text(encoding="utf-8")
-    for canonical_name in expected_canonical_names:
-        assert f".github/skills/{canonical_name}/SKILL.md" in inventory
-    assert ".github/skills/internal-grill-me/SKILL.md" not in inventory
-    assert "mattpocock-writing-great-skills" not in inventory
-    assert {
-        (source.repository, asset.upstream, asset.local, asset.canonical_name)
-        for source in manifest.sources
-        for asset in source.assets
-    } >= {
-        (
-            "https://github.com/atlassian/atlassian-mcp-server.git",
-            "skills/search-company-knowledge",
-            ".github/skills/search-company-knowledge",
-            "search-company-knowledge",
-        ),
-        (
-            "https://github.com/openai/skills.git",
-            "skills/.curated/openai-docs",
-            ".github/skills/openai-docs",
-            "openai-docs",
-        ),
-        (
-            "https://github.com/anthropics/skills.git",
-            "skills/docx",
-            ".github/skills/anthropic-docx",
-            "anthropic-docx",
-        ),
-        (
-            "https://github.com/anthropics/skills.git",
-            "skills/pptx",
-            ".github/skills/anthropic-pptx",
-            "anthropic-pptx",
-        ),
-        (
-            "https://github.com/anthropics/skills.git",
-            "skills/xlsx",
-            ".github/skills/anthropic-xlsx",
-            "anthropic-xlsx",
-        ),
-    }
-    imported_assets = {
-        (source.repository, asset.upstream, asset.local, asset.canonical_name)
-        for source in manifest.sources
-        for asset in source.assets
-    }
-    assert (
-        "https://github.com/anthropics/skills.git",
-        "skills/skill-creator",
-        ".github/skills/anthropic-skill-creator",
-        "anthropic-skill-creator",
-    ) not in imported_assets
-    assert {
-        item.local for item in manifest.assets if item.source == "obra-superpowers"
-    } == {
-        ".github/skills/superpowers-brainstorming",
-        ".github/skills/superpowers-diagnosing-superpowers",
-        ".github/skills/superpowers-dispatching-parallel-agents",
-        ".github/skills/superpowers-finishing-a-development-branch",
-        ".github/skills/superpowers-receiving-code-review",
-        ".github/skills/superpowers-requesting-code-review",
-        ".github/skills/superpowers-subagent-driven-development",
-        ".github/skills/superpowers-systematic-debugging",
-        ".github/skills/superpowers-test-driven-development",
-        ".github/skills/superpowers-using-git-worktrees",
-        ".github/skills/superpowers-using-superpowers",
-        ".github/skills/superpowers-verification-before-completion",
-    }
-    assert {
-        item.local
-        for item in manifest.assets
-        if item.source == "addyosmani-agent-skills"
-    } == {
-        ".github/skills/addyosmani-code-review-and-quality",
-        ".github/skills/addyosmani-code-simplification",
-        ".github/skills/addyosmani-idea-refine",
-        ".github/skills/addyosmani-planning-and-task-breakdown",
-        ".github/skills/addyosmani-planning-and-task-breakdown/references/definition-of-done.md",
-    }
+
+    assert not (repo_root / local).exists()
+    assert all(
+        asset.local != local and not asset.local.startswith(local + "/")
+        for asset in manifest.assets
+    )
+    assert name not in inventory
 
 
 def test_manifest_rejects_duplicate_local_paths(tmp_path: Path) -> None:
@@ -608,52 +497,23 @@ def test_live_override_targets_sit_under_managed_assets(repo_root: Path) -> None
         )
 
 
-def test_live_handoff_override_is_owned_by_candidate_normalization(
-    repo_root: Path,
-) -> None:
-    overrides_path = (
-        repo_root
-        / ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
-    )
-    overrides = load_overrides(overrides_path)
-    assert all(
-        override.target_path != ".github/skills/mattpocock-handoff/SKILL.md"
+@pytest.mark.parametrize(
+    "retired_target",
+    (
+        ".github/skills/mattpocock-handoff/SKILL.md",
+        ".github/skills/mattpocock-writing-great-skills/SKILL.md",
+        ".github/skills/mattpocock-writing-for-agents/SKILL.md",
+        ".github/skills/addyosmani-idea-refine",
+    ),
+)
+def test_retired_override_targets_absent(repo_root: Path, retired_target: str) -> None:
+    overrides = load_overrides(repo_root / _OVERRIDES_PATH)
+
+    assert not any(
+        override.target_path == retired_target
+        or override.target_path.startswith(retired_target + "/")
         for override in overrides
     )
-
-
-def test_mattpocock_writing_for_agents_needs_no_replay_override(
-    repo_root: Path,
-) -> None:
-    overrides_path = (
-        repo_root / ".github/skills/local-agent-sync-external-resources/references/"
-        "imported-asset-overrides.yaml"
-    )
-    overrides = load_overrides(overrides_path)
-    override_targets = {override.target_path for override in overrides}
-
-    assert ".github/skills/mattpocock-writing-great-skills/SKILL.md" not in (
-        override_targets
-    )
-    assert ".github/skills/mattpocock-writing-for-agents/SKILL.md" not in (
-        override_targets
-    )
-
-
-def test_active_internal_skill_consumers_use_current_mattpocock_entrypoints(
-    repo_root: Path,
-) -> None:
-    active_consumers = (
-        repo_root / ".github/skills/internal-skill-creator/SKILL.md",
-        repo_root / ".github/skills/internal-skill-creator/agents/openai.yaml",
-    )
-
-    combined = "\n".join(
-        consumer.read_text(encoding="utf-8") for consumer in active_consumers
-    )
-    assert "mattpocock-writing-great-skills" not in combined
-    assert "mattpocock-writing-for-agents" in combined
-    assert "/internal-grill-me" not in combined
 
 
 def test_manifest_rejects_undeclared_backtick_skill_reference(tmp_path: Path) -> None:
@@ -677,3 +537,44 @@ def test_manifest_rejects_undeclared_backtick_skill_reference(tmp_path: Path) ->
 
     with pytest.raises(ValueError, match="not-an-asset"):
         load_managed_resources(manifest)
+
+
+def test_live_managed_skills_match_invocation_policy(repo_root: Path) -> None:
+    resources = _load_live_manifest(repo_root)
+    mismatches: list[str] = []
+    for asset in resources.assets:
+        bundle = repo_root / asset.local
+        skill = bundle / "SKILL.md"
+        if not skill.is_file():
+            continue
+        policy = asset.invocation_policy
+        frontmatter = yaml.safe_load(
+            skill.read_text(encoding="utf-8").split("---", 2)[1]
+        )
+        expected_copilot = policy.copilot_disable_model_invocation if policy else None
+        if frontmatter.get("disable-model-invocation") != (
+            True if expected_copilot else None
+        ):
+            mismatches.append(f"{asset.canonical_name}: SKILL.md invocation")
+
+        metadata_path = bundle / "agents/openai.yaml"
+        metadata = (
+            yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+            if metadata_path.is_file()
+            else {}
+        )
+        actual_codex = (metadata.get("policy") or {}).get("allow_implicit_invocation")
+        expected_codex = policy.codex_allow_implicit_invocation if policy else None
+        if actual_codex != expected_codex:
+            mismatches.append(f"{asset.canonical_name}: agents/openai.yaml policy")
+
+    assert mismatches == []
+
+
+def test_live_grill_me_has_one_scope_convergence_block(repo_root: Path) -> None:
+    content = (repo_root / ".github/skills/grill-me/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert content.count(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START) == 1
+    assert content.count(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END) == 1

@@ -47,6 +47,10 @@ declared source.
 - `superpowers-brainstorming` remains an independently declared exception:
   keep `disable-model-invocation: true` in `SKILL.md` and set
   `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
+- `mattpocock-implement` and `mattpocock-to-spec` are Codex-only restrictions:
+  keep `codex.allow_implicit_invocation: false` and declare no Copilot policy,
+  because `internal-gateway-execute-plans` and `internal-gateway-idea` `+spec`
+  must load them as handoff owners.
 - `tests/test_external_resource_catalog_contract.py` verifies that committed
   invocation metadata matches the manifest in both runtimes: declared skills
   carry their policy, and undeclared skills carry none. It checks metadata,

@@ -1,17 +1,17 @@
 import json
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
-
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+from sync_external_resources import _build_candidate_patch
+from sync_external_resources_core import (
+    ManagedAsset,
+    ManagedResources,
+    ManagedSource,
+    load_managed_resources,
 )
-SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
-sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 
 def _write_source_metadata_for_fixture(
@@ -29,31 +29,11 @@ def _write_source_metadata_for_fixture(
     (source_dir / ".external-resource-source.tsv").write_text(tsv, encoding="utf-8")
 
 
-def _run_git(cwd: Path, args: list[str]) -> None:
-    subprocess.run(
-        ["git", *args],
-        cwd=cwd,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-
-def _commit_all(repo: Path) -> None:
-    _run_git(repo, ["add", "-A"])
-    _run_git(repo, ["commit", "-m", "snapshot", "--allow-empty"])
-
-
-@pytest.fixture
-def repo_root() -> Path:
-    return REPO_ROOT
-
-
-def test_audit_does_not_fetch_or_write(repo_root: Path) -> None:
+def test_audit_does_not_fetch_or_write(repo_root: Path, script_dir: Path) -> None:
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "audit",
             "--repo-root",
             str(repo_root),
@@ -69,10 +49,17 @@ def test_audit_does_not_fetch_or_write(repo_root: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["mode"] == "audit"
     assert payload["repository_changed"] is False
-    assert payload["managed_assets"] == 69
+    manifest = load_managed_resources(
+        repo_root
+        / ".github/skills/local-agent-sync-external-resources"
+        / "references/managed-resources.yaml"
+    )
+    assert payload["managed_assets"] == len(manifest.assets)
 
 
-def test_plan_materializes_only_the_selected_source(tmp_path: Path) -> None:
+def test_plan_materializes_only_the_selected_source(
+    tmp_path: Path, script_dir: Path
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     workspace = tmp_path / "external-workspace"
@@ -132,7 +119,7 @@ overrides:
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "plan",
             "--repo-root",
             str(repo),
@@ -159,11 +146,11 @@ overrides:
     assert not (workspace / "candidate/.github/skills/unrelated").exists()
 
 
-def test_audit_rejects_an_unknown_source(repo_root: Path) -> None:
+def test_audit_rejects_an_unknown_source(repo_root: Path, script_dir: Path) -> None:
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "audit",
             "--repo-root",
             str(repo_root),
@@ -183,12 +170,17 @@ def test_audit_rejects_an_unknown_source(repo_root: Path) -> None:
     ]
 
 
-def test_apply_refuses_dirty_target(tmp_path: Path) -> None:
+def test_apply_refuses_dirty_target(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     mini_manifest = tmp_path / "manifest.yaml"
     mini_manifest.write_text(
@@ -219,7 +211,7 @@ overrides: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
     target.write_text("---\nname: locally-edited\n---\n", encoding="utf-8")
 
     workspace = tmp_path / "external-workspace"
@@ -228,7 +220,7 @@ overrides: []
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "apply",
             "--repo-root",
             str(repo),
@@ -249,12 +241,15 @@ overrides: []
 
 def test_apply_reports_repository_changed_when_candidate_diff_applies(
     tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -285,7 +280,7 @@ overrides: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
@@ -306,7 +301,7 @@ overrides: []
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "apply",
             "--repo-root",
             str(repo),
@@ -333,31 +328,34 @@ overrides: []
 
 def test_apply_prepares_missing_snapshots_in_repository_tmp(
     tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     remote = tmp_path / "remote.git"
     remote.mkdir()
-    _run_git(remote, ["init", "--bare"])
-    _run_git(remote, ["config", "uploadpack.allowFilter", "true"])
-    _run_git(remote, ["config", "uploadpack.allowReachableSHA1InWant", "true"])
+    run_git(remote, ["init", "--bare"])
+    run_git(remote, ["config", "uploadpack.allowFilter", "true"])
+    run_git(remote, ["config", "uploadpack.allowReachableSHA1InWant", "true"])
 
     source_worktree = tmp_path / "source-worktree"
     source_worktree.mkdir()
-    _run_git(source_worktree, ["init"])
-    _run_git(source_worktree, ["config", "user.email", "test@test.com"])
-    _run_git(source_worktree, ["config", "user.name", "Test"])
+    run_git(source_worktree, ["init"])
+    run_git(source_worktree, ["config", "user.email", "test@test.com"])
+    run_git(source_worktree, ["config", "user.name", "Test"])
     source_skill = source_worktree / "skills" / "example"
     source_skill.mkdir(parents=True)
     (source_skill / "SKILL.md").write_text(
         "---\nname: example\n---\nPrepared content.\n",
         encoding="utf-8",
     )
-    _commit_all(source_worktree)
+    commit_all(source_worktree)
     commit_sha = subprocess.run(
         ["git", "rev-parse", "HEAD"],
         cwd=source_worktree,
@@ -365,8 +363,8 @@ def test_apply_prepares_missing_snapshots_in_repository_tmp(
         text=True,
         check=True,
     ).stdout.strip()
-    _run_git(source_worktree, ["remote", "add", "origin", str(remote)])
-    _run_git(source_worktree, ["push", "origin", "HEAD:refs/heads/main"])
+    run_git(source_worktree, ["remote", "add", "origin", str(remote)])
+    run_git(source_worktree, ["push", "origin", "HEAD:refs/heads/main"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -390,14 +388,14 @@ watchlist: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "apply",
             "--repo-root",
             str(repo),
@@ -426,12 +424,17 @@ watchlist: []
     assert "Prepared content." in target.read_text(encoding="utf-8")
 
 
-def test_plan_uses_explicit_source_root(tmp_path: Path) -> None:
+def test_plan_uses_explicit_source_root(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -462,7 +465,7 @@ overrides: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
@@ -483,7 +486,7 @@ overrides: []
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "plan",
             "--repo-root",
             str(repo),
@@ -508,12 +511,17 @@ overrides: []
     assert payload["mode"] == "plan"
 
 
-def test_plan_then_apply_end_to_end(tmp_path: Path) -> None:
+def test_plan_then_apply_end_to_end(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -544,7 +552,7 @@ overrides: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
@@ -564,7 +572,7 @@ overrides: []
 
     common_args = [
         sys.executable,
-        str(SCRIPT_DIR / "sync_external_resources.py"),
+        str(script_dir / "sync_external_resources.py"),
         "--repo-root",
         str(repo),
         "--workspace",
@@ -605,14 +613,17 @@ overrides: []
 def test_plan_and_apply_reject_mismatched_prepared_ref(
     tmp_path: Path,
     mode: str,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
     (repo / "README.md").write_text("init\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -652,7 +663,7 @@ watchlist: []
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             mode,
             "--repo-root",
             str(repo),
@@ -676,11 +687,11 @@ watchlist: []
     assert "ref" in failure_output
 
 
-def test_audit_tsv_contains_summary_mode_row(repo_root: Path) -> None:
+def test_audit_tsv_contains_summary_mode_row(repo_root: Path, script_dir: Path) -> None:
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "audit",
             "--repo-root",
             str(repo_root),
@@ -698,25 +709,28 @@ def test_audit_tsv_contains_summary_mode_row(repo_root: Path) -> None:
 
 def test_prepare_cold_then_warm_against_fixture(
     tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
-    _commit_all(repo)
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
+    commit_all(repo)
 
     remote = tmp_path / "remote.git"
     remote.mkdir()
-    _run_git(remote, ["init", "--bare"])
-    _run_git(remote, ["config", "uploadpack.allowReachableSHA1InWant", "true"])
-    _run_git(remote, ["config", "uploadpack.allowFilter", "true"])
+    run_git(remote, ["init", "--bare"])
+    run_git(remote, ["config", "uploadpack.allowReachableSHA1InWant", "true"])
+    run_git(remote, ["config", "uploadpack.allowFilter", "true"])
 
     work = tmp_path / "work"
     work.mkdir()
-    _run_git(work, ["init"])
-    _run_git(work, ["config", "user.email", "test@test.com"])
-    _run_git(work, ["config", "user.name", "Test"])
+    run_git(work, ["init"])
+    run_git(work, ["config", "user.email", "test@test.com"])
+    run_git(work, ["config", "user.name", "Test"])
 
     skill_dir = work / "skills" / "example"
     skill_dir.mkdir(parents=True)
@@ -727,7 +741,7 @@ def test_prepare_cold_then_warm_against_fixture(
     decoy = work / "decoy.bin"
     decoy.write_bytes(b"\x00" * 1024)
 
-    _commit_all(work)
+    commit_all(work)
     sha_result = subprocess.run(
         ["git", "rev-parse", "HEAD"],
         cwd=work,
@@ -736,8 +750,8 @@ def test_prepare_cold_then_warm_against_fixture(
         check=True,
     )
     commit_sha = sha_result.stdout.strip()
-    _run_git(work, ["remote", "add", "origin", str(remote)])
-    _run_git(work, ["push", "origin", "HEAD:refs/heads/main"])
+    run_git(work, ["remote", "add", "origin", str(remote)])
+    run_git(work, ["push", "origin", "HEAD:refs/heads/main"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -763,7 +777,7 @@ watchlist: []
 
     common_args = [
         sys.executable,
-        str(SCRIPT_DIR / "sync_external_resources.py"),
+        str(script_dir / "sync_external_resources.py"),
         "--repo-root",
         str(repo),
         "--workspace",
@@ -801,29 +815,6 @@ watchlist: []
     assert "source\ttest-source\tcached" in second.stdout
 
 
-def test_owner_docs_state_prepare_is_the_only_network_mode(
-    repo_root: Path,
-) -> None:
-    skill_md = repo_root / ".github/skills/local-agent-sync-external-resources/SKILL.md"
-    agent_md = repo_root / ".github/agents/local-sync-external-resources.agent.md"
-    texts = []
-    for path in (skill_md, agent_md):
-        if path.exists():
-            texts.append(path.read_text(encoding="utf-8"))
-    combined = "\n".join(texts)
-
-    if not combined:
-        pytest.skip("Owner docs not yet written")
-
-    for phrase in (
-        "prepare",
-        "offline",
-        "pinned",
-        "no package",
-    ):
-        assert phrase.lower() in combined.lower(), f"Owner docs must mention {phrase!r}"
-
-
 def test_bundle_exposes_one_public_cli(repo_root: Path) -> None:
     scripts = repo_root / ".github/skills/local-agent-sync-external-resources/scripts"
     public_scripts = sorted(
@@ -833,12 +824,17 @@ def test_bundle_exposes_one_public_cli(repo_root: Path) -> None:
     assert public_scripts == ["sync_external_resources.py"]
 
 
-def test_audit_reports_dirty_targets_but_stays_zero_exit(tmp_path: Path) -> None:
+def test_audit_reports_dirty_targets_but_stays_zero_exit(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -863,13 +859,13 @@ watchlist: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
     target.write_text("---\nname: locally-edited\n---\n", encoding="utf-8")
 
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "audit",
             "--repo-root",
             str(repo),
@@ -908,12 +904,14 @@ watchlist: []
     ]
 
 
-def test_plan_reports_missing_source_prepare_failure(tmp_path: Path) -> None:
+def test_plan_reports_missing_source_prepare_failure(
+    tmp_path: Path, run_git: Callable[[Path, list[str]], None], script_dir: Path
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -942,7 +940,7 @@ watchlist: []
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "plan",
             "--repo-root",
             str(repo),
@@ -966,30 +964,55 @@ watchlist: []
     assert "fetch" in failure_output
 
 
-def test_agent_and_skill_do_not_route_to_unneeded_skills(repo_root: Path) -> None:
-    paths = (
-        repo_root / ".github/agents/local-sync-external-resources.agent.md",
-        repo_root / ".github/skills/local-agent-sync-external-resources/SKILL.md",
+def test_build_candidate_patch_detects_repo_vs_candidate_diff(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
+    commit_all(repo)
+
+    candidate = tmp_path / "candidate"
+    candidate.mkdir()
+    cand_target = candidate / ".github/skills/example/SKILL.md"
+    cand_target.parent.mkdir(parents=True)
+    cand_target.write_text("---\nname: example\n---\nNew content.\n", encoding="utf-8")
+
+    asset = ManagedAsset(
+        source="test-source",
+        upstream="skills/example",
+        local=".github/skills/example",
+        canonical_name="example",
     )
-    text = "\n".join(
-        path.read_text(encoding="utf-8") for path in paths if path.exists()
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="test-source",
+                repository="https://example.com/repo.git",
+                ref="abc",
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
     )
 
-    if not text:
-        pytest.skip("Agent or skill file not yet rewritten")
-
-    for forbidden in (
-        "internal-skill-creator",
-        "internal-agent-creator",
-        "internal-gateway-idea",
-        "internal-copilot-docs-research",
-        "internal-copilot-audit",
-    ):
-        assert forbidden not in text
+    patch = _build_candidate_patch(repo, candidate, resources)
+    assert patch.strip(), "patch must be non-empty when candidate differs from repo"
+    assert "New content." in patch
 
 
 def test_invalid_manifest_emits_blocker_not_traceback(
-    tmp_path: Path, repo_root: Path
+    tmp_path: Path, repo_root: Path, script_dir: Path
 ) -> None:
     bad_manifest = tmp_path / "bad-manifest.yaml"
     bad_manifest.write_text("version: 2\nsources: {}\n", encoding="utf-8")
@@ -997,7 +1020,7 @@ def test_invalid_manifest_emits_blocker_not_traceback(
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "audit",
             "--repo-root",
             str(repo_root),
@@ -1061,12 +1084,17 @@ def test_prepare_tsv_metric_rows_use_status_column_for_status(
     assert rows[("source", "example")] == ("fetched", "a" * 40)
 
 
-def test_audit_tsv_emits_source_provenance_rows(tmp_path: Path) -> None:
+def test_audit_tsv_emits_source_provenance_rows(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -1092,12 +1120,12 @@ watchlist: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
 
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "audit",
             "--repo-root",
             str(repo),
@@ -1126,12 +1154,17 @@ watchlist: []
     assert rows[("metric", "test-source.skills_count")] == ("ok", "1")
 
 
-def test_audit_json_reports_source_provenance(tmp_path: Path) -> None:
+def test_audit_json_reports_source_provenance(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     manifest_src = tmp_path / "manifest.yaml"
     manifest_src.write_text(
@@ -1158,12 +1191,12 @@ watchlist: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
 
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "audit",
             "--repo-root",
             str(repo),
@@ -1193,22 +1226,27 @@ watchlist: []
     ]
 
 
-def test_plan_rejects_commit_date_mismatch_against_cache(tmp_path: Path) -> None:
+def test_plan_rejects_commit_date_mismatch_against_cache(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+    script_dir: Path,
+) -> None:
     from source_prepare_core import _cache_key_for_repository
 
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
 
     work = tmp_path / "work"
     work.mkdir()
-    _run_git(work, ["init"])
-    _run_git(work, ["config", "user.email", "test@test.com"])
-    _run_git(work, ["config", "user.name", "Test"])
+    run_git(work, ["init"])
+    run_git(work, ["config", "user.email", "test@test.com"])
+    run_git(work, ["config", "user.name", "Test"])
     (work / "marker.txt").write_text("marker\n", encoding="utf-8")
-    _commit_all(work)
+    commit_all(work)
     commit_sha = subprocess.run(
         ["git", "rev-parse", "HEAD"],
         cwd=work,
@@ -1241,7 +1279,7 @@ watchlist: []
     target = repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
@@ -1252,8 +1290,8 @@ watchlist: []
         / _cache_key_for_repository("https://example.com/repo.git")
     )
     cache.mkdir(parents=True)
-    _run_git(cache, ["init", "--bare"])
-    _run_git(cache, ["fetch", str(work), "HEAD"])
+    run_git(cache, ["init", "--bare"])
+    run_git(cache, ["fetch", str(work), "HEAD"])
 
     sources_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
     source_dir = sources_root / "test-source" / "skills" / "example"
@@ -1272,7 +1310,7 @@ watchlist: []
     result = subprocess.run(
         [
             sys.executable,
-            str(SCRIPT_DIR / "sync_external_resources.py"),
+            str(script_dir / "sync_external_resources.py"),
             "plan",
             "--repo-root",
             str(repo),

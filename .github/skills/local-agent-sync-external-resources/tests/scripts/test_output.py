@@ -1,15 +1,4 @@
-import sys
-from pathlib import Path
-
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
-sys.path.insert(0, SCRIPT_DIR.as_posix())
-
-from sync_output_core import (  # noqa: E402
+from sync_output_core import (
     OutputRecord,
     escape_tsv,
     render_tsv,

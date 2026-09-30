@@ -5,28 +5,18 @@ import io
 import os
 import stat
 import subprocess
-import sys
 import tarfile
 from pathlib import Path
 
 import pytest
-
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
-sys.path.insert(0, SCRIPT_DIR.as_posix())
-
-from source_prepare_core import (  # noqa: E402
+from source_prepare_core import (
     _build_fetch_command,
     _cache_key_for_repository,
     _extract_archive,
     _validate_upstream_paths,
     prepare_sources,
 )
-from sync_external_resources_core import (  # noqa: E402
+from sync_external_resources_core import (
     ManagedAsset,
     ManagedResources,
     ManagedSource,
@@ -679,9 +669,7 @@ def test_network_fetch_uses_extended_timeout(monkeypatch: pytest.MonkeyPatch) ->
 
 def test_read_commit_date_returns_none_without_cache() -> None:
     assert (
-        source_prepare_core.read_commit_date(
-            Path("/nonexistent-cache"), _FULL_SHA40
-        )
+        source_prepare_core.read_commit_date(Path("/nonexistent-cache"), _FULL_SHA40)
         is None
     )
 

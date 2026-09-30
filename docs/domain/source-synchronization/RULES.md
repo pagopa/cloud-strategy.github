@@ -27,7 +27,7 @@ These rules govern source-to-target synchronization and preservation of consumer
 - Rule ID: home-sync-preserves-home-only-resources
 - Owner: Source synchronization
 - Severity: blocking
-- Enforcement owner: `.github/skills/local-agent-sync-install-ai-resources/scripts/home_syncing.py` and `.github/skills/local-agent-sync-install-ai-resources/tests/scripts/test_apply_paths.py`
-- Evidence: `.github/skills/local-agent-sync-install-ai-resources/references/sync-contract.md`, `.github/skills/local-agent-sync-install-ai-resources/tests/scripts/test_apply_paths.py`
+- Enforcement owner: `.github/skills/local-agent-sync-install-ai-resources/scripts/home_syncing.py` and `.github/skills/local-agent-sync-install-ai-resources/tests/scripts/test_cli.py`
+- Evidence: `.github/skills/local-agent-sync-install-ai-resources/references/sync-contract.md`, `.github/skills/local-agent-sync-install-ai-resources/tests/scripts/test_cli.py`
 - Remediation: Preserve home-only skills and resolve ownership before applying a plan.
 - Rule: Home-only skills, local bundles, invalid repository bundles, and catalog-excluded IDs remain untouched by repository-to-home synchronization.

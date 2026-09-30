@@ -1,22 +1,16 @@
 import hashlib
 import json
 import subprocess
-import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 import yaml
-
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
-sys.path.insert(0, SCRIPT_DIR.as_posix())
-
-from sync_external_resources import _build_candidate_patch  # noqa: E402
-from sync_external_resources_core import (  # noqa: E402
+from sync_external_resources_core import (
+    _GUIDED_QUESTION_CONTRACT,
+    _GUIDED_QUESTION_CONTRACT_START,
+    _SUPERPOWERS_NO_COMMIT_CONTRACT,
+    _SUPERPOWERS_NO_COMMIT_CONTRACT_START,
     ImportedOverride,
     InvocationPolicy,
     ManagedAsset,
@@ -36,33 +30,19 @@ from sync_external_resources_core import (  # noqa: E402
 )
 
 
-def _run_git(cwd: Path, args: list[str]) -> None:
-    subprocess.run(
-        ["git", *args],
-        cwd=cwd,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-
-def _commit_all(repo: Path) -> None:
-    _run_git(repo, ["add", "-A"])
-    _run_git(
-        repo,
-        ["commit", "-m", "snapshot", "--allow-empty"],
-    )
-
-
 @pytest.fixture
-def git_repo(tmp_path: Path) -> Path:
+def git_repo(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+) -> Path:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
     (repo / "README.md").write_text("init\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
     return repo
 
 
@@ -557,11 +537,13 @@ def test_workspace_outside_repository_is_accepted(tmp_path: Path) -> None:
     validate_external_workspace(repo, workspace)
 
 
-def test_dirty_managed_target_is_reported(git_repo: Path) -> None:
+def test_dirty_managed_target_is_reported(
+    git_repo: Path, commit_all: Callable[[Path], None]
+) -> None:
     target = git_repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\n", encoding="utf-8")
-    _commit_all(git_repo)
+    commit_all(git_repo)
     target.write_text("---\nname: locally-edited\n---\n", encoding="utf-8")
 
     assert find_dirty_targets(git_repo, (_example_asset(),)) == (
@@ -569,11 +551,13 @@ def test_dirty_managed_target_is_reported(git_repo: Path) -> None:
     )
 
 
-def test_clean_managed_target_is_not_reported(git_repo: Path) -> None:
+def test_clean_managed_target_is_not_reported(
+    git_repo: Path, commit_all: Callable[[Path], None]
+) -> None:
     target = git_repo / ".github/skills/example/SKILL.md"
     target.parent.mkdir(parents=True)
     target.write_text("---\nname: example\n---\n", encoding="utf-8")
-    _commit_all(git_repo)
+    commit_all(git_repo)
 
     assert find_dirty_targets(git_repo, (_example_asset(),)) == ()
 
@@ -686,11 +670,8 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     expected_changed = [f"{local}/SKILL.md", f"{local}/agents/openai.yaml"]
     assert first_changed == tuple(sorted(expected_changed))
     assert second_changed == ()
-    assert content.count("Local guided-question contract") == 1
-    assert "numbered bulk question blocks" in content
-    assert "`Question`, `Recommendation`, `Why`, and `Default if accepted`" in content
-    assert "Keep each question, recommendation, and reason brief" in content
-    assert "overrides any earlier instruction to ask one question at a time" in content
+    assert content.count(_GUIDED_QUESTION_CONTRACT_START) == 1
+    assert _GUIDED_QUESTION_CONTRACT in content
 
 
 def test_normalization_enforces_no_commit_contract_for_superpowers_skills(
@@ -751,10 +732,8 @@ def test_normalization_enforces_no_commit_contract_for_superpowers_skills(
     content = skill.read_text(encoding="utf-8")
     assert f"{local}/SKILL.md" in first_changed
     assert second_changed == ()
-    assert content.count("<!-- local-sync:no-commit:start -->") == 1
-    assert "## Local no-commit contract" in content
-    assert "Do not create, amend, squash, or push Git commits" in content
-    assert "every subagent brief" in content
+    assert content.count(_SUPERPOWERS_NO_COMMIT_CONTRACT_START) == 1
+    assert _SUPERPOWERS_NO_COMMIT_CONTRACT in content
     assert prompt.read_text(encoding="utf-8") == "Commit your work.\n"
     assert "local-sync:no-commit" not in other_skill.read_text(encoding="utf-8")
 
@@ -774,7 +753,7 @@ def test_normalization_prefixes_superpowers_sibling_paths_in_all_files(
         encoding="utf-8",
     )
     script_body = (
-        '#!/usr/bin/env bash\n'
+        "#!/usr/bin/env bash\n"
         'sdd="$(cd "$(dirname "$0")/../../subagent-driven-development/scripts" && pwd)"\n'
         'other="../unknown-skill/scripts"\n'
     )
@@ -787,7 +766,9 @@ def test_normalization_prefixes_superpowers_sibling_paths_in_all_files(
     other_local = ".github/skills/example"
     other_script = candidate / other_local / "scripts" / "run"
     other_script.parent.mkdir(parents=True)
-    other_script.write_text("../../subagent-driven-development/scripts\n", encoding="utf-8")
+    other_script.write_text(
+        "../../subagent-driven-development/scripts\n", encoding="utf-8"
+    )
     superpowers_assets = tuple(
         ManagedAsset(
             source="obra-superpowers",
@@ -1303,8 +1284,7 @@ def test_normalization_restores_grill_me_scope_guardrail_when_engine_is_already_
     engine.parent.mkdir(parents=True)
     engine_metadata.parent.mkdir(parents=True)
     wrapper.write_text(
-        "---\nname: grill-me\n---\n"
-        "Imported grill-me body remains.\n",
+        "---\nname: grill-me\n---\nImported grill-me body remains.\n",
         encoding="utf-8",
     )
     engine.write_text(
@@ -1331,12 +1311,13 @@ def test_normalization_restores_grill_me_scope_guardrail_when_engine_is_already_
     assert second_changed == ()
     wrapper_content = wrapper.read_text(encoding="utf-8")
     assert "Imported grill-me body remains.\n" in wrapper_content
-    assert wrapper_content.count(
-        "<!-- local-sync:grill-me-scope-convergence:start -->"
-    ) == 1
-    assert wrapper_content.count(
-        "<!-- local-sync:grill-me-scope-convergence:end -->"
-    ) == 1
+    assert (
+        wrapper_content.count("<!-- local-sync:grill-me-scope-convergence:start -->")
+        == 1
+    )
+    assert (
+        wrapper_content.count("<!-- local-sync:grill-me-scope-convergence:end -->") == 1
+    )
     assert engine.read_text(encoding="utf-8") == (
         "---\n"
         "disable-model-invocation: true\n"
@@ -1558,14 +1539,18 @@ def test_materialize_candidate_rejects_mismatched_prepared_ref(
 
 
 @pytest.fixture
-def candidate_repo(tmp_path: Path) -> Path:
+def candidate_repo(
+    tmp_path: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+) -> Path:
     repo = tmp_path / "candidate"
     repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
     (repo / "README.md").write_text("init\n", encoding="utf-8")
-    _commit_all(repo)
+    commit_all(repo)
     return repo
 
 
@@ -1591,6 +1576,7 @@ def test_override_hash_normalizes_text_whitespace(tmp_path: Path) -> None:
 
 def _make_override(
     candidate_repo: Path,
+    commit_all: Callable[[Path], None],
     override_id: str = "test-override",
     target_rel: str = ".github/skills/test/SKILL.md",
     original_content: str = "---\nname: test\n---\nOriginal content.\n",
@@ -1599,7 +1585,7 @@ def _make_override(
     target = candidate_repo / target_rel
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(original_content, encoding="utf-8")
-    _commit_all(candidate_repo)
+    commit_all(candidate_repo)
 
     patch_dir = candidate_repo / "patches"
     patch_dir.mkdir(exist_ok=True)
@@ -1626,8 +1612,10 @@ def _make_override(
     return override, target, patch_path
 
 
-def test_override_applies_cleanly(candidate_repo: Path) -> None:
-    override, target, _ = _make_override(candidate_repo)
+def test_override_applies_cleanly(
+    candidate_repo: Path, commit_all: Callable[[Path], None]
+) -> None:
+    override, target, _ = _make_override(candidate_repo, commit_all)
 
     results = replay_overrides(candidate_repo, (override,))
 
@@ -1639,27 +1627,31 @@ def test_override_applies_cleanly(candidate_repo: Path) -> None:
 
 @pytest.mark.parametrize("upstream_changed", [False, True])
 def test_idea_refine_normalization_keeps_tmp_output_after_upstream_changes(
-    tmp_path: Path, upstream_changed: bool,
+    tmp_path: Path,
+    upstream_changed: bool,
+    repo_root: Path,
 ) -> None:
-    bundle_root = REPO_ROOT / ".github/skills/local-agent-sync-external-resources"
+    bundle_root = repo_root / ".github/skills/local-agent-sync-external-resources"
     target_root = ".github/skills/addyosmani-idea-refine"
     candidate = tmp_path / "candidate"
     candidate.mkdir()
-    resources = load_managed_resources(bundle_root / "references/managed-resources.yaml")
+    resources = load_managed_resources(
+        bundle_root / "references/managed-resources.yaml"
+    )
     overrides = load_overrides(bundle_root / "references/imported-asset-overrides.yaml")
     assert not any(
-        override.target_path.startswith(target_root + "/")
-        for override in overrides
+        override.target_path.startswith(target_root + "/") for override in overrides
     )
 
     for relative_file in ("SKILL.md", "scripts/idea-refine.sh"):
         target_path = f"{target_root}/{relative_file}"
         baseline = subprocess.run(
             [
-                "git", "show",
+                "git",
+                "show",
                 f"9d75fb4b829f10949215b4916f36a6b3ecc1bc2e:{target_path}",
             ],
-            cwd=REPO_ROOT,
+            cwd=repo_root,
             capture_output=True,
             text=True,
             check=True,
@@ -1679,7 +1671,9 @@ def test_idea_refine_normalization_keeps_tmp_output_after_upstream_changes(
 
     neighbor = candidate / ".github/skills/addyosmani-code-simplification/SKILL.md"
     neighbor.parent.mkdir(parents=True)
-    neighbor_content = "---\nname: addyosmani-code-simplification\n---\ndocs/ideas/example.md\n"
+    neighbor_content = (
+        "---\nname: addyosmani-code-simplification\n---\ndocs/ideas/example.md\n"
+    )
     neighbor.write_text(neighbor_content, encoding="utf-8")
     notes = candidate / target_root / "references/paths.md"
     notes.parent.mkdir()
@@ -1699,7 +1693,10 @@ def test_idea_refine_normalization_keeps_tmp_output_after_upstream_changes(
             text=True,
             check=True,
         )
-        assert json.loads(result.stdout) == {"status": "ready", "directory": "tmp/ideas"}
+        assert json.loads(result.stdout) == {
+            "status": "ready",
+            "directory": "tmp/ideas",
+        }
         assert (candidate / "tmp/ideas").is_dir()
         assert not (candidate / "docs").exists()
         retained = candidate / "tmp/ideas/retained.md"
@@ -1729,9 +1726,13 @@ def test_idea_refine_normalization_keeps_tmp_output_after_upstream_changes(
     assert "Additional upstream section." in updated
 
 
-def test_planning_normalization_uses_one_plan_and_preserves_scope(tmp_path: Path) -> None:
-    bundle_root = REPO_ROOT / ".github/skills/local-agent-sync-external-resources"
-    resources = load_managed_resources(bundle_root / "references/managed-resources.yaml")
+def test_planning_normalization_uses_one_plan_and_preserves_scope(
+    tmp_path: Path, repo_root: Path
+) -> None:
+    bundle_root = repo_root / ".github/skills/local-agent-sync-external-resources"
+    resources = load_managed_resources(
+        bundle_root / "references/managed-resources.yaml"
+    )
     candidate = tmp_path / "candidate"
     target = candidate / ".github/skills/addyosmani-planning-and-task-breakdown"
     target.mkdir(parents=True)
@@ -1775,15 +1776,29 @@ def test_planning_normalization_uses_one_plan_and_preserves_scope(tmp_path: Path
 @pytest.mark.parametrize(
     ("name", "legacy", "replacement"),
     [
-        ("superpowers-brainstorming", "writing-plans", "internal-gateway-writing-plans"),
-        ("superpowers-subagent-driven-development", "executing-plans", "internal-gateway-execute-plans"),
+        (
+            "superpowers-brainstorming",
+            "writing-plans",
+            "internal-gateway-writing-plans",
+        ),
+        (
+            "superpowers-subagent-driven-development",
+            "executing-plans",
+            "internal-gateway-execute-plans",
+        ),
     ],
 )
 def test_retired_planner_routing_is_normalized(
-    tmp_path: Path, name: str, legacy: str, replacement: str,
+    tmp_path: Path,
+    name: str,
+    legacy: str,
+    replacement: str,
+    repo_root: Path,
 ) -> None:
-    bundle_root = REPO_ROOT / ".github/skills/local-agent-sync-external-resources"
-    resources = load_managed_resources(bundle_root / "references/managed-resources.yaml")
+    bundle_root = repo_root / ".github/skills/local-agent-sync-external-resources"
+    resources = load_managed_resources(
+        bundle_root / "references/managed-resources.yaml"
+    )
     candidate = tmp_path / "candidate"
     target = candidate / f".github/skills/{name}"
     target.mkdir(parents=True)
@@ -1795,38 +1810,32 @@ def test_retired_planner_routing_is_normalized(
     notes = target / "references/routing.md"
     notes.parent.mkdir()
     notes.write_text(
-        f"/{legacy}; /{replacement}; unrelated-{legacy}-archive\n", encoding="utf-8",
+        f"/{legacy}; /{replacement}; unrelated-{legacy}-archive\n",
+        encoding="utf-8",
     )
 
     normalize_candidate(resources, candidate)
 
-    assert f"Invoke {replacement}; use /{replacement}." in skill.read_text(encoding="utf-8")
+    assert f"Invoke {replacement}; use /{replacement}." in skill.read_text(
+        encoding="utf-8"
+    )
     assert notes.read_text(encoding="utf-8") == (
         f"/{replacement}; /{replacement}; unrelated-{legacy}-archive\n"
     )
-    assert skill.read_text(encoding="utf-8").rstrip().endswith(
-        "<!-- local-sync:plan-gateway-routing:end -->"
+    assert (
+        skill.read_text(encoding="utf-8")
+        .rstrip()
+        .endswith("<!-- local-sync:plan-gateway-routing:end -->")
     )
     assert normalize_candidate(resources, candidate) == ()
 
 
-def test_live_idea_refine_overrides_are_not_git_patches() -> None:
-    bundle_root = REPO_ROOT / ".github/skills/local-agent-sync-external-resources"
-    overrides = tuple(
-        override
-        for override in load_overrides(
-            bundle_root / "references/imported-asset-overrides.yaml"
-        )
-        if override.target_path.startswith(".github/skills/addyosmani-idea-refine/")
-    )
-    assert overrides == ()
-
-
 def test_conflicting_second_override_leaves_candidate_unchanged(
-    candidate_repo: Path,
+    candidate_repo: Path, commit_all: Callable[[Path], None]
 ) -> None:
     first, target, _ = _make_override(
         candidate_repo,
+        commit_all,
         override_id="first",
         patched_content="---\nname: test\n---\nFirst patch.\n",
     )
@@ -1881,51 +1890,6 @@ overrides:
     assert len(overrides) == 1
     assert overrides[0].override_id == "test-override"
     assert overrides[0].expected_content_hash == "abcdef0123456789" * 4
-
-
-def test_build_candidate_patch_detects_repo_vs_candidate_diff(
-    tmp_path: Path,
-) -> None:
-    repo = tmp_path / "repo"
-    repo.mkdir()
-    _run_git(repo, ["init"])
-    _run_git(repo, ["config", "user.email", "test@test.com"])
-    _run_git(repo, ["config", "user.name", "Test"])
-
-    target = repo / ".github/skills/example/SKILL.md"
-    target.parent.mkdir(parents=True)
-    target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
-    _commit_all(repo)
-
-    candidate = tmp_path / "candidate"
-    candidate.mkdir()
-    cand_target = candidate / ".github/skills/example/SKILL.md"
-    cand_target.parent.mkdir(parents=True)
-    cand_target.write_text("---\nname: example\n---\nNew content.\n", encoding="utf-8")
-
-    asset = ManagedAsset(
-        source="test-source",
-        upstream="skills/example",
-        local=".github/skills/example",
-        canonical_name="example",
-    )
-    resources = ManagedResources(
-        sources=(
-            ManagedSource(
-                source_id="test-source",
-                repository="https://example.com/repo.git",
-                ref="abc",
-                advertised_ref=None,
-                assets=(asset,),
-            ),
-        ),
-        replacements=(),
-        watchlist=(),
-    )
-
-    patch = _build_candidate_patch(repo, candidate, resources)
-    assert patch.strip(), "patch must be non-empty when candidate differs from repo"
-    assert "New content." in patch
 
 
 def test_materialize_candidate_uses_explicit_source_root(
@@ -2018,9 +1982,11 @@ def test_materialize_candidate_reports_all_missing_upstreams(
     assert "src-b" in message
 
 
-def test_materialize_candidate_reports_expected_source_root(tmp_path: Path) -> None:
+def test_materialize_candidate_reports_expected_source_root(
+    tmp_path: Path, repo_root: Path
+) -> None:
     resources = load_managed_resources(
-        REPO_ROOT
+        repo_root
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
     workspace = tmp_path / "workspace"
@@ -2058,11 +2024,12 @@ overrides:
 
 def test_override_3way_replay_uses_real_git_repo(
     candidate_repo: Path,
+    commit_all: Callable[[Path], None],
 ) -> None:
     target = candidate_repo / ".github/skills/test/SKILL.md"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text("---\nname: test\n---\nOriginal.\n", encoding="utf-8")
-    _commit_all(candidate_repo)
+    commit_all(candidate_repo)
 
     patch_dir = candidate_repo / "patches"
     patch_dir.mkdir(exist_ok=True)
@@ -2260,13 +2227,17 @@ def _example_asset() -> ManagedAsset:
     )
 
 
-def test_renamed_managed_file_is_reported_once_with_new_path(git_repo: Path) -> None:
+def test_renamed_managed_file_is_reported_once_with_new_path(
+    git_repo: Path,
+    commit_all: Callable[[Path], None],
+    run_git: Callable[[Path, list[str]], None],
+) -> None:
     target = git_repo / ".github/skills/example"
     target.mkdir(parents=True)
     (target / "SKILL.md").write_text("---\nname: example\n---\n", encoding="utf-8")
-    _commit_all(git_repo)
+    commit_all(git_repo)
 
-    _run_git(
+    run_git(
         git_repo,
         ["mv", ".github/skills/example/SKILL.md", ".github/skills/example/RENAMED.md"],
     )

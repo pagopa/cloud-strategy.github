@@ -153,8 +153,6 @@ sources:
         local: .github/skills/mattpocock-implement
         canonical_name: mattpocock-implement
         invocation_policy:
-          copilot:
-            disable_model_invocation: true
           codex:
             allow_implicit_invocation: false
       - upstream: skills/engineering/improve-codebase-architecture
@@ -184,8 +182,6 @@ sources:
         local: .github/skills/mattpocock-to-spec
         canonical_name: mattpocock-to-spec
         invocation_policy:
-          copilot:
-            disable_model_invocation: true
           codex:
             allow_implicit_invocation: false
       - upstream: skills/engineering/to-tickets

@@ -1,126 +1,19 @@
 import subprocess
-import sys
 from pathlib import Path
 
 import pytest
-
-REPO_ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
-)
-SCRIPT_DIR = REPO_ROOT / ".github/skills/local-sync-repos/scripts"
-sys.path.insert(0, SCRIPT_DIR.as_posix())
-
-from sync_contract import (  # noqa: E402
-    MANAGED_COPY_PATHS,
-    SourceContractError,
-    build_plan,
-)
-
-MANAGED_COPY_PATHS_EXPECTED = (
-    "AGENTS.md",
-    ".python-version",
-    ".pre-commit-config.yaml",
-    ".editorconfig",
-    ".vscode/settings.json",
-    ".github/copilot-instructions.md",
-    ".github/workflows/_pre-commit.yml",
-    ".github/workflows/_pr-title.yml",
-)
-
-
-def _git_init(repo: Path) -> None:
-    subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "-C", str(repo), "config", "user.email", "test@example.com"],
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "-C", str(repo), "config", "user.name", "Test"],
-        check=True,
-        capture_output=True,
-    )
-
-
-def _populate_source(source: Path) -> None:
-    (source / "AGENTS.md").write_text("# agents\n", encoding="utf-8")
-    (source / ".python-version").write_text("3.13\n", encoding="utf-8")
-    (source / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
-    (source / ".editorconfig").write_text("root = true\n", encoding="utf-8")
-    settings = source / ".vscode" / "settings.json"
-    settings.parent.mkdir(parents=True, exist_ok=True)
-    settings.write_text(
-        "{\n"
-        '  "chat.permissions.default": "default",\n'
-        '  "chat.tools.global.autoApprove": false,\n'
-        '  "chat.tools.terminal.autoReplyToPrompts": false,\n'
-        '  "chat.tools.terminal.enableAutoApprove": false\n'
-        "}\n",
-        encoding="utf-8",
-    )
-    (source / ".github").mkdir(exist_ok=True)
-    (source / ".github" / "copilot-instructions.md").write_text(
-        "# copilot\n", encoding="utf-8"
-    )
-    (source / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
-    (source / ".github" / "workflows" / "_pre-commit.yml").write_text(
-        "name: pre-commit\n", encoding="utf-8"
-    )
-    (source / ".github" / "workflows" / "_pr-title.yml").write_text(
-        "name: pr-title\n", encoding="utf-8"
-    )
-    instructions = source / ".github" / "instructions"
-    instructions.mkdir(parents=True, exist_ok=True)
-    (instructions / "internal-python.instructions.md").write_text(
-        "# python\n", encoding="utf-8"
-    )
-
-
-@pytest.fixture()
-def source_repo(tmp_path: Path) -> Path:
-    repo = tmp_path / "source"
-    repo.mkdir()
-    _git_init(repo)
-    _populate_source(repo)
-    subprocess.run(
-        ["git", "-C", str(repo), "add", "-A"], check=True, capture_output=True
-    )
-    subprocess.run(
-        ["git", "-C", str(repo), "commit", "-m", "init", "--allow-empty"],
-        check=True,
-        capture_output=True,
-    )
-    return repo
-
-
-@pytest.fixture()
-def target_repo(tmp_path: Path) -> Path:
-    repo = tmp_path / "target"
-    repo.mkdir()
-    _git_init(repo)
-    subprocess.run(
-        ["git", "-C", str(repo), "commit", "-m", "init", "--allow-empty"],
-        check=True,
-        capture_output=True,
-    )
-    return repo
-
-
-def test_managed_copy_paths_constant_matches_approved_scope() -> None:
-    assert MANAGED_COPY_PATHS == MANAGED_COPY_PATHS_EXPECTED
+from sync_contract import SourceContractError, build_plan
 
 
 def test_build_plan_creates_only_approved_managed_paths(
-    source_repo: Path, target_repo: Path
+    source_repo: Path, target_repo: Path, managed_copy_paths: tuple[str, ...]
 ) -> None:
     plan = build_plan(source_repo, target_repo)
     mutations = {
         (item.action, item.path) for item in plan.operations if item.is_mutation
     }
     assert mutations == {
-        *(("create", path) for path in MANAGED_COPY_PATHS_EXPECTED),
+        *(("create", path) for path in managed_copy_paths),
         ("create", ".github/instructions/internal-python.instructions.md"),
         ("create", "AGENTS.local.md"),
     }
@@ -132,15 +25,6 @@ def test_build_plan_updates_changed_managed_file(
     (target_repo / ".editorconfig").write_text("target\n", encoding="utf-8")
     plan = build_plan(source_repo, target_repo)
     assert ("update", ".editorconfig") in {
-        (item.action, item.path) for item in plan.operations
-    }
-
-
-def test_build_plan_manages_workspace_chat_settings(
-    source_repo: Path, target_repo: Path
-) -> None:
-    plan = build_plan(source_repo, target_repo)
-    assert ("create", ".vscode/settings.json") in {
         (item.action, item.path) for item in plan.operations
     }
 
@@ -178,9 +62,12 @@ def test_nested_source_instructions_are_discovered(
 
 
 def test_identical_files_produce_no_mutation(
-    source_repo: Path, target_repo: Path
+    source_repo: Path,
+    target_repo: Path,
+    managed_copy_paths: tuple[str, ...],
+    agents_local_template: Path,
 ) -> None:
-    for relative in MANAGED_COPY_PATHS_EXPECTED:
+    for relative in managed_copy_paths:
         target_file = target_repo / relative
         target_file.parent.mkdir(parents=True, exist_ok=True)
         target_file.write_bytes((source_repo / relative).read_bytes())
@@ -192,28 +79,16 @@ def test_identical_files_produce_no_mutation(
     )
     instruction_tgt.parent.mkdir(parents=True, exist_ok=True)
     instruction_tgt.write_bytes(instruction_src.read_bytes())
-    (target_repo / "AGENTS.local.md").write_text(
-        (
-            REPO_ROOT / ".github/skills/local-sync-repos/templates/AGENTS.local.md"
-        ).read_text(),
-        encoding="utf-8",
-    )
+    (target_repo / "AGENTS.local.md").write_bytes(agents_local_template.read_bytes())
     plan = build_plan(source_repo, target_repo)
     mutations = [op for op in plan.operations if op.is_mutation]
     assert mutations == []
 
 
 def test_missing_source_path_raises_source_contract_error(
-    target_repo: Path, tmp_path: Path
+    target_repo: Path, tmp_path: Path, git_repo
 ) -> None:
-    empty_source = tmp_path / "empty-source"
-    empty_source.mkdir()
-    _git_init(empty_source)
-    subprocess.run(
-        ["git", "-C", str(empty_source), "commit", "-m", "init", "--allow-empty"],
-        check=True,
-        capture_output=True,
-    )
+    empty_source = git_repo(tmp_path / "empty-source")
     with pytest.raises(SourceContractError, match="missing required source path"):
         build_plan(empty_source, target_repo)
 
