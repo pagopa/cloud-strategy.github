@@ -4,8 +4,16 @@ This directory records repository-wide architectural decisions that explain cost
 
 ## Contents
 
-- [0001 Terraform skill routing boundaries](./0001-terraform-skill-routing-boundaries.md)
-- [0002 Knowledge domain layout](./0002-knowledge-domain-layout.md)
+| ADR | Topic | Level | Serves | Load when |
+| --- | --- | --- | --- | --- |
+| [ADR-0001](./0001-terraform-skill-routing-boundaries.md) | Terraform skill routing boundaries | tactical | PUR | Changing Terraform skill routing or its implementation boundary. |
+| [ADR-0002](./0002-knowledge-domain-layout.md) | Knowledge domain layout | strategic | PUR | Changing the repository's knowledge contexts or their ownership. |
+
+`Level` and `Serves` are index metadata for these existing records; their
+bodies remain unchanged. Use `strategic` for a decision that establishes or
+changes repository direction and `tactical` for an implementation or
+governance choice within that direction. New ADRs state their level next to
+status and tactical ADRs name their `Serves:` target.
 
 ## Local format
 

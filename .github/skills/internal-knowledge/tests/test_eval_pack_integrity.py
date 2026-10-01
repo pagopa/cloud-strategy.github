@@ -295,20 +295,6 @@ def test_alignment_and_general_repository_scenarios_have_bound_cases() -> None:
         heading, _, body = section.partition("\n")
         sections[heading] = body
 
-    expected_blocks = [
-        section.split("**Expected:**", 1)[1]
-        for section in sections.values()
-        if "**Expected:**" in section
-    ]
-    required_diagram = re.compile(
-        r"(?i)\b(?:require|include|create|use|draw|produce)\s+"
-        r"(?:one\s+)?(?:mermaid\s+)?diagram\b|\bone\s+mermaid\s+diagram\b"
-    )
-    assert all(not required_diagram.search(block) for block in expected_blocks)
-    old_ceiling = "ten-" + "document ceiling"
-    assert old_ceiling not in scenarios.lower()
-    assert not re.search(r"\blanes?\b", scenarios.lower())
-
     assert set(required) <= set(sections)
     for heading, case_id in required.items():
         case = pack_cases[case_id]

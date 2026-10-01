@@ -2,6 +2,8 @@
 
 ## Purpose
 
+**Purpose ID:** `PUR`
+
 This document captures stable local context for this repository. It explains
 what the repository is for, who it serves, and which outcomes it supports.
 

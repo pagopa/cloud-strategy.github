@@ -5,6 +5,7 @@ These rules govern source-to-target synchronization and preservation of consumer
 ## skill-first-knowledge-docs-keep-ownership-split - Knowledge ownership
 
 - Rule ID: skill-first-knowledge-docs-keep-ownership-split
+- Serves: PUR
 - Owner: Source synchronization
 - Severity: blocking
 - Enforcement owner: not enforced
@@ -15,6 +16,7 @@ These rules govern source-to-target synchronization and preservation of consumer
 ## resource-governance-uses-supported-origin-naming - Resource origin naming
 
 - Rule ID: resource-governance-uses-supported-origin-naming
+- Serves: PUR
 - Owner: Source synchronization
 - Severity: blocking
 - Enforcement owner: not enforced
@@ -25,6 +27,7 @@ These rules govern source-to-target synchronization and preservation of consumer
 ## home-sync-preserves-home-only-resources - Home-only preservation
 
 - Rule ID: home-sync-preserves-home-only-resources
+- Serves: PUR
 - Owner: Source synchronization
 - Severity: blocking
 - Enforcement owner: `.github/skills/local-agent-sync-install-ai-resources/scripts/home_syncing.py` and `.github/skills/local-agent-sync-install-ai-resources/tests/scripts/test_cli.py`

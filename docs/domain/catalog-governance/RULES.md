@@ -5,6 +5,7 @@ These rules govern repository-owned Copilot catalog assets, their source ownersh
 ## skill-first-root-agents-is-entrypoint - Root agent entrypoint
 
 - Rule ID: skill-first-root-agents-is-entrypoint
+- Serves: PUR
 - Owner: Catalog governance
 - Severity: blocking
 - Enforcement owner: `.github/tools/catalog/rules.py` checks required bridge presence and selected references; detailed content placement is not enforced
@@ -15,6 +16,7 @@ These rules govern repository-owned Copilot catalog assets, their source ownersh
 ## skill-first-inventory-is-externalized - Inventory ownership
 
 - Rule ID: skill-first-inventory-is-externalized
+- Serves: PUR
 - Owner: Catalog governance
 - Severity: blocking
 - Enforcement owner: `.github/tools/catalog/rules.py` through `make catalog-check`
@@ -25,6 +27,7 @@ These rules govern repository-owned Copilot catalog assets, their source ownersh
 ## skill-first-domain-skills-are-canonical - Skill ownership
 
 - Rule ID: skill-first-domain-skills-are-canonical
+- Serves: PUR
 - Owner: Catalog governance
 - Severity: blocking
 - Enforcement owner: `.github/tools/skills/rules.py` validates selected bundle structure; canonical guidance ownership is not enforced end to end

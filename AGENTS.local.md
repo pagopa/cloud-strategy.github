@@ -43,7 +43,9 @@ Use the default canonical triage labels for local issues. See `docs/agents/triag
 ### Domain docs
 
 This repository uses the multi-context domain documentation layout recorded in
-`CONTEXT-MAP.md`. See `docs/agents/domain.md`.
+`CONTEXT-MAP.md`. Use [`docs/README.md`](docs/README.md) to map strategic and
+tactical knowledge to its owner. See [`docs/agents/domain.md`](docs/agents/domain.md)
+to select the relevant domain context.
 
 This file applies only to this standards repository. Do not treat these rules
 as consumer-repository defaults without an explicit sync contract change.
