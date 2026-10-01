@@ -14,7 +14,7 @@ VALIDATE_CODE_ARGS ?=
 CATALOG_FAST_TESTS := tests/github/tools/inventory/test-inventory.py tests/github/tools/common/test-repository.py tests/github/scripts/test-graphify-hooks.py tests/github/tools/test-runner.py tests/test_repository_test_layout_contract.py
 CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.22.1
-MARKDOWNLINT_GLOBS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
+MARKDOWNLINT_GLOBS := "**/*.md"
 
 .PHONY: help all lint catalog-lint docs-lint test validate-code clean \
 	catalog-fast-check catalog-check catalog-audit github-catalog-validation \

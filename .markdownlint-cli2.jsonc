@@ -7,6 +7,9 @@
   "ignores": [
     // Keep transient retained work out of markdownlint; dedicated contract tests cover tmp/superpowers artifacts.
     "tmp/**",
+    // Graphify output is generated and is ignored by Git.
+    "graphify-out/**",
+    ".graphify_*",
     // Ignore the local tools venv because it is generated tooling state, not repo-owned content.
     ".github/tools/.venv/**",
     // Ignore any generated virtual environment, including task-specific variants.
@@ -21,6 +24,8 @@
     ".github/skills/internal-gateway-critical-master/fixtures/*.md",
     // The internal Markdown checker owns these deliberately invalid regression fixtures.
     ".github/skills/internal-markdown/fixtures/invalid/*.md",
+    // Terraform docs fixtures contain intentional generated HTML anchors.
+    ".github/skills/internal-tf/tests/evaluation/fixtures/README.md",
     // Ignore local OpenCode runtime artifacts.
     ".opencode/**",
     // Preserve imported support skill families verbatim by default; lint only repo-owned Markdown.
