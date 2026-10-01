@@ -82,6 +82,8 @@ def test_runtime_view_copies_public_projection_and_selected_references(tmp_path:
     runtime = destination / "skill" / "internal-knowledge"
     selected = (
         Path("agents/openai.yaml"),
+        Path("references/knowledge-types.md"),
+        Path("references/alignment.md"),
         Path("references/knowledge-topology.md"),
         Path("references/knowledge-report.md"),
     )
@@ -92,6 +94,12 @@ def test_runtime_view_copies_public_projection_and_selected_references(tmp_path:
         manifest_key = (Path("skill/internal-knowledge") / relative).as_posix()
         assert copied.read_bytes() == source_bytes
         assert manifest[manifest_key] == hashlib.sha256(source_bytes).hexdigest()
+
+    retired_references = (
+        "managerial-" + "maintenance.md",
+        "project-" + "memory-" + "maintenance.md",
+    )
+    assert all(not (runtime / "references" / name).exists() for name in retired_references)
 
 
 @pytest.mark.parametrize(

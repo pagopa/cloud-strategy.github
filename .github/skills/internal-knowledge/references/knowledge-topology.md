@@ -7,6 +7,7 @@ Load it in `setup`. Load it in `sync` only when the plan introduces an artifact 
 ## Contents
 
 - [Supported layouts](#supported-layouts)
+- [Strategic and tactical scope](#strategic-and-tactical-scope)
 - [Layout migration](#layout-migration)
 - [Evidence to artifact](#evidence-to-artifact)
 - [Context documents](#context-documents)
@@ -16,23 +17,18 @@ Load it in `setup`. Load it in `sync` only when the plan introduces an artifact 
 - [Documentation modes](#documentation-modes)
 - [Anti-scope](#anti-scope)
 
-## Common core and lanes
+## Strategic and tactical scope
 
-The common core is a README index and evidence-backed project orientation.
-Select project orientation only when it serves an unmet durable reader outcome;
-an existing owner may already provide it. A roadmap and knowledge-maintenance
-guide are optional: include either only when repository evidence or local policy
-supports it. Do not create empty artifacts to satisfy a checklist.
+Use the [knowledge types](knowledge-types.md) taxonomy to select a strategic
+or tactical owner from repository evidence. The canonical README index maps
+each evidenced type to its existing owner. Purpose belongs in its owner only
+when it serves an unmet durable reader outcome. Do not create empty artifacts
+or a separate memory file to complete a checklist.
 
-The technical lane is an evidence-backed technical extension. It may include
-architecture, principles, domain contexts and rules, ADRs, guides, or
-specialist references when the repository supports the reader outcome. A
-legitimate extension has an evidenced owner and lifecycle; tooling or state
-differences alone do not create a technical domain.
-
-The managerial lane covers purpose, priorities, initiatives, proposals, and
-observed outcomes. It is an authoring lane, not a runtime profile. The five
-runtime modes remain the only modes. Never add a profile field. Never create a profile directory. Never create a profile registry.
+A roadmap, backlog, proposal, or work outcome is not a knowledge type. Keep
+those records with their existing owners. Record an accepted decision under
+the appropriate ADR owner; do not infer acceptance, implementation, or outcome
+from a proposal or a passing check.
 
 README indexes inside the requested docs perimeter are ordinary targets.
 Generated files remain with their generator. Canonical historical records,
@@ -126,6 +122,7 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 
 | Evidence | Artifact | Do not create when |
 | --- | --- | --- |
+| Durable purpose, scope, non-goals, stakeholders, or constraints with an unmet reader outcome | The existing Purpose owner mapped from the canonical index | An existing owner already covers the outcome or evidence is temporary or aspirational. |
 | A significant component | A README in that component | The parent already documents it completely. |
 | Terms whose meaning is repository-specific | The root `CONTEXT.md`, or `docs/domain/<slug>/CONTEXT.md` when two or more domains are evidenced | The terms are general technology vocabulary. |
 | Two or more areas with distinct vocabulary, state, or lifecycle | `docs/domain/<slug>/` per area | Only one area is evidenced; keep the vocabulary in the root document. |
@@ -139,20 +136,18 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 | Recurring criteria that decide between alternatives | `docs/engineering-principles.md` | Only one occurrence is evidenced. |
 | An evidenced chain from a declaration to its effect | `docs/guides/<name>.md` | A component README already covers the chain. |
 | Durable project purpose, boundaries, and current orientation not already owned by an existing knowledge document | A project-orientation entry at the repository's existing canonical owner | The orientation is already complete, or the evidence is only temporary, aspirational, or inferred. |
-| An approved specification selected for durable retention with a canonical owner and stable reader value | A project-memory entry linking to the existing specification | The source is draft, unapproved, a backlog item, or has no identifiable owner. |
+| An approved specification that evidences one strategic or tactical type | A link from that type's existing owner | The source is draft, unapproved, temporary, or has no identifiable owner. |
 
-Author guides with [standards maintenance](standards-maintenance.md). Author
-project orientation and selected approved specifications with
-[project memory maintenance](project-memory-maintenance.md).
+Author guides with [standards maintenance](standards-maintenance.md). Use the
+type-specific owner for Purpose and other strategic or tactical knowledge.
 
 Every evidence-table row ends as one of four outcomes: `planned`, `existing owner covers`, `explicit exclusion`, or `considered, not evidenced`. The last outcome records that the reader outcome and detailed owner were considered but the evidence is insufficient; never create an artifact merely to satisfy a row. The plan accounts for every row. Standards, principles, and guides are the rows most often passed over, because nothing in the repository asks for them by name.
 
-Project orientation and selected specifications are optional durable knowledge,
-not a new documentation mode. Before retaining either one, check whether an
-existing README, context document, architecture document, ADR, or specification
-already owns the material. Prefer a link or a small orientation entry at that
-owner over a duplicate copy. If no canonical owner or durable evidence exists,
-record the gap as `considered, not evidenced` and do not create a placeholder.
+Before adding material, check whether an existing README, context document,
+architecture document, ADR, or specification already owns it. Prefer a link
+from the relevant type owner over a duplicate copy. If no canonical owner or
+durable evidence exists, record the gap as `considered, not evidenced` and do
+not create a placeholder.
 
 ## Context documents
 

@@ -363,14 +363,12 @@ def test_eval_bindings_authorize_requested_targets_and_define_case_constraints()
                 )
     assert any(
         _glob_allows(pattern, "README.md")
-        for pattern in bindings["C-HOLD-MERMAID"]["allowlist"]
+        for pattern in bindings["C-HOLD-SETUP"]["allowlist"]
     )
     split = bindings["C-SPLIT-SIGNAL-ONLY"]["gold_overrides"]
-    lifecycle = bindings["C-MERMAID-LIFECYCLE"]["gold_overrides"]
     mixed = bindings["C-SPLIT-MIXED"]["gold_overrides"]
     setup = bindings["C-HOLD-SETUP"]["gold_overrides"]
     assert split["sections"] and split["protected_paths"]
-    assert lifecycle["facts"] and lifecycle["diagram_edges"]
     assert mixed == {}
     f6_sections = {
         section["marker"]: section["dest"] for section in gold["F6"]["sections"]
@@ -418,25 +416,6 @@ def test_composed_split_signal_case_passes_and_rejects_deleted_reference() -> No
         v.status == "fail"
         for v in _bound_verdicts("C-SPLIT-SIGNAL-ONLY", tree, deleted)
     )
-
-
-def test_composed_lifecycle_case_checks_states_and_transitions() -> None:
-    core = core_module()
-    tree = core.load_strict_json(EVALUATION_ROOT / "fixtures/F2.tree.json")["files"]
-    after = dict(tree)
-    after["services/billing/README.md"] += (
-        "\nBilling moves through draft, active, and retired states.\n\n"
-        "```mermaid\nstateDiagram-v2\naccTitle: Billing lifecycle\n"
-        "accDescr: Billing moves from draft to active to retired.\n"
-        "draft --> active\nactive --> retired\n```\n"
-    )
-    verdicts = _bound_verdicts("C-MERMAID-LIFECYCLE", tree, after)
-    assert all(v.status == "pass" for v in verdicts), verdicts
-    after["services/billing/README.md"] = after["services/billing/README.md"].replace(
-        "active --> retired\n", ""
-    )
-    verdicts = _bound_verdicts("C-MERMAID-LIFECYCLE", tree, after)
-    assert any(v.code == "critical-omission" for v in verdicts)
 
 
 def test_composed_mixed_content_and_holdout_setup_cases_have_required_outputs() -> None:

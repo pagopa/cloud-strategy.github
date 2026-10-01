@@ -1,92 +1,48 @@
 # README Maintenance
 
-Use this reference to create or refresh README files for repository-relative directories or explicit README paths supplied by the user.
+Use this reference only for the repository-root README and the canonical
+`docs/README.md` knowledge index. Component READMEs are outside the skill's
+write scope; they belong to their component owners.
 
 ## Scope
 
-1. Accept repository-relative directories such as `.` or `src/service-a`, and explicit paths named `README.md` such as `README.md` or `src/service-a/README.md`. Normalize directories to `<target>/README.md`; the normalized destinations form the complete README-authoring allowlist. In `sync` and `setup`, those destinations come from the approved plan and form the same closed allowlist.
-2. Reject absolute paths, traversal, globs, duplicate normalized destinations, escaping symlinks, missing parent directories, and unusable README destinations. If any target fails, stop before writing any target. Report a preflight table with `input`, `resolved target`, `README destination`, and `resolved / failed`.
-3. Read each existing README and capture its current state before drafting. Recheck it immediately before writing and stop on concurrent changes.
-4. Read outside a target only for bounded evidence. Never expand the write allowlist while drafting: in `targeted` it is the supplied set, and in `sync` and `setup` it is the approved plan. A component or manifest entry discovered after approval produces a reported gap, not a write.
-5. When the repository serves a profile README from `.github/README.md`, treat it as the displayed entry point and the root `README.md` as the in-repository entry point. State which is which, and stop before writing when the two contradict each other.
+The only README destinations are:
 
-## Reader Contract
+- the root `README.md`, which orients readers to the repository; and
+- `docs/README.md`, which indexes strategic and tactical knowledge.
 
-Open with a title and one or two sentences that say what the component is and
-when a reader should use it. Within the first screen (about 40 non-blank
-lines), provide a useful next step or link. When the target has behavior,
-include safe usage and validation guidance. Let the README summarize and link
-to one detailed owner instead of copying its full contract. Organize sections
-around the target's nature and reader task; around 150 lines is a signal to
-check whether details belong with an owner, not a size limit. In the completion
-report, account for each README as created, refreshed, unchanged, or failed,
-and record each intentional omission with a reason.
+Use only destinations in the approved allowlist. Normalize and verify each
+path before drafting. Do not widen the allowlist to component directories or
+other README files discovered during the work. If an index is generated,
+leave it with its generator and report the owner.
 
-## Evidence and Content
+## Root README
 
-Apply repository instructions and the nearest documentation contract. Derive claims from source, configuration, interfaces, manifests, tests, workflows, scripts, ADRs, and existing documentation. Treat general technology knowledge as guidance, not evidence of repository behavior.
+Explain what the repository is for and where a reader should begin. Keep
+implementation details with their maintained owners. Link to `docs/README.md`
+when it exists or is an authorized target. Preserve the existing document
+language, links, badges, and generated blocks.
 
-For each target, record its scope, primary nature, reader outcome, document language, applicable sections, and evidence status. Preserve the existing language unless the user or a local contract requires another. Resolve the profile from the nearest owner or target metadata, direct target behavior and interfaces, repository documentation, then a neutral fallback. Use `evidenced`, `inferred`, `not evidenced`, or `conflicting` for purpose, audience, ownership, consumers, effects, identities, and lifecycle. State only evidenced claims as facts and stop on authoritative conflicts.
+## Canonical knowledge index
 
-When several natures are supported, apply this nature precedence:
+Maintain one canonical `docs/README.md` index. Map each evidenced knowledge
+type to its existing owner and state **Load when** a reader needs that
+knowledge. Use an explicit `not evidenced` entry for a type that has no
+evidence; do not create an empty document to fill the gap.
 
-1. Use a verified local contract or target metadata as the primary nature when target evidence does not conflict.
-2. Select `mixed` only when at least two independently evidenced natures have separate lifecycle phases or interfaces that materially change the reader path. Multiple file types alone do not make a target mixed.
-3. Otherwise select the directly evidenced nature that supports the explicit reader outcome. If none is explicit, use this composition precedence as the deterministic tie-breaker: IaC or infrastructure, workflow or custom action, deployable application or service, library or package, CLI or tool, data/configuration/policy, then documentation/reference/integration.
+The index publishes the alignment contract: operational work cites the
+knowledge IDs it realizes; the skill reads operational artifacts only as
+evidence; and `docs/` contains no reverse registry of operational work.
+Link to [the alignment contract](alignment.md) for the detailed rules.
 
-Every README needs a proportionate title, summary, purpose or scope, useful reader path, and validation guidance. When no repository contract states otherwise, use `Purpose`, `Responsibilities`, `Inputs and outputs`, `Dependencies`, and `Validation` as the default component section set, and drop any section the target does not evidence. A repository-owned README contract always wins over this default; preserve a repository-owned README marker exactly as found and never introduce one. Add only sections supported by the target, such as usage, change path, architecture, inputs and outputs, configuration, dependencies, operations, security, ownership, or related documentation. Avoid empty sections and duplicate headings. Treat headings with the same semantic purpose as one section and prefer the most specific evidence-backed heading. Add a table of contents (TOC) only when it materially helps the reader navigate or a local contract requires one. When included, place it immediately after the title and summary, keep entries in document order, omit the TOC heading itself, and do not enumerate generated Terraform headings. When omitted, record `omitted-with-reason` in the completion report.
+## Evidence and validation
 
-Keep operational detail in a README only when it serves that component's reader
-and the README is its maintained owner. When relocating detail, consolidate
-duplicates instead of appending another copy; link to another maintained owner
-when it owns the procedure.
+Derive claims from repository-owned documents and other bounded evidence.
+Distinguish observed facts from assumptions and report unresolved conflicts
+instead of inventing a resolution. Keep one authoritative owner for each
+contract and link to it rather than copying its detail.
 
-Adapt emphasis to the target:
-
-- Applications, services, tools, and workflows: prerequisites, interfaces, usage or change path, operational behavior, and safe validation.
-- Infrastructure: distinguish roots from reusable modules; document ownership and state boundaries, inputs, outputs, repository wrappers, existing examples, consumers, and non-mutating validation.
-- GitHub actions and workflows: distinguish custom actions, reusable workflows, and internal workflows; document only evidenced triggers, inputs, outputs, secrets metadata, permissions, callers, and release behavior.
-- Libraries and CLIs: installation, compatibility, public interface, minimal usage, and tests.
-- Data, configuration, and policy: shape, scope, source of truth, consumers, effects, precedence, lifecycle, and validation.
-- Documentation and integration surfaces: authority, audience, navigation, related sources, update path, and link or format checks.
-- Monorepo roots: concise component map and cross-component boundaries, linking existing component READMEs without reproducing them.
-
-For cloud account or execution-boundary targets, keep these concepts separate when evidenced:
-
-- the logical infrastructure root or reusable module;
-- the physical account, subscription, project, tenant, or execution context and its state boundary;
-- the bootstrap, payer, management, or foundation owner and the target it provisions;
-- the workflow caller, assumed identity, runtime identity, and managed target identity or resource.
-
-Use stable checked-in names instead of live identifiers. Document only direct trust, caller, and identity edges supported by code or configuration; naming alone does not prove separate accounts or direct invocation.
-
-When declarative source drives a runtime effect, explain the phases separately: desired state, coordinator or trigger, side effect, downstream consumer, and retry or recovery. Use a table only when it makes comparison, effect, or ownership clearer than prose.
-
-Preserve still-valid facts, links, commands, badges, and generated blocks. Keep every existing generated block byte-for-byte; the skill must preserve generated blocks byte-for-byte and report conflicts instead of rewriting or regenerating them. Authored prose and diagrams go before the opening marker of a generated block: content placed after it sits in territory the generator owns and disappears on its next run, which the current diff never shows. Never include secrets, personal data, state content, sensitive output, or unnecessary live identifiers.
-
-Use [the Mermaid contract](mermaid-contract.md) to decide, author, and report
-diagrams. Link to an existing owner instead of redrawing a relationship it
-already owns. When an expected diagram is omitted, report the
-`omitted-with-reason` disposition through the report's `omitted` field as
-`<path>: <reason>`.
-
-During a read-only audit, a README is evidence within the named perimeter. Its
-length, link set, or absence of a section does not authorize a refresh, widen
-the audit, or prove ownership of another artifact. Report the observed reader
-gap or unknown and leave authoring to a separate explicit request.
-
-Verify each diagram by rendering or parsing it when a renderer is available.
-When parsing cannot run, record that evidence gap; do not claim validation.
-Write arrows as literal `-->` and `->>` so source remains parseable.
-
-## Validation and Completion
-
-Before writing, verify every target path, material claim, local link, command, heading, placeholder, generated block, and security-sensitive value. Resolve local links from the README directory; check external-link syntax and test reachability only when a safe network tool is available. Confirm that commands use evidenced working directories and repository wrappers. Execute only safe non-mutating checks, and distinguish static checks, executed checks, and checks not run with reasons.
-
-Treat local templates, coverage manifests, README validators, and documentation generators as optional integrations. A manifest may inform coverage but never expands the write allowlist. Run an existing README validator only when its scope is understood. Run a documentation generator only when a repository owner requires it and its verified write scope is the selected README; never regenerate an existing block during maintenance.
-
-Prepare and validate every selected draft before the first write. Recheck destination snapshots and generated blocks immediately before writing; any draft failure or concurrent change means zero writes for the batch. That batch consistency check is not an atomic-write or rollback promise: do not promise filesystem-level atomic writes or destructive rollback. Leave byte-equivalent README files untouched. Report each target as created, refreshed, unchanged, or failed, including static, executed, and not-run validation and every `omitted-with-reason` entry.
-
-A local README validator proves only the paths it actually covered. It is not universal proof of the supplied target set, of unselected paths, or of semantic heading equivalence.
-
-When a check resolves links or anchors, exclude generated blocks from the scanned body while still collecting the anchors they define, such as the HTML anchors a Terraform documentation generator emits. Scanning their body reports links the document does not own; ignoring their anchors reports valid references as broken. Derive an anchor from a heading by replacing each whitespace character, not each run of them: a heading that loses a punctuation mark keeps the two spaces around it, and the resulting anchor carries a double separator that a collapsing implementation never produces.
+Before writing, verify the authorized destination, its owner, local links,
+generated blocks, and supported claims. Leave byte-equivalent content
+unchanged. Run applicable Markdown and repository checks and report what each
+check covered.

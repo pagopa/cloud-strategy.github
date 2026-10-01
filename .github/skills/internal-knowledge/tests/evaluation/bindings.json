@@ -349,108 +349,6 @@
         ]
       }
     },
-    "C-README-TINY-LIB": {
-      "fixture": "F2",
-      "gold": "tests/evaluation/gold/F2.gold.json",
-      "profile": "author",
-      "graders": [
-        "diagram_warranted",
-        "readme_opening"
-      ],
-      "runs": 3,
-      "allowlist": [
-        "libs/tiny/**"
-      ],
-      "gold_overrides": {
-        "readme_paths": [
-          "libs/tiny/README.md"
-        ]
-      }
-    },
-    "C-MERMAID-DEPS": {
-      "fixture": "F2",
-      "gold": "tests/evaluation/gold/F2.gold.json",
-      "profile": "author",
-      "graders": [
-        "diagram_relations",
-        "mermaid_static",
-        "mermaid_parse"
-      ],
-      "runs": 3,
-      "allowlist": [
-        "docs/**"
-      ],
-      "gold_overrides": {}
-    },
-    "C-MERMAID-LIFECYCLE": {
-      "fixture": "F2",
-      "gold": "tests/evaluation/gold/F2.gold.json",
-      "profile": "author",
-      "graders": [
-        "diagram_warranted",
-        "mermaid_static",
-        "must_contain_facts",
-        "diagram_relations"
-      ],
-      "runs": 3,
-      "allowlist": [
-        "services/billing/**"
-      ],
-      "gold_overrides": {
-        "facts": [
-          {
-            "path": "services/billing/README.md",
-            "text": "Billing moves through draft, active, and retired states."
-          }
-        ],
-        "diagram_edges": {
-          "docs/architecture.md": [
-            [
-              "api",
-              "auth"
-            ],
-            [
-              "billing",
-              "api"
-            ],
-            [
-              "api",
-              "tiny"
-            ]
-          ],
-          "services/billing/README.md": [
-            [
-              "draft",
-              "active"
-            ],
-            [
-              "active",
-              "retired"
-            ]
-          ]
-        },
-        "diagram_triggers": [
-          {
-            "doc": "services/billing/README.md",
-            "required": true
-          }
-        ]
-      }
-    },
-    "C-MERMAID-OMIT-LINKED": {
-      "fixture": "F2",
-      "gold": "tests/evaluation/gold/F2.gold.json",
-      "profile": "author",
-      "graders": [
-        "diagram_warranted",
-        "readme_links"
-      ],
-      "runs": 3,
-      "allowlist": [
-        "docs/**"
-      ],
-      "gold_overrides": {}
-    },
     "C-GLOSSARY-BOLD": {
       "fixture": "F3",
       "gold": "tests/evaluation/gold/F3.gold.json",
@@ -529,17 +427,62 @@
         ]
       }
     },
-    "C-HOLD-MERMAID": {
-      "fixture": "FH",
-      "gold": "tests/evaluation/gold/FH.gold.json",
+    "C-ALIGN-CASCADE": {
+      "fixture": "F7",
+      "gold": "tests/evaluation/gold/F7.gold.json",
+      "profile": "audit",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-ALIGN-HARVEST": {
+      "fixture": "F7",
+      "gold": "tests/evaluation/gold/F7.gold.json",
+      "profile": "audit",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-ALIGN-AUDIT": {
+      "fixture": "F7",
+      "gold": "tests/evaluation/gold/F7.gold.json",
+      "profile": "audit",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-ALIGN-EXPIRED": {
+      "fixture": "F7",
+      "gold": "tests/evaluation/gold/F7.gold.json",
+      "profile": "audit",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-NONCODE": {
+      "fixture": "F7",
+      "gold": "tests/evaluation/gold/F7.gold.json",
       "profile": "author",
-      "graders": [
-        "diagram_relations",
-        "diagram_warranted",
-        "mermaid_static"
-      ],
-      "runs": 3,
+      "graders": [],
+      "runs": 1,
       "allowlist": [
+        "docs/**",
+        "README.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-STUDY": {
+      "fixture": "F8",
+      "gold": "tests/evaluation/gold/F8.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [
+        "docs/**",
         "README.md"
       ],
       "gold_overrides": {}

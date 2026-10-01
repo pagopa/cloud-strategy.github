@@ -47,6 +47,12 @@ work.
 
 ## README Index
 
+Maintain one canonical index at docs/README.md for strategic and tactical
+knowledge. Map each evidenced type to its existing owner and add a "Load when"
+entry that tells the reader when to open it. Use "not evidenced" when no
+supported owner exists; do not create a placeholder document. The root README
+provides repository orientation and links to this index.
+
 Treat a README index as an ordinary documentation target only when it is in
 the approved allowlist. Before drafting, inspect the index and its generator
 markers. When a marker or authoritative generator configuration shows the
@@ -54,6 +60,12 @@ index is generated, leave its bytes to the generator and report the owner and
 enforcement gap. Write a hand-maintained index only when no generator owns it,
 the path is authorized, and its links can be checked against the final target
 set.
+
+Include the alignment contract in the index: operational work cites the
+knowledge IDs it realizes; the skill reads operational artifacts only as
+evidence; and docs/ contains no reverse registry of operational work. Link to
+[alignment](alignment.md) for IDs, Serves, precedence, and the audit outcome
+rules.
 
 Use the repository's existing entry point and information hierarchy. Keep the
 root README focused on repository orientation and route readers to the

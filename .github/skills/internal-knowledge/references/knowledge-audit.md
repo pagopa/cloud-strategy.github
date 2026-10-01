@@ -19,6 +19,13 @@ Audit is read-only and non-persistent by default. It must not:
 
 A possible fix may be recorded as a next action, but it is never applied by the audit. A separate request must name the authoring destination and owner.
 
+Run the [alignment check](alignment.md) within the normalized perimeter. It
+reports orphan tactical items, Direction items without tactical coverage,
+contradictions, expired Direction horizons, undefined terms, and references to
+superseded ADRs. For every DIR, report exactly one outcome: tactical coverage,
+operational evidence found, or unknown. These are documentation outcomes;
+missing evidence does not establish that work was not executed.
+
 ## Missing instruction route
 
 When ordinary maintenance is not discoverable without invoking this skill,

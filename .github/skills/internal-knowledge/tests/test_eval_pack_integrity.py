@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib
+import re
 import sys
 from pathlib import Path
 
@@ -268,3 +269,55 @@ def test_grader_fixtures_and_compatibility_matrix_are_complete() -> None:
     for row in compatibility["scenarios"]:
         assert row["case_ids"]
         assert set(row["case_ids"]) <= case_ids
+
+
+def test_alignment_and_general_repository_scenarios_have_bound_cases() -> None:
+    required = {
+        "Propose tactical changes from strategic direction": "C-ALIGN-CASCADE",
+        "Find nothing durable to promote from closed work": "C-ALIGN-HARVEST",
+        "Report one alignment outcome for each direction item": "C-ALIGN-AUDIT",
+        "Mark expired direction as not reconfirmed": "C-ALIGN-EXPIRED",
+        "Set up knowledge for a non-code governance repository": "C-NONCODE",
+        "Set up a personal study repository without assuming software": "C-STUDY",
+    }
+    pack = load_strict_json(EVALUATION_ROOT / "evals.json")
+    bindings = load_strict_json(EVALUATION_ROOT / "bindings.json")["cases"]
+    compatibility = load_strict_json(EVALUATION_ROOT / "compatibility.json")
+    compatibility_cases = {
+        row["heading"]: row["case_ids"] for row in compatibility["scenarios"]
+    }
+    pack_cases = {case["id"]: case for case in pack["cases"]}
+    scenarios = (BUNDLE_ROOT / "evals/evaluation_scenarios.md").read_text(
+        encoding="utf-8"
+    )
+    sections = {}
+    for section in re.split(r"(?m)^### ", scenarios)[1:]:
+        heading, _, body = section.partition("\n")
+        sections[heading] = body
+
+    expected_blocks = [
+        section.split("**Expected:**", 1)[1]
+        for section in sections.values()
+        if "**Expected:**" in section
+    ]
+    required_diagram = re.compile(
+        r"(?i)\b(?:require|include|create|use|draw|produce)\s+"
+        r"(?:one\s+)?(?:mermaid\s+)?diagram\b|\bone\s+mermaid\s+diagram\b"
+    )
+    assert all(not required_diagram.search(block) for block in expected_blocks)
+    old_ceiling = "ten-" + "document ceiling"
+    assert old_ceiling not in scenarios.lower()
+    assert not re.search(r"\blanes?\b", scenarios.lower())
+
+    assert set(required) <= set(sections)
+    for heading, case_id in required.items():
+        case = pack_cases[case_id]
+        binding = bindings[case_id]
+        assert case_id in compatibility_cases[heading]
+        assert case["kind"] == "rubric"
+        assert case["status"] == "not-run"
+        assert binding["graders"] == []
+        assert case["rubric"]["pass"] and case["rubric"]["fail"]
+        assert all((BUNDLE_ROOT / path).is_file() for path in case["files"])
+        assert "**Prompt:**" in sections[heading]
+        assert "**Expected:**" in sections[heading]

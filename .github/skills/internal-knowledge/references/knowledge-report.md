@@ -13,10 +13,10 @@ each authored target its lifecycle status: `created`, `refreshed`,
 `unchanged`, `excluded`, or `failed`. Keep those statuses accurate and do not
 claim a file was written when it was not.
 
-`mode` is required and has exactly one value: `help`, `audit`, `targeted`,
-`sync`, or `setup`. Other fields are optional; omit a field when it has no
-evidenced value. Each key appears at most once, and values must not be empty.
-Use only these keys:
+`mode` is required and has exactly one value: `help`, `audit`, `align`,
+`targeted`, `sync`, or `setup`. Other fields are optional; omit a field
+when it has no evidenced value. Each key appears at most once, and values must
+not be empty. Use only these keys:
 
 | Key | Meaning |
 | --- | --- |
@@ -78,3 +78,7 @@ path or line number. Do not turn defects into document warnings, disclaimers,
 manufactured unknowns, or open questions. Keep `gaps` for its existing meaning:
 unresolved evidence, ownership, enforcement, or validation gaps; the human
 problem section does not replace it or any required machine field.
+
+Material alignment problems include orphan tactical items, uncovered Direction
+items, contradictions, expired Direction horizons, undefined terms, and
+references to superseded ADRs.

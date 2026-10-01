@@ -6,6 +6,7 @@ Use this reference to decide **what the skill may touch** before any drafting st
 
 - [Mode resolution](#mode-resolution)
 - [Audit mode](#audit-mode)
+- [Align mode](#align-mode)
 - [Buckets](#buckets)
 - [Help mode](#help-mode)
 - [Layout declaration and drift](#layout-declaration-and-drift)
@@ -26,11 +27,20 @@ Resolve exactly one provisional mode from the request signals before reading evi
 | --- | --- | --- |
 | `help` | The request opens with `help`, or asks what this skill can do, which mode applies, or how to phrase the real request. | None. Read-only. |
 | `audit` | The request explicitly asks for a bounded read-only audit, review, inspection, or diagnosis of documentation or its ownership/evidence. | No write allowlist. Read only the normalized audit perimeter and directly necessary supporting evidence. |
+| `align` | The user explicitly invokes `align cascade` or `align harvest`. | No write allowlist. Return approvable deltas or `nothing to promote`. |
 | `targeted` | The user names explicit paths, directories, or a single document. | Only those normalized destinations. |
 | `sync` | No explicit targets, and the repository already realizes its declared knowledge layout. | The approved plan intersected with the requested bucket: existing documents plus missing documents on the closed derived-gap list. |
 | `setup` | No explicit targets, and the declared layout is absent, incomplete, or contradicted by what exists on disk. | The approved plan intersected with the requested bucket: the layout and component documents the bucket admits. |
 
 An explicit `audit` signal wins before path interpretation, so a request such as "audit this README" remains read-only rather than becoming targeted authoring. If a request combines audit with a possible fix, complete the audit report only and require a separate explicit authoring request for any change. When two modes remain defensible after the check, do not guess: state both readings and ask which one applies.
+
+## Align mode
+
+`align` runs only when explicitly invoked. Choose one direction: `cascade`
+proposes tactical deltas from strategic knowledge; `harvest` proposes durable
+promotions from closed operational work. Neither direction writes files or
+approves its own proposal. If no harvest candidate passes the admission tests
+in [alignment](alignment.md), report `nothing to promote`.
 
 `sync` aligns documents to repository evidence and is not a sync contract over managed copies. When the request is about managed-copy state, blockers, or apply flows, stop and ask which run applies before resolving a mode.
 
@@ -141,6 +151,8 @@ Account for every discovered directory and evidence-table row as `planned`, `exi
 
 - In `audit`, there is no write allowlist. The normalized perimeter is a read
   boundary only, and a report is not persisted by default.
+- In `align`, there is no write allowlist. Proposals are returned for human
+  review and approval before any separate authoring request.
 - In `targeted`, the allowlist is the normalized set of user-supplied destinations.
 - In `sync` and `setup`, the allowlist is exactly the approved plan intersected with the requested bucket. Approval is what authorizes a write, not discovery.
 - An authored deletion must name its exact path as a deletion in the proposed allowlist and receive approval. Approval for `targeted`, `sync`, or `setup` does not authorize deleting an unnamed path; generated and protected content remains with its owner.
@@ -185,7 +197,8 @@ A target is `unchanged` when all of the following hold:
 3. Every relative link resolves from the document's directory.
 4. Every generated block is intact and internally consistent.
 5. No material claim in the document contradicts current repository evidence.
-6. There is no material addition for its stated reader outcome still required. If a material omission prevents that outcome, the target is not `unchanged`.
+6. Every claim fits its strategic or tactical knowledge type and is held by an owner appropriate to that layer; use [knowledge types](knowledge-types.md) to check the fit.
+7. There is no material addition for its stated reader outcome still required. If a material omission prevents that outcome, the target is not `unchanged`.
 
 When the predicate holds, report the target as `unchanged` and do not write it. When it fails, name the failing clause in the plan; that clause is the justification for the rewrite. Stylistic preference is never a justification.
 
@@ -213,7 +226,13 @@ The plan is negotiable line by line. Removing a row moves it to the exclusion le
 
 Order the plan by reader value: the layout root document first, then the components a reader must understand to use the repository, then the remainder.
 
-Write at most one coherent wave per invocation. A coherent batch contains every authored document needed to keep one owner split and its links coherent; the former ten-document ceiling is not a fixed quota. The ceiling is not a target: bound the wave by evidence, coherence, or an explicit user decision, and explain the boundary when more documents remain. A wave must leave the repository coherent on its own: never publish a document whose links point at artifacts a later wave would create. Report the remaining waves so the next invocation resumes without rediscovery.
+Write at most one coherent wave per invocation. A coherent batch contains
+every authored document needed to keep one owner split and its links coherent.
+Bound the wave by evidence, coherence, and reader value, and explain what
+remains for a later invocation. A wave must leave the repository coherent on
+its own: never publish a document whose links point at artifacts a later wave
+would create. Report the remaining waves so the next invocation resumes
+without rediscovery.
 
 A wave partitions documents, never the obligations of an authoring reference. Every rule that reference states for a document, including its sections, its links, and its diagram disposition, is satisfied when that document is written. Treating one obligation as its own later wave leaves every document already published incomplete, and the defect survives review because each wave looked finished on its own.
 

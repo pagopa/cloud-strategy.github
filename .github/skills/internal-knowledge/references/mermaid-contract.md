@@ -52,5 +52,5 @@ a distinct question; otherwise use a focused owner link or prose.
 
 Check source structure and warranted relationships separately. Parse a
 diagram with `mmdc` when it is available; when it is unavailable, report the
-parse check as `not-run` with that reason. A parse result does not prove that
-A parse result establishes syntax only, not evidentiary accuracy or reader value.
+parse check as `not-run` with that reason. A parse result establishes syntax
+only, not evidentiary accuracy or reader value.
