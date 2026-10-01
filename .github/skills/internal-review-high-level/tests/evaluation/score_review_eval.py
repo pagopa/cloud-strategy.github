@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 REQUIRED_BENCHMARK_FIELDS = (
     "contract_version",
     "schema_version",
