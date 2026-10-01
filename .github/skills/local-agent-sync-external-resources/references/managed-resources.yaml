@@ -152,9 +152,6 @@ sources:
       - upstream: skills/engineering/implement
         local: .github/skills/mattpocock-implement
         canonical_name: mattpocock-implement
-        invocation_policy:
-          codex:
-            allow_implicit_invocation: false
       - upstream: skills/engineering/improve-codebase-architecture
         local: .github/skills/mattpocock-improve-codebase-architecture
         canonical_name: mattpocock-improve-codebase-architecture
@@ -181,17 +178,12 @@ sources:
       - upstream: skills/engineering/to-spec
         local: .github/skills/mattpocock-to-spec
         canonical_name: mattpocock-to-spec
-        invocation_policy:
-          codex:
-            allow_implicit_invocation: false
       - upstream: skills/engineering/to-tickets
         local: .github/skills/mattpocock-to-tickets
         canonical_name: mattpocock-to-tickets
         invocation_policy:
           copilot:
             disable_model_invocation: true
-          codex:
-            allow_implicit_invocation: false
       - upstream: skills/engineering/triage
         local: .github/skills/mattpocock-triage
         canonical_name: mattpocock-triage
@@ -228,8 +220,6 @@ sources:
         invocation_policy:
           copilot:
             disable_model_invocation: true
-          codex:
-            allow_implicit_invocation: false
       - upstream: skills/productivity/teach
         local: .github/skills/mattpocock-teach
         canonical_name: mattpocock-teach

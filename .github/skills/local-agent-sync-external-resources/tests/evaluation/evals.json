@@ -4,7 +4,7 @@
   "requirements": [
     {
       "id": "R-CODEX-DEFAULT-STRIP",
-      "text": "For a managed asset that declares no codex.allow_implicit_invocation, the candidate agents/openai.yaml carries no upstream allow_implicit_invocation; other policy fields are kept and an empty policy is dropped.",
+      "text": "For a managed asset that declares no codex.allow_implicit_invocation, the candidate agents/openai.yaml carries no upstream allow_implicit_invocation; other policy fields are kept and an empty policy is dropped. The Matt source leaves implement, research, setup-matt-pocock-skills, to-spec, to-tickets, handoff, and domain-modeling model-invocable in Codex.",
       "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
     },
     {
@@ -92,9 +92,9 @@
       "family": "delegation-boundary",
       "kind": "rubric",
       "requirement_ids": ["R-REFRESH-GATE", "R-PINNED-OFFLINE"],
-      "prompt": "Regenerate only the Matt source metadata fix; only grill-me and setup metadata may change.",
+      "prompt": "Regenerate the Matt source metadata fix for Codex model invocation; only implement, to-spec, to-tickets, and handoff metadata may change.",
       "initial_state": "The pinned SHA and pin ref exist in the workspace cache; the plan summary lists many normalization changes.",
-      "expected_output": "The agent compares the candidate with the repository, finds only the two authorized paths, applies with network protocols blocked, and reports any extra path as a stop condition.",
+      "expected_output": "The agent compares the candidate with the repository, finds changes only in the four authorized agents/openai.yaml files, applies with network protocols blocked, and reports any extra path as a stop condition.",
       "files": [],
       "assertions": [
         {"id": "A-REAL-DIFF", "text": "Repository impact is taken from the candidate-versus-repository diff.", "critical": true},
@@ -108,11 +108,11 @@
       "held_out": false,
       "rubric": {
         "pass": [
-          "The transcript shows a candidate-versus-repository diff limited to the two authorized files before or after apply.",
+          "The transcript shows a candidate-versus-repository diff limited to the four authorized metadata files before or after apply.",
           "Commands run with network protocols blocked or only through pinned prepare."
         ],
         "fail": [
-          "The agent approves the refresh from the 48-path normalization summary alone.",
+          "The agent approves the refresh from the normalization summary alone.",
           "The agent fetches upstream outside pinned prepare."
         ]
       }

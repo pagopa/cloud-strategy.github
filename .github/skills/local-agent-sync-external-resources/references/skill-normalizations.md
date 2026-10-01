@@ -39,22 +39,23 @@ declared source.
 - Apply `invocation_policy` generically per asset. Its fields are
   `copilot.disable_model_invocation` and `codex.allow_implicit_invocation`;
   do not hardcode per-asset exceptions.
-- The Matt source declares 13 upstream user-invoked skills explicitly and
-  leaves the other 12 model-invoked skills unrestricted. Keep `grill-me`
-  model-invocable and make `grilling` user-invoked, so skills that must
-  interview the user load the self-contained canonical entrypoint.
-  Preserve this split in both runtimes.
+- Apply Copilot and Codex invocation policies independently for each Matt
+  asset. Keep `grill-me` model-invocable and make `grilling` user-invoked, so
+  skills that must interview the user load the self-contained canonical
+  entrypoint.
+- Keep Codex model invocation allowed for `mattpocock-implement`,
+  `mattpocock-research`, `mattpocock-setup-matt-pocock-skills`,
+  `mattpocock-to-spec`, `mattpocock-to-tickets`, `mattpocock-handoff`, and
+  `mattpocock-domain-modeling`. Their manifest entries must not declare
+  `codex.allow_implicit_invocation`. `to-tickets` and `handoff` retain their
+  Copilot `disable_model_invocation` setting independently.
 - `superpowers-brainstorming` remains an independently declared exception:
   keep `disable-model-invocation: true` in `SKILL.md` and set
   `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
-- `mattpocock-implement` and `mattpocock-to-spec` are Codex-only restrictions:
-  keep `codex.allow_implicit_invocation: false` and declare no Copilot policy,
-  because `internal-gateway-execute-plans` and `internal-gateway-idea` `+spec`
-  must load them as handoff owners.
-- `tests/test_external_resource_catalog_contract.py` verifies that committed
-  invocation metadata matches the manifest in both runtimes: declared skills
-  carry their policy, and undeclared skills carry none. It checks metadata,
-  not observed runtime selection.
+- `tests/scripts/test_manifest.py` verifies that committed invocation metadata
+  matches the manifest in both runtimes: declared skills carry their policy,
+  and undeclared skills carry none. It checks metadata, not observed runtime
+  selection.
 
 ## Executable Python Normalization
 

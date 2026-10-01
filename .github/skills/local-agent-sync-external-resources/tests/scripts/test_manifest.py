@@ -38,8 +38,17 @@ _MATTPOCOCK_USER_INVOKED = {
     "wait-what",
     "wayfinder",
 }
-# Gateway handoff owners stay model-invocable in Copilot; see skill-normalizations.md.
-_MATTPOCOCK_CODEX_ONLY_RESTRICTED = {"implement", "to-spec"}
+# Gateway handoff owners stay model-invocable in both runtimes.
+_MATTPOCOCK_CODEX_MODEL_INVOKABLE = {
+    "domain-modeling",
+    "handoff",
+    "implement",
+    "research",
+    "setup-matt-pocock-skills",
+    "to-spec",
+    "to-tickets",
+}
+_MATTPOCOCK_COPILOT_MODEL_INVOKABLE = {"implement", "to-spec"}
 _RETIRED_SKILL_BUNDLES = (
     "internal-grill-me",
     "mattpocock-writing-great-skills",
@@ -407,19 +416,29 @@ def test_live_mattpocock_invocation_policy(repo_root: Path) -> None:
     )
     upstream_names = {Path(asset.upstream).name for asset in matt_source.assets}
     assert _MATTPOCOCK_USER_INVOKED <= upstream_names
+    assert _MATTPOCOCK_CODEX_MODEL_INVOKABLE <= upstream_names
 
     for asset in matt_source.assets:
         upstream_name = Path(asset.upstream).name
         policy = asset.invocation_policy
-        if upstream_name not in _MATTPOCOCK_USER_INVOKED:
-            assert policy is None, upstream_name
-            continue
-        assert policy is not None, upstream_name
-        assert policy.codex_allow_implicit_invocation is False
-        if upstream_name in _MATTPOCOCK_CODEX_ONLY_RESTRICTED:
-            assert not policy.copilot_disable_model_invocation, upstream_name
-        else:
-            assert policy.copilot_disable_model_invocation is True, upstream_name
+        expected_codex = (
+            False
+            if upstream_name in _MATTPOCOCK_USER_INVOKED
+            and upstream_name not in _MATTPOCOCK_CODEX_MODEL_INVOKABLE
+            else None
+        )
+        expected_copilot = (
+            True
+            if upstream_name in _MATTPOCOCK_USER_INVOKED
+            and upstream_name not in _MATTPOCOCK_COPILOT_MODEL_INVOKABLE
+            else None
+        )
+        assert (
+            policy.codex_allow_implicit_invocation if policy else None
+        ) == expected_codex, upstream_name
+        assert (
+            policy.copilot_disable_model_invocation if policy else None
+        ) == expected_copilot, upstream_name
 
 
 @pytest.mark.parametrize("name", _RETIRED_SKILL_BUNDLES)
