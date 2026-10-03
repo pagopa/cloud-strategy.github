@@ -41,9 +41,6 @@ TRIGGER_FIRST_PREFIXES = (
     "Use before",
     "When ",
 )
-ALLOWED_VIRTUAL_PATHS = {
-    ".github/copilot-sync.manifest.json",
-}
 ALLOWED_VIRTUAL_PREFIXES = ("tmp/",)
 SKILL_INVOCATION_PATTERN = re.compile(r"(?<![\w-])/(internal|local)-[a-z0-9][a-z0-9-]*")
 DOLLAR_SKILL_INVOCATION_PATTERN = re.compile(
@@ -1579,8 +1576,6 @@ def resolve_reference(
     if "://" in target or target.startswith("mailto:"):
         return None
     if target.endswith("/"):
-        return None
-    if target in ALLOWED_VIRTUAL_PATHS:
         return None
     if target.startswith(ALLOWED_VIRTUAL_PREFIXES):
         return None
