@@ -136,6 +136,21 @@ declared source.
   the new producer and update the bounded search and behavioral check. Do not
   silently assume that the old rule proves the new producer's destination.
 
+## To Spec Testing Decisions Override
+
+- Target only `mattpocock-skills` / canonical `mattpocock-to-spec` / `SKILL.md`.
+- Append or replace the `local-sync:to-spec-testing-decisions` marked note.
+  It overrides upstream seam confirmation and applies to `Testing Decisions`.
+- Keep accepted mandatory checks separate from optional evaluations and
+  proposed seams. Behavioral evaluation is optional unless explicitly required;
+  missing optional runtime does not block publication or planning.
+- Required evaluation prerequisites must be evidenced or recorded as unresolved.
+  Do not invent a runner, waive a mandatory check, or conceal unresolved
+  prerequisites behind `ready-for-agent`. Unperformed evaluation is `not-run`.
+- Preserve unrelated upstream content and neighboring bundles. Verify fresh
+  injection, stale-note replacement, and idempotence with
+  `tests/scripts/test_candidate.py -k to_spec_testing`.
+
 ## Idea Refine Output Override
 
 - Target only the canonical `addyosmani-idea-refine` bundle.

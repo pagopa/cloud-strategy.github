@@ -2245,3 +2245,48 @@ def test_renamed_managed_file_is_reported_once_with_new_path(
     dirty = find_dirty_targets(git_repo, (_example_asset(),))
 
     assert dirty == (".github/skills/example/RENAMED.md",)
+
+
+@pytest.mark.parametrize("stale_note", [False, True])
+def test_to_spec_testing_contract_refresh_is_scoped_and_idempotent(
+    tmp_path: Path, stale_note: bool,
+) -> None:
+    # Catch missing refresh injection, stale-note retention, and neighbor writes.
+    candidate = tmp_path / "candidate"
+    assets = tuple(
+        ManagedAsset(
+            source="mattpocock-skills", upstream=f"engineering/{name}",
+            local=f".github/skills/mattpocock-{name}",
+            canonical_name=f"mattpocock-{name}",
+        )
+        for name in ("to-spec", "to-tickets")
+    )
+    resources = ManagedResources(
+        sources=(ManagedSource(
+            source_id="mattpocock-skills", repository="https://example.com/skills.git",
+            ref="a" * 40, advertised_ref=None, assets=assets,
+        ),), replacements=(), watchlist=(),
+    )
+    start = "<!-- local-sync:to-spec-testing-decisions:start -->"
+    end = "<!-- local-sync:to-spec-testing-decisions:end -->"
+    originals = {}
+    for asset in assets:
+        path = candidate / asset.local / "SKILL.md"
+        path.parent.mkdir(parents=True)
+        body = f"---\nname: {asset.canonical_name}\n---\nUpstream body.\n"
+        originals[asset.canonical_name] = body
+        if stale_note and asset.canonical_name == "mattpocock-to-spec":
+            body += f"\n{start}\nObsolete test contract.\n{end}\n"
+        path.write_text(body, encoding="utf-8")
+    changed = normalize_candidate(resources, candidate)
+    target = candidate / assets[0].local / "SKILL.md"
+    first = target.read_text(encoding="utf-8")
+    assert changed == (f"{assets[0].local}/SKILL.md",)
+    assert first.startswith(originals["mattpocock-to-spec"])
+    assert first.count(start) == first.count(end) == 1
+    assert "Obsolete test contract." not in first
+    assert (candidate / assets[1].local / "SKILL.md").read_text(
+        encoding="utf-8"
+    ) == originals["mattpocock-to-tickets"]
+    assert normalize_candidate(resources, candidate) == ()
+    assert target.read_text(encoding="utf-8") == first

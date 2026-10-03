@@ -72,3 +72,27 @@ A description of the things that are out of scope for this spec.
 Any further notes about the feature.
 
 </spec-template>
+
+<!-- local-sync:to-spec-testing-decisions:start -->
+## Local testing-decisions contract
+
+This contract overrides conflicting seam-confirmation, testing, and readiness
+instructions above. Apply it in the spec's `Testing Decisions` section.
+
+- Separate accepted mandatory checks, optional evaluations, and proposed test
+  seams. Synthesize decisions already made; do not invent mandatory checks.
+  Agreement on a seam or test design alone does not require its execution.
+- Prefer existing runnable checks. Behavioral skill evaluations, including
+  writer-to-executor trials, are optional unless the user explicitly requires
+  them. A missing optional runner must not block spec publication or planning.
+  Record unperformed behavioral evaluation as `not-run`; structural validation
+  does not prove behavior.
+- For an explicitly required evaluation, record the established runner,
+  invocation, access, judge, result-capture path, and initial spending limit
+  when paid. Where evidence is missing, name the unresolved prerequisite;
+  preserve the requirement without inventing availability, silently waiving it,
+  or presenting the spec as ready for executable planning.
+- Do not conduct a new interview or request routine seam confirmation while
+  synthesizing. Record proposals and unknowns in `Testing Decisions`; a
+  `ready-for-agent` label must not conceal unresolved mandatory prerequisites.
+<!-- local-sync:to-spec-testing-decisions:end -->

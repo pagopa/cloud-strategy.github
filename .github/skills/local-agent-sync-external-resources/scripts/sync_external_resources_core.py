@@ -757,6 +757,37 @@ _MATTPOCOCK_RETAINED_PATHS = {
     ): (("./tmp/codebase-improve/", "./tmp/.codebase-improve/"),),
 }
 _MATTPOCOCK_GRILLING_REDIRECT_EXCLUSIONS = frozenset({"grill-me", "grilling"})
+_TO_SPEC_TESTING_START = "<!-- local-sync:to-spec-testing-decisions:start -->"
+_TO_SPEC_TESTING_END = "<!-- local-sync:to-spec-testing-decisions:end -->"
+_TO_SPEC_TESTING_RE = re.compile(
+    re.escape(_TO_SPEC_TESTING_START) + r".*?" + re.escape(_TO_SPEC_TESTING_END),
+    re.DOTALL,
+)
+_TO_SPEC_TESTING_CONTRACT = f"""\
+{_TO_SPEC_TESTING_START}
+## Local testing-decisions contract
+
+This contract overrides conflicting seam-confirmation, testing, and readiness
+instructions above. Apply it in the spec's `Testing Decisions` section.
+
+- Separate accepted mandatory checks, optional evaluations, and proposed test
+  seams. Synthesize decisions already made; do not invent mandatory checks.
+  Agreement on a seam or test design alone does not require its execution.
+- Prefer existing runnable checks. Behavioral skill evaluations, including
+  writer-to-executor trials, are optional unless the user explicitly requires
+  them. A missing optional runner must not block spec publication or planning.
+  Record unperformed behavioral evaluation as `not-run`; structural validation
+  does not prove behavior.
+- For an explicitly required evaluation, record the established runner,
+  invocation, access, judge, result-capture path, and initial spending limit
+  when paid. Where evidence is missing, name the unresolved prerequisite;
+  preserve the requirement without inventing availability, silently waiving it,
+  or presenting the spec as ready for executable planning.
+- Do not conduct a new interview or request routine seam confirmation while
+  synthesizing. Record proposals and unknowns in `Testing Decisions`; a
+  `ready-for-agent` label must not conceal unresolved mandatory prerequisites.
+{_TO_SPEC_TESTING_END}"""
+
 _MATTPOCOCK_RESEARCH_SKILL = "mattpocock-research"
 _MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_START = (
     "<!-- local-sync:research-workspace:start -->"
@@ -1461,6 +1492,14 @@ def normalize_candidate(
                 and file_path.parent == asset_dir
             ):
                 content = _enforce_codebase_improve_workspace_contract(content)
+            if (
+                asset.source == _MATTPOCOCK_SOURCE
+                and asset.canonical_name == "mattpocock-to-spec"
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_marked_contract(
+                    content, _TO_SPEC_TESTING_RE, _TO_SPEC_TESTING_CONTRACT,
+                )
             if (
                 asset.source == _MATTPOCOCK_SOURCE
                 and asset.canonical_name == _MATTPOCOCK_RESEARCH_SKILL
