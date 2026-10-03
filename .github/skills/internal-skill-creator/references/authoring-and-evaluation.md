@@ -8,9 +8,8 @@ success criteria, validation path, and anti-scope.
 
 ## Creator delegation matrix
 
-Delegate only after the parent fixes the complete task-specific objective,
-value gate, bounded evidence, constraints, write scope, expected output,
-acceptance, validation, and budget.
+Apply the delegation gate in `SKILL.md` first. This matrix maps eligible
+creator tasks to a mode.
 
 | Creator task | Mode | Expected output | Write scope | Parent acceptance |
 | --- | --- | --- | --- | --- |
@@ -20,14 +19,10 @@ acceptance, validation, and budget.
 | One bounded implementation artifact | `write` | one artifact | one exact file or artifact path | Parent runs independent validation and accepts the result. |
 | Bounded validation set with multiple observable checks | `read` | validation evidence | empty | All declared checks and pass signals are present. |
 
-A single command, one obvious edit, unresolved policy, boundary, authority, or
-acceptance, incomplete acceptance, and unverifiable prose stay local or blocked.
-A competing-owner request stays with its owner; a Copilot agent under
-`.github/agents/` routes to `/internal-agent-creator`.
-
 Use one worker, one brief, and one result. Default to one attempt. A corrective
-retry requires new evidence or a concrete correction target. Cosmetic,
-punctuation, prose-only, and semantic disagreement do not reopen the worker.
+retry requires new evidence and a concrete correction target, and it must carry
+a changed brief. Cosmetic, punctuation, prose-only, and semantic disagreement do
+not reopen the worker.
 Direct worker writes are limited to one exact declared artifact; the parent
 reviews and accepts it. The worker never edits the creator contract, inventory,
 approval records, protected bundles, or broad directories.
@@ -52,8 +47,9 @@ v1; unobserved worker validation and budget data remain claims or unavailable
 evidence. When timeout, interruption, executor unavailability, or missing
 terminal output prevents a worker payload, the caller records a
 `LifecycleRecord` and creates neither a synthetic `WorkerResult` nor a
-`VerificationReceipt`. Trigger, boundary, policy, scope, retry choice, and
-subjective authoring decisions remain with the parent.
+`VerificationReceipt`. Trigger, boundary, policy, scope, retry choice,
+independent validation, acceptance, semantic review, closeout, and subjective
+authoring decisions remain with the parent.
 
 ## Lifecycle and retirement
 
@@ -66,14 +62,8 @@ hollow references or unmanaged catalog fallout.
 Name each affected inventory, sync, validator, and test surface. A report or
 output-contract change propagates to three surfaces: the SKILL.md contract,
 `agents/openai.yaml`, and the paired `.github/agents/<name>.agent.md` when one
-exists. A session started before the change keeps the previous snapshot; prove
-the new contract from a newly started session. Prefer the smallest
-deterministic proof and record unavailable proof as a gap.
-
-## Self-review risk
-
-When this skill revises its own contract, name the rationalization risk and
-prefer evidence from external consumers and focused tests.
+exists. Prefer the smallest deterministic proof and record unavailable proof
+as a gap.
 
 ## Evaluation selection
 
@@ -87,18 +77,22 @@ writing, design, and judgment work use human review.
 | Script, CLI, parser, generator | Executable test with fixtures |
 | Stable public output | Producer and consumer test |
 | LLM routing or trigger | Executable resolver or concrete evaluation cases |
+| Mandatory rule moved behind a conditional reference | Treat as behavioral reachability change and evaluate the affected branch |
 | Subjective instructional prose | Human review with an explicit evidence gap when runtime evaluation is unavailable |
-| Editorial wording or reorganization | Markdown and token validation only |
+| Editorial wording that preserves behavior | Markdown and token validation only |
 
 Raw instructional wording is not an executable or evaluable seam. Do not
 manufacture wording tests when a change has no parser, executable consumer,
 public protocol, or concrete evaluation case.
 
-## Baselines
+## Evaluation packs and baselines
 
-For a material revision, compare with the previous version. For a new skill,
-compare with the same task without it when isolation is available. Otherwise,
-record the gap and use the closest focused validator plus human review.
+Use [`eval-packs.md`](eval-packs.md) to define requirements, cases, trigger
+queries, frozen criteria, and evidence states. Use
+[`grading-and-analysis.md`](grading-and-analysis.md) to grade artifacts and
+interpret comparisons. For a new skill, compare with the same task without it
+when the host can isolate that condition. For a material revision, compare
+with a frozen snapshot under `tmp/`.
 
 ## Evidence and human review
 
@@ -106,12 +100,6 @@ For each applicable branch, record the prompt or fixture, expected and observed
 behavior, review method, and status. Present subjective outputs to the user
 before changing them from agent judgment alone. Generalize feedback; do not
 optimize only for sampled prompts.
-
-## Description trigger checks
-
-Test realistic should-trigger and near-miss prompts. Include the main branch
-and a competing-owner case. When tuning against enough cases, reserve a holdout
-set. Record a gap when the runtime cannot measure invocation.
 
 ## Iteration stop conditions
 
@@ -122,14 +110,8 @@ evidence gaps blocked.
 ## Portability and invocation contract
 
 `SKILL.md` frontmatter allows only `name`, `description`, `metadata`, `license`,
-and `compatibility`. Invocation policy goes to `agents/openai.yaml` under
+and `compatibility`. `name` matches the bundle directory name. Invocation
+policy goes to `agents/openai.yaml` under
 `policy.allow_implicit_invocation`. Provenance fields (`source`, `risk`,
 `date_added`, and `revision`) go under `metadata`. The validator blocks
 non-portable fields.
-
-## Skill evaluation harness
-
-A new skill requires at least three realistic scenario prompts, should-trigger
-and should-not-trigger cases (including one competing-owner near-miss), and a
-baseline comparison without the skill. A material revision re-runs trigger
-checks only when the description changed.

@@ -16,7 +16,10 @@ description: Use when editing or reviewing Makefile or .mk syntax, targets, prer
 
 ## When not to use
 
-- CI or runtime semantics are the main concern; use the matching owner.
+- CI or runtime semantics are the main concern; route them to the matching
+  owner.
+- Embedded shell behavior is the primary concern; route it to
+  `/internal-bash`.
 - Generated Makefiles unless the generator is the intended edit point.
 
 ## Baseline
@@ -30,11 +33,6 @@ description: Use when editing or reviewing Makefile or .mk syntax, targets, prer
   as review concerns.
 - `make` and `make -n` are not generic safety boundaries; `make -n` is only a
   preview, so inspect recipes before execution.
-
-## Narrow owner routing
-
-- Route embedded shell behavior to `/internal-bash` when shell semantics are
-  the primary concern.
 
 ## Validation
 
@@ -50,3 +48,6 @@ It requires `checkmake` 0.3.2 and never invokes GNU Make or recipe commands.
 Supported checks are parser-backed Makefile rules and configured static
 limits. Variable intent, `$`/`$$` behavior, parallelism, order-only
 prerequisites, recipe side effects, and domain behavior are unsupported.
+
+For installation, self-test, and configured rules, read
+[`references/validation-contract.md`](references/validation-contract.md).

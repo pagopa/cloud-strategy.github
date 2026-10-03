@@ -1,0 +1,75 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "ledger_records_immutable",
+  "gold": "tests/evaluation/grader-fixtures/gold/ledger_records_immutable.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/traceability.md": "Intro\nTR-001 first\nTR-002 second\n"
+        },
+        "after": {
+          "docs/traceability.md": "Updated intro\nTR-001 first\nTR-002 second\nTR-003 third\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {}
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "edited-record",
+      "kind": "protected-change",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/traceability.md": "TR-001 first\nTR-002 second\n"
+        },
+        "after": {
+          "docs/traceability.md": "TR-001 changed\nTR-002 second\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "ledger-record-changed"
+    },
+    {
+      "name": "reordered-records",
+      "kind": "protected-change",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/traceability.md": "TR-001 first\nTR-002 second\n"
+        },
+        "after": {
+          "docs/traceability.md": "TR-002 second\nTR-001 first\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "ledger-record-changed"
+    }
+  ]
+}

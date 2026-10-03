@@ -1,82 +1,84 @@
 # Cache and Token Efficiency
 
-Apply when creating or materially revising a skill bundle. Every always-loaded
-token is paid on every turn, and every byte change to a loaded prefix re-pays
-the cache write. Source anchors: OpenAI prompt caching, Anthropic prompt
-caching and Agent Skills docs, and the GPT-5.6 valuemaxxing migration evidence
-recorded below.
+Apply when creating or materially revising a skill bundle. Hosts differ in how
+they load skills, form reusable prefixes, and account for cached input. Keep
+always-loaded content deliberate, then measure from the runtime fields the
+host exposes. Vendor reports below are documented claims, not repository-local
+measurements.
 
 ## Cache model
 
-Prompt caching is prefix caching with exact matching, not a similarity cache.
-The cacheable prefix is ordered `tools → system → messages`; a change at one
-point invalidates that point and everything after it. Skill descriptions and
-frontmatter sit in the always-loaded prefix; `SKILL.md` loads on activation;
-`references/` load on demand. Measure cache behavior from runtime usage fields
-(`cached_tokens`, `cache_read_input_tokens`) only when the adapter exposes
-them; otherwise record the evidence gap. Repository skill authors do not place
-provider breakpoints; the runtime does.
+Prefix reuse depends on the host's cache rules, request layout, and cache
+eligibility. Exact-prefix matching and invalidation behavior are documented
+for some providers; do not assume another host behaves the same way. Here,
+skill descriptions and frontmatter serve routing, `SKILL.md` loads on
+activation, and references are selected on demand. Actual request composition
+belongs to the runtime. Measure cache behavior from `cached_tokens` or
+`cache_read_input_tokens` when the adapter exposes them; otherwise record the
+evidence gap. Repository authors do not configure provider breakpoints.
 
 ## Cache-stability rules
 
-- Keep every always-loaded surface byte-stable: description, frontmatter
+- Keep always-loaded surfaces deliberate and stable: description, frontmatter
   serialization, section order, projection order, and reference link order.
-- Prohibit volatile content in `SKILL.md`, frontmatter, descriptions, and
-  references: timestamps, session or request IDs, generated counts, run
-  telemetry, and dates. Route volatile facts to on-demand content or the
-  conversation, never to a cached prefix.
-- Order content stable-to-volatile inside every file: durable rules first,
-  session-specific guidance last. A volatile sentence at the top of a body
-  costs the whole prefix; at the end it costs nothing behind the breakpoint.
-- Batch contract changes. Each published edit to a loaded prefix re-pays the
-  cache write for every consumer; prefer one coherent revision over a trail
-  of small edits, which also matches the smallest-coherent-bundle rule.
-- Prefer progressive disclosure over inline growth: on-demand references keep
-  the prefix intact while still adding capability, the same way append-only
-  on-demand tool loading preserves a KV cache.
+  A stable revision date describes release history; it is not per-request
+  volatility.
+- Keep request IDs, session data, generated counts, run telemetry, and other
+  changing values out of descriptions and frontmatter. Put them in a reference
+  or the conversation when needed.
+- Put durable rules before session-specific guidance. Whether placement affects
+  cache reuse depends on where the host draws its prefix.
+- Batch related contract changes into one coherent revision. A changed prefix
+  can reduce reuse on hosts that cache exact prefixes; verify the effect from
+  host usage data rather than assuming a universal cost.
+- Prefer progressive disclosure when only some branches need the detail. It
+  keeps the main skill easier to scan even when cache behavior is unknown.
 
 ## Activation budget
 
-Hosts cap the initial skill list. Codex uses at most 2% of the context window,
-or 8,000 characters, and shortens or omits descriptions when the limit is
-exceeded, so keep descriptions short and trigger-first. Runtime sessions
-snapshot skills at start; restart the runtime after publishing a skill change
-before validating it.
+Hosts may cap the initial skill list or truncate descriptions. Codex's
+documented limit is the lower of 2% of the context window or 8,000 characters;
+this host-specific figure does not define other runtimes. Keep descriptions
+concise and trigger-first. A session may retain the skill version loaded at
+start; after publishing a change, use a new session to check propagation. The
+refresh behavior is host-dependent.
 
 ## Progressive-disclosure budgets
 
-- Description: trigger-focused, at most 1,024 characters.
-- `SKILL.md` body: under 500 lines and under 5,000 tokens; split when
-  approaching the limit.
-- References: one level deep; add a table of contents beyond 100 lines.
-- Deterministic or repetitive operations belong in `scripts/`: execution
-  returns output without loading source into context.
+- Keep the description trigger-focused. A 1,024-character bound is a
+  documented authoring convention, not a universal host limit.
+- Keep `SKILL.md` concise and move branch-specific detail to references. The
+  500-line and 5,000-token figures are practical review budgets, not cross-host
+  runtime guarantees.
+- Keep references one level deep; add a table of contents beyond 100 lines.
+- Put deterministic or repetitive operations in `scripts/` when an executable
+  helper is clearer than more instructions.
 
 ## Instruction-sediment review
 
-For every retained paragraph, ask whether removing it changes behavior; if
-not, delete it. Newer models need less explicit instruction, so audit
-accumulated rules on every material revision instead of only adding. A rule
-that must always hold goes to a validator, hook, or permission, not prose.
+For each retained paragraph, ask whether removing it changes behavior. Remove
+no-op guidance and review accumulated instructions on every material revision.
+A rule that must always hold belongs in a validator, hook, or permission rather
+than prose alone.
 
 ## Value measurement
 
-Measure cost per completed task, not tokens consumed. For a material
-revision, record before/after line, word, and estimated token counts for the
-always-loaded surfaces (description and `SKILL.md` body). A shorter cached
-prefix still wins twice: lower per-turn input cost and smaller cache writes.
+Measure cost per accepted task, not tokens alone. For a material revision,
+record before/after line, word, and estimated token counts for the description
+and `SKILL.md` body. Use runtime cost and cache fields when available; shorter
+text does not guarantee lower cost or equal outcomes.
 
 ## Evidence anchors
 
-- Exact-prefix matching, cache invalidation, ordering, and usage fields:
-  OpenAI prompt caching and Anthropic prompt caching documentation.
-- Metadata-always-loaded, body-on-activation, budgets, scripts-over-prose:
-  Anthropic Agent Skills overview and authoring best practices.
-- Production migration numbers (GPT-5.6 Build Hour, Ploy case study):
-  append-only on-demand tool loading cut tool-schema tokens 45% and cost 33%;
-  cross-chat breakpoints on system prompt and tools cut first-message cost
-  89% and overall spend 5%; batched tool calls with multi-action tools cut
-  cost 14% at equal pass rate; compaction cut input tokens 82%; slimmed tool
-  output cut web-tool response size 70%; moving deterministic work out of the
-  model cut token spend 54%. Volatile data placed at the prompt start was the
-  recurring cache-breaking failure.
+- Provider documentation describes exact-prefix matching, cache eligibility,
+  invalidation, and usage fields for that provider. Treat the details as
+  provider-specific.
+- Anthropic Agent Skills documentation describes metadata, body activation,
+  progressive disclosure, and authoring budgets. Those limits belong to its
+  documented environment.
+- Vendor-reported production migrations (GPT-5.6 Build Hour and the Ploy case
+  study) report lower cost at equal pass rate after append-only on-demand tool
+  loading, batching, compaction, smaller tool output, and moving deterministic
+  work out of the model. They report volatility near the prompt start as a
+  cache failure pattern. These examples have no local reproduction; treat the
+  direction as reported evidence and the magnitudes as unverified.

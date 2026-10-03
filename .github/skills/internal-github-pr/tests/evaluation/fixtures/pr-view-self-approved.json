@@ -1,0 +1,14 @@
+{
+  "_fixture": "Defective input: the author commented approval on their own PR; GitHub does not count it and review is still required.",
+  "number": 94,
+  "author": {"login": "dlagos"},
+  "reviewDecision": "REVIEW_REQUIRED",
+  "mergeStateStatus": "BLOCKED",
+  "statusCheckRollup": [
+    {"name": "pre-commit", "status": "COMPLETED", "conclusion": "SUCCESS"},
+    {"name": "code-analysis", "status": "COMPLETED", "conclusion": "SUCCESS"}
+  ],
+  "reviews": [
+    {"author": {"login": "dlagos"}, "state": "COMMENTED", "body": "LGTM, approving my own change."}
+  ]
+}

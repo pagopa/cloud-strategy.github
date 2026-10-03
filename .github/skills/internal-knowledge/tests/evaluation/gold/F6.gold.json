@@ -1,0 +1,56 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "fixture": "F6",
+  "components": [
+    "ci-ux",
+    "docs-checker"
+  ],
+  "edges": [],
+  "lifecycle_states": {},
+  "protected_paths": [
+    "docs/adr/0001-use-markdown.md",
+    "docs/traceability.md"
+  ],
+  "generated_paths": [
+    "docs/testing-inventory.md"
+  ],
+  "adr_dir": "docs/adr",
+  "ledger": {
+    "path": "docs/traceability.md",
+    "record_pattern": "^TR-\\d{3}\\b"
+  },
+  "router": null,
+  "expected_placements": {
+    "docs/ci-ux.md": "docs/guides/maintain-ci-ux.md"
+  },
+  "sections": [
+    {
+      "marker": "## Procedure",
+      "dest": "docs/guides/maintain-ci-ux.md"
+    },
+    {
+      "marker": "## Active obligation",
+      "dest": "docs/guides/maintain-ci-ux.md"
+    }
+  ],
+  "must_write": [],
+  "facts": [
+    {
+      "path": "docs/standards/documentation.md",
+      "text": "Front matter is enabled for maintained guides."
+    }
+  ],
+  "readme_paths": [
+    "README.md",
+    "docs/adr/README.md"
+  ],
+  "owner_links": [
+    {
+      "source": "README.md",
+      "target": "docs/adr/README.md"
+    }
+  ],
+  "diagram_edges": {},
+  "aliases": {},
+  "diagram_triggers": []
+}

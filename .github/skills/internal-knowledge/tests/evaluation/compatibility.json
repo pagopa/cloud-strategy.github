@@ -1,0 +1,486 @@
+{
+  "schema": "knowledge-eval-compat/v1",
+  "scenarios": [
+    {
+      "heading": "Refresh README directories",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Refresh an explicit README path",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Refresh a cloud account README",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Refresh repository architecture",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SYNC"
+      ],
+      "reason": "Mapped to the nearest retained offline acceptance case; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Reject an ambiguous architecture root",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SYNC"
+      ],
+      "reason": "Mapped to the nearest retained offline acceptance case; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Reject an unsafe README target batch",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Offline case does not yet cover this exact boundary; retain until Plan B adds equivalent coverage."
+    },
+    {
+      "heading": "Preserve a generated README block",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-INDEX-GENERATED"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Record an architectural decision",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Supersede an accepted ADR",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-PROT-ADR"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Guide an unclear request",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Align repository knowledge from scratch",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep targeted writes closed",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Leave a current repository unchanged",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-IDEM-RERUN"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Treat a material omission as a refresh trigger",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Refuse an unevidenced domain",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Resist domain promotion from tooling differences",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep evidence coverage from becoming an artifact quota",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Discover a standard and a principle during setup",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SETUP"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Keep work waves bounded by coherence",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SETUP"
+      ],
+      "reason": "Updated to the accepted strategic and tactical knowledge contract; runtime outcome evidence remains not-run."
+    },
+    {
+      "heading": "Keep a standard semantic when a check is added",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Guide a recovery or troubleshooting task",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep architecture structure proportional",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SYNC"
+      ],
+      "reason": "Mapped to the nearest retained offline acceptance case; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Keep public projections aligned",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-ALIGN-CASCADE"
+      ],
+      "reason": "Updated to the accepted strategic and tactical knowledge contract; runtime outcome evidence remains not-run."
+    },
+    {
+      "heading": "Distrust a declaration that names nothing",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Escalate a sync that understates the repository",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep a context document to its external format",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-GLOSSARY-BOLD"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Separate a standard from a rule",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Report the enforcement gap",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Update only the docs bucket",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Update only the README bucket",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-OPENING"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Stop when sync means the sync contract",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Re-run setup when drift reappears",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SETUP"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Map the old mode vocabulary to the new one",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Audit an explicit file without authoring",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Report partial audit coverage",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Mapped to offline acceptance coverage; live outcome evidence remains deferred to Plan B."
+    },
+    {
+      "heading": "Keep semantic contradictions as findings",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Link an approved specification through its owner",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-KNOWLEDGE-LAYERS"
+      ],
+      "reason": "Updated to the accepted strategic and tactical knowledge contract; runtime outcome evidence remains not-run."
+    },
+    {
+      "heading": "Set up knowledge for a non-code governance repository",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-NONCODE"
+      ],
+      "reason": "Updated to the accepted strategic and tactical knowledge contract; runtime outcome evidence remains not-run."
+    },
+    {
+      "heading": "Classify durable knowledge and operating detail",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-KNOWLEDGE-LAYERS",
+        "C-SPLIT-MIXED"
+      ],
+      "reason": "Mapped to concrete offline rubric and grader coverage; semantic review remains not-run."
+    },
+    {
+      "heading": "Gate authored deletions by the allowlist",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-DELETE-APPROVAL"
+      ],
+      "reason": "Mapped to the deletion rubric and existing allowlist grader boundary; semantic review remains not-run."
+    },
+    {
+      "heading": "Report discovered problems to the human",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-PROBLEM-REPORT"
+      ],
+      "reason": "Mapped to concrete offline rubric coverage; semantic review remains not-run."
+    },
+    {
+      "heading": "Preserve evidence-backed counterexamples",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-PRESERVE-COUNTEREXAMPLES"
+      ],
+      "reason": "Mapped to concrete offline rubric coverage; semantic review remains not-run."
+    },
+    {
+      "heading": "Propose tactical changes from strategic direction",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-ALIGN-CASCADE"
+      ],
+      "reason": "Updated to the accepted strategic and tactical knowledge contract; runtime outcome evidence remains not-run."
+    },
+    {
+      "heading": "Keep proposal and approval separate",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Keep proposal and evidence states distinct",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-ALIGN-HARVEST"
+      ],
+      "reason": "Updated to the accepted strategic and tactical knowledge contract; runtime outcome evidence remains not-run."
+    },
+    {
+      "heading": "Documentation enforcement",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Architecture analysis without authoring",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SYNC"
+      ],
+      "reason": "Mapped to the nearest retained offline acceptance case; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Application implementation",
+      "disposition": "pending-plan-b",
+      "case_ids": [
+        "C-MODE-TARGETED"
+      ],
+      "reason": "Runtime behavior and broader task coverage remain for Plan B."
+    },
+    {
+      "heading": "Find nothing durable to promote from closed work",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-ALIGN-HARVEST"
+      ],
+      "reason": "Added for strategic and tactical alignment coverage; no runtime evaluation has been run."
+    },
+    {
+      "heading": "Report one alignment outcome for each direction item",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-ALIGN-AUDIT"
+      ],
+      "reason": "Added for strategic and tactical alignment coverage; no runtime evaluation has been run."
+    },
+    {
+      "heading": "Mark expired direction as not reconfirmed",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-ALIGN-EXPIRED"
+      ],
+      "reason": "Added for strategic and tactical alignment coverage; no runtime evaluation has been run."
+    },
+    {
+      "heading": "Set up a personal study repository without assuming software",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-STUDY"
+      ],
+      "reason": "Added for strategic and tactical alignment coverage; no runtime evaluation has been run."
+    },
+    {
+      "heading": "Audit a README-only request without authoring",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-AUDIT-FILE"
+      ],
+      "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Check ownership before excluding a managed path",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-ROUTER-CENTRAL-COPY"
+      ],
+      "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Extend an existing document for a material omission",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-USEFUL"
+      ],
+      "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Keep a short README proportional",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-README-USEFUL"
+      ],
+      "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Ordinary documentation edit",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-HELP"
+      ],
+      "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Refresh after a new component appears",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-MODE-SYNC"
+      ],
+      "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Route a missing instruction owner",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-PROBLEM-REPORT"
+      ],
+      "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Select optional knowledge from evidence",
+      "disposition": "replaced-by",
+      "case_ids": [
+        "C-KNOWLEDGE-LAYERS"
+      ],
+      "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    }
+  ]
+}

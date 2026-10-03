@@ -21,8 +21,10 @@
 
 - Route executable or evaluable behavior changes through `/internal-tdd` before
   implementation; that skill owns test posture and sequencing.
-- Route GitHub requests through `/internal-github`, which selects the
-  governance, actions, operations, PR, or strategic lane.
+- Route GitHub work by deliverable: workflows, composite actions, and failed
+  runs to `/internal-github-actions`; pull-request lifecycle to
+  `/internal-github-pr`; repository and organization controls, identity,
+  runners, and rollout evidence to `/internal-github-platform`.
 - Route current Copilot or MCP platform documentation needs to
   `/internal-copilot-docs-research`.
 
@@ -40,7 +42,10 @@ Use the default canonical triage labels for local issues. See `docs/agents/triag
 
 ### Domain docs
 
-This repository uses the single-context domain documentation layout. See `docs/agents/domain.md`.
+This repository uses the multi-context domain documentation layout recorded in
+`CONTEXT-MAP.md`. Use [`docs/README.md`](docs/README.md) to map strategic and
+tactical knowledge to its owner. See [`docs/agents/domain.md`](docs/agents/domain.md)
+to select the relevant domain context.
 
 This file applies only to this standards repository. Do not treat these rules
 as consumer-repository defaults without an explicit sync contract change.
@@ -55,7 +60,7 @@ as consumer-repository defaults without an explicit sync contract change.
 ## Standards Repository Validation
 
 - Run `make token-risks` or
-  `python3 ./.github/scripts/detect_token_risks.py --root .` after changes that
+  `./.github/tools/run.sh detect-token-risks --root .` after changes that
   affect root policy or major AI assets in this repository.
 
 ## Standards Repository Locality
@@ -68,7 +73,7 @@ as consumer-repository defaults without an explicit sync contract change.
   instructions, references, examples, fixtures, scripts, and `agents/openai.yaml`
   resolvable from the bundle itself; do not require bundle users to load
   guidance from outside the skill directory.
-- Before completion, run `.github/scripts/validate_skill_change_scope.py`
+- Before completion, run `.github/tools/run.sh validate-skill-change-scope`
   without an allowlist, or with only the exact currently authorized bundle
   paths.
 

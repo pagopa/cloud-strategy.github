@@ -1,0 +1,6 @@
+# Quoted scalars keep parser-sensitive values as strings.
+country_codes:
+  - "no"
+  - "se"
+feature_enabled: true
+file_mode: "0644"

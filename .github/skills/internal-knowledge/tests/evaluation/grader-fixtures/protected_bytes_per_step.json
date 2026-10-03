@@ -1,0 +1,110 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "protected_bytes_per_step",
+  "gold": "tests/evaluation/grader-fixtures/gold/protected_bytes_per_step.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/LOCK.md": "fixed"
+        },
+        "after": {
+          "docs/LOCK.md": "fixed"
+        },
+        "steps": [
+          {
+            "docs/LOCK.md": "fixed"
+          }
+        ],
+        "trace": [
+          {
+            "step": 0,
+            "tool": "write",
+            "kind": "write",
+            "path": "docs/a.md"
+          }
+        ],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/LOCK.md": "fixed"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "protected-changed-in-step",
+      "kind": "protected-change",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/LOCK.md": "fixed"
+        },
+        "after": {
+          "docs/LOCK.md": "edited"
+        },
+        "steps": [
+          {
+            "docs/LOCK.md": "edited"
+          }
+        ],
+        "trace": [
+          {
+            "step": 0,
+            "tool": "write",
+            "kind": "write",
+            "path": "docs/LOCK.md"
+          }
+        ],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/LOCK.md": "fixed"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "protected-changed-in-step"
+    },
+    {
+      "name": "protected-deleted-in-step",
+      "kind": "protected-change",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/LOCK.md": "fixed"
+        },
+        "after": {},
+        "steps": [
+          {}
+        ],
+        "trace": [
+          {
+            "step": 0,
+            "tool": "shell",
+            "kind": "shell",
+            "path": "docs/LOCK.md"
+          }
+        ],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/LOCK.md": "fixed"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "protected-changed-in-step"
+    }
+  ]
+}

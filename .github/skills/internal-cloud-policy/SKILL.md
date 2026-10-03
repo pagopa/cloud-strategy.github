@@ -1,13 +1,14 @@
 ---
 name: internal-cloud-policy
-description: Use when authoring, comparing, or reviewing concrete cloud policy definitions such as AWS SCPs, Azure Policy, or GCP Org Policy, especially for cross-cloud policy shape or rollout safety.
+description: Use when authoring, comparing, or reviewing concrete cloud policy definitions such as AWS SCPs, Azure Policy, or GCP Org Policy, especially for cross-cloud policy shape or rollout safety. Route platform structure and guardrail placement to /internal-aws, /internal-azure, or /internal-gcp.
 ---
 
 # Cloud Policy Skill
 
 ## Referenced skills
 
-- None.
+- `/internal-gcp`: optional handoff for Google Cloud control choice, scope,
+  rollout staging, and evidence.
 
 ## When to use
 
@@ -19,6 +20,7 @@ description: Use when authoring, comparing, or reviewing concrete cloud policy d
 
 - Use this skill for concrete policy artifacts or cross-cloud policy comparisons.
 - When the main question is IAM, RBAC, operating-model, or guardrail strategy rather than the policy definition itself, treat it as a governance-design problem instead of a policy-definition task.
+- For Google Cloud, this skill owns the constraint content. Route which control to use, its folder or project scope, dry-run staging, and rollout evidence to `/internal-gcp`.
 
 ## Mandatory rules
 

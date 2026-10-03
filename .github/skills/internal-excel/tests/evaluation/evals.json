@@ -1,0 +1,368 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-excel",
+  "requirements": [
+    {
+      "id": "R-TRIGGER-SCOPE",
+      "text": "Activate for reading, writing, conversion, profiling, validation, or reconciliation of XLSX, XLSM, CSV, or TSV data, including a casual request that names a file such as customers.csv; do not activate for a mere mention of Excel or a file extension without data work.",
+      "source": "internal-excel SKILL.md: description; When to use"
+    },
+    {
+      "id": "R-INTEGRITY",
+      "text": "Keep the spreadsheet integrity contract for headers, types, nulls, duplicates, joins, reconciliation, stable IDs, and row counts; preserve leading zeros and long IDs, including when /anthropic-xlsx is added for rendering, charts, cached recalculation, or polished presentation.",
+      "source": "internal-excel SKILL.md: Referenced skills; Integrity boundary"
+    },
+    {
+      "id": "R-WORKBOOK-CONTRACT",
+      "text": "When a sample workbook or tab defines the layout, preserve its column order, widths, styles, and formula-column intent across every applicable produced tab; keep source columns atomic when formulas are requested.",
+      "source": "internal-excel SKILL.md: Workbook contracts"
+    },
+    {
+      "id": "R-ARTIFACT-SAFETY",
+      "text": "Exclude lock files and inactive binary exports from discovery, never modify sample workbooks or generated exports, and write any generated workbook to a declared controlled path that is reported for inspection.",
+      "source": "internal-excel SKILL.md: Discovery and binary artifacts"
+    },
+    {
+      "id": "R-VALIDATION",
+      "text": "Inspect the named artifact before broad transformation, choose the narrowest suitable tool, and run focused integrity checks after material changes, reporting compact counts, anomalies, reconciliation evidence, and assumptions.",
+      "source": "internal-excel SKILL.md: Workflow; Validation"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-TRIGGER-CASUAL",
+      "family": "trigger-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-TRIGGER-SCOPE"],
+      "prompt": "Clean up this customers.csv by removing duplicate customer IDs and return the corrected file.",
+      "initial_state": "The user names a CSV file casually but requests a concrete data transformation.",
+      "expected_output": "Treat the request as internal-excel work and preserve the CSV data contract while cleaning it.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-CSV-TRIGGERS",
+          "text": "The response activates internal-excel because the named CSV is the data artifact being transformed.",
+          "critical": true
+        },
+        {
+          "id": "A-NO-PROSE-ROUTE",
+          "text": "The response does not dismiss the request as a generic question merely because the filename was mentioned casually.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Treat the request as out of scope solely because the file was named in casual language."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "internal-excel is selected for the customers.csv cleanup.",
+          "The answer distinguishes a concrete data operation from a prose-only mention."
+        ],
+        "fail": [
+          "The answer says a casual filename mention cannot trigger the skill.",
+          "The answer routes the data cleanup to a prose-only owner."
+        ]
+      }
+    },
+    {
+      "id": "C-TRIGGER-NO-DATA",
+      "family": "trigger-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-TRIGGER-SCOPE"],
+      "prompt": "What does XLSX stand for? I am writing a blog post and only need a sentence mentioning Excel; do not inspect a file.",
+      "initial_state": "There is no workbook or tabular artifact and no requested read, write, conversion, profiling, validation, or reconciliation.",
+      "expected_output": "Do not activate internal-excel for the terminology or prose request.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-NO-DATA-TRIGGER",
+          "text": "The response keeps internal-excel inactive because the request contains no data work.",
+          "critical": true
+        },
+        {
+          "id": "A-MENTION-ONLY",
+          "text": "The response treats XLSX and Excel as mentions rather than evidence of an active spreadsheet task.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Invent a workbook inspection or transformation that the user did not request."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The answer declines to activate internal-excel for a definition and blog sentence.",
+          "The answer explicitly distinguishes mention-only language from data work."
+        ],
+        "fail": [
+          "The answer activates spreadsheet processing solely because XLSX or Excel appears.",
+          "The answer invents data-integrity steps for a prose request."
+        ]
+      }
+    },
+    {
+      "id": "C-INTEGRITY-WITH-ANTHROPIC",
+      "family": "adjacent-owner-integrity",
+      "kind": "rubric",
+      "requirement_ids": ["R-INTEGRITY", "R-WORKBOOK-CONTRACT"],
+      "prompt": "Use /anthropic-xlsx to make the workbook polished, then dedupe customers.xlsx using IDs such as 000042 and report retained row counts across every tab.",
+      "initial_state": "A sample workbook defines tab layout and presentation; rendering is first-class, but the requested operation also changes records and must reconcile counts.",
+      "expected_output": "Add /anthropic-xlsx for presentation concerns while keeping internal-excel active for stable-ID fidelity, duplicate handling, row-count reconciliation, and the sample tab contract on every relevant tab.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-ADJACENT-OWNER",
+          "text": "The response adds /anthropic-xlsx only for the stated presentation concern and does not replace the internal-excel integrity contract.",
+          "critical": true
+        },
+        {
+          "id": "A-LEADING-ZEROS",
+          "text": "The response preserves 000042 as an identifier instead of coercing it to 42.",
+          "critical": true
+        },
+        {
+          "id": "A-COUNT-CONTRACT",
+          "text": "The response requires duplicate and row-count reconciliation across all affected tabs and carries the sample layout contract across produced tabs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Treat /anthropic-xlsx as permission to coerce stable IDs or skip row-count reconciliation.",
+        "Apply the sample tab contract only to the tab used for visual review."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The answer names both owners with separate presentation and integrity responsibilities.",
+          "Leading zeros remain exact and counts, duplicates, and tab contracts are checked."
+        ],
+        "fail": [
+          "The answer converts 000042 to a numeric value or leaves ID coercion unspecified.",
+          "The answer treats rendered polish as replacing data-integrity validation."
+        ]
+      }
+    },
+    {
+      "id": "C-SAMPLE-OUTPUT",
+      "family": "binary-artifact-safety",
+      "kind": "rubric",
+      "requirement_ids": ["R-ARTIFACT-SAFETY", "R-WORKBOOK-CONTRACT"],
+      "prompt": "Generate a cleaned workbook from samples/input.xlsx and place the result where CI can inspect it.",
+      "initial_state": "samples/input.xlsx is a reference binary with a tab layout contract. The working tree also contains prior generated exports and an Excel lock file.",
+      "expected_output": "Read the sample as evidence, exclude lock files and inactive exports, write the new workbook to a declared controlled output path, report that path, and leave the sample binary unchanged while preserving its applicable tab contract.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-CONTROLLED-PATH",
+          "text": "The response declares and reports a controlled path for the generated workbook.",
+          "critical": true
+        },
+        {
+          "id": "A-SAMPLE-IMMUTABLE",
+          "text": "The response treats samples/input.xlsx as read-only evidence and does not modify it or a prior generated export.",
+          "critical": true
+        },
+        {
+          "id": "A-LOCK-EXCLUDED",
+          "text": "The response excludes Excel lock files from discovery and validation.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Overwrite samples/input.xlsx.",
+        "Use an undeclared output location or edit a prior generated binary as the working artifact."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "A controlled output path is named before or as part of generation.",
+          "The sample and unrelated binary exports remain untouched, and lock files are excluded."
+        ],
+        "fail": [
+          "The generated workbook replaces the sample binary.",
+          "The answer claims completion without identifying where the new workbook was written."
+        ]
+      }
+    },
+    {
+      "id": "C-VALIDATE-TRANSFORM",
+      "family": "integrity-validation",
+      "kind": "rubric",
+      "requirement_ids": ["R-INTEGRITY", "R-VALIDATION", "R-ARTIFACT-SAFETY"],
+      "prompt": "Convert a large day-first TSV with account IDs like 000123 into an XLSX workbook, keeping the source values exact and producing a concise validation report.",
+      "initial_state": "The TSV is large enough that broad raw output is undesirable. Date text is day-first, IDs have leading zeros, and the result must be a new workbook rather than an edit to the source.",
+      "expected_output": "Inspect headers, counts, nulls, IDs, dates, and locale assumptions first; choose a suitable narrow tool; write the workbook to a declared controlled path; then report compact row-count, schema, duplicate, and coercion checks with gaps and assumptions.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-PREFLIGHT",
+          "text": "The response inspects the input structure and locale-sensitive fields before the broad conversion.",
+          "critical": true
+        },
+        {
+          "id": "A-INTEGRITY-CHECKS",
+          "text": "The response preserves leading-zero IDs and day-first date text and checks row counts, schema, duplicates, and coercion assumptions after conversion.",
+          "critical": true
+        },
+        {
+          "id": "A-COMPACT-EVIDENCE",
+          "text": "The response reports aggregate evidence and the controlled output path instead of dumping the large file or claiming unverified success.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Silently coerce identifiers or dates to locale-dependent numeric values.",
+        "Modify the source TSV or write an unreported workbook over an existing sample."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The workflow has a preflight, explicit schema/coercion rules, post-transform reconciliation, and compact evidence.",
+          "The generated workbook has a declared controlled path and the input remains unchanged."
+        ],
+        "fail": [
+          "The answer reports only that conversion completed without row-count or identifier evidence.",
+          "The answer relies on implicit locale conversion or overwrites the source."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-01",
+        "query": "Clean up this customers.csv by removing duplicate customer IDs and return a corrected file.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-02",
+        "query": "Profile transactions.tsv for headers, nulls, duplicate keys, and row counts.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-03",
+        "query": "Reconcile sales.xlsx against returns.csv and explain any dropped or unmatched rows.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-04",
+        "query": "Convert legacy.xlsm to a clean workbook while preserving formulas and stable identifiers.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-05",
+        "query": "Validate the row count and leading zeros in employees.csv before importing it.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-06",
+        "query": "Extract headers, null patterns, and locale-sensitive numeric fields from export.xls.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-07",
+        "query": "Dedupe this large orders.tsv without losing long order IDs and give me aggregate reconciliation evidence.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-08",
+        "query": "Update the formula column in report.xlsx while keeping source columns atomic and checking every affected tab.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-09",
+        "query": "Create a cleaned workbook from sample.xlsx and put the generated binary in a controlled CI output directory.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-10",
+        "query": "Compare schemas and join cardinality across billing.xlsm and adjustments.tsv.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-11",
+        "query": "What does XLSX stand for?",
+        "should_trigger": false,
+        "split": "train"
+      },
+      {
+        "id": "Q-12",
+        "query": "Write a blog post mentioning Excel; do not inspect or transform a file.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-13",
+        "query": "I only need a pixel-perfect chart and theme review of an existing workbook; no values, tabular data, or integrity work are in scope.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "anthropic-xlsx"
+      },
+      {
+        "id": "Q-14",
+        "query": "Write a Python CLI that parses CSV filenames but never reads or transforms the data.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-python-script"
+      },
+      {
+        "id": "Q-15",
+        "query": "Fix Markdown table syntax in a README that happens to mention CSV.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-16",
+        "query": "Explain how XLSM differs from XLSX for a general audience without opening a workbook.",
+        "should_trigger": false,
+        "split": "train"
+      },
+      {
+        "id": "Q-17",
+        "query": "Polish workbook charts and cached rendering only; do not inspect or change spreadsheet values.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "anthropic-xlsx"
+      },
+      {
+        "id": "Q-18",
+        "query": "Add argparse options to a Python ETL launcher; file transformation is out of scope.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-python-script"
+      },
+      {
+        "id": "Q-19",
+        "query": "Draft a data-governance policy that lists TSV as an example without handling tabular data.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-20",
+        "query": "Review Markdown links around a CSV example; there is no local data operation.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-markdown"
+      }
+    ]
+  }
+}

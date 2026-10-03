@@ -51,6 +51,12 @@ Do not add a lesson directly to `AGENTS.md` or `.github/copilot-instructions.md`
 7. Validate the touched owner.
    Run the closest existing validator for the changed files. If no validator exists, state the gap.
 
+## Cost of deferring
+
+`defer` in step 5 costs nothing now and everything later: a ledger row has no owner, no deadline, and no reader. Before choosing it, read the pending table. A long run of rows that each named a codification target and never reached it is evidence about this decision, not a queue awaiting its turn.
+
+When the lesson feels too large to codify now, it is usually several lessons; codify the part whose owner is obvious. Say whether you are deferring because the owner is undecided or because the lesson is not yet durable, so a later reader can tell an open question from a postponed decision.
+
 ## Existing backlog
 
 Do not bulk-migrate existing pending rows unless the user explicitly asks for a backlog codification pass. Existing lessons may stay where they are while this procedure is introduced.

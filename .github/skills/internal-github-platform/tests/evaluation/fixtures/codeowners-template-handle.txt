@@ -1,0 +1,3 @@
+# Defective input: CODEOWNERS copied from a template with an unresolved placeholder handle.
+*                 @your-org/platform-governance-team
+/.github/         @your-org/platform-governance-team

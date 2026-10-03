@@ -3,7 +3,7 @@ name: mattpocock-to-spec
 description: Turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed.
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a spec (you may know this document as a PRD). Do NOT interview the user — just synthesize what you already know.
+This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user — just synthesize what you already know.
 
 The issue tracker and triage label vocabulary should have been provided to you — run `/mattpocock-setup-matt-pocock-skills` if not.
 
@@ -73,11 +73,26 @@ Any further notes about the feature.
 
 </spec-template>
 
-<!-- local-sync:mattpocock-git-autonomy:start -->
-## Local Git-autonomy contract
+<!-- local-sync:to-spec-testing-decisions:start -->
+## Local testing-decisions contract
 
-- Keep completed changes in the working tree for user review.
-- You may stage only changes owned by the current task when staging helps inspect the exact diff.
-- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
-- Keep pre-existing or unrelated user changes out of the index.
-<!-- local-sync:mattpocock-git-autonomy:end -->
+This contract overrides conflicting seam-confirmation, testing, and readiness
+instructions above. Apply it in the spec's `Testing Decisions` section.
+
+- Separate accepted mandatory checks, optional evaluations, and proposed test
+  seams. Synthesize decisions already made; do not invent mandatory checks.
+  Agreement on a seam or test design alone does not require its execution.
+- Prefer existing runnable checks. Behavioral skill evaluations, including
+  writer-to-executor trials, are optional unless the user explicitly requires
+  them. A missing optional runner must not block spec publication or planning.
+  Record unperformed behavioral evaluation as `not-run`; structural validation
+  does not prove behavior.
+- For an explicitly required evaluation, record the established runner,
+  invocation, access, judge, result-capture path, and initial spending limit
+  when paid. Where evidence is missing, name the unresolved prerequisite;
+  preserve the requirement without inventing availability, silently waiving it,
+  or presenting the spec as ready for executable planning.
+- Do not conduct a new interview or request routine seam confirmation while
+  synthesizing. Record proposals and unknowns in `Testing Decisions`; a
+  `ready-for-agent` label must not conceal unresolved mandatory prerequisites.
+<!-- local-sync:to-spec-testing-decisions:end -->

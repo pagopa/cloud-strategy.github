@@ -5,25 +5,34 @@ description: Use when authoring or reviewing Kubernetes workload manifests, serv
 
 # Internal Kubernetes Deployment
 
+Use this skill for operational Kubernetes delivery work after the platform
+direction is already known.
+
 ## Referenced skills
 
-- `internal-kubernetes`: Kubernetes umbrella lane selection when ownership is not already clear.
-- `internal-yaml`: YAML formatting and parser-safety baseline.
-
-Use this skill for operational Kubernetes delivery work after the platform direction is already known.
+- `internal-kubernetes`: Kubernetes umbrella lane selection when ownership is
+  not already clear.
+- `internal-yaml`: YAML formatting and parser-safety baseline. Load
+  `/internal-yaml` when manifest syntax, indentation, or parser behavior is
+  the main issue.
 
 ## When to use
 
 - Author or review Kubernetes workload manifests.
-- Work on service exposure, probes, autoscaling, rollout strategy, or production-readiness settings for workloads.
-- Improve operational Kubernetes delivery without turning the task into a platform-architecture discussion.
+- Work on service exposure, probes, autoscaling, rollout strategy, or
+  production-readiness settings for workloads.
+- Improve operational Kubernetes delivery without turning the task into a
+  platform-architecture discussion.
 
 ## Boundary
 
-- If the real question is cluster architecture, GitOps operating model, service mesh, or multi-cluster strategy, treat it as a platform-design problem rather than a manifest-delivery task.
-- Keep this skill focused on workload manifests, rollout safety, and production hardening.
+- If the real question is cluster architecture, GitOps operating model,
+  service mesh, or multi-cluster strategy, treat it as a platform-design
+  problem rather than a manifest-delivery task.
+- Keep this skill focused on workload manifests, rollout safety, and
+  production hardening.
 
-## Operational Workflow
+## Operational workflow
 
 1. Identify workload type: stateless, stateful, batch, or platform component.
 2. Choose the right controller: Deployment, StatefulSet, Job, or CronJob.
@@ -32,7 +41,7 @@ Use this skill for operational Kubernetes delivery work after the platform direc
 5. Add health, scaling, security, and policy settings.
 6. Validate rollout and rollback behavior.
 
-## Manifest Priorities
+## Manifest priorities
 
 - Explicit resource requests and limits
 - Readiness and liveness probes
@@ -42,24 +51,29 @@ Use this skill for operational Kubernetes delivery work after the platform direc
 - NetworkPolicy when east-west or egress boundaries matter
 - Pod disruption and rollout settings for availability
 
-## Delivery Extensions
+## Delivery extensions
 
-- Prefer raw manifests by default; add Helm only when repeated installs, versioned packaging, or environment overlays justify chart maintenance.
-- Treat service mesh integration as conditional: configure traffic policy, mTLS, and mesh telemetry only when the cluster already runs a mesh or the platform standard requires it.
-- Prefer controller-driven delivery such as GitOps only when the team already operates that model and the rollout ownership is explicit.
-- Load /internal-yaml for YAML formatting and parser checks when manifest syntax, indentation, or parser behavior is the main issue.
+- Prefer raw manifests by default; add Helm only when repeated installs,
+  versioned packaging, or environment overlays justify chart maintenance.
+- Treat service mesh integration as conditional: configure traffic policy,
+  mTLS, and mesh telemetry only when the cluster already runs a mesh or the
+  platform standard requires it.
+- Prefer controller-driven delivery such as GitOps only when the team already
+  operates that model and the rollout ownership is explicit.
 
-## Operational Rules
+## Operational rules
 
 - Do not deploy bare Pods for managed workloads.
 - Keep images versioned and reproducible.
 - Prefer rolling updates with bounded surge and unavailability.
 - Use HPA only when the workload exposes a sensible scaling signal.
 - Make failure modes visible through probes and events.
-- Verify workload, Service, Ingress, and policy state together; a healthy Pod alone does not prove a complete deployment.
-- Add dashboards, alerts, and scrape annotations only when they match the platform's observability standard.
+- Verify workload, Service, Ingress, and policy state together; a healthy Pod
+  alone does not prove a complete deployment.
+- Add dashboards, alerts, and scrape annotations only when they match the
+  platform's observability standard.
 
-## Security Rules
+## Security rules
 
 - Run as non-root when possible.
 - Minimize capabilities.
@@ -68,7 +82,7 @@ Use this skill for operational Kubernetes delivery work after the platform direc
 - Avoid over-broad service account permissions.
 - Use NetworkPolicy and namespace boundaries to narrow runtime traffic.
 
-## Anti-Patterns
+## Anti-patterns
 
 - Missing resource limits in shared clusters
 - Using probes that only prove the process exists
@@ -77,7 +91,7 @@ Use this skill for operational Kubernetes delivery work after the platform direc
 - Exposing workloads publicly without clear ingress intent
 - Treating a successful `kubectl apply` as proof of production readiness
 
-## Output Expectations
+## Output expectations
 
 When producing guidance, include:
 

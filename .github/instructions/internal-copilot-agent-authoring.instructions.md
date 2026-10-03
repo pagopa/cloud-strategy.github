@@ -1,5 +1,5 @@
 ---
-description: Use when authoring or revising repository-owned Copilot agents; owns boundary clarity, paired-asset coherence, and minimal duplication.
+description: Review checks for repository-owned Copilot agents covering scope boundaries, routing, referenced assets, and duplication.
 applyTo: ".github/agents/internal-*.agent.md,.github/agents/local-*.agent.md"
 excludeAgent: "cloud-agent"
 ---

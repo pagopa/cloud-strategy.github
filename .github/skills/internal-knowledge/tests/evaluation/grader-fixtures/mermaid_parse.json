@@ -1,0 +1,78 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "mermaid_parse",
+  "gold": "tests/evaluation/grader-fixtures/gold/mermaid_parse.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "invalid-mermaid-one",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: Bad\naccDescr: Bad syntax.\na -->\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: Bad\naccDescr: Bad syntax.\na -->\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "mermaid-parse"
+    },
+    {
+      "name": "invalid-mermaid-two",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nsequenceDiagram\naccTitle: Bad\naccDescr: Bad syntax.\nA->>\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nsequenceDiagram\naccTitle: Bad\naccDescr: Bad syntax.\nA->>\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "mermaid-parse"
+    }
+  ]
+}

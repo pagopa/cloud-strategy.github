@@ -8,6 +8,84 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-10-01
+
+- Reworked `.github/copilot-instructions.md` and
+  `.github/instructions/copilot-code-review.instructions.md` for GitHub.com
+  Copilot code review: removed comment-format directives that code review
+  ignores, split the always-on content into a review contract (intent check,
+  noise suppression for linter-enforced issues, intentional fixtures, and
+  generated files) and severity anchors plus cross-cutting security checks,
+  and removed the duplicated rules between both files.
+- Replaced bundle-checker directives that code review cannot run in the JSON,
+  YAML, Markdown, and Makefile instructions with concrete review checks;
+  widened `internal-json` to `**/*.json` with a JSONC exception.
+- Made GitHub Actions checks concrete for script injection and
+  `pull_request_target`/`workflow_run` trust, Terraform checks for `moved`,
+  `removed`, and `import` blocks, sensitive outputs, and `default_tags`, and
+  reframed authoring-style `description:` values as review checks.
+- Added `.github/instructions/internal-copilot-skill-authoring.instructions.md`
+  for skill bundles: protected imported bundles, `SKILL.md` frontmatter and
+  triggers, reachability, self-containment, and tests.
+
+## 2026-09-27
+
+- Reworked .github/skills/internal-gateway-writing-plans/ and .github/skills/internal-gateway-execute-plans/ around shared plan and chat contracts, plan-adjacent run state, read-only handoff checks, native-only execution, bounded repair and stop rules, and checkpoint diffs; added the plan-contract and chat-templates references plus root protocol and ignored-scratch checkpoint tests; removed both retired executor and writer eval-run records. Migration: legacy .superpowers/sdd runs are not resumed; start a new run beside the retained plan.
+- Consolidated the five Google Cloud skills into `.github/skills/internal-gcp/`: the router became the single implicit owner with an always-on GCP baseline, a decision mode, a freshness rule, and explicit handoffs; retired `internal-gcp-governance`, `internal-gcp-operations`, `internal-gcp-organization-structure`, and `internal-gcp-strategic` into `references/governance.md`, `references/operations.md`, and `references/structure.md`, with sourced facts for Org Policy dry-run support, IAM deny and Principal Access Boundary composition, VPC Service Controls dry-run, Privileged Access Manager, Data Access audit defaults, Network Connectivity Center, and Backup and DR.
+- Replaced the five GCP eval packs with one pack (14 requirements, 10 cases, 3 fixtures, 20 trigger queries) and added `.github/skills/internal-gcp/tests/test_eval_pack_boundaries.py`; added a minimal eval pack to `.github/skills/internal-cloud-policy/` and GCP boundary lines to `internal-cloud-policy` and `internal-terraform`.
+- Consolidated the six Azure skills into two: `.github/skills/internal-azure/` became the single implicit Azure control-plane owner with an always-on baseline, a shared workflow, a freshness rule, a three-field output, and `references/structure.md`, `references/governance.md`, `references/operations.md`, `references/decision-mode.md`, and `references/adjacent-owners.md`; retired `internal-azure-governance`, `internal-azure-operations`, `internal-azure-organization-structure`, and `internal-azure-strategic` and removed the Terraform fixtures from the old routing matrix. Migration: invoke `/internal-azure` for every retired lane.
+- `.github/skills/internal-azure-devops/` now triggers directly and implicitly, keeps only Azure DevOps-specific guidance in `references/pipelines.md`, and hands off CLI execution and tool-neutral delivery strategy; added eval packs for both Azure skills (12 and 10 requirements, 10 and 6 cases, 20 and 16 trigger queries) and the defective fixture `internal-azure-devops/fixtures/pipeline-secret-inline.yml`.
+- Consolidated the seven AWS skills into two: `.github/skills/internal-aws/` became the single implicit AWS platform owner with nine core rules, two output modes, explicit handoffs, and `references/organization.md`, `references/governance.md`, `references/evidence.md`, `references/current-facts.md`, and `references/decisions.md`; retired `internal-aws-governance`, `internal-aws-mcp-research`, `internal-aws-operations`, `internal-aws-organization-structure`, and `internal-aws-strategic` and removed the router `references/routing-matrix.md`. Added sourced guidance for RCPs (scope, exclusions, `RCPFullAWSAccess`), declarative policies, data perimeters, Control Tower control implementations, and mechanism-specific validation. Migration: invoke `/internal-aws` for every retired lane.
+- `.github/skills/internal-aws-lambda/` now triggers directly and implicitly, hands off trust and language-only work, adds VPC and freshness rules, and merges `references/common-mistakes.md` into `references/sharp-edges.md`; added eval packs for both AWS skills (14 and 10 requirements, 14 and 8 cases, 21 and 20 trigger queries), four defective fixtures, and `.github/skills/internal-aws/tests/test_eval_pack_boundaries.py`. A runtime pilot recorded `baseline-previous` and `with-skill` case runs (22 of 22 with the new skills, 20 of 22 with the retired family) and held-out activation trials under `tests/evaluation/runs/`.
+- Consolidated the six GitHub skills into three implicit owners without a
+  router: `.github/skills/internal-github-actions/` (workflows, composite
+  actions, failed-run root cause; references reduced from 15 to 9, including
+  new `references/run-debugging.md`), `.github/skills/internal-github-pr/`
+  (template, readiness from fresh `reviewDecision` and check evidence, squash,
+  terminal state), and new `.github/skills/internal-github-platform/` (decide,
+  control, and prove modes with sourced references for rulesets, CODEOWNERS,
+  environments, tokens and OIDC including immutable subject claims, runners,
+  audit evidence, and security-feature rollout). Retired `internal-github`,
+  `internal-github-governance`, `internal-github-operations`, and
+  `internal-github-strategic`. Migration: invoke the deliverable owner
+  directly; `internal-review-code` now invokes `/internal-github-actions` as
+  its observer-only contributor.
+- Added eval packs for the three GitHub skills (12, 9, and 15 requirements;
+  8, 9, and 12 cases; 22, 21, and 25 trigger queries; 12 defective fixtures)
+  and `tests/test_github_skill_routing_consistency.py`, which checks
+  identical-prompt sibling near-misses and retired-name references.
+- Fixed the ordering check in
+  `.github/instructions/internal-codeowners.instructions.md`: GitHub applies
+  the last matching pattern, so catch-alls come first.
+
+## 2026-09-26
+
+- Extended `.github/skills/internal-bash/references/review-anti-patterns.md` with conditioned rows `SH-C04`, `SH-C05`, `SH-M09` to `SH-M12`, and `SH-m08`; added an optional, declared `Compatibility target: Bash 3.2` to `internal-bash` and `internal-bash-script`; added eval cases with purpose-built defective fixtures and a shared dialect-parity case to both packs; added a download-and-execute check to `.github/instructions/internal-bash.instructions.md`.
+- Rebuilt `.github/skills/internal-gateway-writing-plans/` and `.github/skills/internal-gateway-execute-plans/` as thin overlays on `superpowers-writing-plans`, `superpowers-executing-plans`, and `superpowers-subagent-driven-development`; retired the Execution Manifest v3, its parser, structural checker, bundled runtime, YAML status sibling, fixtures, and v3 tests, including `tests/internal_gateway/test_bundle_alignment.py` and `tests/internal_gateway/test_execute_plans_v3_contract.py`.
+- Execution now runs in the current checkout without commits, records `START` in the superpowers ledger, and stops when `HEAD` moves, a task file was dirty at start, or a change leaves the plan's `Files:` perimeter.
+- `internal-gateway-execute-plans` now records object-only checkpoint trees (`CP0..CPn`) for resume, per-task and fix-round review diffs, perimeter checks, and `CP0`-based final attribution; resume continues on partial state inside the first incomplete task and otherwise stops for reconciliation.
+- `internal-gateway-writing-plans` now replaces the imported executor header, offers the imported `Subagent-driven` or `Native` handoff, routes every answer to `/internal-gateway-execute-plans`, and converts legacy manifest plans into new plans on explicit request; both eval packs gained cases and a `with-skill` run record.
+- The external-resource sync now prefixes relative sibling-skill paths in every `obra-superpowers` file, including scripts, so `task-start` and `task-done` resolve in this repository.
+
+## 2026-09-16
+
+- Split approved Terraform import execution into the secondary `.github/skills/internal-terraform-import/` bundle while retaining `.github/skills/internal-terraform/` as the stable decision and routing wrapper; the relocated runner now defaults to non-mutating assessment and requires complete execute evidence for live import or apply.
+
+## 2026-09-11
+
+- Hardened `.github/skills/internal-gateway-writing-plans/` and `.github/skills/internal-gateway-execute-plans/` against the post-mortem plan-generation defects: the writer checker and the executor parser now emit separator-aware and prose-aware manifest-fence messages with removal hints and bounded 160-character compact finding messages.
+- Added the manifest-section hygiene rule, the canonical complete 16-field manifest skeleton with canonical nested values, and the ordered evidence-gate command checklist carrying the literal tokens `structure=passed(0 blocking)` and `execution=passed(0 blocking)` to both `references/manifest-v3.md` files, enforced by full post-preamble reference equality.
+- Pinned the post-mortem mutations (`manifest-separator-after-fence`, `partial-manifest-missing-fields`) in the writer regression corpus and added `tests/internal_gateway/test_bundle_alignment.py` with the skeleton parser pin and the differential parity harness for structural mutations.
+- Added the plan-completeness contract to both gateway bundles: mandatory `## Target Census`, `## Execution Authorization`, and `## Completeness Audit` sections plus the optional `## Task Graph`, enforced by new blocking checks in `.github/skills/internal-gateway-writing-plans/scripts/check_plan_structure.py` and covered by its regression corpus.
+- Aligned both `references/manifest-v3.md` copies with checker behavior: documented the accepted no-hit tokens, the backticked completeness-audit command, the Task Graph emission convention, and the bundle-local pytest suite as the third evidence gate.
+- Moved the writer gateway's delegated-authoring mechanics to `references/delegation.md` to keep `SKILL.md` within the 220-line body budget, and repaired the writer `agents/openai.yaml` projection with a complete legacy-material clause, normalized indentation, and the completeness and delegation sync.
+- Hardened the writer gate against contradictory plans: execution-gating prose in `## Global Constraints` now blocks in every mode, scope-limiting prose blocks only when it contradicts a declared `modify` target, and the authorization mode must pair with the writer/executor handoff owner in `.github/skills/internal-gateway-writing-plans/scripts/check_plan_structure.py`.
+- Added native executor authorization findings `authorization-missing` and `authorization-invalid` for plans with `modify` targets, each naming the `plan-normalization: authorization-backfill` repair, and widened `handoff.next_owner` acceptance to the writer and executor owners in `.github/skills/internal-gateway-execute-plans/scripts/plan_execution.py`.
+- Added the parser-validated `plan-normalization` deviation vocabulary (`authorization-backfill`, `census-backfill`, `audit-backfill`, `orphan-rebind`, `constraint-supersession`) requiring the pre-edit `sha256:` semantic fingerprint and the superseded or backfilled content, documented identically in both `references/manifest-v3.md` copies.
+- Encoded the dual-gate OK evidence contract and the execution-ready-only handoff offer in the writer surfaces and the bounded normalization loop with typed deviations in the executor surfaces, keeping both `SKILL.md` bodies within the 220-line budget.
+- Swept proven-dead legacy paths after a caller/test/current-plan audit: removed the `explicit-single-plan` bootstrap apparatus, the `Preflight` and `Preflight Gate` heading aliases, and the unused delegation compatibility helper, retaining the live rejection codes.
+- Extended `tests/internal_gateway/test_bundle_alignment.py` with the missing-authorization, authoring-only, gating-prose, and scope-conflict corpus entries and raised `MINIMUM_EXECUTOR_BLOCKING_CASES` to the new observed count of 16.
+
 ## 2026-08-12
 
 - Narrowed `.github/skills/internal-tf/` to language-only structure guidance, moved cross-platform provider lockfile evidence and executable import-safe guards to `.github/skills/internal-terraform/references/operational-validation.md`, and preserved the wrapper as the fail-safe primary for mixed and operational work.

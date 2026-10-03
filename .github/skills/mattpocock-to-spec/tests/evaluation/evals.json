@@ -1,0 +1,241 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "mattpocock-to-spec",
+  "requirements": [
+    {
+      "id": "R-TEST-CLASSIFICATION",
+      "text": "Testing Decisions separates accepted mandatory checks, optional evaluations and proposed seams. A proposed test does not become mandatory through synthesis or seam approval alone.",
+      "source": "User-approved testing-decision alignment"
+    },
+    {
+      "id": "R-OPTIONAL-RUNTIME",
+      "text": "Behavioral skill evaluations are optional unless explicitly required by the user. Missing optional runtime does not block spec publication. Unperformed evaluations remain not-run.",
+      "source": "User-approved testing-decision alignment"
+    },
+    {
+      "id": "R-MANDATORY-FEASIBILITY",
+      "text": "Explicitly mandatory evaluations retain their requirement; record verified runner, invocation, access, judge, capture and initial paid budget or name unresolved prerequisites without claiming executable readiness.",
+      "source": "User-approved testing-decision alignment"
+    },
+    {
+      "id": "R-SYNTHESIS",
+      "text": "Synthesize available requirements without routine seam confirmation or inventing testing decisions.",
+      "source": "SKILL.md synthesis contract and user-approved alignment"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-OPTIONAL-MISSING",
+      "family": "testing-feasibility",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-TEST-CLASSIFICATION",
+        "R-OPTIONAL-RUNTIME",
+        "R-SYNTHESIS"
+      ],
+      "prompt": "Create the spec from our accepted gateway changes.",
+      "initial_state": "Local pack validators exist, no model runner is exposed, and the user did not request behavioral execution.",
+      "expected_output": "Publish the spec with available structural checks; a suggested writer-to-executor trial is optional and not-run. Do not ask for a runner or budget.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-1",
+          "text": "Spec publication proceeds without an optional runtime prerequisite.",
+          "critical": true
+        },
+        {
+          "id": "A-2",
+          "text": "Evidence does not claim behavioral success.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Invent runtime availability or behavioral results.",
+        "Silently waive an explicit mandatory trial."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Spec publication proceeds without an optional runtime prerequisite.",
+          "Evidence does not claim behavioral success."
+        ],
+        "fail": [
+          "Optional runtime blocks synthesis.",
+          "A proposed seam is promoted to a requirement.",
+          "Explicit mandatory prerequisites are hidden or invented."
+        ]
+      }
+    },
+    {
+      "id": "C-SEAM-APPROVAL",
+      "family": "testing-feasibility",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-TEST-CLASSIFICATION",
+        "R-SYNTHESIS"
+      ],
+      "prompt": "Synthesize our decisions into a spec.",
+      "initial_state": "The user agreed that writer-to-executor is a useful test seam but did not require running it. Runner availability is unknown.",
+      "expected_output": "Record the proposed seam separately from mandatory checks and retain optional status without another confirmation round.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-1",
+          "text": "Agreement on test design is not treated as an explicit execution requirement.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Invent runtime availability or behavioral results.",
+        "Silently waive an explicit mandatory trial."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Agreement on test design is not treated as an explicit execution requirement."
+        ],
+        "fail": [
+          "Optional runtime blocks synthesis.",
+          "A proposed seam is promoted to a requirement.",
+          "Explicit mandatory prerequisites are hidden or invented."
+        ]
+      }
+    },
+    {
+      "id": "C-MANDATORY-MISSING",
+      "family": "testing-feasibility",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MANDATORY-FEASIBILITY"
+      ],
+      "prompt": "Write the spec; running the compatibility trial is mandatory.",
+      "initial_state": "The user explicitly requires the trial; no runner, invocation or result-capture path is known.",
+      "expected_output": "Preserve the requirement and name the missing capabilities in Testing Decisions. Do not present the evaluation as runnable or mark the spec ready for executable planning.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-1",
+          "text": "The mandatory trial is retained and unresolved prerequisites are visible.",
+          "critical": true
+        },
+        {
+          "id": "A-2",
+          "text": "No runner or executable readiness is fabricated.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Invent runtime availability or behavioral results.",
+        "Silently waive an explicit mandatory trial."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The mandatory trial is retained and unresolved prerequisites are visible.",
+          "No runner or executable readiness is fabricated."
+        ],
+        "fail": [
+          "Optional runtime blocks synthesis.",
+          "A proposed seam is promoted to a requirement.",
+          "Explicit mandatory prerequisites are hidden or invented."
+        ]
+      }
+    },
+    {
+      "id": "C-MANDATORY-AVAILABLE",
+      "family": "testing-feasibility",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MANDATORY-FEASIBILITY"
+      ],
+      "prompt": "Write the spec with the explicitly required behavioral trial.",
+      "initial_state": "The accepted context supplies a runner, command, access, judge, result location and initial paid budget.",
+      "expected_output": "Record those established prerequisites and the mandatory trial. Do not execute it while synthesizing the spec.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-1",
+          "text": "The required check has concrete prerequisite evidence.",
+          "critical": true
+        },
+        {
+          "id": "A-2",
+          "text": "No evaluation is executed or claimed passed by spec authoring.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Invent runtime availability or behavioral results.",
+        "Silently waive an explicit mandatory trial."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The required check has concrete prerequisite evidence.",
+          "No evaluation is executed or claimed passed by spec authoring."
+        ],
+        "fail": [
+          "Optional runtime blocks synthesis.",
+          "A proposed seam is promoted to a requirement.",
+          "Explicit mandatory prerequisites are hidden or invented."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-1",
+        "should_trigger": true,
+        "split": "train",
+        "query": "Turn our accepted discussion into a spec."
+      },
+      {
+        "id": "Q-2",
+        "should_trigger": true,
+        "split": "held-out",
+        "query": "Synthesize the gateway alignment specification."
+      },
+      {
+        "id": "Q-3",
+        "should_trigger": true,
+        "split": "train",
+        "query": "Write a spec from these agreed requirements."
+      },
+      {
+        "id": "Q-4",
+        "should_trigger": true,
+        "split": "held-out",
+        "query": "Publish the feature spec from our conversation."
+      },
+      {
+        "id": "Q-5",
+        "should_trigger": false,
+        "split": "train",
+        "query": "Execute the implementation plan."
+      },
+      {
+        "id": "Q-6",
+        "should_trigger": false,
+        "split": "held-out",
+        "query": "Investigate where the API handler lives."
+      },
+      {
+        "id": "Q-7",
+        "should_trigger": false,
+        "split": "train",
+        "query": "Write an implementation plan from the spec."
+      },
+      {
+        "id": "Q-8",
+        "should_trigger": false,
+        "split": "held-out",
+        "query": "Run the paid behavioral evaluation now."
+      }
+    ]
+  }
+}

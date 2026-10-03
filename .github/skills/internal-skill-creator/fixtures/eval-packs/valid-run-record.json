@@ -1,0 +1,16 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "fixture-skill",
+  "date": "2026-09-26",
+  "host": "local-fixture-host",
+  "model": "pinned-fixture-model",
+  "configuration": "with-skill",
+  "case_results": [
+    {
+      "case_id": "C-DETERMINISTIC",
+      "status": "passed",
+      "transcript_ref": "transcripts/C-DETERMINISTIC.txt",
+      "assertions": [{"id": "A-OUTPUT", "passed": true, "evidence": "Output fixture matched the expected result."}]
+    }
+  ]
+}

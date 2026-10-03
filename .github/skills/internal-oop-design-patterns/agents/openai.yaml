@@ -1,4 +1,4 @@
 interface:
   display_name: "internal-oop-design-patterns"
   short_description: "Pattern-aware OOP design and refactoring"
-  default_prompt: "Use $internal-oop-design-patterns to choose or refactor OOP patterns with the repository-owned workflow."
+  default_prompt: "Use $internal-oop-design-patterns to decide whether an object-oriented pattern is justified, then refactor collaborations, branching, god classes, or construction logic."

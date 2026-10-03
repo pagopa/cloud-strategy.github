@@ -1,0 +1,30 @@
+{
+  "posture": {
+    "value": "mandatory-test-first",
+    "change": "behavior",
+    "reason": "Reproducible bug fix in an established CLI contract."
+  },
+  "boundary": {
+    "behavior": "The sync CLI exits 2 when the manifest path is missing.",
+    "location": "tools/sync/tests/test_cli.py"
+  },
+  "checks": [
+    {
+      "phase": "red",
+      "command": "python3 -m pytest -q tools/sync/tests/test_cli.py::test_missing_manifest_exits_2",
+      "result": "failed: exit code 0 != 2"
+    },
+    {
+      "phase": "focused",
+      "command": "python3 -m pytest -q tools/sync/tests/test_cli.py",
+      "result": "passed"
+    },
+    {
+      "phase": "broader",
+      "command": "make test",
+      "result": "passed"
+    }
+  ],
+  "state": "test-first-validated",
+  "gaps": "none"
+}

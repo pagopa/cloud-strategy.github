@@ -15,11 +15,18 @@ from typing import Literal, Sequence
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
+from source_prepare_core import (  # noqa: E402
+    PrepareSourceResult,
+    prepare_sources,
+    verify_commit_dates_against_cache,
+)
 from sync_external_resources_core import (  # noqa: E402
-    ManagedAsset,
+    ImportedOverride,
     ManagedResources,
     OverrideResult,
+    SourceProvenance,
     SyncCommandError,
+    build_source_provenance,
     find_dirty_targets,
     load_managed_resources,
     load_overrides,
@@ -32,10 +39,6 @@ from sync_external_resources_core import (  # noqa: E402
 from sync_output_core import (  # noqa: E402
     OutputRecord,
     render_tsv,
-)
-from source_prepare_core import (  # noqa: E402
-    PrepareSourceResult,
-    prepare_sources,
 )
 
 DEFAULT_MANIFEST = (
@@ -62,6 +65,7 @@ class SyncOutcome:
     repository_changed: bool
     source_results: tuple[PrepareSourceResult, ...] = ()
     source_root: str | None = None
+    source_provenance: tuple[SourceProvenance, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         result: dict[str, object] = {
@@ -97,6 +101,18 @@ class SyncOutcome:
                     "duration_ms": r.duration_ms,
                 }
                 for r in self.source_results
+            ]
+        if self.source_provenance:
+            result["source_provenance"] = [
+                {
+                    "source_id": p.source_id,
+                    "repository": p.repository,
+                    "ref": p.ref,
+                    "advertised_ref": p.advertised_ref,
+                    "commit_date": p.commit_date,
+                    "skills_count": p.skills_count,
+                }
+                for p in self.source_provenance
             ]
         return result
 
@@ -191,12 +207,58 @@ class SyncOutcome:
                     sr.fetch_strategy,
                 )
             )
+        prepared_source_ids = {sr.source_id for sr in self.source_results}
+        for provenance in self.source_provenance:
+            records.extend(
+                (
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.repository",
+                        "ok",
+                        provenance.repository,
+                    ),
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.ref",
+                        "ok",
+                        provenance.ref,
+                    ),
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.commit_date",
+                        "ok",
+                        provenance.commit_date or "-",
+                    ),
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.advertised_ref",
+                        "ok",
+                        provenance.advertised_ref or "-",
+                    ),
+                    OutputRecord(
+                        "metric",
+                        f"{provenance.source_id}.skills_count",
+                        "ok",
+                        str(provenance.skills_count),
+                    ),
+                )
+            )
+            if provenance.source_id not in prepared_source_ids:
+                records.append(
+                    OutputRecord(
+                        "source",
+                        provenance.source_id,
+                        "ok",
+                        provenance.ref,
+                    )
+                )
         return tuple(records)
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Audit, plan, or apply declared external resource refreshes."
+        description="Audit, plan, or apply declared external resource refreshes.",
+        allow_abbrev=False,
     )
     parser.add_argument("mode", choices=("prepare", "audit", "plan", "apply"))
     parser.add_argument("--repo-root", default=".")
@@ -207,6 +269,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--source-root",
         help="Use prepared source checkouts instead of network fetch.",
     )
+    parser.add_argument(
+        "--source",
+        action="append",
+        dest="sources",
+        help="Limit the operation to one source ID; repeat to select more than one.",
+    )
     parser.add_argument("--allow-dirty", action="store_true")
     parser.add_argument("--format", choices=("text", "tsv", "json"), default="text")
     parser.add_argument(
@@ -215,6 +283,46 @@ def build_parser() -> argparse.ArgumentParser:
         help="Force rebuild of the Git object cache (prepare mode only).",
     )
     return parser
+
+
+def _select_resources(
+    resources: ManagedResources, requested_source_ids: Sequence[str] | None
+) -> ManagedResources:
+    if not requested_source_ids:
+        return resources
+
+    requested = set(requested_source_ids)
+    available = {source.source_id for source in resources.sources}
+    unknown = sorted(requested - available)
+    if unknown:
+        raise ValueError(f"unknown source id: {', '.join(unknown)}")
+
+    return ManagedResources(
+        sources=tuple(
+            source for source in resources.sources if source.source_id in requested
+        ),
+        replacements=tuple(
+            replacement
+            for replacement in resources.replacements
+            if replacement.source in requested
+        ),
+        watchlist=resources.watchlist,
+    )
+
+
+def _applicable_overrides(
+    overrides: tuple[ImportedOverride, ...], resources: ManagedResources
+) -> tuple[ImportedOverride, ...]:
+    managed_roots = tuple(asset.local.rstrip("/") for asset in resources.assets)
+    return tuple(
+        override
+        for override in overrides
+        if any(
+            override.target_path == root
+            or override.target_path.startswith(f"{root}/")
+            for root in managed_roots
+        )
+    )
 
 
 def _run_git(repo_root: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -418,6 +526,7 @@ def _prepare(
         repository_changed=False,
         source_results=results,
         source_root=str(sources_root),
+        source_provenance=build_source_provenance(resources),
     )
 
 
@@ -425,15 +534,16 @@ def _audit(
     repo_root: Path,
     resources: ManagedResources,
     overrides_path: Path,
+    allow_dirty: bool,
 ) -> SyncOutcome:
     blockers: list[str] = []
     dirty = find_dirty_targets(repo_root, resources.assets)
-    if dirty:
+    if dirty and not allow_dirty:
         blockers.append(f"dirty managed targets: {', '.join(dirty)}")
 
     validations: list[str] = ["manifest-parsed"]
     if overrides_path.exists():
-        overrides = load_overrides(overrides_path)
+        overrides = _applicable_overrides(load_overrides(overrides_path), resources)
         validations.append("overrides-parsed")
         bundle_root = overrides_path.parent.parent
         try:
@@ -453,6 +563,7 @@ def _audit(
         validations=tuple(validations),
         blockers=tuple(blockers),
         repository_changed=False,
+        source_provenance=build_source_provenance(resources),
     )
 
 
@@ -509,6 +620,7 @@ def _plan(
     source_results = _materialize_candidate_with_auto_prepare(
         resources, workspace, candidate, sources_root
     )
+    verify_commit_dates_against_cache(resources, workspace)
     changed = normalize_candidate(resources, candidate)
     validations = (
         "prepared-sources-validated",
@@ -521,7 +633,7 @@ def _plan(
 
     override_results: tuple[OverrideResult, ...] = ()
     if overrides_path.exists():
-        overrides = load_overrides(overrides_path)
+        overrides = _applicable_overrides(load_overrides(overrides_path), resources)
         bundle_root = overrides_path.parent.parent
         validate_override_patches(overrides, bundle_root)
         override_results = replay_overrides(candidate, overrides, bundle_root)
@@ -537,6 +649,7 @@ def _plan(
         repository_changed=False,
         source_results=source_results,
         source_root=str(sources_root),
+        source_provenance=build_source_provenance(resources),
     )
 
 
@@ -569,6 +682,7 @@ def _apply(
     source_results = _materialize_candidate_with_auto_prepare(
         resources, workspace, candidate, sources_root
     )
+    verify_commit_dates_against_cache(resources, workspace)
     changed = normalize_candidate(resources, candidate)
     validations = (
         "prepared-sources-validated",
@@ -582,7 +696,7 @@ def _apply(
 
     override_results: tuple[OverrideResult, ...] = ()
     if overrides_path.exists():
-        overrides = load_overrides(overrides_path)
+        overrides = _applicable_overrides(load_overrides(overrides_path), resources)
         bundle_root = overrides_path.parent.parent
         validate_override_patches(overrides, bundle_root)
         override_results = replay_overrides(candidate, overrides, bundle_root)
@@ -601,6 +715,7 @@ def _apply(
         repository_changed=repository_changed,
         source_results=source_results,
         source_root=str(sources_root),
+        source_provenance=build_source_provenance(resources),
     )
 
 
@@ -650,7 +765,9 @@ def run(argv: Sequence[str] | None = None) -> int:
     if not overrides_path.is_absolute():
         overrides_path = repo_root / overrides_path
 
-    resources = load_managed_resources(manifest_path)
+    resources = _select_resources(
+        load_managed_resources(manifest_path), args.sources
+    )
 
     if args.mode == "prepare":
         if not args.workspace:
@@ -664,7 +781,7 @@ def run(argv: Sequence[str] | None = None) -> int:
     elif args.mode == "audit":
         if args.rebuild_cache:
             parser.error("--rebuild-cache is only valid for prepare mode")
-        outcome = _audit(repo_root, resources, overrides_path)
+        outcome = _audit(repo_root, resources, overrides_path, args.allow_dirty)
     elif args.mode == "plan":
         if not args.workspace:
             parser.error("plan mode requires --workspace")

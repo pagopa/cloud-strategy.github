@@ -2,6 +2,8 @@
 
 ## Purpose
 
+**Purpose ID:** `PUR`
+
 This document captures stable local context for this repository. It explains
 what the repository is for, who it serves, and which outcomes it supports.
 
@@ -29,7 +31,8 @@ and source-side sync tooling.
 ## Capabilities
 
 - Skill and agent governance under `.github/skills/` and `.github/agents/`.
-- Catalog generation and validation from `.github/scripts/` and `tests/`.
+- Catalog generation and validation through `.github/tools/run.sh`, backed by
+  functional tool areas with mirrored tests under `tests/github/tools/`.
 - Sync contract support through source templates and sync automation.
 - Retained-plan and retained-learning governance through owned workflows.
 

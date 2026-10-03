@@ -1122,6 +1122,13 @@ def _parser() -> argparse.ArgumentParser:
     result.add_argument("path", type=Path)
     result.add_argument("brief", type=Path)
     result.add_argument("--repo-root", type=Path, default=Path.cwd())
+    worker = subparsers.add_parser(
+        "worker-payload",
+        help="Check that a raw worker semantic payload composes into a valid WorkerResult.",
+    )
+    worker.add_argument("path", type=Path)
+    worker.add_argument("brief", type=Path)
+    worker.add_argument("--repo-root", type=Path, default=Path.cwd())
     progress = subparsers.add_parser("progress-signature", help="Print a result progress signature.")
     progress.add_argument("path", type=Path)
     return parser
@@ -1140,6 +1147,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             repo_root=args.repo_root,
             brief_bytes=args.brief.read_bytes(),
         )
+    elif args.command == "worker-payload":
+        # Lazy import: runtime_evidence imports this module.
+        from runtime_evidence import AdapterError, compose_handoff
+
+        try:
+            compose_handoff(
+                _load_json(args.path),  # type: ignore[arg-type]
+                _load_json(args.brief),  # type: ignore[arg-type]
+                repo_root=args.repo_root,
+                brief_bytes=args.brief.read_bytes(),
+                raw_worker_bytes=args.path.read_bytes(),
+            )
+            errors = []
+        except AdapterError as exc:
+            errors = [str(exc)]
     else:
         print(compute_progress_signature(_load_json(args.path)))  # type: ignore[arg-type]
         return 0

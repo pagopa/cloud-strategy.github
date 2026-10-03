@@ -1,0 +1,68 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "local-agent-sync-install-ai-resources",
+  "requirements": [
+    {
+      "id": "R-FULL-HOME",
+      "text": "A request to refresh .agents as a whole selects both repository skills and the portable AGENTS.md baseline, and audits the result.",
+      "source": "SKILL.md: Commands, Operating Contract"
+    },
+    {
+      "id": "R-TARGETED",
+      "text": "A request for only AGENTS.md or only skills selects just that target without synchronizing repository-local AGENTS.local.md.",
+      "source": "SKILL.md: Scope, Commands"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-FULL-HOME",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-FULL-HOME"],
+      "prompt": "Aggiorna questa skill con il repo attuale, poi lanciala per aggiornare .agents.",
+      "initial_state": "The repository skill catalog has changed and the home baseline and skill links are stale; the user authorizes a home update.",
+      "expected_output": "Review the plan, run sync --targets skills,agents.md, audit both targets, and report applied operations and blockers.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-BOTH", "text": "The sync selects skills and agents.md together.", "critical": true},
+        {"id": "A-AUDIT", "text": "A post-sync audit checks both targets and reports drift or blockers.", "critical": true}
+      ],
+      "forbidden_actions": ["Synchronize AGENTS.local.md to home.", "Delete home-only skill bundles."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Both home targets are refreshed and the final audit is reported."],
+        "fail": ["Only skills or only AGENTS.md is refreshed despite the whole-.agents request."]
+      }
+    },
+    {
+      "id": "C-ONLY-BASELINE",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-TARGETED"],
+      "prompt": "Aggiorna solo ~/.agents/AGENTS.md dal repository.",
+      "initial_state": "The user explicitly limits the update to the global baseline.",
+      "expected_output": "Use sync --targets agents.md and leave the skill target unselected.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-BASELINE", "text": "Only agents.md is selected and AGENTS.local.md remains repository-local.", "critical": true}
+      ],
+      "forbidden_actions": ["Synchronize skill links.", "Synchronize AGENTS.local.md."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The global baseline is refreshed without expanding scope."],
+        "fail": ["The entire home skill catalog is refreshed or local policy is copied."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-FULL-TRAIN", "query": "Aggiorna tutte le risorse del repo dentro ~/.agents.", "should_trigger": true, "split": "train"},
+      {"id": "Q-FULL-HELD", "query": "Allinea le skill e il baseline AGENTS.md in .agents al repository.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-BASELINE", "query": "Aggiorna soltanto ~/.agents/AGENTS.md.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-NO-TRAIN", "query": "Aggiorna le risorse AI del repository in un altro progetto consumer.", "should_trigger": false, "split": "train"},
+      {"id": "Q-NO-HELD", "query": "Aggiorna le risorse AI scaricandole dai cataloghi esterni.", "should_trigger": false, "split": "held-out"}
+    ]
+  }
+}

@@ -5,10 +5,6 @@ description: Use when planning, auditing, or applying repository-owned AI resour
 
 # Local Agent Sync Home AI Resources
 
-## Referenced skills
-
-- None.
-
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 The repository is the only source of truth for managed resources. Home is a
 runtime projection: a write through a managed skill link writes the repository
@@ -30,6 +26,9 @@ bundle directly.
   Markdown agents are translated only for Codex and OpenCode copy targets.
 - Home-only skills are unmanaged and preserved. This includes catalog-excluded
   `graphify` and every `local-*` bundle.
+- When a repository skill is renamed, rerun `sync --targets skills` so the
+  stale managed link is removed and the canonical link for the new skill ID is
+  created.
 - Reverse synchronization, reconciliation, and copied-skill fallback are
   forbidden.
 
@@ -39,6 +38,7 @@ Use `scripts/run.sh`.
 
 | Request | Command |
 | --- | --- |
+| Refresh all repository-managed resources under `~/.agents/` | `sync --targets skills,agents.md` |
 | Update the global `AGENTS.md` baseline | `sync --targets agents.md` |
 | Default repository-to-home sync | `sync --targets skills` |
 | Sync skills and native runtime agents | `sync --targets skills,copilot,codex` |
@@ -48,10 +48,11 @@ Use `scripts/run.sh`.
 | Readiness check | `doctor --targets skills` |
 
 `dry-run` is an alias for `plan`. The repository dispatcher
-`./.github/scripts/run.sh sync_home_ai_resources ...` remains a delegating
+`./.github/tools/run.sh sync_home_ai_resources ...` remains a delegating
 compatibility entrypoint.
 
-When the user calls this skill with an `agents.md` request, `agents.md` means `sync --targets agents.md`.
+When the user asks to update `.agents` as a whole, use `sync --targets skills,agents.md`.
+When the request names only `agents.md`, use `sync --targets agents.md`.
 Accept `agents-md` as a CLI alias for the same target.
 
 `scripts/run.sh` bootstraps its own environment: on first run it creates a skill-local `.venv` under `scripts/` and installs `requirements.txt` with `pip --require-hashes` behind a recorded requirements hash, re-installing only when that hash changes. `PYTHON_BIN` overrides the default `python3` interpreter. No manual environment setup is required.
@@ -93,10 +94,14 @@ Accept `agents-md` as a CLI alias for the same target.
 - `sync` may auto-apply clean repository-to-home work, including `agents.md`.
   It stops for blockers,
   missing-directory approval, or copied-agent prune gates.
-- `plan` and `audit` are read-only.
+- `plan` and `audit` do not materialize or modify managed runtime resources.
+  They persist their snapshot and lock under the home sync state root, so they
+  are not free of filesystem writes.
 - `apply` needs an explicit request; `--create-missing-dirs` and
   `--prune-managed` remain explicit.
-- `doctor` is read-only and checks roots, support, catalog sources, and state.
+- `doctor` checks roots, support, catalog sources, and state without modifying
+  managed runtime resources. It persists its snapshot and lock under the home
+  sync state root.
 
 ## Reporting
 
@@ -118,7 +123,7 @@ action; see `references/error-codes.md`.
 ## Validation
 
 - Run focused tests under
-  `tests/github/skills/local-agent-sync-install-ai-resources/scripts`.
-- Run `bash -n scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
-- Rebuild `.github/INVENTORY.md` with `./.github/scripts/run.sh build_inventory --root .` after bundle changes.
-- Run `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks` after bundle or automation changes.
+  `.github/skills/local-agent-sync-install-ai-resources/tests/scripts`.
+- Run `bash -n scripts/run.sh .github/tools/run.sh` after shell entrypoint changes.
+- Rebuild `.github/INVENTORY.md` with `./.github/tools/run.sh build-inventory --root .` after bundle changes.
+- Run `./.github/tools/run.sh validate-catalog --root . --include-token-risks` after bundle or automation changes.

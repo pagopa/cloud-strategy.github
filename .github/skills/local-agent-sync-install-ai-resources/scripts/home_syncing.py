@@ -1,3 +1,5 @@
+# ruff: noqa: E402, I001
+
 from __future__ import annotations
 
 import hashlib
@@ -10,9 +12,9 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-_SCRIPTS_LIB = Path(__file__).resolve().parents[3] / "scripts" / "lib"
-if _SCRIPTS_LIB.parent.as_posix() not in sys.path:
-    sys.path.insert(0, _SCRIPTS_LIB.parent.as_posix())
+_TOOLS_ROOT = Path(__file__).resolve().parents[3] / "tools"
+if _TOOLS_ROOT.as_posix() not in sys.path:
+    sys.path.insert(0, _TOOLS_ROOT.as_posix())
 
 from agent_translation import target_extension, translate_agent_for_target
 from home_sync_contract import (
@@ -29,9 +31,7 @@ from home_sync_contract import (
     runtime_skill_root,
     state_root_for_home,
 )
-from lib.sync_exclusions import (
-    IGNORED_SYNC_PARTS,
-    IGNORED_SYNC_SUFFIXES,
+from common.exclusions import (
     should_ignore_sync_path as _shared_should_ignore_sync_path,
     sync_copytree_ignore,
 )

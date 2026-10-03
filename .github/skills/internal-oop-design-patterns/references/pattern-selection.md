@@ -1,6 +1,7 @@
 # Pattern Selection Map
 
-Load this file when you know the design pressure but have not chosen the right pattern yet.
+Load this file when you know the design pressure but have not chosen the right
+pattern yet.
 
 | Pressure | Prefer | Good fit when | Avoid when |
 | --- | --- | --- | --- |
@@ -15,9 +16,10 @@ Load this file when you know the design pressure but have not chosen the right p
 | Many listeners must react to one source | Observer | Fan-out and loose coupling matter | A direct call chain is simpler and stable |
 | Peer objects are tightly coordinating in many directions | Mediator | One coordinator can simplify the collaboration graph | The workflow is simple enough for direct calls |
 
-## Anti-Triggers
+## Anti-triggers
 
 - Prefer a plain function or module when there is no long-lived object state.
 - Prefer a data table or mapping when behavior selection is declarative.
 - Prefer composition before inheritance for code reuse.
-- Prefer removing accidental responsibilities from a god class before adding new abstractions around it.
+- Prefer removing accidental responsibilities from a god class before adding
+  new abstractions around it.

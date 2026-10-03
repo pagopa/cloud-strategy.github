@@ -1,0 +1,368 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-tdd",
+  "requirements": [
+    {
+      "id": "R-POSTURE",
+      "text": "Select exactly one posture before implementation, decided by risk and delivery stage rather than by a feature label.",
+      "source": "internal-tdd SKILL.md: Test postures, Selection rules"
+    },
+    {
+      "id": "R-RED-FIRST",
+      "text": "For mandatory-test-first new or corrected behavior, load the core TDD skill and observe a failure caused by the missing or incorrect behavior before changing production code.",
+      "source": "internal-tdd SKILL.md: Test postures"
+    },
+    {
+      "id": "R-REFACTOR",
+      "text": "For a behavior-preserving refactor, pin current behavior with a passing characterization check before refactoring.",
+      "source": "internal-tdd SKILL.md: Test postures"
+    },
+    {
+      "id": "R-BOUNDARY",
+      "text": "Use the nearest native boundary, test layout, and runner; use an external-language harness only for a real cross-language boundary.",
+      "source": "internal-tdd SKILL.md: Execution contract step 2"
+    },
+    {
+      "id": "R-ROUTING",
+      "text": "Route unknown root causes, skill-bundle prose, and review-only work to their owners.",
+      "source": "internal-tdd SKILL.md: When not to use"
+    },
+    {
+      "id": "R-EVIDENCE",
+      "text": "Treat only executed behavioral checks as behavioral evidence and apply the verification gate before positive claims.",
+      "source": "internal-tdd SKILL.md: Test postures, Execution contract step 6"
+    },
+    {
+      "id": "R-COMPLETION",
+      "text": "Report one honest completion state, including blocked, without relabeling finished work or presenting tests added later as TDD.",
+      "source": "internal-tdd SKILL.md: Completion"
+    },
+    {
+      "id": "R-DELEGATION",
+      "text": "Delegate only after the parent locks posture, boundary, scope, acceptance, and validation, and keep proof and final verification with the parent.",
+      "source": "internal-tdd SKILL.md: Execution contract step 5"
+    },
+    {
+      "id": "R-RECORD",
+      "text": "Report the posture record fields in order, with observed results for every claimed check.",
+      "source": "internal-tdd SKILL.md: Posture record"
+    },
+    {
+      "id": "R-LLM-DRIFT",
+      "text": "For prompt, agent, or LLM-output drift, define concrete evaluation examples or failure cases before changing behavior.",
+      "source": "internal-tdd SKILL.md: Execution contract step 4"
+    },
+    {
+      "id": "R-NATIVE-SEAM",
+      "text": "Treat a format's native validator as the seam, choose the posture by risk, and add no wording tests or manufactured ceremony.",
+      "source": "internal-tdd SKILL.md: Test postures"
+    },
+    {
+      "id": "R-MIXED",
+      "text": "Split a task that mixes postures into single-posture slices.",
+      "source": "internal-tdd SKILL.md: Selection rules"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-RECORD-CHECK",
+      "family": "completion-evidence",
+      "kind": "deterministic",
+      "requirement_ids": ["R-RED-FIRST", "R-COMPLETION", "R-RECORD"],
+      "prompt": "Check whether this posture record supports its completion state.",
+      "initial_state": "A posture record for a mandatory-test-first CLI bugfix is provided.",
+      "expected_output": "Accept the valid record; reject the defective record because it claims test-first-validated with no red check and an unrun broader check.",
+      "files": ["tests/evaluation/fixtures/posture-record-valid.json", "scripts/check_posture_record.py"],
+      "assertions": [
+        {
+          "id": "A-RED-PRESENT",
+          "text": "A test-first-validated record contains an observed red check before the focused check.",
+          "critical": true
+        },
+        {
+          "id": "A-BROADER-OBSERVED",
+          "text": "Every claimed check has an observed result; a not-run broader check prevents a validated state.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Accept a validated state without red and broader evidence."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/posture-record-defective.json"
+    },
+    {
+      "id": "C-BUGFIX",
+      "family": "mandatory-test-first",
+      "kind": "rubric",
+      "requirement_ids": ["R-POSTURE", "R-RED-FIRST", "R-BOUNDARY", "R-EVIDENCE"],
+      "prompt": "The plan validator accepts a manifest with a duplicate task ID. The cause is known: the set check runs after deduplication. Fix it.",
+      "initial_state": "The validator script has native pytest tests beside it; the root cause is diagnosed.",
+      "expected_output": "Select mandatory-test-first, add a native test that fails on the duplicate-ID input, show the red run, then fix and rerun focused and broader checks.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-RED-BEFORE-FIX",
+          "text": "The red run is observed before any production change.",
+          "critical": true
+        },
+        {
+          "id": "A-NATIVE-TEST",
+          "text": "The test lives beside the validator and uses its established runner.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": ["Edit the validator before observing a failing test."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript shows a failing duplicate-ID test before the fix diff."],
+        "fail": ["The fix is written first and the test is added afterwards as TDD."]
+      }
+    },
+    {
+      "id": "C-REFACTOR",
+      "family": "mandatory-test-first",
+      "kind": "rubric",
+      "requirement_ids": ["R-POSTURE", "R-REFACTOR"],
+      "prompt": "Split the 600-line report generator into three modules without changing its output.",
+      "initial_state": "The generator has thin test coverage and a stable CLI output.",
+      "expected_output": "Select mandatory-test-first and pin current output with a passing characterization check at the CLI boundary before moving code.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CHARACTERIZE",
+          "text": "A passing characterization check exists before the first move.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Break working code only to manufacture a red test."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Current output is captured and passing before the refactor starts."],
+        "fail": ["The refactor proceeds with no behavior pin, or code is broken to fake red."]
+      }
+    },
+    {
+      "id": "C-FEATURE-LABEL",
+      "family": "posture-selection",
+      "kind": "rubric",
+      "requirement_ids": ["R-POSTURE", "R-COMPLETION"],
+      "prompt": "New feature: add a --purge flag to the sync CLI that deletes stale target files.",
+      "initial_state": "The sync CLI has an established contract and native tests.",
+      "expected_output": "Select mandatory-test-first because the feature is destructive, despite the new-feature label.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-RISK-WINS",
+          "text": "The destructive risk, not the feature label, decides the posture.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Select feature-first for destructive behavior."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The posture reason cites deletion risk."],
+        "fail": ["The posture is feature-first because the request says new feature."]
+      }
+    },
+    {
+      "id": "C-FEATURE-FIRST",
+      "family": "posture-selection",
+      "kind": "rubric",
+      "requirement_ids": ["R-POSTURE", "R-EVIDENCE", "R-COMPLETION"],
+      "prompt": "Add an optional --json output mode to the read-only inventory report. The broader suite has an unrelated failing test.",
+      "initial_state": "The report is read-only, the new mode changes no existing contract, and one unrelated test already fails on the base branch.",
+      "expected_output": "Select feature-first, show passing focused checks, rerun the unrelated failing test on the base commit to prove it is pre-existing, and record it in gaps with state feature-first-validated without reopening the implementation.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-SCOPE-HONEST",
+          "text": "The report names the verified scope and the out-of-scope broader failure.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Claim the whole suite passes.", "Relabel the work prototype-unverified."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Focused results are shown and the unrelated failure is reported with evidence."],
+        "fail": ["The answer implies complete validation or hides the failing test."]
+      }
+    },
+    {
+      "id": "C-ROUTING",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTING"],
+      "prompt": "CI fails intermittently in the catalog sync test and nobody knows why. Fix it test-first.",
+      "initial_state": "The failure is flaky and its root cause is unknown.",
+      "expected_output": "Route diagnosis to /internal-debugging first, then return for the regression check once the cause is known.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-DIAGNOSE-FIRST",
+          "text": "Diagnosis is routed before any test or fix is written.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Write a speculative fix before the cause is known."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The response hands diagnosis to the debugging owner."],
+        "fail": ["The response guesses a cause and writes a test for it."]
+      }
+    },
+    {
+      "id": "C-VALIDATION-ONLY",
+      "family": "seam-gap",
+      "kind": "rubric",
+      "requirement_ids": ["R-POSTURE", "R-EVIDENCE"],
+      "prompt": "Change the ANSI colors of the interactive welcome banner printed by the sync CLI.",
+      "initial_state": "The banner is printed only on a TTY, no test captures it, and bash -n plus a manual run are available.",
+      "expected_output": "Select validation-only, state that no useful automated seam covers terminal colors, run the syntax check and a manual TTY run, and write no failing test.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-NO-FAKE-RED",
+          "text": "No failing test is manufactured for the color change.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Assert the escape-code wording in a unit test as behavioral proof."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The alternate validator is named and run."],
+        "fail": ["A lexical test is added and reported as behavioral evidence."]
+      }
+    },
+    {
+      "id": "C-DELEGATION",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-DELEGATION"],
+      "prompt": "Delegate the implementation of the parser fix to a worker so it goes faster.",
+      "initial_state": "The posture and boundary are not yet chosen.",
+      "expected_output": "The transcript shows the posture, test boundary, and acceptance written into the worker brief before dispatch, and the parent rerunning the red and final checks itself after the worker returns.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-LOCK-FIRST",
+          "text": "Nothing is delegated before the posture and acceptance are locked.",
+          "critical": true
+        },
+        {
+          "id": "A-PARENT-VERIFIES",
+          "text": "The parent independently verifies the worker's red proof and final checks.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Accept a worker's pass claim without independent verification."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["A locked brief precedes delegation and the parent reruns checks."],
+        "fail": ["The worker chooses the posture or its result is accepted as proof."]
+      }
+    },
+    {
+      "id": "C-LLM-DRIFT",
+      "family": "evaluable-contract",
+      "kind": "rubric",
+      "requirement_ids": ["R-LLM-DRIFT", "R-RECORD"],
+      "prompt": "The summarizer prompt now drops the risk section in about a third of outputs. Fix the prompt.",
+      "initial_state": "Three captured bad outputs and the prompt template are available.",
+      "expected_output": "Turn the captured outputs into concrete failing evaluation examples before editing the prompt, then report the posture record.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-EXAMPLES-FIRST",
+          "text": "Concrete failure examples exist before the prompt changes.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Edit the prompt and assert its new wording as proof."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The captured failures become evaluation cases before the edit."],
+        "fail": ["The prompt is rewritten with no evaluable examples."]
+      }
+    },
+    {
+      "id": "C-NATIVE-SEAM",
+      "family": "seam-selection",
+      "kind": "rubric",
+      "requirement_ids": ["R-NATIVE-SEAM", "R-POSTURE"],
+      "prompt": "Add a variable validation block to the Terraform module that rejects empty bucket names.",
+      "initial_state": "The module has .tftest.hcl tests run by terraform test.",
+      "expected_output": "Use terraform test as the seam, add a run that expects the new validation failure, and do not add a Python wording test.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-NATIVE-SEAM",
+          "text": "The native terraform test runner is the selected seam.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Add an external-language harness that greps the HCL.", "Select validation-only while a native test runner exists."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The posture record names terraform test and the failing run."],
+        "fail": ["The work adds wording tests or skips the native runner."]
+      }
+    },
+    {
+      "id": "C-MIXED",
+      "family": "posture-selection",
+      "kind": "rubric",
+      "requirement_ids": ["R-MIXED", "R-REFACTOR"],
+      "prompt": "Refactor the sync loader and, while you are there, add an optional --verbose flag.",
+      "initial_state": "The loader has a stable contract; the flag is new and reversible.",
+      "expected_output": "Split the work into a mandatory-test-first refactor slice and a feature-first flag slice, each with its own record.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-SPLIT",
+          "text": "Each slice has exactly one posture.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": ["Record feature-first for the whole mixed task."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Two records appear, one per slice."],
+        "fail": ["The refactor inherits the weaker feature-first posture."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Fix the bug where the inventory builder drops symlinked skills; I already found the cause in the path resolver.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Add a --dry-run flag to the sync CLI and make sure it is tested.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Refactor the plan validator into smaller functions without changing behavior.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Change the JSON output shape of the catalog report; downstream scripts parse it.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Our summarizer prompt keeps dropping the risk section; here are three bad outputs, fix it.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Add a migration step that rewrites old manifest files in place.", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Write a regression test for the token-risk detector false positive and then fix it.", "should_trigger": true, "split": "train"},
+      {"id": "Q-08", "query": "Quick throwaway script to explore the graph JSON, just for learning.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Harden the permission check in the GitHub workflow helper script.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-10", "query": "Implement the new parser for eval run records in the checker script.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-11", "query": "Which test posture should this adapter change use before I start coding?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-12", "query": "The build fails randomly and I have no idea why; figure out what is going on.", "should_trigger": false, "split": "train", "competing_owner": "internal-debugging"},
+      {"id": "Q-13", "query": "Review this pull request for defects before merge.", "should_trigger": false, "split": "train", "competing_owner": "internal-review-code"},
+      {"id": "Q-14", "query": "Rewrite the description of the internal-docker skill so it triggers less often.", "should_trigger": false, "split": "train", "competing_owner": "internal-skill-creator"},
+      {"id": "Q-15", "query": "Fix the typos in the architecture document.", "should_trigger": false, "split": "train"},
+      {"id": "Q-16", "query": "Make the test suite faster; it takes four minutes.", "should_trigger": false, "split": "train", "competing_owner": "internal-performance-optimization"},
+      {"id": "Q-17", "query": "Regenerate the inventory file after adding a skill.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-18", "query": "Explain how red-green-refactor works in general.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-19", "query": "Draft an implementation plan for the new sync feature.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gateway-writing-plans"},
+      {"id": "Q-20", "query": "Update CODEOWNERS for the new tools directory.", "should_trigger": false, "split": "held-out"}
+    ]
+  }
+}
