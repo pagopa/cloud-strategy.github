@@ -81,6 +81,16 @@ checker, load `/internal-bash` when it is available.
 - When no harness can exercise the behavior before editing, record a pre-code testability exception and the alternate validation path. Use syntax, lint,
   and a safe non-mutating invocation as evidence; do not represent later
   regression coverage as test-first work.
+- Name the defect each test detects and use independent expectations. Include
+  meaningful success, error, and boundary cases; verify outputs, exit codes,
+  and intended or forbidden filesystem effects.
+- Give process tests an isolated workspace, controlled environment, and bounded
+  timeout. Keep the script real; stub only external command boundaries and
+  verify their arguments when command construction is part of the contract.
+- Run focused native tests first, then relevant integration and declared shell
+  compatibility checks. Measure comparable timings before claiming gains.
+- Load [Testing recipes](references/testing.md) when authoring or reorganizing
+  tests. Keep test assertions in Python and preserve the existing framework.
 
 ## References
 

@@ -48,10 +48,10 @@ for the toolkit; the trees above show one colocated option.
 import argparse
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     # Resolve, orchestrate, and report at this boundary.
     return 0 if args.target else 1
 

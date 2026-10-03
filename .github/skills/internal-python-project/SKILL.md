@@ -72,12 +72,18 @@ consumer named in the request.
 
 ## Testing and validation
 
-- Follow the repository's pytest defaults and keep the public API, service
-  boundary, adapter contract, or framework seam under focused coverage when it
-  changes.
-- Mock true external boundaries; do not mock internal business logic seams by
-  default. Use parameterization or fixtures when they reduce duplication.
-- Run the repository-declared syntax check, focused pytest command, and
+- Preserve the declared test framework and its conventions; prefer pytest for
+  a new suite without a declared framework. Keep the changed public API,
+  service, adapter, or framework seam under focused coverage.
+- Name a representative defect each test detects. Use independent expected
+  results and meaningful success, error, and boundary cases; verify invariants
+  and effects instead of private structure or coverage percentages.
+- Mock true external boundaries. Keep decisions and internal collaborators
+  real; isolate mutable state and keep fixtures small with explicit cleanup.
+- Run focused tests first, then relevant integration and declared compatibility
+  checks. Measure comparable timings before adding speed machinery or claiming
+  gains. Load [Testing recipes](references/testing.md) when authoring tests.
+- Run the repository-declared syntax check, focused native test command, and
   configured linter for changed behavior. For dependency changes, run the
   declared manager's canonical frozen or locked validation.
 - Remove unused imports that the linter reports; do not suppress them with

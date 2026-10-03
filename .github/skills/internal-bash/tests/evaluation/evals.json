@@ -41,6 +41,21 @@
       "id": "R-PYTHON-TESTS",
       "text": "Write behavioral test setup, expected results, and assertions in Python using the existing Python framework. Shell fixtures, stubs, and invocation snippets may exercise the real target with its declared interpreter, but must not implement test assertions. Do not introduce Bats or a shell assertion harness.",
       "source": "internal-bash SKILL.md: Testing"
+    },
+    {
+      "id": "R-TEST-DESIGN",
+      "text": "Choose observable behavior and meaningful success, error, and boundary cases; derive expected results independently; isolate mutable state and preserve the declared framework.",
+      "source": "internal-bash SKILL.md: Testing; references/testing.md"
+    },
+    {
+      "id": "R-TEST-SPEED",
+      "text": "Use focused native tests first, separate actual integration and declared compatibility checks, and justify speed changes with comparable measurements.",
+      "source": "internal-bash SKILL.md: Testing; references/testing.md"
+    },
+    {
+      "id": "R-TEST-PROOF",
+      "text": "Provide executable test recipes that detect representative defects, keep bundle guidance self-contained, and distinguish structural evidence from runtime effectiveness.",
+      "source": "internal-bash SKILL.md: Testing; references/testing.md"
     }
   ],
   "cases": [
@@ -323,6 +338,101 @@
       "rubric": {
         "pass": ["The generated unittest cases run both real inputs through /bin/sh and assert their statuses in Python."],
         "fail": ["The tests introduce another framework, run only syntax checks, or put their assertions in shell code."]
+      }
+    },
+    {
+      "id": "C-TEST-AUTHORING",
+      "family": "testing-quality",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-TEST-DESIGN",
+        "R-TEST-SPEED",
+        "R-TEST-PROOF"
+      ],
+      "prompt": "Add useful fast Python tests for a shell target that receives a directory containing spaces and wildcard characters, invokes an external command, and must report command failures without corrupting files.",
+      "initial_state": "The repository already uses unittest with a stdlib harness. The shell dialect and deployment invocation are declared. The external command must not reach a live provider.",
+      "expected_output": "Keep unittest, execute the real declared shell boundary, pass inputs as arguments, use isolated workspace and environment with a bounded timeout, and verify quoted paths, command failures, and filesystem effects.",
+      "files": [
+        "SKILL.md"
+      ],
+      "assertions": [
+        {
+          "id": "A-REAL-BEHAVIOR",
+          "text": "Tests execute the actual changed contract and detect at least one representative wrong result, wrong argument, or unintended side effect.",
+          "critical": true
+        },
+        {
+          "id": "A-ISOLATION",
+          "text": "Mutable state is isolated and subprocess inputs, environment, working directory, and timeout are explicit when processes are needed.",
+          "critical": true
+        },
+        {
+          "id": "A-SPEED-EVIDENCE",
+          "text": "Focused and broader evidence are distinguished; any claimed speed gain names comparable baseline and final measurements.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Assert instructional wording instead of behavior.",
+        "Mock the function being changed.",
+        "Migrate a working framework without authorization.",
+        "Claim runtime effectiveness from schema validation."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "A reviewer can identify the defect each test detects.",
+          "Relevant observable outputs and file effects are checked with isolated state.",
+          "Dependencies and supported runtime gaps are reported; optional speed machinery is evidence-based."
+        ],
+        "fail": [
+          "Tests assert only mock presence or implementation source.",
+          "Tests inherit uncontrolled mutable home or shared output files.",
+          "Performance or model effectiveness is claimed without observed evidence."
+        ]
+      }
+    },
+    {
+      "id": "C-TEST-HELD-OUT",
+      "family": "testing-quality",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-TEST-DESIGN",
+        "R-TEST-SPEED"
+      ],
+      "prompt": "A refactor preserves the public contract, but tests fail because private helper names changed. Another test passes although the output artifact is no longer written. Repair the tests without introducing a new framework or broad fixture layer.",
+      "initial_state": "Existing native tests and an established public output contract; compatibility requirements are explicitly declared.",
+      "expected_output": "Keep real contract coverage, replace private structure assertions with independent result and side-effect checks, preserve framework and layout, and run focused then relevant broader checks.",
+      "files": [
+        "SKILL.md"
+      ],
+      "assertions": [
+        {
+          "id": "A-STABLE-CONTRACT",
+          "text": "The missing artifact causes a test failure while a behavior-preserving private refactor does not.",
+          "critical": true
+        },
+        {
+          "id": "A-BOUNDED-COST",
+          "text": "Shared fixtures or parallel execution are introduced only with isolation and measured cost justification.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Weaken the artifact contract to make the suite pass."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Contract-preserving internal changes keep assertions valid.",
+          "A representative missing output defect is detected."
+        ],
+        "fail": [
+          "Assertions pin private symbol names.",
+          "The expected value is computed by the implementation being tested."
+        ]
       }
     }
   ],

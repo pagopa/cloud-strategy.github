@@ -91,8 +91,17 @@ human lifecycle output, bounded diagnostics, redaction, or final summaries.
 
 ## Testing and validation
 
-- Follow repository pytest defaults and cover the public CLI or stable helper
-  seam for changed behavior.
+- Preserve the declared test framework; prefer pytest for a new suite without
+  one. Test real helper decisions in process and retain focused process tests
+  for the public CLI, exit codes, diagnostics, and file effects.
+- Name the defect each test detects; use independent expected results and
+  meaningful success, error, and boundary cases. Isolate mutable state and mock
+  only true external boundaries.
+- Execute the documented invocation for execution contracts. Give subprocess
+  tests explicit arguments, workspace, environment, and bounded timeout.
+- Run focused tests first, then relevant integration and declared compatibility
+  checks. Measure comparable timings before claiming gains. Load
+  [Testing recipes](references/testing.md) when authoring or reorganizing tests.
 - Use the declared interpreter or shared runner for focused tests and syntax
   checks. Run `py_compile` or `compileall` only over changed source paths.
 - Run the declared linter on changed files. Remove unused imports it reports;

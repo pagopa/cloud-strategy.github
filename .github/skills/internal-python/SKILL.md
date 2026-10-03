@@ -63,13 +63,28 @@ linter-owned diagnostics to the configured tooling.
 - Keep machine-readable output plain data and keep human-facing rendering at an
   entrypoint or adapter boundary.
 - Keep comments, docstrings, logs, exceptions, and CLI output in English.
-- Add focused `pytest` coverage for new or changed behavior and use the nearest
+- Add focused native coverage for new or changed behavior and use the nearest
   repository-owned syntax or runtime check for syntax-only changes.
+
+## Testing workflow
+
+- Preserve the repository's declared Python test framework. Prefer pytest for
+  a new suite when no framework is declared; do not migrate a working suite as
+  part of an unrelated change.
+- Name the changed contract and a representative defect each new test detects.
+  Derive expected results independently and cover meaningful success, error,
+  and boundary cases. Assert observable results and effects, not private layout.
+- Keep mutable state isolated and mock only true external boundaries. Test pure
+  decisions in process; use real CLI or subprocess tests for execution contracts.
+- Run focused native tests first, then relevant integration and declared
+  compatibility checks. Measure comparable timings before claiming speed gains.
+- Load [Testing recipes](references/testing.md) when authoring or reorganizing
+  tests. Keep component ownership explicit for mixed Python and shell work.
 
 ## Validation
 
 - Use the repository wrapper or declared runtime before ambient `python3`.
-- Run the nearest focused `pytest` command for behavior changes.
+- Run the nearest focused native test command for behavior changes.
 - Keep imports minimal and backed by actual usage while writing Python. Before
   handoff, run the repository's declared static-analysis or lint check against
   every changed `.py` file. Resolve unused or otherwise dead-import diagnostics

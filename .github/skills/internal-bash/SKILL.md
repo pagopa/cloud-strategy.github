@@ -95,6 +95,15 @@ A finding that assumes the wrong dialect is not a finding.
   shell source, and assert captured output and exit status in Python.
 - Do not introduce Bats or shell-based assertion harnesses. Syntax checks and
   ShellCheck complement behavioral tests; they do not replace them.
+- Name the defect each test detects and use independent expectations. Cover
+  meaningful success, error, and boundary cases, including argument boundaries,
+  failure propagation, and observable file effects where applicable.
+- Give process tests an isolated workspace, controlled environment, and bounded
+  timeout. Keep the real shell target; stub only external command boundaries.
+- Run focused native tests first, then relevant integration and declared shell
+  compatibility checks. Measure comparable timings before claiming gains.
+- Load [Testing recipes](references/testing.md) when authoring or reorganizing
+  tests; the examples keep assertions in Python and run actual shell code.
 
 ## Validation
 
