@@ -32,8 +32,9 @@ Add `Compatibility target: Bash 3.2` only when the caller or repository
 declares macOS `/bin/bash` support. Then avoid `mapfile`, `readarray`,
 `declare -A`, `${var,,}`, `${var^^}`, and `wait -n`, and guard an empty-array
 expansion under `set -u` with a `${#array[@]}` check. Static checks do not
-detect these. Run the script's own harness under `/bin/bash` 3.2 in an isolated
-workspace, or report `Bash 3.2 compatibility: unverified`.
+detect these. Use the Python test harness to execute the shell target under
+`/bin/bash` 3.2 in an isolated workspace, or report
+`Bash 3.2 compatibility: unverified`.
 
 ## Portable minimum
 
@@ -65,9 +66,14 @@ checker, load `/internal-bash` when it is available.
 ## Testing
 
 - For behavior changes, create the failing focused check before the first implementation edit.
-- Prefer the repository's existing Bash harness. Cover parser decisions,
-  guards, dry-run behavior, command construction, and rerun safety at their
-  stable boundary.
+- Write behavioral test setup, expected results, and assertions in Python.
+  Reuse the repository's existing Python test framework. Cover parser
+  decisions, guards, dry-run behavior, command construction, and rerun safety
+  at their stable boundary.
+- Execute the real script through `subprocess`. Shell fixtures, command
+  stubs, and invocation snippets may exercise the target, but must not
+  implement test assertions. Do not introduce Bats or shell-based assertion
+  harnesses.
 - When the script is documented for direct invocation, that invocation is the
   stable boundary. Reaching the code through an interpreter tests a different
   boundary and leaves the executable bit, the shebang, and `PATH` resolution

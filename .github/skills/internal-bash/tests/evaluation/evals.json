@@ -34,8 +34,13 @@
     },
     {
       "id": "R-BASH32-TARGET",
-      "text": "Apply Bash 3.2 rules only when the target is declared, and report compatibility as unverified unless the target's own harness ran under Bash 3.2 in an isolated workspace.",
+      "text": "Apply Bash 3.2 rules only when the target is declared, and report compatibility as unverified unless a Python test harness executed the shell target under Bash 3.2 in an isolated workspace.",
       "source": "internal-bash SKILL.md: Dialect decision"
+    },
+    {
+      "id": "R-PYTHON-TESTS",
+      "text": "Write behavioral test setup, expected results, and assertions in Python using the existing Python framework. Shell fixtures, stubs, and invocation snippets may exercise the real target with its declared interpreter, but must not implement test assertions. Do not introduce Bats or a shell assertion harness.",
+      "source": "internal-bash SKILL.md: Testing"
     }
   ],
   "cases": [
@@ -274,6 +279,50 @@
       "rubric": {
         "pass": ["The same three assertions hold for this skill and for internal-bash-script on the shared fixture."],
         "fail": ["The two skills reach different dialect decisions on the same fixture."]
+      }
+    },
+    {
+      "id": "C-PYTHON-SOURCED-TESTS",
+      "family": "test-harness",
+      "kind": "rubric",
+      "requirement_ids": ["R-PYTHON-TESTS", "R-DIALECT"],
+      "prompt": "Add regression tests for require_value in fixtures/valid/sourced-helper.sh. Our callers use Bash and our tests use pytest. Cover an empty value, a missing argument, and a value containing spaces. Change only test files.",
+      "initial_state": "A sourced helper without a shebang. require_value returns 1 and writes missing value to stderr for an absent or empty argument; a non-empty value succeeds. Bash and pytest are available.",
+      "expected_output": "Python tests pass values as subprocess arguments to a fixed Bash snippet that sources the helper and invokes require_value. Python asserts exit status and captured output for all three inputs; the helper is unchanged.",
+      "files": ["fixtures/valid/sourced-helper.sh"],
+      "assertions": [
+        {"id": "A-PYTHON-ORACLE", "text": "Setup, expected statuses, expected output, and assertions are Python code; the shell snippet only sources and invokes the target.", "critical": true},
+        {"id": "A-REAL-SHELL", "text": "subprocess executes the real helper with Bash, preserving the spaced argument without interpolating it into shell source.", "critical": true},
+        {"id": "A-INPUT-CASES", "text": "Missing and empty inputs each return 1 with missing value on stderr; the spaced non-empty input returns 0.", "critical": true}
+      ],
+      "forbidden_actions": ["Introduce Bats or a shell assertion harness.", "Modify the helper or add a shebang to it."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The generated Python tests exercise all three real helper calls and independently assert their results."],
+        "fail": ["Expected-result comparisons appear inside the shell snippet, the helper is mocked, or a spaced value is split into multiple arguments."]
+      }
+    },
+    {
+      "id": "C-PYTHON-POSIX-TESTS",
+      "family": "test-harness",
+      "kind": "rubric",
+      "requirement_ids": ["R-PYTHON-TESTS", "R-DIALECT"],
+      "prompt": "Test require_value in fixtures/valid/sourced-helper.sh for our POSIX sh callers. This repository uses Python unittest, not pytest. Keep dependencies and the helper unchanged.",
+      "initial_state": "The helper is sourced by /bin/sh. Python unittest is the existing framework. The shell target accepts a non-empty value and rejects an empty one.",
+      "expected_output": "Python unittest cases invoke the real helper through /bin/sh and assert both outcomes in Python, without adding pytest, Bats, or a shell assertion harness.",
+      "files": ["fixtures/valid/sourced-helper.sh"],
+      "assertions": [
+        {"id": "A-EXISTING-FRAMEWORK", "text": "The tests use unittest and add no test dependency.", "critical": true},
+        {"id": "A-POSIX-RUNTIME", "text": "The helper is sourced and executed by /bin/sh, not silently switched to Bash.", "critical": true},
+        {"id": "A-PYTHON-RESULTS", "text": "Python assertions check success for a non-empty input and failure for an empty input; shell code contains no expected-result comparisons.", "critical": true}
+      ],
+      "forbidden_actions": ["Add pytest or Bats.", "Replace the helper's declared caller interpreter with Bash."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The generated unittest cases run both real inputs through /bin/sh and assert their statuses in Python."],
+        "fail": ["The tests introduce another framework, run only syntax checks, or put their assertions in shell code."]
       }
     }
   ],

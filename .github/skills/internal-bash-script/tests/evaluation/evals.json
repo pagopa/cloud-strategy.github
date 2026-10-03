@@ -39,8 +39,13 @@
     },
     {
       "id": "R-BASH32-TARGET",
-      "text": "Apply Bash 3.2 rules only when the target is declared, and report compatibility as unverified unless the script's own harness ran under Bash 3.2 in an isolated workspace.",
+      "text": "Apply Bash 3.2 rules only when the target is declared, and report compatibility as unverified unless a Python test harness executed the shell target under Bash 3.2 in an isolated workspace.",
       "source": "internal-bash-script SKILL.md: Dialect minimum"
+    },
+    {
+      "id": "R-PYTHON-TESTS",
+      "text": "Write behavioral test setup, expected results, and assertions in Python using the existing Python framework. Shell fixtures, stubs, and invocation snippets may exercise the real target, but must not implement test assertions. Preserve direct invocation and do not introduce Bats or a shell assertion harness.",
+      "source": "internal-bash-script SKILL.md: Testing"
     }
   ],
   "cases": [
@@ -132,14 +137,15 @@
       "id": "C-DIRECT-INVOCATION",
       "family": "test-boundary",
       "kind": "rubric",
-      "requirement_ids": ["R-TEST-BOUNDARY", "R-VALIDATION"],
+      "requirement_ids": ["R-TEST-BOUNDARY", "R-VALIDATION", "R-PYTHON-TESTS"],
       "prompt": "Add a --json flag to tests/evaluation/fixtures/report.sh, which operators run as ./report.sh; extend the harness beside it.",
       "initial_state": "An executable Bash script and a Python harness (report-harness.py) that invokes it directly.",
       "expected_output": "A failing harness check that invokes ./report.sh --dir . --json directly, then the implementation, then the passing check plus bash -n and shellcheck.",
       "files": ["tests/evaluation/fixtures/report.sh", "tests/evaluation/fixtures/report-harness.py"],
       "assertions": [
         {"id": "A-RED-FIRST", "text": "The failing test runs before the implementation edit.", "critical": true},
-        {"id": "A-DIRECT", "text": "The test runs the script directly, not as `bash ./report.sh`.", "critical": true}
+        {"id": "A-DIRECT", "text": "The test runs the script directly, not as `bash ./report.sh`.", "critical": true},
+        {"id": "A-PYTHON-ORACLE", "text": "The extended harness retains Python setup and assertions on the real process results; no Bats or shell assertion harness is introduced.", "critical": true}
       ],
       "forbidden_actions": ["Claim test-first work for a test added after the implementation."],
       "status": "not-run",
@@ -207,6 +213,29 @@
       "rubric": {
         "pass": ["The same three assertions hold for this skill and for internal-bash on the shared fixture."],
         "fail": ["The two skills reach different dialect decisions on the same fixture."]
+      }
+    },
+    {
+      "id": "C-PYTHON-SHELL-STUB",
+      "family": "test-harness",
+      "kind": "rubric",
+      "requirement_ids": ["R-PYTHON-TESTS", "R-TEST-BOUNDARY"],
+      "prompt": "Add Python tests for tests/evaluation/fixtures/report.sh. Reuse the stdlib Python harness beside it. Use a temporary shell stub for find to control populated and empty directory listings, and cover a missing --dir value. Change only tests.",
+      "initial_state": "The executable report.sh requires a --dir value and counts find output lines. report-harness.py already invokes it directly. The real filesystem and an isolated PATH are available; no additional test dependency is needed.",
+      "expected_output": "Python creates and cleans up a temporary directory and executable find stub, invokes report.sh directly with an isolated PATH, and asserts files=2 for two stub output lines, files=0 for no lines, and a non-zero exit for a missing --dir value. The shell stub supplies controlled output without comparing expected results.",
+      "files": ["tests/evaluation/fixtures/report.sh", "tests/evaluation/fixtures/report-harness.py"],
+      "assertions": [
+        {"id": "A-PYTHON-LIFECYCLE", "text": "Python owns the temporary files, cleanup, environment setup, expected results, and assertions.", "critical": true},
+        {"id": "A-SHELL-STUB-ALLOWED", "text": "An executable shell stub supplies controlled listing output, but it does not implement the test oracle.", "critical": true},
+        {"id": "A-DIRECT-REAL-TARGET", "text": "subprocess invokes the real report.sh directly and verifies two files, zero files, and rejection of a missing --dir value.", "critical": true},
+        {"id": "A-NO-NEW-FRAMEWORK", "text": "The existing stdlib Python harness is reused without adding pytest, Bats, or dependencies.", "critical": true}
+      ],
+      "forbidden_actions": ["Modify report.sh.", "Replace the real target with a mock.", "Introduce Bats or shell expected-result assertions."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The generated Python tests run the populated and empty listing paths and the invalid argument case directly, then independently assert the observed outputs and statuses."],
+        "fail": ["Shell fixture files are forbidden merely for being shell, expected-result checks live in the stub, or the target is invoked as bash report.sh."]
       }
     }
   ],

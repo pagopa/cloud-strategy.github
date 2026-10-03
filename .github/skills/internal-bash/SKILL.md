@@ -40,8 +40,9 @@ Add `Compatibility target: Bash 3.2` only when the caller or repository
 declares macOS `/bin/bash` support. Then avoid `mapfile`, `readarray`,
 `declare -A`, `${var,,}`, `${var^^}`, and `wait -n`, and guard an empty-array
 expansion under `set -u` with a `${#array[@]}` check. Static checks do not
-detect these. Run the target's own harness under `/bin/bash` 3.2 in an isolated
-workspace, or report `Bash 3.2 compatibility: unverified`.
+detect these. Use the Python test harness to execute the shell target under
+`/bin/bash` 3.2 in an isolated workspace, or report
+`Bash 3.2 compatibility: unverified`.
 
 ## Portable core
 
@@ -81,6 +82,19 @@ For a focused review, load
 [references/review-anti-patterns.md](references/review-anti-patterns.md) and
 report each finding with its ID, severity, location, and the declared dialect.
 A finding that assumes the wrong dialect is not a finding.
+
+## Testing
+
+- Write behavioral test setup, expected results, and assertions in Python.
+  Reuse the repository's existing Python test framework.
+- Execute the real shell target through `subprocess` with the declared
+  interpreter. Shell fixtures, command stubs, and invocation snippets may
+  exercise the target, but must not implement test assertions.
+- For sourced helpers, use a fixed shell snippet to load the helper and call
+  its functions. Pass test inputs as subprocess arguments, not interpolated
+  shell source, and assert captured output and exit status in Python.
+- Do not introduce Bats or shell-based assertion harnesses. Syntax checks and
+  ShellCheck complement behavioral tests; they do not replace them.
 
 ## Validation
 

@@ -1,6 +1,8 @@
 import subprocess
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -8,9 +10,9 @@ REPO_ROOT = next(
 )
 
 
-def run_shell(command: str) -> subprocess.CompletedProcess[str]:
+def run_shell(command: str, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["bash", "-lc", command],
+        ["bash", "-lc", command, "test-runner", *args],
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,
@@ -34,13 +36,11 @@ def test_resolve_script_handles_current_catalog_and_debug_log_tools() -> None:
     )
 
 
-def test_resolve_script_rejects_removed_idea_tools() -> None:
-    result = run_shell(
-        "source ./.github/tools/run.sh; "
-        "if resolve_script adapt_critical_report >/dev/null; then exit 1; fi; "
-        "if resolve_script validate_full_analysis >/dev/null; then exit 1; fi"
-    )
-    assert result.returncode == 0
+@pytest.mark.parametrize("tool", ["adapt_critical_report", "validate_full_analysis"])
+def test_resolve_script_rejects_removed_idea_tools(tool: str) -> None:
+    result = run_shell('source ./.github/tools/run.sh; resolve_script "$1"', tool)
+    assert result.returncode == 1
+    assert result.stdout == ""
 
 
 def test_resolve_script_handles_protected_skill_scope_validator() -> None:
