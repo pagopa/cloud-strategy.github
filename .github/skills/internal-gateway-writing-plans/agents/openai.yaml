@@ -4,6 +4,11 @@ interface:
   default_prompt: >-
     Use $internal-gateway-writing-plans to write one retained implementation
     plan under tmp/.plans/ from the approved source, target, and anti-scope.
-    Use available local checks without requiring a skill evaluation runtime.
-    Return the plan path, task IDs, and limitations; execution requires the
-    user's request to execute the identified plan.
+    Read the executor gateway contract and pass its workspace, operation,
+    authority, and verification constraints to the planner. Check required
+    operations against that contract and ask the user to remove any unsupported
+    operation or approve a supported alternative; withhold executable output
+    pending that decision. Changing the executor contract needs separate
+    authority. Use available local checks without requiring a skill evaluation
+    runtime. Return the plan path, task IDs, and limitations; execution
+    requires the user's request to execute the identified plan.

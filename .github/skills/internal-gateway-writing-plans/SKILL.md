@@ -32,19 +32,27 @@ using creation time and a dash-case topic. Keep requested alternative filenames
 under `tmp/.plans/`. Preserve existing plans: use a distinct suffix on collision,
 and update a plan in place only on explicit replanning. Do not migrate plans.
 
-Pass the accepted requirements, relevant local evidence, target, anti-scope,
-and exact output path to `/addyosmani-planning-and-task-breakdown`. Override
-its separate plan/todo outputs and Git defaults: use the current branch and
-HEAD for comparisons; require no branch, worktree, staging, commit, or stash.
+Read the repository-owned `internal-gateway-execute-plans` contract. Pass its
+applicable workspace, operation, authority, and verification constraints to
+`/addyosmani-planning-and-task-breakdown` with the accepted requirements,
+relevant local evidence, target, anti-scope, and exact output path. Override its
+separate plan/todo outputs and Git defaults: use the current branch and HEAD
+for comparisons; require no branch, worktree, staging, commit, or stash.
 Produce one Markdown file with overview, risks, detailed tasks, and `Progress`.
 Create tracker items or another task list only on explicit request.
 
 Each task declares ID, acceptance criteria, dependencies, exact writable paths,
 and concrete verification. `Files likely touched` is not authority; protected
 paths require explicit authorization. Apply `/internal-tdd` where relevant.
-Check local files, dependencies, and validation commands without implementing
-tasks or proving advance success. A supported setup step may be a prerequisite
-task with its own scope and check.
+Check local files, dependencies, validation commands, and whether each required
+operation is allowed and available under the executor's contract. Resolve
+material operation conflicts during planning: name any unsupported required
+operation and ask the user to remove it or approve a supported alternative.
+Withhold an executable plan until the user resolves the conflict. Changing the
+executor contract requires separate authority. Command existence alone does
+not establish operation compatibility. Do not implement tasks or prove advance
+success. A supported setup step may be a prerequisite task with its own scope
+and check.
 
 Skill evaluations, including writer-to-executor trials, are optional unless
 the user explicitly requires them. Do not require a runtime, judge, pilot, or
