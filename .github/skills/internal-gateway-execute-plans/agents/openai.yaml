@@ -3,8 +3,9 @@ interface:
   short_description: "Approved retained-plan execution"
   default_prompt: >-
     Use $internal-gateway-execute-plans to execute the identified retained
-    plan; this explicit invocation approves its declared tasks. Hand them to
+    plan; the user's execution request approves its declared tasks. Hand them to
     /mattpocock-implement under the gateway's no-commit, single-final-review
-    contract, and stop if that skill is not loaded.
+    contract. Locate and read the available implementer without another mention;
+    report genuine missing capability and actual check results.
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

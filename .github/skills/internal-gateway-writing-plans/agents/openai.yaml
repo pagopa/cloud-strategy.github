@@ -4,5 +4,6 @@ interface:
   default_prompt: >-
     Use $internal-gateway-writing-plans to write one retained implementation
     plan under tmp/.plans/ from the approved source, target, and anti-scope.
-    Return the plan path, task IDs, and open decisions; only an explicit user
-    invocation starts execution.
+    Use available local checks without requiring a skill evaluation runtime.
+    Return the plan path, task IDs, and limitations; execution requires the
+    user's request to execute the identified plan.
