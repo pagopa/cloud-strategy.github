@@ -132,6 +132,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/mattpocock-prototype/SKILL.md`
 - `.github/skills/mattpocock-research/SKILL.md`
 - `.github/skills/mattpocock-resolving-merge-conflicts/SKILL.md`
+- `.github/skills/mattpocock-retro/SKILL.md`
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`
 - `.github/skills/mattpocock-teach/SKILL.md`
@@ -202,7 +203,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/awesome-copilot-security-review/SKILL.md`
 
-### mattpocock/skills — ref 6acc160e4e0c · tag v1.2.3 · 2026-08-06 · 25 skills
+### mattpocock/skills — ref 24fe0ef7737e · tag v1.3.1 · 2026-10-04 · 25 skills
 
 - `.github/skills/grill-me/SKILL.md`
 - `.github/skills/grilling/SKILL.md`
@@ -217,7 +218,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/mattpocock-improve-codebase-architecture/SKILL.md`
 - `.github/skills/mattpocock-prototype/SKILL.md`
 - `.github/skills/mattpocock-research/SKILL.md`
-- `.github/skills/mattpocock-resolving-merge-conflicts/SKILL.md`
+- `.github/skills/mattpocock-retro/SKILL.md`
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`
 - `.github/skills/mattpocock-teach/SKILL.md`

@@ -11,7 +11,7 @@ version: 1
 # | antonbabenko-terraform-skill | antonbabenko/terraform-skill | 0a3a4a66e990 | - | 2026-07-03 | 1 |
 # | atlassian-mcp-server | atlassian/atlassian-mcp-server | 798f8138c976 | - | 2026-09-03 | 1 |
 # | github-awesome-copilot | github/awesome-copilot | f38fb6cf039b | - | 2026-09-07 | 10 |
-# | mattpocock-skills | mattpocock/skills | 6acc160e4e0c | v1.2.3 | 2026-08-06 | 25 |
+# | mattpocock-skills | mattpocock/skills | 24fe0ef7737e | v1.3.1 | 2026-10-04 | 25 |
 # | obra-superpowers | obra/superpowers | 8ca22dba9a94 | v6.4.2 | 2026-09-25 | 12 |
 # | openai-skills-curated | openai/skills | 49f948faa925 | - | 2026-06-23 | 2 |
 # | openai-skills-retained-doc | openai/skills | 49f948faa925 | - | 2026-06-23 | 1 |
@@ -112,9 +112,9 @@ sources:
         canonical_name: awesome-copilot-security-review
   mattpocock-skills:
     repository: https://github.com/mattpocock/skills.git
-    ref: 6acc160e4e0cd062dbbbd7a1b26ae92855edf07e
-    commit_date: 2026-08-06
-    advertised_ref: v1.2.3
+    ref: 24fe0ef7737efae15c87225755e9f6f5965e4888
+    commit_date: 2026-10-04
+    advertised_ref: v1.3.1
     rewrite_skill_references: true
     backtick_skill_references:
       - code-review
@@ -166,12 +166,12 @@ sources:
       - upstream: skills/engineering/research
         local: .github/skills/mattpocock-research
         canonical_name: mattpocock-research
-      - upstream: skills/engineering/resolving-merge-conflicts
-        local: .github/skills/mattpocock-resolving-merge-conflicts
-        canonical_name: mattpocock-resolving-merge-conflicts
       - upstream: skills/engineering/setup-matt-pocock-skills
         local: .github/skills/mattpocock-setup-matt-pocock-skills
         canonical_name: mattpocock-setup-matt-pocock-skills
+      - upstream: skills/engineering/retro
+        local: .github/skills/mattpocock-retro
+        canonical_name: mattpocock-retro
       - upstream: skills/engineering/tdd
         local: .github/skills/mattpocock-tdd
         canonical_name: mattpocock-tdd
