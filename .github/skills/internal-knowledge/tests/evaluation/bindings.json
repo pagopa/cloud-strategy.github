@@ -292,37 +292,26 @@
     "C-ROUTER-ATTESTED": {
       "fixture": "F3",
       "gold": "tests/evaluation/gold/F3.gold.json",
-      "profile": "protected",
+      "profile": "audit",
       "graders": [
-        "router_block_only",
-        "protected_bytes_per_step"
+        "zero_writes",
+        "no_transient_writes"
       ],
       "runs": 3,
-      "allowlist": [
-        "AGENTS.local.md",
-        "docs/**"
-      ],
+      "allowlist": [],
       "gold_overrides": {}
     },
     "C-ROUTER-CENTRAL-COPY": {
       "fixture": "F3",
       "gold": "tests/evaluation/gold/F3.gold.json",
-      "profile": "protected",
+      "profile": "audit",
       "graders": [
-        "router_ownership_gap",
-        "router_block_only"
+        "zero_writes",
+        "no_transient_writes"
       ],
       "runs": 3,
-      "allowlist": [
-        "AGENTS.local.md",
-        "docs/**"
-      ],
-      "gold_overrides": {
-        "router": {
-          "path": "AGENTS.md",
-          "ownership": "central-copy"
-        }
-      }
+      "allowlist": [],
+      "gold_overrides": {}
     },
     "C-README-OPENING": {
       "fixture": "F2",
@@ -607,6 +596,42 @@
       "allowlist": [
         "docs/domain/review/GLOSSARY.md",
         "GLOSSARY-MAP.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-STANDARD-AUTOMATION": {
+      "fixture": "F7",
+      "gold": "tests/evaluation/gold/F7.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [
+        "docs/standards/grant-reference.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-KNOWLEDGE-IDS": {
+      "fixture": "F7",
+      "gold": "tests/evaluation/gold/F7.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [
+        "docs/standards/grant-reference.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-README-BOUNDARY": {
+      "fixture": "F2",
+      "gold": "tests/evaluation/gold/F2.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [
+        "services/api/README.md",
+        "services/auth/README.md",
+        "services/billing/README.md",
+        "libs/tiny/README.md"
       ],
       "gold_overrides": {}
     }

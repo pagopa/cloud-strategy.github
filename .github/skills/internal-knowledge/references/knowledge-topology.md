@@ -133,7 +133,7 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 | Existing ADRs with no stated local format | `docs/adr/README.md` | The repository already states its ADR contract where the ADR author reads it. |
 | Components, boundaries, and flows across the repository | `docs/architecture.md` | The repository has a single component fully covered by its README. |
 | Relationships that cross the repository boundary | The relevant relationship sections of `docs/architecture.md` | No dependency leaves the repository. |
-| A convention repeated across the repository with no automated check | `docs/standards/<name>.md` | The convention is already enforced; enforcement makes it a rule, not a standard. |
+| An evidenced convention the repository follows by agreement | `docs/standards/<name>.md` | An existing owner already covers it, or no agreement is evidenced. Automation is enforcement evidence and does not change its category. |
 | Recurring criteria that decide between alternatives | `docs/engineering-principles.md` | Only one occurrence is evidenced. |
 | An evidenced chain from a declaration to its effect | `docs/guides/<name>.md` | A component README already covers the chain. |
 | Durable project purpose, boundaries, and current orientation not already owned by an existing knowledge document | A project-orientation entry at the repository's existing canonical owner | The orientation is already complete, or the evidence is only temporary, aspirational, or inferred. |

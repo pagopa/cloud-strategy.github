@@ -56,3 +56,13 @@ approved runtime configuration.
 
 The Mermaid parser grader returns `not-run` when `mmdc` is unavailable. Static
 Mermaid checks still run offline; they do not substitute for parser evidence.
+
+## Contract realignment coverage
+
+Router cases now require zero writes even when a policy path is attested.
+Legacy router-block grader fixtures remain offline compatibility examples, not
+permission for new skill invocations. Component README cases admit durable
+knowledge updates and hand off operational authoring. New anchored rubrics
+cover that boundary, semantic standard classification after automation, and
+stable principle and standard IDs with file-level strategic links. All revised
+and new runtime cases remain `not-run`.

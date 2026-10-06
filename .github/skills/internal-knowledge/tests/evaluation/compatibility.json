@@ -481,6 +481,38 @@
         "C-KNOWLEDGE-LAYERS"
       ],
       "reason": "Mapped to retained offline coverage for the current contract; live outcome evidence remains not-run."
+    },
+    {
+      "heading": "Keep routers read-only despite path attestation",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-ROUTER-ATTESTED"
+      ],
+      "reason": "Authorized realignment of review findings; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Preserve standard category after automation",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-STANDARD-AUTOMATION"
+      ],
+      "reason": "Authorized realignment of review findings; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Keep stable knowledge identifiers",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-KNOWLEDGE-IDS"
+      ],
+      "reason": "Authorized realignment of review findings; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Bound component README updates to knowledge",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-README-BOUNDARY"
+      ],
+      "reason": "Authorized realignment of review findings; runtime outcome remains not-run."
     }
   ]
 }

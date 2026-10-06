@@ -1,19 +1,20 @@
 # README Maintenance
 
-Use this reference only for the repository-root README and the canonical
-`docs/README.md` knowledge index. Component READMEs are outside the skill's
-write scope; they belong to their component owners.
+Use this reference for authorized README knowledge updates: repository
+orientation, the canonical knowledge index, and durable component purpose,
+contracts, and boundaries. Component operation stays with its operational owner.
 
 ## Scope
 
-The only README destinations are:
+README destinations may include:
 
-- the root `README.md`, which orients readers to the repository; and
-- `docs/README.md`, which indexes strategic and tactical knowledge.
+- the root `README.md`, which orients readers to the repository;
+- `docs/README.md`, which indexes strategic and tactical knowledge; and
+- component READMEs whose durable knowledge is not already covered by a parent.
 
 Use only destinations in the approved allowlist. Normalize and verify each
-path before drafting. Do not widen the allowlist to component directories or
-other README files discovered during the work. If an index is generated,
+path before drafting. Discovery does not add component directories or other
+README files to the allowlist. If an index is generated,
 leave it with its generator and report the owner.
 
 ## Root README
@@ -34,6 +35,15 @@ The index publishes the alignment contract: operational work cites the
 knowledge IDs it realizes; the skill reads operational artifacts only as
 evidence; and `docs/` contains no reverse registry of operational work.
 Link to [the alignment contract](alignment.md) for the detailed rules.
+
+## Component README
+
+Maintain evidence-backed purpose, responsibilities, stable contracts, and
+ownership boundaries. Link to the maintained operational owner for usage,
+commands, procedures, and validation instructions. Preserve existing operational
+content and generated blocks; hand off operational changes to the component
+owner. A new README needs only the knowledge and owner links supported by
+evidence, not an operational template.
 
 ## Evidence and validation
 

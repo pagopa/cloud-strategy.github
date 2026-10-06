@@ -23,7 +23,7 @@ not be empty. Use only these keys:
 | `mode` | The single resolved skill mode. |
 | `bucket` | The requested README or docs filter, when one applies. |
 | `signal` | The evidence that selected the mode. |
-| `router` | `written`, `unchanged`, `gap`, or `not-applicable`. |
+| `router` | `unchanged`, `gap`, or `not-applicable` for new work; `written` is accepted for legacy reports only. Router edits belong to the instruction owner. |
 | `written` | Every created or refreshed path that exists after the invocation. |
 | `removed` | Every observed deletion, separately from written paths. |
 | `transfers` | Verified `<old path> -> <new path>` content transfers, separated by a semicolon and space. A mixed source may remain; list each destination separately. |

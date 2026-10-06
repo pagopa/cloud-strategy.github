@@ -9,10 +9,13 @@ The three artifacts look alike and are not interchangeable. Classify before draf
 | Artifact | What it records | Stable identifier | Enforcement evidence |
 | --- | --- | --- | --- |
 | `docs/domain/<slug>/RULES.md` | An invariant that must hold | Required | Named, or `not enforced` |
-| `docs/standards/<name>.md` | A convention the repository follows by agreement | None | Optional evidence; it never changes the semantic category |
-| `docs/engineering-principles.md` | The criteria that decide between alternatives | None | Optional evidence; it never changes the semantic category |
+| `docs/standards/<name>.md` | A convention the repository follows by agreement | `STD-<area>-nn` | Optional evidence; it never changes the semantic category |
+| `docs/engineering-principles.md` | The criteria that decide between alternatives | `PRI-nn` | Optional evidence; it never changes the semantic category |
 
 Classify by meaning and owner, not by whether a check exists. A standard is a convention the repository follows by agreement, a rule is a domain invariant, and a principle is a repeated decision criterion. Automated enforcement does not change the semantic category: a check on a convention is enforcement evidence for the standard, while a rule remains a rule because of its invariant. When a rule has no check, record `not enforced` and report the gap.
+
+Use [alignment](alignment.md) for stable IDs, retirement, and strategic links.
+Every standard item has its own ID; each Standards file has one `Serves:` line.
 
 ## Evidence and seeding
 
@@ -31,7 +34,9 @@ Do not create any of these artifacts empty. A file whose only content is a promi
 
 <One line naming who follows these conventions and where they apply.>
 
-## <Convention>
+Serves: <strategic ID>
+
+## STD-<area>-nn — <Convention>
 
 - Convention: <the statement, in the repository's own vocabulary>
 - Evidence: <paths where the repository already follows it>
@@ -42,7 +47,7 @@ Do not create any of these artifacts empty. A file whose only content is a promi
 
 Record a principle only when the same criterion is visible in two or more independent decisions. One occurrence is an anecdote.
 
-Each principle states the criterion, the trade-off it accepts, and the decisions that evidence it. Link the ADRs that applied it. A principle that no recorded decision ever applied is aspiration, not knowledge.
+Each principle keeps a stable `PRI-nn` ID and states the criterion, the trade-off it accepts, and the decisions that evidence it. Link the ADRs that applied it. A principle that no recorded decision ever applied is aspiration, not knowledge.
 
 ## Guides
 

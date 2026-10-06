@@ -112,7 +112,7 @@
 
 ### Discover a standard and a principle during setup
 
-**Prompt:** "Align the knowledge in this repository." Every workflow pins its actions to a commit SHA with a version comment and no check enforces it, and two accepted ADRs decide by the same criterion.
+**Prompt:** "Align the knowledge in this repository." Every workflow pins its actions to a commit SHA with a version comment and no check enforces it, and two accepted ADRs decide by the same criterion. An authoritative local agreement confirms the pinning convention.
 
 **Expected:** Account for every row of the evidence-to-artifact table. Plan `docs/standards/<name>.md` for the repeated convention that no check enforces, and `docs/engineering-principles.md` for the criterion visible in two independent decisions, citing the paths that evidence each. Leaving those rows out of the plan is a silent omission, not restraint.
 
@@ -126,7 +126,7 @@
 
 **Prompt:** "Refresh a small component README whose reader only needs its purpose, one usage path, and one safe validation command."
 
-**Expected:** Use only sections that support the reader outcome. Keep the document concise, omit fixed boilerplate, and preserve generated content and safe-validation guidance.
+**Expected:** Update only durable purpose, responsibilities, and owner links. Preserve existing operational content, generated blocks, and safe-validation guidance; hand off new usage or validation commands to the component owner.
 
 ### Extend an existing document for a material omission
 
@@ -204,7 +204,7 @@
 
 **Prompt:** "Set up the READMEs for every component; do not touch the other documentation."
 
-**Expected:** Resolve `setup` with the readme bucket. Plan one README per significant component the parent does not already document completely, touch the layout root only to add or update the rows describing those targets, and report the rest of the unrealized layout as the named follow-up block with a copyable `setup` prompt instead of writing it.
+**Expected:** Resolve `setup` with the readme bucket. Plan one README per significant component the parent does not already document completely, leave non-README layout roots untouched because they are outside the bucket, and report the rest of the unrealized layout as the named follow-up block with a copyable `setup` prompt instead of writing it.
 
 ### Stop when sync means the sync contract
 
@@ -361,6 +361,30 @@
 **Prompt:** "Add pagination to the users API."
 
 **Expected:** Do not invoke this skill.
+
+### Keep routers read-only despite path attestation
+
+**Prompt:** "Update the attested routing block in AGENTS.local.md."
+
+**Expected:** Leave all files unchanged, report the routing gap, and hand the policy edit to the instruction owner. Ownership evidence never grants this skill policy authoring scope.
+
+### Preserve standard category after automation
+
+**Prompt:** "Record an agreed grant-reference convention now enforced by a validator."
+
+**Expected:** Keep the convention in its standard owner and cite the validator as enforcement evidence. Preserve the separate governance invariant and its rule ID.
+
+### Keep stable knowledge identifiers
+
+**Prompt:** "Preserve PRI-01 and author the accepted grant-reference standard serving PUR."
+
+**Expected:** Preserve `PRI-01`, assign a stable `STD-<area>-nn` identifier to the new standard item, and include the Standards file-level `Serves: PUR` link.
+
+### Bound component README updates to knowledge
+
+**Prompt:** "Refresh a service README for durable purpose and ownership; a deployment procedure is also requested."
+
+**Expected:** Author only evidence-backed strategic and tactical knowledge within the authorized README. Preserve operational content and hand off the requested procedure to its component owner.
 
 ## Baseline
 

@@ -56,7 +56,8 @@ layers aligned. This skill does not write operational artifacts.
   language. Write new documents in English unless a local contract requires
   another language.
 - Read [knowledge navigation](references/knowledge-navigation.md) before
-  proposing an index write. Keep README ownership with
+  proposing an index write. Routers remain read-only evidence. Keep README
+  ownership with
   [README maintenance](references/readme-maintenance.md).
 
 ## Reference owners

@@ -1,8 +1,8 @@
 # Knowledge Navigation
 
 Use this reference when discovering a repository's knowledge router or README
-index, or when a sync/setup plan proposes to write either one. Discovery
-identifies the candidate; it does not grant write authority.
+index, or when a sync/setup plan proposes an index write. Routers are evidence
+only; their instruction owners maintain them.
 
 ## Router Detection
 
@@ -16,34 +16,21 @@ Check candidate paths in this order:
    evidence.
 
 Do not infer repository ownership from a filename, location, existence, or the
-fact that a central instruction loads a local file. A write requires positive
-proof for that exact path: authoritative synchronization metadata identifying
-it as repository-owned, or the user's explicit attestation of that path in the
-approved write allowlist. If either proof is absent or ambiguous, leave the
-router unchanged and report `router: gap`.
+fact that a central instruction loads a local file. Inspect ownership evidence
+to identify the instruction owner for a handoff. Ownership or explicit path
+authorization does not bring policy edits into this skill's write scope.
 
-## Bounded Router Edits
+## Router Handoff
 
-Read the entire candidate before planning a change. A router edit changes only
-the content between these exact markers:
+Read the candidate when routing is relevant to the requested knowledge work.
+Leave every byte unchanged, including existing router blocks. Report a missing
+or stale route as `router: gap`, name its evidence and instruction owner, and
+hand off the bounded policy change. Uncertain ownership is also a gap.
 
-```text
-<!-- knowledge-router:start -->
-<!-- knowledge-router:end -->
-```
-
-Preserve every byte outside the delimited block. If the markers are duplicated,
-malformed, or cannot be preserved, do not write; report the gap. Add a new
-block only when the exact router path is authorized and ownership is proved.
-Keep routing entries concise, task-oriented, and directed to the smallest
-valid owner. Do not rewrite neighboring policy, generated content, or
-instructions owned elsewhere.
-
-Report `router: written` when the authorized block changed, `router:
-unchanged` when a proved and authorized block already serves the reader, and
-`router: gap` when selection or ownership is unresolved. Use
-`router: not-applicable` only when no router write was part of the resolved
-work.
+Report `router: unchanged` when the inspected route serves the reader and
+`router: not-applicable` when routing was outside the resolved work. The legacy
+`router: written` report value remains readable for compatibility; this skill
+does not emit it for new work.
 
 ## README Index
 

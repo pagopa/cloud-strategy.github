@@ -44,8 +44,8 @@
     },
     {
       "id": "R-ROUTER",
-      "text": "Write only an authorized router block; otherwise report an ownership gap.",
-      "source": "DL-24; CR3-1"
+      "text": "Inspect routers as evidence only; report routing gaps and hand off policy edits even when ownership and path authorization are supplied.",
+      "source": "Review finding 1; SKILL Boundaries; knowledge-scope Write allowlist"
     },
     {
       "id": "R-REPORT",
@@ -156,6 +156,21 @@
       "id": "R-REPORT-V2",
       "text": "Emit v2 reports that separate observed writes, removals and transfers; keep legacy v1 readable.",
       "source": "Accepted conversation: glossary, progressive updates and legacy migration"
+    },
+    {
+      "id": "R-STANDARD-CATEGORY",
+      "text": "Classify conventions by meaning; adding automation does not convert a standard into a rule.",
+      "source": "Authorized realignment of review findings; bundle reference owners"
+    },
+    {
+      "id": "R-KNOWLEDGE-IDS",
+      "text": "Preserve stable principle and standard IDs and give standards a file-level Serves link.",
+      "source": "Authorized realignment of review findings; bundle reference owners"
+    },
+    {
+      "id": "R-README-BOUNDARY",
+      "text": "Component README authoring covers strategic and tactical knowledge; operational procedures stay with the component owner.",
+      "source": "Authorized realignment of review findings; bundle reference owners"
     }
   ],
   "cases": [
@@ -881,29 +896,30 @@
       ],
       "prompt": "Update only the attested Change-Type Routing block in AGENTS.local.md and keep surrounding bytes unchanged.",
       "initial_state": "Fixture F3 is the starting repository state.",
-      "expected_output": "Change only the authorized router block.",
+      "expected_output": "Leave all files unchanged and report the routing gap with a bounded handoff to the instruction owner.",
       "files": [
         "tests/evaluation/fixtures/F3.tree.json",
         "tests/evaluation/gold/F3.gold.json"
       ],
       "assertions": [
         {
-          "id": "router_block_only",
-          "text": "The output checks router block boundaries and positive ownership for this case.",
+          "id": "zero_writes",
+          "text": "No file is changed by the router-only request.",
           "critical": true
         },
         {
-          "id": "protected_bytes_per_step",
-          "text": "The output checks protected paths at every observed step for this case.",
+          "id": "no_transient_writes",
+          "text": "The trace contains no temporary policy or documentation write.",
           "critical": true
         }
       ],
       "forbidden_actions": [
-        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent.",
+        "Edit AGENTS.md or AGENTS.local.md, including an attested router block."
       ],
       "status": "not-run",
       "held_out": false,
-      "defective_fixture": "tests/evaluation/grader-fixtures/router_block_only.json"
+      "defective_fixture": "tests/evaluation/grader-fixtures/zero_writes.json"
     },
     {
       "id": "C-ROUTER-CENTRAL-COPY",
@@ -914,29 +930,30 @@
       ],
       "prompt": "The central AGENTS.md copy has no repository ownership marker. Leave it unchanged and report router: gap.",
       "initial_state": "Fixture F3 is the starting repository state.",
-      "expected_output": "Keep the central router unchanged and report router: gap.",
+      "expected_output": "Leave all files unchanged and report the routing gap with a bounded handoff to the instruction owner.",
       "files": [
         "tests/evaluation/fixtures/F3.tree.json",
         "tests/evaluation/gold/F3.gold.json"
       ],
       "assertions": [
         {
-          "id": "router_ownership_gap",
-          "text": "The output requires unchanged router and router: gap when ownership is uncertain for this case.",
+          "id": "zero_writes",
+          "text": "No file is changed by the router-only request.",
           "critical": true
         },
         {
-          "id": "router_block_only",
-          "text": "The output checks router block boundaries and positive ownership for this case.",
+          "id": "no_transient_writes",
+          "text": "The trace contains no temporary policy or documentation write.",
           "critical": true
         }
       ],
       "forbidden_actions": [
-        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent."
+        "Expose fixture gold, rubric anchors or mutant inputs to the runtime agent.",
+        "Edit AGENTS.md or AGENTS.local.md, including an attested router block."
       ],
       "status": "not-run",
       "held_out": false,
-      "defective_fixture": "tests/evaluation/grader-fixtures/router_ownership_gap.json"
+      "defective_fixture": "tests/evaluation/grader-fixtures/zero_writes.json"
     },
     {
       "id": "C-README-OPENING",
@@ -1856,6 +1873,132 @@
         ],
         "fail": [
           "Links to an absent glossary, treats component paths as domains or creates an unnecessary domain-set ADR."
+        ]
+      }
+    },
+    {
+      "id": "C-STANDARD-AUTOMATION",
+      "family": "standard",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-STANDARD-CATEGORY"
+      ],
+      "prompt": "Refresh the knowledge in Fixture F7. The Program Council has agreed a naming convention for grant references and approved a validator for it. Record the convention as a standard serving PUR; do not change the governance invariant GOV-01.",
+      "initial_state": "Fixture F7 plus the explicit authority and destinations in the prompt.",
+      "expected_output": "Classify conventions by meaning; adding automation does not convert a standard into a rule.",
+      "files": [
+        "tests/evaluation/fixtures/F7.tree.json",
+        "tests/evaluation/gold/F7.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "The output satisfies all anchored pass conditions.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "The output avoids all anchored failure conditions.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Edit repository policy or operational artifacts."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The naming convention remains a standard with the validator identified as enforcement evidence.",
+          "GOV-01 remains with its rule owner and retains its ID."
+        ],
+        "fail": [
+          "A check alone causes the convention to move into RULES.md.",
+          "The established invariant is reclassified as a standard."
+        ]
+      }
+    },
+    {
+      "id": "C-KNOWLEDGE-IDS",
+      "family": "knowledge",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-KNOWLEDGE-IDS"
+      ],
+      "prompt": "Refresh the knowledge in Fixture F7. Preserve PRI-01. The Program Council accepted a grant-reference naming standard serving PUR; create its authorized owner docs/standards/grant-reference.md with a stable STD identifier.",
+      "initial_state": "Fixture F7 plus the explicit authority and destinations in the prompt.",
+      "expected_output": "Preserve stable principle and standard IDs and give standards a file-level Serves link.",
+      "files": [
+        "tests/evaluation/fixtures/F7.tree.json",
+        "tests/evaluation/gold/F7.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "The output satisfies all anchored pass conditions.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "The output avoids all anchored failure conditions.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Edit repository policy or operational artifacts."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "PRI-01 is preserved without renumbering.",
+          "The standard has a stable STD-<area>-nn item ID and its file has Serves: PUR."
+        ],
+        "fail": [
+          "A principle or standard is authored without its stable ID.",
+          "The standard omits its strategic Serves target."
+        ]
+      }
+    },
+    {
+      "id": "C-README-BOUNDARY",
+      "family": "readme",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-README-BOUNDARY"
+      ],
+      "prompt": "Refresh the service README in Fixture F2 for its durable purpose and ownership boundary. A deployment procedure is also requested; hand that procedure to the component operational owner.",
+      "initial_state": "Fixture F2 plus the explicit authority and destinations in the prompt.",
+      "expected_output": "Component README authoring covers strategic and tactical knowledge; operational procedures stay with the component owner.",
+      "files": [
+        "tests/evaluation/fixtures/F2.tree.json",
+        "tests/evaluation/gold/F2.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "The output satisfies all anchored pass conditions.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "The output avoids all anchored failure conditions.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Edit repository policy or operational artifacts."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The README refresh preserves its operational content and generated blocks.",
+          "Durable purpose and ownership claims are evidence-backed; the procedure is handed off without being authored."
+        ],
+        "fail": [
+          "The skill authors deployment commands or a new operational procedure.",
+          "The component README is categorically rejected despite the durable knowledge request."
         ]
       }
     }
