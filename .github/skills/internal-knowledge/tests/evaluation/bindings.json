@@ -486,6 +486,129 @@
         "README.md"
       ],
       "gold_overrides": {}
+    },
+    "C-GLOSSARY-LAZY-DEFAULT": {
+      "fixture": "F1",
+      "gold": "tests/evaluation/gold/F1.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "GLOSSARY.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-GLOSSARY-LEGACY-OWNER": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "CONTEXT.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-PROGRESSIVE-RESOLUTION": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "CONTEXT.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-PROGRESSIVE-AUTHORITY": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "CONTEXT.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-PROGRESSIVE-DURABLE-TYPES": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "docs/architecture.md",
+        "docs/adr/0002-review.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-MIGRATION-DETECT": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "audit",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-MIGRATION-CLASSIFY": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-MIGRATION-COHERENT": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "CONTEXT.md",
+        "GLOSSARY.md",
+        "docs/architecture.md",
+        "README.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-MIGRATION-INTERRUPTED": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "CONTEXT.md",
+        "GLOSSARY.md",
+        "docs/architecture.md",
+        "README.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-MIGRATION-AUDIT-TRANSITION": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "audit",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-GLOSSARY-MAP": {
+      "fixture": "F10",
+      "gold": "tests/evaluation/gold/F10.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "docs/domain/review/GLOSSARY.md",
+        "GLOSSARY-MAP.md"
+      ],
+      "gold_overrides": {}
     }
   }
 }

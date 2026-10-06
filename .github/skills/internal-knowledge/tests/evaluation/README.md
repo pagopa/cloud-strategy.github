@@ -36,6 +36,17 @@ The runtime view copies only `SKILL.md`, `references/`, `agents/` and the
 fixture tree into a temporary workspace. It excludes `evals/`, `tests/`,
 gold answers and grader mutants, then checks for byte-identical planted data.
 
+## Revision coverage
+
+The glossary, progressive-maintenance and migration cases use anchored rubrics
+and remain `not-run`. They cover lazy creation, legacy ownership, multi-round
+resolution, authority, owner maturity, bounded detection, activation, transfer
+and interruption. The report consumer has offline executable v1/v2 checks in
+`tests/test_report_migration.py`; path checks do not establish semantic transfer
+or complete migration. Existing v1 fixtures remain compatibility checks. The R-REPORT criterion now
+selects v2 for new authoring under the accepted contract evolution; its truth
+requirement is unchanged. Baseline snapshots used for comparisons stay in disposable session storage.
+
 ## Holdout and live runs
 
 Do not open FH or its gold while tuning graders, prompts or expected outputs.

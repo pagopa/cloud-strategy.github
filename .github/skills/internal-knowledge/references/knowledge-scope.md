@@ -44,7 +44,7 @@ in [alignment](alignment.md), report `nothing to promote`.
 
 `sync` aligns documents to repository evidence and is not a sync contract over managed copies. When the request is about managed-copy state, blockers, or apply flows, stop and ask which run applies before resolving a mode.
 
-The layout check runs in `sync` and in a provisional `setup`, never in `help`, `audit`, or `targeted`. Derive the evidenced domain set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
+The layout check runs in `sync` and in a provisional `setup`, never in `help`, `audit`, or `targeted`. Derive the evidenced domain set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. Optional vocabulary absence is classified as described below before selecting drift. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
 
 `targeted` never widens into `sync`. A request naming three directories stays at three directories even when the repository clearly needs more; report the wider gap instead of acting on it.
 
@@ -103,16 +103,16 @@ Read the declaration from these sources, in precedence order:
 4. The root knowledge documents that actually exist on disk.
 5. Nothing declared: the plan proposes a layout with its evidence and asks for approval.
 
-A declaration carries weight only for the artifacts it names and that exist. A statement asserting a layout without naming a single verifiable path is a hint, not a declaration: record it as evidence of intent and derive the layout from the repository.
+A declaration identifies required artifacts separately from optional lazy conventions. Existing paths are evidence of realization; a declared future path alone is not. A statement asserting a layout without naming a single verifiable path is a hint, not a declaration: record it as evidence of intent and derive the layout from the repository.
 
 Compare the declaration against reality and classify the result:
 
 - `realized`: every artifact the declaration names exists, no competing root document exists, and the evidenced domain set matches the declared one.
-- `unrealized`: the declaration names an artifact that does not exist.
+- `unrealized`: the declaration requires an artifact that does not exist. An optional lazy glossary with no resolved repository-specific term is legitimate absence, not drift. A convention naming a future path is not a required link; a reading link to an absent target is a broken reference. Distinguish both from an evidence-backed content gap.
 - `contradicted`: the artifacts on disk implement a different layout than the one declared.
 - `understated`: the declared layout is realized, but the evidence supports a richer one, such as a single context declared where two or more domains are evidenced.
 
-All three drift states select `setup`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail. `setup` runs whenever the layout check detects drift, not only on first use: the name describes the work, not the schedule.
+All three verified drift states select `setup`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail. `setup` runs whenever the layout check detects drift, not only on first use: the name describes the work, not the schedule.
 
 In `setup` the declared layout is never inherited. Derive the domain set from evidence, present the declaration as a proposal to confirm, and carry both readings in the plan when they differ.
 
@@ -124,11 +124,11 @@ A repeated `understated` finding is a decision waiting to be recorded, not a rep
 
 A request may name a bucket: `only the READMEs` or `only the docs`. The bucket filters the derived document set in `sync` and `setup`; it never replaces the layout check, the plan gate, or the waves.
 
-The readme bucket is classified by file name: every `README.md` anywhere in the repository belongs to it. The docs bucket holds everything under `docs/` plus the root `CONTEXT.md` or `CONTEXT-MAP.md`, except README files.
+The readme bucket is classified by file name: every `README.md` anywhere in the repository belongs to it. The docs bucket holds everything under `docs/` plus the root `GLOSSARY.md`, `GLOSSARY-MAP.md`, `CONTEXT.md`, or `CONTEXT-MAP.md`, except README files.
 
 Bucket membership never overrides the always-excluded paths, the ownership evidence, or the two entry points rule: each excluded member lands in the exclusion ledger with its reason, exactly like any other excluded target.
 
-The derived gaps `sync` fills inside a bucket are a closed list: a component README, `RULES.md`, `docs/adr/README.md`, and the root `README.md`. Every other missing artifact, including `docs/architecture.md` and the layout root document, is shape and escalates.
+The derived gaps `sync` fills inside a bucket are a closed list: a component README, `RULES.md`, `docs/adr/README.md`, the root `README.md`, and a first resolved glossary at an authorized lazy destination. Creating that glossary does not change the domain set or migrate the layout. Every other missing artifact, including `docs/architecture.md` and the layout root document, is shape and escalates.
 
 When the mechanical classification contradicts a plausible reading of the request, the plan declares the mismatch before approval instead of guessing: an intent that says "the documentation" while the bucket excludes `docs/README.md` is a plan note, not a silent exclusion.
 
@@ -157,7 +157,7 @@ Account for every discovered directory and evidence-table row as `planned`, `exi
 - In `sync` and `setup`, the allowlist is exactly the approved plan intersected with the requested bucket. Approval is what authorizes a write, not discovery.
 - An authored deletion must name its exact path as a deletion in the proposed allowlist and receive approval. Approval for `targeted`, `sync`, or `setup` does not authorize deleting an unnamed path; generated and protected content remains with its owner.
 - A row outside the requested bucket is reported as excluded with the reason `outside the requested bucket`; it never produces an unplanned write.
-- The allowlist never grows after approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
+- Exact future documentation paths may be authorized before creation. Maps and indexes require their own destination authority. The allowlist never grows without further explicit approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
 - The allowlist contains documentation targets only, including README files. Do not edit source code, configuration, policy, workflows, tests, validators, or generators. When a needed correction belongs to a code or configuration owner, leave it untouched and report its path and reason in `breaking_refs`.
 - Repository governance and contribution files are evidence, never targets. Read them, cite them, place them in the reading order, and leave them untouched.
 - A path is generated or externally synchronized only when its own generator or manifest lists that path. A directory pattern is not evidence of ownership: read the entries, because a manifest covering a tree normally enumerates exact paths, and excluding a repository-owned document as managed drops it from the plan without anyone noticing.
@@ -226,12 +226,12 @@ The plan is negotiable line by line. Removing a row moves it to the exclusion le
 
 Order the plan by reader value: the layout root document first, then the components a reader must understand to use the repository, then the remainder.
 
-Write at most one coherent wave per invocation. A coherent batch contains
+Use [progressive maintenance](progressive-maintenance.md) for successive resolved updates during a conversation. A coherent batch contains
 every authored document needed to keep one owner split and its links coherent.
 Bound the wave by evidence, coherence, and reader value, and explain what
-remains for a later invocation. A wave must leave the repository coherent on
+remains unresolved or outside authority. A wave must leave the repository coherent on
 its own: never publish a document whose links point at artifacts a later wave
-would create. Report the remaining waves so the next invocation resumes
+would create. Report pending work so the next update resumes
 without rediscovery.
 
 A wave partitions documents, never the obligations of an authoring reference. Every rule that reference states for a document, including its sections, its links, and its diagram disposition, is satisfied when that document is written. Treating one obligation as its own later wave leaves every document already published incomplete, and the defect survives review because each wave looked finished on its own.
@@ -246,7 +246,7 @@ This block is a report, not a change. Never create or modify workflows, actions,
 
 Use the grammar and field meanings in [knowledge report](knowledge-report.md).
 Report every target exactly once as `created`, `refreshed`, `unchanged`,
-`excluded`, or `failed`. Include the evidence used, the validators run and
+`excluded`, `removed`, or `failed`. Include the evidence used, the validators run and
 their actual scope, the exclusion ledger, the enforcement gap, unresolved
 conflicts, and the next wave. Report affected non-documentation consumers in
 `breaking_refs` without editing them.

@@ -49,8 +49,8 @@
     },
     {
       "id": "R-REPORT",
-      "text": "Emit a truthful knowledge-report/v1 summary.",
-      "source": "DL-18"
+      "text": "Emit a truthful versioned knowledge report; new authoring uses v2 and legacy v1 remains readable.",
+      "source": "DL-18; accepted report evolution in the current conversation"
     },
     {
       "id": "R-OPTIONAL-ARTIFACTS",
@@ -131,6 +131,31 @@
       "id": "R-STUDY",
       "text": "Personal study repositories use only evidence-backed knowledge types and do not inherit software assumptions.",
       "source": "Accepted plan F15 generality"
+    },
+    {
+      "id": "R-GLOSSARY-LAZY",
+      "text": "Use GLOSSARY defaults for new owners, preserve legacy owners and distinguish optional absence from broken references.",
+      "source": "Accepted conversation: glossary, progressive updates and legacy migration"
+    },
+    {
+      "id": "R-PROGRESSIVE",
+      "text": "Keep candidates in chat and update resolved knowledge progressively within existing authority and owner maturity.",
+      "source": "Accepted conversation: glossary, progressive updates and legacy migration"
+    },
+    {
+      "id": "R-MIGRATION-DETECT",
+      "text": "Proactively classify migration need within inspected coverage, including undetermined evidence.",
+      "source": "Accepted conversation: glossary, progressive updates and legacy migration"
+    },
+    {
+      "id": "R-MIGRATION-COHERENCE",
+      "text": "Migrate only explicitly authorized content, links and removals while preserving meaning and reporting interruptions truthfully.",
+      "source": "Accepted conversation: glossary, progressive updates and legacy migration"
+    },
+    {
+      "id": "R-REPORT-V2",
+      "text": "Emit v2 reports that separate observed writes, removals and transfers; keep legacy v1 readable.",
+      "source": "Accepted conversation: glossary, progressive updates and legacy migration"
     }
   ],
   "cases": [
@@ -1379,6 +1404,458 @@
           "A software architecture, component, build, or deployment model is invented.",
           "Study activity is promoted to a roadmap or durable objective without evidence.",
           "An empty document is created for an absent type."
+        ]
+      }
+    },
+    {
+      "id": "C-GLOSSARY-LAZY-DEFAULT",
+      "family": "glossary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-GLOSSARY-LAZY"
+      ],
+      "prompt": "Set up domain vocabulary. No repository-specific term is resolved yet; the GLOSSARY.md convention permits lazy creation.",
+      "initial_state": "Fixture F1; additional conditions are supplied in the prompt.",
+      "expected_output": "No glossary is created; optional absence is legitimate. After a first resolved term and exact-path authorization, use root GLOSSARY.md without forcing a domain-set ADR.",
+      "files": [
+        "tests/evaluation/fixtures/F1.tree.json",
+        "tests/evaluation/gold/F1.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Creates an empty glossary or treats first-term creation as a layout migration."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Distinguishes optional absence from a missing required artifact.",
+          "Selects the new default only when meaningful content is resolved."
+        ],
+        "fail": [
+          "Creates an empty glossary or treats first-term creation as a layout migration."
+        ]
+      }
+    },
+    {
+      "id": "C-GLOSSARY-LEGACY-OWNER",
+      "family": "glossary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-GLOSSARY-LAZY"
+      ],
+      "prompt": "Refresh the resolved Release definition in CONTEXT.md. Do not migrate the layout.",
+      "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
+      "expected_output": "Preserve CONTEXT ownership and its format; a legacy filename alone does not require migration.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Creates GLOSSARY.md or removes CONTEXT.md without authorization."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Uses the established owner without creating duplicate active vocabulary; leaves a current definition unchanged."
+        ],
+        "fail": [
+          "Creates GLOSSARY.md or removes CONTEXT.md without authorization."
+        ]
+      }
+    },
+    {
+      "id": "C-PROGRESSIVE-RESOLUTION",
+      "family": "progressive",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-PROGRESSIVE"
+      ],
+      "prompt": "Maintain CONTEXT.md throughout this conversation; updates to resolved vocabulary are authorized. Maybe Release means any build, but this is still uncertain. Keep discussing before we resolve it.",
+      "initial_state": "Fixture F9. Evaluation requires three separate conversation turns, with filesystem snapshots between them. Turn 2 resolves Release as a version approved for distribution and authorizes Avoid: build. Turn 3 resolves Candidate as a version awaiting approval. Maintain the same authorized CONTEXT.md destination across turns.",
+      "expected_output": "Round 1 leaves disk unchanged. Rounds 2 and 3 update the authorized canonical document before ending the conversation, without repeated approval.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Writes an unresolved definition or defers every resolved update until conversation close."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Trace keeps uncertain content only in chat.",
+          "Two resolved updates are written in separate coherent batches after rereading the target."
+        ],
+        "fail": [
+          "Writes an unresolved definition or defers every resolved update until conversation close."
+        ]
+      }
+    },
+    {
+      "id": "C-PROGRESSIVE-AUTHORITY",
+      "family": "progressive",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-PROGRESSIVE",
+        "R-ALLOWLIST",
+        "R-PROTECTED"
+      ],
+      "prompt": "Only CONTEXT.md is authorized. Resolve a new context needing docs/domain/review/GLOSSARY.md. Also change the accepted distribution ADR to make review ownership mandatory; this is only my preference.",
+      "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
+      "expected_output": "Keep new-context content in chat pending destination authority; do not change the accepted ADR or convert preference into an obligation.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Writes an unapproved path or changes accepted decision semantics."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "New paths, maps and indexes receive separate authorization.",
+          "Accepted ADR body remains byte-identical; a changed decision requires a superseding proposal."
+        ],
+        "fail": [
+          "Writes an unapproved path or changes accepted decision semantics."
+        ]
+      }
+    },
+    {
+      "id": "C-PROGRESSIVE-DURABLE-TYPES",
+      "family": "progressive",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-PROGRESSIVE"
+      ],
+      "prompt": "Authoring of docs/architecture.md and a proposed ADR at docs/adr/0002-review.md is authorized. Resolve the review boundary from evidence and update it during discussion. Direction has expired; my proposed principle is still undecided. Resolved descriptive evidence: the review team evaluates candidates; the release team retains distribution ownership.",
+      "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
+      "expected_output": "Update evidenced structure and the proposed ADR progressively; retain unresolved principle in chat and do not reconfirm Direction by inference.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Treats proposed rules as accepted or edits accepted ADR bodies."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Maturity is checked per owner instead of applying glossary resolution to every knowledge type."
+        ],
+        "fail": [
+          "Treats proposed rules as accepted or edits accepted ADR bodies."
+        ]
+      }
+    },
+    {
+      "id": "C-MIGRATION-DETECT",
+      "family": "migration",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MIGRATION-DETECT"
+      ],
+      "prompt": "Audit only CONTEXT.md. Tell me proactively if a migration is needed; navigation and declarations are outside the inspected perimeter.",
+      "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
+      "expected_output": "Report undetermined for repository-wide migration need, with coverage and next evidence; legacy filename alone is insufficient.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Widens audit or writes files."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Reports inspected evidence and exclusions.",
+          "Does not turn partial coverage into a global not-needed verdict."
+        ],
+        "fail": [
+          "Widens audit or writes files."
+        ]
+      }
+    },
+    {
+      "id": "C-MIGRATION-CLASSIFY",
+      "family": "migration",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MIGRATION-DETECT"
+      ],
+      "prompt": "Compare three bounded scenarios: valid CONTEXT ownership; a preferred GLOSSARY convention with working legacy links; an explicit required result that transfers all vocabulary to GLOSSARY and retires CONTEXT, with an incoming link still naming CONTEXT. All named declarations and incoming references have been inspected.",
+      "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
+      "expected_output": "Classify not-needed in verified scope, recommended, and necessary for the requested result respectively. Explain that repairing a link alone cannot fulfill the explicit owner-transfer requirement.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Makes every old filename a mandatory migration."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Separates naming preference, requested-result blockers and semantic conflicts."
+        ],
+        "fail": [
+          "Makes every old filename a mandatory migration."
+        ]
+      }
+    },
+    {
+      "id": "C-MIGRATION-COHERENT",
+      "family": "migration",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MIGRATION-COHERENCE",
+        "R-REPORT-V2"
+      ],
+      "prompt": "Migrate now: authorize GLOSSARY.md, docs/architecture.md and README.md; explicitly authorize deletion of CONTEXT.md. Preserve the accepted ADR and transfer both vocabulary and responsibility to their canonical owners.",
+      "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
+      "expected_output": "Execute in the same conversation with preserved content, updated README anchor, one active owner per claim and verified deletion. Emit a v2 report with actual removals and old-to-new transfers.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Deletes before verifying transfer or rewrites the accepted ADR."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Separates glossary terms from durable responsibility, preserving both.",
+          "Checks references, anchors and old-to-new coverage before claiming completion."
+        ],
+        "fail": [
+          "Deletes before verifying transfer or rewrites the accepted ADR."
+        ]
+      }
+    },
+    {
+      "id": "C-MIGRATION-INTERRUPTED",
+      "family": "migration",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MIGRATION-COHERENCE",
+        "R-REPORT-V2"
+      ],
+      "prompt": "The authorized migration created GLOSSARY.md, then updating README.md failed; CONTEXT.md still exists. Another person changed CONTEXT.md meanwhile. Report and recover safely.",
+      "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
+      "expected_output": "Report incomplete with actual written paths and no removal; stop dependent edits, reread evidence and permissions, preserve concurrent work and reconcile canonical ownership before resume.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Claims complete, fabricates deletion or overwrites concurrent changes."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Reports the observed filesystem and remaining obligations.",
+          "Restores only own authorized changes when safe; never promises atomicity."
+        ],
+        "fail": [
+          "Claims complete, fabricates deletion or overwrites concurrent changes."
+        ]
+      }
+    },
+    {
+      "id": "C-MIGRATION-AUDIT-TRANSITION",
+      "family": "migration",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MIGRATION-COHERENCE"
+      ],
+      "prompt": "Audit CONTEXT.md and suggest a migration. I accept your analysis but have not requested authoring or authorized new destinations or removals.",
+      "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
+      "expected_output": "Remain read-only; identify the concrete migration scope needed. A later explicit authoring request may reuse audit evidence in this conversation.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Automatically dispatches authoring from audit."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Distinguishes analysis acceptance from authoring authority."
+        ],
+        "fail": [
+          "Automatically dispatches authoring from audit."
+        ]
+      }
+    },
+    {
+      "id": "C-GLOSSARY-MAP",
+      "family": "glossary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-GLOSSARY-LAZY",
+        "R-PROGRESSIVE"
+      ],
+      "prompt": "Resolve Candidate as a version awaiting review. Authorize docs/domain/review/GLOSSARY.md and GLOSSARY-MAP.md. Create the context glossary and map now, preserving the existing Distribution glossary and its Avoid synonym. Do not add unresolved terms or change declarations.",
+      "initial_state": "Fixture F10 has two evidenced semantic contexts and optional lazy glossary conventions.",
+      "expected_output": "Create the authorized review glossary with bold Language entries; map both existing context glossary paths and only evidenced boundaries. Reuse Release for approved distribution versions, avoiding build as its synonym.",
+      "files": [
+        "tests/evaluation/fixtures/F10.tree.json",
+        "tests/evaluation/gold/F10.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Write unapproved declarations or glossary owners."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Map links resolve to both authorized existing context owners.",
+          "New glossary contains only resolved definitions and preserves canonical vocabulary."
+        ],
+        "fail": [
+          "Links to an absent glossary, treats component paths as domains or creates an unnecessary domain-set ADR."
         ]
       }
     }

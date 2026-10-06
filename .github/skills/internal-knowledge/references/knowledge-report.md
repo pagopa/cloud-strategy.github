@@ -7,10 +7,10 @@ for the reader-facing explanation.
 ## Grammar
 
 Write two or three non-empty prose lines, followed by the exact marker
-`knowledge-report/v1`. Then write one `key: value` field per line until a blank
+`knowledge-report/v2`. Then write one `key: value` field per line until a blank
 line or end of report. The first prose lines summarize the outcome and assign
 each authored target its lifecycle status: `created`, `refreshed`,
-`unchanged`, `excluded`, or `failed`. Keep those statuses accurate and do not
+`unchanged`, `excluded`, `removed`, or `failed`. Keep those statuses accurate and do not
 claim a file was written when it was not.
 
 `mode` is required and has exactly one value: `help`, `audit`, `align`,
@@ -24,9 +24,12 @@ not be empty. Use only these keys:
 | `bucket` | The requested README or docs filter, when one applies. |
 | `signal` | The evidence that selected the mode. |
 | `router` | `written`, `unchanged`, `gap`, or `not-applicable`. |
-| `written` | Every created or refreshed path, exactly matching observed changes. |
+| `written` | Every created or refreshed path that exists after the invocation. |
+| `removed` | Every observed deletion, separately from written paths. |
+| `transfers` | Verified `<old path> -> <new path>` content transfers, separated by a semicolon and space. A mixed source may remain; list each destination separately. |
+| `migration_state` | `complete` or `incomplete` when migration was activated. Incomplete requires `gaps`. |
 | `unchanged` | Existing planned paths that needed no change. |
-| `failed` | Planned paths whose authoring or validation failed. |
+| `failed` | Planned paths that could not be written; changed paths with validation failures remain in `written` or `removed`, with the failure in `gaps`. |
 | `omitted` | `<path>: <reason>` for required content or diagrams not supplied. |
 | `excluded` | `<path>: <reason>` for discovered paths outside the approved scope. |
 | `gaps` | Unresolved evidence, ownership, enforcement, or validation gaps. |
@@ -40,11 +43,32 @@ items with a semicolon and a following space. Keep paths repository-relative
 and supported by observed evidence. Do not use prose such as "all files" when
 coverage is bounded.
 
-The `written` set must equal the paths actually changed. A path reported as
+The disjoint union of `written` and `removed` must equal the paths actually changed. `written` contains changed paths present after the invocation; `removed` contains paths present before and absent after it. A path reported as
 `unchanged` or `failed` must not also be reported as written. The prose lines
-carry the per-target lifecycle status; `written` records only the changed-path
+carry the per-target lifecycle status; `written` and `removed` record the observed changed-path
 set. This lets a reader distinguish a newly created target from a refreshed
-one without changing the stable field vocabulary.
+one while keeping the base field vocabulary compatible.
+
+## Version Compatibility
+
+New authoring emits `knowledge-report/v2`. Consumers in this bundle accept both
+versions. Legacy `knowledge-report/v1` keeps its closed field set: no `removed`,
+`transfers` or `migration_state`; its `written` remains the entire changed-path
+set, including deletions. Existing fixtures remain v1 compatibility evidence.
+Do not add v2 fields under a v1 marker. An external consumer known to require v1
+needs explicit version alignment; report the dependency instead of silently
+claiming compatibility. The offline parser validates syntax and observed paths;
+it does not prove semantic transfer, link completeness or migration completion.
+
+`transfers` names only verified content moves: the old path exists in the before
+snapshot and the new owner exists after. Its meaning may be distributed among
+several owners. Report partial operations honestly: `migration_state: incomplete`
+requires the remaining obligations and failure evidence in `gaps`. Reserve
+`complete` for the verification in [legacy migration](legacy-migration.md).
+
+Proactive migration assessments belong in the prose and coverage or gaps,
+with the inspected perimeter and next action. They do not activate migration
+or require a `migration_state` field before authoring begins.
 
 ## Truth And Coverage
 
@@ -52,23 +76,26 @@ Resolve status from the final filesystem and the authorized plan. `created`
 means the path did not exist before and now exists; `refreshed` means an
 existing path changed; `unchanged` means it was considered and left byte-
 equivalent; `excluded` means it was considered but not authorized or protected;
-`failed` means an authorized target could not be completed. Report each target
+`removed` means an authorized existing path was deleted;
+`failed` means an authorized target could not be written. A changed path whose
+validation failed remains in `written` or `removed`; report its failure in
+`gaps`, not under a status that hides the change. Report each target
 exactly once.
 
 Report only checks that ran and what they covered. Distinguish structural
 validation, executable checks, human review, and checks not run. Name the
 reason when evidence is unavailable. A `not-run` check is a gap, never a pass.
-For `audit` and `help`, keep the report consistent with their read-only
+For `audit`, `align`, and `help`, keep the report consistent with their read-only
 contracts and never list authored paths in those reports.
 
 ## Problems Found
 
 When material defects or conflicts are discovered, report them to the human in
 an optional `## Problems found` section after the machine block, with a blank
-line separating it from the final `knowledge-report/v1` field. The section is
+line separating it from the final `knowledge-report/v2` field. The section is
 required only when material problems were found; omit it otherwise. The blank
 line ends the machine block, so this human-facing section does not add fields to
-or change the `knowledge-report/v1` parser contract.
+or change the `knowledge-report/v2` parser contract.
 
 Use a table with severity, problem, location, impact, and status columns. Set
 status to `verified` or `reported`. Link to an evidenced file location when

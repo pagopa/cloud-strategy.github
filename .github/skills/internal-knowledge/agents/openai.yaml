@@ -18,4 +18,10 @@ interface:
     separate from accepted decisions, preserve accepted ADR bodies and
     generated blocks, and report defects and conflicts to the human. Do not
     write operational artifacts, validators, workflows, or generators, or
-    widen the approved allowlist.
+    widen the approved allowlist. Use GLOSSARY defaults for new vocabulary owners
+    and preserve established CONTEXT layouts. Keep unresolved candidates in chat;
+    update resolved, authorized knowledge progressively during the conversation.
+    Follow progressive-maintenance.md and legacy-migration.md for maturity,
+    proactive migration detection, concrete activation scope and recovery.
+    Emit knowledge-report/v2 with observed writes, removals and verified transfers;
+    incomplete migrations must report their remaining gaps.

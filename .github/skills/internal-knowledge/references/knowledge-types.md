@@ -11,7 +11,7 @@ alignment. It does not maintain operational content.
 | Purpose | Scope, non-goals, stakeholders, and constraints | `docs/project.md` |
 | Principles | Durable principles that apply across cycles | `docs/principles.md` |
 | Direction | Diagnosis, guiding policy, objectives with a horizon, assumptions, and strategic risks | `docs/direction.md` |
-| Language | Domain terms and their intended meanings | `docs/domain/<context>/CONTEXT.md` or a shared glossary |
+| Language | Domain terms and their intended meanings | Root `GLOSSARY.md`, or context glossaries linked from `GLOSSARY-MAP.md`; retain existing CONTEXT owners |
 | Strategic decisions | Accepted choices that establish or change direction | `docs/adr/` |
 
 ## Tactical knowledge

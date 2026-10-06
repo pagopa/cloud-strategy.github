@@ -93,28 +93,29 @@ history artifacts automatically or split content solely by time validity.
 Preserve canonical ADR status and decision history, plus records required by
 local policy, with their existing owners.
 
-| Domains evidenced | Root document | Domain documents |
+| Domains evidenced | New default | Existing supported layout |
 | --- | --- | --- |
-| One | Root `CONTEXT.md` | `docs/domain/<slug>/RULES.md` when normative rules exist |
-| Two or more | Root `CONTEXT-MAP.md` | `docs/domain/<slug>/CONTEXT.md`, plus `RULES.md` when normative rules exist |
+| One | Root `GLOSSARY.md` | Root `CONTEXT.md` |
+| Two or more | Root `GLOSSARY-MAP.md` linking context `GLOSSARY.md` files | Root `CONTEXT-MAP.md` linking context `CONTEXT.md` files |
 
-Domain documents always live under `docs/domain/<slug>/`. Never co-locate them with the code of a directory: a domain may span several directories or own none at all, and a path that holds only part of a domain misrepresents the boundary.
+Preserve an existing canonical layout until migration is explicitly authorized.
+For new context homes, prefer `docs/domain/<slug>/GLOSSARY.md`; preserve an
+established code-colocated glossary when it represents the full context and
+local ownership supports it. A component directory alone is not a domain.
+Use `RULES.md` only for evidenced normative rules. Preserve established ADR
+locations, including context-local directories; default new decisions to
+`docs/adr/`. A changed domain set follows the ADR owner and acceptance authority.
 
-Both layouts keep decisions under `docs/adr/`, the system view in `docs/architecture.md`, and the domain set recorded as an ADR.
+Glossaries are lazy: create one only for a first meaningful resolved term at an
+authorized destination. Optional absence is valid. First creation does not
+itself require layout migration or a domain-set ADR.
 
 ## Layout migration
 
-When the approved plan moves a repository from one layout to the other, the migration is one coherent unit:
-
-1. Record the new domain set as an ADR, with the evidence that selected it.
-2. Create the new root document with the content the old one carried.
-3. Update the layout declaration so it names the new root document and that ADR.
-4. Update every reference to the previous root document.
-5. Remove the previous root document only when the plan says so and nothing still points at it.
-
-Never publish a layout change that leaves a declaration, a reading order, or a link pointing at a document that does not exist. If the wave limit prevents completing all five steps, do not start the migration in this invocation.
-
-Once an accepted ADR records the domain set, the layout changes only through a superseding decision. Re-derivation may report that the evidence has moved; it never migrates the layout on its own.
+Use [legacy migration](legacy-migration.md) for detection, activation, transfer,
+reference verification and interruption recovery. Changing an accepted domain
+set requires a superseding decision. A format-only migration preserves that
+set and does not manufacture an ADR. Never migrate on re-derivation alone.
 
 ## Evidence to artifact
 
@@ -124,14 +125,14 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 | --- | --- | --- |
 | Durable purpose, scope, non-goals, stakeholders, or constraints with an unmet reader outcome | The existing Purpose owner mapped from the canonical index | An existing owner already covers the outcome or evidence is temporary or aspirational. |
 | A significant component | A README in that component | The parent already documents it completely. |
-| Terms whose meaning is repository-specific | The root `CONTEXT.md`, or `docs/domain/<slug>/CONTEXT.md` when two or more domains are evidenced | The terms are general technology vocabulary. |
-| Two or more areas with distinct vocabulary, state, or lifecycle | `docs/domain/<slug>/` per area | Only one area is evidenced; keep the vocabulary in the root document. |
+| Terms whose meaning is repository-specific | The canonical glossary or legacy CONTEXT owner | The terms are general technology vocabulary. |
+| Two or more areas with distinct vocabulary, state, or lifecycle | `docs/domain/<slug>/` per area | Only one area is evidenced; keep the vocabulary in its root owner. |
 | Normative rules already stated in a validator, workflow, decision, or document | `docs/domain/<slug>/RULES.md` | No rule exists yet. Never invent a rule to fill the file. |
 | A decision that is costly to reverse and surprising without context | An ADR | The decision is routine or already recorded. |
-| The domain set that selects the layout | An ADR recording it with its evidence | An accepted ADR already records the same set. |
+| A domain-set decision that meets the ADR admission criteria | An ADR recording the set and its evidence | The choice is routine, only a first glossary is created, or an accepted ADR records the same set. |
 | Existing ADRs with no stated local format | `docs/adr/README.md` | The repository already states its ADR contract where the ADR author reads it. |
 | Components, boundaries, and flows across the repository | `docs/architecture.md` | The repository has a single component fully covered by its README. |
-| Relationships that cross the repository boundary | Sections 6 and 7 of `docs/architecture.md` | No dependency leaves the repository. |
+| Relationships that cross the repository boundary | The relevant relationship sections of `docs/architecture.md` | No dependency leaves the repository. |
 | A convention repeated across the repository with no automated check | `docs/standards/<name>.md` | The convention is already enforced; enforcement makes it a rule, not a standard. |
 | Recurring criteria that decide between alternatives | `docs/engineering-principles.md` | Only one occurrence is evidenced. |
 | An evidenced chain from a declaration to its effect | `docs/guides/<name>.md` | A component README already covers the chain. |
@@ -151,37 +152,36 @@ not create a placeholder.
 
 ## Context documents
 
-`CONTEXT.md` and `CONTEXT-MAP.md` follow the repository's declared context
-format. When available, draft them with `/mattpocock-domain-modeling` and
-follow that format exactly. Recognize both `## Terms` with `### <term>` entries
-and `## Language` with bold `**<term>**:` entries; preserve the existing form
-instead of normalizing it.
+Glossaries contain definitions, not specifications or implementation detail.
+For new files use `## Language`, bold `**<term>**:` entries with short resolved
+definitions, and optional `_Avoid_: <synonyms>` when those synonyms have been
+resolved as misleading. Maps link existing context glossaries and describe
+only evidenced semantic boundaries and relationships. Reuse canonical terms in
+authored knowledge and avoid resolved misleading synonyms. Flag conflicts with
+accepted ADRs instead of silently redefining either source.
 
-When the external format owner is unavailable, use this bundle's minimal
-fallback: context documents define repository-specific terms; `RULES.md`
-contains only evidenced normative obligations. Cite the source path for each
-term or rule, distinguish current obligations from historical observations,
-and follow the repository's declared authority precedence. If sources conflict
-and that precedence does not resolve them, report the conflict instead of
-inventing a universal order or silently changing the vocabulary.
+Existing `CONTEXT.md` and `CONTEXT-MAP.md` retain their local contract, including
+`## Terms` with `### <term>` entries or `## Language` with bold entries. Do not
+apply a newer external glossary format to a legacy mixed-content owner by
+renaming it. Use the authorized extraction procedure for content with separate
+owners.
 
-When using the external format, never add a section it does not define or
-relocate one it does. Under the fallback, keep context terms separate from
-normative rules. Content that does not fit either contract belongs to another
-artifact:
+When available, use `/mattpocock-domain-modeling` for vocabulary resolution;
+local ownership, authority and accepted ADR contracts remain controlling.
+When unavailable, state that fallback in the plan and use the self-contained
+shapes above. Cite source paths for evidenced terms and rules without copying
+implementation detail into definitions. Check source evidence,
+meaning, examples and ambiguous synonyms. Report unresolved source conflicts
+in chat instead of inventing definitions or precedence.
 
 | Content | Owner |
 | --- | --- |
-| Component paths and responsibilities | Section 5 of `docs/architecture.md` |
-| Reading order for a human | The root `README.md` |
-| Reading order for an agent | `docs/agents/domain.md` |
-| Decisions index | `docs/adr/README.md` |
-| Rules and invariants | `docs/domain/<slug>/RULES.md` |
-
-When the external skill is unavailable, use the self-contained fallback above
-and state that choice in the plan before approval. Do not report the vocabulary
-layer as a gap solely because the external skill is unavailable; unresolved
-source conflicts remain gaps.
+| Resolved domain definitions | Canonical glossary or legacy context document |
+| Component paths and responsibilities | Relevant architecture view |
+| Reading order for a human | Root `README.md` |
+| Reading order for an agent | Existing domain documentation guide |
+| Decisions index and history | Existing ADR owner |
+| Rules and invariants | Existing rules owner or `docs/domain/<slug>/RULES.md` |
 
 ## Relationships
 
@@ -189,8 +189,8 @@ Relationships are recorded at two levels, and the same pair is never described a
 
 | Level | Where | What it records |
 | --- | --- | --- |
-| Between domains | The relationships section of the context map | The concept that crosses the boundary and the direction it travels |
-| Between components, and toward systems outside the repository | Sections 6 and 7 of `docs/architecture.md` | The dependency, its status, and its evidence path |
+| Between domains | The relationships section of the glossary or legacy context map | The concept that crosses the boundary and the direction it travels |
+| Between components, and toward systems outside the repository | The relevant relationship sections of `docs/architecture.md` | The dependency, its status, and its evidence path |
 
 With a single domain there is no domain-to-domain relationship. The boundary the repository actually has is the one toward the outside, and it belongs to `docs/architecture.md`.
 
