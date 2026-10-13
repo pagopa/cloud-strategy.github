@@ -51,6 +51,11 @@
       "id": "R-REPORT",
       "text": "Close with an ordered final report that maps each requirement to an observed evidence state or a named gap.",
       "source": "internal-skill-creator SKILL.md: Final report"
+    },
+    {
+      "id": "R-FRONTMATTER",
+      "text": "Keep every created, edited, or re-checked SKILL.md frontmatter parseable by strict YAML, with name and description as strings.",
+      "source": "internal-skill-creator SKILL.md: Author or revise; references/authoring-and-evaluation.md: Portability and invocation contract"
     }
   ],
   "cases": [
@@ -141,6 +146,34 @@
       "status": "generated",
       "held_out": false,
       "defective_fixture": "tests/evaluation/fixtures/generated-pack-defective.json"
+    },
+    {
+      "id": "C-FRONTMATTER-YAML",
+      "family": "bounded-revision",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-FRONTMATTER",
+        "R-PORTABILITY"
+      ],
+      "prompt": "Re-check six existing skills. Their trigger-first descriptions list cases after a colon, for example 'Use when the problem is workplace-first: negotiation, ...', and Copilot reports 'mapping values are not allowed'. The host validator passes them.",
+      "initial_state": "The skills use unquoted plain-scalar descriptions; the host validator parses frontmatter line by line and accepts them.",
+      "expected_output": "Run the bundle frontmatter checker, report each unsafe description with its line, quote the values, and rerun the checker until it passes.",
+      "files": [
+        "tests/evaluation/fixtures/frontmatter-valid.md"
+      ],
+      "assertions": [
+        {
+          "id": "A-FRONTMATTER-YAML",
+          "text": "Every re-checked SKILL.md passes the bundle frontmatter checker; a host validator pass alone is not accepted as proof.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Reporting the skills as valid because the lenient host validator passes."
+      ],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/frontmatter-defective.md"
     },
     {
       "id": "C-RULE-RELOCATION",

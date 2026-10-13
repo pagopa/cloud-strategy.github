@@ -115,3 +115,14 @@ policy goes to `agents/openai.yaml` under
 `policy.allow_implicit_invocation`. Provenance fields (`source`, `risk`,
 `date_added`, and `revision`) go under `metadata`. The validator blocks
 non-portable fields.
+
+Write each frontmatter value so strict YAML reads it as one string. Wrap the
+whole value in double quotes, or use a `>-` folded block, when it contains a
+colon followed by a space, ends with a colon, contains a space followed by
+`#`, or starts with a YAML indicator such as `` ` ``, `@`, `%`, `&`, `*`,
+`!`, `#`, `-`, or `?`. Trigger-first
+descriptions often hit this with a list after a colon, for example
+`Use when the problem is X: A, B, or C.` Copilot then reports
+`mapping values are not allowed` and skips the skill. A lenient host parser
+can accept the same file, so a host validator pass is not proof;
+`scripts/check_skill_frontmatter.py` is the gate.

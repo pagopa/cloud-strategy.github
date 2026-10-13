@@ -21,6 +21,11 @@ python3 .github/skills/internal-skill-creator/scripts/check_eval_pack.py \
 The host validator may check the same pack when the host provides that gate.
 The bundle checker remains usable without the host tool.
 
+`C-FRONTMATTER-YAML` uses `fixtures/frontmatter-valid.md` and
+`fixtures/frontmatter-defective.md`; `tests/test_frontmatter_checker.py`
+asserts that `scripts/check_skill_frontmatter.py` accepts the first and
+rejects the second.
+
 ## Runtime plan and current gap
 
 No runtime run record is included. A runtime pilot requires explicit user

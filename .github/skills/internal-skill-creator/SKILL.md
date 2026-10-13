@@ -80,8 +80,16 @@ Classify a wording edit as editorial only when behavior and reachability stay
 the same. Moving a mandatory rule behind a conditional reference is a
 behavioral change.
 
+Hosts such as Copilot parse frontmatter with strict YAML and skip a skill that
+fails. Every time you create, edit, or re-check a `SKILL.md`, run the checker
+shipped in this bundle on it:
+
+```bash
+python3 <this-bundle>/scripts/check_skill_frontmatter.py <target>/SKILL.md
+```
+
 **Complete when:** the skill, metadata, and applicable projections agree with
-the accepted requirements.
+the accepted requirements, and the frontmatter checker passes.
 
 ### 4. Generate or update the eval pack
 
