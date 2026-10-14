@@ -13,6 +13,7 @@ Load it in `setup`. Load it in `sync` only when the plan introduces an artifact 
 - [Context documents](#context-documents)
 - [Relationships](#relationships)
 - [Domain levels](#domain-levels)
+- [Cross-context home](#cross-context-home)
 - [Rules document](#rules-document)
 - [Documentation modes](#documentation-modes)
 - [Anti-scope](#anti-scope)
@@ -93,12 +94,14 @@ history artifacts automatically or split content solely by time validity.
 Preserve canonical ADR status and decision history, plus records required by
 local policy, with their existing owners.
 
-| Domains evidenced | New default | Existing supported layout |
+| Domains evidenced | New default | Legacy layout |
 | --- | --- | --- |
 | One | Root `GLOSSARY.md` | Root `CONTEXT.md` |
 | Two or more | Root `GLOSSARY-MAP.md` linking context `GLOSSARY.md` files | Root `CONTEXT-MAP.md` linking context `CONTEXT.md` files |
 
 Preserve an existing canonical layout until migration is explicitly authorized.
+A legacy layout is `legacy` drift: propose its format-only migration as a
+separate wave.
 For new context homes, prefer `docs/domain/<slug>/GLOSSARY.md`; preserve an
 established code-colocated glossary when it represents the full context and
 local ownership supports it. A component directory alone is not a domain.
@@ -115,7 +118,10 @@ itself require layout migration or a domain-set ADR.
 Use [legacy migration](legacy-migration.md) for detection, activation, transfer,
 reference verification and interruption recovery. Changing an accepted domain
 set requires a superseding decision. A format-only migration preserves that
-set and does not manufacture an ADR. Never migrate on re-derivation alone.
+set and its glossary, rules, and cross-context split. It needs no ADR unless an
+accepted ADR names the legacy file names; then record a brief ADR that
+supersedes only those names and cites the upstream convention. Never migrate
+on re-derivation alone.
 
 ## Evidence to artifact
 
@@ -127,6 +133,7 @@ Create an artifact only when the listed evidence exists. Absence of evidence is 
 | A significant component | A README in that component | The parent already documents it completely. |
 | Terms whose meaning is repository-specific | The canonical glossary or legacy CONTEXT owner | The terms are general technology vocabulary. |
 | Two or more areas with distinct vocabulary, state, or lifecycle | `docs/domain/<slug>/` per area | Only one area is evidenced; keep the vocabulary in its root owner. |
+| A term whose meaning differs across two or more contexts, or a rule that spans two or more contexts | `docs/domain/cross-context/` (see [Cross-context home](#cross-context-home)) | Only one context is evidenced, or the term or rule belongs to one context. |
 | Normative rules already stated in a validator, workflow, decision, or document | `docs/domain/<slug>/RULES.md` | No rule exists yet. Never invent a rule to fill the file. |
 | A decision that is costly to reverse and surprising without context | An ADR | The decision is routine or already recorded. |
 | A domain-set decision that meets the ADR admission criteria | An ADR recording the set and its evidence | The choice is routine, only a first glossary is created, or an accepted ADR records the same set. |
@@ -152,25 +159,46 @@ not create a placeholder.
 
 ## Context documents
 
-Glossaries contain definitions, not specifications or implementation detail.
-For new files use `## Language`, bold `**<term>**:` entries with short resolved
-definitions, and optional `_Avoid_: <synonyms>` when those synonyms have been
-resolved as misleading. Maps link existing context glossaries and describe
-only evidenced semantic boundaries and relationships. Reuse canonical terms in
-authored knowledge and avoid resolved misleading synonyms. Flag conflicts with
-accepted ADRs instead of silently redefining either source.
+A glossary contains definitions only. Use this shape for new and migrated
+glossaries:
 
-Existing `CONTEXT.md` and `CONTEXT-MAP.md` retain their local contract, including
-`## Terms` with `### <term>` entries or `## Language` with bold entries. Do not
-apply a newer external glossary format to a legacy mixed-content owner by
-renaming it. Use the authorized extraction procedure for content with separate
-owners.
+```markdown
+# <Context name>
+
+<One or two sentences on what this context is and why it exists.>
+
+## Language
+
+**<Term>**:
+<One or two sentences defining what the term is.>
+_Avoid_: <synonyms resolved as misleading>
+```
+
+Group terms under subheadings only when natural clusters emerge. Include only
+repository-specific terms, not general technology vocabulary. Keep paths,
+component and root names, rule identifiers, normative statements, and
+relationships out of a glossary: rules go to `RULES.md`, component ownership
+goes to `docs/architecture.md`, and relationships between contexts go to the
+map.
+
+A map has a title, `## Contexts` with one link and a one-line description per
+context, and `## Relationships` with one bold `**A → B**` or `**A ↔ B**` entry
+per evidenced relationship, naming the concept that crosses the boundary. It
+holds no per-context component, declaration, or root sections; it may close
+with one line pointing to `docs/architecture.md` for those. Reuse canonical
+terms in authored knowledge and avoid resolved misleading synonyms. Flag
+conflicts with accepted ADRs instead of silently redefining either source.
+
+Existing `CONTEXT.md` and `CONTEXT-MAP.md` keep their local contract until an
+approved migration. Do not rename a legacy mixed-content owner without first
+moving its non-glossary content to the owners above; use the extraction
+procedure in [legacy migration](legacy-migration.md).
 
 When available, use `/mattpocock-domain-modeling` for vocabulary resolution;
 local ownership, authority and accepted ADR contracts remain controlling.
 When unavailable, state that fallback in the plan and use the self-contained
-shapes above. Cite source paths for evidenced terms and rules without copying
-implementation detail into definitions. Check source evidence,
+shapes above. Cite source paths for evidenced terms in the plan and report,
+not inside definitions. Check source evidence,
 meaning, examples and ambiguous synonyms. Report unresolved source conflicts
 in chat instead of inventing definitions or precedence.
 
@@ -189,7 +217,7 @@ Relationships are recorded at two levels, and the same pair is never described a
 
 | Level | Where | What it records |
 | --- | --- | --- |
-| Between domains | The relationships section of the glossary or legacy context map | The concept that crosses the boundary and the direction it travels |
+| Between domains | The `## Relationships` section of the glossary map or legacy context map | The concept that crosses the boundary and the direction it travels |
 | Between components, and toward systems outside the repository | The relevant relationship sections of `docs/architecture.md` | The dependency, its status, and its evidence path |
 
 With a single domain there is no domain-to-domain relationship. The boundary the repository actually has is the one toward the outside, and it belongs to `docs/architecture.md`.
@@ -214,9 +242,23 @@ Name domains in the vocabulary the repository already uses. A domain name that a
 
 A domain needs no directory of its own. When its evidence is spread across configuration, validators, and reports that share one vocabulary, the boundary is still real; record the evidence paths instead of forcing a home for it.
 
+## Cross-context home
+
+Use `docs/domain/cross-context/` only when evidence shows a term whose meaning
+differs across two or more contexts, or a normative rule that spans two or more
+contexts. Its `GLOSSARY.md` resolves the shared or ambiguous terms; its
+`RULES.md` holds cross-context rules that name the participating contexts.
+List it in the map as a context. It is not a domain and does not count in the
+domain-set ADR. A term or rule owned by one context stays in that context.
+
 ## Rules document
 
 Write this document only when normative rules already exist somewhere in the repository. Each rule keeps a stable identifier and a fixed body.
+
+In `sync` and `setup`, give every context one `RULES.md` outcome: existing,
+planned with evidence, or `considered, not evidenced` naming the sources
+inspected. Check security baselines, validators, workflows, decisions, and
+contribution guides before concluding that no rule exists.
 
 ```markdown
 # <Name> Rules
@@ -226,6 +268,7 @@ Write this document only when normative rules already exist somewhere in the rep
 ## <RULE-ID> — <short title>
 
 - Rule ID: <RULE-ID>
+- Serves: <PUR, PRI-nn, DIR-nn, or a strategic ADR>
 - Owner: <owning context>
 - Severity: <blocking | warning>
 - Enforcement owner: <where the rule is checked, or `not enforced`>
@@ -235,6 +278,9 @@ Write this document only when normative rules already exist somewhere in the rep
 ```
 
 Never derive a rule from prose that only describes a habit. If enforcement does not exist, record `not enforced` rather than implying a check.
+
+When the repository already has a rules contract, keep its field names and
+severity scale and add only `Serves`, as [alignment](alignment.md) defines it.
 
 ## Documentation modes
 

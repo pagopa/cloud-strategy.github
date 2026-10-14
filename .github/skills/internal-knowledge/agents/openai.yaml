@@ -8,7 +8,7 @@ interface:
     includes the alignment check. Invoke align explicitly with cascade or
     harvest; it returns proposals and writes no files. Targeted uses only the
     supplied destinations; sync applies to a realized declared layout; setup
-    applies when the layout is absent, incomplete, or contradicted. Follow
+    applies when the layout is absent, incomplete, contradicted, or legacy. Follow
     SKILL.md and bundle references: knowledge-scope.md owns modes and
     allowlists; knowledge-audit.md owns audit reporting; alignment.md owns IDs,
     precedence, Serves, and alignment behavior; knowledge-types.md owns the
@@ -20,8 +20,10 @@ interface:
     write operational artifacts, policy, validators, workflows, or generators, or
     widen the approved allowlist. Inspect routers only as evidence and hand off
     policy changes. README updates cover durable knowledge, not component operation.
-    Use GLOSSARY defaults for new vocabulary owners
-    and preserve established CONTEXT layouts. Keep unresolved candidates in chat;
+    Use GLOSSARY defaults for new vocabulary owners; preserve established
+    CONTEXT layouts until an approved format-only migration, which sync and
+    setup propose. Give every knowledge type and context rules file an outcome.
+    Keep unresolved candidates in chat;
     update resolved, authorized knowledge progressively during the conversation.
     Follow progressive-maintenance.md and legacy-migration.md for maturity,
     proactive migration detection, concrete activation scope and recovery.

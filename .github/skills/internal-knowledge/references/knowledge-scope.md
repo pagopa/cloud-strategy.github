@@ -111,8 +111,11 @@ Compare the declaration against reality and classify the result:
 - `unrealized`: the declaration requires an artifact that does not exist. An optional lazy glossary with no resolved repository-specific term is legitimate absence, not drift. A convention naming a future path is not a required link; a reading link to an absent target is a broken reference. Distinguish both from an evidence-backed content gap.
 - `contradicted`: the artifacts on disk implement a different layout than the one declared.
 - `understated`: the declared layout is realized, but the evidence supports a richer one, such as a single context declared where two or more domains are evidenced.
+- `legacy`: the realized layout uses `CONTEXT.md` or `CONTEXT-MAP.md` names or the legacy glossary format. `setup` preserves the evidenced domain set and proposes a format-only migration as its own wave; see [legacy migration](legacy-migration.md).
 
-All three verified drift states select `setup`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail. `setup` runs whenever the layout check detects drift, not only on first use: the name describes the work, not the schedule.
+The declared layout also covers knowledge types. In `sync` and `setup`, give each of the nine [knowledge types](knowledge-types.md) one outcome: `existing owner`, `planned`, `considered, not evidenced`, or `explicit exclusion`. A missing canonical index, an index row that names an absent owner, or a type with neither an owner nor a recorded exclusion is `unrealized`. Record an approved exclusion as an index row with its reason; it settles later invocations until the evidence changes. A `considered, not evidenced` type outcome is provisional: propose it as an exclusion row for approval, because only a written row stops the type from reappearing as `unrealized`.
+
+All verified drift states select `setup`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail. `setup` runs whenever the layout check detects drift, not only on first use: the name describes the work, not the schedule.
 
 In `setup` the declared layout is never inherited. Derive the domain set from evidence, present the declaration as a proposal to confirm, and carry both readings in the plan when they differ.
 
@@ -124,7 +127,7 @@ A repeated `understated` finding is a decision waiting to be recorded, not a rep
 
 A request may name a bucket: `only the READMEs` or `only the docs`. The bucket filters the derived document set in `sync` and `setup`; it never replaces the layout check, the plan gate, or the waves.
 
-The readme bucket is classified by file name: every `README.md` anywhere in the repository belongs to it. The docs bucket holds everything under `docs/` plus the root `GLOSSARY.md`, `GLOSSARY-MAP.md`, `CONTEXT.md`, or `CONTEXT-MAP.md`, except README files.
+The readme bucket is classified by file name: every `README.md` belongs to it except the canonical knowledge index at `docs/README.md`. The docs bucket holds everything under `docs/`, including that index, plus the root `GLOSSARY.md`, `GLOSSARY-MAP.md`, `CONTEXT.md`, or `CONTEXT-MAP.md`. The index maps knowledge types to owners; it is not a component README.
 
 Bucket membership never overrides the always-excluded paths, the ownership evidence, or the two entry points rule: each excluded member lands in the exclusion ledger with its reason, exactly like any other excluded target.
 
@@ -213,6 +216,8 @@ The plan states, briefly:
 - whether the external context-format skill is available, whenever the plan includes a context document;
 - one row per planned target with its path, its state under the unchanged predicate, and the reason it is included;
 - every evidence row accounted for as `planned`, `existing owner covers`, `considered, not evidenced`, or `explicit exclusion`, with only `planned` entering the target list;
+- one outcome for each of the nine knowledge types and for each context's `RULES.md`, naming the inspected sources behind every `considered, not evidenced`;
+- each operational document found in the docs perimeter, with its proposed maintained owner and the [legacy migration](legacy-migration.md) assessment;
 - the exclusion ledger;
 - artifacts to be created that do not exist yet;
 - the requested bucket, the intent-to-bucket reading, and any mismatch the classification produces;

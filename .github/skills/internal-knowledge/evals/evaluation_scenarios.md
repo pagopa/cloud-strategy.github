@@ -386,6 +386,42 @@
 
 **Expected:** Author only evidence-backed strategic and tactical knowledge within the authorized README. Preserve operational content and hand off the requested procedure to its component owner.
 
+### Account for every knowledge type
+
+**Prompt:** "Update all the documentation, but exclude the READMEs."
+
+**Expected:** Resolve `setup` when the knowledge index is missing, keep `docs/README.md` in the docs bucket, give each of the nine types one outcome, and propose Purpose and Direction candidates for human acceptance. Write nothing before approval.
+
+### Give every context a rules outcome
+
+**Prompt:** "Sync the domain documentation; a security baseline states a rule for one context only."
+
+**Expected:** Plan `RULES.md` for the context with an evidenced rule and record `considered, not evidenced` with inspected sources for the other. Invent no rule.
+
+### Link new rules to strategy
+
+**Prompt:** "Record the accepted, enforced governance rule in the existing rules file."
+
+**Expected:** Add a stable rule ID and a `Serves` line naming an existing strategic item, keeping the local field names and severity scale.
+
+### Place shared vocabulary in a cross-context home
+
+**Prompt:** "A term means different things in two contexts and one rule spans both."
+
+**Expected:** Propose `docs/domain/cross-context/` for the term and the rule, list it in the map, and do not count it as a domain.
+
+### Keep glossaries to definitions
+
+**Prompt:** "Add a build script path, a signing rule and a downstream flow to a glossary entry."
+
+**Expected:** Keep only the definition in the glossary, put the relationship in the map, and route the path and rule to their owners.
+
+### Propose migration for a legacy context layout
+
+**Prompt:** "Sync the documentation" in a repository that realizes a `CONTEXT.md` layout.
+
+**Expected:** Report `legacy` drift, resolve `setup`, preserve the domain set, and propose a format-only migration wave. Add a brief ADR only when an accepted ADR names the legacy files.
+
 ## Baseline
 
 Without this skill, an agent may broaden a README refresh beyond the requested targets, overstate architecture from weak evidence, or rewrite an accepted ADR. With this skill, README and architecture authoring remain target-bounded and evidence-based, while ADR authoring follows the local contract and supersedes changed accepted decisions.

@@ -11,7 +11,7 @@ alignment. It does not maintain operational content.
 | Purpose | Scope, non-goals, stakeholders, and constraints | `docs/project.md` |
 | Principles | Durable principles that apply across cycles | `docs/principles.md` |
 | Direction | Diagnosis, guiding policy, objectives with a horizon, assumptions, and strategic risks | `docs/direction.md` |
-| Language | Domain terms and their intended meanings | Root `GLOSSARY.md`, or context glossaries linked from `GLOSSARY-MAP.md`; retain existing CONTEXT owners |
+| Language | Domain terms and their intended meanings | Root `GLOSSARY.md`, or context glossaries linked from `GLOSSARY-MAP.md`; legacy CONTEXT owners migrate when approved |
 | Strategic decisions | Accepted choices that establish or change direction | `docs/adr/` |
 
 ## Tactical knowledge
@@ -27,7 +27,15 @@ These nine types are optional. Create a file only when repository evidence
 supports durable content for it. No file is created without evidence merely to
 complete a type list. A new repository may use the default homes above; an
 existing repository keeps its established files. Its `docs/README.md` maps
-each evidenced type to its local owner and says when to load that owner.
+each evidenced type to its local owner, says when to load that owner, and
+records each approved type exclusion with its reason.
+
+Every type still receives an outcome in `sync` and `setup`, so an absence is a
+visible decision rather than an omission. Purpose, Principles, and Direction
+are human decisions. When repository evidence is insufficient for them,
+propose candidate content in chat and ask the human. Content the human
+explicitly accepts in the conversation is evidence: record the accepting role
+and date in the owner body. Unaccepted proposals stay in chat.
 
 An approved specification may be linked as evidence from the knowledge type
 it supports. Keep the durable claim with that type's existing owner; do not

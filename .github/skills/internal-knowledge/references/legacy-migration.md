@@ -21,7 +21,10 @@ next evidence or action, even if the user did not notice the drift:
 | Necessary for the requested result | A verified blocker cannot be resolved while retaining the current ownership or layout. Explain why a smaller repair is insufficient. |
 | Undetermined | Relevant declaration, content, reference or consumer evidence is missing. Name the gap and the next bounded inspection. |
 
-A legacy `CONTEXT` filename alone never makes migration necessary. An optional
+A legacy `CONTEXT` filename alone never makes migration necessary; it makes a
+format-only migration `Recommended`, because the upstream convention uses
+`GLOSSARY` names and the glossary shape in
+[knowledge topology](knowledge-topology.md#context-documents). An optional
 glossary with no resolved term may legitimately be absent. A broken link may
 need only a repair. Conflicting meanings need semantic resolution before a
 move; a rename does not resolve them. Do not label uninspected areas coherent.

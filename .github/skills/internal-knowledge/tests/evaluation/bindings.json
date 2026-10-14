@@ -634,6 +634,65 @@
         "libs/tiny/README.md"
       ],
       "gold_overrides": {}
+    },
+    "C-TYPES-ACCOUNTING": {
+      "fixture": "F10",
+      "gold": "tests/evaluation/gold/F10.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-RULES-OUTCOME": {
+      "fixture": "F10",
+      "gold": "tests/evaluation/gold/F10.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-RULES-SERVES": {
+      "fixture": "F7",
+      "gold": "tests/evaluation/gold/F7.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 1,
+      "allowlist": [
+        "docs/domain/repository-governance/RULES.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-CROSSCONTEXT-HOME": {
+      "fixture": "F10",
+      "gold": "tests/evaluation/gold/F10.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {}
+    },
+    "C-GLOSSARY-SHAPE": {
+      "fixture": "F10",
+      "gold": "tests/evaluation/gold/F10.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [
+        "docs/domain/distribution/GLOSSARY.md",
+        "GLOSSARY-MAP.md"
+      ],
+      "gold_overrides": {}
+    },
+    "C-MIGRATION-LEGACY-DRIFT": {
+      "fixture": "F9",
+      "gold": "tests/evaluation/gold/F9.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 3,
+      "allowlist": [],
+      "gold_overrides": {}
     }
   }
 }

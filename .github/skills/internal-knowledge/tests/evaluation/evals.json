@@ -134,7 +134,7 @@
     },
     {
       "id": "R-GLOSSARY-LAZY",
-      "text": "Use GLOSSARY defaults for new owners, preserve legacy owners and distinguish optional absence from broken references.",
+      "text": "Use GLOSSARY defaults for new owners, preserve legacy owners until an approved migration and distinguish optional absence from broken references.",
       "source": "Accepted conversation: glossary, progressive updates and legacy migration"
     },
     {
@@ -171,6 +171,36 @@
       "id": "R-README-BOUNDARY",
       "text": "Component README authoring covers strategic and tactical knowledge; operational procedures stay with the component owner.",
       "source": "Authorized realignment of review findings; bundle reference owners"
+    },
+    {
+      "id": "R-TYPE-ACCOUNTING",
+      "text": "In sync and setup, give each knowledge type an outcome; a missing index or an unowned, unexcluded type is unrealized, and Purpose, Principles and Direction may come from decisions the human accepts in chat.",
+      "source": "Accepted conversation 2026-10-14: north-star knowledge layout alignment"
+    },
+    {
+      "id": "R-DOCS-INDEX-BUCKET",
+      "text": "The canonical knowledge index docs/README.md belongs to the docs bucket, not the readme bucket.",
+      "source": "Accepted conversation 2026-10-14: north-star knowledge layout alignment"
+    },
+    {
+      "id": "R-RULES-OUTCOME",
+      "text": "Give every context a RULES.md outcome from inspected sources and add a Serves link to rules when a strategic owner exists.",
+      "source": "Accepted conversation 2026-10-14: north-star knowledge layout alignment"
+    },
+    {
+      "id": "R-CROSS-CONTEXT",
+      "text": "Use a cross-context home only for evidenced terms whose meaning differs across contexts or rules spanning contexts; it is not a domain.",
+      "source": "Accepted conversation 2026-10-14: north-star knowledge layout alignment"
+    },
+    {
+      "id": "R-GLOSSARY-SHAPE",
+      "text": "Glossaries hold only definitions in the upstream shape; maps hold only contexts and relationships.",
+      "source": "Accepted conversation 2026-10-14: upstream glossary format alignment"
+    },
+    {
+      "id": "R-LEGACY-DRIFT",
+      "text": "A legacy CONTEXT layout is legacy drift: setup preserves the domain set and proposes a format-only migration wave, with an ADR only when an accepted ADR names the legacy files.",
+      "source": "Accepted conversation 2026-10-14: upstream glossary format alignment"
     }
   ],
   "cases": [
@@ -1679,7 +1709,7 @@
       ],
       "prompt": "Compare three bounded scenarios: valid CONTEXT ownership; a preferred GLOSSARY convention with working legacy links; an explicit required result that transfers all vocabulary to GLOSSARY and retires CONTEXT, with an incoming link still naming CONTEXT. All named declarations and incoming references have been inspected.",
       "initial_state": "Fixture F9; additional conditions are supplied in the prompt.",
-      "expected_output": "Classify not-needed in verified scope, recommended, and necessary for the requested result respectively. Explain that repairing a link alone cannot fulfill the explicit owner-transfer requirement.",
+      "expected_output": "Classify a recommended format-only migration, recommended, and necessary for the requested result respectively. Explain that repairing a link alone cannot fulfill the explicit owner-transfer requirement.",
       "files": [
         "tests/evaluation/fixtures/F9.tree.json",
         "tests/evaluation/gold/F9.gold.json"
@@ -1703,7 +1733,8 @@
       "held_out": false,
       "rubric": {
         "pass": [
-          "Separates naming preference, requested-result blockers and semantic conflicts."
+          "Separates naming preference, requested-result blockers and semantic conflicts.",
+          "Classifies valid legacy CONTEXT ownership as a recommended format-only migration, never as necessary."
         ],
         "fail": [
           "Makes every old filename a mandatory migration."
@@ -1999,6 +2030,252 @@
         "fail": [
           "The skill authors deployment commands or a new operational procedure.",
           "The component README is categorically rejected despite the durable knowledge request."
+        ]
+      }
+    },
+    {
+      "id": "C-TYPES-ACCOUNTING",
+      "family": "types",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-TYPE-ACCOUNTING",
+        "R-DOCS-INDEX-BUCKET"
+      ],
+      "prompt": "Update all the documentation, but exclude the READMEs.",
+      "initial_state": "Fixture F10 has two realized context glossaries and no docs/README.md knowledge index.",
+      "expected_output": "Resolve setup because the canonical index is missing. Keep docs/README.md in the docs bucket as the knowledge index. Give each of the nine types one outcome, propose Purpose and Direction candidates for human acceptance instead of concluding absence, and write nothing before plan approval.",
+      "files": [
+        "tests/evaluation/fixtures/F10.tree.json",
+        "tests/evaluation/gold/F10.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Write before plan approval or create an empty type document."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The plan lists one outcome for each of the nine knowledge types.",
+          "docs/README.md is treated as the knowledge index inside the docs bucket.",
+          "Each considered-not-evidenced type is proposed as an index exclusion row for approval."
+        ],
+        "fail": [
+          "Resolves sync with a realized layout and omits the missing types.",
+          "Excludes docs/README.md as a README or writes a placeholder document."
+        ]
+      }
+    },
+    {
+      "id": "C-RULES-OUTCOME",
+      "family": "rules",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-RULES-OUTCOME"
+      ],
+      "prompt": "Sync the domain documentation. A security baseline requires short-lived federated credentials for the Review deployment identity; Distribution has no stated rule.",
+      "initial_state": "Fixture F10; additional conditions are supplied in the prompt.",
+      "expected_output": "Give each context one RULES.md outcome: planned for Review from the baseline, considered not evidenced for Distribution with the sources inspected. Invent no rule.",
+      "files": [
+        "tests/evaluation/fixtures/F10.tree.json",
+        "tests/evaluation/gold/F10.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Create a RULES.md without a normative source."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Both contexts receive an explicit RULES.md outcome with named sources."
+        ],
+        "fail": [
+          "Silently omits a context or invents a Distribution rule."
+        ]
+      }
+    },
+    {
+      "id": "C-RULES-SERVES",
+      "family": "rules",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-RULES-OUTCOME",
+        "R-KNOWLEDGE-IDS"
+      ],
+      "prompt": "Record the accepted, enforced governance rule in the existing repository-governance rules file.",
+      "initial_state": "Fixture F7 has purpose, principles, direction and a rules file.",
+      "expected_output": "Add the rule with a stable ID and a Serves line naming an existing PUR, PRI or DIR target, keeping the file's existing field names and severity scale.",
+      "files": [
+        "tests/evaluation/fixtures/F7.tree.json",
+        "tests/evaluation/gold/F7.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Invent a strategic target or renumber an existing rule."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The new rule has a Serves line that resolves to an existing strategic item."
+        ],
+        "fail": [
+          "Omits Serves, invents a target, or replaces the local severity scale."
+        ]
+      }
+    },
+    {
+      "id": "C-CROSSCONTEXT-HOME",
+      "family": "crosscontext",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-CROSS-CONTEXT"
+      ],
+      "prompt": "Scope means a collection target in Distribution and a policy binding in Review, and one approval rule spans both contexts. Plan where these belong.",
+      "initial_state": "Fixture F10; additional conditions are supplied in the prompt.",
+      "expected_output": "Propose docs/domain/cross-context/GLOSSARY.md for scope and docs/domain/cross-context/RULES.md for the spanning rule, list the home in the map as a context, and do not count it as a domain.",
+      "files": [
+        "tests/evaluation/fixtures/F10.tree.json",
+        "tests/evaluation/gold/F10.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Add a domain to the domain-set ADR for the cross-context home."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The ambiguous term and the spanning rule go to the cross-context home."
+        ],
+        "fail": [
+          "Duplicates the term in both contexts or treats cross-context as a domain."
+        ]
+      }
+    },
+    {
+      "id": "C-GLOSSARY-SHAPE",
+      "family": "glossary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-GLOSSARY-SHAPE"
+      ],
+      "prompt": "Add to the Distribution glossary that a release is built by scripts/release.sh, must be signed, and flows to Review. Only the Distribution glossary and the glossary map are authorized.",
+      "initial_state": "Fixture F10; additional conditions are supplied in the prompt.",
+      "expected_output": "Keep only the definition in the glossary, add the Distribution-to-Review relationship to the map, and report that the script path and signing rule belong to other owners that are not authorized.",
+      "files": [
+        "tests/evaluation/fixtures/F10.tree.json",
+        "tests/evaluation/gold/F10.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Write paths, rules or relationships into a glossary."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The glossary holds only the definition and the map holds the relationship."
+        ],
+        "fail": [
+          "The glossary gains a path, a rule or a relationship section, or the map gains per-context component sections."
+        ]
+      }
+    },
+    {
+      "id": "C-MIGRATION-LEGACY-DRIFT",
+      "family": "migration",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-LEGACY-DRIFT",
+        "R-MIGRATION-DETECT"
+      ],
+      "prompt": "Sync the documentation.",
+      "initial_state": "Fixture F9 realizes a legacy CONTEXT layout with an accepted ADR.",
+      "expected_output": "Report legacy drift and resolve setup, preserve the domain set, and propose a format-only migration wave with a transfer table. Propose a brief ADR only if the accepted ADR names the legacy file. Write nothing before approval.",
+      "files": [
+        "tests/evaluation/fixtures/F9.tree.json",
+        "tests/evaluation/gold/F9.gold.json"
+      ],
+      "assertions": [
+        {
+          "id": "rubric-pass",
+          "text": "Every anchored pass condition holds.",
+          "critical": true
+        },
+        {
+          "id": "rubric-fail",
+          "text": "No anchored failure condition occurs.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Rename or delete CONTEXT.md before approval."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The plan names legacy drift and a separate format-only migration wave."
+        ],
+        "fail": [
+          "Reports the legacy layout as realized, or changes the domain set during the migration."
         ]
       }
     }

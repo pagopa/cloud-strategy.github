@@ -36,6 +36,8 @@ historical `Level` and `Serves` values in columns of the ADR index instead.
 - Standards and Structure documents have one `Serves:` line per file.
 - The ADR index carries `Level` and `Serves` columns for accepted ADRs whose
   bodies cannot be changed.
+- When no strategic owner exists yet, omit `Serves:` and report the gap; never
+  invent a target.
 
 ## Authority and precedence
 

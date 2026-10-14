@@ -513,6 +513,54 @@
         "C-README-BOUNDARY"
       ],
       "reason": "Authorized realignment of review findings; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Account for every knowledge type",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-TYPES-ACCOUNTING"
+      ],
+      "reason": "Accepted conversation 2026-10-14; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Give every context a rules outcome",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-RULES-OUTCOME"
+      ],
+      "reason": "Accepted conversation 2026-10-14; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Link new rules to strategy",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-RULES-SERVES"
+      ],
+      "reason": "Accepted conversation 2026-10-14; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Place shared vocabulary in a cross-context home",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-CROSSCONTEXT-HOME"
+      ],
+      "reason": "Accepted conversation 2026-10-14; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Keep glossaries to definitions",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-GLOSSARY-SHAPE"
+      ],
+      "reason": "Accepted conversation 2026-10-14; runtime outcome remains not-run."
+    },
+    {
+      "heading": "Propose migration for a legacy context layout",
+      "disposition": "new-case",
+      "case_ids": [
+        "C-MIGRATION-LEGACY-DRIFT"
+      ],
+      "reason": "Accepted conversation 2026-10-14; runtime outcome remains not-run."
     }
   ]
 }
