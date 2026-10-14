@@ -271,7 +271,7 @@ contribution guides before concluding that no rule exists.
 - Serves: <PUR, PRI-nn, DIR-nn, or a strategic ADR>
 - Owner: <owning context>
 - Severity: <blocking | warning>
-- Enforcement owner: <where the rule is checked, or `not enforced`>
+- Enforcement owner: <where the rule is checked and any exemptions the check skips, or `not enforced`>
 - Evidence: <paths that show the rule exists>
 - Remediation: <what to do when the rule is violated>
 - Rule: <the normative statement>

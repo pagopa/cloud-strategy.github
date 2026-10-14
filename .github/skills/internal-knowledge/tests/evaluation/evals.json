@@ -2151,7 +2151,8 @@
       "held_out": false,
       "rubric": {
         "pass": [
-          "The new rule has a Serves line that resolves to an existing strategic item."
+          "The new rule has a Serves line that resolves to an existing strategic item.",
+          "The enforcement owner names any exemption the check skips."
         ],
         "fail": [
           "Omits Serves, invents a target, or replaces the local severity scale."
