@@ -1,13 +1,14 @@
 ---
 name: internal-markdown
-description: Use when editing or reviewing Markdown structure, fences, references, links, paths, or dialect-aware format checks.
+description: Use when editing or reviewing Markdown structure, fences, references, links, paths, or dialect-aware format checks. Route Mermaid diagram content to /internal-mermaid.
 ---
 
 # Internal Markdown
 
 ## When to use
 
-- Markdown edits where generic structure and link safety are the active concern.
+- Markdown edits where generic structure and link safety are the active
+  concern.
 - Reviews focused on heading fragments, fenced code blocks, local paths,
   inline links, reference definitions, and dialect awareness.
 - Format-owner routing when a document has a narrower operational owner.
@@ -16,7 +17,7 @@ description: Use when editing or reviewing Markdown structure, fences, reference
 
 - Imported Markdown that must remain verbatim unless explicitly allowed.
 - A domain-specific document whose semantics are owned by another skill or
-  instruction set.
+  instruction set; route those semantics to that owner.
 - Editorial, audience, or policy review beyond Markdown structure and links.
 
 ## Baseline
@@ -40,3 +41,6 @@ It requires `markdownlint-cli2` 0.22.1 and does not install dependencies.
 Supported checks are selected structural link and reference rules. Dialect
 choice, external or local filesystem availability, editorial quality, and
 heading policy are unsupported and remain review-only.
+
+For installation, self-test, and the enabled rule IDs, read
+[`references/validation-contract.md`](references/validation-contract.md).

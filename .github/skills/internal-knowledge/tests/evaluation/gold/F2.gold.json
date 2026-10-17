@@ -1,0 +1,84 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "fixture": "F2",
+  "components": [
+    "services/api",
+    "services/auth",
+    "services/billing",
+    "libs/tiny"
+  ],
+  "edges": [
+    {
+      "from": "services/api",
+      "to": "services/auth"
+    },
+    {
+      "from": "services/api",
+      "to": "libs/tiny"
+    },
+    {
+      "from": "services/billing",
+      "to": "services/api"
+    }
+  ],
+  "lifecycle_states": {
+    "services/billing": [
+      "draft",
+      "active",
+      "retired"
+    ]
+  },
+  "protected_paths": [],
+  "generated_paths": [],
+  "adr_dir": null,
+  "ledger": null,
+  "router": null,
+  "expected_placements": {},
+  "sections": [],
+  "must_write": [],
+  "facts": [],
+  "readme_paths": [
+    "services/api/README.md",
+    "services/auth/README.md",
+    "services/billing/README.md",
+    "libs/tiny/README.md"
+  ],
+  "owner_links": [
+    {
+      "source": "services/billing/README.md",
+      "target": "services/api/README.md"
+    }
+  ],
+  "diagram_edges": {
+    "docs/architecture.md": [
+      [
+        "api",
+        "auth"
+      ],
+      [
+        "billing",
+        "api"
+      ],
+      [
+        "api",
+        "tiny"
+      ]
+    ]
+  },
+  "aliases": {
+    "api": "services/api",
+    "auth": "services/auth",
+    "billing": "services/billing",
+    "tiny": "libs/tiny"
+  },
+  "diagram_triggers": [
+    {
+      "doc": "services/billing/README.md",
+      "required": true
+    },
+    {
+      "doc": "libs/tiny/README.md",
+      "required": false
+    }
+  ]
+}

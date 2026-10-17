@@ -1,5 +1,5 @@
 ---
-description: Terraform authoring standards for readability, typed interfaces, and validation-first delivery.
+description: Terraform review checks for typed interfaces, version constraints, destructive changes, least privilege, and state-address moves.
 applyTo: "**/*.tf"
 excludeAgent: "cloud-agent"
 ---
@@ -8,16 +8,14 @@ excludeAgent: "cloud-agent"
 
 This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-- Flag variables or outputs missing a `description`.
-- Flag variables missing an explicit `type`.
-- Verify variable and output types are explicit and match actual usage.
-- Flag provider, module, or version constraints that are missing or too loose.
-- Check resource changes for destructive replacement or drift-risk behavior.
+- Flag variables missing `type` or `description`, and outputs missing `description`.
+- Flag outputs that expose secrets without `sensitive = true`.
+- Flag provider, module, or Terraform version constraints that are missing or too loose.
+- Flag resource changes that force replacement of stateful resources, such as a changed name, identifier, or immutable argument.
+- Flag renamed resources or modules without a `moved` block, and `removed` or `import` blocks without a migration note in the pull request.
 - Verify IAM and network changes follow least-privilege intent.
 - Report hidden dependencies that rely on implicit ordering.
-- Check naming, tagging, and state-sensitive references for consistency.
 - Flag hardcoded IDs, ARNs, subscription IDs, or secrets.
-- Flag taggable resources without tags.
+- Flag taggable resources without tags unless provider `default_tags` or a tagging module covers them.
 - Flag non-`snake_case` Terraform identifiers.
-- Flag `terraform state mv`, `terraform state rm`, or `terraform import` changes without a documented migration note.
-- Flag missing validation or precondition logic on critical inputs.
+- Flag missing `validation`, `precondition`, or `postcondition` logic on critical inputs.

@@ -1,5 +1,5 @@
 ---
-description: Java project standards with DDD boundaries, readability-first design, and deterministic unit testing.
+description: Java review checks for domain boundaries, null and exception safety, API compatibility, tests, and build reproducibility.
 applyTo: "**/*.java,**/pom.xml,**/build.gradle,**/build.gradle.kts"
 excludeAgent: "cloud-agent"
 ---

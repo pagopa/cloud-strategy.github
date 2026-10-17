@@ -1,0 +1,443 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-aws-lambda",
+  "requirements": [
+    {
+      "id": "R-THIN-HANDLER",
+      "text": "Keep the handler a transport adapter over testable business logic.",
+      "source": "internal-aws-lambda SKILL.md: Core rules"
+    },
+    {
+      "id": "R-EVENT-CONTRACT",
+      "text": "Code to one event-source contract and validate input at the boundary.",
+      "source": "internal-aws-lambda SKILL.md: Core rules"
+    },
+    {
+      "id": "R-IDEMPOTENCY",
+      "text": "Treat duplicate delivery as normal for async and queue triggers.",
+      "source": "internal-aws-lambda SKILL.md: Core rules"
+    },
+    {
+      "id": "R-PARTIAL-BATCH",
+      "text": "Return only failed item identifiers when partial batch response is enabled.",
+      "source": "internal-aws-lambda SKILL.md: Event-source guidance"
+    },
+    {
+      "id": "R-OPERATING-PROFILE",
+      "text": "Size timeout, memory, concurrency, batch size, and queue visibility timeout together.",
+      "source": "internal-aws-lambda SKILL.md: Core rules"
+    },
+    {
+      "id": "R-RECURSION",
+      "text": "Separate input and output surfaces for file-driven triggers.",
+      "source": "internal-aws-lambda SKILL.md: Event-source guidance"
+    },
+    {
+      "id": "R-SECRETS",
+      "text": "Fetch secrets from managed stores and do not log raw sensitive payloads by default.",
+      "source": "internal-aws-lambda SKILL.md: Core rules"
+    },
+    {
+      "id": "R-VPC-DEFAULT",
+      "text": "Attach a function to a VPC only for a concrete private dependency.",
+      "source": "internal-aws-lambda SKILL.md: Core rules"
+    },
+    {
+      "id": "R-LIMIT-FRESHNESS",
+      "text": "Verify numeric Lambda limits and runtime support, or mark them unverified.",
+      "source": "internal-aws-lambda SKILL.md: Freshness"
+    },
+    {
+      "id": "R-HANDOFF",
+      "text": "Hand off execution-role trust and guardrails to /internal-aws and language-only work to the language skill.",
+      "source": "internal-aws-lambda SKILL.md: Boundaries"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-SQS-WHOLE-BATCH",
+      "family": "defective-artifact",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-PARTIAL-BATCH",
+        "R-IDEMPOTENCY"
+      ],
+      "prompt": "Review this SQS consumer. One malformed message keeps the whole batch retrying.",
+      "initial_state": "Partial batch response is enabled on the event source mapping.",
+      "expected_output": "The review replaces the whole-batch failure with per-record handling that returns only failed message IDs and notes idempotency.",
+      "files": [
+        "tests/evaluation/fixtures/sqs-whole-batch-failure.py"
+      ],
+      "assertions": [
+        {
+          "id": "A-PER-RECORD",
+          "text": "The review returns batchItemFailures with only the failed message IDs.",
+          "critical": true
+        },
+        {
+          "id": "A-IDEMPOTENT",
+          "text": "The review requires the processing step to be idempotent.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Keep raising on the first bad record."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/sqs-whole-batch-failure.py"
+    },
+    {
+      "id": "C-S3-RECURSION",
+      "family": "defective-artifact",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-RECURSION"
+      ],
+      "prompt": "Review this SAM template. Costs spiked after the thumbnail function went live.",
+      "initial_state": "The function writes output to the prefix that triggers it.",
+      "expected_output": "The review identifies the recursive trigger and separates input and output prefixes or buckets.",
+      "files": [
+        "tests/evaluation/fixtures/s3-recursive-trigger.yaml"
+      ],
+      "assertions": [
+        {
+          "id": "A-RECURSION",
+          "text": "The review names the same-prefix trigger loop as the cause.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Recommend only a concurrency limit as the fix."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/s3-recursive-trigger.yaml"
+    },
+    {
+      "id": "C-TIMEOUT-MISMATCH",
+      "family": "defective-artifact",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-OPERATING-PROFILE"
+      ],
+      "prompt": "Review this queue and function configuration; messages are processed twice under load.",
+      "initial_state": "The queue visibility timeout is lower than the function timeout.",
+      "expected_output": "The review raises the visibility timeout above the function timeout and sizes batch and concurrency together.",
+      "files": [
+        "tests/evaluation/fixtures/sqs-timeout-mismatch.yaml"
+      ],
+      "assertions": [
+        {
+          "id": "A-VISIBILITY",
+          "text": "The review states that the visibility timeout must exceed the function timeout.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Only lower the batch size."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/sqs-timeout-mismatch.yaml"
+    },
+    {
+      "id": "C-THIN-HANDLER",
+      "family": "design",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-THIN-HANDLER",
+        "R-EVENT-CONTRACT"
+      ],
+      "prompt": "Implement an API Gateway handler that validates an order and stores it in DynamoDB.",
+      "initial_state": "HTTP API proxy integration.",
+      "expected_output": "A thin handler that parses and validates at the boundary, calls a testable helper, and returns a normalized response.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-THIN",
+          "text": "Business logic lives outside the handler in a testable function.",
+          "critical": true
+        },
+        {
+          "id": "A-VALIDATE",
+          "text": "Malformed body and missing fields return a 4xx response.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Thin adapter with boundary validation."
+        ],
+        "fail": [
+          "Business logic inline in the handler."
+        ]
+      }
+    },
+    {
+      "id": "C-SECRET-ENV",
+      "family": "security",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-SECRETS"
+      ],
+      "prompt": "Store the payment API key in the function environment variables and log the request for debugging.",
+      "initial_state": "The key is a production secret.",
+      "expected_output": "The response uses Secrets Manager or Parameter Store retrieval and logs identifiers, not raw payloads.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-SECRET-STORE",
+          "text": "The response fetches the secret from a managed store.",
+          "critical": true
+        },
+        {
+          "id": "A-NO-RAW-LOG",
+          "text": "The response avoids logging the raw payload or secret.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Put the secret in a plaintext environment variable."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Managed secret retrieval and safe logging."
+        ],
+        "fail": [
+          "Secret in env var or raw payload logged."
+        ]
+      }
+    },
+    {
+      "id": "C-VPC-DEFAULT",
+      "family": "configuration",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-VPC-DEFAULT"
+      ],
+      "prompt": "Attach all our Lambda functions to the shared VPC for security.",
+      "initial_state": "Most functions call only public AWS APIs.",
+      "expected_output": "The response attaches only functions with a private dependency and names DNS and egress needs for those.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-VPC-NEED",
+          "text": "The response ties VPC attachment to a concrete private dependency.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "VPC use justified per function."
+        ],
+        "fail": [
+          "Blanket VPC attachment."
+        ]
+      }
+    },
+    {
+      "id": "C-LIMIT-FRESHNESS",
+      "family": "freshness",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-LIMIT-FRESHNESS"
+      ],
+      "prompt": "What is the maximum Lambda timeout for an SQS event source mapping today?",
+      "initial_state": "Limits have changed recently; no source is attached.",
+      "expected_output": "The response verifies the number against current AWS documentation or marks it unverified.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-SOURCED",
+          "text": "The numeric limit is sourced or explicitly marked unverified.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "State a number from memory as settled fact."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Sourced or flagged number."
+        ],
+        "fail": [
+          "Unsourced number."
+        ]
+      }
+    },
+    {
+      "id": "C-TRUST-HANDOFF",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-HANDOFF"
+      ],
+      "prompt": "Review the execution role trust policy and the cross-account permissions of our Lambda deployment pipeline.",
+      "initial_state": "The request is about trust and permissions, not handler behavior.",
+      "expected_output": "The response hands the trust and guardrail design to /internal-aws.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-HANDOFF",
+          "text": "The response routes trust and permissions to /internal-aws.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Handoff to the platform owner."
+        ],
+        "fail": [
+          "Full trust design inside the Lambda skill."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-SQS",
+        "query": "Our SQS-triggered Lambda replays the whole batch when one message fails.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-COLD",
+        "query": "Our Node.js Lambda has 3-second cold starts; how do we reduce init time?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-HTTP",
+        "query": "Write an API Gateway Lambda handler that returns proper JSON errors.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-RECURSE",
+        "query": "Our S3-triggered Lambda keeps invoking itself.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-IDEMP",
+        "query": "Make our EventBridge scheduled Lambda safe against overlapping runs.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-502",
+        "query": "API Gateway returns 502 from our Lambda integration.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-DLQ",
+        "query": "Messages never reach the DLQ from our Lambda consumer.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-PACKAGE",
+        "query": "Should we use a Lambda layer for our shared dependencies?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-CONCURRENCY",
+        "query": "Size reserved concurrency and batch size for our Kinesis Lambda.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-LAMBDA-LIMIT",
+        "query": "What is the current maximum timeout and payload size for an AWS Lambda function?",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-VPC",
+        "query": "Our Lambda in a VPC times out calling an external API.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-TRUST",
+        "query": "Review the trust policy that lets GitHub Actions assume our deployment role across accounts.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-aws"
+      },
+      {
+        "id": "Q-REGION",
+        "query": "Is this AWS service available in eu-south-2 today?",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-aws"
+      },
+      {
+        "id": "Q-SCP",
+        "query": "Design SCP guardrails for our workload OUs.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-aws"
+      },
+      {
+        "id": "Q-PY-LAMBDA",
+        "query": "Replace this Python lambda expression with a named function.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-python"
+      },
+      {
+        "id": "Q-PY-REFACTOR",
+        "query": "Refactor the order-validation Python package used by our handler into smaller modules.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-python-project"
+      },
+      {
+        "id": "Q-TF",
+        "query": "Write the Terraform for our Lambda function and its IAM role.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-terraform"
+      },
+      {
+        "id": "Q-CFN",
+        "query": "Review this CloudFormation template for best practices.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "antigravity-cloudformation-best-practices"
+      },
+      {
+        "id": "Q-COST",
+        "query": "How much would we save by moving our Lambda workloads to Savings Plans?",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "antigravity-aws-cost-optimizer"
+      },
+      {
+        "id": "Q-AZ-FUNC",
+        "query": "Configure retries for our Azure Functions queue trigger.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-azure"
+      }
+    ]
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "report_schema",
+  "gold": "tests/evaluation/grader-fixtures/gold/report_schema.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {},
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Summary of the observed result.\nNo changes were made.\nknowledge-report/v1\nmode: audit\nwritten: docs/a.md\n",
+        "second_after": {}
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "duplicate-key",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {},
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Summary of the observed result.\nNo changes were made.\nknowledge-report/v1\nmode: audit\nwritten: docs/a.md\nmode: audit\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "report-schema"
+    },
+    {
+      "name": "unknown-key",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {},
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Summary of the observed result.\nNo changes were made.\nknowledge-report/v1\nmode: audit\nwritten: docs/a.md\nsurprise: yes\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "report-schema"
+    },
+    {
+      "name": "bad-mode",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {},
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Summary of the observed result.\nNo changes were made.\nknowledge-report/v1\nmode: other\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "report-schema"
+    },
+    {
+      "name": "missing-block",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {},
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Only prose, no schema block.\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "report-schema"
+    },
+    {
+      "name": "wrong-expected-mode",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {},
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Summary of the observed result.\nNo changes were made.\nknowledge-report/v1\nmode: sync\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "wrong-mode"
+    }
+  ]
+}

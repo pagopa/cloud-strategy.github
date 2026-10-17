@@ -4,6 +4,16 @@ Load this reference after dialect selection. The shebangs below are deployment
 conventions; they do not change the language guarantees of the selected
 dialect.
 
+## Contents
+
+- [Bash Minimal Template](#bash-minimal-template)
+- [POSIX sh Minimal Template](#posix-sh-minimal-template)
+- [Bash Argument Parsing Pattern](#bash-argument-parsing-pattern)
+- [POSIX sh Argument Parsing Pattern](#posix-sh-argument-parsing-pattern)
+- [Bash ERR Trap Pattern](#bash-err-trap-pattern)
+- [Bash Hardening Helpers](#bash-hardening-helpers)
+- [POSIX sh Cleanup Helper](#posix-sh-cleanup-helper)
+
 ## Bash Minimal Template
 
 ```bash

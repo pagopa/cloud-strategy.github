@@ -1,4 +1,4 @@
 interface:
   display_name: "internal-python-project"
-  short_description: "Importable Python application guidance"
-  default_prompt: "Use $internal-python-project for reusable imported Python behavior in packages, libraries, applications, services, framework-owned flows, and thin adapters that preserve that contract."
+  short_description: "Reusable Python packages, libraries, and services"
+  default_prompt: "Use $internal-python-project for reusable imported Python code in packages, libraries, SDKs, services, framework handlers, thin CLI adapters over package code, and their tests."

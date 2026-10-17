@@ -1,0 +1,143 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "local-agent-sync-external-resources",
+  "requirements": [
+    {
+      "id": "R-CODEX-DEFAULT-STRIP",
+      "text": "For a managed asset that declares no codex.allow_implicit_invocation, the candidate agents/openai.yaml carries no upstream allow_implicit_invocation; other policy fields are kept and an empty policy is dropped. The Matt source leaves implement, research, setup-matt-pocock-skills, to-spec, to-tickets, handoff, and domain-modeling model-invocable in Codex.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-CODEX-DECLARED",
+      "text": "A declared codex.allow_implicit_invocation overrides the upstream value in agents/openai.yaml.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-METADATA-STABLE",
+      "text": "Codex metadata without an undeclared allow_implicit_invocation stays byte-identical, and a second normalization pass reports no changes.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-REFRESH-GATE",
+      "text": "A refresh judges repository impact from the candidate-versus-repository diff, not the normalization change summary, and stops when paths outside the authorized set would change.",
+      "source": "SKILL.md: Workflow, Safety"
+    },
+    {
+      "id": "R-PINNED-OFFLINE",
+      "text": "Network access happens only through the pinned prepare flow; no pull, argumentless fetch, remote update, or package manager is used.",
+      "source": "SKILL.md: Pinned Content Only"
+    },
+    {"id": "R-SINGLE-PLAN", "text": "Normalize only the Addy planner to one embedded-task plan under tmp/.plans/, preserving nested paths, neighbors, existing work and idempotence.", "source": "references/skill-normalizations.md: Single Implementation Plan"},
+    {"id": "R-RETIRED-ROUTING", "text": "Do not import the two retired Superpowers plan skills; normalize only their authorized caller references to the gateways without creating execution approval, and keep legacy hash replay valid.", "source": "references/skill-normalizations.md: Retired Plan Skills And Gateway Routing"},
+    {"id": "R-TO-SPEC-TESTING", "text": "Refresh reapplies the testing-decisions marked override only to Matt To Spec, preserves unrelated content and neighbors, replaces stale notes and is idempotent.", "source": "references/skill-normalizations.md: To Spec Testing Decisions Override"}
+  ],
+  "cases": [
+    {
+      "id": "C-STRIP-UNDECLARED",
+      "family": "bounded-revision",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CODEX-DEFAULT-STRIP"],
+      "prompt": "Refresh the Matt source; upstream grill-me ships policy.allow_implicit_invocation: false.",
+      "initial_state": "grill-me has no invocation_policy in managed-resources.yaml; the upstream snapshot contains fixtures/upstream-restricted-openai.yaml.",
+      "expected_output": "The candidate grill-me agents/openai.yaml equals fixtures/expected-unrestricted-openai.yaml.",
+      "files": [
+        "tests/evaluation/fixtures/upstream-restricted-openai.yaml",
+        "tests/evaluation/fixtures/expected-unrestricted-openai.yaml"
+      ],
+      "assertions": [
+        {"id": "A-NO-POLICY", "text": "The candidate metadata has no policy key.", "critical": true},
+        {"id": "A-INTERFACE-KEPT", "text": "display_name and short_description keep the upstream values.", "critical": true}
+      ],
+      "forbidden_actions": ["Hand-edit the committed file instead of normalizing the candidate."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/defective-retained-policy-openai.yaml"
+    },
+    {
+      "id": "C-DECLARED-POLICY",
+      "family": "neighboring-regression",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CODEX-DECLARED"],
+      "prompt": "Refresh the Matt source and confirm grilling stays user-invoked in Codex.",
+      "initial_state": "grilling declares codex.allow_implicit_invocation: false; upstream grilling metadata has no policy.",
+      "expected_output": "The candidate grilling agents/openai.yaml contains policy.allow_implicit_invocation: false.",
+      "files": ["tests/evaluation/fixtures/upstream-restricted-openai.yaml"],
+      "assertions": [
+        {"id": "A-DECLARED-VALUE", "text": "The declared value is present after normalization.", "critical": true}
+      ],
+      "forbidden_actions": ["Strip a policy that the manifest declares."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/defective-overwritten-declared-openai.yaml"
+    },
+    {
+      "id": "C-STABLE-METADATA",
+      "family": "neighboring-regression",
+      "kind": "deterministic",
+      "requirement_ids": ["R-METADATA-STABLE"],
+      "prompt": "Run plan twice on an unchanged source.",
+      "initial_state": "A managed asset whose upstream metadata already lacks allow_implicit_invocation.",
+      "expected_output": "The metadata stays byte-identical and the second pass reports no normalization changes.",
+      "files": ["tests/evaluation/fixtures/expected-unrestricted-openai.yaml"],
+      "assertions": [
+        {"id": "A-BYTE-IDENTICAL", "text": "The file content is unchanged.", "critical": true},
+        {"id": "A-IDEMPOTENT", "text": "A second normalization pass reports no changed paths.", "critical": true}
+      ],
+      "forbidden_actions": ["Re-serialize metadata that needs no change."],
+      "status": "generated",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-restricted-openai.yaml"
+    },
+    {
+      "id": "C-REFRESH-REPORT",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-REFRESH-GATE", "R-PINNED-OFFLINE"],
+      "prompt": "Regenerate the Matt source metadata fix for Codex model invocation; only implement, to-spec, to-tickets, and handoff metadata may change.",
+      "initial_state": "The pinned SHA and pin ref exist in the workspace cache; the plan summary lists many normalization changes.",
+      "expected_output": "The agent compares the candidate with the repository, finds changes only in the four authorized agents/openai.yaml files, applies with network protocols blocked, and reports any extra path as a stop condition.",
+      "files": [],
+      "assertions": [
+        {"id": "A-REAL-DIFF", "text": "Repository impact is taken from the candidate-versus-repository diff.", "critical": true},
+        {"id": "A-OFFLINE", "text": "Plan and apply run without a mutable or unpinned fetch.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Treat the normalization change summary as the repository change set.",
+        "Run git pull, an argumentless git fetch, or git remote update."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The transcript shows a candidate-versus-repository diff limited to the four authorized metadata files before or after apply.",
+          "Commands run with network protocols blocked or only through pinned prepare."
+        ],
+        "fail": [
+          "The agent approves the refresh from the normalization summary alone.",
+          "The agent fetches upstream outside pinned prepare."
+        ]
+      }
+    }
+    ,{"id": "C-PLANNER-UPSTREAM-DRIFT", "family": "normalization-boundary", "kind": "rubric", "requirement_ids": ["R-SINGLE-PLAN", "R-METADATA-STABLE"], "prompt": "Refresh Addy after an upstream section rename and added task-list guidance.", "initial_state": "The pinned candidate has tasks/plan.md, ./tasks/todo.md, a nested other/tasks/plan.md and unrelated neighboring bundles; a previous local override is followed by new upstream text.", "expected_output": "Bounded root-path replacements and one trailing override retain the single-plan contract without modifying nested paths or neighbors; a second pass produces no changes. The candidate test exercises the real normalizer.", "files": ["tests/scripts/test_candidate.py"], "assertions": [{"id": "A-SCOPE", "text": "Only the planner's project-root default outputs are rewritten.", "critical": true}, {"id": "A-CONVERGENCE", "text": "Exactly one effective override remains last and repeated normalization is stable.", "critical": true}], "forbidden_actions": ["Depend on exact upstream prose or line numbers.", "Rewrite neighboring bundles."], "status": "not-run", "held_out": true, "rubric": {"pass": ["Native candidate tests show bounded replacement and stable repeated output."], "fail": ["Upstream text additions restore separate artifacts or the override is duplicated."]}},
+    {"id": "C-RETIRE-AND-REFRESH", "family": "retirement", "kind": "rubric", "requirement_ids": ["R-RETIRED-ROUTING", "R-PINNED-OFFLINE"], "prompt": "Refresh Superpowers after retiring writing-plans and executing-plans.", "initial_state": "The manifest excludes both bundles, caller resources still mention bare and prefixed legacy names, and brainstorming has a legacy description patch with a final content hash.", "expected_output": "Neither bundle is materialized. Only brainstorming and subagent-driven routing references are redirected, internal calls do not create user approval, the updated legacy hash verifies, and repeated normalization remains stable. Stale source-path attestations are rebuilt rather than bypassed.", "files": ["tests/scripts/test_candidate.py", "tests/scripts/test_manifest.py", "references/managed-resources.yaml", "references/imported-asset-overrides.yaml"], "assertions": [{"id": "A-RETIRED", "text": "Retired bundles are absent from declared and materialized assets.", "critical": true}, {"id": "A-HANDOFF", "text": "Routing preserves explicit user authority and unrelated workflow content.", "critical": true}, {"id": "A-REPLAY", "text": "Legacy patch verification remains valid without weakening snapshot identity checks.", "critical": true}], "forbidden_actions": ["Reimport retired skills.", "Treat an internal handoff as user approval.", "Disable hash or source-attestation checks."], "status": "not-run", "held_out": false, "rubric": {"pass": ["Manifest, native candidate tests and offline audit verify the bounded output and existing override hash."], "fail": ["A refresh restores retired entrypoints or needs disabled integrity checks."]}},
+    {"id": "C-TO-SPEC-TESTING", "family": "bounded-revision", "kind": "rubric", "requirement_ids": ["R-TO-SPEC-TESTING"], "prompt": "Refresh the Matt source while retaining the approved To Spec testing-decision override.", "initial_state": "The candidate contains upstream To Spec and To Tickets. To Spec has either no local note or an obsolete marked note.", "expected_output": "Only To Spec gains the current marked note; unrelated upstream content and To Tickets stay unchanged. A second pass reports no changes.", "files": [], "assertions": [{"id": "A-SCOPED", "text": "Only the authorized To Spec note changes.", "critical": true}, {"id": "A-IDEMPOTENT", "text": "One current note remains and a second pass makes no changes.", "critical": true}], "forbidden_actions": ["Modify neighboring skills.", "Register a new replay patch."], "status": "not-run", "held_out": true, "rubric": {"pass": ["The native candidate regression tests pass for fresh and stale-note inputs."], "fail": ["A note is missing or duplicated, a stale note survives, or neighboring content changes."]}}
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Audit the external skill manifest and tell me which managed targets are dirty.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Plan a refresh of the mattpocock-skills source into the external workspace.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Apply the pinned obra-superpowers refresh and rebuild inventory.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Prepare snapshots for the pinned sources without applying anything.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Why does the sync keep re-adding policy.allow_implicit_invocation to grill-me?", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Re-pin github-awesome-copilot to a new commit and record its commit_date.", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Add a replay override for an imported skill line the normalizer cannot handle.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Run the sync plan in TSV and show provenance rows for sickn33-antigravity.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Install our internal skills into ~/.codex and ~/.copilot.", "should_trigger": false, "split": "train", "competing_owner": "local-agent-sync-install-ai-resources"},
+      {"id": "Q-10", "query": "Align the consumer repository's managed instructions with this baseline.", "should_trigger": false, "split": "train", "competing_owner": "local-sync-repos"},
+      {"id": "Q-11", "query": "Rewrite the description of internal-bash to narrow its trigger.", "should_trigger": false, "split": "train", "competing_owner": "internal-skill-creator"},
+      {"id": "Q-12", "query": "Why is the pytest job failing in GitHub Actions on this PR?", "should_trigger": false, "split": "train", "competing_owner": "openai-gh-fix-ci"},
+      {"id": "Q-13", "query": "Find a community skill for Grafana dashboards I could install.", "should_trigger": false, "split": "held-out", "competing_owner": "vercel-find-skills"},
+      {"id": "Q-14", "query": "Sync my AGENTS.md baseline to the local home runtime.", "should_trigger": false, "split": "held-out", "competing_owner": "local-agent-sync-install-ai-resources"}
+    ]
+  }
+}

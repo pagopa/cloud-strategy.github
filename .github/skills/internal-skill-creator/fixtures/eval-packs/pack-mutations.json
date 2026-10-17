@@ -1,0 +1,26 @@
+[
+  {"name": "requirement-ref-object", "target": "pack", "changes": [{"path": ["cases", 0, "requirement_ids"], "value": [{"id": "R-OUTPUT"}]}], "expected_codes": ["eval-pack-unresolved-requirement"]},
+  {"name": "case-status-list", "target": "pack", "changes": [{"path": ["cases", 0, "status"], "value": ["generated"]}], "expected_codes": ["eval-pack-invalid-status"]},
+  {"name": "case-kind-list", "target": "pack", "changes": [{"path": ["cases", 0, "kind"], "value": ["deterministic"]}], "expected_codes": ["eval-pack-schema"]},
+  {"name": "case-not-object", "target": "pack", "changes": [{"path": ["cases", 0], "value": "not-an-object"}], "expected_codes": ["eval-pack-schema"]},
+  {"name": "trigger-split-list", "target": "pack", "changes": [{"path": ["triggers", "queries", 0, "split"], "value": ["train"]}], "expected_codes": ["eval-pack-trigger-coverage", "eval-pack-trigger-coverage"]},
+  {"name": "trigger-id-non-string", "target": "pack", "changes": [{"path": ["triggers", "queries", 0, "id"], "value": 7}], "expected_codes": ["eval-pack-schema", "eval-pack-trigger-coverage"]},
+  {"name": "duplicate-trigger-empty-owner", "target": "pack", "changes": [{"path": ["triggers", "queries", 1], "value": {"id": "Q-IN", "query": "Another near-miss request.", "should_trigger": false, "split": "held-out", "competing_owner": ""}}], "expected_codes": ["eval-pack-duplicate-id", "eval-pack-schema", "eval-pack-trigger-coverage"]},
+  {"name": "directory-defective-fixture", "target": "pack", "changes": [{"path": ["cases", 0, "defective_fixture"], "value": "fixtures"}], "expected_codes": ["eval-pack-unsafe-path"]},
+  {"name": "directory-file-entry", "target": "pack", "changes": [{"path": ["cases", 0, "files"], "value": ["."]}], "expected_codes": ["eval-pack-unsafe-path"]},
+  {"name": "run-configuration-list", "target": "run", "changes": [{"path": ["configuration"], "value": ["with-skill"]}], "expected_codes": ["eval-run-unbacked-result"]},
+  {"name": "run-date-non-string", "target": "run", "changes": [{"path": ["date"], "value": 20260926}], "expected_codes": ["eval-run-unbacked-result"]},
+  {"name": "run-case-id-list", "target": "run", "changes": [{"path": ["case_results", 0, "case_id"], "value": ["C-DETERMINISTIC"]}], "expected_codes": ["eval-run-unbacked-result"]},
+  {"name": "run-status-list", "target": "run", "changes": [{"path": ["case_results", 0, "status"], "value": ["passed"]}], "expected_codes": ["eval-run-unbacked-result"]},
+  {"name": "run-assertion-id-list", "target": "run", "changes": [{"path": ["case_results", 0, "assertions", 0, "id"], "value": ["A-OUTPUT"]}], "expected_codes": ["eval-run-assertion-mismatch"]},
+  {"name": "run-evidence-non-string", "target": "run", "changes": [{"path": ["case_results", 0, "status"], "value": "failed"}, {"path": ["case_results", 0, "assertions", 0, "evidence"], "value": 5}], "expected_codes": ["eval-run-assertion-mismatch"]},
+  {"name": "run-assertion-set-differs", "target": "run", "changes": [{"path": ["case_results", 0, "assertions", 0, "id"], "value": "A-OTHER"}], "expected_codes": ["eval-run-assertion-mismatch"]},
+  {"name": "run-passed-with-failed-assertion", "target": "run", "changes": [{"path": ["case_results", 0, "assertions", 0, "passed"], "value": false}], "expected_codes": ["eval-run-unbacked-result"]},
+  {"name": "run-executed-with-failed-critical", "target": "run", "changes": [{"path": ["case_results", 0, "status"], "value": "executed"}, {"path": ["case_results", 0, "assertions", 0, "passed"], "value": false}], "expected_codes": ["eval-run-unbacked-result"]},
+  {"name": "run-failed-with-failed-critical", "target": "run", "changes": [{"path": ["case_results", 0, "status"], "value": "failed"}, {"path": ["case_results", 0, "assertions", 0, "passed"], "value": false}], "expected_codes": []},
+  {"name": "run-blocked-with-unevaluated-assertion", "target": "run", "changes": [{"path": ["case_results", 0, "status"], "value": "blocked"}, {"path": ["case_results", 0, "assertions", 0, "passed"], "value": false}, {"path": ["case_results", 0, "assertions", 0, "evidence"], "value": ""}], "expected_codes": []},
+  {"name": "run-duplicate-case-result", "target": "run", "changes": [{"path": ["case_results"], "value": [
+    {"case_id": "C-DETERMINISTIC", "status": "passed", "transcript_ref": "transcripts/C-DETERMINISTIC.txt", "assertions": [{"id": "A-OUTPUT", "passed": true, "evidence": "Output matched."}]},
+    {"case_id": "C-DETERMINISTIC", "status": "failed", "transcript_ref": "transcripts/C-DETERMINISTIC-2.txt", "assertions": [{"id": "A-OUTPUT", "passed": false, "evidence": "Output differed."}]}
+  ]}], "expected_codes": ["eval-run-unbacked-result"]}
+]

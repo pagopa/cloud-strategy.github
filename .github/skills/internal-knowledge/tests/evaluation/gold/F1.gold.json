@@ -1,0 +1,40 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "fixture": "F1",
+  "components": [
+    "src/app"
+  ],
+  "edges": [],
+  "lifecycle_states": {},
+  "protected_paths": [],
+  "generated_paths": [],
+  "adr_dir": null,
+  "ledger": null,
+  "router": null,
+  "expected_placements": {},
+  "sections": [],
+  "must_write": [
+    "docs/index.md",
+    "docs/domain/app/README.md"
+  ],
+  "facts": [
+    {
+      "path": "docs/domain/app/README.md",
+      "text": "The application entry point is src/app/main.py."
+    }
+  ],
+  "readme_paths": [
+    "README.md",
+    "docs/index.md",
+    "docs/domain/app/README.md"
+  ],
+  "owner_links": [
+    {
+      "source": "docs/index.md",
+      "target": "docs/domain/app/README.md"
+    }
+  ],
+  "diagram_edges": {},
+  "aliases": {},
+  "diagram_triggers": []
+}

@@ -1,0 +1,5 @@
+{
+  "expected_placements": {
+    "docs/flat.md": "docs/reference/api.md"
+  }
+}

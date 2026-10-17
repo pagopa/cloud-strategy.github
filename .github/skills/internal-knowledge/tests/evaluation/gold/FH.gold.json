@@ -1,0 +1,68 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "fixture": "FH",
+  "components": [
+    "services/ingest",
+    "services/transform",
+    "services/publish",
+    "jobs"
+  ],
+  "edges": [
+    {
+      "from": "services/ingest",
+      "to": "services/transform"
+    },
+    {
+      "from": "services/transform",
+      "to": "services/publish"
+    }
+  ],
+  "lifecycle_states": {
+    "jobs": [
+      "queued",
+      "running",
+      "done",
+      "failed"
+    ]
+  },
+  "protected_paths": [],
+  "generated_paths": [],
+  "adr_dir": null,
+  "ledger": null,
+  "router": null,
+  "expected_placements": {},
+  "sections": [],
+  "must_write": [],
+  "facts": [],
+  "readme_paths": [
+    "README.md",
+    "services/ingest/README.md",
+    "services/transform/README.md",
+    "services/publish/README.md",
+    "jobs/README.md"
+  ],
+  "owner_links": [],
+  "diagram_edges": {
+    "README.md": [
+      [
+        "ingest",
+        "transform"
+      ],
+      [
+        "transform",
+        "publish"
+      ]
+    ]
+  },
+  "aliases": {
+    "ingest": "services/ingest",
+    "transform": "services/transform",
+    "publish": "services/publish"
+  },
+  "diagram_triggers": [
+    {
+      "doc": "README.md",
+      "required": true
+    }
+  ]
+}

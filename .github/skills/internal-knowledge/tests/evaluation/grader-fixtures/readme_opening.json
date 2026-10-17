@@ -1,0 +1,78 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "readme_opening",
+  "gold": "tests/evaluation/grader-fixtures/gold/readme_opening.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "README.md": "# Project\n\nA short summary.\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "README.md": "# Project\n\nA short summary.\n"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "title-missing",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "README.md": "Project\n\nSummary."
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "README.md": "Project\n\nSummary."
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "readme-opening"
+    },
+    {
+      "name": "summary-too-late",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "README.md": "# Project\n\n## Details\n\n## Usage\n\n## Deploy\n\nSummary."
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "README.md": "# Project\n\n## Details\n\n## Usage\n\nSummary."
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "readme-opening"
+    }
+  ]
+}
