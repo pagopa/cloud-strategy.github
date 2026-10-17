@@ -1,9 +1,10 @@
-# Repository-Specific Operational Validation
+# Operational Validation Overlay
 
 Use this reference only when `/internal-terraform` selects an operational,
 mixed, testing, CI, provider, state, recovery, or infrastructure-diagnosis
-branch. It supplies repository-specific gates; `antonbabenko-terraform-skill`
-remains authoritative for unoverridden Terraform/OpenTofu operational depth.
+branch. It supplies gates and corrections that `antonbabenko-terraform-skill`
+lacks; that skill remains authoritative for unoverridden Terraform/OpenTofu
+operational depth.
 
 ## Root Runner and CI Reachability
 
@@ -20,6 +21,15 @@ observe it. Python or another external-language check must not replace native
 resource, module, provider, plan, or assertion checks. A repository-specific
 static contract is allowed only when no native equivalent exists and its
 cross-boundary purpose is recorded.
+
+Mock and override values accept partial objects; the runner fills omitted
+attributes with random values. Set every attribute the configuration parses,
+such as resource IDs, and omit the rest. An `override_data` whose target
+instance is outside the run's scope is a silent no-op.
+
+A negative run passes when any check on its `expect_failures` target fails.
+Prove that each negative run trips its intended check: disable the other
+checks on the same target once, or give each check its own checkable object.
 
 ## Provider and Import Guard Gates
 
@@ -57,7 +67,7 @@ classified.
 
 ## Handoff
 
-State the selected primary owner, the repository-specific gate being applied,
+State the selected primary owner, the overlay gate being applied,
 the evidence context, and the narrowest validation.
 `antonbabenko-terraform-skill` remains the owner of general Terraform/OpenTofu
 provider procedures and operational depth.

@@ -94,4 +94,6 @@ complete.
 - Coordinate with `/internal-gcp` only for an independent Google Cloud design
   or governance decision.
 - Route non-Terraform requests to the actual artifact owner.
-- Retain local guidance only when it is uniquely repository-specific.
+- This wrapper is the overlay for `antonbabenko-terraform-skill`: put verified
+  corrections and missing guidance in the reference for their branch, and
+  remove an overlay once the core covers it.

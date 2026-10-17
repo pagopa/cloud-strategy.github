@@ -114,8 +114,8 @@ not replace the read-only Terraform domain ownership of
 
 ## Temporary Local Override and Sunset
 
-A local override is permitted only for a uniquely repository-specific adoption
-edge. It must name its owner and a sunset trigger or date, must not alter the
-imported bundle, and must be removed when the upstream capability covers the
-safety delta. Temporary analysis or handoff artifacts are not runtime
-dependencies.
+A local override is permitted for an adoption safety delta that
+`antonbabenko-terraform-skill` lacks. It must name its owner and a sunset
+trigger or date, must not alter the imported bundle, and must be removed when
+the upstream capability covers the safety delta. Temporary analysis or handoff
+artifacts are not runtime dependencies.

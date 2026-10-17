@@ -287,7 +287,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - Expected behavior:
   - overlap alone does not justify wrapping or replacing an imported asset
-  - repository-owned wrappers or replacements are justified when they add repository-specific routing, governance, terminology, output shape, safety expectations, or a missing internal owner
+  - repository-owned wrappers or replacements are justified when they add repository-specific routing, governance, terminology, output shape, safety expectations, a missing internal owner, or verified corrections and guidance that the read-only imported asset lacks
   - imported assets may remain verbatim when those gaps do not exist
 
 #### `resource-governance-canonical-operational-model-stays-explicit`
