@@ -6,7 +6,7 @@ entrypoints.
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
-| Missing purpose or usage context | Operators cannot discover the entrypoint contract locally | Add a purpose header, usage examples, and `--help` |
+| Missing or stale purpose/usage header | Operators cannot discover the entrypoint contract locally | Before completion, add an introductory purpose/usage header consistent with `--help`; include prerequisites, defaults, safety, and exit details proportional to risk, not boilerplate for trivial scripts |
 | Building dynamic Bash commands as strings | Quoting and argument boundaries become fragile | Use arrays plus `printf` in the Bash branch; use carefully quoted scalar invocations in POSIX `sh` |
 | Destructive commands without rerun safety | Repeated execution can corrupt state or surprise operators | Add `--dry-run` and make the mutation idempotent |
 | A multi-function script with no clear entrypoint | The starting point is not obvious | Define `main` and invoke it at the execution boundary. An unconditional call still runs when sourced; test standalone scripts by invocation and source only helpers designed for it |

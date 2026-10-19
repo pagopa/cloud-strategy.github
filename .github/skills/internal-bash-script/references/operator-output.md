@@ -8,19 +8,56 @@ Keep argument parsing, selector resolution, execution and scheduling, lifecycle 
 
 Execution must not depend on terminal visibility, color support, or the selected human-output projection. Keep machine-readable results plain and stable. Create files only when a caller explicitly requests them. Use the script's existing shell dialect and project-specific options; this reference adds no library or universal flag.
 
+## Mutating operator workflow
+
+Use this order for operator-visible mutations:
+
+1. Show target context: account or environment, scope, and selected targets.
+2. Present a non-mutating plan of intended changes and material risks.
+3. When the chosen flow is interactive, request proportionate confirmation
+	immediately after the plan, before execution or unrelated narration.
+4. Execute only the authorized plan, recording command results per target.
+5. Check final state against the intended effects with non-mutating reads.
+6. Render a separate outcome report from the command and verification evidence.
+
+For fixed bounded targets, a simple yes/no prompt with default no is appropriate;
+decline or EOF must leave state unchanged. Choose stronger confirmation only
+when risk warrants it. Preserve an established non-interactive authorization
+contract; do not impose interactive defaults or typed phrases on every script.
+If the target or plan materially changes, renew authorization before mutation.
+
+Request acceptance is not proof of effect, and an error is not proof of no
+effect. Record command acceptance/errors separately from verified effects,
+newly created or partial state, and unverified state. Bound verification waits;
+when state cannot be established, report it as unverified, not successful.
+The final report must retain those distinctions and any evidence-based next step.
+
+Keep selector loops and confirmation/control input separate from child stdin.
+When a child may read stdin but needs no input, redirect it from `/dev/null`;
+when it needs data, supply a separate explicit stream or descriptor. Do not let
+children consume remaining selectors or prompt responses. Exercise this boundary
+with a local stdin-consuming stub, not a live provider.
+
 ## Lifecycle and human logs
 
-For each selected unit in a multi-step command, write `▶️ started` when it begins and one terminal state when it ends: `✅ passed`, `❌ failed`, `⚠️ warning`, or `⏭️ skipped`. Include the unit category and selector. Add `[n/N]` when position helps the operator follow progress.
+For each selected unit in a multi-step command, record `started` when it begins
+and one terminal state when it ends: `passed`, `failed`, `warning`, or `skipped`.
+Include the unit category and selector. Add `[n/N]` when position helps.
+Use deliberately sparse emojis as phase/status cues paired with words, such as
+`▶️ execution`, `✅ passed`, or `⚠️ unverified`. Prefer a cue at a phase boundary
+or a material outcome; do not decorate every target line or repeat markers as
+clutter. Plain state words keep dense per-unit logs readable.
 
-For a long-running unit, write `⏱️ heartbeat` only when it reports measured progress. Bound heartbeat frequency and output using project-specific choices. Keep a concise started event and terminal-state event for every selected unit, including failures and skips.
+For a long-running unit, write `heartbeat` only when it reports measured progress. Bound heartbeat frequency and output using project-specific choices. Keep a concise started event and terminal-state event for every selected unit, including failures and skips.
 
-Human log markers pair the accepted emoji with its state word. If the active output encoding cannot represent Unicode, print the state word alone. Do not use ASCII art. `--no-color` and `NO_COLOR` disable ANSI styling only; they do not remove emoji or state words.
+Human log markers pair any chosen emoji with its phase/status word. If the active output encoding cannot represent Unicode, print the word alone. Do not use ASCII art. `--no-color` and `NO_COLOR` disable ANSI styling only; they do not remove emoji or state words. Keep emoji out of machine-readable payloads and preserve existing stdout/stderr routing and quiet contracts.
 
 A portable event can use `printf`:
 
 ```sh
-printf '%s\n' '▶️ started · [1/3] terraform/identity'
-printf '%s\n' '❌ failed · [1/3] terraform/identity · exit=1'
+printf '%s\n' '▶️ execution'
+printf '%s\n' 'started · [1/3] cache/dev'
+printf '%s\n' 'failed · [1/3] cache/dev · exit=1'
 ```
 
 ## Diagnostics and summaries
@@ -38,6 +75,12 @@ next: rerun the failed selector with the owning tool's documented command
 ```
 
 ## Compact, quiet, and verbose output
+
+Default human output should be compact without requiring a new flag. Show
+shared context once, then use readable, unambiguous target names. Avoid repeated
+UUIDs and full resource IDs; include them when needed to resolve ambiguity, in
+relevant diagnostics, or on explicit verbose output. Compactness must not hide
+material failures, partial effects, or unverified state.
 
 A new, high-volume terminal interface may consider `--compact` as a terminal-only projection when measured output volume justifies it. Compact output preserves each unit's lifecycle state and does not change selectors, work units, scheduling, concurrency, exit codes, machine-readable output, CI formats, Markdown, or artifacts.
 

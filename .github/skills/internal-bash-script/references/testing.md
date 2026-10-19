@@ -29,10 +29,19 @@ unconditional final call still executes it on source.
 
 ## Runnable direct-invocation recipe
 
-Place the test beside executable `tool.sh`, the bundled illustrative script at
+Place the test in the host's declared component test layout, preserving its
+runner and discovery convention. Neither script co-location nor repository-root
+`tests/` is universal. Resolve the real executable explicitly for that layout.
+This recipe receives its path through `TOOL_UNDER_TEST`, set by the runner before
+import (or replace that lookup with the host's existing path helper).
+
+The bundled illustrative executable is
 [`cache-clean-valid.sh`](../tests/evaluation/fixtures/cache-clean-valid.sh).
-The example copy must have executable permission. For a real target, test its
-existing permission rather than silently repairing it in test setup.
+Give the example copy executable permission; for a real target, test its existing
+permission rather than silently repairing it in setup. For example, a runner
+may supply `TOOL_UNDER_TEST="$PWD/tools/tool.sh"` while discovering tests in
+`tools/tests`, or supply `TOOL_UNDER_TEST="$PWD/scripts/tool.sh"` for tests in
+`tests/operators`. Both paths are host choices, not required layouts.
 
 ```python
 import os
@@ -41,7 +50,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-TOOL = Path(__file__).with_name("tool.sh")
+TOOL = Path(os.environ["TOOL_UNDER_TEST"]).resolve()
 
 
 class ScriptContractTests(unittest.TestCase):

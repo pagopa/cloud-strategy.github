@@ -3,6 +3,26 @@
   "skill": "internal-bash-script",
   "requirements": [
     {
+      "id": "R-MUTATING-WORKFLOW",
+      "text": "Mutating scripts show context, a non-mutating plan, proportionate confirmation immediately after the plan when interactive, execution, final-state verification, and a separate outcome report. Preserve automation; fixed bounded targets may use yes/no default no. Distinguish accepted requests/errors from verified effects, partial/new state, and unverified state.",
+      "source": "SKILL.md: Operator guidance; references/operator-output.md"
+    },
+    {
+      "id": "R-OPERATOR-COMPACTNESS",
+      "text": "Human output is compact by default: common context once, unambiguous names instead of repeated full IDs, full identifiers for relevant ambiguity/diagnostics/verbose. Use deliberate sparse phase/status emojis paired with words, preserving quiet, machine-readable payloads, and output channels.",
+      "source": "references/operator-output.md"
+    },
+    {
+      "id": "R-CONTROL-INPUT",
+      "text": "Isolate child stdin from selector loops and confirmation/control input when child commands could consume it; provide separate explicit input when needed.",
+      "source": "references/operator-output.md"
+    },
+    {
+      "id": "R-HEADER-LAYOUT",
+      "text": "Completion requires an introductory purpose/usage header coherent with help, with prerequisites/defaults/safety/exit details proportional to risk. Test location follows the declared host convention without mandatory co-location or a universal repository-root tests directory.",
+      "source": "SKILL.md: Validation; references/common-mistakes.md; references/testing.md"
+    },
+    {
       "id": "R-DIALECT-MINIMUM",
       "text": "Record the dialect contract and apply this bundle's dialect and portable minimum before choosing a template; /internal-bash is an optional enrichment, and the task completes without it.",
       "source": "internal-bash-script SKILL.md: Dialect minimum, Portable minimum"
@@ -64,6 +84,73 @@
     }
   ],
   "cases": [
+    {
+      "id": "C-MUTATING-OPERATOR-FLOW",
+      "family": "operator-workflow",
+      "kind": "rubric",
+      "requirement_ids": ["R-OPERATOR-SAFETY", "R-MUTATING-WORKFLOW", "R-OPERATOR-COMPACTNESS"],
+      "prompt": "Improve an interactive maintenance entrypoint that updates two fixed named targets in one account. Keep a simple yes/no confirmation and make the terminal flow easy to scan with thoughtful sparse emojis.",
+      "initial_state": "The script repeats full UUIDs on every line, asks for approval before showing changes, and reports success when the update command returns. One target reaches the desired state; the other request is accepted but its effect cannot be verified. --quiet and --format json already exist.",
+      "expected_output": "Shared context once, non-mutating plan, default-no confirmation immediately after it, execution, final-state checks, and a separate report. Use names and sparse text-labelled phase/status emojis only in human narration; preserve quiet, JSON and channels.",
+      "files": ["references/operator-output.md"],
+      "assertions": [
+        {"id": "A-ORDER", "text": "The transcript has context, side-effect-free plan, confirmation immediately after plan, execution, verification, and distinct report in order; decline or EOF causes no mutation.", "critical": true},
+        {"id": "A-PROPORTIONATE", "text": "Fixed bounded targets use yes/no default no without mandatory typed phrases or a new global interactive default.", "critical": true},
+        {"id": "A-VERIFIED-OUTCOMES", "text": "The report separates the verified target from accepted-but-unverified effects and preserves partial/new state rather than claiming overall success.", "critical": true},
+        {"id": "A-COMPACT-CHANNELS", "text": "Common context appears once; names replace repeated IDs, with full IDs for ambiguity/diagnostics/verbose. Emojis are sparse phase/status cues paired with words, not repeated on every item; quiet and parsed JSON retain payloads and channels.", "critical": true}
+      ],
+      "forbidden_actions": ["Contact a live provider.", "Treat request acceptance as verified effect.", "Add emoji to machine-readable output."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["A reviewer can point to the ordered transcript and no-mutation decline/EOF evidence.", "One result is verified and one unverified; JSON is unchanged and human phase markers are sparse and text-labelled."],
+        "fail": ["Approval precedes the plan or unrelated narration separates plan and prompt.", "Every line repeats IDs/emoji, fixed targets demand a typed phrase, or accepted requests are all called verified success."]
+      }
+    },
+    {
+      "id": "C-BATCH-STDIN-AND-PARTIAL-STATE",
+      "family": "operator-workflow",
+      "kind": "rubric",
+      "requirement_ids": ["R-MUTATING-WORKFLOW", "R-CONTROL-INPUT"],
+      "prompt": "Repair a non-interactive maintenance loop that reads targets from stdin. Its child may read stdin too; preserve automation and report partial outcomes.",
+      "initial_state": "Three targets are expected. A child consumes the next selector; another creates a resource then errors, and the final target cannot be verified. External commands can be stubbed locally; no live provider is available.",
+      "expected_output": "Separate control input from child stdin, preserve all selected outcomes under a safe failure policy, and distinguish errors, newly created partial state, verified effects, and unverified state without adding an automation prompt.",
+      "files": ["references/operator-output.md"],
+      "assertions": [
+        {"id": "A-INPUT-ISOLATION", "text": "A local stdin-consuming child stub cannot consume later selectors or confirmation input; use /dev/null or separate explicit input as appropriate.", "critical": true},
+        {"id": "A-PARTIAL-REPORT", "text": "The report preserves selected outcomes and names newly created partial state and unavailable verification separately from command statuses.", "critical": true},
+        {"id": "A-AUTOMATION", "text": "Existing non-interactive authorization is preserved without a new unconditional prompt or universal fail-fast policy.", "critical": true}
+      ],
+      "forbidden_actions": ["Contact a live provider.", "Discard partial state after a command error."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["A local stdin-consuming stub leaves all three selectors available and receives no confirmation input.", "The report separates command error, created partial resource and unverified target; automation remains non-interactive."],
+        "fail": ["Child stdin silently skips a target.", "An error is equated with no effects, absent verification becomes success, or automation blocks on a prompt."]
+      }
+    },
+    {
+      "id": "C-HEADER-AND-HOST-LAYOUT",
+      "family": "operator-completion",
+      "kind": "rubric",
+      "requirement_ids": ["R-OPERATOR-SAFETY", "R-HEADER-LAYOUT", "R-TEST-DESIGN", "R-TEST-PROOF"],
+      "prompt": "Complete a bounded shell utility change, including its introductory header and Python tests. Adapt the published recipe to each declared host layout.",
+      "initial_state": "The script has no purpose header and current help. Host A declares tools/tests/test_tool.py with tools/tool.sh; Host B declares tests/operators/test_tool.py with scripts/tool.sh. Both use unittest. Compare a trivial read-only utility with a risky mutating utility.",
+      "expected_output": "A purpose/usage header coherent with --help, with prerequisites/defaults/safety/exits proportional to risk. Preserve each host's test location and explicitly resolve its real script without universal root or co-location rules.",
+      "files": ["references/testing.md", "references/common-mistakes.md"],
+      "assertions": [
+        {"id": "A-HEADER-COMPLETE", "text": "Delivered headers agree with observed --help; risky utilities document material prerequisites/defaults/safety/exits, while trivial utilities avoid irrelevant boilerplate.", "critical": true},
+        {"id": "A-HOST-LOCATION", "text": "Host A retains tools/tests and Host B tests/operators; neither moves tests beside scripts nor imposes one root layout on both.", "critical": true},
+        {"id": "A-RECIPE-RUNS", "text": "Adapted unittest recipes resolve the real executable and detect valid/defective fixture differences through direct invocation.", "critical": true}
+      ],
+      "forbidden_actions": ["Migrate the framework.", "Add a universal test-directory policy."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Header and --help describe the same supported invocation with risk-proportionate detail.", "Both layouts keep native test homes and directly invoke the intended executable."],
+        "fail": ["Completion lacks a header, has stale usage, or demands irrelevant boilerplate.", "Tests are universally beside scripts or at root, or the adapted path targets the wrong executable."]
+      }
+    },
     {
       "id": "C-OPERATOR-GUARDS",
       "family": "operator-safety",

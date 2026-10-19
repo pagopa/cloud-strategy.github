@@ -49,6 +49,9 @@ checker, load `/internal-bash` when it is available.
 ## Operator guidance
 
 - Prefer `printf` for formatted output.
+- For mutating entrypoints, load [Operator output](references/operator-output.md)
+  and apply its context, plan, proportionate confirmation when interactive,
+  execution, final-state verification, and separate outcome report workflow.
 - Destructive or repeatable scripts should be idempotent and expose
   `--dry-run` when operator risk is non-trivial.
 - Prefer safe reruns with guards like `mkdir -p`, existence checks, or
@@ -105,6 +108,9 @@ checker, load `/internal-bash` when it is available.
 
 ## Validation
 
+- Complete the introductory purpose/usage header and check it against `--help`.
+  Scale prerequisites, defaults, safety, and exit details to the script's risk;
+  use [Common mistakes](references/common-mistakes.md) for the completion check.
 - `Dialect: Bash`: run `bash -n FILE` and `shellcheck -s bash FILE`.
 - `Dialect: POSIX sh`: run `dash -n FILE` (or `sh -n FILE`, reported as
   limited evidence) and `shellcheck -s sh FILE`.
