@@ -29,7 +29,8 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 - Never: force-push or delete others' work; commit unless the user requests it
   in the current turn.
 - A user request in the current turn authorizes its own action. An answer to
-  your own question authorizes no item in `Never`.
+  your own question authorizes no item in `Never`: a "yes" to "shall I run the
+  tests?" is not permission to commit.
 
 ## Think Before Coding
 
@@ -44,11 +45,13 @@ it generic enough to reuse in any repository; keep repository-specific rules in
   wider only to find an unknown component or call path. Use graph or index
   tools only when `AGENTS.local.md` or a loaded skill directs it.
 - Proportion: keep a small, declared policy-only change with the nearest owner
-  and its adjacent checks. Load heavy workflows only on concrete ambiguity or
-  contradiction.
+  and its adjacent checks. A one-line change in a known config needs that file
+  and one adjacent check, not a critical review. Load heavy workflows only on
+  concrete ambiguity or contradiction.
 - State: before editing non-trivial work, state the assumptions, target state,
   non-goals, and tradeoffs, and name what is unclear. Name the rejected reading
-  in one line. Push back when a simpler approach exists.
+  in one line: `Assumption: <X>. Rejected: <Y>.` Push back when a simpler
+  approach exists.
 - Ask: when two plausible readings produce materially different changes, or
   when `Boundaries` require it. Ask one specific question and include your
   recommendation.
@@ -62,11 +65,12 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 
 - Write the least code that meets the goal, with the fewest abstractions,
   options, and states that internal invariants leave reachable. Validate
-  external boundaries. When it could be much shorter, or a senior engineer
-  would call it overcomplicated, simplify it.
+  external boundaries. When 200 lines could be 50, or a senior engineer would
+  call it overcomplicated, rewrite it.
 - Keep every changed line surgical: it traces to the request, matches the
-  existing style, and leaves formatting, comments, and working code untouched,
-  even inside touched functions.
+  existing style even when you would write it differently, and leaves
+  formatting, comments, and working code untouched, even inside touched
+  functions.
 - Report unrelated dead code and leave it in place. Remove only the imports,
   variables, and functions that your own change orphaned.
 
@@ -75,13 +79,21 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 **Define done as checks that can fail, then loop until they pass.**
 
 - A check is a command with an expected result or, for prose-only work, an
-  observable condition on the artifact. "Make it work" is not a check.
+  observable condition on the artifact. "Make it work" is not a check; "the
+  date parser rejects 2026-13-01" is.
 - Test first for executable or evaluable behavior. Fix a bug: go red by
   reproducing it with a failing check before the fix. Add validation: write
   tests for invalid inputs, then make them pass. Refactor: run the same checks
   before and after.
-- For multi-step work, write `step -> verify: <check>` before editing. Strong
-  checks let you loop without asking; weak checks force clarifying questions.
+- For multi-step work, write the plan before editing, one check per step.
+  Strong checks let you loop without asking; weak checks force clarifying
+  questions.
+
+  ```text
+  1. <step> -> verify: <check>
+  2. <step> -> verify: <check>
+  ```
+
 - Name the closest executable validation early, run it after the change, and
   report unavailable checks or evidence gaps explicitly.
 - Run targeted checks before global ones. Treat a failure as pre-existing only
@@ -130,8 +142,9 @@ it generic enough to reuse in any repository; keep repository-specific rules in
   start with `internal-` or `local-` as protected.
 - Only an explicit instruction in the current user conversation naming the
   exact protected skill or path authorizes an edit, limited to the requested
-  files, purpose, and turn. Invocation, wrapping, synchronization, dependency,
-  or perceived necessity implies no authorization.
+  files, purpose, and turn. "Update the vendored bundle's description" names
+  no skill: stop. Invocation, wrapping, synchronization, dependency, or
+  perceived necessity implies no authorization.
 - An unapproved protected-skill finding is a stop condition; do not create an
   allowlist to bypass it.
 
