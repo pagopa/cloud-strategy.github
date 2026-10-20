@@ -28,6 +28,21 @@
 - Route current Copilot or MCP platform documentation needs to
   `/internal-copilot-docs-research`.
 
+## Repository Navigation And Placement
+
+- When `graphify-out/graph.json` exists, use `graphify query "<question>"` for
+  questions about architecture, structure, components, or where to add or find
+  code. Use `graphify path "<A>" "<B>"` for relationships and
+  `graphify explain "<concept>"` for one concept. Skip the graph for questions
+  limited to known files or symbols.
+- Use `graphify-out/wiki/index.md` for broad navigation. Read
+  `graphify-out/GRAPH_REPORT.md` only for broad architecture review or when
+  the commands above do not surface enough context. Read source files only to
+  modify or debug specific code, when the graph lacks the detail, or when the
+  graph is missing or stale. Type `/graphify` in Copilot Chat to build or
+  update the graph.
+- Treat `tmp/` as disposable support. Do not commit its contents.
+
 ## Agent skills
 
 ### Issue tracker
