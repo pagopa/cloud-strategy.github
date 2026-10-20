@@ -26,9 +26,35 @@
       "id": "R-OUTPUT",
       "text": "Return the controlling assumption, the construct changed, the smallest valid edit, the validation result, and any handoff.",
       "source": "internal-tf SKILL.md: Output contract"
+    },
+    {
+      "id": "R-OBJECT-MAP-EQUALITY",
+      "text": "Explain that an object from a braced for expression can compare false to a map because equality checks types; normalize compatible types when intended without banning tomap().",
+      "source": "references/common-mistakes.md: Terraform Language Mistakes"
     }
   ],
   "cases": [
+    {
+      "id": "C-OBJECT-MAP-EQUALITY",
+      "family": "expression-semantics",
+      "kind": "rubric",
+      "requirement_ids": ["R-OBJECT-MAP-EQUALITY"],
+      "prompt": "Why can { for key, value in { name = \"demo\" } : key => value } == tomap({ name = \"demo\" }) be false?",
+      "initial_state": "Both sides have matching entries but one is an object and the other a map.",
+      "expected_output": "Explain the object/map type difference in == and suggest converting both sides when map comparison is intended and conversion is valid.",
+      "files": ["references/common-mistakes.md"],
+      "assertions": [
+        {"id": "A-TYPES", "text": "The result is explained as a boolean comparison affected by types, not a diagnostic error.", "critical": true},
+        {"id": "A-CONVERSION", "text": "tomap() remains valid where compatible conversion is intended.", "critical": true}
+      ],
+      "forbidden_actions": ["Ban tomap() generally.", "Call the type difference a diagnostic error."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The answer explains this comparison and a conditional conversion."],
+        "fail": ["The answer invents an error or forbids map conversion."]
+      }
+    },
     {
       "id": "C-INTERFACE-REVIEW",
       "family": "bounded-revision",

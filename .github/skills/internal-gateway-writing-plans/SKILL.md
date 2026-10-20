@@ -41,6 +41,9 @@ for comparisons; require no branch, worktree, staging, commit, or stash.
 Produce one Markdown file with overview, risks, detailed tasks, and `Progress`.
 Create tracker items or another task list only on explicit request.
 
+For every count written into the plan, state the command that reproduces it
+or omit the count.
+
 Each task declares ID, acceptance criteria, dependencies, exact writable paths,
 and concrete verification. `Files likely touched` is not authority; protected
 paths require explicit authorization. Apply `/internal-tdd` where relevant.
@@ -67,6 +70,11 @@ ID. Only progress may change without changing approval; it must not hide new
 criteria, dependencies, checks, or writable scope. Checkpoints are automatic
 unless the user selected a human gate. Include task checks and one final review
 of execution changes, including uncommitted work.
+
+If execution discovers a scope-changing decision, the executor records the
+pending decision or blocker in `Progress` before the next task starts; any
+change to writable paths, acceptance criteria, dependencies, or checks blocks
+affected tasks until reapproval.
 
 Review coverage, scope, dependencies, and checks. Return the plan path, task IDs,
 and material limitations. A plan describes intended work; it does not guarantee

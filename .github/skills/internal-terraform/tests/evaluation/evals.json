@@ -31,9 +31,35 @@
       "id": "R-IMPORT-HANDOFF",
       "text": "Hand off an approved import with Primary = /internal-terraform, Execution owner = /internal-terraform-import, and complete root, mode, scope, identity, ownership, runner, mutation, convergence, and recovery evidence; missing evidence blocks live execution.",
       "source": "internal-terraform SKILL.md: Handoff"
+    },
+    {
+      "id": "R-MOCK-ASSERTION-SCOPE",
+      "text": "Keep mock timing remedies conditional and distinguish root assertions through child outputs from testing the child itself.",
+      "source": "references/operational-validation.md: Native Test Authority"
     }
   ],
   "cases": [
+    {
+      "id": "C-MOCK-FILTER-CHILD",
+      "family": "native-test-guidance",
+      "kind": "rubric",
+      "requirement_ids": ["R-MOCK-ASSERTION-SCOPE"],
+      "prompt": "A root test filters unknown mocked values and needs to assert on a child resource. What should I check?",
+      "initial_state": "The Terraform version and mock timing must be checked; the child resource is not exposed by an output.",
+      "expected_output": "Check whether command = apply or a supported override_during = plan fits the test; use child outputs for root assertions or test the child as the module under test.",
+      "files": ["references/operational-validation.md"],
+      "assertions": [
+        {"id": "A-TIMING", "text": "Timing remedies are conditional on the test and Terraform support.", "critical": true},
+        {"id": "A-CHILD", "text": "Child resources remain testable through outputs or by testing the child itself.", "critical": true}
+      ],
+      "forbidden_actions": ["Guarantee that apply fixes every unknown-value filter.", "Claim that child-module resources are not checkable."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The answer distinguishes timing support and assertion scope."],
+        "fail": ["The answer gives an absolute timing rule or declares child resources untestable."]
+      }
+    },
     {
       "id": "C-ROUTING-FIXTURE",
       "family": "regression",

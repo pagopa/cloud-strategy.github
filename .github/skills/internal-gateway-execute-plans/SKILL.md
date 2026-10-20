@@ -40,12 +40,18 @@ Checkbox and concise verification/blocker changes in `Progress` are state, not
 contract drift, and do not invalidate approval.
 
 Each task's declared writable paths are its perimeter, with one limited
-exception: update only checklist state and concise execution evidence in the
-selected plan's `Progress` section. Do not change requirements or scope there.
-`Files likely touched` is not authority. Preserve user changes and stop on
-conflicts or out-of-scope writes. Never stash, overwrite user work, stage,
-commit, create a branch, or create a worktree. New targets outside the approved
-plan and separate provider or destructive actions need their own authority.
+exception: update only checklist state and concise execution or blocker
+evidence in the selected plan's `Progress` section. Do not change requirements
+or scope there. If execution discovers a scope-changing decision, record the
+pending decision or blocker in `Progress` before the next task starts and stop
+affected tasks until reapproval when writable paths, acceptance criteria,
+dependencies, or checks change. `Files likely touched` is not authority.
+Preserve user changes and stop on conflicts or out-of-scope writes. Never
+stash, overwrite user work, stage, commit, create a branch, or create a
+worktree. New targets outside the approved plan and separate provider or
+destructive actions need their own authority. Use `tmp/` only for disposable
+scratch; it does not authorize plan targets outside the plan's declared
+writable paths.
 
 ## Implementer handoff
 
@@ -58,6 +64,13 @@ If it is not loaded, locate and read its `SKILL.md` in the declared skill roots
 without asking for another mention. A readable file does not prove execution
 capability: report a genuinely missing file or unsupported host capability
 before affected writes; do not substitute another executor.
+
+When correctness depends on file content, read the files directly; do not rely
+on subagent summaries for content. The parent must verify every factual claim
+returned by a subagent, including file content, counts, and pass/fail, before
+recording it as evidence. Derived counts, including file and test-case totals,
+must come from commands run in this session; record each command. Do not write
+counts from memory.
 
 Execute in dependency order. Run each task's required checks and record their
 actual results in `Progress`; count completion only after they pass. Continue
@@ -77,7 +90,7 @@ Before writes, record HEAD and the initial state of authorized paths. Preserve
 existing user edits with a targeted disposable snapshot when needed; retain it
 on resume. Do not copy secrets or follow symlinks outside write authority.
 
-Give `/mattpocock-code-review` one final review package: plan requirements and
+Give `/internal-review-code` one final review package: plan requirements and
 actual changes from execution start to end, including untracked files, deletions,
 and both rename endpoints. Use HEAD and captured initial file state to separate
 user edits from execution changes; inspect untracked files without staging.

@@ -27,6 +27,16 @@ attributes with random values. Set every attribute the configuration parses,
 such as resource IDs, and omit the rest. An `override_data` whose target
 instance is outside the run's scope is a silent no-op.
 
+If a plan-time filter depends on unknown values under a mock provider, the test
+may need `command = apply`, or `override_during = plan` in `mock_provider` if
+plan-time mock values fit the test. Check support in the selected Terraform
+version; neither option fixes every unknown-value error. See the
+[mock timing documentation](https://developer.hashicorp.com/terraform/language/tests/mocking).
+
+For resources inside a child module, root-test assertions must use the child's
+outputs, or select the child itself as the module under test. See the
+[test module documentation](https://developer.hashicorp.com/terraform/language/tests#modules).
+
 A negative run passes when any check on its `expect_failures` target fails.
 Prove that each negative run trips its intended check: disable the other
 checks on the same target once, or give each check its own checkable object.
