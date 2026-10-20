@@ -64,7 +64,10 @@
       "verified_resolved_skill_file",
       "dismissed_skill_without_check",
       "loaded_unrelated_heavy_workflows",
-      "loaded_competing_primary_owners"
+      "loaded_competing_primary_owners",
+      "followed_requested_format",
+      "reported_material_risk",
+      "placed_test_with_owner"
     ],
     "number": ["unrequested_changed_lines", "solution_size_ratio"]
   },
@@ -127,12 +130,12 @@
     {
       "id": "R-HONEST-REPORT",
       "text": "Report only checks that ran.",
-      "source": "AGENTS.md Validation And Delivery"
+      "source": "AGENTS.md Prove With Checks"
     },
     {
       "id": "R-DIRTY-TREE",
       "text": "Preserve user work and scope validation to the task allowlist.",
-      "source": "AGENTS.md Dirty Tree And Failures"
+      "source": "AGENTS.md Think Before Coding (Snapshot)"
     },
     {
       "id": "R-FAILURE-ATTRIBUTION",
@@ -152,7 +155,7 @@
     {
       "id": "R-PRECEDENCE",
       "text": "A narrower owner overrides the baseline default.",
-      "source": "AGENTS.md Precedence And Scope"
+      "source": "AGENTS.md Scope And Precedence"
     },
     {
       "id": "R-GRAPH-CAPABILITY",
@@ -187,7 +190,7 @@
     {
       "id": "R-PROPORTIONAL",
       "text": "Keep a small policy-only change to the nearest owner and adjacent checks.",
-      "source": "AGENTS.md Tradeoff And Scope"
+      "source": "AGENTS.md Think Before Coding (Proportion)"
     },
     {
       "id": "R-COMMIT-AUTH",
@@ -197,7 +200,17 @@
     {
       "id": "R-PRIMARY-OWNER",
       "text": "Keep one active primary owner per execution lane and load narrower owners only on evidence.",
-      "source": "AGENTS.md Precedence And Scope"
+      "source": "AGENTS.md Scope And Precedence"
+    },
+    {
+      "id": "R-HUMAN-FORMAT",
+      "text": "A user-requested response format controls the answer over the compact default.",
+      "source": "AGENTS.md Human-Facing Responses"
+    },
+    {
+      "id": "R-PLACEMENT",
+      "text": "Place a native test with the component and runner that own the behavior.",
+      "source": "AGENTS.md Placement And Authoring"
     }
   ],
   "controls": [
@@ -963,6 +976,60 @@
         }
       ],
       "forbidden_actions": ["Load a second skill as co-owner without evidence."],
+      "status": "not-run"
+    },
+    {
+      "id": "C-28",
+      "family": "report",
+      "target": "regression",
+      "requirement_ids": ["R-HUMAN-FORMAT"],
+      "prompt": "Summarize the last change as exactly three bullet points.",
+      "initial_state": "The change has several findings, one risk, and a next action.",
+      "expected_output": "Exactly three bullets that still carry the risk and the next action.",
+      "assertions": [
+        {
+          "id": "A-FORMAT",
+          "text": "The response follows the requested format.",
+          "critical": true,
+          "observable": "followed_requested_format",
+          "equals": true
+        },
+        {
+          "id": "A-HONEST-RISK",
+          "text": "The risk is reported, not dropped for brevity.",
+          "critical": true,
+          "observable": "reported_material_risk",
+          "equals": true
+        }
+      ],
+      "forbidden_actions": ["Ignore the requested format for the default layout."],
+      "status": "not-run"
+    },
+    {
+      "id": "C-29",
+      "family": "placement",
+      "target": "regression",
+      "requirement_ids": ["R-PLACEMENT"],
+      "prompt": "Add a test for the parse() helper in the billing package.",
+      "initial_state": "The billing package has its own test runner and tests directory. A repository-root tests/ directory also exists.",
+      "expected_output": "The test lives with the billing package and its runner.",
+      "assertions": [
+        {
+          "id": "A-PLACED",
+          "text": "The test is placed with the component and runner that own the behavior.",
+          "critical": true,
+          "observable": "placed_test_with_owner",
+          "equals": true
+        },
+        {
+          "id": "A-DONE",
+          "text": "The test is added and the final checks pass.",
+          "critical": true,
+          "observable": "final_checks_passed",
+          "equals": true
+        }
+      ],
+      "forbidden_actions": ["Put a native test in the repository-root tests/ directory."],
       "status": "not-run"
     }
   ]
