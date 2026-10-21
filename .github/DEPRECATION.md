@@ -41,6 +41,35 @@ Immediate removal is allowed only for security or compliance issues. The removal
 
 ## Current deprecations
 
+- `.github/skills/internal-aws-governance/`, `.github/skills/internal-aws-mcp-research/`,
+  `.github/skills/internal-aws-operations/`,
+  `.github/skills/internal-aws-organization-structure/`, and
+  `.github/skills/internal-aws-strategic/`: **Removed immediately under the
+  approved architecture-migration exception** on 2026-09-27 with explicit user
+  authorization. `.github/skills/internal-aws/` is now the single AWS platform
+  owner, with `references/organization.md`, `references/governance.md`,
+  `references/evidence.md`, `references/current-facts.md`, and
+  `references/decisions.md`. `.github/skills/internal-aws-lambda/` is
+  unchanged in name and now triggers directly. Roll back by restoring the last
+  Git revision containing the seven bundles.
+- `.github/skills/internal-gcp-governance/`, `.github/skills/internal-gcp-operations/`,
+  `.github/skills/internal-gcp-organization-structure/`, and
+  `.github/skills/internal-gcp-strategic/`: **Removed immediately under the
+  approved architecture-migration exception** on 2026-09-27 with explicit user
+  authorization. `.github/skills/internal-gcp/` is now the single Google Cloud
+  owner, with `references/structure.md`, `references/governance.md`, and
+  `references/operations.md`. Roll back by restoring the last Git revision
+  containing the five bundles.
+- `.github/skills/internal-azure-governance/`, `.github/skills/internal-azure-operations/`,
+  `.github/skills/internal-azure-organization-structure/`, and
+  `.github/skills/internal-azure-strategic/`: **Removed immediately under the
+  approved architecture-migration exception** on 2026-09-27 with explicit user
+  authorization. `.github/skills/internal-azure/` is now the single Azure
+  control-plane owner, with `references/structure.md`,
+  `references/governance.md`, `references/operations.md`, and
+  `references/decision-mode.md`. `.github/skills/internal-azure-devops/` is
+  unchanged in name and now triggers directly. Roll back by restoring the last
+  Git revision containing the six bundles.
 - `.github/skills/ibm-terraform-test/`: **Removed immediately under the approved
   architecture-migration exception** on 2026-08-05 with explicit user
   authorization. Native tests and all non-language Terraform work now use

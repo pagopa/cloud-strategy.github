@@ -1,5 +1,5 @@
 ---
-description: Docker and container build standards for secure, reproducible images and pinned digests.
+description: Container review checks for pinned images, runtime user, secret leakage, reproducible builds, and Compose exposure.
 applyTo: "**/Dockerfile,**/Dockerfile.*,**/*.dockerfile,**/.dockerignore,**/docker-compose*.yml,**/docker-compose*.yaml,**/compose*.yml,**/compose*.yaml"
 excludeAgent: "cloud-agent"
 ---

@@ -1,0 +1,22 @@
+{
+  "scenarios": [
+    {
+      "id": "hcl-only",
+      "primary_owner": "internal-tf",
+      "execution_owner": null,
+      "delegated_owner": null,
+      "loaded_local_references": ["references/existing-infrastructure-adoption.md"],
+      "forbidden_local_references": ["references/operational-validation.md"],
+      "fail_closed_on_unknown": false
+    },
+    {
+      "id": "bulk-multi-state-import",
+      "primary_owner": "internal-terraform-import",
+      "execution_owner": "internal-terraform-import",
+      "delegated_owner": null,
+      "loaded_local_references": ["references/operational-validation.md"],
+      "forbidden_local_references": [],
+      "fail_closed_on_unknown": false
+    }
+  ]
+}

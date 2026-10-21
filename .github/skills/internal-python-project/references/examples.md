@@ -33,10 +33,18 @@ example keeps the subject importable and tests its public contract.
 ```python
 import pytest
 
-from account_status import AccountId
+from account_status import AccountId, resolve_account_state
 
 
-def test_given_blank_account_id_when_creating_then_raises_value_error() -> None:
-    with pytest.raises(ValueError):
-        AccountId(" ")
+@pytest.mark.parametrize("value", ["", " ", "\t\n"])
+def test_blank_identifier_is_rejected(value: str) -> None:
+    with pytest.raises(ValueError, match="account id is required"):
+        AccountId(value)
+
+
+@pytest.mark.parametrize(
+    ("locked", "expected"), [(True, "locked"), (False, "active:demo")]
+)
+def test_account_state_obeys_lock_decision(locked: bool, expected: str) -> None:
+    assert resolve_account_state(AccountId("demo"), locked) == expected
 ```

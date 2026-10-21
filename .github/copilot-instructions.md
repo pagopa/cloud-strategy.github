@@ -2,61 +2,37 @@
 
 This file is only for GitHub.com Copilot code review.
 
-It is not a general task-execution guide, repository routing guide, planning
-workflow, or local agent runtime contract.
+## Comment Only On Evidenced Defects
 
-## Review Objective
+- Comment when the diff shows a concrete defect, risk, or missing validation.
+- Prioritize correctness, security, regressions, and missing tests over style.
+- State the impact and the smallest safe fix in each comment.
+- Report a repeated defect once, list the other locations, and raise its
+  severity when the repetition widens the impact.
+- When the diff lacks evidence, ask one short question instead of asserting.
 
-Review changed files for defects that matter before merge.
+## Check The Change Against Its Intent
 
-- Prioritize correctness, security, regressions, missing validation, and
-  maintainability.
-- Prefer actionable findings over broad advice.
-- Tie each finding to concrete changed-file evidence.
-- Do not restate repository policy unless the diff creates a specific risk.
+- Compare the diff with the pull request description and linked issues. Flag
+  missing requirements, behavior that contradicts the stated intent, and
+  unrelated changes.
+- For changed behavior, flag tests that would still pass if the change were
+  wrong.
+- When a contract changes, such as a schema, CLI, output, frontmatter, or
+  policy, flag callers, validators, tests, and docs left on the old contract.
 
-## Finding Priority
+## Skip Noise
 
-Use these buckets when reporting issues:
-
-- `Critical`: data loss, credential exposure, remote code execution, production
-  outage, or a merge-blocking contract break.
-- `Major`: correctness bugs, security weaknesses, broken validators, missing
-  required tests, or behavior regressions.
-- `Minor`: maintainability, edge-case, resilience, or observability issues that
-  should be fixed before merge when practical.
-- `Nit`: small clarity or style issues that are safe to ignore.
-- `Notes`: useful context that is not a defect.
-
-## Required Checks
-
-- Check for hardcoded secrets, credentials, keys, tokens, and tenant-sensitive
-  values.
-- Check least privilege, destructive behavior controls, unsafe execution paths,
-  and missing input validation.
-- Check whether changed behavior has appropriate tests, fixtures, docs, or
-  validators.
-- Check contract alignment for changed schemas, generated assets, sync behavior,
-  prompts, instructions, skills, scripts, and CI workflows.
-- Check that fixes are scoped to the requested behavior and do not rewrite large
-  unaffected areas.
-
-## Review Discipline
-
-- Report findings first, ordered by severity.
-- For each finding, include the file or changed area, impact, and a concrete fix
-  direction.
-- Avoid speculative findings when the diff does not provide enough evidence.
-- Avoid praise, summaries, or style-only comments unless they reveal a real
-  maintenance risk.
-- Escalate repeated instances of the same defect pattern when the repetition
-  increases risk.
+- Skip formatting, import order, and syntax issues that the repository's
+  configured formatters, linters, and pre-commit hooks already enforce.
+- Skip intentional defects in test fixtures, seeded review targets, eval packs,
+  and gold outputs. Check only that the fixture matches its consuming test.
+- Skip generated files unless the generator input and output disagree.
 
 ## Non-Scope
 
-- Do not provide implementation plans unless the review finding needs fix
-  guidance.
-- Do not ask the author to follow local runtime workflows that GitHub.com cannot
-  execute.
+- Treat `AGENTS.md` as policy for judging the diff. Its local workflow steps,
+  such as tool, graph, or planning commands, are not review findings.
+- Do not ask authors to run local workflows, agents, or skills.
 - Do not treat this file as instructions for coding agents, local CLIs, or
   non-review Copilot chat behavior.

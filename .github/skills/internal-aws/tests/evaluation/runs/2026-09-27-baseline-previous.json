@@ -1,0 +1,243 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "internal-aws",
+  "date": "2026-09-27",
+  "host": "VS Code GitHub Copilot Chat; isolated read-only subagents given the skill entrypoint by path, no web or MCP tools, assertions withheld; several cases per subagent (less rigorous than one clean session per case)",
+  "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+  "configuration": "baseline-previous",
+  "case_results": [
+    {
+      "case_id": "C-SCP-EXPLICIT-DENY",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-SCP-BLOCKS",
+          "passed": true,
+          "evidence": "States an explicit SCP deny overrides every IAM allow; another allow will not help."
+        },
+        {
+          "id": "A-SCOPE",
+          "passed": true,
+          "evidence": "Checks SCPs on root, parent OUs, and the account."
+        }
+      ]
+    },
+    {
+      "case_id": "C-MGMT-SCP",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-MGMT-EXEMPT",
+          "passed": true,
+          "evidence": "SCPs never affect users or roles in the management account."
+        },
+        {
+          "id": "A-MINIMAL",
+          "passed": true,
+          "evidence": "Keep the management account minimal; move workloads to member accounts."
+        }
+      ]
+    },
+    {
+      "case_id": "C-RCP-PERIMETER",
+      "status": "failed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-RCP",
+          "passed": true,
+          "evidence": "Selects an RCP for resource-side access."
+        },
+        {
+          "id": "A-EXCLUSIONS",
+          "passed": false,
+          "evidence": "Names management-account resources and AWS managed KMS keys but omits service-linked roles; supported-service limit only as 'confirm support'."
+        },
+        {
+          "id": "A-STAGED",
+          "passed": true,
+          "evidence": "Non-production OU first, rollback by detach, partner exception with expiry."
+        },
+        {
+          "id": "A-NO-SIM-PROOF",
+          "passed": true,
+          "evidence": "Validation is observed CloudTrail and access results; no simulation claimed as RCP proof."
+        }
+      ]
+    },
+    {
+      "case_id": "C-RCP-MGMT-PRINCIPAL",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-RCP-APPLIES",
+          "passed": true,
+          "evidence": "RCP evaluated for every request to the member-account bucket, including management-account roles."
+        }
+      ]
+    },
+    {
+      "case_id": "C-RCP-AWS-MANAGED-KEY",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-MANAGED-KEY",
+          "passed": true,
+          "evidence": "RCPs do not apply to AWS managed KMS keys such as aws/s3."
+        },
+        {
+          "id": "A-UNSUPPORTED",
+          "passed": true,
+          "evidence": "ec2:ModifyImageAttribute is not an RCP-supported service action."
+        }
+      ]
+    },
+    {
+      "case_id": "C-DECLARATIVE-AMI",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-DECLARATIVE",
+          "passed": true,
+          "evidence": "EC2 declarative policy for image block public access, configuration-level."
+        },
+        {
+          "id": "A-SCOPE",
+          "passed": true,
+          "evidence": "Attach at root or selected OUs."
+        }
+      ]
+    },
+    {
+      "case_id": "C-DELEGATED-ADMIN",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-DELEGATED",
+          "passed": true,
+          "evidence": "Security tooling account as GuardDuty delegated administrator."
+        },
+        {
+          "id": "A-SCP-APPLIES",
+          "passed": true,
+          "evidence": "Delegated administrator is a member account; SCPs apply fully."
+        },
+        {
+          "id": "A-UNIT",
+          "passed": true,
+          "evidence": "One non-critical OU first."
+        }
+      ]
+    },
+    {
+      "case_id": "C-STACKSETS-MGMT",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-NO-MGMT-DEPLOY",
+          "passed": true,
+          "evidence": "Service-managed StackSets never deploy to the management account."
+        }
+      ]
+    },
+    {
+      "case_id": "C-BACKUP-PROOF",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-SEPARATE",
+          "passed": true,
+          "evidence": "Backup success proves backups exist, not recoverability."
+        },
+        {
+          "id": "A-LABEL",
+          "passed": true,
+          "evidence": "Confirmed versus not proven listed separately."
+        }
+      ]
+    },
+    {
+      "case_id": "C-REGION-FRESHNESS",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-FALLBACK",
+          "passed": true,
+          "evidence": "States it cannot confirm and lists official sources to check."
+        },
+        {
+          "id": "A-NO-GUESS",
+          "passed": true,
+          "evidence": "Memory-based note is labeled inference, not verified."
+        }
+      ]
+    },
+    {
+      "case_id": "C-IAM-READ-ONLY",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-READ-ONLY",
+          "passed": true,
+          "evidence": "Read-only inspection and simulation; no change without approval."
+        },
+        {
+          "id": "A-PROPOSE",
+          "passed": true,
+          "evidence": "Proposes a tightened policy with rollback path."
+        }
+      ]
+    },
+    {
+      "case_id": "C-QUICK-ANSWER",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-QUICK",
+          "passed": true,
+          "evidence": "Short yes with one reason."
+        }
+      ]
+    },
+    {
+      "case_id": "C-DECISION-NOTE",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-OPTIONS",
+          "passed": true,
+          "evidence": "Compares Control Tower and custom landing zone."
+        },
+        {
+          "id": "A-REVERSIBILITY",
+          "passed": true,
+          "evidence": "States leaving Control Tower is possible but disruptive; one OU first."
+        }
+      ]
+    },
+    {
+      "case_id": "C-HANDOFF-POLICY-DOC",
+      "status": "failed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline aws-a / aws-b'",
+      "assertions": [
+        {
+          "id": "A-HANDOFF",
+          "passed": false,
+          "evidence": "Authored the SCP JSON itself; no handoff to /internal-cloud-policy."
+        }
+      ]
+    }
+  ]
+}

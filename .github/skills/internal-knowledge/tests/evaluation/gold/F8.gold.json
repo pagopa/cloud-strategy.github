@@ -1,0 +1,39 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "components": [
+    "coastal-processes"
+  ],
+  "edges": [],
+  "lifecycle_states": {},
+  "protected_paths": [],
+  "generated_paths": [],
+  "adr_dir": null,
+  "ledger": null,
+  "router": null,
+  "expected_placements": {},
+  "sections": [],
+  "must_write": [],
+  "facts": [
+    {
+      "path": "docs/project.md",
+      "text": "PUR — Build a durable understanding of coastal erosion for personal study."
+    },
+    {
+      "path": "docs/domain/coastal-processes/CONTEXT.md",
+      "text": "### Littoral transport"
+    },
+    {
+      "path": "docs/principles.md",
+      "text": "PRI-01 — Compare claims against at least two cited primary sources."
+    }
+  ],
+  "readme_paths": [
+    "README.md",
+    "docs/README.md"
+  ],
+  "owner_links": [],
+  "diagram_edges": {},
+  "aliases": {},
+  "diagram_triggers": [],
+  "fixture": "F8"
+}

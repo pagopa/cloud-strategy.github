@@ -1,0 +1,6 @@
+{
+  "ledger": {
+    "path": "docs/traceability.md",
+    "record_pattern": "^TR-\\d{3}\\b"
+  }
+}

@@ -34,15 +34,15 @@ repos:
 
       # Structured data validation
       - id: check-yaml # Validate YAML syntax before CI sees it.
-        exclude: '^\.github/skills/internal-yaml/fixtures/invalid/'
+        exclude: '^\.github/skills/(internal-yaml/fixtures/invalid/|internal-aws-lambda/tests/evaluation/fixtures/.*\.yaml$)'
       - id: check-json # Validate JSON syntax before runtime uses it.
         exclude: '^\.github/skills/internal-json/fixtures/invalid/'
 
       # Python safety rails
       - id: check-ast # Ensure Python files are syntactically valid.
-        files: ^(scripts|src|tests|tools)/.*\.py$
+        files: ^(scripts|src|tests|tools|\.github/(actions|tools))/.*\.py$
       - id: debug-statements # Block accidental breakpoint() and debugger imports.
-        files: ^(scripts|src|tests|tools)/.*\.py$
+        files: ^(scripts|src|tests|tools|\.github/(actions|tools))/.*\.py$
 
       # Security
       - id: detect-aws-credentials # Prevent committing AWS credentials by mistake.
@@ -50,12 +50,22 @@ repos:
           - --allow-missing-credentials
       - id: detect-private-key # Prevent committing private keys.
         exclude: '^\.github/skills/awesome-copilot-security-review/references/'
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e # gitleaks v8.30.1; source https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1
+    hooks:
+      - id: gitleaks # Scan staged changes before committing.
 
   # GitHub Actions
   - repo: https://github.com/rhysd/actionlint
     rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # actionlint v1.7.12; source https://github.com/rhysd/actionlint/releases/tag/v1.7.12
     hooks:
       - id: actionlint # Validate workflow syntax, expressions, and action usage.
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: fa412071e4f5d44d44f9e365f4676f9df92456a2 # zizmor-pre-commit v1.30.1; source https://github.com/zizmorcore/zizmor-pre-commit/releases/tag/v1.30.1
+    hooks:
+      - id: zizmor # Audit workflows and actions for security issues.
+        args:
+          - --offline
 
   # Shell scripts
   - repo: https://github.com/shellcheck-py/shellcheck-py
@@ -64,33 +74,45 @@ repos:
       - id: shellcheck # Lint shell scripts for portability issues and common bugs.
         args:
           - --severity=warning
+        files: ^(scripts|src|tools|\.github/(actions|tools))/.*\.sh$|^validate-repo-locally\.sh$
         exclude: '^\.github/skills/'
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: 2a30809d16bc7a60d9b97353c797f42b510d3368 # pre-commit-shfmt v3.12.0-2; source https://github.com/scop/pre-commit-shfmt/tree/v3.12.0-2
+    hooks:
+      - id: shfmt # Format repository-owned shell scripts.
+        files: ^\.github/(scripts|tools)/.*\.sh$
 
   # Python linting and formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: 3b3f7c3f57fe9925356faf5fe6230835138be230 # ruff-pre-commit v0.15.11; source https://github.com/astral-sh/ruff-pre-commit/releases/tag/v0.15.11
     hooks:
-      - id: ruff-check # Auto-sort Python imports with Ruff, replacing isort.
+      - id: ruff-check # Fix Python imports with Ruff, replacing isort.
         name: ruff-check-imports
         args:
           - --fix
           - --select
-          - I
-        files: ^(scripts|src|tests|tools)/.*\.py$
+          - F401,I
+        files: ^(scripts|src|tests|tools|\.github/(actions|tools))/.*\.py$
       - id: ruff-format # Format Python code with Ruff instead of Black.
-        files: ^(scripts|src|tests|tools)/.*\.py$
+        files: ^(scripts|src|tests|tools|\.github/(actions|tools))/.*\.py$
       - id: ruff-check # Lint Python code for correctness, style, and simplifications.
-        files: ^(scripts|src|tests|tools)/.*\.py$
+        args:
+          - --ignore
+          - E402
+        files: ^(scripts|src|tests|tools|\.github/(actions|tools))/.*\.py$
 
   # Terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: d61ded22bf9aa0f757303ebcbb0d6d71c4b54015 # pre-commit-terraform v1.105.0; source https://github.com/antonbabenko/pre-commit-terraform/releases/tag/v1.105.0
     hooks:
       - id: terraform_fmt # Enforce canonical Terraform formatting.
-      - id: terraform_docs # Keep Terraform module documentation aligned with code.
+      - id: terraform_docs # Generate and update Terraform documentation in README.md.
         args:
-          - markdown --sort-by required
+          - --hook-config=--add-to-existing-file=true
+          - --hook-config=--create-file-if-not-exist=true
+          - --args=--sort-by=required
       - id: terraform_validate # Validate Terraform configuration without remote backends.
+        exclude: '^\.github/skills/internal-tf/tests/evaluation/fixtures/'
         verbose: true
         args:
           # Keep logs deterministic and readable when validate fails in CI.
@@ -102,6 +124,7 @@ repos:
           # only when it needs structured retry/error matching.
           - --args=-no-color
       - id: terraform_tflint # Lint Terraform code against provider and best-practice rules.
+        exclude: '^\.github/skills/internal-tf/tests/evaluation/fixtures/'
       # Keep this hook commented to avoid slowing normal pre-commit runs.
       # Treat the platform list below as the canonical `.terraform.lock.hcl` matrix.
       # - id: terraform_providers_lock # Regenerate provider lock files for supported platforms.

@@ -1,103 +1,136 @@
 ---
 name: internal-subagent-contract
-description: Use when validating the caller-owned contract for one bounded subagent brief and result.
+description: Use when writing, executing, or checking one bounded subagent handoff under the internal-subagent-contract/v1 protocol, including a DelegationBrief, the worker's semantic result, the WorkerResult, a VerificationReceipt, or a LifecycleRecord.
 ---
 
 # Internal Subagent Contract
 
-Use this skill when a caller needs a small, structured handoff to one bounded
-worker and must verify the returned evidence. The contract is passive: it
-defines the brief/result shape and validates protocol invariants. The caller
-chooses whether delegation is worthwhile, owns scope and authority, selects
-the runtime, validates acceptance, and closes the work.
+This skill defines one structured handoff between a caller and one bounded
+worker, and it ships a validator for that handoff. It is a protocol, not a
+router: the caller decides whether to delegate, picks the worker, owns scope
+and authority, runs acceptance, and closes the work. The protocol never
+selects a provider, model, skill, reviewer, retry, or acceptance decision.
 
-V1 binds one brief/result pair. It is an integrity and handoff protocol, not a
-sandbox or proof that every execution fact was observed. A deterministic
-runtime adapter composes hashes, telemetry, persistence, and a separate
-caller-owned `VerificationReceipt` without changing semantic worker fields.
+V1 binds exactly one brief and one result. It proves integrity and binding;
+it does not sandbox the worker or prove facts that nobody observed.
 
 ## When to use
 
-Use it at the producer/worker/consumer boundary when a bounded task needs a
-machine-readable brief, result, artifact hash, acceptance evidence, or
-progress check. Do not use it as a router, retry loop, reviewer, or lifecycle
-owner.
+- A caller is about to delegate one bounded task and needs a checkable brief.
+- A worker received a `DelegationBrief` and must return its result.
+- A caller must check a returned result, receipt, or missing result before it
+  accepts, retries, or closes the work.
+
+Keep routing, retry loops, review, and lifecycle ownership with the caller.
+When delegation fails the value gate, the primary owner does the work locally
+and writes no brief.
 
 ## Roles
 
-- The producer writes a complete `DelegationBrief` with a measurable objective,
-  value gate, bounded evidence, write scope, acceptance, and budgets.
-- The worker reads caller-authorized policy and brief evidence, performs the
-  bounded assignment, writes only declared artifacts, and returns semantic
-  worker fields.
-- The runtime adapter composes the deterministic `WorkerResult` envelope,
-  persists it outside worker scope, and produces a `VerificationReceipt` when
-  a terminal worker payload exists. When no terminal payload exists, the
-  caller records a separate `LifecycleRecord` instead.
-- The consumer checks result and receipt before deciding acceptance, retry,
-  promotion, or closeout.
+| Role | Owns | Produces |
+| --- | --- | --- |
+| Caller (producer) | Value gate, scope, authority, budgets, evidence | `DelegationBrief` |
+| Worker | The bounded assignment only | Artifacts in `write_scope` and one semantic payload |
+| Runtime adapter | Hashes, telemetry, persistence | `WorkerResult` and `VerificationReceipt` |
+| Caller (consumer) | Acceptance, retry choice, closeout | Receipt decision or `LifecycleRecord` |
 
-## Value gate
+One agent may act as caller, adapter, and consumer. The worker role stays
+separate: a worker never writes the receipt or decides acceptance.
 
-Delegation is valid only when the brief says why the work is autonomous,
-verifiable, and materially more useful than a trivial local operation. A short
-answer, one obvious edit, one command, or an unverifiable request fails the
-gate. `value_delivered: true` requires an artifact or acceptance-bound pass
-evidence; a prose summary is not value.
+## Caller: write the brief
 
-For `mode: plan`, the `value_gate` also requires non-empty
-`local_alternative` and `off_critical_path` fields. The caller must compare the
-worker package with the actual primary-owner alternative and explain why the
-package is not on the critical path. The validator checks only that these
-fields are present and non-empty; the caller owns the semantic admission
-decision. If the comparison or rationale is not substantive, the caller must
-use local authoring with `mode: none` rather than invoke a worker. Provider or
-model identity never satisfies this gate.
+1. Pass the value gate. Delegate only when the brief can state why the work is
+   autonomous, verifiable, and materially more useful than doing it locally.
+   A short answer, one obvious edit, one command, or an unverifiable request
+   fails the gate. Provider or model identity never satisfies it.
+2. Pick the mode. Valid values are exactly `read`, `write`, and `plan`.
+   - `read`: bounded evidence in, analysis out; `write_scope` is `[]` and
+     `expected_output.path` is `null`.
+   - `write`: one bounded implementation or artifact scope.
+   - `plan`: one bounded draft plus a caller-owned acceptance check. The
+     `value_gate` also needs non-empty `local_alternative` (the real
+     primary-owner alternative) and `off_critical_path` (why the next handoff
+     does not wait on this worker). The validator checks presence only; the
+     caller judges substance and works locally when the comparison is weak.
+3. List evidence as `fact:<inline value>` or `path:<repository-relative path>`.
+   Resolved paths form the worker's read allowlist. Globs, `..`, absolute
+   paths, and missing paths are rejected. Bare relative paths remain valid for
+   compatibility.
+4. Keep every path repository-relative. Budgets may be at most
+   `attempts: 2` and `context_refills: 1`.
+5. Run `brief` validation (see [Validation](#validation)) and fix every error
+   before handing the brief to a worker.
 
-## Three protocol branches
+The full field list and examples are in the DelegationBrief section of
+[`references/protocol.md`](references/protocol.md).
 
-- `read` supplies bounded evidence and produces no worker write scope.
-- `write` supplies a bounded implementation or artifact scope.
-- `plan` supplies bounded drafting scope and a caller-owned acceptance check.
+## Worker: execute and return
 
-Evidence uses `fact:<inline-value>` or `path:<repository-relative-path>`;
-unprefixed repository paths remain the v1 compatibility form. Resolved paths
-form the worker read allowlist. All branches use the same versioned fields. The protocol does not select a
-provider, model, skill, route, reviewer, retry, or acceptance decision.
+1. Read only caller-authorized policy and the brief's evidence.
+2. Do the one assignment. Write only inside `write_scope`. Do not invoke,
+   spawn, or hand off to another agent.
+3. Stop early with the matching status when facts, authority, capability,
+   scope, or budget are missing. Do not guess the missing input.
+4. Return one JSON object with exactly these ten fields and no others:
 
-## Status and retry breaker
+   ```json
+   {
+     "schema_version": 1,
+     "delegation_id": "<same as the brief>",
+     "status": "completed",
+     "value_delivered": true,
+     "summary": "one factual sentence",
+     "artifacts": [{"path": "<inside write_scope>", "kind": "<artifact kind>"}],
+     "evidence": [{"acceptance_id": "A1", "ref": "<file, command, or test>", "outcome": "pass"}],
+     "non_blocking_findings": [],
+     "remaining": [],
+     "retry": {"recommended": false, "reason": "<why>", "required_new_input": null}
+   }
+   ```
 
-Results use `completed`, `partial`, `blocked`, `stalled`, `invalid_input`, or
-`failed`. Attempt, refill, retry, and progress fields remain compatible claims
-for one pair; v1 does not own multi-attempt lineage. `retry_eligible()` is a
-deprecated caller-side compatibility utility. Missing authority and invalid
-input stop the worker. Minor or prose-only findings do not justify a retry.
+   Leave out `brief_sha256`, `progress_signature`, and `budgets_used`; the
+   adapter computes them and rejects a payload that supplies them. Artifact
+   `sha256` is optional and must match the file bytes when present.
+5. Set `value_delivered: true` only with an artifact or an acceptance-bound
+   `pass` evidence entry. A prose summary is not value.
+6. When a worker can run commands, check the payload before returning it:
+   `worker-payload` in [Validation](#validation).
 
-## Worker result projection
+A short human summary may follow the JSON. It never replaces the JSON.
 
-The worker returns one compact semantic result, not a progress transcript:
+### Status selection
 
-```text
-Status: <completed | partial | blocked | stalled | invalid_input | failed>
-Value: <true/false and one factual sentence>
-Artifacts: <path + verified kind, or none>
-Evidence: <acceptance-bound outcomes only>
-Remaining: <material gaps, or none>
-Retry: <recommended/not recommended + required new input>
-```
+| Status | Use when |
+| --- | --- |
+| `completed` | Every acceptance item has `pass` evidence. |
+| `partial` | Some acceptance is met; `remaining` lists each gap. |
+| `blocked` | Authority, capability, or scope is missing. |
+| `invalid_input` | The brief is contradictory, incomplete, or invalid. |
+| `stalled` | Material progress repeats, so another attempt would not change the result. |
+| `failed` | The work was attempted and cannot meet acceptance. |
 
-The caller-owned `VerificationReceipt` remains separate and is not repeated in
-the worker summary. A result is not accepted because its prose sounds complete:
-the caller must verify the declared bytes, scope, evidence, receipt, and
-acceptance decision. A timeout or missing terminal result is `stalled`, never a
-successful summary. A timeout, interruption, or missing terminal result must
-be represented by a caller-owned `LifecycleRecord`; it must not be converted
-into a successful `WorkerResult` or a fabricated receipt.
+`blocked` and `invalid_input` stop the worker. Recommend a retry only with a
+concrete `required_new_input`. Minor, cosmetic, or prose-only findings go in
+`non_blocking_findings` and never justify a retry.
 
-## Lifecycle record projection
+## Caller: check and decide
 
-When the worker is unavailable or does not emit a terminal payload, the caller
-records lifecycle evidence separately from the worker protocol:
+1. Compose the `WorkerResult` and receipt with the adapter in
+   `scripts/runtime_evidence.py` (`compose_handoff`, then `persist_handoff`).
+   The adapter must not rewrite semantic worker fields; a mismatch fails.
+2. Verify artifact bytes, declared scope, evidence, and the receipt yourself.
+   Do not accept a result because its prose sounds complete.
+3. Read each receipt attestation as `verified`, `worker_claim`,
+   `unavailable`, or `failed`. A worker-declared validation stays
+   `worker_claim` until the caller or runtime observes it. Missing telemetry
+   stays `unavailable`.
+4. Record the separate caller decision: `accepted`, `rejected`, or
+   `not_decided`. `value_verified: true` requires acceptance and verified
+   attestations.
+5. When a timeout, interruption, unavailable executor, or missing terminal
+   output leaves no worker payload, record a `LifecycleRecord` with
+   `compose_lifecycle_record`. Do not create a `WorkerResult` or receipt for
+   that case.
 
 ```text
 Event: <timeout | interrupted | unavailable | no_terminal_result>
@@ -107,16 +140,41 @@ VerificationReceipt: <none>
 Owner: caller
 ```
 
-`stalled` is the terminal classification for timeout, interruption, and
-missing terminal output. `unavailable` records an unavailable executor. The
-record binds the delegation ID and exact brief hash, and may be persisted as a
-`.lifecycle.json` sibling without creating result or receipt files.
+`unavailable` marks an unavailable executor; the other events are `stalled`.
+Result, receipt, and lifecycle files use the `.result.json`, `.receipt.json`,
+and `.lifecycle.json` siblings outside the worker's `write_scope`.
+
+Progress and retry fields describe one pair only. V1 owns no multi-attempt
+lineage; `retry_eligible()` is a deprecated caller-side helper and takes no
+new dependencies.
+
+## Validation
+
+Run from the repository root. Each command prints `valid` and exits `0`, or
+prints one error per line and exits `1`.
+
+```bash
+python3 <this-bundle>/scripts/subagent_contract.py brief <brief.json>
+python3 <this-bundle>/scripts/subagent_contract.py worker-payload <payload.json> <brief.json>
+python3 <this-bundle>/scripts/subagent_contract.py result <result.json> <brief.json>
+python3 <this-bundle>/scripts/subagent_contract.py progress-signature <result.json>
+```
+
+`worker-payload` checks the raw ten-field worker object; `result` checks the
+adapter-composed `WorkerResult`. Receipts and lifecycle records are checked
+through `validate_receipt` and `validate_lifecycle_record` in the same script.
 
 ## Completion criteria
 
-The consumer accepts a result only after it verifies the adapter-composed
-result and caller-owned receipt. Receipt attestations are `verified`,
-`worker_claim`, `unavailable`, or `failed`; caller acceptance stays separate.
-Use the executable validator in
-`scripts/subagent_contract.py`; load `references/protocol.md` for examples,
-canonical projections, cache fields, and migration details.
+- The brief passes `brief` validation before any worker runs.
+- The worker payload passes `worker-payload`, or the caller records why it
+  could not run.
+- The consumer has a receipt with every attestation state set and a separate
+  caller decision, or a `LifecycleRecord` when no payload exists.
+- No accepted result rests only on worker prose or unobserved claims.
+
+## References
+
+- [`references/protocol.md`](references/protocol.md): full schemas, receipt
+  and lifecycle shapes, progress signature, prompt order, cache fields, and
+  migration notes.
