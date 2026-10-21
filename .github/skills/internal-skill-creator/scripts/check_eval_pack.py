@@ -50,6 +50,12 @@ IDENTIFIERS = {
     "case": re.compile(r"C-[A-Z0-9-]+"),
     "query": re.compile(r"Q-[A-Z0-9-]+"),
 }
+# A prompt sharing this many consecutive words with SKILL.md teaches the case, not the rule.
+COPY_NGRAM = 7
+WORD_PATTERN = re.compile(r"[a-z0-9]+")
+HEADING_PATTERN = re.compile(r"^#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$", re.MULTILINE)
+# Opt-in anchor form: <bundle-relative path>.md#<Heading>, separated by ";".
+SOURCE_ANCHOR_PATTERN = re.compile(r"([^\s;#]+\.md)#([^;]+)")
 
 
 class DuplicateJSONKey(ValueError):
@@ -231,6 +237,34 @@ def _validate_pack(pack: Any, bundle_root: Path, skill_name: str) -> list[dict[s
             findings.append(_finding("eval-pack-schema", "A trigger query has an empty competing owner."))
     if polarities != {True, False} or splits != set(SPLITS):
         findings.append(_finding("eval-pack-trigger-coverage", "Triggers need both polarities and both train and held-out splits."))
+    findings.extend(_content_findings(requirements, cases, bundle_root))
+    return findings
+
+
+def _ngrams(text: str) -> set[tuple[str, ...]]:
+    words = WORD_PATTERN.findall(text.lower())
+    return {tuple(words[i : i + COPY_NGRAM]) for i in range(len(words) - COPY_NGRAM + 1)}
+
+
+def _headings(path: Path) -> set[str]:
+    return {match.group(1).strip() for match in HEADING_PATTERN.finditer(path.read_text(encoding="utf-8"))}
+
+
+def _content_findings(requirements: Any, cases: Any, bundle_root: Path) -> list[dict[str, str]]:
+    """Flag case prompts copied from SKILL.md and opt-in source anchors that no longer resolve."""
+    findings: list[dict[str, str]] = []
+    skill_path = bundle_root / "SKILL.md"
+    skill_ngrams = _ngrams(skill_path.read_text(encoding="utf-8")) if skill_path.is_file() else set()
+    for case in cases:
+        if isinstance(case, dict) and _nonempty_string(case.get("prompt")) and _ngrams(case["prompt"]) & skill_ngrams:
+            findings.append(_finding("eval-pack-prompt-copied", f"Case {case.get('id')!r} prompt shares {COPY_NGRAM}+ consecutive words with SKILL.md."))
+    for item in requirements:
+        if not isinstance(item, dict) or not _nonempty_string(item.get("source")):
+            continue
+        for match in SOURCE_ANCHOR_PATTERN.finditer(item["source"]):
+            relative, heading = match.group(1), match.group(2).strip()
+            if not _safe_existing_file(bundle_root, relative) or heading not in _headings(bundle_root / relative):
+                findings.append(_finding("eval-pack-stale-source", f"Requirement {item.get('id')!r} source {match.group(0).strip()!r} does not resolve to a heading in the bundle."))
     return findings
 
 

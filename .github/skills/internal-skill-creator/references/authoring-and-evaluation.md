@@ -107,6 +107,29 @@ Stop when the accepted prompts and validators pass, the user accepts subjective
 outputs, or another iteration adds no decision-relevant evidence. Keep required
 evidence gaps blocked.
 
+## Rule shape and merging
+
+Apply this pass to every workflow section you author or revise.
+
+- Principle: open the section with one line the agent can repeat, such as
+  "Freeze criteria before reading outputs."
+- Trigger word: open each conditional bullet with the condition word, such as
+  `Ask:`, `Stop:`, or `On a dirty tree:`. State invariants as direct
+  imperatives.
+- Concreteness: replace a vague bound with a threshold, template, or example a
+  reader can check, such as "under 30 lines" or `1. <step> -> verify: <check>`.
+  Add the reason only when no file, config, or command reveals it.
+- Example independence: write examples that differ from every eval prompt in
+  the bundle's pack. An example that mirrors a prompt teaches the case, not the
+  rule, and inflates the score.
+- Merging: merge two rules only when they share a trigger and an authorization
+  regime. An unconditional ban, a per-turn request, and an exact-path
+  authorization are three regimes. Before a merge, map the cases that cover
+  each rule and run or review them after the merge.
+
+Detailed writing technique, such as leading words, negation, and no-op tests,
+lives in `/mattpocock-writing-for-agents`; this section takes precedence.
+
 ## Portability and invocation contract
 
 `SKILL.md` frontmatter allows only `name`, `description`, `metadata`, `license`,

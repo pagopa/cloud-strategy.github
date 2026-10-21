@@ -76,6 +76,11 @@ portability and invocation contract in
 and keep always-loaded surfaces within the budgets and sediment review in
 [`references/cache-and-token-efficiency.md`](references/cache-and-token-efficiency.md).
 Link every reference from `SKILL.md`; an unlinked reference is unreachable.
+Apply the rule-shape and merging pass in
+[`references/authoring-and-evaluation.md`](references/authoring-and-evaluation.md)
+to every section you write: one-line principle, trigger-word bullets, concrete
+bounds, examples independent of eval prompts, and merges only within one
+authorization regime.
 Classify a wording edit as editorial only when behavior and reachability stay
 the same. Moving a mandatory rule behind a conditional reference is a
 behavioral change.
@@ -96,7 +101,8 @@ the accepted requirements, and the frontmatter checker passes.
 Deliver an eval pack for every skill created or behaviorally changed. Derive
 cases from the frozen requirements, include a defective fixture for
 deterministic cases or anchored rubrics for judgment cases, and record the
-evidence state honestly. Follow [`references/eval-packs.md`](references/eval-packs.md)
+evidence state honestly. Write prompts in the user's words, never the skill's,
+and anchor new requirement sources to headings. Follow [`references/eval-packs.md`](references/eval-packs.md)
 and run the checker shipped in this bundle:
 
 ```bash

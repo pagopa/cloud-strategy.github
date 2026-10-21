@@ -56,6 +56,21 @@
       "id": "R-FRONTMATTER",
       "text": "Keep every created, edited, or re-checked SKILL.md frontmatter parseable by strict YAML, with name and description as strings.",
       "source": "internal-skill-creator SKILL.md: Author or revise; references/authoring-and-evaluation.md: Portability and invocation contract"
+    },
+    {
+      "id": "R-MERGE",
+      "text": "Merge two rules only when they share a trigger and an authorization regime, after mapping the eval cases that cover each rule.",
+      "source": "internal-skill-creator/references/authoring-and-evaluation.md: Rule shape and merging"
+    },
+    {
+      "id": "R-RULE-SHAPE",
+      "text": "Give each workflow section a one-line principle, open conditional bullets with their trigger word, and make an abstract rule concrete with an example, template, or threshold that does not copy an eval prompt.",
+      "source": "internal-skill-creator/references/authoring-and-evaluation.md: Rule shape and merging"
+    },
+    {
+      "id": "R-CONTENT-CHECKS",
+      "text": "Reject case prompts that copy seven or more consecutive words of SKILL.md and opt-in source anchors that no longer resolve to a bundle heading, in both the creator checker and the host validator.",
+      "source": "SKILL.md#4. Generate or update the eval pack; references/eval-packs.md#Schema v1"
     }
   ],
   "cases": [
@@ -851,6 +866,126 @@
         ],
         "fail": [
           "A section is missing or out of order, or an unobserved check is reported as passed."
+        ]
+      }
+    },
+    {
+      "id": "C-CONTENT-CHECKS",
+      "family": "regression",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-CONTENT-CHECKS",
+        "R-EVALUATION"
+      ],
+      "prompt": "My pack scores perfectly but I suspect the cases just quote the skill text back, and one source points at a heading I renamed last week. Can the checker catch both?",
+      "initial_state": "The creator checker, the host validator, the valid fixture pack, and the shared mutation fixtures are available.",
+      "expected_output": "Both validators report eval-pack-prompt-copied and eval-pack-stale-source on the matching mutations and stay silent on the valid pack, short overlaps, and free-text sources.",
+      "files": [
+        "scripts/check_eval_pack.py",
+        "fixtures/eval-packs/valid-pack.json"
+      ],
+      "assertions": [
+        {
+          "id": "A-COPY-FLAGGED",
+          "text": "A prompt sharing seven consecutive words with SKILL.md yields eval-pack-prompt-copied.",
+          "critical": true
+        },
+        {
+          "id": "A-STALE-FLAGGED",
+          "text": "An anchored source naming a missing heading or file yields eval-pack-stale-source.",
+          "critical": true
+        },
+        {
+          "id": "A-NO-FALSE-POSITIVE",
+          "text": "Short overlaps and free-text sources produce no finding.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Lowering the seven-word threshold to make a fixture fail."
+      ],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "fixtures/eval-packs/pack-mutations.json"
+    },
+    {
+      "id": "C-MERGE-REGIMES",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MERGE",
+        "R-REVISION"
+      ],
+      "prompt": "Shorten the skill by folding its three permission bullets into a single 'requires explicit approval' rule.",
+      "initial_state": "One bullet is an unconditional ban, one needs a request in the current turn, and one needs the exact path named. Each bullet has its own eval case.",
+      "expected_output": "Keep the three regimes separate, name the cases each merge would break, and shorten only the wording within each bullet.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-REGIMES-KEPT",
+          "text": "The unconditional ban, the per-turn request, and the exact-path rule remain distinct.",
+          "critical": true
+        },
+        {
+          "id": "A-CASES-NAMED",
+          "text": "The cases that the proposed merge would break are named before any edit.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Merging rules that differ in authorization regime to save lines."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The answer maps each bullet to its regime and its case, then declines the unsafe merge."
+        ],
+        "fail": [
+          "One merged rule weakens the ban or loosens the exact-path condition."
+        ]
+      }
+    },
+    {
+      "id": "C-RULE-SHAPE",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-RULE-SHAPE",
+        "R-AUTHORING"
+      ],
+      "prompt": "Tighten the workflow section that says 'keep outputs reasonably small and check them properly'.",
+      "initial_state": "The section has no principle line, no threshold, and no example; the skill's eval pack includes a case whose prompt asks for a 40-line summary.",
+      "expected_output": "A one-line principle, a measurable size threshold or template, and an example that is not the eval prompt.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CONCRETE",
+          "text": "The vague bound becomes a threshold, template, or example that a reader can check.",
+          "critical": true
+        },
+        {
+          "id": "A-NO-PROMPT-COPY",
+          "text": "No example reuses the wording of an eval case prompt.",
+          "critical": true
+        },
+        {
+          "id": "A-PRINCIPLE",
+          "text": "The section opens with a one-line principle.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Copying an eval prompt into the skill as an example."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The rewritten section is checkable and its example is independent of the pack."
+        ],
+        "fail": [
+          "The bound stays vague, or the example mirrors the 40-line summary case."
         ]
       }
     }

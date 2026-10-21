@@ -80,7 +80,16 @@ Finding codes shared by the creator checker and host validator are:
 - `eval-pack-missing-defective-fixture`, `eval-pack-missing-rubric`;
 - `eval-pack-invalid-status`, `eval-pack-unsafe-path`;
 - `eval-pack-trigger-coverage`;
+- `eval-pack-prompt-copied`, `eval-pack-stale-source`;
 - `eval-run-unbacked-result`, `eval-run-assertion-mismatch`.
+
+`eval-pack-prompt-copied` fires when a case prompt shares seven or more
+consecutive words with the bundle's `SKILL.md`; such a case scores recall of
+the text, not the rule. `eval-pack-stale-source` checks only opt-in anchors of
+the form `<bundle-relative path>.md#<Heading>`, separated by `;`, such as
+`SKILL.md#Workflow; references/eval-packs.md#Case design`. Free-text sources
+stay unchecked; prefer the anchor form for new requirements so a renamed
+heading fails the checker.
 
 The host change-scope gate also reports `eval-pack-missing-new-skill` as a
 blocker for a newly added internal skill and

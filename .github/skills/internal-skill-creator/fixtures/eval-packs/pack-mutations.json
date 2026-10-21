@@ -22,5 +22,12 @@
   {"name": "run-duplicate-case-result", "target": "run", "changes": [{"path": ["case_results"], "value": [
     {"case_id": "C-DETERMINISTIC", "status": "passed", "transcript_ref": "transcripts/C-DETERMINISTIC.txt", "assertions": [{"id": "A-OUTPUT", "passed": true, "evidence": "Output matched."}]},
     {"case_id": "C-DETERMINISTIC", "status": "failed", "transcript_ref": "transcripts/C-DETERMINISTIC-2.txt", "assertions": [{"id": "A-OUTPUT", "passed": false, "evidence": "Output differed."}]}
-  ]}], "expected_codes": ["eval-run-unbacked-result"]}
+  ]}], "expected_codes": ["eval-run-unbacked-result"]},
+  {"name": "prompt-copied-from-skill", "target": "pack", "changes": [{"path": ["cases", 0, "prompt"], "value": "Turn the request into requirements for behavior, output, and permissions."}], "expected_codes": ["eval-pack-prompt-copied"]},
+  {"name": "prompt-short-overlap-allowed", "target": "pack", "changes": [{"path": ["cases", 0, "prompt"], "value": "Freeze criteria before reviewing the generated report."}], "expected_codes": []},
+  {"name": "source-anchor-valid", "target": "pack", "changes": [{"path": ["requirements", 0, "source"], "value": "SKILL.md#Workflow; references/eval-packs.md#Case design"}], "expected_codes": []},
+  {"name": "source-anchor-missing-heading", "target": "pack", "changes": [{"path": ["requirements", 0, "source"], "value": "SKILL.md#Working Agreement"}], "expected_codes": ["eval-pack-stale-source"]},
+  {"name": "source-anchor-missing-file", "target": "pack", "changes": [{"path": ["requirements", 0, "source"], "value": "references/retired.md#Workflow"}], "expected_codes": ["eval-pack-stale-source"]},
+  {"name": "source-anchor-escape", "target": "pack", "changes": [{"path": ["requirements", 0, "source"], "value": "../internal-review-high-level/SKILL.md#Report"}], "expected_codes": ["eval-pack-stale-source"]},
+  {"name": "source-free-text-ignored", "target": "pack", "changes": [{"path": ["requirements", 0, "source"], "value": "internal-skill-creator SKILL.md: Renamed Section"}], "expected_codes": []}
 ]
