@@ -2,17 +2,22 @@
 
 `AGENTS.md` is the always-on, portable policy baseline for coding agents. Keep
 it generic enough to reuse in any repository; keep repository-specific rules in
-`AGENTS.local.md` and specialized guidance with the nearest owner. Load
-`AGENTS.local.md` next to this file after this baseline when it exists.
+`AGENTS.local.md` and specialized guidance with the nearest owner.
 
 ## Scope And Precedence
 
 **The narrowest applicable owner decides.**
 
+- Local policy: when `AGENTS.local.md` exists next to this file, you must read
+  it before you act and apply it after this baseline. Its rules override
+  baseline defaults, subject to the limits below. When it does not exist,
+  continue without error and do not create it.
 - Direct user instructions win for the current task unless they require unsafe,
   destructive, or impossible behavior.
 - Apply the smallest relevant owner. Narrower, target-specific rules override
   broader defaults when they conflict.
+- Local policy and narrower owners must not weaken `Boundaries` or
+  `Protected Skill Boundary`, or override direct user instructions.
 - Keep one active primary owner per execution lane. That owner retains material
   decisions and final acceptance; load narrower owners only when evidence shows
   they are needed.
@@ -26,8 +31,8 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 - Always: keep secrets out of code and history.
 - Ask first: destructive or irreversible actions, and policy or public-contract
   changes.
-- Never: force-push or delete others' work; commit unless the user requests it
-  in the current turn.
+- Never: force-push or delete others' work. Never commit unless the user
+  requests a commit in the current turn.
 - A user request in the current turn authorizes its own action. An answer to
   your own question authorizes no item in `Never`: a "yes" to "shall I run the
   tests?" is not permission to commit.
@@ -53,7 +58,7 @@ it generic enough to reuse in any repository; keep repository-specific rules in
   in one line: `Assumption: <X>. Rejected: <Y>.` Push back when a simpler
   approach exists.
 - Ask: when two plausible readings produce materially different changes, or
-  when `Boundaries` require it. Ask one specific question and include your
+  when `Boundaries` require it, ask one specific question and include your
   recommendation.
 - Stop: with no user channel, stop at the decision and report the blocker.
 - Snapshot: on a dirty working tree, record the initial state without
@@ -64,15 +69,17 @@ it generic enough to reuse in any repository; keep repository-specific rules in
 **Build what the request names. Touch only what you must.**
 
 - Write the least code that meets the goal, with the fewest abstractions,
-  options, and states that internal invariants leave reachable. Validate
-  external boundaries. When 200 lines could be 50, or a senior engineer would
-  call it overcomplicated, rewrite it.
+  options, and states that internal invariants leave reachable. Add no
+  abstraction for single-use code. Validate external boundaries. When 200
+  lines could be 50, or a senior engineer would call it overcomplicated,
+  rewrite it.
 - Keep every changed line surgical: it traces to the request, matches the
   existing style even when you would write it differently, and leaves
   formatting, comments, and working code untouched, even inside touched
   functions.
-- Report unrelated dead code and leave it in place. Remove only the imports,
-  variables, and functions that your own change orphaned.
+- Report unrelated dead code and leave it in place unless the user asks to
+  remove it. Remove only the imports, variables, and functions that your own
+  change orphaned.
 
 ## Prove With Checks
 
@@ -106,6 +113,12 @@ it generic enough to reuse in any repository; keep repository-specific rules in
   documentation so stale checks cannot restore the old behavior.
 - Treat prose as guidance, not enforcement. Put hard guarantees in permissions,
   validators, hooks, or CI.
+- Before handoff, review your changes against the recorded initial state.
+  Revert only your own hunks that do not trace to the request, and preserve
+  all pre-existing changes. Collapse speculative options and single-use
+  abstractions that your task introduced. A clarification that surfaced only
+  after editing came too late: report it and confirm the diff still matches
+  the clarified intent.
 - Before the final answer, re-read the changed files from the working tree
   and compare them with the answer. Report only checks, content, and behavior
   that the final state contains.
