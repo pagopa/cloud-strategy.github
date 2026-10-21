@@ -120,6 +120,11 @@ EVAL_ID_PATTERNS = {
     "case": re.compile(r"C-[A-Z0-9-]+"),
     "query": re.compile(r"Q-[A-Z0-9-]+"),
 }
+# Mirrors internal-skill-creator/scripts/check_eval_pack.py content checks.
+EVAL_COPY_NGRAM = 7
+EVAL_WORD_PATTERN = re.compile(r"[a-z0-9]+")
+EVAL_HEADING_PATTERN = re.compile(r"^#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$", re.MULTILINE)
+EVAL_SOURCE_ANCHOR_PATTERN = re.compile(r"([^\s;#]+\.md)#([^;]+)")
 
 
 class _DuplicateJSONKey(ValueError):
@@ -454,6 +459,58 @@ def _validate_eval_pack_data(
                 "Triggers need both polarities and both splits.",
             )
         )
+    findings.extend(_eval_content_findings(requirements, cases, bundle_root, source))
+    return findings
+
+
+def _eval_ngrams(text: str) -> set[tuple[str, ...]]:
+    words = EVAL_WORD_PATTERN.findall(text.lower())
+    size = EVAL_COPY_NGRAM
+    return {tuple(words[i : i + size]) for i in range(len(words) - size + 1)}
+
+
+def _eval_headings(path: Path) -> set[str]:
+    text = path.read_text(encoding="utf-8")
+    return {match.group(1).strip() for match in EVAL_HEADING_PATTERN.finditer(text)}
+
+
+def _eval_content_findings(
+    requirements: object, cases: object, bundle_root: Path, source: Path | None
+) -> list[Finding]:
+    """Flag prompts copied from SKILL.md and opt-in source anchors that do not resolve."""
+    findings: list[Finding] = []
+    skill_path = bundle_root / "SKILL.md"
+    skill_ngrams = (
+        _eval_ngrams(skill_path.read_text(encoding="utf-8"))
+        if skill_path.is_file()
+        else set()
+    )
+    for case in cases if isinstance(cases, list) else []:
+        prompt = case.get("prompt") if isinstance(case, dict) else None
+        if _eval_nonempty(prompt) and _eval_ngrams(prompt) & skill_ngrams:
+            findings.append(
+                _eval_finding(
+                    "eval-pack-prompt-copied",
+                    source,
+                    f"Case prompt shares {EVAL_COPY_NGRAM}+ consecutive words with SKILL.md.",
+                )
+            )
+    for item in requirements if isinstance(requirements, list) else []:
+        text = item.get("source") if isinstance(item, dict) else None
+        if not _eval_nonempty(text):
+            continue
+        for match in EVAL_SOURCE_ANCHOR_PATTERN.finditer(text):
+            relative, heading = match.group(1), match.group(2).strip()
+            if not _eval_safe_file(
+                bundle_root, relative
+            ) or heading not in _eval_headings(bundle_root / relative):
+                findings.append(
+                    _eval_finding(
+                        "eval-pack-stale-source",
+                        source,
+                        "Requirement source anchor does not resolve to a bundle heading.",
+                    )
+                )
     return findings
 
 

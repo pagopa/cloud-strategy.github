@@ -4,6 +4,7 @@
   "host": "github-copilot",
   "arms": ["baseline-old", "candidate-new", "control-broken"],
   "runs_per_cell": { "first_pass": 3, "escalation": 5 },
+  "min_improvement_share": 0.5,
   "metrics": [
     {
       "id": "M-UNREQUESTED-LINES",
@@ -220,7 +221,7 @@
     },
     {
       "id": "CTL-OLD-FAILS-IMPROVEMENT",
-      "text": "baseline-old must lose at least one critical assertion that candidate-new wins."
+      "text": "candidate-new must win at least one critical assertion over baseline-old in at least min_improvement_share of the improvement cases."
     }
   ],
   "cases": [

@@ -195,3 +195,38 @@ def test_identical_arms_do_not_discriminate(pack: dict) -> None:
     assert any(
         "CTL-OLD-FAILS-IMPROVEMENT" in finding for finding in result["gate_failures"]
     )
+
+
+def test_one_improvement_win_is_not_enough_to_discriminate(pack: dict) -> None:
+    improvement = [c["id"] for c in pack["cases"] if c["target"] == "improvement"]
+    records = _records(
+        pack, {scorer.OLD: True, scorer.NEW: True, scorer.CONTROL: False}, runs=5
+    )
+    for record in records:
+        if record["case_id"] == improvement[0] and record["arm"] == scorer.OLD:
+            case = next(c for c in pack["cases"] if c["id"] == improvement[0])
+            record["observations"].update(
+                {item["observable"]: _failing(item) for item in case["assertions"]}
+            )
+
+    result = scorer.score(pack, records)
+
+    assert any(
+        "CTL-OLD-FAILS-IMPROVEMENT" in finding for finding in result["gate_failures"]
+    )
+
+
+def test_pack_rejects_invalid_improvement_share(pack: dict) -> None:
+    broken = copy.deepcopy(pack)
+    broken["min_improvement_share"] = 1.5
+
+    assert any("min_improvement_share" in error for error in scorer.validate_pack(broken))
+
+
+def test_pack_rejects_prompt_copied_from_subject(pack: dict) -> None:
+    broken = copy.deepcopy(pack)
+    broken["cases"][0]["prompt"] = (
+        "Keep one active primary owner per execution lane for this task."
+    )
+
+    assert any("copies AGENTS.md" in error for error in scorer.validate_pack(broken))
