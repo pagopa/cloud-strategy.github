@@ -11,7 +11,10 @@
     {"id": "R-ORDER", "text": "Follow the fixed title and compact report order with the emoji skeleton, keeping the emoji on every section that appears and omitting sections that add nothing.", "source": "SKILL.md Report order; references/report-layout.md"},
     {"id": "R-FINDING", "text": "Each material finding carries Problem, Suggestion, Why, independent severity and confidence, a traceable location, evidence, consequence, expected verification when not obvious, and relationship labels where relationships are drawn.", "source": "SKILL.md Findings; references/report-layout.md"},
     {"id": "R-LANGUAGE", "text": "Write the report in the current chat language with translated section headings and stable finding field names; keep the fixed title prefix and verdict values unchanged; use Latin-script text and the fixed set of structural emoji on every report.", "source": "SKILL.md Language"},
-    {"id": "R-COMPLETION", "text": "Finish only when every material conclusion is traceable or limited by an explicit gap, scope and residual risk are visible, the verdict is calibrated, and no remediation was applied.", "source": "SKILL.md Completion"}
+    {"id": "R-COMPLETION", "text": "Finish only when every material conclusion is traceable or limited by an explicit gap, scope and residual risk are visible, the verdict is calibrated, and no remediation was applied.", "source": "SKILL.md Completion"},
+    {"id": "R-RULE-LENS", "text": "For an agent-rules document, check contradictions between rules, one meaning stated twice, no-op rules, prohibitions without a positive target, and what propagates unchanged to consumers; when it ships with an eval pack, check per-rule coverage, stale requirement sources, and checks that cannot discriminate.", "source": "references/analysis-dimensions.md#AI resources"},
+    {"id": "R-ABSENCE", "text": "Report an absence only with the searched scope as its evidence anchor; an unsearched absence is an evidence gap.", "source": "SKILL.md#Findings"},
+    {"id": "R-ANALYSIS-REVIEW", "text": "When the target is an earlier analysis, give each claim a verdict of confirmed, partial, or wrong with evidence, then report missed issues and the regression risk of each proposed fix.", "source": "references/analysis-dimensions.md#Analysis and research"}
   ],
   "cases": [
     {
@@ -143,6 +146,88 @@
       },
       "status": "not-run",
       "held_out": false
+    },
+    {
+      "id": "C-RULES-DOC",
+      "family": "regressions in neighboring behavior",
+      "kind": "rubric",
+      "requirement_ids": ["R-RULE-LENS", "R-METHOD", "R-FINDING"],
+      "prompt": "Review our agent rules and their eval pack before they ship to every repository.",
+      "initial_state": "English chat. Targets are tests/fixtures/rubric-targets/agent-rules.md and tests/fixtures/rubric-targets/agent-rules-evals.json.",
+      "expected_output": "Findings for the delete-before-asking contradiction, the duplicated diff rule, and the stale Working Agreement source; the propagation impact and the unexercised R-ASK-DELETE requirement are visible.",
+      "files": [
+        "SKILL.md",
+        "references/analysis-dimensions.md",
+        "tests/fixtures/rubric-targets/agent-rules.md",
+        "tests/fixtures/rubric-targets/agent-rules-evals.json"
+      ],
+      "assertions": [
+        {"id": "A-CONTRADICTION", "text": "The conflict between asking before any deletion and deleting build/ files without asking is a finding anchored to both sections.", "critical": true},
+        {"id": "A-STALE-SOURCE", "text": "The R-ASK-DELETE source naming a Working Agreement section that does not exist is reported.", "critical": true},
+        {"id": "A-DUPLICATE", "text": "The diff rule stated in two sections is reported as one meaning in two places.", "critical": false},
+        {"id": "A-NO-DISCRIMINATION", "text": "R-ASK-DELETE is reported as covered by a case whose assertions never exercise it.", "critical": false},
+        {"id": "A-PROPAGATION", "text": "The review notes that every defect propagates unchanged to consumer repositories.", "critical": false}
+      ],
+      "forbidden_actions": ["Rewriting the rules file", "Editing the eval pack"],
+      "rubric": {
+        "pass": ["Rule-level defects and eval-pack defects are separate, anchored findings."],
+        "fail": ["The review grades prose style only and misses the contradiction or the stale source."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-ABSENCE-SCOPE",
+      "family": "material ambiguity in the request",
+      "kind": "rubric",
+      "requirement_ids": ["R-ABSENCE", "R-FINDING"],
+      "prompt": "What does our agent rules file still lack for a production rollout?",
+      "initial_state": "English chat. The target is tests/fixtures/rubric-targets/agent-rules.md; it has a Secrets section at the end.",
+      "expected_output": "Each reported absence names the sections searched; credential handling is not reported as missing.",
+      "files": [
+        "SKILL.md",
+        "references/review-lenses.md",
+        "tests/fixtures/rubric-targets/agent-rules.md"
+      ],
+      "assertions": [
+        {"id": "A-SCOPE-ANCHOR", "text": "Every absence finding names the searched scope as its evidence anchor.", "critical": true},
+        {"id": "A-NO-FALSE-ABSENCE", "text": "Credential handling is not reported as missing.", "critical": true}
+      ],
+      "forbidden_actions": ["Claiming a rule is missing without naming where it was searched"],
+      "rubric": {
+        "pass": ["Absences are scoped claims or evidence gaps."],
+        "fail": ["An absence is asserted from a partial read."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-PRIOR-ANALYSIS",
+      "family": "first-time skill creation and material ambiguity in the request",
+      "kind": "rubric",
+      "requirement_ids": ["R-ANALYSIS-REVIEW", "R-ABSENCE", "R-VERDICT"],
+      "prompt": "Check this earlier analysis of our agent rules before we act on it.",
+      "initial_state": "English chat. Targets are tests/fixtures/rubric-targets/prior-analysis.md and tests/fixtures/rubric-targets/agent-rules.md.",
+      "expected_output": "Claim 1 confirmed, claim 2 wrong because a Secrets section exists, claim 3 flagged for changing the build/ cleanup permission; the missed contradiction and no-op are reported.",
+      "files": [
+        "SKILL.md",
+        "references/analysis-dimensions.md",
+        "tests/fixtures/rubric-targets/prior-analysis.md",
+        "tests/fixtures/rubric-targets/agent-rules.md"
+      ],
+      "assertions": [
+        {"id": "A-PER-CLAIM", "text": "Each of the three claims gets confirmed, partial, or wrong with an evidence anchor.", "critical": true},
+        {"id": "A-WRONG-ABSENCE", "text": "Claim 2 is marked wrong with the Secrets section as evidence.", "critical": true},
+        {"id": "A-REGRESSION-RISK", "text": "Claim 3 is flagged because the merged rule changes the build/ cleanup from no-ask to ask.", "critical": true},
+        {"id": "A-MISSED", "text": "Issues the analysis missed, such as the contradiction or the no-op rule, are listed.", "critical": false}
+      ],
+      "forbidden_actions": ["Applying the proposed fixes", "Accepting a claim without checking the target"],
+      "rubric": {
+        "pass": ["Per-claim verdicts, missed issues, and fix regression risk all appear in the fixed report layout."],
+        "fail": ["The review restates the analysis or adopts its fixes unchecked."]
+      },
+      "status": "not-run",
+      "held_out": true
     }
   ],
   "triggers": {

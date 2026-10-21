@@ -22,6 +22,10 @@ that can change the verdict for the target and declared decision.
 - Evidence coverage, uncertainty, and alternative explanations
 - Assumptions, limitations, and transferability
 - Traceability from evidence to conclusion
+- Review of an earlier analysis: give each claim `confirmed`, `partial`, or
+  `wrong` with its evidence anchor, then list what the analysis missed and the
+  regression risk of each fix it proposes. Report these as findings in the
+  fixed layout, not as a separate report shape.
 
 ## Informational documents
 
@@ -63,6 +67,13 @@ that can change the verdict for the target and declared decision.
 - Handoffs, stop conditions, and degraded behavior
 - Evaluation and observability readiness
 - Consumer, catalog, and propagation impact
+- Rules documents: rules that contradict each other, one meaning stated in two
+  places, rules that change nothing versus model defaults, prohibitions with no
+  positive target, and which content reaches consumers unchanged. Two rules
+  merge safely only when they share a trigger and an authorization regime.
+- Eval packs that ship with the artifact: rules with no case, requirement
+  sources that name a section the target no longer has, and requirements a
+  case lists but no assertion exercises.
 
 ## Proposals and mature ideas
 

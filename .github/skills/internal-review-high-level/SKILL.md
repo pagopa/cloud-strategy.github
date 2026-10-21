@@ -2,7 +2,7 @@
 name: internal-review-high-level
 description: Use when a user needs an independent, evidence-first, report-only review of a non-code artifact or change, including AI resources, architectures, mature proposals, documents, policies, plans, specifications, decisions, or processes.
 metadata:
-  revision: 2026-09-26
+  revision: 2026-10-21
 ---
 
 # Internal Review High Level
@@ -132,6 +132,10 @@ Each material finding keeps `Problem` / `Suggestion` / `Why`, independent
 severity and confidence, a location or evidence anchor, consequence, and
 `Expected verification` when closure is not obvious. Label relationships as
 `[documented]`, `[observed]`, `[proposed]`, or `[unknown]`.
+
+An absence is a finding only when its anchor names the searched scope, for
+example "no data-retention period in sections 2-5 or the glossary". Without
+that scope, report it as an evidence gap.
 
 Load [`references/report-layout.md`](references/report-layout.md) when
 composing the report; it defines the finding, evidence-gap, open, next, and
