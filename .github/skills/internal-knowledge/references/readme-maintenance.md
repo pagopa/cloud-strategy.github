@@ -31,6 +31,11 @@ type to its existing owner and state **Load when** a reader needs that
 knowledge. Use an explicit `not evidenced` entry for a type that has no
 evidence; do not create an empty document to fill the gap.
 
+In [complete setup](complete-setup.md), link prepared knowledge separately
+with its placeholder status and link operational templates as reusable
+support, not as active work or confirmed knowledge. Mock examples never
+satisfy coverage.
+
 The index publishes the alignment contract: operational work cites the
 knowledge IDs it realizes; the skill reads operational artifacts only as
 evidence; and `docs/` contains no reverse registry of operational work.

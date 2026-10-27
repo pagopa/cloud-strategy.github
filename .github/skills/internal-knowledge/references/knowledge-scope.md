@@ -29,10 +29,16 @@ Resolve exactly one provisional mode from the request signals before reading evi
 | `audit` | The request explicitly asks for a bounded read-only audit, review, inspection, or diagnosis of documentation or its ownership/evidence. | No write allowlist. Read only the normalized audit perimeter and directly necessary supporting evidence. |
 | `align` | The user explicitly invokes `align cascade` or `align harvest`. | No write allowlist. Return approvable deltas or `nothing to promote`. |
 | `targeted` | The user names explicit paths, directories, or a single document. | Only those normalized destinations. |
-| `sync` | No explicit targets, and the repository already realizes its declared knowledge layout. | The approved plan intersected with the requested bucket: existing documents plus missing documents on the closed derived-gap list. |
-| `setup` | No explicit targets, and the declared layout is absent, incomplete, or contradicted by what exists on disk. | The approved plan intersected with the requested bucket: the layout and component documents the bucket admits. |
+| `sync` | No explicit targets or complete-installation request, and the repository already realizes its declared knowledge layout. | The approved plan intersected with the requested bucket: existing documents plus missing documents on the closed derived-gap list. |
+| `setup` | Explicit complete workspace setup, or no explicit targets and a layout that is absent, incomplete, or contradicted on disk. | The approved exact-path plan intersected with the requested bucket; complete setup also admits the scaffolds and operational documentation defined in its reference. |
 
 An explicit `audit` signal wins before path interpretation, so a request such as "audit this README" remains read-only rather than becoming targeted authoring. If a request combines audit with a possible fix, complete the audit report only and require a separate explicit authoring request for any change. When two modes remain defensible after the check, do not guess: state both readings and ask which one applies.
+
+An explicit whole-workspace installation selects `setup` rather than `sync`,
+even when the current layout is realized. It is not an explicit destination
+merely because the user names the workspace. Apply
+[complete setup](complete-setup.md) only to that request, not to a bounded
+vocabulary update or an automatic layout-drift escalation.
 
 ## Align mode
 
@@ -117,6 +123,11 @@ The declared layout also covers knowledge types. In `sync` and `setup`, give eac
 
 All verified drift states select `setup`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail. `setup` runs whenever the layout check detects drift, not only on first use: the name describes the work, not the schedule.
 
+Complete installation separately checks real project areas and prepared
+scaffolds. A missing glossary is legitimate under ordinary lazy maintenance
+but is a preparation gap in complete setup. Do not infer multiple semantic
+contexts merely from multiple project areas or count mock as a real domain.
+
 In `setup` the declared layout is never inherited. Derive the domain set from evidence, present the declaration as a proposal to confirm, and carry both readings in the plan when they differ.
 
 Changing a declaration is a documentation change like any other. It enters the plan, appears in the allowlist, and is written only after approval. Never update a declaration silently, and never leave a declaration pointing at a document the plan does not create.
@@ -162,6 +173,10 @@ Account for every discovered directory and evidence-table row as `planned`, `exi
 - A row outside the requested bucket is reported as excluded with the reason `outside the requested bucket`; it never produces an unplanned write.
 - Exact future documentation paths may be authorized before creation. Maps and indexes require their own destination authority. The allowlist never grows without further explicit approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
 - The allowlist contains documentation targets only, including README files. Do not edit source code, configuration, policy, workflows, tests, validators, or generators. When a needed correction belongs to a code or configuration owner, leave it untouched and report its path and reason in `breaking_refs`.
+- In explicit complete setup, documentation targets may additionally include
+  marked knowledge scaffolds, operational templates, and eligible synthetic
+  examples. This exception does not authorize live work records, policy edits,
+  executable installation, or arbitrary component procedures.
 - Repository governance and contribution files are evidence, never targets. Read them, cite them, place them in the reading order, and leave them untouched.
 - A path is generated or externally synchronized only when its own generator or manifest lists that path. A directory pattern is not evidence of ownership: read the entries, because a manifest covering a tree normally enumerates exact paths, and excluding a repository-owned document as managed drops it from the plan without anyone noticing.
 - `targeted` has no implicit root-layout exception. If the layout root is not a supplied destination, report any gap it creates and leave the root untouched.
@@ -196,11 +211,17 @@ Before rewriting an existing document, evaluate this predicate. It is mechanical
 A target is `unchanged` when all of the following hold:
 
 1. Every section its contract requires is present, in the required order.
-2. No placeholder, unresolved marker, or empty required section remains.
+2. No unresolved claim or unintentionally empty required section remains.
+   A marked scaffold or template installed under complete setup may retain
+   its intentional notice and unfilled sections; assess its installation
+   contract, not whether future knowledge has already been supplied.
 3. Every relative link resolves from the document's directory.
 4. Every generated block is intact and internally consistent.
 5. No material claim in the document contradicts current repository evidence.
-6. Every claim fits its strategic or tactical knowledge type and is held by an owner appropriate to that layer; use [knowledge types](knowledge-types.md) to check the fit.
+6. Knowledge claims fit their strategic or tactical type and canonical owner;
+   use [knowledge types](knowledge-types.md) to check the fit. Setup scaffolds,
+   templates, and examples instead satisfy [complete setup](complete-setup.md)
+   without claiming knowledge coverage or real work.
 7. There is no material addition for its stated reader outcome still required. If a material omission prevents that outcome, the target is not `unchanged`.
 
 When the predicate holds, report the target as `unchanged` and do not write it. When it fails, name the failing clause in the plan; that clause is the justification for the rewrite. Stylistic preference is never a justification.
@@ -212,6 +233,9 @@ When the predicate holds, report the target as `unchanged` and do not write it. 
 The plan states, briefly:
 
 - the resolved mode, its selecting signal, and the result of the layout check;
+- for complete setup, real project-domain evidence, mock eligibility,
+  canonical glossary ownership, scaffold statuses, operational destinations,
+  and preservation checks from [complete setup](complete-setup.md);
 - the layout, its declaration source, the evidenced domain set, and any drift;
 - whether the external context-format skill is available, whenever the plan includes a context document;
 - one row per planned target with its path, its state under the unchanged predicate, and the reason it is included;

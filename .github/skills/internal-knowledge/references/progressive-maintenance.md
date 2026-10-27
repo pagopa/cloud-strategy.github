@@ -7,7 +7,8 @@ It changes update timing within an authoring mode, not mode or authority.
 ## Resolution and authority
 
 Keep candidate definitions, disputed meanings, and tentative decisions in chat.
-Do not create a placeholder or persist an unresolved candidate. A claim is ready
+Outside [complete setup](complete-setup.md), do not create a placeholder;
+never persist an unresolved candidate as an accepted claim. A claim is ready
 when its meaning is resolved with the user or authoritative evidence, its owner
 and maturity are known, and it adds durable knowledge without contradiction.
 

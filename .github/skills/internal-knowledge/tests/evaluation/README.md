@@ -47,6 +47,22 @@ or complete migration. Existing v1 fixtures remain compatibility checks. The R-R
 selects v2 for new authoring under the accepted contract evolution; its truth
 requirement is unchanged. Baseline snapshots used for comparisons stay in disposable session storage.
 
+## Complete setup coverage
+
+The accepted complete-installation request narrows R-OPTIONAL-ARTIFACTS:
+evidence-free claims remain forbidden, but an explicitly marked scaffold is
+valid preparation in complete setup. Narrow vocabulary updates and ordinary
+knowledge maintenance retain the lazy glossary behavior.
+
+FS0-FS2 and C-SETUP-AUDIT, C-SETUP-EMPTY, C-SETUP-REAL, and C-SETUP-REPEAT cover the glossary
+placeholder, operational templates in one setup, zero-real-domain mock gate,
+technical-folder exclusion, a real project evidenced without a README,
+customized-template preservation, retained historical mock, and zero-write
+repeat. The audit case covers complete setup as an inspection subject without
+permitting installation; existing align cases retain the read-only boundary.
+The added rubric cases remain `not-run`; native checks validate the pack,
+not observed model idempotence or successful installation.
+
 ## Holdout and live runs
 
 Do not open FH or its gold while tuning graders, prompts or expected outputs.

@@ -56,6 +56,10 @@ authoritative source.
 
 ## Proposal and evidence states
 
+Marked setup scaffolds, reusable templates, and synthetic mock examples are
+not accepted knowledge, alignment targets, or operational execution evidence.
+Their presence does not prove coverage and supplies no authoritative IDs.
+
 A proposal remains a proposal until the named decision authority accepts it.
 Acceptance does not prove that the decision is implemented, and implementation
 does not by itself establish an observed outcome. Keep accepted decisions,

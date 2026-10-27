@@ -2,7 +2,9 @@
 
 Use this reference to classify durable repository knowledge and select its
 owner. The skill maintains strategic and tactical knowledge and their
-alignment. It does not maintain operational content.
+alignment. Complete setup also prepares marked scaffolds and operational
+documentation under [its separate contract](complete-setup.md); those
+artifacts do not become strategic or tactical knowledge by existing.
 
 ## Strategic knowledge
 
@@ -18,7 +20,7 @@ alignment. It does not maintain operational content.
 
 | Type | What it records | Default home for a new repository |
 | --- | --- | --- |
-| Rules and policies | Normative requirements that govern work | `docs/domain/<context>/RULES.md` or a policy owner |
+| Rules and policies | Normative requirements that govern work | `docs/domains/<context>/RULES.md` or a policy owner |
 | Standards and conventions | Shared practices, including naming grammar | `docs/standards/` |
 | Structure and boundaries | Components, domains, contracts between parts, and repository maps | `docs/architecture.md`; use `contracts/` only when needed |
 | Tactical decisions | Accepted implementation or governance choices within direction | `docs/adr/` |
@@ -29,6 +31,11 @@ complete a type list. A new repository may use the default homes above; an
 existing repository keeps its established files. Its `docs/README.md` maps
 each evidenced type to its local owner, says when to load that owner, and
 records each approved type exclusion with its reason.
+
+In complete setup, distinguish `placeholder` owners from confirmed content.
+A glossary scaffold is required preparation, not proof of resolved language.
+Other scaffolds need an approved reader need rather than taxonomy completion.
+Templates and mock examples never satisfy knowledge coverage.
 
 Every type still receives an outcome in `sync` and `setup`, so an absence is a
 visible decision rather than an omission. Purpose, Principles, and Direction

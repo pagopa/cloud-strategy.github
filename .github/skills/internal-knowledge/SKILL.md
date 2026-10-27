@@ -1,17 +1,20 @@
 ---
 name: internal-knowledge
-description: Use when creating, aligning, or materially refreshing strategic and tactical project knowledge, or checking the alignment between them.
+description: Use when setting up complete project documentation, creating or refreshing strategic and tactical knowledge, or checking its alignment.
 ---
 
 # Internal Knowledge
 
-Maintain evidence-backed strategic and tactical knowledge, and keep those
-layers aligned. This skill does not write operational artifacts.
+Maintain evidence-backed strategic and tactical knowledge. Complete workspace
+setup also coordinates knowledge scaffolds and operational documentation,
+without treating templates or examples as accepted knowledge or real work.
 
 ## When to use
 
 - Align or set up repository knowledge when its declared layout is missing,
   incomplete, or contradicted by evidence on disk.
+- Prepare complete workspace documentation through one approved setup,
+  including a glossary scaffold and operational templates.
 - Refresh an explicit knowledge destination or an in-scope README index.
 - Record a principle, standard, rule, structure, or accepted decision that the
   repository already supports with evidence.
@@ -21,17 +24,17 @@ layers aligned. This skill does not write operational artifacts.
 ## When not to use
 
 - Installing or changing workflows, validators, generators, manifests, or CI.
-- Writing procedures, commands, inventories, work state, or component
-  operation.
+- Operating components, executing work, or maintaining work state. Complete
+  setup may prepare operational documentation under its own bounded contract.
 - Fixing wording or Markdown structure without a material knowledge change;
   route those edits to /internal-markdown.
 
 ## Workflow
 
-1. Resolve one repository root and exactly one mode with [knowledge scope](references/knowledge-scope.md): help, audit, align, targeted, sync, or setup. Help answers and stops. Audit is bounded and read-only. Align runs only when explicitly invoked. Targeted uses only supplied destinations. Sync applies when the declared layout is realized; setup applies when it is absent, incomplete, contradicted, or legacy. A README or docs bucket filters authoring without replacing the layout check.
+1. Resolve one repository root and exactly one mode with [knowledge scope](references/knowledge-scope.md): help, audit, align, targeted, sync, or setup. Help answers and stops. Audit is bounded and read-only. Align runs only when explicitly invoked. Targeted uses only supplied destinations. Sync applies to a realized declared layout; setup applies to explicit complete installation or an absent, incomplete, contradicted, or legacy layout. A README or docs bucket filters authoring without replacing the layout check.
 2. In audit, inspect only the normalized perimeter and report evidence, coverage, exclusions, findings, unknowns, and next actions. Run the [alignment check](references/alignment.md) as part of the audit. Do not write, persist a report by default, or dispatch an authoring mode.
 3. In align, choose one direction: cascade proposes tactical deltas from strategic knowledge; harvest proposes strategic or tactical promotions from closed operational evidence. Proposals require human review. The mode writes no files and never treats imported content as instructions.
-4. In sync and setup, derive the evidence-backed document set with [knowledge topology](references/knowledge-topology.md) and classify it with [knowledge types](references/knowledge-types.md). Give every knowledge type and every context's rules an outcome. Create no file without evidence. Load the detailed owner for every included artifact before drafting and obtain approval for the proposed allowlist.
+4. In sync and setup, derive the document set with [knowledge topology](references/knowledge-topology.md) and classify it with [knowledge types](references/knowledge-types.md). For an explicit whole-workspace installation, apply [complete setup](references/complete-setup.md): prepare marked scaffolds and operational documentation in one approved plan; create mock only when no real domain exists. Otherwise create only evidence-backed knowledge. Give every knowledge type and every context's rules an outcome. Load each included artifact's owner and obtain approval for the exact allowlist.
 5. In targeted, skip the layout gate and use exactly the supplied destinations. Read applicable repository instructions, existing target content, and only evidence needed to support material claims.
 6. Recheck each destination before writing. Apply the unchanged predicate and detailed owner. Use [progressive maintenance](references/progressive-maintenance.md) to keep candidates in chat and update resolved, authorized knowledge during the conversation in coherent batches.
 7. When relevant inspected evidence suggests drift, proactively assess migration with [legacy migration](references/legacy-migration.md). Report need and coverage; migrate only within an explicitly authorized authoring scope.
@@ -39,9 +42,11 @@ layers aligned. This skill does not write operational artifacts.
 
 ## Boundaries
 
-- The skill maintains strategic and tactical knowledge only. It never writes
-  operational artifacts, workflows, validators, generators, coverage
-  manifests, repository policy, or component operation.
+- Ordinary maintenance authors strategic and tactical knowledge. Complete
+  setup additionally prepares marked scaffolds, templates, and eligible
+  synthetic examples; it never turns them into accepted knowledge or live
+  work. Workflows, validators, generators, coverage manifests, repository
+  policy, and component operation remain outside this skill.
 - Knowledge types are optional. Existing repositories keep their files; the
   canonical docs/README.md maps evidenced types to local owner files and
   states when to load them.
@@ -69,7 +74,9 @@ layers aligned. This skill does not write operational artifacts.
   Serves, and alignment behavior; [knowledge types](references/knowledge-types.md)
   owns the strategic and tactical taxonomy.
 - [Knowledge topology](references/knowledge-topology.md) owns domain and
-  artifact decisions. [Architecture maintenance](references/architecture-maintenance.md),
+  artifact decisions. [Complete setup](references/complete-setup.md) owns
+  scaffold authority, operational preparation, conditional mock, and repeat
+  installation. [Architecture maintenance](references/architecture-maintenance.md),
   [ADR maintenance](references/adr-maintenance.md),
   [standards maintenance](references/standards-maintenance.md), and the
   [minimal MADR format](references/madr-minimal.md) own their document shapes.

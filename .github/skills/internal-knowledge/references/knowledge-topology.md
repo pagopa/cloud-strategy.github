@@ -26,6 +26,10 @@ each evidenced type to its existing owner. Purpose belongs in its owner only
 when it serves an unmet durable reader outcome. Do not create empty artifacts
 or a separate memory file to complete a checklist.
 
+For explicit whole-workspace installation, [complete setup](complete-setup.md)
+permits marked scaffolds and operational documentation without inventing
+knowledge claims. A prepared owner is not evidence of populated knowledge.
+
 A roadmap, backlog, proposal, or work outcome is not a knowledge type. Keep
 those records with their existing owners. Record an accepted decision under
 the appropriate ADR owner; do not infer acceptance, implementation, or outcome
@@ -102,7 +106,7 @@ local policy, with their existing owners.
 Preserve an existing canonical layout until migration is explicitly authorized.
 A legacy layout is `legacy` drift: propose its format-only migration as a
 separate wave.
-For new context homes, prefer `docs/domain/<slug>/GLOSSARY.md`; preserve an
+For new context homes, prefer `docs/domains/<slug>/GLOSSARY.md`; preserve an
 established code-colocated glossary when it represents the full context and
 local ownership supports it. A component directory alone is not a domain.
 Use `RULES.md` only for evidenced normative rules. Preserve established ADR
@@ -112,6 +116,11 @@ locations, including context-local directories; default new decisions to
 Glossaries are lazy: create one only for a first meaningful resolved term at an
 authorized destination. Optional absence is valid. First creation does not
 itself require layout migration or a domain-set ADR.
+
+Complete setup instead prepares the canonical vocabulary owner as a marked
+placeholder when it has no terms. New project documentation areas also use
+`docs/domains/<slug>/`, but their number does not select the semantic context
+layout. Preserve a shared glossary when it is the established owner.
 
 ## Layout migration
 
@@ -125,16 +134,18 @@ on re-derivation alone.
 
 ## Evidence to artifact
 
-Create an artifact only when the listed evidence exists. Absence of evidence is a reported gap, never a placeholder document.
+For ordinary knowledge maintenance, create an artifact only when the listed
+evidence exists. Complete setup may prepare marked scaffolds under its
+separate contract; absent content never permits invented claims.
 
 | Evidence | Artifact | Do not create when |
 | --- | --- | --- |
 | Durable purpose, scope, non-goals, stakeholders, or constraints with an unmet reader outcome | The existing Purpose owner mapped from the canonical index | An existing owner already covers the outcome or evidence is temporary or aspirational. |
 | A significant component | A README in that component | The parent already documents it completely. |
 | Terms whose meaning is repository-specific | The canonical glossary or legacy CONTEXT owner | The terms are general technology vocabulary. |
-| Two or more areas with distinct vocabulary, state, or lifecycle | `docs/domain/<slug>/` per area | Only one area is evidenced; keep the vocabulary in its root owner. |
-| A term whose meaning differs across two or more contexts, or a rule that spans two or more contexts | `docs/domain/cross-context/` (see [Cross-context home](#cross-context-home)) | Only one context is evidenced, or the term or rule belongs to one context. |
-| Normative rules already stated in a validator, workflow, decision, or document | `docs/domain/<slug>/RULES.md` | No rule exists yet. Never invent a rule to fill the file. |
+| Two or more areas with distinct vocabulary, state, or lifecycle | `docs/domains/<slug>/` per area | Only one area is evidenced; keep the vocabulary in its root owner. |
+| A term whose meaning differs across two or more contexts, or a rule that spans two or more contexts | `docs/domains/cross-context/` (see [Cross-context home](#cross-context-home)) | Only one context is evidenced, or the term or rule belongs to one context. |
+| Normative rules already stated in a validator, workflow, decision, or document | `docs/domains/<slug>/RULES.md` | No rule exists yet. Never invent a rule to fill the file. |
 | A decision that is costly to reverse and surprising without context | An ADR | The decision is routine or already recorded. |
 | A domain-set decision that meets the ADR admission criteria | An ADR recording the set and its evidence | The choice is routine, only a first glossary is created, or an accepted ADR records the same set. |
 | Existing ADRs with no stated local format | `docs/adr/README.md` | The repository already states its ADR contract where the ADR author reads it. |
@@ -155,12 +166,15 @@ Before adding material, check whether an existing README, context document,
 architecture document, ADR, or specification already owns it. Prefer a link
 from the relevant type owner over a duplicate copy. If no canonical owner or
 durable evidence exists, record the gap as `considered, not evidenced` and do
-not create a placeholder.
+not create a placeholder outside the complete-setup exception.
 
 ## Context documents
 
 A glossary contains definitions only. Use this shape for new and migrated
 glossaries:
+
+For an unpopulated complete-setup glossary, use only the orientation, marked
+placeholder notice, and empty `## Language` section until definitions resolve.
 
 ```markdown
 # <Context name>
@@ -209,7 +223,7 @@ in chat instead of inventing definitions or precedence.
 | Reading order for a human | Root `README.md` |
 | Reading order for an agent | Existing domain documentation guide |
 | Decisions index and history | Existing ADR owner |
-| Rules and invariants | Existing rules owner or `docs/domain/<slug>/RULES.md` |
+| Rules and invariants | Existing rules owner or `docs/domains/<slug>/RULES.md` |
 
 ## Relationships
 
@@ -244,7 +258,7 @@ A domain needs no directory of its own. When its evidence is spread across confi
 
 ## Cross-context home
 
-Use `docs/domain/cross-context/` only when evidence shows a term whose meaning
+Use `docs/domains/cross-context/` only when evidence shows a term whose meaning
 differs across two or more contexts, or a normative rule that spans two or more
 contexts. Its `GLOSSARY.md` resolves the shared or ambiguous terms; its
 `RULES.md` holds cross-context rules that name the participating contexts.

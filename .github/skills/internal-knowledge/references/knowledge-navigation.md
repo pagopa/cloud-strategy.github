@@ -37,7 +37,11 @@ does not emit it for new work.
 Maintain one canonical index at docs/README.md for strategic and tactical
 knowledge. Map each evidenced type to its existing owner and add a "Load when"
 entry that tells the reader when to open it. Use "not evidenced" when no
-supported owner exists; do not create a placeholder document. The root README
+supported owner exists; ordinary maintenance does not create a placeholder.
+Complete setup links prepared scaffolds with their visible placeholder status
+separately from confirmed knowledge and links operational templates separately
+from knowledge coverage. Synthetic examples supply no accepted evidence.
+The root README
 provides repository orientation and links to this index.
 
 Treat a README index as an ordinary documentation target only when it is in

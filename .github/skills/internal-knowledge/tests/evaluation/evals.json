@@ -54,8 +54,8 @@
     },
     {
       "id": "R-OPTIONAL-ARTIFACTS",
-      "text": "Create only evidence-backed strategic and tactical knowledge types; do not create empty artifacts or a separate project-memory owner.",
-      "source": "Accepted spec: optional common-core artifacts"
+      "text": "Create only evidence-backed knowledge claims. Complete setup may prepare explicitly marked scaffolds under its approved allowlist; other authoring does not create empty artifacts or a separate project-memory owner.",
+      "source": "references/complete-setup.md#Scaffolds and authority"
     },
     {
       "id": "R-DUPLICATE-CONSOLIDATION",
@@ -198,12 +198,116 @@
       "source": "Accepted conversation 2026-10-14: upstream glossary format alignment"
     },
     {
+      "id": "R-COMPLETE-SETUP",
+      "text": "An explicit complete workspace setup uses one approved plan for knowledge scaffolds and operational documentation support, preserves local ownership, and never installs code, CI, or policy through this skill.",
+      "source": "references/complete-setup.md#One setup"
+    },
+    {
+      "id": "R-SETUP-MOCK",
+      "text": "Create a synthetic mock area only when no real project domain is evidenced or declared. Empty folders, technical directories, scaffolds, and existing demos do not count as real domains. Never silently remove an existing mock.",
+      "source": "references/complete-setup.md#Real domains and mock"
+    },
+    {
+      "id": "R-SETUP-SCAFFOLDS",
+      "text": "Prepare a glossary at its canonical owner even without resolved terms, mark it as a placeholder, and keep templates and synthetic examples outside accepted knowledge coverage.",
+      "source": "references/complete-setup.md#Scaffolds and authority"
+    },
+    {
+      "id": "R-SETUP-REPEAT",
+      "text": "An intentional scaffold can remain unchanged. Repeating a completed setup with identical inputs produces no writes; customized files and existing mocks are preserved.",
+      "source": "references/complete-setup.md#Repeat runs and conflicts"
+    },
+    {
       "id": "R-LEGACY-DRIFT",
       "text": "A legacy CONTEXT layout is legacy drift: setup preserves the domain set and proposes a format-only migration wave, with an ADR only when an accepted ADR names the legacy files.",
       "source": "Accepted conversation 2026-10-14: upstream glossary format alignment"
     }
   ],
   "cases": [
+    {
+      "id": "C-SETUP-AUDIT",
+      "family": "setup",
+      "kind": "rubric",
+      "requirement_ids": ["R-COMPLETE-SETUP", "R-MODE", "R-ALLOWLIST"],
+      "prompt": "Audit whether the full workspace installation is ready, including the glossary, operational templates and illustrative project. Do not change anything.",
+      "initial_state": "Fixture FS0 has no installed scaffolds or real project areas.",
+      "expected_output": "Remain in read-only audit, report the missing preparation and zero real domains, and create no glossary, template, mock, or persistent report.",
+      "files": ["tests/evaluation/fixtures/FS0.tree.json", "tests/evaluation/gold/FS0.gold.json"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "Every read-only audit condition holds.", "critical": true},
+        {"id": "rubric-fail", "text": "No automatic installation occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Escalate audit into setup.", "Persist scaffolds or a report without authorization."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The mode remains audit despite the full-installation subject.", "The report distinguishes missing preparation from invented project facts.", "All fixture files remain byte-identical and no paths are created."],
+        "fail": ["The skill writes a glossary, template, mock, or persistent report.", "The lack of installed structure is treated as permission to bootstrap."]
+      }
+    },
+    {
+      "id": "C-SETUP-EMPTY",
+      "family": "setup",
+      "kind": "rubric",
+      "requirement_ids": ["R-COMPLETE-SETUP", "R-SETUP-MOCK", "R-SETUP-SCAFFOLDS", "R-OPTIONAL-ARTIFACTS"],
+      "prompt": "Prepare this empty workspace so I can start managing projects immediately. Include the glossary and an illustrative project if there is no real one.",
+      "initial_state": "Fixture FS0 has no real project area; tools/ is a technical directory.",
+      "expected_output": "Propose and, after exact-path approval, install the glossary scaffold, operational templates and synthetic mock area in one coherent setup. Do not invent accepted definitions, real tickets, policy, or code.",
+      "files": ["tests/evaluation/fixtures/FS0.tree.json", "tests/evaluation/gold/FS0.gold.json"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "The complete setup meets every pass anchor.", "critical": true},
+        {"id": "rubric-fail", "text": "No failure anchor occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Treat tools/ as a real project.", "Assign accepted ADR IDs to synthetic content.", "Write outside the approved paths."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["A single plan covers knowledge and operational documentation without extra installation ceremonies.", "The glossary is explicitly a scaffold; mock is clearly synthetic and excluded from real-domain counts and knowledge coverage.", "Templates prepare real work without creating fictional active tickets."],
+        "fail": ["No glossary is prepared because no term is resolved.", "Mock is omitted merely because a technical folder exists, or is presented as a real domain.", "The setup installs workflows, changes router policy, or invents accepted knowledge."]
+      }
+    },
+    {
+      "id": "C-SETUP-REAL",
+      "family": "setup",
+      "kind": "rubric",
+      "requirement_ids": ["R-COMPLETE-SETUP", "R-SETUP-MOCK", "R-SETUP-SCAFFOLDS"],
+      "prompt": "Finish the workspace installation for the projects already documented here. Keep the portfolio's existing vocabulary ownership.",
+      "initial_state": "Fixture FS1 has two real project areas, one represented by an analysis rather than a README.",
+      "expected_output": "Recognize both real areas, do not create mock, preserve the shared glossary destination, and prepare missing scaffolds and templates without treating the two projects as proven technical contexts.",
+      "files": ["tests/evaluation/fixtures/FS1.tree.json", "tests/evaluation/gold/FS1.gold.json"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "Every existing-domain pass anchor holds.", "critical": true},
+        {"id": "rubric-fail", "text": "No existing-domain failure anchor occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Create mock beside a real project.", "Force a context-map migration from directory count alone."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The linked analysis is sufficient evidence for Archive; a missing README does not erase the project.", "Mock is absent and root GLOSSARY.md remains the canonical vocabulary destination.", "The existing principles placeholder is not reported as accepted principles or rewritten merely for being incomplete."],
+        "fail": ["A mock area is created, a real area is missed, or the setup creates duplicate glossary ownership.", "Project directories are promoted to technical bounded contexts without semantic evidence.", "A scaffold is counted as confirmed knowledge."]
+      }
+    },
+    {
+      "id": "C-SETUP-REPEAT",
+      "family": "setup",
+      "kind": "rubric",
+      "requirement_ids": ["R-SETUP-REPEAT", "R-SETUP-SCAFFOLDS", "R-SETUP-MOCK"],
+      "prompt": "Run the same complete installation again. There is no new project information, and I have tailored the specification template.",
+      "initial_state": "Fixture FS2 has a complete scaffold, an intentional empty glossary, a customized template, a real project, and a retained earlier mock.",
+      "expected_output": "Report setup with no writes, preserve the customized section and every existing file, and neither regenerate nor delete the retained demo.",
+      "files": ["tests/evaluation/fixtures/FS2.tree.json", "tests/evaluation/gold/FS2.gold.json"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "All repeat-run and preservation pass anchors hold.", "critical": true},
+        {"id": "rubric-fail", "text": "No repeat-run failure anchor occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Rewrite an intentional placeholder just to remove its marker.", "Overwrite the customized template.", "Delete the retained mock without exact-path authorization."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Every before/after file is byte-identical and there are no transient write events.", "The custom Required Checks section is preserved.", "The retained mock is excluded from real-domain discovery and authority without being deleted or regenerated."],
+        "fail": ["The empty Language section triggers a rewrite or invented terms.", "The default template replaces a customization.", "The setup removes mock automatically, or changes an already coherent index."]
+      }
+    },
     {
       "id": "C-MODE-HELP",
       "family": "mode",
