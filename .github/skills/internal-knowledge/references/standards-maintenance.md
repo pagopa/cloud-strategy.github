@@ -8,7 +8,7 @@ The three artifacts look alike and are not interchangeable. Classify before draf
 
 | Artifact | What it records | Stable identifier | Enforcement evidence |
 | --- | --- | --- | --- |
-| `docs/domains/<slug>/RULES.md` | An invariant that must hold | Required | Named, or `not enforced` |
+| `docs/areas/<area>/<topic>/RULES.md` | An invariant that must hold | Required | Named, or `not enforced` |
 | `docs/standards/<name>.md` | A convention the repository follows by agreement | `STD-<area>-nn` | Optional evidence; it never changes the semantic category |
 | `docs/engineering-principles.md` | The criteria that decide between alternatives | `PRI-nn` | Optional evidence; it never changes the semantic category |
 

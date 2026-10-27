@@ -2,7 +2,7 @@
 
 Use this reference when the plan creates or changes the shape of a repository's documentation: which documents exist, where they live, and what each one must contain. [Knowledge scope](knowledge-scope.md) decides what may be touched; this reference decides what the touched documents are.
 
-Load it in `setup`. Load it in `sync` only when the plan introduces an artifact that does not exist yet, such as the first document for a newly discovered component or domain.
+Load it in `setup`. Load it in `sync` only when the plan introduces an artifact that does not exist yet, such as the first document for an approved Topic or component.
 
 ## Contents
 
@@ -12,8 +12,8 @@ Load it in `setup`. Load it in `sync` only when the plan introduces an artifact 
 - [Evidence to artifact](#evidence-to-artifact)
 - [Context documents](#context-documents)
 - [Relationships](#relationships)
-- [Domain levels](#domain-levels)
-- [Cross-context home](#cross-context-home)
+- [Areas and Topics](#areas-and-topics)
+- [Shared Terms](#shared-terms)
 - [Rules document](#rules-document)
 - [Documentation modes](#documentation-modes)
 - [Anti-scope](#anti-scope)
@@ -48,13 +48,13 @@ Classify each claim by what it means and who maintains it, not by whether it
 contains a path, number, date, status, or command-like name. Use this primary
 question:
 
-> Does this sentence govern a domain or design decision, or describe operating machinery?
+> Does this sentence govern an Area, Topic, or design decision, or describe operating machinery?
 
 For a borderline claim, ask:
 
 > Would it stay true if the component were rewritten with the same behavior?
 
-Strategic claims establish purpose, direction, boundaries, decisions, domain
+Strategic claims establish purpose, direction, boundaries, decisions, Topic
 language, and rules. Tactical claims express durable UX language, naming
 grammar, high-level policies, ownership boundaries, and stable contract names.
 Operational claims describe how a particular implementation runs, including
@@ -67,8 +67,9 @@ and execution history.
 | A request moves through proposed, approved, implemented, and observed states. | Run `deploy --region <name>` from the release job. |
 | The public API preserves the `authorization/v2` contract. | The handler applies this exact retry expression and a 30-second timeout. |
 
-Put operational detail with the nearest maintained component owner, such as its
-README or an authorized guide. When relocating it, consolidate duplicates
+Put operational detail in the Area's declared operational home: `work/<area>/`
+for a document-only workspace, or the existing code paths for a code repository.
+Never use `docs/` as a fallback operational home. When relocating it, consolidate duplicates
 instead of appending every copy. If no maintained owner can usefully hold it,
 propose removal; do not delete it without naming the exact path in the proposed
 allowlist and obtaining approval. Preserve stable contracts, evidence paths,
@@ -81,11 +82,14 @@ open questions.
 
 ## Supported layouts
 
-Every repository has at least one knowledge domain. The evidenced domain count selects the layout; a declaration proposes a layout and never overrides the evidence.
+Use one DDD-inspired layout with plain vocabulary from
+[knowledge types](knowledge-types.md#plain-vocabulary). Areas express purpose
+and ownership; Topics own language and Rules. Directory counts do not prove
+semantic boundaries. New Areas and Topics require human approval.
 
 Organize the top level by artifact type. Use L0-L3 only as navigation depth in
 the plan: L0 is the repository index, L1 is repository orientation, L2 is the
-owning domain or document type, and L3 is a specialist reference. These labels
+owning Area or document type, and L3 is a specialist reference. These labels
 do not require directories, metadata, or a fixed document at every level.
 Group `reference/<area>/` when an area has about three or more reference
 documents; with fewer, use flat `reference/<area>-<topic>.md` paths. The count
@@ -98,36 +102,75 @@ history artifacts automatically or split content solely by time validity.
 Preserve canonical ADR status and decision history, plus records required by
 local policy, with their existing owners.
 
-| Domains evidenced | New default | Legacy layout |
+| Condition | New default | Legacy layout |
 | --- | --- | --- |
-| One | Root `GLOSSARY.md` | Root `CONTEXT.md` |
-| Two or more | Root `GLOSSARY-MAP.md` linking context `GLOSSARY.md` files | Root `CONTEXT-MAP.md` linking context `CONTEXT.md` files |
+| One or more declared Areas | `docs/areas/<area>/README.md`, even for one Area | `docs/domains/<slug>/` or mixed project folders |
+| One or more Topics | Topic-local `GLOSSARY.md` and root `GLOSSARY-MAP.md`, even for one Topic | Root `GLOSSARY.md`, `CONTEXT.md`, or `CONTEXT-MAP.md` |
+| No declared Areas | Root `GLOSSARY.md` may remain | Root `CONTEXT.md` |
+| An Area with zero Topics | No Area glossary | A project-wide glossary with no resolved owner |
+
+```text
+GLOSSARY-MAP.md                     # required as soon as one Topic exists
+docs/
+  README.md                        # strategic and tactical knowledge index
+  adr/                             # ALL ADRs; new records carry Area:
+  agents/                          # managed agent placement and promotion guides
+  views/                           # optional Obsidian .base navigation indexes
+  areas/
+    _shared/                       # Shared Terms, created on first real case
+    <area>/README.md                # Purpose, scope, boundary, Topics, decisions
+    <area>/<topic>/GLOSSARY.md
+    <area>/<topic>/RULES.md          # only when evidenced
+work/<area>/                       # document-only operational home
+  README.md
+  sources/                         # append-only external inputs
+  research/
+  <deliverables>
+tracker/<feature-slug>/             # operational work records
+tracker/_templates/                # reusable spec and issue templates
+tmp/                               # disposable, never durable evidence
+```
+
+`docs/` holds strategic and tactical knowledge, not analyses, data, scripts,
+vendor offers, research, sources, or execution records. Managed guides and
+optional views are navigation support, not accepted knowledge. Existing
+evidence-backed knowledge owners such as `docs/project.md` remain valid.
+
+In document-only workspaces, the operational root defaults to `work/` and may
+be overridden in `AGENTS.local.md`. Mirror each `docs/areas/<area>/` with exactly
+one `<operational-root>/<area>/` and vice versa. `_`-prefixed names are reserved
+and never mirrored. In code repositories, the Area README instead declares
+`Operational home:` with a list of existing code paths. Do not move code or
+require a `work/` mirror. The skill writes only the Area README scaffold in
+`work/`; it never authors operational deliverables or research.
+
+Area READMEs list Purpose, scope, boundary, Topics with their
+Core/Supporting/Commodity classification, operational home, and links to
+decisions in `docs/adr/`. Topics, not Areas, receive that classification.
+When the optional viewer is enabled, Area status is authoritative on the
+docs side; the work README mirrors it. See [Obsidian vault](obsidian-vault.md).
 
 Preserve an existing canonical layout until migration is explicitly authorized.
 A legacy layout is `legacy` drift: propose its format-only migration as a
 separate wave.
-For new context homes, prefer `docs/domains/<slug>/GLOSSARY.md`; preserve an
-established code-colocated glossary when it represents the full context and
-local ownership supports it. A component directory alone is not a domain.
-Use `RULES.md` only for evidenced normative rules. Preserve established ADR
-locations, including context-local directories; default new decisions to
-`docs/adr/`. A changed domain set follows the ADR owner and acceptance authority.
+For new Topics use `docs/areas/<area>/<topic>/GLOSSARY.md`. Use `RULES.md` only
+for evidenced normative rules. All ADRs belong in `docs/adr/`; never create an
+Area-local ADR directory. Existing accepted ADR bodies remain unchanged.
+Legacy ADR locations need an approved migration, not an automatic move.
+An Area or Topic boundary change follows the ADR owner and acceptance authority.
 
-Glossaries are lazy: create one only for a first meaningful resolved term at an
-authorized destination. Optional absence is valid. First creation does not
-itself require layout migration or a domain-set ADR.
-
-Complete setup instead prepares the canonical vocabulary owner as a marked
-placeholder when it has no terms. New project documentation areas also use
-`docs/domains/<slug>/`, but their number does not select the semantic context
-layout. Preserve a shared glossary when it is the established owner.
+Do not invent Topics to prepare a glossary. As soon as one Topic is approved,
+create its glossary (a marked placeholder if no terms have resolved) and the
+root map in the same approved wave. An Area has no glossary of its own.
+Root `GLOSSARY.md` remains only in repositories without declared Areas.
+Removing a Topic needs user approval and archives it; never delete it.
 
 ## Layout migration
 
 Use [legacy migration](legacy-migration.md) for detection, activation, transfer,
-reference verification and interruption recovery. Changing an accepted domain
+reference verification and interruption recovery. Changing an accepted Area/Topic
 set requires a superseding decision. A format-only migration preserves that
-set and its glossary, rules, and cross-context split. It needs no ADR unless an
+set and its glossary, Rules, and shared-language split. It needs no ADR unless an
 accepted ADR names the legacy file names; then record a brief ADR that
 supersedes only those names and cites the upstream convention. Never migrate
 on re-derivation alone.
@@ -143,11 +186,12 @@ separate contract; absent content never permits invented claims.
 | Durable purpose, scope, non-goals, stakeholders, or constraints with an unmet reader outcome | The existing Purpose owner mapped from the canonical index | An existing owner already covers the outcome or evidence is temporary or aspirational. |
 | A significant component | A README in that component | The parent already documents it completely. |
 | Terms whose meaning is repository-specific | The canonical glossary or legacy CONTEXT owner | The terms are general technology vocabulary. |
-| Two or more areas with distinct vocabulary, state, or lifecycle | `docs/domains/<slug>/` per area | Only one area is evidenced; keep the vocabulary in its root owner. |
-| A term whose meaning differs across two or more contexts, or a rule that spans two or more contexts | `docs/domains/cross-context/` (see [Cross-context home](#cross-context-home)) | Only one context is evidenced, or the term or rule belongs to one context. |
-| Normative rules already stated in a validator, workflow, decision, or document | `docs/domains/<slug>/RULES.md` | No rule exists yet. Never invent a rule to fill the file. |
+| An approved Area with durable purpose and ownership | `docs/areas/<area>/README.md` and its declared operational home | Only a technical folder or speculative boundary exists. |
+| An approved Topic with distinct meaning, state, or lifecycle | `docs/areas/<area>/<topic>/GLOSSARY.md` plus root `GLOSSARY-MAP.md` | No semantic or ownership boundary is evidenced. |
+| Identical terms or Rules jointly used across Topics | `docs/areas/_shared/` (see [Shared Terms](#shared-terms)) | Meanings differ; keep separate definitions in their Topics. |
+| Normative rules already stated in a validator, workflow, decision, or document | `docs/areas/<area>/<topic>/RULES.md` | No rule exists yet. Never invent a rule to fill the file. |
 | A decision that is costly to reverse and surprising without context | An ADR | The decision is routine or already recorded. |
-| A domain-set decision that meets the ADR admission criteria | An ADR recording the set and its evidence | The choice is routine, only a first glossary is created, or an accepted ADR records the same set. |
+| An Area/Topic boundary decision that meets the ADR admission criteria | An ADR recording the set and its evidence | The choice is routine, only a first glossary is created, or an accepted ADR records the same set. |
 | Existing ADRs with no stated local format | `docs/adr/README.md` | The repository already states its ADR contract where the ADR author reads it. |
 | Components, boundaries, and flows across the repository | `docs/architecture.md` | The repository has a single component fully covered by its README. |
 | Relationships that cross the repository boundary | The relevant relationship sections of `docs/architecture.md` | No dependency leaves the repository. |
@@ -177,9 +221,9 @@ For an unpopulated complete-setup glossary, use only the orientation, marked
 placeholder notice, and empty `## Language` section until definitions resolve.
 
 ```markdown
-# <Context name>
+# <Topic name> Glossary
 
-<One or two sentences on what this context is and why it exists.>
+<One or two sentences on what this Topic is and why it exists.>
 
 ## Language
 
@@ -192,13 +236,14 @@ Group terms under subheadings only when natural clusters emerge. Include only
 repository-specific terms, not general technology vocabulary. Keep paths,
 component and root names, rule identifiers, normative statements, and
 relationships out of a glossary: rules go to `RULES.md`, component ownership
-goes to `docs/architecture.md`, and relationships between contexts go to the
+goes to `docs/architecture.md`, and relationships between Topics go to the
 map.
 
-A map has a title, `## Contexts` with one link and a one-line description per
-context, and `## Relationships` with one bold `**A → B**` or `**A ↔ B**` entry
+A Glossary Map has a title, `## Topics` with one link and a one-line description
+per Topic grouped by Area, an optional Shared Terms link, and
+`## Relationships` with one bold `**A → B**` or `**A ↔ B**` entry
 per evidenced relationship, naming the concept that crosses the boundary. It
-holds no per-context component, declaration, or root sections; it may close
+holds no per-Topic component, declaration, or root sections; it may close
 with one line pointing to `docs/architecture.md` for those. Reuse canonical
 terms in authored knowledge and avoid resolved misleading synonyms. Flag
 conflicts with accepted ADRs instead of silently redefining either source.
@@ -218,12 +263,12 @@ in chat instead of inventing definitions or precedence.
 
 | Content | Owner |
 | --- | --- |
-| Resolved domain definitions | Canonical glossary or legacy context document |
+| Resolved Topic definitions | Canonical glossary or legacy context document |
 | Component paths and responsibilities | Relevant architecture view |
 | Reading order for a human | Root `README.md` |
-| Reading order for an agent | Existing domain documentation guide |
+| Reading order for an agent | Managed layout and vocabulary guides, or existing legacy guide |
 | Decisions index and history | Existing ADR owner |
-| Rules and invariants | Existing rules owner or `docs/domains/<slug>/RULES.md` |
+| Rules and invariants | Existing rules owner or `docs/areas/<area>/<topic>/RULES.md` |
 
 ## Relationships
 
@@ -231,45 +276,56 @@ Relationships are recorded at two levels, and the same pair is never described a
 
 | Level | Where | What it records |
 | --- | --- | --- |
-| Between domains | The `## Relationships` section of the glossary map or legacy context map | The concept that crosses the boundary and the direction it travels |
+| Between Topics | The `## Relationships` section of the Glossary Map or legacy context map | The concept that crosses the boundary and the direction it travels |
 | Between components, and toward systems outside the repository | The relevant relationship sections of `docs/architecture.md` | The dependency, its status, and its evidence path |
 
-With a single domain there is no domain-to-domain relationship. The boundary the repository actually has is the one toward the outside, and it belongs to `docs/architecture.md`.
+With a single Topic there is no Topic-to-Topic relationship, but the root map
+still exists. External system boundaries belong to `docs/architecture.md`.
 
 Describe each relationship as it is today, not as it should become. Use a named integration pattern only when the repository has already decided and recorded it; never infer a pattern from code shape. When no relationship is evidenced, record `none evidenced` and stop: an invented relationship is worse than an acknowledged absence.
 
 In `docs/architecture.md`, keep the direction vocabulary neutral: `upstream`, `downstream`, `mutually dependent`, or `free`.
 
-## Domain levels
+## Areas and Topics
 
 Distinguish three levels and never collapse them:
 
-1. **Knowledge domain** — a durable area of responsibility with its own vocabulary.
-2. **Bounded context** — a knowledge domain that additionally owns state, lifecycle, and invariants, evidenced on disk.
+1. **Area** — a durable responsibility with a Purpose and ownership boundary.
+2. **Topic** — a boundary within an Area where language and Rules have one meaning.
 3. **Component** — a physical unit of code or configuration.
 
-Promote an area to its own domain only when an evidenced semantic or ownership boundary exists. The boundary must be visible in at least one of these forms: distinct ubiquitous language; an evidenced bounded context that owns its own lifecycle or invariants; or decoupled team ownership with responsibility that does not follow the neighbouring context. A different tool, state file, schema, delivery process, or deployability may corroborate a boundary, but an operational difference alone never creates one.
+Propose an Area or Topic only when an evidenced semantic or ownership boundary
+exists: distinct language, its own lifecycle or Rules, or independent ownership.
+A different tool, state file, schema, delivery process, or deployability may
+corroborate a boundary, but an operational difference alone never creates one.
 
-Enumerate that list explicitly: record a verdict and an evidence path for each candidate signal, then record the semantic or ownership boundary in the plan before the layout is selected. The enumeration precedes the ADR that records the domain set: a decision written from an impression rather than from the evidenced boundary is the ordinary way a repository acquires a layout it has to supersede in the next invocation. The plan promotes the area, or it carries the user's explicit decision to keep the narrower layout as the ledger reason. Relative size is not a signal: an area holding far less material than its neighbour is still a domain when its own semantic or ownership boundary holds. When an accepted ADR records a domain set the current evidence exceeds, report the drift and propose the superseding decision.
+Record a verdict and evidence path for each candidate signal before proposing
+the Area/Topic set or its ADR. Relative size is not a boundary signal.
+The plan records either the evidenced boundary or the user's explicit decision
+to keep a narrower set. When evidence exceeds an accepted set, report drift
+and propose the superseding decision; never create the boundary silently.
 
-Name domains in the vocabulary the repository already uses. A domain name that appears nowhere in the repository is a sign the boundary is invented.
+Name Areas and Topics in the repository's vocabulary. A name that appears
+nowhere in the evidence is a sign the boundary is invented.
 
-A domain needs no directory of its own. When its evidence is spread across configuration, validators, and reports that share one vocabulary, the boundary is still real; record the evidence paths instead of forcing a home for it.
+Evidence may be spread across configuration, validators, and reports. Record
+those paths without moving them. An approved Area still has a docs-side README.
 
-## Cross-context home
+## Shared Terms
 
-Use `docs/domains/cross-context/` only when evidence shows a term whose meaning
-differs across two or more contexts, or a normative rule that spans two or more
-contexts. Its `GLOSSARY.md` resolves the shared or ambiguous terms; its
-`RULES.md` holds cross-context rules that name the participating contexts.
-List it in the map as a context. It is not a domain and does not count in the
-domain-set ADR. A term or rule owned by one context stays in that context.
+Create `docs/areas/_shared/` only on the first evidenced shared meaning or Rule.
+Its `GLOSSARY.md` holds identical meanings shared across Topics; its `RULES.md`
+names participating Topics and their shared obligations. List its glossary in
+the map, but do not count `_shared` as an Area or Topic or mirror it in `work/`.
+Same word with different meanings stays in separate Topic glossaries. Shared
+Terms are a Shared Kernel only when joint ownership is explicitly declared;
+see the closest DDD concepts in [knowledge types](knowledge-types.md#plain-vocabulary).
 
 ## Rules document
 
 Write this document only when normative rules already exist somewhere in the repository. Each rule keeps a stable identifier and a fixed body.
 
-In `sync` and `setup`, give every context one `RULES.md` outcome: existing,
+In `sync` and `setup`, give every Topic one `RULES.md` outcome: existing,
 planned with evidence, or `considered, not evidenced` naming the sources
 inspected. Check security baselines, validators, workflows, decisions, and
 contribution guides before concluding that no rule exists.
@@ -283,7 +339,7 @@ contribution guides before concluding that no rule exists.
 
 - Rule ID: <RULE-ID>
 - Serves: <PUR, PRI-nn, DIR-nn, or a strategic ADR>
-- Owner: <owning context>
+- Owner: <owning Topic>
 - Severity: <blocking | warning>
 - Enforcement owner: <where the rule is checked and any exemptions the check skips, or `not enforced`>
 - Evidence: <paths that show the rule exists>

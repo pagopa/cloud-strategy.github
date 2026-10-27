@@ -25,17 +25,41 @@ A legacy `CONTEXT` filename alone never makes migration necessary; it makes a
 format-only migration `Recommended`, because the upstream convention uses
 `GLOSSARY` names and the glossary shape in
 [knowledge topology](knowledge-topology.md#context-documents). An optional
-glossary with no resolved term may legitimately be absent. A broken link may
+glossary with no resolved term may legitimately be absent only when no Topic
+requires it; an approved Topic may use a marked placeholder. A broken link may
 need only a repair. Conflicting meanings need semantic resolution before a
 move; a rename does not resolve them. Do not label uninspected areas coherent.
+
+Check these additional drift classes only within the inspected perimeter:
+
+- Layout: `docs/domains/<slug>/` and `cross-context/` are legacy. Map approved
+  Areas to `docs/areas/<area>/` and Topics to their own glossaries. Differing
+  meanings stay Topic-local; only identical meanings may enter `_shared/`.
+  Root `GLOSSARY.md` with declared Areas also needs lifecycle resolution.
+- Operational content in `docs/`: sources, vendor offers, research, analyses,
+  data, scripts, deliverables, and execution state belong to the declared
+  operational home, never a new docs-side fallback. In document-only
+  workspaces use `work/<area>/`; in code repositories keep existing code paths.
+- Mirrors: when the home is `work/` (or its approved root-name override), each
+  Area needs exactly one mirror; `_`-prefixed names never participate.
+- Tracker: `.scratch/` is the legacy name for `tracker/`;
+  `docs/templates/` operational forms move to `tracker/_templates/`.
+  Existing tracker records permit path and link rewrites only, not content
+  rewrites. Preserve their facts, state, and wording.
+- ADRs: all ADRs belong in `docs/adr/`. Area READMEs link there rather than
+  creating Area-local ADR directories. Preserve accepted bodies.
+
+These are migration proposals, not automatic renames. A new approved Topic
+requires its glossary and root map even with no resolved terms; zero Topics
+requires neither. User-approved Topic removal archives it, never deletes it.
 
 ## Activation and scope
 
 Present a concrete transfer table before migration: old owner, new owner,
 content or stable IDs retained, affected links and anchors, declarations,
 indexes, maps, consumers, and exact removals. Distinguish a format or name
-change, extraction from a mixed document, and a changed domain or decision.
-Only the last may require a new or superseding domain-set decision; a first
+change, extraction from a mixed document, and a changed Area, Topic, or decision.
+Only the last may require a new or superseding boundary decision; a first
 glossary or a routine filename change does not require one by itself.
 
 Migration may start immediately in the same conversation after an explicit
@@ -54,6 +78,10 @@ transition that cannot be completed within authorized scope.
 Perform one coherent migration unit:
 
 1. Verify the transfer table against current files and incoming references.
+   For a non-git workspace, first create and verify a tar backup in the
+   approved persistent location. Record an exact old path → new path manifest
+   with sha256 values; sources and relocated ADRs must remain byte-identical.
+   Keep this migration evidence outside durable knowledge.
 2. Create or update canonical destinations, preserving meanings, stable IDs,
    evidence links and required history. Extract only vocabulary into a glossary;
    retain other content with its maintained owner. Preserve accepted ADR bodies.
@@ -66,6 +94,10 @@ Perform one coherent migration unit:
    verification. A mixed source may remain for its other responsibilities.
 6. Reread the final files and run applicable checks. Claim completion only when
    every required transfer, reference and authorized removal is verified.
+   Check commands as well as links and anchors. Run affected executable
+   deliverables before and after transfer and compare outputs. Restore from
+   the verified backup if recovery is needed and authorized; never infer
+   permission to overwrite concurrent work.
 
 The transfer table is working evidence in the conversation, not a second
 durable knowledge artifact. Report actual operations through

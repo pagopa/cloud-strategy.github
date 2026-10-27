@@ -50,7 +50,7 @@ in [alignment](alignment.md), report `nothing to promote`.
 
 `sync` aligns documents to repository evidence and is not a sync contract over managed copies. When the request is about managed-copy state, blockers, or apply flows, stop and ask which run applies before resolving a mode.
 
-The layout check runs in `sync` and in a provisional `setup`, never in `help`, `audit`, or `targeted`. Derive the evidenced domain set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. Optional vocabulary absence is classified as described below before selecting drift. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
+The layout check runs in `sync` and in a provisional `setup`, never in `help`, `audit`, or `targeted`. Derive the evidenced Area and Topic set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. Optional vocabulary absence is classified as described below before selecting drift. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
 
 `targeted` never widens into `sync`. A request naming three directories stays at three directories even when the repository clearly needs more; report the wider gap instead of acting on it.
 
@@ -104,8 +104,8 @@ A declaration states intent; the repository states fact. Read the declaration, a
 Read the declaration from these sources, in precedence order:
 
 1. An explicit instruction in the current request.
-2. An accepted ADR recording the domain set.
-3. A repository agent-facing documentation guide, such as `docs/agents/domain.md`, when present.
+2. An accepted ADR recording the Area and Topic set.
+3. A repository agent-facing documentation guide, such as `docs/agents/layout.md` or an established legacy guide, when present.
 4. The root knowledge documents that actually exist on disk.
 5. Nothing declared: the plan proposes a layout with its evidence and asks for approval.
 
@@ -113,26 +113,33 @@ A declaration identifies required artifacts separately from optional lazy conven
 
 Compare the declaration against reality and classify the result:
 
-- `realized`: every artifact the declaration names exists, no competing root document exists, and the evidenced domain set matches the declared one.
+- `realized`: every artifact the declaration names exists, no competing root document exists, and the evidenced Area and Topic set matches the declared one.
 - `unrealized`: the declaration requires an artifact that does not exist. An optional lazy glossary with no resolved repository-specific term is legitimate absence, not drift. A convention naming a future path is not a required link; a reading link to an absent target is a broken reference. Distinguish both from an evidence-backed content gap.
 - `contradicted`: the artifacts on disk implement a different layout than the one declared.
-- `understated`: the declared layout is realized, but the evidence supports a richer one, such as a single context declared where two or more domains are evidenced.
-- `legacy`: the realized layout uses `CONTEXT.md` or `CONTEXT-MAP.md` names or the legacy glossary format. `setup` preserves the evidenced domain set and proposes a format-only migration as its own wave; see [legacy migration](legacy-migration.md).
+- `understated`: the declared layout is realized, but the evidence supports additional Areas or Topic boundaries not yet declared.
+- `legacy`: the realized layout uses `CONTEXT.md`, `CONTEXT-MAP.md`,
+  `docs/domains/<slug>/`, `cross-context/`, legacy root glossaries with declared
+  Areas, or operational content inside `docs/`. Missing `work/` Area mirrors,
+  when that operational root applies, are also drift. Propose a separate
+  migration wave; preserve meanings and follow [legacy migration](legacy-migration.md).
 
 The declared layout also covers knowledge types. In `sync` and `setup`, give each of the nine [knowledge types](knowledge-types.md) one outcome: `existing owner`, `planned`, `considered, not evidenced`, or `explicit exclusion`. A missing canonical index, an index row that names an absent owner, or a type with neither an owner nor a recorded exclusion is `unrealized`. Record an approved exclusion as an index row with its reason; it settles later invocations until the evidence changes. A `considered, not evidenced` type outcome is provisional: propose it as an exclusion row for approval, because only a written row stops the type from reappearing as `unrealized`.
 
 All verified drift states select `setup`. Report the drift explicitly; a declaration pointing at an absent document is a defect, not a detail. `setup` runs whenever the layout check detects drift, not only on first use: the name describes the work, not the schedule.
 
-Complete installation separately checks real project areas and prepared
-scaffolds. A missing glossary is legitimate under ordinary lazy maintenance
-but is a preparation gap in complete setup. Do not infer multiple semantic
-contexts merely from multiple project areas or count mock as a real domain.
+Complete installation separately checks approved Areas, Topics, managed
+guides, and prepared scaffolds. Each approved Topic requires a local Glossary
+and root Glossary Map, even when it is the only Topic; a marked placeholder
+is valid until terms resolve. Zero Topics means no Area glossary. Do not infer
+Topics from Area counts or count a synthetic example as a real Area.
 
-In `setup` the declared layout is never inherited. Derive the domain set from evidence, present the declaration as a proposal to confirm, and carry both readings in the plan when they differ.
+In `setup` the declared layout is never inherited. Derive the Area and Topic
+set from evidence, present the declaration as a proposal to confirm, and carry
+both readings in the plan when they differ.
 
 Changing a declaration is a documentation change like any other. It enters the plan, appears in the allowlist, and is written only after approval. Never update a declaration silently, and never leave a declaration pointing at a document the plan does not create.
 
-A repeated `understated` finding is a decision waiting to be recorded, not a report to reissue. When the user keeps the narrower layout, propose an ADR that records the domain set with its evidence; that record then answers the question for every later invocation.
+A repeated `understated` finding is a decision waiting to be recorded, not a report to reissue. When the user keeps the narrower layout, propose an ADR that records the Area and Topic set with its evidence; that record then answers the question for every later invocation.
 
 ## Buckets
 
@@ -142,7 +149,12 @@ The readme bucket is classified by file name: every `README.md` belongs to it ex
 
 Bucket membership never overrides the always-excluded paths, the ownership evidence, or the two entry points rule: each excluded member lands in the exclusion ledger with its reason, exactly like any other excluded target.
 
-The derived gaps `sync` fills inside a bucket are a closed list: a component README, `RULES.md`, `docs/adr/README.md`, the root `README.md`, and a first resolved glossary at an authorized lazy destination. Creating that glossary does not change the domain set or migrate the layout. Every other missing artifact, including `docs/architecture.md` and the layout root document, is shape and escalates.
+The derived gaps `sync` fills inside a bucket are a closed list: a component
+README, `RULES.md`, `docs/adr/README.md`, the root `README.md`, and resolved
+definitions in an approved Topic glossary or legacy vocabulary owner.
+Creating a Topic and its required glossary/map pair is shape and selects
+`setup`; it is not an implicit `sync` gap. Every other missing artifact,
+including `docs/architecture.md` and the layout root document, also escalates.
 
 When the mechanical classification contradicts a plausible reading of the request, the plan declares the mismatch before approval instead of guessing: an intent that says "the documentation" while the bucket excludes `docs/README.md` is a plan note, not a silent exclusion.
 
@@ -172,22 +184,36 @@ Account for every discovered directory and evidence-table row as `planned`, `exi
 - An authored deletion must name its exact path as a deletion in the proposed allowlist and receive approval. Approval for `targeted`, `sync`, or `setup` does not authorize deleting an unnamed path; generated and protected content remains with its owner.
 - A row outside the requested bucket is reported as excluded with the reason `outside the requested bucket`; it never produces an unplanned write.
 - Exact future documentation paths may be authorized before creation. Maps and indexes require their own destination authority. The allowlist never grows without further explicit approval. New evidence found while drafting produces a reported gap and, if material, a stop; it never produces an unplanned write.
-- The allowlist contains documentation targets only, including README files. Do not edit source code, configuration, policy, workflows, tests, validators, or generators. When a needed correction belongs to a code or configuration owner, leave it untouched and report its path and reason in `breaking_refs`.
+- Ordinary allowlists contain documentation targets only, including README
+  files. Do not edit source code, configuration, policy, workflows, tests,
+  validators, or generators outside the setup exceptions below. Report other
+  needed corrections with their owner in `breaking_refs`.
 - In explicit complete setup, documentation targets may additionally include
   marked knowledge scaffolds, operational templates, and eligible synthetic
-  examples. This exception does not authorize live work records, policy edits,
-  executable installation, or arbitrary component procedures.
-- Repository governance and contribution files are evidence, never targets. Read them, cite them, place them in the reading order, and leave them untouched.
+  examples, managed `docs/agents/{layout,vocabulary,promotion,issue-tracker}.md`
+  guides, the managed placement block in `AGENTS.local.md` (at most 15 lines),
+  and `work/<area>/README.md` scaffolds. This is the only write in `work/`;
+  an approved operational-root override changes that scaffold path.
+- Obsidian setup additionally admits only `.obsidian/app.json` managed keys,
+  `.obsidian/graph.json` `colorGroups`, and exact named `docs/views/*.base`
+  navigation views when enabled; see [Obsidian vault](obsidian-vault.md).
+  Obtain exact-path allowlist approval, preserve unowned keys, and do not
+  infer permission for any other config or runtime installation.
+- The setup exception never authorizes live work records, operational
+  deliverables, other policy edits, executable installation, or arbitrary
+  component procedures. Repository governance and contribution files remain
+  read-only evidence except for the approved managed placement block.
 - A path is generated or externally synchronized only when its own generator or manifest lists that path. A directory pattern is not evidence of ownership: read the entries, because a manifest covering a tree normally enumerates exact paths, and excluding a repository-owned document as managed drops it from the plan without anyone noticing.
 - `targeted` has no implicit root-layout exception. If the layout root is not a supplied destination, report any gap it creates and leave the root untouched.
 
 ## Protected Paths And Metadata
 
-Front matter is opt-in. Add `doc_type`, `doc_lifecycle` (`active` or
-`history`), or `doc_owner` only when an authoritative local standard enables
-that field. Avoid keys reserved by the repository's documentation framework.
-Never add front matter to ADRs, generated documents, or append-only ledger
-records.
+Frontmatter is limited to `status: active|archived` on Area READMEs when the
+viewer is enabled (authoritative on the docs side; mirrored on the work side)
+and `source`/`retrieved` on research notes owned by operational work. This
+skill does not author those research notes. Never add path-derived
+`type`/`area`/`topic` properties or frontmatter to accepted ADRs, `sources/`,
+generated documents, protected files, or append-only records.
 
 Keep protected document edits within their owner's contract:
 
@@ -233,14 +259,14 @@ When the predicate holds, report the target as `unchanged` and do not write it. 
 The plan states, briefly:
 
 - the resolved mode, its selecting signal, and the result of the layout check;
-- for complete setup, real project-domain evidence, mock eligibility,
+- for complete setup, real Area and Topic evidence, mock eligibility,
   canonical glossary ownership, scaffold statuses, operational destinations,
   and preservation checks from [complete setup](complete-setup.md);
-- the layout, its declaration source, the evidenced domain set, and any drift;
+- the layout, its declaration source, the evidenced Area and Topic set, and any drift;
 - whether the external context-format skill is available, whenever the plan includes a context document;
 - one row per planned target with its path, its state under the unchanged predicate, and the reason it is included;
 - every evidence row accounted for as `planned`, `existing owner covers`, `considered, not evidenced`, or `explicit exclusion`, with only `planned` entering the target list;
-- one outcome for each of the nine knowledge types and for each context's `RULES.md`, naming the inspected sources behind every `considered, not evidenced`;
+- one outcome for each of the nine knowledge types and for each Topic's `RULES.md`, naming the inspected sources behind every `considered, not evidenced`;
 - each operational document found in the docs perimeter, with its proposed maintained owner and the [legacy migration](legacy-migration.md) assessment;
 - the exclusion ledger;
 - artifacts to be created that do not exist yet;
@@ -269,7 +295,9 @@ A wave partitions documents, never the obligations of an authoring reference. Ev
 
 The skill authors documents and never installs the checks that keep them true. Report an enforcement gap when an evidenced risk warrants one: name the affected property, the existing owner that could address it, and what breaks first without it. Keep recommendations proportional; do not require a new check merely to enforce the documentation contract.
 
-This block is a report, not a change. Never create or modify workflows, actions, validators, coverage manifests, or repository policy files.
+This block is a report, not a change. Never create or modify workflows,
+actions, validators, coverage manifests, or repository policy outside the
+explicitly approved setup placement block.
 
 ## Completion report
 
@@ -280,7 +308,9 @@ their actual scope, the exclusion ledger, the enforcement gap, unresolved
 conflicts, and the next wave. Report affected non-documentation consumers in
 `breaking_refs` without editing them.
 
-When a bucket excludes material gaps, such as a missing `RULES.md` for an evidenced domain, elevate them above the ledger boilerplate: name each one with its evidence and the follow-up that would author it.
+When a bucket excludes material gaps, such as missing `RULES.md` for an
+evidenced Topic, name each gap above the ledger boilerplate with its evidence
+and the follow-up that would author it.
 
 State what each validator actually covered as counts, not as a verdict. A check that resolved nothing also reports no failures, so a bare pass is compatible with having checked nothing; the counts are what separate the two.
 

@@ -12,6 +12,15 @@ README destinations may include:
 - `docs/README.md`, which indexes strategic and tactical knowledge; and
 - component READMEs whose durable knowledge is not already covered by a parent.
 
+Complete setup additionally prepares Area READMEs under
+`docs/areas/<area>/README.md` and the matching `work/<area>/README.md` scaffold
+when that operational home applies. Use the
+[managed templates](../templates/README.md); the skill does not maintain the
+work-side deliverable index after scaffolding or write operational outputs.
+Code repositories declare `Operational home:` code paths on the docs side
+instead of creating a work mirror. Optional viewer status follows
+[the Obsidian contract](obsidian-vault.md#properties).
+
 Use only destinations in the approved allowlist. Normalize and verify each
 path before drafting. Discovery does not add component directories or other
 README files to the allowlist. If an index is generated,

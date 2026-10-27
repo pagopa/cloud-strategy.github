@@ -2,7 +2,7 @@
 
 Use this reference when discovering a repository's knowledge router or README
 index, or when a sync/setup plan proposes an index write. Routers are evidence
-only; their instruction owners maintain them.
+only in ordinary maintenance; setup has one bounded managed-block exception.
 
 ## Router Detection
 
@@ -18,14 +18,22 @@ Check candidate paths in this order:
 Do not infer repository ownership from a filename, location, existence, or the
 fact that a central instruction loads a local file. Inspect ownership evidence
 to identify the instruction owner for a handoff. Ownership or explicit path
-authorization does not bring policy edits into this skill's write scope.
+authorization does not bring general policy edits into this skill's scope.
+Complete setup may install the approved placement block described below.
 
 ## Router Handoff
 
 Read the candidate when routing is relevant to the requested knowledge work.
-Leave every byte unchanged, including existing router blocks. Report a missing
+In ordinary maintenance, leave every byte unchanged, including existing router blocks. Report a missing
 or stale route as `router: gap`, name its evidence and instruction owner, and
 hand off the bounded policy change. Uncertain ownership is also a gap.
+
+In explicit complete setup only, an approved exact-path allowlist may include
+the managed `AGENTS.local.md` placement block and managed `docs/agents/` guides
+from [complete setup](complete-setup.md#managed-guides-and-scaffolds). Keep
+the block at most 15 lines and preserve all outside bytes. Do not edit
+`AGENTS.md` or other router policy. Report that write as setup artifact work;
+do not repurpose the legacy `router: written` report value.
 
 Report `router: unchanged` when the inspected route serves the reader and
 `router: not-applicable` when routing was outside the resolved work. The legacy
@@ -60,7 +68,7 @@ rules.
 
 Use the repository's existing entry point and information hierarchy. Keep the
 root README focused on repository orientation and route readers to the
-knowledge index, context map, or domain owners as supported by evidence. Do
+knowledge index, Glossary Map, or Area owners as supported by evidence. Do
 not duplicate the detail held by linked owners. If an index target is outside
 the requested bucket or approved plan, report it as excluded rather than
 widening the allowlist.

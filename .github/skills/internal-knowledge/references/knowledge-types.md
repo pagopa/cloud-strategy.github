@@ -6,23 +6,42 @@ alignment. Complete setup also prepares marked scaffolds and operational
 documentation under [its separate contract](complete-setup.md); those
 artifacts do not become strategic or tactical knowledge by existing.
 
+## Plain vocabulary
+
+The layout is DDD-inspired, not an implementation of DDD. Use the plain terms
+in documents; DDD names below identify only the closest DDD concept.
+
+| Plain term | Meaning | Closest DDD concept |
+| --- | --- | --- |
+| Area | A durable responsibility with a Purpose and ownership boundary | Domain |
+| Purpose | Why an Area exists, whom it serves, and what it excludes | Domain Vision Statement |
+| Topic | A boundary within an Area where language and Rules have one meaning; usually, not necessarily, aligned with one Subdomain | Bounded Context |
+| Glossary | A Topic's resolved definitions | Ubiquitous Language |
+| Rules | Evidenced normative requirements owned by a Topic | Invariants |
+| Glossary Map | The index of Topics and their evidenced relationships | Context Map |
+| Shared Terms | Identical meanings used across Topics; joint ownership must be declared before calling them a Shared Kernel | Shared Kernel, only with joint ownership |
+| Core / Supporting / Commodity | A Topic's strategic role, listed in its Area README | Core / Supporting / Generic Subdomain |
+
+An Area has no Glossary. Distinct meanings of the same word belong to separate
+Topics. Shared Terms are created lazily and are not another Topic.
+
 ## Strategic knowledge
 
 | Type | What it records | Default home for a new repository |
 | --- | --- | --- |
-| Purpose | Scope, non-goals, stakeholders, and constraints | `docs/project.md` |
+| Purpose | Scope, non-goals, stakeholders, and constraints | Area README; `docs/project.md` for repository-wide purpose |
 | Principles | Durable principles that apply across cycles | `docs/principles.md` |
 | Direction | Diagnosis, guiding policy, objectives with a horizon, assumptions, and strategic risks | `docs/direction.md` |
-| Language | Domain terms and their intended meanings | Root `GLOSSARY.md`, or context glossaries linked from `GLOSSARY-MAP.md`; legacy CONTEXT owners migrate when approved |
+| Language | Topic terms and their intended meanings | `docs/areas/<area>/<topic>/GLOSSARY.md` plus root `GLOSSARY-MAP.md` whenever at least one Topic exists; root `GLOSSARY.md` only without declared Areas |
 | Strategic decisions | Accepted choices that establish or change direction | `docs/adr/` |
 
 ## Tactical knowledge
 
 | Type | What it records | Default home for a new repository |
 | --- | --- | --- |
-| Rules and policies | Normative requirements that govern work | `docs/domains/<context>/RULES.md` or a policy owner |
+| Rules and policies | Normative requirements that govern work | `docs/areas/<area>/<topic>/RULES.md` or an existing policy owner |
 | Standards and conventions | Shared practices, including naming grammar | `docs/standards/` |
-| Structure and boundaries | Components, domains, contracts between parts, and repository maps | `docs/architecture.md`; use `contracts/` only when needed |
+| Structure and boundaries | Components, Areas, Topics, contracts between parts, and repository maps | `docs/architecture.md`; use `contracts/` only when needed |
 | Tactical decisions | Accepted implementation or governance choices within direction | `docs/adr/` |
 
 These nine types are optional. Create a file only when repository evidence
