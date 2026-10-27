@@ -142,6 +142,22 @@ declared source.
   the new producer and update the bounded search and behavioral check. Do not
   silently assume that the old rule proves the new producer's destination.
 
+## Matt Pocock Local Issue Tracker Paths
+
+- Target only the `mattpocock-skills` source's canonical
+  `mattpocock-setup-matt-pocock-skills`, `mattpocock-ask-matt`,
+  `mattpocock-to-tickets`, and `mattpocock-code-review` bundles.
+- Search every UTF-8 text file in those bundles, including nested references
+  and executable scripts. Replace project-root `.scratch/` and `./.scratch/`
+  with `tracker/`, preserving suffixes and neighboring text. The match must
+  not follow a letter, digit, underscore, dot, slash, or hyphen. Preserve nested
+  paths such as `other/.scratch/`, `.scratch-archive/`, and bare `.scratch`.
+- Apply this idempotent path rule through `normalize_candidate` on every
+  refresh. Do not add a replay patch or override-registry entry.
+- Run `tests/scripts/test_candidate.py -k 'tracker_paths or retired_mattpocock_paths'`
+  for rewrite, scope, neighboring-path preservation, and repeat-run checks;
+  then run the full native sync test suite.
+
 ## To Spec Testing Decisions Override
 
 - Target only `mattpocock-skills` / canonical `mattpocock-to-spec` / `SKILL.md`.

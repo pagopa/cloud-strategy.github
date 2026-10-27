@@ -701,6 +701,17 @@ policy:
   allow_implicit_invocation: {allow_implicit_invocation}
 """
 _MATTPOCOCK_SOURCE = "mattpocock-skills"
+_MATTPOCOCK_TRACKER_SKILLS = frozenset(
+    {
+        "mattpocock-setup-matt-pocock-skills",
+        "mattpocock-ask-matt",
+        "mattpocock-to-tickets",
+        "mattpocock-code-review",
+    }
+)
+_MATTPOCOCK_TRACKER_PATH_RE = re.compile(
+    r"(?<![A-Za-z0-9_./-])(?:\./)?\.scratch/"
+)
 _MATTPOCOCK_GRILL_ME_SKILL = "grill-me"
 _MATTPOCOCK_GRILLING_SKILL = "grilling"
 _MATTPOCOCK_GRILLING_MERGE_FILES = frozenset(
@@ -1456,6 +1467,8 @@ def normalize_candidate(
                 )
 
             if asset.source == _MATTPOCOCK_SOURCE:
+                if asset.canonical_name in _MATTPOCOCK_TRACKER_SKILLS:
+                    content = _MATTPOCOCK_TRACKER_PATH_RE.sub("tracker/", content)
                 content = _normalize_mattpocock_retained_paths(
                     asset.canonical_name,
                     file_path.relative_to(asset_dir).as_posix(),

@@ -47,3 +47,21 @@ _Avoid_: Generic Terraform validation
 **Imported skill**:
 A sync-managed external skill whose upstream content remains authoritative unless a local override is registered.
 _Avoid_: Local Terraform skill, copied skill
+
+## Knowledge vocabulary
+
+**Area**:
+A durable responsibility with a stated Purpose and an ownership boundary.
+_Avoid_: Project folder, knowledge domain
+
+**Topic**:
+A boundary within an Area where language and Rules have one meaning. Its closest DDD concept is a Bounded Context, usually but not necessarily aligned with one Subdomain.
+_Avoid_: Component, project area
+
+**Operational Home**:
+The declared owner location for an Area's working evidence and deliverables, separate from accepted durable knowledge.
+_Avoid_: Knowledge store, documentation bucket
+
+**Shared Terms**:
+Identical meanings used across Topics. They form a Shared Kernel only when joint ownership is explicitly declared.
+_Avoid_: Ambiguous terms, shared Topic

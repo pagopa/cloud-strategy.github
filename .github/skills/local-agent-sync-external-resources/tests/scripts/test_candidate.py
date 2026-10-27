@@ -262,13 +262,105 @@ def test_normalization_rewrites_mattpocock_legacy_workspace_paths(
 
 
 @pytest.mark.parametrize(
+    "canonical_name",
+    [
+        "mattpocock-setup-matt-pocock-skills",
+        "mattpocock-ask-matt",
+        "mattpocock-to-tickets",
+        "mattpocock-code-review",
+    ],
+)
+@pytest.mark.parametrize(
+    "file_name", ["SKILL.md", "issue-tracker-local.md", "scripts/nested/tracker.py"]
+)
+def test_normalization_rewrites_mattpocock_tracker_paths(
+    tmp_path: Path,
+    canonical_name: str,
+    file_name: str,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = f".github/skills/{canonical_name}"
+    target = candidate / local / file_name
+    target.parent.mkdir(parents=True)
+    original = (
+        "Upstream path: `.scratch/<feature>/`\n"
+        "Root path: './.scratch/<feature>/issues/01-task.md'\n"
+        "Keep other/.scratch/<feature>/ and .scratch-archive/ and .scratch\n"
+    )
+    target.write_text(original, encoding="utf-8")
+    asset = ManagedAsset(
+        source="mattpocock-skills",
+        upstream=f"skills/{canonical_name}",
+        local=local,
+        canonical_name=canonical_name,
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    assert first_changed == (f"{local}/{file_name}",)
+    assert second_changed == ()
+    assert target.read_text(encoding="utf-8") == (
+        "Upstream path: `tracker/<feature>/`\n"
+        "Root path: 'tracker/<feature>/issues/01-task.md'\n"
+        "Keep other/.scratch/<feature>/ and .scratch-archive/ and .scratch\n"
+    )
+
+
+@pytest.mark.parametrize(
+    "canonical_name",
+    ["mattpocock-triage", "mattpocock-code-review-extra", "example"],
+)
+def test_normalization_preserves_tracker_paths_outside_declared_bundles(
+    tmp_path: Path,
+    canonical_name: str,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = f".github/skills/{canonical_name}"
+    target = candidate / local / "references/tracker.md"
+    target.parent.mkdir(parents=True)
+    original = "Upstream path: `.scratch/<feature>/`\n"
+    target.write_text(original, encoding="utf-8")
+    asset = ManagedAsset(
+        source="mattpocock-skills",
+        upstream=f"skills/{canonical_name}",
+        local=local,
+        canonical_name=canonical_name,
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    assert normalize_candidate(resources, candidate) == ()
+    assert target.read_text(encoding="utf-8") == original
+
+
+@pytest.mark.parametrize(
     ("canonical_name", "file_name", "upstream_path"),
     [
-        (
-            "mattpocock-setup-matt-pocock-skills",
-            "issue-tracker-local.md",
-            ".scratch/<feature>/",
-        ),
         (
             "mattpocock-triage",
             "OUT-OF-SCOPE.md",
