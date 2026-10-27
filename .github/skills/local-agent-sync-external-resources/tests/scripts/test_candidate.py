@@ -1223,6 +1223,41 @@ def test_normalization_rewrites_declared_mattpocock_skill_references(
     assert "/unmanaged" in content
 
 
+def test_normalization_restores_retro_reference_after_refresh(
+    tmp_path: Path,
+    repo_root: Path,
+) -> None:
+    bundle = repo_root / ".github/skills/local-agent-sync-external-resources"
+    resources = load_managed_resources(bundle / "references/managed-resources.yaml")
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/mattpocock-retro/SKILL.md"
+    skill = candidate / local
+    skill.parent.mkdir(parents=True)
+    skill.write_bytes(
+        (bundle / "tests/evaluation/fixtures/upstream-retro-reference.md").read_bytes()
+    )
+    neighbor = candidate / ".github/skills/unmanaged/SKILL.md"
+    neighbor.parent.mkdir(parents=True)
+    neighbor_content = "Keep `writing-for-agents` outside the managed source.\n"
+    neighbor.write_text(neighbor_content, encoding="utf-8")
+
+    changed = normalize_candidate(resources, candidate)
+
+    assert changed == (local,)
+    assert skill.read_text(encoding="utf-8") == (
+        "---\n"
+        "name: mattpocock-retro\n"
+        "description: Review the working environment.\n"
+        "---\n\n"
+        "Call the Skill tool with `mattpocock-writing-for-agents` "
+        "for the writing style guide.\n"
+        "Follow the advice in the `mattpocock-writing-for-agents` skill.\n"
+        "Keep `writing-for-agents-extra` and `unmanaged` unchanged.\n"
+    )
+    assert neighbor.read_text(encoding="utf-8") == neighbor_content
+    assert normalize_candidate(resources, candidate) == ()
+
+
 def test_normalization_builds_self_contained_grill_me_from_grilling(
     tmp_path: Path,
 ) -> None:

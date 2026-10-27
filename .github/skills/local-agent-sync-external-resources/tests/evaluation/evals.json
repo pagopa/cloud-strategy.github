@@ -29,9 +29,37 @@
     },
     {"id": "R-SINGLE-PLAN", "text": "Normalize only the Addy planner to one embedded-task plan under tmp/.plans/, preserving nested paths, neighbors, existing work and idempotence.", "source": "references/skill-normalizations.md: Single Implementation Plan"},
     {"id": "R-RETIRED-ROUTING", "text": "Do not import the two retired Superpowers plan skills; normalize only their authorized caller references to the gateways without creating execution approval, and keep legacy hash replay valid.", "source": "references/skill-normalizations.md: Retired Plan Skills And Gateway Routing"},
-    {"id": "R-TO-SPEC-TESTING", "text": "Refresh reapplies the testing-decisions marked override only to Matt To Spec, preserves unrelated content and neighbors, replaces stale notes and is idempotent.", "source": "references/skill-normalizations.md: To Spec Testing Decisions Override"}
+    {"id": "R-TO-SPEC-TESTING", "text": "Refresh reapplies the testing-decisions marked override only to Matt To Spec, preserves unrelated content and neighbors, replaces stale notes and is idempotent.", "source": "references/skill-normalizations.md: To Spec Testing Decisions Override"},
+    {
+      "id": "R-RETRO-REFERENCE",
+      "text": "The declared Matt source rewrites exact backtick writing-for-agents references to the installed canonical skill name, preserving compound names, unmanaged bundles, and second-pass stability.",
+      "source": "references/skill-normalizations.md#Managed Skill Reference Normalization"
+    }
   ],
   "cases": [
+    {
+      "id": "C-RETRO-REFERENCE",
+      "family": "dependency-resolution",
+      "kind": "deterministic",
+      "requirement_ids": ["R-RETRO-REFERENCE"],
+      "prompt": "Keep the retrospective's writing-guide dependency usable after the next Matt import.",
+      "initial_state": "The candidate contains the upstream retrospective fixture and an unmanaged neighboring bundle mentioning the same guide.",
+      "expected_output": "The real manifest and candidate normalizer produce canonical guide references in Retro, retain unrelated names and unmanaged content, and report no changes on a second pass.",
+      "files": [
+        "references/managed-resources.yaml",
+        "tests/scripts/test_candidate.py",
+        "tests/evaluation/fixtures/upstream-retro-reference.md"
+      ],
+      "assertions": [
+        {"id": "A-RESOLVABLE", "text": "Both guide references in the normalized Retro resolve to the canonical declared asset.", "critical": true},
+        {"id": "A-SCOPED", "text": "Compound names and unmanaged neighboring content remain unchanged.", "critical": true},
+        {"id": "A-STABLE", "text": "Repeated normalization reports zero changed paths.", "critical": true}
+      ],
+      "forbidden_actions": ["Register a replay patch.", "Change the pinned upstream revision."],
+      "status": "generated",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-retro-reference.md"
+    },
     {
       "id": "C-STRIP-UNDECLARED",
       "family": "bounded-revision",

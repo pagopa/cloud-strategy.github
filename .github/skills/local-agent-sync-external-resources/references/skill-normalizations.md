@@ -13,6 +13,12 @@ declared source.
   `canonical_name` values.
 - `skill_reference_aliases` are source-local and point only at declared
   canonical names.
+- Declare `writing-for-agents` in the Matt source's
+  `backtick_skill_references`, so refreshes preserve the canonical
+  `mattpocock-writing-for-agents` dependency in `mattpocock-retro`.
+  Rewrite exact backtick names only; preserve compound names and unmanaged
+  bundles. Verify fresh upstream input and repeat-run stability with
+  `tests/scripts/test_candidate.py -k restores_retro_reference`.
 - The `mattpocock-skills` source imports all 25 direct `engineering/` and
   `productivity/` bundles from the pinned release. Keep `grill-me` and
   `grilling` unprefixed; prefix the other 23 canonical names with

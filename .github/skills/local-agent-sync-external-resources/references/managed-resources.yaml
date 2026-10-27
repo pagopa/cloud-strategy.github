@@ -120,6 +120,7 @@ sources:
       - code-review
       - tdd
       - to-spec
+      - writing-for-agents
     assets:
       - upstream: skills/engineering/ask-matt
         local: .github/skills/mattpocock-ask-matt
