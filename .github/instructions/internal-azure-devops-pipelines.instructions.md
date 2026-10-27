@@ -1,5 +1,5 @@
 ---
-description: Best practices for Azure DevOps Pipeline YAML files
+description: Azure Pipelines review checks for trigger scope, pinning, secrets, stage gating, and deployment approvals.
 applyTo: "**/azure-pipelines.yml,**/azure-pipelines*.yml,**/*.pipeline.yml"
 excludeAgent: "cloud-agent"
 ---

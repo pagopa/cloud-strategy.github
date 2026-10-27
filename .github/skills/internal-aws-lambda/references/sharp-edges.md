@@ -11,3 +11,6 @@
 | File workflows recurse forever | Input and output use the same trigger surface | Bucket notification scope, prefixes, output location | Separate input and output prefixes or buckets |
 | Node.js invocations hang after work is done | Open sockets, timers, or connection pools keep the event loop alive | Client lifecycle, timers, runtime settings | Close unused handles or intentionally set `callbackWaitsForEmptyEventLoop = false` |
 | Secrets leak into logs or configs | Secrets are treated like normal configuration values | Environment variables, startup logs, error serialization | Use managed secret stores and scrub logs by default |
+| Duplicate side effects after retries | Async and queue triggers deliver at least once | Write paths, dedupe keys, idempotency markers | Use idempotent writes, dedupe keys, or safe upserts |
+| One large shared bundle slows every function | Unrelated dependencies ship to every function | Package size per function, shared imports | Split by function responsibility and keep dependencies narrow |
+| Integrations break when core logic changes | HTTP request and response mapping is mixed into business code | Where parsing and response shaping live | Keep request and response mapping at the edge |

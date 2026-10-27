@@ -1,0 +1,43 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "components": [
+    "community-grant-program"
+  ],
+  "edges": [],
+  "lifecycle_states": {},
+  "protected_paths": [],
+  "generated_paths": [],
+  "adr_dir": null,
+  "ledger": null,
+  "router": null,
+  "expected_placements": {},
+  "sections": [],
+  "must_write": [],
+  "facts": [
+    {
+      "path": "docs/project.md",
+      "text": "PUR — Govern a fair and reviewable community grant program."
+    },
+    {
+      "path": "docs/direction.md",
+      "text": "DIR-01 — Review whether the process meets its purpose."
+    },
+    {
+      "path": "docs/domain/repository-governance/RULES.md",
+      "text": "Serves: DIR-02"
+    },
+    {
+      "path": "docs/operations/closed-selection.md",
+      "text": "The 2026 selection completed under GOV-01 with no exception or durable process change."
+    }
+  ],
+  "readme_paths": [
+    "README.md",
+    "docs/README.md"
+  ],
+  "owner_links": [],
+  "diagram_edges": {},
+  "aliases": {},
+  "diagram_triggers": [],
+  "fixture": "F7"
+}

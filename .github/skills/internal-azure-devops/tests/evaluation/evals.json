@@ -1,0 +1,161 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-azure-devops",
+  "requirements": [
+    {"id": "R-CONVENTIONS", "text": "Inspect existing pipelines, templates, variables, and environments before proposing structure.", "source": "internal-azure-devops SKILL.md Workflow step 2 (retained)"},
+    {"id": "R-TRIGGERS", "text": "Keep branch, path, schedule, and resource triggers intentional.", "source": "retired pipelines.md Structure and triggers"},
+    {"id": "R-SERVICE-CONNECTION", "text": "Use least-privilege service connections scoped to the target and prefer workload identity federation over secrets.", "source": "internal-azure-devops SKILL.md Workflow step 4; Azure consolidation spec section 5"},
+    {"id": "R-SECRETS", "text": "Keep secrets in secret variables, Key Vault-linked variable groups, or managed identity patterns, and never print them.", "source": "retired pipelines.md Variables and secrets"},
+    {"id": "R-ENV-GATES", "text": "Use deployment jobs targeting environments with approvals or checks for production-like targets.", "source": "retired pipelines.md Deployment"},
+    {"id": "R-PINNING", "text": "Pin task major versions and name agent images deliberately.", "source": "retired pipelines.md Build and test"},
+    {"id": "R-ROLLBACK", "text": "Make rollback and health checks explicit when deployment is in scope.", "source": "internal-azure-devops SKILL.md Workflow step 5"},
+    {"id": "R-VALIDATION", "text": "Run or name the focused YAML and pipeline validation available in the repository.", "source": "internal-azure-devops SKILL.md Workflow step 6"},
+    {"id": "R-HANDOFF", "text": "Route CLI execution to awesome-copilot-azure-devops-cli, general delivery strategy to internal-devops-core-principles, and Azure platform design to internal-azure.", "source": "Azure consolidation spec section 6"},
+    {"id": "R-OUTPUT", "text": "Return the design, material risk, and next validation action, and add security controls and rollback only when material.", "source": "Azure consolidation spec section 5; decision D3"}
+  ],
+  "cases": [
+    {
+      "id": "C-PIPELINE-HARDEN",
+      "family": "regression",
+      "kind": "deterministic",
+      "requirement_ids": ["R-SECRETS", "R-SERVICE-CONNECTION", "R-PINNING", "R-TRIGGERS"],
+      "prompt": "Review and harden this Azure DevOps pipeline before we use it for production deploys.",
+      "initial_state": "The fixture pipeline hardcodes a password, prints it, uses an Owner connection across all subscriptions, triggers on every branch, and floats the agent image.",
+      "expected_output": "Findings for the hardcoded and printed secret, the over-privileged service connection, the wildcard trigger, and the unpinned image, with concrete fixes.",
+      "files": ["fixtures/pipeline-secret-inline.yml"],
+      "defective_fixture": "fixtures/pipeline-secret-inline.yml",
+      "assertions": [
+        {"id": "A-SECRET", "text": "The response flags the hardcoded password and the echo that prints it.", "critical": true},
+        {"id": "A-CONNECTION", "text": "The response flags the Owner connection across all subscriptions and proposes a scoped connection with workload identity federation.", "critical": true},
+        {"id": "A-TRIGGER", "text": "The response flags the wildcard branch trigger.", "critical": false},
+        {"id": "A-IMAGE", "text": "The response flags the floating ubuntu-latest image or proposes a deliberate image choice.", "critical": false}
+      ],
+      "forbidden_actions": ["Keep the secret in plain YAML.", "Approve the pipeline for production unchanged."],
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-PROD-PROMOTION",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-ENV-GATES", "R-ROLLBACK", "R-OUTPUT"],
+      "prompt": "Add a production stage after staging in our Azure DevOps pipeline.",
+      "initial_state": "The pipeline has build and staging stages that use plain jobs.",
+      "expected_output": "A deployment job targeting a production environment with approvals or checks, a health check, and a rollback path.",
+      "files": ["references/pipelines.md"],
+      "assertions": [
+        {"id": "A-DEPLOYMENT-JOB", "text": "The production stage uses a deployment job targeting an environment with approvals or checks.", "critical": true},
+        {"id": "A-ROLLBACK", "text": "The response includes a health check and a rollback path.", "critical": true}
+      ],
+      "forbidden_actions": ["Deploy to production from a plain job without environment gates."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Environment gate, health check, and rollback are explicit."],
+        "fail": ["The stage deploys ungated or has no rollback."]
+      }
+    },
+    {
+      "id": "C-CONVENTIONS",
+      "family": "material-ambiguity",
+      "kind": "rubric",
+      "requirement_ids": ["R-CONVENTIONS", "R-TRIGGERS"],
+      "prompt": "Create a CI pipeline for the new service in this repository.",
+      "initial_state": "The repository already has shared templates under pipelines/templates and path-filtered triggers for other services.",
+      "expected_output": "The new pipeline reuses the existing templates and follows the path-filter convention.",
+      "files": [],
+      "assertions": [
+        {"id": "A-REUSE", "text": "The response inspects and reuses the existing templates instead of inventing a new structure.", "critical": true},
+        {"id": "A-PATH-FILTER", "text": "The trigger is path-filtered to the new service.", "critical": false}
+      ],
+      "forbidden_actions": ["Introduce a parallel template structure without reason."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Conventions are discovered and followed."],
+        "fail": ["The pipeline ignores existing templates and triggers on every change."]
+      }
+    },
+    {
+      "id": "C-CLI-HANDOFF",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF"],
+      "prompt": "Run the nightly pipeline now with az pipelines run and show me the result.",
+      "initial_state": "The request asks for CLI execution, not pipeline design.",
+      "expected_output": "CLI execution is routed to awesome-copilot-azure-devops-cli.",
+      "files": ["references/pipelines.md"],
+      "assertions": [
+        {"id": "A-CLI-OWNER", "text": "The response routes CLI execution to awesome-copilot-azure-devops-cli.", "critical": true}
+      ],
+      "forbidden_actions": ["Redesign the pipeline YAML for a CLI execution request."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The CLI owner handles the command."],
+        "fail": ["The pipeline design workflow runs instead."]
+      }
+    },
+    {
+      "id": "C-VALIDATE",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-VALIDATION"],
+      "prompt": "I edited azure-pipelines.yml to add a test stage. Make sure it is valid.",
+      "initial_state": "The repository has a YAML linter configured in pre-commit.",
+      "expected_output": "The focused YAML validation is run or named, and remote pipeline validation is named as a gap if not available locally.",
+      "files": [],
+      "assertions": [
+        {"id": "A-FOCUSED-CHECK", "text": "The response runs or names the repository YAML validation.", "critical": true},
+        {"id": "A-GAP", "text": "The response states which pipeline-level validation remains unverified.", "critical": false}
+      ],
+      "forbidden_actions": ["Claim the pipeline is valid without any check."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["A concrete validation result or named gap is reported."],
+        "fail": ["Validity is asserted without evidence."]
+      }
+    },
+    {
+      "id": "C-STRATEGY-HANDOFF",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF", "R-OUTPUT"],
+      "prompt": "Should our organization move from release branches to trunk-based delivery with feature flags?",
+      "initial_state": "The question is tool-neutral delivery strategy.",
+      "expected_output": "General delivery strategy is routed to internal-devops-core-principles; Azure DevOps specifics are offered only when requested.",
+      "files": ["references/pipelines.md"],
+      "assertions": [
+        {"id": "A-STRATEGY-OWNER", "text": "The response routes the delivery-strategy decision to internal-devops-core-principles.", "critical": true}
+      ],
+      "forbidden_actions": ["Answer a tool-neutral strategy question with pipeline YAML."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The strategy owner is used."],
+        "fail": ["The response produces Azure DevOps YAML."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Review this azure-pipelines.yml for security issues.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Add a production environment with approvals to our Azure DevOps pipeline.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Move this Azure DevOps service connection to workload identity federation.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Split our Azure DevOps pipeline into reusable templates with parameters.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Link a Key Vault-backed variable group to the deploy stage.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-06", "query": "Our ADO path triggers run on every docs change; fix them.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-07", "query": "Add rollback and health checks to the Azure DevOps deployment job.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Pin tasks and the agent image in this Azure pipeline.", "should_trigger": true, "split": "train"},
+      {"id": "Q-09", "query": "Run az pipelines run for the nightly build.", "should_trigger": false, "split": "train", "competing_owner": "awesome-copilot-azure-devops-cli"},
+      {"id": "Q-10", "query": "Choose trunk-based versus release-branch promotion in general.", "should_trigger": false, "split": "train", "competing_owner": "internal-devops-core-principles"},
+      {"id": "Q-11", "query": "Harden this GitHub Actions workflow.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-actions"},
+      {"id": "Q-12", "query": "Design an Azure management-group layout.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-azure"},
+      {"id": "Q-13", "query": "Define RBAC for the Azure deployment subscription.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-azure"},
+      {"id": "Q-14", "query": "Fix this Terraform module applied by the pipeline.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-15", "query": "Review this Dockerfile built by the pipeline.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-docker"},
+      {"id": "Q-16", "query": "Review the diff of this pipeline pull request.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"}
+    ]
+  }
+}

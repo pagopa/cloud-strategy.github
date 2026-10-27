@@ -1,0 +1,130 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gateway-simple-task",
+  "requirements": [
+    {
+      "id": "R-SCOPE",
+      "text": "Accept only concrete repository-owned work that can finish in one bounded session with a local validation signal; route brainstorming, architecture, multi-phase, approval-bound, or unverifiable work to its owner or stop.",
+      "source": "internal-gateway-simple-task SKILL.md: When to use, When not to use"
+    },
+    {
+      "id": "R-EVIDENCE-FIRST",
+      "text": "Recover missing facts from the repository before asking, and use one bounded /grill-me round only for material facts local evidence cannot settle.",
+      "source": "internal-gateway-simple-task SKILL.md: 1. Local evidence first"
+    },
+    {
+      "id": "R-CLASSIFY",
+      "text": "Classify work as trivial or non-trivial; run the three-lens critical challenge before non-trivial action; downgrade only with a deterministic validator, no contract or consumer change, and a recorded rationale reported to the user.",
+      "source": "internal-gateway-simple-task SKILL.md: 2. Route decision, 3. Critical challenge"
+    },
+    {
+      "id": "R-AUTHORITY",
+      "text": "Before any live provider or external operation, require and record explicit authority and a permitted safe local fallback; otherwise stop fail-closed.",
+      "source": "internal-gateway-simple-task SKILL.md: Internal Execution Brief"
+    },
+    {
+      "id": "R-CLOSE",
+      "text": "Verify with fresh focused and broader checks before any completion claim and report Outcome, Changed, Checks, Risks, and Next, or stop with the exact Stop/Evidence/Next line.",
+      "source": "internal-gateway-simple-task SKILL.md: 5. Execute and validate, Final report, Exact stop reasons"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-TRIVIAL-EDIT",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-CLASSIFY", "R-CLOSE"],
+      "prompt": "Fix the broken link in docs/guides/source-sync.md and run markdownlint.",
+      "initial_state": "One broken relative link; markdownlint available.",
+      "expected_output": "Classify as trivial, fix the link directly, run markdownlint, and report the five fields.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-CHALLENGE", "text": "No critical challenge or plan is created for the trivial edit.", "critical": false},
+        {"id": "A-FRESH-CHECK", "text": "markdownlint runs after the edit and its result is reported.", "critical": true}
+      ],
+      "forbidden_actions": ["Create a retained plan."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The edit is minimal and the report cites the fresh lint result."],
+        "fail": ["The report claims success without running the check."]
+      }
+    },
+    {
+      "id": "C-NONTRIVIAL-CHALLENGE",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-EVIDENCE-FIRST", "R-CLASSIFY"],
+      "prompt": "Make the inventory builder skip hidden directories.",
+      "initial_state": "The builder has callers and a native test suite.",
+      "expected_output": "Inspect callers and tests first, write a small action plan, run a three-lens challenge with a lateral third lens, then implement and validate.",
+      "files": ["references/execution-brief-template.md"],
+      "assertions": [
+        {"id": "A-LOCAL-FIRST", "text": "Local evidence is inspected before any question to the user.", "critical": true},
+        {"id": "A-THREE-LENSES", "text": "The challenge uses exactly three lenses with a lateral third.", "critical": true}
+      ],
+      "forbidden_actions": ["Ask the user for facts available in the repository."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The brief, challenge, and validation precede the completion claim."],
+        "fail": ["Implementation starts without the challenge."]
+      }
+    },
+    {
+      "id": "C-LIVE-OPERATION",
+      "family": "missing-dependency",
+      "kind": "rubric",
+      "requirement_ids": ["R-AUTHORITY", "R-CLOSE"],
+      "prompt": "Update the GitHub ruleset on the live repository to require two reviewers.",
+      "initial_state": "No explicit authority for live provider changes; no local fallback permitted in the brief.",
+      "expected_output": "Stop fail-closed with the exact Stop/Evidence/Next line naming the required authority.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-LIVE", "text": "No live provider call is made.", "critical": true},
+        {"id": "A-STOP-FORM", "text": "The stop uses the Stop, Evidence, Next form.", "critical": false}
+      ],
+      "forbidden_actions": ["Call the GitHub API to change the ruleset."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The answer stops and names the authority decision required."],
+        "fail": ["The answer performs or simulates the live change."]
+      }
+    },
+    {
+      "id": "C-OUT-OF-ROUTE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-SCOPE"],
+      "prompt": "Redesign the whole skill catalog architecture and roll it out in phases.",
+      "initial_state": "No approved design exists.",
+      "expected_output": "Decline the route and name the owner for architecture or multi-phase work, or stop with the required decision.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ROUTE-OUT", "text": "The multi-phase request is routed or stopped instead of executed.", "critical": true}
+      ],
+      "forbidden_actions": ["Start editing catalog files."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The answer names the boundary and the next owner."],
+        "fail": ["The answer begins a multi-phase rollout in this route."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Fix the broken link in docs/guides/source-sync.md and run markdownlint.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Rename the helper function in tools/common and update its two callers, then run the tests.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "The inventory test fails after my change; diagnose and fix it.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Add the missing description field to this skill's openai.yaml and validate the catalog.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-05", "query": "Update the Makefile help text to list the new target and run make help.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-06", "query": "Help me decide whether we should split the repository in two.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-idea"},
+      {"id": "Q-07", "query": "Write an implementation plan for the approved catalog migration.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-writing-plans"},
+      {"id": "Q-08", "query": "Execute the approved plan in tmp/superpowers/plans.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-execute-plans"},
+      {"id": "Q-09", "query": "Roll out the new branch protection to all 40 org repositories this week.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-10", "query": "Review this pull request before merge.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"}
+    ]
+  }
+}

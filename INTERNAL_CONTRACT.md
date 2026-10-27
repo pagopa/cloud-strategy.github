@@ -171,6 +171,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Scope:
   - repo-root helper entry points
   - `.github/scripts/**`
+  - `.github/tools/**`
   - catalog review and consistency guidance
 - Expected behavior:
   - same-named files in different locations are not classified as duplicate from naming or path alone
@@ -286,7 +287,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - Expected behavior:
   - overlap alone does not justify wrapping or replacing an imported asset
-  - repository-owned wrappers or replacements are justified when they add repository-specific routing, governance, terminology, output shape, safety expectations, or a missing internal owner
+  - repository-owned wrappers or replacements are justified when they add repository-specific routing, governance, terminology, output shape, safety expectations, a missing internal owner, or verified corrections and guidance that the read-only imported asset lacks
   - imported assets may remain verbatim when those gaps do not exist
 
 #### `resource-governance-canonical-operational-model-stays-explicit`
@@ -312,7 +313,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Scope:
   - `.github/skills/internal-github-pr/SKILL.md`
   - `CODEOWNERS`
-  - `.github/skills/internal-github-governance/SKILL.md`
+  - `.github/skills/internal-github-platform/SKILL.md`
 - Expected behavior:
   - self-authored PRs under required reviews are not treated as mergeable from green checks alone
   - the GitHub PR skill tells operators to verify a qualifying non-author approval before merge

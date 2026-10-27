@@ -1,0 +1,16 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "FS2",
+  "description": "An installed scaffold with intentional placeholders, customized templates, a real project, and a retained historical demo.",
+  "files": {
+    "README.md": "# Workspace\n\nStart with [the index](docs/README.md).\n",
+    "docs/README.md": "# Knowledge\n\n## Project Areas\n\n- [Relay](domains/relay/README.md)\n\n## Prepared Knowledge\n\n- [Shared glossary](../GLOSSARY.md): placeholder, no accepted definitions.\n\n## Operational Support\n\n- [Specification template](templates/spec.md)\n- [Issue template](templates/issue.md)\n\nThe [retained demo](domains/mock/README.md) is synthetic and is not a real domain or accepted knowledge.\n",
+    "GLOSSARY.md": "# Shared Glossary\n\n<!-- knowledge:placeholder -->\n\nStatus: placeholder. No repository-specific definitions are accepted yet.\n\n## Language\n",
+    "docs/agents/domain.md": "# Domain Docs\n\nProject areas use docs/domains/<slug>/. Root GLOSSARY.md is the shared vocabulary owner. Intentional scaffolds are not accepted knowledge.\n",
+    "docs/agents/issue-tracker.md": "# Issue Tracker\n\nReal work belongs under .scratch/<initiative>/. Copy the approved templates only for real work.\n",
+    "docs/domains/relay/README.md": "# Relay\n\nCoordinate the message relay project. Read the [shared glossary](../../../GLOSSARY.md) and [operational templates](../../README.md#operational-support).\n",
+    "docs/domains/mock/README.md": "# Mock\n\nStatus: example. This retained synthetic demo establishes no real requirement or decision.\n",
+    "docs/templates/spec.md": "# Specification Template\n\n<!-- knowledge:template -->\n\nStatus: template. Replace with a real specification before publishing.\n\n## Outcome\n\n## Required Checks\n\nKeep this project-specific section and its title.\n",
+    "docs/templates/issue.md": "# Issue Template\n\n<!-- knowledge:template -->\n\nStatus: template. This is not an open work item.\n\n## Goal\n\n## Acceptance\n"
+  }
+}

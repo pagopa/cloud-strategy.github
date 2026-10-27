@@ -46,4 +46,5 @@ output "resource_name" {
 }
 ```
 
-Use the router for module architecture, provider behavior, state, and delivery decisions beyond this language-level interface.
+Route module architecture, provider behavior, state, and delivery decisions
+beyond this language-level interface to `/internal-terraform`.

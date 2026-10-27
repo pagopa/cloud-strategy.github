@@ -1,0 +1,7 @@
+# Proposed change: enforce immediately at the organization.
+name: organizations/123456789012/policies/iam.disableServiceAccountKeyCreation
+spec:
+  rules:
+    - enforce: true
+# Rollout note: apply to production today; no exceptions planned.
+# Known: project example-legacy-etl still authenticates with a downloaded key.

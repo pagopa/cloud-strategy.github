@@ -1,0 +1,10 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "FS0",
+  "description": "A documentation workspace with no declared or evidenced project area; a technical directory is not a real domain.",
+  "files": {
+    "README.md": "# Workspace\n\nThis folder is ready for project documentation.\n",
+    "docs/agents/issue-tracker.md": "# Issue Tracker\n\nReal specifications and tickets belong under .scratch/<initiative>/.\n",
+    "tools/README.md": "# Tools\n\nShared maintenance utilities, not a project domain.\n"
+  }
+}

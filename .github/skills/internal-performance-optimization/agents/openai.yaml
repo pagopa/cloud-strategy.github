@@ -1,4 +1,4 @@
 interface:
   display_name: "internal-performance-optimization"
-  short_description: "Help with Internal Performance Optimization tasks"
-  default_prompt: "Use $internal-performance-optimization for this task and follow the repository-owned workflow in the skill."
+  short_description: "Profiling and latency or throughput work"
+  default_prompt: "Use $internal-performance-optimization when performance is the primary problem: profile the slowness first, then reduce latency, improve throughput, or prevent regressions across frontend, backend, and database layers."

@@ -1,0 +1,10 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "F9",
+  "description": "Legacy vocabulary owner, navigation and accepted decision for progressive updates and migration.",
+  "files": {
+    "CONTEXT.md": "# Context\n\n## Language\n\n**Release**: A version approved for distribution.\n\n## Responsibility\n\nThe release team owns distribution.\n",
+    "README.md": "# Distribution\n\nRead [context](CONTEXT.md#language).\n",
+    "docs/adr/0001-distribution.md": "# Distribution ownership\n\n## Status\n\nAccepted\n\n## Decision\n\nThe release team owns distribution.\n"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "no_invented_paths",
+  "gold": "tests/evaluation/grader-fixtures/gold/no_invented_paths.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "docs/a.md": "old"
+        },
+        "after": {
+          "docs/a.md": "new"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Summary of the observed result.\nNo changes were made.\nknowledge-report/v1\nmode: audit\nwritten: docs/a.md\n",
+        "second_after": {
+          "docs/a.md": "new"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "invented-written-path",
+      "kind": "false-success-claim",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {},
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Summary of the observed result.\nNo changes were made.\nknowledge-report/v1\nmode: audit\nwritten: docs/ghost.md\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "invented-path"
+    },
+    {
+      "name": "invented-omission-path",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {},
+        "after": {},
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "Summary of the observed result.\nNo changes were made.\nknowledge-report/v1\nmode: audit\nomitted: docs/missing.md: owner unavailable\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "invented-path"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "fixture-skill",
+  "requirements": [
+    {
+      "id": "R-OUTPUT",
+      "text": "Generate a structurally valid pack with covered requirements.",
+      "source": "fixture specification"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-FIXTURE",
+      "family": "pack generation",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-OUTPUT"
+      ],
+      "prompt": "Generate a minimal valid pack.",
+      "initial_state": "A fixture skill and its bundle files exist.",
+      "expected_output": "A pack that passes the checker.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-VALID",
+          "text": "The generated pack passes structural validation.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": [
+          "All required fields and references validate."
+        ],
+        "fail": [
+          "A required field or reference is missing."
+        ]
+      },
+      "status": "generated",
+      "held_out": false
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-FIXTURE-IN",
+        "query": "Generate a valid skill evaluation pack for this fixture skill.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-FIXTURE-OUT",
+        "query": "Summarize an unrelated report without creating an evaluation pack.",
+        "should_trigger": false,
+        "split": "held-out"
+      }
+    ]
+  }
+}

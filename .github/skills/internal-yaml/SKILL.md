@@ -1,13 +1,14 @@
 ---
 name: internal-yaml
-description: Use when editing or reviewing YAML or YML syntax, encoding, parser safety, or format-owner routing.
+description: Use when editing or reviewing YAML or YML syntax, indentation, duplicate mapping keys, encoding, anchors, or parser safety. Route JSON grammar to /internal-json, Markdown structure to /internal-markdown, and Makefile syntax to /internal-makefile.
 ---
 
 # Internal YAML
 
 ## When to use
 
-- YAML or YML edits where generic format ownership is the active concern.
+- YAML or YML edits where generic format ownership is the active concern,
+  including YAML in Kubernetes manifests and GitHub Actions workflows.
 - Reviews focused on syntax, indentation, duplicate mapping keys, encoding,
   comments, anchors, aliases, and parser-safe structure.
 - Routing a file to a narrower owner when platform or schema semantics are the
@@ -15,20 +16,22 @@ description: Use when editing or reviewing YAML or YML syntax, encoding, parser 
 
 ## When not to use
 
-- JSON grammar or encoding; route those concerns to /internal-json.
-- Markdown structure; route those concerns to /internal-markdown.
-- Makefile syntax; route those concerns to /internal-makefile.
-- YAML embedded in Kubernetes manifests or GitHub Actions workflows remains
-  owned here for format concerns; route domain semantics to the relevant domain
-  skill.
+- JSON grammar or encoding; route those concerns to `/internal-json`.
+- Markdown structure; route those concerns to `/internal-markdown`.
+- Makefile syntax; route those concerns to `/internal-makefile`.
+- Platform schema or domain semantics, including Kubernetes and GitHub
+  Actions content; route them to the relevant domain skill.
 
 ## Baseline
 
-- Use 2-space indentation and never use tabs for indentation.
+- Use 2-space indentation with spaces only; tabs are never valid indentation.
 - Preserve encoding, comments, anchors, aliases, and key spelling unless the
   requested change requires otherwise.
 - Treat duplicate mapping keys as findings, including duplicate keys hidden by
   merge behavior when the checker supports that parser rule.
+- Quote scalars that a parser would coerce, including `yes`, `no`, `on`, `off`,
+  and octal-looking values such as `0644`, unless the boolean or integer is the
+  intended value.
 - Keep generic YAML checks separate from platform schema and domain semantics.
 
 ## Validation
@@ -42,6 +45,9 @@ bash scripts/check.sh FILE [FILE ...]
 The checker returns `0` when checks passed within supported scope, `1` for
 format findings, and `2` for usage, dependency, file, or internal failures.
 It requires `yamllint` 1.38.0 and does not install dependencies. Supported
-checks are parser-backed YAML syntax and duplicate-key detection. Schema,
-tag, platform, and domain-content semantics are unsupported; route those
-questions to the relevant owner.
+checks are parser-backed YAML syntax, duplicate-key detection, implicit boolean
+scalars, and octal values. Schema, tag, platform, and domain-content semantics
+are unsupported; route those questions to the relevant owner.
+
+For installation, self-test, and configured rule behavior, read
+[`references/validation-contract.md`](references/validation-contract.md).

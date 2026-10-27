@@ -1,0 +1,365 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-mermaid",
+  "requirements": [
+    {
+      "id": "R-ROUTE-MARKDOWN",
+      "text": "When the concern is surrounding Markdown structure, fences, or links, route the work to /internal-markdown; use internal-mermaid when the Mermaid diagram itself is the active deliverable or review target.",
+      "source": "internal-mermaid SKILL.md: When not to use"
+    },
+    {
+      "id": "R-DEFAULT-THEME",
+      "text": "Every text-bearing box keeps the renderer's default fill and text colors; explicit fill is allowed only for an empty box, and other explicit colors, themes, and appearance styling are omitted.",
+      "source": "internal-mermaid SKILL.md: Theme-neutral communication"
+    },
+    {
+      "id": "R-RENDERER-EVIDENCE",
+      "text": "Validate with an available renderer such as mmdc or Mermaid Live Editor; when no renderer is available, report the diagram as unverified and never claim validity from source inspection alone.",
+      "source": "internal-mermaid SKILL.md: Validate"
+    },
+    {
+      "id": "R-ACCESSIBLE-MINIMAL",
+      "text": "Choose the smallest suitable diagram type, quote labels containing punctuation, use text labels and topology as the meaning, add accTitle and accDescr when supported, and keep emoji supplementary with a legend when symbols need explanation.",
+      "source": "internal-mermaid SKILL.md: Theme-neutral communication; Generate"
+    },
+    {
+      "id": "R-MODIFY-PRESERVE",
+      "text": "A modification preserves existing node IDs, edge directions, shape semantics, unaffected ordering, and relationships, while removing explicit fills from any text-bearing box that is touched.",
+      "source": "internal-mermaid SKILL.md: Modify"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-MARKDOWN-OWNER",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-ROUTE-MARKDOWN"],
+      "prompt": "The Mermaid fence in docs/README.md is closed incorrectly and a link around it is broken; fix the document.",
+      "initial_state": "The Mermaid source is incidental inside a Markdown document. The requested defects are the fence and link structure, not the diagram semantics.",
+      "expected_output": "Route the work to /internal-markdown and limit any Mermaid discussion to the incidental code block; do not treat this as a Mermaid diagram change.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-MARKDOWN-FIRST",
+          "text": "The response identifies /internal-markdown as the owner for the fence and link defects.",
+          "critical": true
+        },
+        {
+          "id": "A-DIAGRAM-SCOPE",
+          "text": "The response does not rewrite Mermaid nodes or styling when the diagram itself is not the requested target.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Rewrite the Mermaid graph instead of fixing the surrounding Markdown structure."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "/internal-markdown owns the fence and link repair.",
+          "The answer leaves diagram semantics untouched unless a separate diagram defect is demonstrated."
+        ],
+        "fail": [
+          "The answer claims internal-mermaid owns Markdown fences or links.",
+          "The answer changes node IDs or diagram topology for a Markdown-only request."
+        ]
+      }
+    },
+    {
+      "id": "C-TEXT-BOX-FILL",
+      "family": "theme-compatibility",
+      "kind": "rubric",
+      "requirement_ids": ["R-DEFAULT-THEME", "R-MODIFY-PRESERVE"],
+      "prompt": "Modify this flowchart so the text-bearing Order node works in both light and dark themes. It currently has an explicit fill color; keep all IDs and arrows stable.",
+      "initial_state": "The diagram contains a labeled Order node with an explicit fill and several existing IDs and edge directions that other documents reference.",
+      "expected_output": "Remove the explicit fill from the labeled node, omit other appearance styling, and preserve node IDs, edge directions, shapes, ordering, and relationships.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-REMOVE-LABELED-FILL",
+          "text": "The response removes the explicit fill from the text-bearing Order node rather than choosing a replacement color.",
+          "critical": true
+        },
+        {
+          "id": "A-PRESERVE-TOPOLOGY",
+          "text": "The response keeps existing IDs, arrows, shapes, ordering, and relationships stable.",
+          "critical": true
+        },
+        {
+          "id": "A-NO-THEME-DIRECTIVES",
+          "text": "The response does not add theme, themeVariables, linkStyle, or other appearance directives.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Replace the removed fill with another explicit color on the labeled node.",
+        "Change a node ID or edge direction while making the theme fix."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The labeled box uses renderer defaults and the graph structure is unchanged.",
+          "No theme-wide or link appearance directive is introduced."
+        ],
+        "fail": [
+          "A text-bearing box retains or receives an explicit fill.",
+          "The requested styling change also alters topology or silently adds theme configuration."
+        ]
+      }
+    },
+    {
+      "id": "C-UNVERIFIED-RENDER",
+      "family": "evidence-honesty",
+      "kind": "rubric",
+      "requirement_ids": ["R-RENDERER-EVIDENCE"],
+      "prompt": "Validate this Mermaid sequence diagram, but mmdc and the Mermaid Live Editor are unavailable in the environment.",
+      "initial_state": "The source can be inspected, but no Mermaid renderer is installed or reachable.",
+      "expected_output": "Report the diagram as unverified, explain that source inspection is not renderer evidence, and identify the missing renderer check.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-UNVERIFIED",
+          "text": "The response explicitly labels the diagram unverified because no renderer is available.",
+          "critical": true
+        },
+        {
+          "id": "A-NO-SOURCE-CLAIM",
+          "text": "The response does not claim syntax or visual validity from inspection alone.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Claim that the diagram is valid or visually compatible solely from reading its source."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The evidence gap names the unavailable renderer and marks validation unverified.",
+          "The answer separates source review from actual rendered validation."
+        ],
+        "fail": [
+          "The answer says the diagram is valid without a renderer.",
+          "The answer hides the missing renderer check behind a generic success statement."
+        ]
+      }
+    },
+    {
+      "id": "C-ACCESSIBLE-GENERATE",
+      "family": "generation",
+      "kind": "rubric",
+      "requirement_ids": ["R-ACCESSIBLE-MINIMAL", "R-DEFAULT-THEME"],
+      "prompt": "Create a small diagram showing a client request moving through authentication and approval, for readers who may not see emoji or use the same color theme.",
+      "initial_state": "The audience needs a readable relationship diagram. No special visual styling is required, and the meaning must survive monochrome or missing emoji.",
+      "expected_output": "Choose the smallest suitable diagram type, use clear text labels and topology, quote punctuation-sensitive labels, add supported accessibility metadata, and keep all labeled boxes on default renderer colors with any emoji supplementary.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-SMALLEST-TYPE",
+          "text": "The response selects a minimal diagram type that expresses the request flow without decorative or unrelated nodes.",
+          "critical": true
+        },
+        {
+          "id": "A-TEXT-MEANING",
+          "text": "Text labels and topology carry the meaning, and emoji are not required to understand the flow.",
+          "critical": true
+        },
+        {
+          "id": "A-ACCESSIBILITY",
+          "text": "The response adds accTitle and accDescr when supported and quotes labels that contain punctuation.",
+          "critical": false
+        },
+        {
+          "id": "A-DEFAULT-FILL",
+          "text": "Labeled boxes retain default renderer fill and text colors.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Use color or emoji as the only carrier of the authentication or approval meaning.",
+        "Add explicit fill colors to labeled boxes."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The diagram is minimal, readable without emoji, and uses default fills for text-bearing boxes.",
+          "Accessibility metadata and quoted punctuation-sensitive labels are included where supported."
+        ],
+        "fail": [
+          "The diagram relies on color or emoji to distinguish a required state.",
+          "The answer uses a decorative diagram type or explicit fills on labeled nodes."
+        ]
+      }
+    },
+    {
+      "id": "C-PRESERVE-MODIFY",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-MODIFY-PRESERVE", "R-RENDERER-EVIDENCE"],
+      "prompt": "Change the label of the Pending state in an existing state diagram and verify that the update did not change IDs, arrows, shapes, or theme behavior.",
+      "initial_state": "The state diagram is already used by downstream documents. The requested change is one label, and a renderer may or may not be available.",
+      "expected_output": "Make the smallest label-only diff, preserve graph semantics and default theme behavior, then use a renderer if available or report the result unverified if it is not.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {
+          "id": "A-LABEL-ONLY",
+          "text": "The response limits the change to the requested label and preserves IDs, arrows, shapes, ordering, and relationships.",
+          "critical": true
+        },
+        {
+          "id": "A-VALIDATION-CONDITIONAL",
+          "text": "The response reports renderer-backed validation when available and otherwise records an unverified evidence gap.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Rewrite unaffected topology or add appearance styling as part of a label change.",
+        "Claim rendered compatibility without a renderer."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "The diff is label-only and existing semantics remain stable.",
+          "The validation claim matches whether a renderer was actually available."
+        ],
+        "fail": [
+          "The response changes IDs, arrows, shapes, or theme directives unnecessarily.",
+          "The response presents source inspection as rendered validation."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-01",
+        "query": "Create a minimal Mermaid flowchart for a request moving from client to service to database.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-02",
+        "query": "Review this Mermaid sequence diagram for invalid arrows and unclear labels.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-03",
+        "query": "Remove the explicit fill from the labeled Order node so the Mermaid diagram works in light and dark themes.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-04",
+        "query": "Render this Mermaid source with mmdc and report whether the output is readable.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-05",
+        "query": "Troubleshoot a Mermaid flowchart that fails around a label containing brackets and parentheses.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-06",
+        "query": "Change one label in this Mermaid state diagram without changing IDs, arrows, or shapes.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-07",
+        "query": "Add accessible title and description metadata to our Mermaid diagram and keep it understandable without emoji.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-08",
+        "query": "Draw a small Mermaid sequence diagram for authentication, approval, and audit logging.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-09",
+        "query": "Audit this Mermaid source for explicit colors, text-bearing fills, and theme directives.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-10",
+        "query": "Validate the Mermaid diagram in the Live Editor and call out any renderer-specific issue.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-11",
+        "query": "Fix the Markdown code fence around a Mermaid block in docs/README.md.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-12",
+        "query": "Repair the broken links in a Markdown page that happens to contain a Mermaid diagram.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-13",
+        "query": "Restructure the README headings and reference links; the Mermaid block is incidental and must not change.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-14",
+        "query": "Review Markdown link references around an unchanged diagram without reviewing Mermaid syntax.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-15",
+        "query": "Create a Graphviz DOT diagram for our service dependencies.",
+        "should_trigger": false,
+        "split": "train"
+      },
+      {
+        "id": "Q-16",
+        "query": "Build an SVG icon set for the product UI; no Mermaid source is involved.",
+        "should_trigger": false,
+        "split": "train"
+      },
+      {
+        "id": "Q-17",
+        "query": "Use a visual editor to draw a presentation graphic; editing Mermaid source is not required.",
+        "should_trigger": false,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-18",
+        "query": "Fix Markdown table syntax surrounding an unchanged Mermaid example.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-markdown"
+      },
+      {
+        "id": "Q-19",
+        "query": "Explain the system architecture in prose only; do not create or inspect a diagram.",
+        "should_trigger": false,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-20",
+        "query": "Validate a PlantUML class diagram and fix its syntax.",
+        "should_trigger": false,
+        "split": "held-out"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "internal-terraform-import"
+  short_description: "Execute approved imports after wrapper handoff"
+  default_prompt: "Use $internal-terraform-import only after /internal-terraform hands off an approved import with explicit scope and safety evidence. Reject direct invocation without the wrapper handoff; keep protocol v1 assessment non-mutating, require protocol v2 for live execution, classify every plan action, and apply only the exact bound saved plan. Run the bundled runner through the consumer ./terraform.sh and close with the run ID, per-record statuses, plan classification, record paths, and exit status."
