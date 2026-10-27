@@ -1,0 +1,8 @@
+{
+  "schema": "knowledge-fixture-tree/v1", "id": "FS3",
+  "description": "Document-only workspace with one approved Area and one approved Topic; no deliverables may be authored.",
+  "files": {
+    "AGENTS.local.md": "# Local\n\nDocument-only workspace. Preserve this local policy.\n",
+    "README.md": "# Relay\n\nMaintain Relay documentation. The approved Area is relay; its delivery Topic owns delivery terminology.\n"
+  }
+}

@@ -63,6 +63,35 @@ permitting installation; existing align cases retain the read-only boundary.
 The added rubric cases remain `not-run`; native checks validate the pack,
 not observed model idempotence or successful installation.
 
+### Area/Topic setup and migration checks
+
+- FS3 / C-SETUP-AREA-TOPIC: document-only Area and work README scaffolds,
+  Topic glossary and root map, four managed guides, and a placement block
+  capped at 15 lines. Exact allowlists reject deliverables in either tree.
+- FS2 / C-SETUP-MANAGED-REPEAT: current managed setup, custom CRLF outside
+  managed blocks, protected tracker templates, and no repeat write attempts.
+  The original FS2 file tree is retained byte-for-byte as FS2L and bound to
+  C-SETUP-LEGACY-REPEAT; its legacy template protection is unchanged.
+- FS4 / C-MIGRATION-OPERATIONAL-DRIFT: propose each exact operational move
+  from legacy `docs/domains/` to `work/`, requiring approval and zero writes.
+  C-MIGRATION-VERIFIED-MOVE authorizes only the offer transfer. The source
+  leaves fixed-path protection only in that binding, replaced by an exact
+  old/new sha256 manifest checked before, during, and after the move. Other
+  inputs remain protected at their original paths.
+- FS5 / C-SETUP-OBSIDIAN: permit managed config only when opted in and
+  allowlisted. Check key ownership, existing exclusions, protected private
+  config, Markdown links, bounded frontmatter, and approved Base YAML.
+  The JSON schemas and Base rendering are not runtime-verified by these tests.
+
+The new graders have good and mutant offline fixtures. Native tests exercise
+their composed bindings, including negative cases. All model cases remain
+`not-run`; passing a grader self-test does not establish model compliance.
+
+`eval-pack-stale-source` checks source heading anchors, not content hashes.
+This checkout has no Makefile regeneration target or generated source-hash
+file. Update the authored requirement anchor and run `make skill-lint` plus
+the pack checker above; do not invent a hash refresh step.
+
 ## Holdout and live runs
 
 Do not open FH or its gold while tuning graders, prompts or expected outputs.

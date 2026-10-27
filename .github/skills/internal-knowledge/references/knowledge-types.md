@@ -52,7 +52,8 @@ each evidenced type to its local owner, says when to load that owner, and
 records each approved type exclusion with its reason.
 
 In complete setup, distinguish `placeholder` owners from confirmed content.
-A glossary scaffold is required preparation, not proof of resolved language.
+A glossary scaffold for each approved Topic is required preparation, not proof
+of resolved language. An Area without Topics needs no glossary.
 Other scaffolds need an approved reader need rather than taxonomy completion.
 Templates and mock examples never satisfy knowledge coverage.
 

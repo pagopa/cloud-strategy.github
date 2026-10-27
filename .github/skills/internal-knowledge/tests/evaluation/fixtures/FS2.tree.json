@@ -1,16 +1,21 @@
 {
   "schema": "knowledge-fixture-tree/v1",
   "id": "FS2",
-  "description": "An installed scaffold with intentional placeholders, customized templates, a real project, and a retained historical demo.",
+  "description": "Current Area/Topic setup with managed blocks, intentional placeholders, customized tracker templates, and a retained historical demo. Legacy FS2 is preserved as FS2L.",
   "files": {
     "README.md": "# Workspace\n\nStart with [the index](docs/README.md).\n",
-    "docs/README.md": "# Knowledge\n\n## Project Areas\n\n- [Relay](domains/relay/README.md)\n\n## Prepared Knowledge\n\n- [Shared glossary](../GLOSSARY.md): placeholder, no accepted definitions.\n\n## Operational Support\n\n- [Specification template](templates/spec.md)\n- [Issue template](templates/issue.md)\n\nThe [retained demo](domains/mock/README.md) is synthetic and is not a real domain or accepted knowledge.\n",
-    "GLOSSARY.md": "# Shared Glossary\n\n<!-- knowledge:placeholder -->\n\nStatus: placeholder. No repository-specific definitions are accepted yet.\n\n## Language\n",
-    "docs/agents/domain.md": "# Domain Docs\n\nProject areas use docs/domains/<slug>/. Root GLOSSARY.md is the shared vocabulary owner. Intentional scaffolds are not accepted knowledge.\n",
-    "docs/agents/issue-tracker.md": "# Issue Tracker\n\nReal work belongs under .scratch/<initiative>/. Copy the approved templates only for real work.\n",
-    "docs/domains/relay/README.md": "# Relay\n\nCoordinate the message relay project. Read the [shared glossary](../../../GLOSSARY.md) and [operational templates](../../README.md#operational-support).\n",
+    "AGENTS.local.md": "# Local\n\nKeep custom policy byte-identical.\n<!-- knowledge:managed:start -->\n## Knowledge placement\nKnowledge: docs/areas/relay/; operations: work/relay/; work records: tracker/.\n[Layout](docs/agents/layout.md) · [Vocabulary](docs/agents/vocabulary.md)\n[Promotion](docs/agents/promotion.md) · [Tracker](docs/agents/issue-tracker.md)\n<!-- knowledge:managed:end -->\n",
+    "docs/README.md": "# Knowledge\n\n## Areas\n\n- [Relay](areas/relay/README.md)\n\n## Prepared Knowledge\n\n- [Glossary Map](../GLOSSARY-MAP.md): Topic glossary placeholder, no accepted definitions.\n\n## Operational Support\n\n- [Specification template](../tracker/_templates/spec.md)\n- [Issue template](../tracker/_templates/issue.md)\n\nThe [retained demo](domains/mock/README.md) is synthetic and excluded from real Areas and knowledge coverage.\n",
+    "GLOSSARY-MAP.md": "<!-- knowledge:managed:start -->\n# Glossary Map\n\n[Delivery](docs/areas/relay/delivery/GLOSSARY.md)\n<!-- knowledge:managed:end -->\n",
+    "docs/agents/layout.md": "Custom preface\r\n<!-- knowledge:managed:start -->\n# Layout\nKnowledge: docs/areas/; operations: work/; ADRs: docs/adr/.\n<!-- knowledge:managed:end -->\r\nCustom ending\r\n",
+    "docs/agents/vocabulary.md": "<!-- knowledge:managed:start -->\n# Vocabulary\nTopics own glossaries; the root map indexes them. No Area glossary.\n<!-- knowledge:managed:end -->\n",
+    "docs/agents/promotion.md": "<!-- knowledge:managed:start -->\n# Promotion\nUse align harvest and human review before knowledge writes.\n<!-- knowledge:managed:end -->\n",
+    "docs/agents/issue-tracker.md": "<!-- knowledge:managed:start -->\n# Issue Tracker\nReal work records use tracker/; reusable templates use tracker/_templates/.\n<!-- knowledge:managed:end -->\n",
+    "docs/areas/relay/README.md": "<!-- knowledge:managed:start -->\n# Relay\n<!-- knowledge:placeholder -->\nStatus: placeholder\n## Purpose\nCoordinate the message relay project.\n## Scope and boundary\nDocumentation workspace.\n## Topics\n[Delivery](delivery/GLOSSARY.md): Supporting.\n## Operational home\nOperational home: [Relay Work](../../../work/relay/README.md).\n## Decisions\nNone.\n<!-- knowledge:managed:end -->\n",
+    "work/relay/README.md": "<!-- knowledge:managed:start -->\n# Relay Work\n<!-- knowledge:placeholder -->\nStatus: placeholder\nKnowledge owner: [Relay](../../docs/areas/relay/README.md).\n## Deliverable index\nNo deliverables indexed yet.\n## Evidence\nsources/ is add-only. Generated files change only via their generator.\n<!-- knowledge:managed:end -->\n",
+    "docs/areas/relay/delivery/GLOSSARY.md": "<!-- knowledge:managed:start -->\n# Delivery Glossary\n<!-- knowledge:placeholder -->\nStatus: placeholder\nNo resolved definitions yet.\n## Language\n<!-- knowledge:managed:end -->\n",
     "docs/domains/mock/README.md": "# Mock\n\nStatus: example. This retained synthetic demo establishes no real requirement or decision.\n",
-    "docs/templates/spec.md": "# Specification Template\n\n<!-- knowledge:template -->\n\nStatus: template. Replace with a real specification before publishing.\n\n## Outcome\n\n## Required Checks\n\nKeep this project-specific section and its title.\n",
-    "docs/templates/issue.md": "# Issue Template\n\n<!-- knowledge:template -->\n\nStatus: template. This is not an open work item.\n\n## Goal\n\n## Acceptance\n"
+    "tracker/_templates/spec.md": "# Specification Template\n\n<!-- knowledge:template -->\n\nStatus: template. Replace with a real specification before publishing.\n\n## Outcome\n\n## Required Checks\n\nKeep this project-specific section and its title.\n",
+    "tracker/_templates/issue.md": "# Issue Template\n\n<!-- knowledge:template -->\n\nStatus: template. This is not an open work item.\n\n## Goal\n\n## Acceptance\n"
   }
 }

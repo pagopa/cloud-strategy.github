@@ -114,7 +114,11 @@ A declaration identifies required artifacts separately from optional lazy conven
 Compare the declaration against reality and classify the result:
 
 - `realized`: every artifact the declaration names exists, no competing root document exists, and the evidenced Area and Topic set matches the declared one.
-- `unrealized`: the declaration requires an artifact that does not exist. An optional lazy glossary with no resolved repository-specific term is legitimate absence, not drift. A convention naming a future path is not a required link; a reading link to an absent target is a broken reference. Distinguish both from an evidence-backed content gap.
+- `unrealized`: the declaration requires an artifact that does not exist. An
+  optional legacy glossary with no resolved term and no declared Topics is
+  legitimate absence, not drift. A convention naming a future path is not a
+  required link; a reading link to an absent target is a broken reference.
+  Distinguish both from an evidence-backed content gap.
 - `contradicted`: the artifacts on disk implement a different layout than the one declared.
 - `understated`: the declared layout is realized, but the evidence supports additional Areas or Topic boundaries not yet declared.
 - `legacy`: the realized layout uses `CONTEXT.md`, `CONTEXT-MAP.md`,

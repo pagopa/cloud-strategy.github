@@ -1,0 +1,9 @@
+{
+  "schema": "knowledge-fixture-gold/v1", "fixture": "FS5",
+  "components": [], "edges": [], "lifecycle_states": {},
+  "protected_paths": [".obsidian/workspace.json", ".obsidian/appearance.json", ".obsidian/core-plugins.json", "docs/adr/0001-choice.md", "work/relay/sources/offer.md", "AGENTS.local.md"],
+  "generated_paths": [], "adr_dir": "docs/adr", "ledger": null, "router": null,
+  "expected_placements": {}, "sections": [], "must_write": [".obsidian/app.json", ".obsidian/graph.json", "docs/views/active-areas.base"],
+  "facts": [], "readme_paths": ["docs/areas/relay/README.md"], "owner_links": [],
+  "diagram_edges": {}, "aliases": {}, "diagram_triggers": []
+}

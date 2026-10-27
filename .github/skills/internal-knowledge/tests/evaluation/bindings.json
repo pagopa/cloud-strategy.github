@@ -1,6 +1,56 @@
 {
   "schema": "knowledge-eval-bindings/v1",
   "cases": {
+    "C-SETUP-AREA-TOPIC": {
+      "fixture": "FS3", "gold": "tests/evaluation/gold/FS3.gold.json",
+      "profile": "author",
+      "graders": ["setup_layout", "managed_blocks", "writes_within_allowlist", "no_code_edits", "protected_bytes_per_step", "no_transient_writes", "readme_links"],
+      "runs": 1,
+      "allowlist": ["AGENTS.local.md", "docs/areas/relay/README.md", "work/relay/README.md", "docs/areas/relay/delivery/GLOSSARY.md", "GLOSSARY-MAP.md", "docs/agents/layout.md", "docs/agents/vocabulary.md", "docs/agents/promotion.md", "docs/agents/issue-tracker.md"],
+      "gold_overrides": {"areas": {"relay": ["delivery"]}, "operational_root": "work"}
+    },
+    "C-SETUP-MANAGED-REPEAT": {
+      "fixture": "FS2", "gold": "tests/evaluation/gold/FS2.gold.json",
+      "profile": "author",
+      "graders": ["setup_repeat", "managed_blocks", "idempotent", "protected_bytes_per_step", "no_transient_writes"],
+      "runs": 2, "allowlist": [], "gold_overrides": {}
+    },
+    "C-SETUP-LEGACY-REPEAT": {
+      "fixture": "FS2L", "gold": "tests/evaluation/gold/FS2L.gold.json",
+      "profile": "author", "graders": ["setup_repeat", "protected_bytes_per_step"],
+      "runs": 2, "allowlist": [], "gold_overrides": {}
+    },
+    "C-MIGRATION-OPERATIONAL-DRIFT": {
+      "fixture": "FS4", "gold": "tests/evaluation/gold/FS4.gold.json",
+      "profile": "audit", "graders": ["legacy_move_plan", "zero_writes", "protected_bytes_per_step"],
+      "runs": 1, "allowlist": [],
+      "gold_overrides": {
+        "move_plan": {
+          "docs/domains/relay/sources/offer.md": "work/relay/sources/offer.md",
+          "docs/domains/relay/analyses/assessment.md": "work/relay/analyses/assessment.md",
+          "docs/domains/relay/scripts/score.py": "work/relay/scripts/score.py"
+        }
+      }
+    },
+    "C-MIGRATION-VERIFIED-MOVE": {
+      "fixture": "FS4", "gold": "tests/evaluation/gold/FS4.gold.json",
+      "profile": "author",
+      "graders": ["move_preserved", "writes_within_allowlist", "protected_bytes_per_step", "no_transient_writes"],
+      "runs": 1,
+      "allowlist": ["docs/domains/relay/sources/offer.md", "work/relay/sources/offer.md"],
+      "gold_overrides": {
+        "protected_paths": ["docs/domains/relay/analyses/assessment.md", "docs/domains/relay/scripts/score.py"],
+        "transfers": [{"source": "docs/domains/relay/sources/offer.md", "target": "work/relay/sources/offer.md", "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"}]
+      }
+    },
+    "C-SETUP-OBSIDIAN": {
+      "fixture": "FS5", "gold": "tests/evaluation/gold/FS5.gold.json",
+      "profile": "author",
+      "graders": ["obsidian_config", "no_code_edits", "writes_within_allowlist", "protected_bytes_per_step", "no_transient_writes"],
+      "runs": 1,
+      "allowlist": [".obsidian/app.json", ".obsidian/graph.json", "docs/views/active-areas.base", "docs/areas/relay/README.md"],
+      "gold_overrides": {}
+    },
     "C-SETUP-AUDIT": {
       "fixture": "FS0",
       "gold": "tests/evaluation/gold/FS0.gold.json",
@@ -16,7 +66,7 @@
       "profile": "author",
       "graders": [],
       "runs": 1,
-      "allowlist": ["README.md", "GLOSSARY.md", "docs/README.md", "docs/templates/spec.md", "docs/templates/issue.md", "docs/domains/mock/README.md", "docs/domains/mock/examples/spec.md", "docs/domains/mock/examples/issue.md"],
+      "allowlist": ["README.md", "GLOSSARY.md", "docs/README.md", "AGENTS.local.md", "docs/agents/layout.md", "docs/agents/vocabulary.md", "docs/agents/promotion.md", "docs/agents/issue-tracker.md", "tracker/_templates/spec.md", "tracker/_templates/issue.md", "docs/areas/mock/README.md", "work/mock/README.md", "tracker/_templates/examples/spec.md", "tracker/_templates/examples/issue.md"],
       "gold_overrides": {"expected_mode": "setup"}
     },
     "C-SETUP-REAL": {
@@ -25,7 +75,7 @@
       "profile": "author",
       "graders": [],
       "runs": 1,
-      "allowlist": ["GLOSSARY.md", "docs/README.md", "docs/templates/spec.md", "docs/templates/issue.md"],
+      "allowlist": ["GLOSSARY.md", "docs/README.md", "AGENTS.local.md", "docs/agents/layout.md", "docs/agents/vocabulary.md", "docs/agents/promotion.md", "docs/agents/issue-tracker.md", "tracker/_templates/spec.md", "tracker/_templates/issue.md"],
       "gold_overrides": {"expected_mode": "setup"}
     },
     "C-SETUP-REPEAT": {

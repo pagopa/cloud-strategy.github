@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import fnmatch
+import re
+from pathlib import PurePosixPath
 
 from .core import RunInput, Verdict, changed_paths, register
 
@@ -13,6 +15,25 @@ def _result(name: str, code: str | None = None, evidence: str = "") -> Verdict:
 
 def _matches(path: str, allowlist: tuple[str, ...]) -> bool:
     return any(fnmatch.fnmatchcase(path, pattern) for pattern in allowlist)
+
+
+def viewer_enabled(run: RunInput) -> bool:
+    return bool(
+        re.search(
+            r"^Knowledge viewer: obsidian[ \t]*\r?$",
+            run.after.get("AGENTS.local.md", ""),
+            re.MULTILINE,
+        )
+    )
+
+
+def managed_config_path(path: str) -> bool:
+    candidate = PurePosixPath(path)
+    if str(candidate) != path or ".." in candidate.parts:
+        return False
+    return path in {".obsidian/app.json", ".obsidian/graph.json"} or (
+        candidate.parent == PurePosixPath("docs/views") and candidate.suffix == ".base"
+    )
 
 
 @register("writes_within_allowlist")
@@ -37,11 +58,16 @@ def no_code_edits(run: RunInput, gold: dict) -> Verdict:
         path
         for path in changed_paths(run.before, run.after)
         if not path.lower().endswith((".md", ".markdown"))
+        and not (
+            viewer_enabled(run)
+            and managed_config_path(path)
+            and _matches(path, run.allowlist)
+        )
     )
     return _result(
         "no_code_edits",
         "non-documentation-edit" if non_docs else None,
-        f"non-documentation paths: {non_docs}" if non_docs else "changed paths are documentation",
+        f"non-documentation paths: {non_docs}" if non_docs else "changed paths are documentation or approved viewer config",
     )
 
 

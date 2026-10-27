@@ -91,9 +91,7 @@ Organize the top level by artifact type. Use L0-L3 only as navigation depth in
 the plan: L0 is the repository index, L1 is repository orientation, L2 is the
 owning Area or document type, and L3 is a specialist reference. These labels
 do not require directories, metadata, or a fixed document at every level.
-Group `reference/<area>/` when an area has about three or more reference
-documents; with fewer, use flat `reference/<area>-<topic>.md` paths. The count
-is a placement signal, not a quota.
+Use the Area and Topic paths below rather than a second folder hierarchy.
 
 Split a document only when it mixes reader modes or independent contracts or
 consumers that materially change the reader path. A length near 250 lines is

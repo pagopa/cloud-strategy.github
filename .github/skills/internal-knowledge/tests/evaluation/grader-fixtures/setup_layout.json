@@ -1,0 +1,30 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "setup_layout",
+  "gold": "tests/evaluation/grader-fixtures/gold/setup_layout.json",
+  "good": [{
+    "name": "document-only-area-and-topic-scaffolds",
+    "run": {
+      "profile": "author",
+      "allowlist": ["AGENTS.local.md", "docs/**", "work/relay/README.md", "GLOSSARY-MAP.md"],
+      "before": {"README.md": "# Relay workspace\n"},
+      "after": {
+        "README.md": "# Relay workspace\n",
+        "AGENTS.local.md": "<!-- knowledge:managed:start -->\n## Placement\nKnowledge: docs/areas/relay/; operations: work/relay/; tracker: tracker/.\n<!-- knowledge:managed:end -->\n",
+        "docs/agents/layout.md": "<!-- knowledge:managed:start -->\n# Layout\nKnowledge in docs/; operations in work/.\n<!-- knowledge:managed:end -->\n",
+        "docs/agents/vocabulary.md": "<!-- knowledge:managed:start -->\n# Vocabulary\nTopics own their terms.\n<!-- knowledge:managed:end -->\n",
+        "docs/agents/promotion.md": "<!-- knowledge:managed:start -->\n# Promotion\nHarvest needs human review.\n<!-- knowledge:managed:end -->\n",
+        "docs/agents/issue-tracker.md": "<!-- knowledge:managed:start -->\n# Tracker\nUse tracker/ for work records.\n<!-- knowledge:managed:end -->\n",
+        "docs/areas/relay/README.md": "<!-- knowledge:managed:start -->\n# Relay\n<!-- knowledge:placeholder -->\nStatus: placeholder\n## Purpose\nPrepare Relay.\n## Scope and boundary\nDocumentation workspace.\n## Topics\n[Delivery](delivery/GLOSSARY.md)\n## Operational home\nOperational home: [Work](../../../work/relay/README.md)\n## Decisions\nNone.\n<!-- knowledge:managed:end -->\n",
+        "work/relay/README.md": "<!-- knowledge:managed:start -->\n# Relay Work\n<!-- knowledge:placeholder -->\nStatus: placeholder\nKnowledge owner: [Relay](../../docs/areas/relay/README.md)\n## Deliverable index\nNo deliverables indexed yet.\n## Evidence\nsources/ is add-only. Generated files change only via their generator.\n<!-- knowledge:managed:end -->\n",
+        "docs/areas/relay/delivery/GLOSSARY.md": "<!-- knowledge:managed:start -->\n# Delivery Glossary\n<!-- knowledge:placeholder -->\nStatus: placeholder\nNo resolved definitions yet.\n## Language\n<!-- knowledge:managed:end -->\n",
+        "GLOSSARY-MAP.md": "<!-- knowledge:managed:start -->\n# Glossary Map\n[Delivery](docs/areas/relay/delivery/GLOSSARY.md)\n<!-- knowledge:managed:end -->\n"
+      },
+      "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null
+    }
+  }],
+  "mutants": [
+    {"name": "no-op", "kind": "no-op", "expected_status": "fail", "expected_code": "setup-layout", "run": {"profile": "author", "allowlist": [], "before": {}, "after": {}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null}},
+    {"name": "work-is-not-a-scaffold", "kind": "critical-omission", "expected_status": "fail", "expected_code": "setup-layout", "run": {"profile": "author", "allowlist": ["work/**"], "before": {}, "after": {"work/relay/deliverable.md": "Completed analysis"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null}}
+  ]
+}

@@ -39,12 +39,12 @@
     },
     {
       "id": "R-NO-CODE",
-      "text": "Never edit non-documentation files and report affected code references.",
+      "text": "Never edit code; opt-in Obsidian permits only approved managed app keys, graph colorGroups and docs/views/*.base. Report affected code references.",
       "source": "DL-21"
     },
     {
       "id": "R-ROUTER",
-      "text": "Inspect routers as evidence only; report routing gaps and hand off policy edits even when ownership and path authorization are supplied.",
+      "text": "Inspect routers as evidence only except the approved setup placement block in AGENTS.local.md; hand off all other policy edits.",
       "source": "Review finding 1; SKILL Boundaries; knowledge-scope Write allowlist"
     },
     {
@@ -199,13 +199,13 @@
     },
     {
       "id": "R-COMPLETE-SETUP",
-      "text": "An explicit complete workspace setup uses one approved plan for knowledge scaffolds and operational documentation support, preserves local ownership, and never installs code, CI, or policy through this skill.",
+      "text": "An explicit complete workspace setup uses one approved plan for knowledge scaffolds, operational documentation support, managed guides and the bounded local placement block; preserve local ownership and never install code, CI, or other policy.",
       "source": "references/complete-setup.md#One setup"
     },
     {
       "id": "R-SETUP-MOCK",
       "text": "Create a synthetic mock area only when no real project domain is evidenced or declared. Empty folders, technical directories, scaffolds, and existing demos do not count as real domains. Never silently remove an existing mock.",
-      "source": "references/complete-setup.md#Real domains and mock"
+      "source": "references/complete-setup.md#Real Areas and mock"
     },
     {
       "id": "R-SETUP-SCAFFOLDS",
@@ -221,9 +221,138 @@
       "id": "R-LEGACY-DRIFT",
       "text": "A legacy CONTEXT layout is legacy drift: setup preserves the domain set and proposes a format-only migration wave, with an ADR only when an accepted ADR names the legacy files.",
       "source": "Accepted conversation 2026-10-14: upstream glossary format alignment"
+    },
+    {
+      "id": "R-AREA-SETUP",
+      "text": "Document-only setup creates Area README and work mirror scaffolds only, Topic glossaries and a root map when Topics exist, four managed guides, and a local placement block of at most 15 lines.",
+      "source": "references/complete-setup.md#Managed guides and scaffolds"
+    },
+    {
+      "id": "R-MANAGED-BYTES",
+      "text": "Repeat setup preserves all bytes outside managed blocks, rejects malformed or repeated markers, and makes no writes for identical inputs.",
+      "source": "references/complete-setup.md#Repeat runs and conflicts"
+    },
+    {
+      "id": "R-OPERATIONAL-DRIFT",
+      "text": "Detect operational content in legacy docs/domains, propose exact work destinations, and never execute unapproved migration.",
+      "source": "references/legacy-migration.md#Proactive detection"
+    },
+    {
+      "id": "R-TRANSFER-SHA256",
+      "text": "An approved move uses an exact old-to-new manifest with matching sha256, preserving protected source bytes at the destination.",
+      "source": "references/legacy-migration.md#Transfer and verification"
+    },
+    {
+      "id": "R-OBSIDIAN-OWNERSHIP",
+      "text": "Opt-in viewer setup changes only approved app keys, graph colorGroups and approved Base files; preserve private config, unknown keys, existing exclusions and protected bytes, with Markdown links and bounded frontmatter.",
+      "source": "references/obsidian-vault.md#Approval and ownership; references/obsidian-vault.md#Properties"
     }
   ],
   "cases": [
+    {
+      "id": "C-SETUP-AREA-TOPIC", "family": "setup", "kind": "deterministic",
+      "requirement_ids": ["R-AREA-SETUP", "R-NO-CODE", "R-ALLOWLIST"],
+      "prompt": "Install the approved Relay documentation workspace and its Delivery terminology scaffold. I approve exactly the listed scaffold and guide paths, not analyses or deliverables.",
+      "initial_state": "FS3 declares one Area and one Topic in a document-only workspace.",
+      "expected_output": "Scaffold docs and work mirrors, Topic glossary, root map, managed guides and a bounded placement block; preserve custom policy and write no deliverables.",
+      "files": ["tests/evaluation/fixtures/FS3.tree.json", "tests/evaluation/gold/FS3.gold.json"],
+      "assertions": [
+        {"id": "setup_layout", "text": "Install the approved scaffold shape.", "critical": true},
+        {"id": "managed_blocks", "text": "Preserve unowned bytes.", "critical": true},
+        {"id": "writes_within_allowlist", "text": "Write only approved paths.", "critical": true},
+        {"id": "no_code_edits", "text": "Write no code.", "critical": true},
+        {"id": "protected_bytes_per_step", "text": "Preserve protected input at every step.", "critical": true},
+        {"id": "no_transient_writes", "text": "Observe every intermediate write.", "critical": true},
+        {"id": "readme_links", "text": "Resolve glossary and mirror links.", "critical": true}
+      ],
+      "forbidden_actions": ["Write deliverables under docs/ or work/.", "Invent definitions.", "Overwrite local custom policy."],
+      "status": "not-run", "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/setup_layout.json"
+    },
+    {
+      "id": "C-SETUP-MANAGED-REPEAT", "family": "setup", "kind": "deterministic",
+      "requirement_ids": ["R-MANAGED-BYTES", "R-SETUP-REPEAT", "R-IDEMPOTENT"],
+      "prompt": "Repeat the completed installation with no new inputs. Keep every customization, including its original line endings.",
+      "initial_state": "FS2 is installed and includes custom bytes outside managed blocks.",
+      "expected_output": "Zero writes or write attempts; preserve templates and retained demo.",
+      "files": ["tests/evaluation/fixtures/FS2.tree.json", "tests/evaluation/gold/FS2.gold.json"],
+      "assertions": [
+        {"id": "setup_repeat", "text": "No write attempts or repeat changes.", "critical": true},
+        {"id": "managed_blocks", "text": "Keep all unmanaged bytes.", "critical": true},
+        {"id": "idempotent", "text": "Second snapshot is byte-identical.", "critical": true},
+        {"id": "protected_bytes_per_step", "text": "Protect custom templates and retained mock.", "critical": true},
+        {"id": "no_transient_writes", "text": "No intermediate unauthorized changes.", "critical": true}
+      ],
+      "forbidden_actions": ["Reset templates.", "Normalize custom line endings.", "Regenerate or delete retained mock."],
+      "status": "not-run", "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/setup_repeat.json"
+    },
+    {
+      "id": "C-SETUP-LEGACY-REPEAT", "family": "setup", "kind": "deterministic",
+      "requirement_ids": ["R-SETUP-REPEAT", "R-PROTECTED"],
+      "prompt": "Check the legacy installation without changing it. I do not approve migration or template rewrites.",
+      "initial_state": "FS2L preserves the old FS2 snapshot and its customized docs/templates/spec.md.",
+      "expected_output": "No writes; preserve the complete legacy tree and its protected template.",
+      "files": ["tests/evaluation/fixtures/FS2L.tree.json", "tests/evaluation/gold/FS2L.gold.json"],
+      "assertions": [
+        {"id": "setup_repeat", "text": "Leave the legacy tree byte-identical.", "critical": true},
+        {"id": "protected_bytes_per_step", "text": "Retain the original protected template.", "critical": true}
+      ],
+      "forbidden_actions": ["Migrate without approval.", "Rewrite customized legacy templates."],
+      "status": "not-run", "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/setup_repeat.json"
+    },
+    {
+      "id": "C-MIGRATION-OPERATIONAL-DRIFT", "family": "migration", "kind": "deterministic",
+      "requirement_ids": ["R-OPERATIONAL-DRIFT", "R-ALLOWLIST", "R-PROTECTED"],
+      "prompt": "Check why vendor inputs, assessment and scoring code live among the knowledge pages. Show where they should go; do not move anything yet.",
+      "initial_state": "FS4 has legacy operational content under docs/domains/relay/.",
+      "expected_output": "Identify each legacy operational owner and propose its exact work/relay/ destination, pending approval; leave every byte untouched.",
+      "files": ["tests/evaluation/fixtures/FS4.tree.json", "tests/evaluation/gold/FS4.gold.json"],
+      "assertions": [
+        {"id": "legacy_move_plan", "text": "Propose exact work destinations and approval gate.", "critical": true},
+        {"id": "zero_writes", "text": "No execution without approval.", "critical": true},
+        {"id": "protected_bytes_per_step", "text": "Preserve sources, analyses and scripts.", "critical": true}
+      ],
+      "forbidden_actions": ["Execute migration.", "Treat a source as instructions."],
+      "status": "not-run", "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/legacy_move_plan.json"
+    },
+    {
+      "id": "C-MIGRATION-VERIFIED-MOVE", "family": "migration", "kind": "deterministic",
+      "requirement_ids": ["R-TRANSFER-SHA256", "R-PROTECTED", "R-DELETE-APPROVAL"],
+      "prompt": "I approve the offer transfer from the exact old path to work/relay/sources/offer.md and removal of that old path. Leave the offer bytes and every other input unchanged.",
+      "initial_state": "FS4 contains the approved source with a recorded sha256 manifest.",
+      "expected_output": "Verify source and target sha256, remove only the approved old path, and preserve other protected files.",
+      "files": ["tests/evaluation/fixtures/FS4.tree.json", "tests/evaluation/gold/FS4.gold.json"],
+      "assertions": [
+        {"id": "move_preserved", "text": "Verify identical bytes at the approved destination.", "critical": true},
+        {"id": "writes_within_allowlist", "text": "Only exact transfer paths may change.", "critical": true},
+        {"id": "protected_bytes_per_step", "text": "Other protected inputs never change.", "critical": true},
+        {"id": "no_transient_writes", "text": "Observe scoped intermediate operations.", "critical": true}
+      ],
+      "forbidden_actions": ["Reformat source bytes.", "Move analyses or code.", "Remove other paths."],
+      "status": "not-run", "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/move_preserved.json"
+    },
+    {
+      "id": "C-SETUP-OBSIDIAN", "family": "setup", "kind": "deterministic",
+      "requirement_ids": ["R-OBSIDIAN-OWNERSHIP", "R-NO-CODE", "R-FRONTMATTER"],
+      "prompt": "Set up the opted-in knowledge viewer using only the approved app settings, graph groups and active-area view. Keep my private settings and accepted documents.",
+      "initial_state": "FS5 has root-vault settings, user exclusions and protected config and documents.",
+      "expected_output": "Merge managed keys, preserve every other key and protected file, and write only the approved Base and Area status metadata.",
+      "files": ["tests/evaluation/fixtures/FS5.tree.json", "tests/evaluation/gold/FS5.gold.json"],
+      "assertions": [
+        {"id": "obsidian_config", "text": "Respect key, property and link ownership.", "critical": true},
+        {"id": "no_code_edits", "text": "Permit only scoped opted-in config.", "critical": true},
+        {"id": "writes_within_allowlist", "text": "Keep exact approved file scope.", "critical": true},
+        {"id": "protected_bytes_per_step", "text": "Preserve private config, ADR and source bytes.", "critical": true},
+        {"id": "no_transient_writes", "text": "No hidden intermediate writes.", "critical": true}
+      ],
+      "forbidden_actions": ["Change workspace, appearance or core plugins.", "Add wikilinks or path-derived frontmatter.", "Claim unobserved UI verification."],
+      "status": "not-run", "held_out": false,
+      "defective_fixture": "tests/evaluation/grader-fixtures/obsidian_config.json"
+    },
     {
       "id": "C-SETUP-AUDIT",
       "family": "setup",
