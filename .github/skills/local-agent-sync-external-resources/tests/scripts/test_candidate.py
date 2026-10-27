@@ -1350,7 +1350,7 @@ def test_normalization_restores_retro_reference_after_refresh(
     assert normalize_candidate(resources, candidate) == ()
 
 
-def test_normalization_builds_self_contained_grill_me_from_grilling(
+def test_normalization_builds_identical_self_contained_interview_bodies(
     tmp_path: Path,
 ) -> None:
     candidate = tmp_path / "candidate"
@@ -1386,8 +1386,10 @@ def test_normalization_builds_self_contained_grill_me_from_grilling(
     assert "disable-model-invocation" not in wrapper_content
     assert "/grilling" not in wrapper_content
     assert "disable-model-invocation: true" in engine_content
-    assert engine_content.endswith("Run a `/grill-me` session.\n")
-    assert "Interview the user without legacy bulk fields." not in engine_content
+    assert engine_content.split("---\n", 2)[2] == wrapper_content.split("---\n", 2)[2]
+    assert "name: grilling\n" in engine_content
+    assert "/grill-me" not in engine_content
+    assert "/grilling" not in engine_content
     engine_metadata = yaml.safe_load(
         (engine.parent / "agents/openai.yaml").read_text(encoding="utf-8")
     )
@@ -1400,7 +1402,7 @@ def test_normalization_builds_self_contained_grill_me_from_grilling(
         assert legacy_field not in engine_content
 
 
-def test_normalization_restores_grill_me_scope_guardrail_when_engine_is_already_alias(
+def test_normalization_expands_legacy_grilling_alias_to_shared_interview_body(
     tmp_path: Path,
 ) -> None:
     candidate = tmp_path / "candidate"
@@ -1434,7 +1436,10 @@ def test_normalization_restores_grill_me_scope_guardrail_when_engine_is_already_
     first_changed = normalize_candidate(_mattpocock_resources(), candidate)
     second_changed = normalize_candidate(_mattpocock_resources(), candidate)
 
-    assert first_changed == (".github/skills/grill-me/SKILL.md",)
+    assert set(first_changed) == {
+        ".github/skills/grill-me/SKILL.md",
+        ".github/skills/grilling/SKILL.md",
+    }
     assert second_changed == ()
     wrapper_content = wrapper.read_text(encoding="utf-8")
     assert "Imported grill-me body remains.\n" in wrapper_content
@@ -1445,13 +1450,11 @@ def test_normalization_restores_grill_me_scope_guardrail_when_engine_is_already_
     assert (
         wrapper_content.count("<!-- local-sync:grill-me-scope-convergence:end -->") == 1
     )
-    assert engine.read_text(encoding="utf-8") == (
-        "---\n"
-        "disable-model-invocation: true\n"
-        "name: grilling\n"
-        "---\n"
-        "Run a `/grill-me` session.\n"
-    )
+    engine_content = engine.read_text(encoding="utf-8")
+    assert engine_content.split("---\n", 2)[2] == wrapper_content.split("---\n", 2)[2]
+    assert "disable-model-invocation: true\n" in engine_content
+    assert "name: grilling\n" in engine_content
+    assert "/grill-me" not in engine_content
 
 
 def test_normalization_rejects_missing_grilling_engine(tmp_path: Path) -> None:

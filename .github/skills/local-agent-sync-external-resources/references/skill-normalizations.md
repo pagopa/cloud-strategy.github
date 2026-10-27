@@ -26,9 +26,12 @@ declared source.
 - Redirect Matt consumer references from `/grilling` to `/grill-me` only after
   canonical reference rewriting. Build the canonical `grill-me` skill with its
   own frontmatter and metadata plus the `grilling` body, so the interview needs
-  no second skill invocation. Keep `grilling` as the declared upstream engine
-  but publish it as a user-invoked alias back to `/grill-me`; fail candidate
-  creation if the engine adds resources that are not merged.
+  no second skill invocation. Publish the same normalized interview body,
+  including the scope and convergence guardrail, in `grilling`. Preserve each
+  skill's own frontmatter, metadata, and invocation policy; neither entrypoint
+  delegates to the other. Expand an already-normalized legacy `grilling` alias
+  from the self-contained `grill-me` body. Fail candidate creation if the
+  engine adds resources that are not merged.
 - References to undeclared skills remain unchanged and are reported as
   unresolved dependencies.
 

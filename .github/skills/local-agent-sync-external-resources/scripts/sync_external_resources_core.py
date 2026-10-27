@@ -1200,29 +1200,20 @@ def _merge_mattpocock_grilling_into_grill_me(
             raise ValueError(
                 "grilling cannot be reduced to an alias before grill-me composition."
             )
-        normalized_wrapper = _enforce_mattpocock_grill_me_scope_convergence_contract(
-            wrapper_content
-        )
-        if normalized_wrapper != wrapper_content:
-            wrapper_path.write_text(normalized_wrapper, encoding="utf-8")
-            return (wrapper_path.relative_to(candidate).as_posix(),)
-        return ()
+        engine_body = wrapper_body
 
-    merged_content = wrapper_content[: wrapper_frontmatter.end()] + engine_body
-    merged_content = _enforce_mattpocock_grill_me_scope_convergence_contract(
-        merged_content
+    shared_body = _enforce_mattpocock_grill_me_scope_convergence_contract(
+        engine_body
     )
-    aliased_engine_content = (
-        engine_content[: engine_frontmatter.end()]
-        + _MATTPOCOCK_GRILLING_ALIAS_BODY
-    )
+    merged_content = wrapper_content[: wrapper_frontmatter.end()] + shared_body
+    merged_engine_content = engine_content[: engine_frontmatter.end()] + shared_body
     changed: list[str] = []
 
     if merged_content != wrapper_content:
         wrapper_path.write_text(merged_content, encoding="utf-8")
         changed.append(wrapper_path.relative_to(candidate).as_posix())
-    if aliased_engine_content != engine_content:
-        engine_path.write_text(aliased_engine_content, encoding="utf-8")
+    if merged_engine_content != engine_content:
+        engine_path.write_text(merged_engine_content, encoding="utf-8")
         changed.append(engine_path.relative_to(candidate).as_posix())
     return tuple(changed)
 
