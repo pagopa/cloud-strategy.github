@@ -197,7 +197,7 @@ separate contract; absent content never permits invented claims.
 | Relationships that cross the repository boundary | The relevant relationship sections of `docs/architecture.md` | No dependency leaves the repository. |
 | An evidenced convention the repository follows by agreement | `docs/standards/<name>.md` | An existing owner already covers it, or no agreement is evidenced. Automation is enforcement evidence and does not change its category. |
 | Recurring criteria that decide between alternatives | `docs/engineering-principles.md` | Only one occurrence is evidenced. |
-| An evidenced chain from a declaration to its effect | `docs/guides/<name>.md` | A component README already covers the chain. |
+| An evidenced durable explanation of design intent or boundaries | `docs/guides/<name>.md` | An existing owner covers it, or it is an operational procedure rather than knowledge. |
 | Durable project purpose, boundaries, and current orientation not already owned by an existing knowledge document | A project-orientation entry at the repository's existing canonical owner | The orientation is already complete, or the evidence is only temporary, aspirational, or inferred. |
 | An approved specification that evidences one strategic or tactical type | A link from that type's existing owner | The source is draft, unapproved, temporary, or has no identifiable owner. |
 

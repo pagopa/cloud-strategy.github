@@ -56,10 +56,15 @@ Each principle keeps a stable `PRI-nn` ID and states the criterion, the trade-of
 
 ## Guides
 
-Write a guide only for an evidenced reader task, recovery, troubleshooting journey, or declaration-to-effect chain: identify what the reader does, what consumes it, and what changes as a result. A guide with no consumer describes a machine that does not exist.
+Write docs-side guides only for evidenced durable explanations of design
+intent or boundaries. Recovery, troubleshooting, command sequences, and
+operating procedures stay in the declared operational home, with its owner;
+this skill does not author them. A guide with no evidenced reader outcome
+describes a need that has not been established.
 
 - One guide per evidenced reader journey.
-- At most three guides per wave.
+- At most three explanation guides per wave. Managed setup guides follow
+  [complete setup](complete-setup.md), not this count.
 - Name the guide with a term the repository already uses. A guide named after a concept that appears nowhere in the repository is a sign the chain was inferred.
 - State the chain in the repository's own vocabulary. Keep product, provider, and tool names inside the evidence, never in the contract.
 
