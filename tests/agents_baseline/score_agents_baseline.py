@@ -25,7 +25,9 @@ COPY_NGRAM = 7
 
 def _ngrams(text: str) -> set[tuple[str, ...]]:
     words = re.findall(r"[a-z0-9]+", text.lower())
-    return {tuple(words[i : i + COPY_NGRAM]) for i in range(len(words) - COPY_NGRAM + 1)}
+    return {
+        tuple(words[i : i + COPY_NGRAM]) for i in range(len(words) - COPY_NGRAM + 1)
+    }
 
 
 def load_pack(path: Path = PACK_PATH) -> dict:
@@ -34,7 +36,9 @@ def load_pack(path: Path = PACK_PATH) -> dict:
 
 def validate_pack(pack: dict, subject: Path = SUBJECT_PATH) -> list[str]:
     errors: list[str] = []
-    subject_ngrams = _ngrams(subject.read_text(encoding="utf-8")) if subject.is_file() else set()
+    subject_ngrams = (
+        _ngrams(subject.read_text(encoding="utf-8")) if subject.is_file() else set()
+    )
     if pack.get("schema") != SCHEMA:
         errors.append(f"schema must be {SCHEMA}")
     if set(pack.get("arms", [])) != {OLD, NEW, CONTROL}:
@@ -87,7 +91,11 @@ def validate_pack(pack: dict, subject: Path = SUBJECT_PATH) -> list[str]:
     if not any(case["target"] == "improvement" for case in pack.get("cases", [])):
         errors.append("at least one improvement case is required")
     share = pack.get("min_improvement_share")
-    if not isinstance(share, int | float) or isinstance(share, bool) or not 0 < share <= 1:
+    if (
+        not isinstance(share, int | float)
+        or isinstance(share, bool)
+        or not 0 < share <= 1
+    ):
         errors.append("min_improvement_share must be a number in (0, 1]")
     return errors
 

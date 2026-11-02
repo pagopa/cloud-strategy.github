@@ -220,7 +220,9 @@ def test_pack_rejects_invalid_improvement_share(pack: dict) -> None:
     broken = copy.deepcopy(pack)
     broken["min_improvement_share"] = 1.5
 
-    assert any("min_improvement_share" in error for error in scorer.validate_pack(broken))
+    assert any(
+        "min_improvement_share" in error for error in scorer.validate_pack(broken)
+    )
 
 
 def test_pack_rejects_prompt_copied_from_subject(pack: dict) -> None:

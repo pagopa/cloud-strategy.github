@@ -46,7 +46,8 @@ def test_executor_prompt_names_its_implementer_as_a_cross_skill_route() -> None:
 
 
 @pytest.mark.parametrize(
-    "name", [gateway for gateway in GATEWAYS if gateway != "internal-gateway-execute-plans"]
+    "name",
+    [gateway for gateway in GATEWAYS if gateway != "internal-gateway-execute-plans"],
 )
 def test_other_gateway_prompts_never_mention_the_executor(name: str) -> None:
     assert "$internal-gateway-execute-plans" not in _prompt(name)
