@@ -7,6 +7,7 @@ version: 1
 # | source | repository | ref (sha) | tag | commit_date | skills |
 # |---|---|---|---|---|---|
 # | addyosmani-agent-skills | addyosmani/agent-skills | 84ee50673804 | 0.6.9 | 2026-09-04 | 5 |
+# | anthropic-frontend-design | anthropics/skills | ca45fc496a34 | - | 2026-10-28 | 1 |
 # | anthropic-skills | anthropics/skills | 41bbe19d1a1a | - | 2026-09-03 | 4 |
 # | antonbabenko-terraform-skill | antonbabenko/terraform-skill | 0a3a4a66e990 | - | 2026-07-03 | 1 |
 # | atlassian-mcp-server | atlassian/atlassian-mcp-server | 798f8138c976 | - | 2026-09-03 | 1 |
@@ -15,10 +16,36 @@ version: 1
 # | obra-superpowers | obra/superpowers | 8ca22dba9a94 | v6.4.2 | 2026-09-25 | 12 |
 # | openai-skills-curated | openai/skills | 49f948faa925 | - | 2026-06-23 | 2 |
 # | openai-skills-retained-doc | openai/skills | 49f948faa925 | - | 2026-06-23 | 1 |
+# | pbakaus-impeccable | pbakaus/impeccable | 9fadc41729c3 | - | 2026-11-02 | 1 |
 # | sickn33-antigravity | sickn33/antigravity-awesome-skills | b1aebac60a88 | v16.9.1 | 2026-09-06 | 7 |
+# | vercel-labs-agent-skills | vercel-labs/agent-skills | 1a2c79d4e6c4 | - | 2026-10-27 | 1 |
 # | vercel-labs-skills | vercel-labs/skills | 1682051d48c3 | v1.5.24 | 2026-09-06 | 1 |
 # managed-sources-summary:end
 sources:
+  anthropic-frontend-design:
+    repository: https://github.com/anthropics/skills.git
+    ref: ca45fc496a3436251f191354091d557da31c15b5
+    commit_date: 2026-10-28
+    assets:
+      - upstream: skills/frontend-design
+        local: .github/skills/anthropic-frontend-design
+        canonical_name: anthropic-frontend-design
+  pbakaus-impeccable:
+    repository: https://github.com/pbakaus/impeccable.git
+    ref: 9fadc41729c38fd47d7ae622b501558653f9d2e9
+    commit_date: 2026-11-02
+    assets:
+      - upstream: .agents/skills/impeccable
+        local: .github/skills/pbakaus-impeccable
+        canonical_name: pbakaus-impeccable
+  vercel-labs-agent-skills:
+    repository: https://github.com/vercel-labs/agent-skills.git
+    ref: 1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62
+    commit_date: 2026-10-27
+    assets:
+      - upstream: skills/web-design-guidelines
+        local: .github/skills/vercel-web-design-guidelines
+        canonical_name: vercel-web-design-guidelines
   addyosmani-agent-skills:
     repository: https://github.com/addyosmani/agent-skills.git
     ref: 84ee50673804b95c287d1e4eb4f1c1dad7c5188a

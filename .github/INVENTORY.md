@@ -38,6 +38,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/addyosmani-idea-refine/SKILL.md`
 - `.github/skills/addyosmani-planning-and-task-breakdown/SKILL.md`
 - `.github/skills/anthropic-docx/SKILL.md`
+- `.github/skills/anthropic-frontend-design/SKILL.md`
 - `.github/skills/anthropic-pdf/SKILL.md`
 - `.github/skills/anthropic-pptx/SKILL.md`
 - `.github/skills/anthropic-xlsx/SKILL.md`
@@ -147,6 +148,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/openai-docs/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
+- `.github/skills/pbakaus-impeccable/SKILL.md`
 - `.github/skills/search-company-knowledge/SKILL.md`
 - `.github/skills/superpowers-brainstorming/SKILL.md`
 - `.github/skills/superpowers-diagnosing-superpowers/SKILL.md`
@@ -161,6 +163,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/superpowers-using-superpowers/SKILL.md`
 - `.github/skills/superpowers-verification-before-completion/SKILL.md`
 - `.github/skills/vercel-find-skills/SKILL.md`
+- `.github/skills/vercel-web-design-guidelines/SKILL.md`
 
 ### Support-only imported document skills
 
@@ -174,6 +177,10 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/addyosmani-code-simplification/SKILL.md`
 - `.github/skills/addyosmani-idea-refine/SKILL.md`
 - `.github/skills/addyosmani-planning-and-task-breakdown/SKILL.md`
+
+### anthropics/skills — ref ca45fc496a34 · 2026-10-28 · 1 skills
+
+- `.github/skills/anthropic-frontend-design/SKILL.md`
 
 ### anthropics/skills — ref 41bbe19d1a1a · 2026-09-03 · 4 skills
 
@@ -255,6 +262,10 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 - `.github/skills/openai-docs/SKILL.md`
 
+### pbakaus/impeccable — ref 9fadc41729c3 · 2026-11-02 · 1 skills
+
+- `.github/skills/pbakaus-impeccable/SKILL.md`
+
 ### sickn33/antigravity-awesome-skills — ref b1aebac60a88 · tag v16.9.1 · 2026-09-06 · 7 skills
 
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
@@ -264,6 +275,10 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`
 - `.github/skills/antigravity-kubernetes-architect/SKILL.md`
 - `.github/skills/antigravity-network-engineer/SKILL.md`
+
+### vercel-labs/agent-skills — ref 1a2c79d4e6c4 · 2026-10-27 · 1 skills
+
+- `.github/skills/vercel-web-design-guidelines/SKILL.md`
 
 ### vercel-labs/skills — ref 1682051d48c3 · tag v1.5.24 · 2026-09-06 · 1 skills
 
