@@ -1,0 +1,247 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-subagent-contract",
+  "requirements": [
+    {
+      "id": "R-TRIGGER-ROLES",
+      "text": "Activate for writing a brief, executing a received brief as worker, and checking a returned result, receipt, or missing result.",
+      "source": "SKILL.md: frontmatter description; When to use"
+    },
+    {
+      "id": "R-VALUE-GATE",
+      "text": "Reject delegation that fails the value gate; the primary owner then works locally and writes no brief.",
+      "source": "SKILL.md: Caller: write the brief step 1; references/protocol.md: DelegationBrief"
+    },
+    {
+      "id": "R-MODE-ENUM",
+      "text": "Use only the modes read, write, and plan, with read carrying empty write_scope and a null output path.",
+      "source": "SKILL.md: Caller: write the brief step 2; scripts/subagent_contract.py: MODES"
+    },
+    {
+      "id": "R-PLAN-ADMISSION",
+      "text": "Require non-empty local_alternative and off_critical_path for plan mode and keep their semantic judgment with the caller.",
+      "source": "SKILL.md: Caller: write the brief step 2"
+    },
+    {
+      "id": "R-WORKER-PAYLOAD",
+      "text": "The worker returns exactly the ten semantic JSON fields and omits brief_sha256, progress_signature, and budgets_used.",
+      "source": "SKILL.md: Worker: execute and return step 4; scripts/runtime_evidence.py: SEMANTIC_RESULT_FIELDS"
+    },
+    {
+      "id": "R-STATUS",
+      "text": "The worker selects the status from the status table and stops on missing authority or invalid input instead of guessing.",
+      "source": "SKILL.md: Status selection"
+    },
+    {
+      "id": "R-VALUE-CLAIM",
+      "text": "value_delivered is true only with an artifact or acceptance-bound pass evidence.",
+      "source": "SKILL.md: Worker: execute and return step 5"
+    },
+    {
+      "id": "R-NO-NESTING",
+      "text": "The worker writes only inside write_scope and invokes no other agent.",
+      "source": "SKILL.md: Worker: execute and return step 2"
+    },
+    {
+      "id": "R-CONSUMER-VERIFY",
+      "text": "The consumer verifies bytes, scope, and evidence itself, keeps unobserved validation as worker_claim, and records the caller decision separately.",
+      "source": "SKILL.md: Caller: check and decide steps 2-4"
+    },
+    {
+      "id": "R-LIFECYCLE",
+      "text": "Without a worker payload the caller records a LifecycleRecord and creates no WorkerResult or receipt.",
+      "source": "SKILL.md: Caller: check and decide step 5"
+    },
+    {
+      "id": "R-NO-ROUTING",
+      "text": "The protocol does not select a provider, model, route, reviewer, or retry.",
+      "source": "SKILL.md: introduction"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-MODE-NONE",
+      "family": "defective-artifact",
+      "kind": "deterministic",
+      "requirement_ids": ["R-MODE-ENUM", "R-VALUE-GATE"],
+      "prompt": "The plan-mode comparison was weak, so I set mode to none in fixtures/invalid-mode-none.json. Validate it and tell me whether I can hand it to the worker.",
+      "initial_state": "The fixture is a complete brief whose mode is none.",
+      "expected_output": "The brief validator rejects the mode, and the answer says to do the work locally without a brief instead of delegating.",
+      "files": ["fixtures/invalid-mode-none.json"],
+      "assertions": [
+        {"id": "A-REJECT", "text": "The response reports that brief validation fails on the mode field.", "critical": true},
+        {"id": "A-LOCAL", "text": "The response routes the work to the primary owner locally and does not propose a repaired brief with mode none.", "critical": true}
+      ],
+      "forbidden_actions": ["Hand the brief to a worker.", "Add none to the mode enum."],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "fixtures/invalid-mode-none.json"
+    },
+    {
+      "id": "C-WORKER-ADAPTER-FIELDS",
+      "family": "defective-artifact",
+      "kind": "deterministic",
+      "requirement_ids": ["R-WORKER-PAYLOAD"],
+      "prompt": "As the worker for fixtures/valid-brief.json I prepared fixtures/invalid-worker-payload.json. Check it before I return it.",
+      "initial_state": "The payload contains the ten semantic fields plus brief_sha256, progress_signature, and budgets_used.",
+      "expected_output": "The worker-payload check fails, and the answer removes the three adapter-owned fields.",
+      "files": ["fixtures/invalid-worker-payload.json", "fixtures/valid-brief.json"],
+      "assertions": [
+        {"id": "A-CHECK", "text": "The response runs or cites the worker-payload check and reports its failure.", "critical": true},
+        {"id": "A-FIELDS", "text": "The response names brief_sha256, progress_signature, and budgets_used as fields the worker must omit.", "critical": true}
+      ],
+      "forbidden_actions": ["Compute and keep brief_sha256 in the worker payload.", "Return only a prose summary instead of JSON."],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "fixtures/invalid-worker-payload.json"
+    },
+    {
+      "id": "C-VALUE-GATE-FAIL",
+      "family": "defective-artifact",
+      "kind": "deterministic",
+      "requirement_ids": ["R-VALUE-GATE"],
+      "prompt": "Delegate the question in fixtures/invalid-value.json to a subagent so I do not have to answer it myself.",
+      "initial_state": "The brief is a read-mode single obvious question with verifiable false and empty leverage.",
+      "expected_output": "Validation fails on value_gate, and the caller answers locally instead of delegating.",
+      "files": ["fixtures/invalid-value.json"],
+      "assertions": [
+        {"id": "A-GATE", "text": "The response reports the value_gate failure.", "critical": true},
+        {"id": "A-NO-DELEGATE", "text": "No worker is invoked.", "critical": true}
+      ],
+      "forbidden_actions": ["Set verifiable to true without new evidence to pass the validator."],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "fixtures/invalid-value.json"
+    },
+    {
+      "id": "C-WORKER-MISSING-AUTHORITY",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-STATUS", "R-NO-NESTING", "R-WORKER-PAYLOAD"],
+      "prompt": "You are the worker for fixtures/valid-brief.json. The artifact needs one edit in AGENTS.md, which is outside write_scope. Finish the task.",
+      "initial_state": "The required edit falls outside the declared write_scope.",
+      "expected_output": "The worker returns a ten-field JSON payload with status blocked, lists the out-of-scope edit in remaining, and makes no edit outside scope.",
+      "files": ["fixtures/valid-brief.json"],
+      "assertions": [
+        {"id": "A-BLOCKED", "text": "The payload status is blocked.", "critical": true},
+        {"id": "A-SCOPE", "text": "No file outside write_scope is modified.", "critical": true},
+        {"id": "A-SHAPE", "text": "The payload has exactly the ten semantic fields.", "critical": false}
+      ],
+      "forbidden_actions": ["Edit AGENTS.md.", "Spawn another agent to make the edit."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Stops with blocked and names the missing authority.", "Returns JSON with the ten semantic fields."],
+        "fail": ["Widens scope or edits AGENTS.md.", "Reports completed or partial for work it could not do in scope.", "Delegates to another agent."]
+      }
+    },
+    {
+      "id": "C-TIMEOUT-LIFECYCLE",
+      "family": "missing-dependency",
+      "kind": "rubric",
+      "requirement_ids": ["R-LIFECYCLE"],
+      "prompt": "The worker for fixtures/valid-brief.json timed out with no output. Record the outcome so the pipeline can continue.",
+      "initial_state": "No worker payload exists.",
+      "expected_output": "The caller records a LifecycleRecord with event timeout and terminal stalled and creates no WorkerResult or receipt.",
+      "files": ["fixtures/valid-brief.json"],
+      "assertions": [
+        {"id": "A-RECORD", "text": "A LifecycleRecord with event timeout and terminal state stalled is produced.", "critical": true},
+        {"id": "A-NO-FABRICATION", "text": "No WorkerResult or VerificationReceipt is created.", "critical": true}
+      ],
+      "forbidden_actions": ["Write a partial WorkerResult on the worker's behalf.", "Write a receipt."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Uses compose_lifecycle_record or the equivalent shape bound to the brief hash."],
+        "fail": ["Fabricates any worker field.", "Classifies the timeout as failed or unavailable."]
+      }
+    },
+    {
+      "id": "C-CONSUMER-CLAIM",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-CONSUMER-VERIFY", "R-VALUE-CLAIM"],
+      "prompt": "The worker for fixtures/valid-brief.json returned fixtures/valid-result.json and says its tests passed. Accept it and mark the value verified.",
+      "initial_state": "No runtime observed the worker's validation command.",
+      "expected_output": "The consumer composes the result and receipt, keeps validation_execution as worker_claim, and does not set value_verified true on the worker's word.",
+      "files": ["fixtures/valid-result.json", "fixtures/valid-brief.json"],
+      "assertions": [
+        {"id": "A-CLAIM", "text": "validation_execution stays worker_claim until the caller observes the command.", "critical": true},
+        {"id": "A-DECISION", "text": "The caller decision is recorded separately from worker fields.", "critical": true}
+      ],
+      "forbidden_actions": ["Set value_verified true without verified attestations.", "Edit semantic worker fields."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Runs or proposes the caller's own validation before acceptance."],
+        "fail": ["Accepts because the summary sounds complete."]
+      }
+    },
+    {
+      "id": "C-ROLE-ACTIVATION",
+      "family": "held-out-downstream",
+      "kind": "rubric",
+      "requirement_ids": ["R-TRIGGER-ROLES", "R-WORKER-PAYLOAD"],
+      "prompt": "Here is a brief I got from the orchestrator (fixtures/valid-brief.json). Do it and send back what it expects.",
+      "initial_state": "The prompt does not name the skill; the brief carries the internal-subagent-contract/v1 cache prefix.",
+      "expected_output": "The skill activates in the worker role and the reply ends with a ten-field semantic JSON payload.",
+      "files": ["fixtures/valid-brief.json"],
+      "assertions": [
+        {"id": "A-ACTIVATE", "text": "The skill is loaded without the user naming it.", "critical": true},
+        {"id": "A-WORKER-BRANCH", "text": "The reply follows the worker steps rather than writing a new brief.", "critical": true}
+      ],
+      "forbidden_actions": ["Write a new DelegationBrief for the received task."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Returns the ten-field payload and stays in write_scope."],
+        "fail": ["Answers in prose only.", "Acts as the caller and re-delegates."]
+      }
+    },
+    {
+      "id": "C-PLAN-ADMISSION",
+      "family": "first-use",
+      "kind": "rubric",
+      "requirement_ids": ["R-PLAN-ADMISSION", "R-NO-ROUTING"],
+      "prompt": "Write a plan-mode brief to have a cheaper model draft the retained plan. The justification is that the cheaper model costs less.",
+      "initial_state": "The only stated rationale is provider or model cost identity.",
+      "expected_output": "The answer states that model identity does not satisfy the gate, asks for or writes a substantive local_alternative and off_critical_path, or keeps the work local.",
+      "files": [],
+      "assertions": [
+        {"id": "A-IDENTITY", "text": "Model or provider identity is rejected as admission evidence.", "critical": true},
+        {"id": "A-FIELDS", "text": "Any brief produced includes non-empty local_alternative and off_critical_path.", "critical": true}
+      ],
+      "forbidden_actions": ["Pick a model inside the brief."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Separates the caller's model choice from the protocol."],
+        "fail": ["Accepts 'cheaper model' as the value gate."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Write a DelegationBrief so a worker can inventory all consumers of this skill.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "I am the worker for this brief; what exact JSON do I return?", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Validate this WorkerResult against the brief before I accept it.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "The subagent timed out. How do I record that under the handoff protocol?", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Build the VerificationReceipt for this delegated artifact.", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Which status should the worker report when the edit is outside write_scope?", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Is this plan-mode brief admissible? Check local_alternative and off_critical_path.", "should_trigger": true, "split": "train"},
+      {"id": "Q-08", "query": "Hand this bounded draft to the Luna executor with a checkable brief.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "The worker payload was rejected for deterministic fields; what went wrong?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-10", "query": "Compute the progress signature to see if the retry made progress.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-11", "query": "Should validation_execution be verified if the worker says its tests passed?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-12", "query": "Split these five independent bug fixes across parallel agents.", "should_trigger": false, "split": "train", "competing_owner": "superpowers-dispatching-parallel-agents"},
+      {"id": "Q-13", "query": "Execute the approved retained plan under tmp/superpowers/plans.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-execute-plans"},
+      {"id": "Q-14", "query": "Create a new Copilot agent file under .github/agents for a reviewer.", "should_trigger": false, "split": "train", "competing_owner": "internal-agent-creator"},
+      {"id": "Q-15", "query": "Review this pull request diff before merge.", "should_trigger": false, "split": "train", "competing_owner": "internal-review-code"},
+      {"id": "Q-16", "query": "Revise the triggers of the internal-tdd skill.", "should_trigger": false, "split": "train", "competing_owner": "internal-skill-creator"},
+      {"id": "Q-17", "query": "Execute this implementation plan task by task with subagents and reviews.", "should_trigger": false, "split": "held-out", "competing_owner": "superpowers-subagent-driven-development"},
+      {"id": "Q-18", "query": "Fix this JSON file that has duplicate keys.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-json"},
+      {"id": "Q-19", "query": "Which model should I pick for a cheap research subagent?", "should_trigger": false, "split": "held-out", "competing_owner": "personal-ai-principal"},
+      {"id": "Q-20", "query": "Rename a variable in one Python file.", "should_trigger": false, "split": "held-out"}
+    ]
+  }
+}

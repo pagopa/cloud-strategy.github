@@ -1,0 +1,711 @@
+[
+  {
+    "name": "invalid-json",
+    "raw_text": "{\"schema\":\"skill-eval-pack/v1\",\"schema\":\"skill-eval-pack/v1\"}",
+    "expected_codes": [
+      "eval-pack-invalid-json"
+    ]
+  },
+  {
+    "name": "schema",
+    "pack": {
+      "schema": "wrong",
+      "skill": "fixture-skill"
+    },
+    "expected_codes": [
+      "eval-pack-schema"
+    ]
+  },
+  {
+    "name": "duplicate-id",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        },
+        {
+          "id": "R-X",
+          "text": "y",
+          "source": "y"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "rubric": {
+            "pass": [
+              "x"
+            ],
+            "fail": [
+              "y"
+            ]
+          },
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-H",
+            "query": "y",
+            "should_trigger": false,
+            "split": "held-out"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-duplicate-id"
+    ]
+  },
+  {
+    "name": "unresolved-requirement",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-MISSING",
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "rubric": {
+            "pass": [
+              "x"
+            ],
+            "fail": [
+              "y"
+            ]
+          },
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-H",
+            "query": "y",
+            "should_trigger": false,
+            "split": "held-out"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-unresolved-requirement"
+    ]
+  },
+  {
+    "name": "uncovered-requirement",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        },
+        {
+          "id": "R-UNUSED",
+          "text": "unused",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "rubric": {
+            "pass": [
+              "x"
+            ],
+            "fail": [
+              "y"
+            ]
+          },
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-H",
+            "query": "y",
+            "should_trigger": false,
+            "split": "held-out"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-uncovered-requirement"
+    ]
+  },
+  {
+    "name": "missing-defective-fixture",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "deterministic",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-H",
+            "query": "y",
+            "should_trigger": false,
+            "split": "held-out"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-missing-defective-fixture"
+    ]
+  },
+  {
+    "name": "missing-rubric",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-H",
+            "query": "y",
+            "should_trigger": false,
+            "split": "held-out"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-missing-rubric"
+    ]
+  },
+  {
+    "name": "invalid-status",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "rubric": {
+            "pass": [
+              "x"
+            ],
+            "fail": [
+              "y"
+            ]
+          },
+          "status": "passed",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-H",
+            "query": "y",
+            "should_trigger": false,
+            "split": "held-out"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-invalid-status"
+    ]
+  },
+  {
+    "name": "unsafe-path-traversal",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [
+            "../escape.txt"
+          ],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "rubric": {
+            "pass": [
+              "x"
+            ],
+            "fail": [
+              "y"
+            ]
+          },
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-H",
+            "query": "y",
+            "should_trigger": false,
+            "split": "held-out"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-unsafe-path"
+    ]
+  },
+  {
+    "name": "unsafe-absolute-path",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [
+            "/etc/passwd"
+          ],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "rubric": {
+            "pass": [
+              "x"
+            ],
+            "fail": [
+              "y"
+            ]
+          },
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-H",
+            "query": "y",
+            "should_trigger": false,
+            "split": "held-out"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-unsafe-path"
+    ]
+  },
+  {
+    "name": "trigger-missing-polarity",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "rubric": {
+            "pass": [
+              "x"
+            ],
+            "fail": [
+              "y"
+            ]
+          },
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-trigger-coverage"
+    ]
+  },
+  {
+    "name": "trigger-missing-split",
+    "pack": {
+      "schema": "skill-eval-pack/v1",
+      "skill": "fixture-skill",
+      "requirements": [
+        {
+          "id": "R-X",
+          "text": "x",
+          "source": "x"
+        }
+      ],
+      "cases": [
+        {
+          "id": "C-X",
+          "family": "x",
+          "kind": "rubric",
+          "requirement_ids": [
+            "R-X"
+          ],
+          "prompt": "x",
+          "initial_state": "x",
+          "expected_output": "x",
+          "files": [],
+          "assertions": [
+            {
+              "id": "A-X",
+              "text": "x",
+              "critical": true
+            }
+          ],
+          "forbidden_actions": [],
+          "rubric": {
+            "pass": [
+              "x"
+            ],
+            "fail": [
+              "y"
+            ]
+          },
+          "status": "generated",
+          "held_out": false
+        }
+      ],
+      "triggers": {
+        "queries": [
+          {
+            "id": "Q-T",
+            "query": "x",
+            "should_trigger": true,
+            "split": "train"
+          },
+          {
+            "id": "Q-F",
+            "query": "y",
+            "should_trigger": false,
+            "split": "train"
+          }
+        ]
+      }
+    },
+    "expected_codes": [
+      "eval-pack-trigger-coverage"
+    ]
+  },
+  {
+    "name": "unbacked-run",
+    "record": {
+      "schema": "skill-eval-run/v1",
+      "skill": "fixture-skill",
+      "date": "2026-09-26",
+      "host": "fixture",
+      "model": "fixture",
+      "configuration": "with-skill",
+      "case_results": [
+        {
+          "case_id": "C-DETERMINISTIC",
+          "status": "passed",
+          "assertions": [
+            {
+              "id": "A-OUTPUT",
+              "passed": true,
+              "evidence": "evidence"
+            }
+          ]
+        }
+      ]
+    },
+    "expected_codes": [
+      "eval-run-unbacked-result"
+    ]
+  },
+  {
+    "name": "run-assertion-mismatch",
+    "record": {
+      "schema": "skill-eval-run/v1",
+      "skill": "fixture-skill",
+      "date": "2026-09-26",
+      "host": "fixture",
+      "model": "fixture",
+      "configuration": "with-skill",
+      "case_results": [
+        {
+          "case_id": "C-DETERMINISTIC",
+          "status": "failed",
+          "transcript_ref": "transcript.txt",
+          "assertions": []
+        }
+      ]
+    },
+    "expected_codes": [
+      "eval-run-assertion-mismatch"
+    ]
+  }
+]

@@ -1,0 +1,121 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "internal-aws-lambda",
+  "date": "2026-09-27",
+  "host": "VS Code GitHub Copilot Chat; isolated read-only subagents given the skill entrypoint by path, no web or MCP tools, assertions withheld; several cases per subagent (less rigorous than one clean session per case)",
+  "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+  "configuration": "baseline-previous",
+  "case_results": [
+    {
+      "case_id": "C-SQS-WHOLE-BATCH",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline lambda'",
+      "assertions": [
+        {
+          "id": "A-PER-RECORD",
+          "passed": true,
+          "evidence": "Per-record try/except returning batchItemFailures with failed message IDs."
+        },
+        {
+          "id": "A-IDEMPOTENT",
+          "passed": true,
+          "evidence": "Requires process_message to be idempotent."
+        }
+      ]
+    },
+    {
+      "case_id": "C-S3-RECURSION",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline lambda'",
+      "assertions": [
+        {
+          "id": "A-RECURSION",
+          "passed": true,
+          "evidence": "Output prefix uploads/ matches the trigger prefix; recursive loop."
+        }
+      ]
+    },
+    {
+      "case_id": "C-TIMEOUT-MISMATCH",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline lambda'",
+      "assertions": [
+        {
+          "id": "A-VISIBILITY",
+          "passed": true,
+          "evidence": "Visibility timeout 30 below function timeout 120; raise it well above."
+        }
+      ]
+    },
+    {
+      "case_id": "C-THIN-HANDLER",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline lambda'",
+      "assertions": [
+        {
+          "id": "A-THIN",
+          "passed": true,
+          "evidence": "validate_order and save_order helpers outside the handler."
+        },
+        {
+          "id": "A-VALIDATE",
+          "passed": true,
+          "evidence": "Invalid JSON and validation errors return 400."
+        }
+      ]
+    },
+    {
+      "case_id": "C-SECRET-ENV",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline lambda'",
+      "assertions": [
+        {
+          "id": "A-SECRET-STORE",
+          "passed": true,
+          "evidence": "Secrets Manager or SSM SecureString with ARN-only env var."
+        },
+        {
+          "id": "A-NO-RAW-LOG",
+          "passed": true,
+          "evidence": "Do not log the raw request; log stable identifiers."
+        }
+      ]
+    },
+    {
+      "case_id": "C-VPC-DEFAULT",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline lambda'",
+      "assertions": [
+        {
+          "id": "A-VPC-NEED",
+          "passed": true,
+          "evidence": "Attach only functions with a concrete private dependency."
+        }
+      ]
+    },
+    {
+      "case_id": "C-LIMIT-FRESHNESS",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline lambda'",
+      "assertions": [
+        {
+          "id": "A-SOURCED",
+          "passed": true,
+          "evidence": "Figure labeled inference, not verified, with sources to check."
+        }
+      ]
+    },
+    {
+      "case_id": "C-TRUST-HANDOFF",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 639fe5f1-3651-4412-be9b-048897783346, subagent 'Cases baseline lambda'",
+      "assertions": [
+        {
+          "id": "A-HANDOFF",
+          "passed": true,
+          "evidence": "Router sent trust and permissions to the predecessor governance lane, not the Lambda lane."
+        }
+      ]
+    }
+  ]
+}

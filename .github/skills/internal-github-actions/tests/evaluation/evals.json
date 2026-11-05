@@ -1,0 +1,495 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-github-actions",
+  "requirements": [
+    {
+      "id": "R-AUTHOR-WORKFLOW",
+      "text": "Creates or edits workflows under .github/workflows/ with valid events, jobs, and context use, and runs actionlint on changed files when available.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-SHA-PIN",
+      "text": "Pins every third-party uses: reference to a full 40-character SHA with an adjacent release comment.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-LEAST-PRIVILEGE",
+      "text": "Declares explicit permissions at workflow or job scope and never uses write-all.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-INPUT-VALIDATION",
+      "text": "Validates workflow_dispatch and workflow_call inputs before shell or deploy steps, and passes expression values through env: instead of inline run: interpolation.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-COMPOSITE-ENV-FORWARD",
+      "text": "Declares shell: bash on every composite run: step (not on uses: steps), starts shell blocks with set -euo pipefail, and forwards inputs through env:.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-COMPOSITE-OUTPUTS",
+      "text": "Maps caller-visible outputs from $GITHUB_OUTPUT, documents them, and treats a changed input or output contract as a versioning event.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-REUSE-SELECTION",
+      "text": "Chooses inline steps, a script, a reusable workflow, or a composite action by the unit of reuse and states the reason.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-RUN-DEBUG",
+      "text": "Diagnoses a failed run from the first failed step with log evidence before proposing a fix.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-PRT-DEFAULT-BRANCH",
+      "text": "States that pull_request_target runs the default-branch workflow definition, so a workflow fix inside a PR does not change that PR's run.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-TOKEN-SCOPE-OPTION",
+      "text": "When an action option needs a wider GITHUB_TOKEN scope, grants that scope explicitly or disables the option.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-REVIEW-CONTRIBUTOR-RECORD",
+      "text": "When invoked by internal-review-code, returns only the contributor record fields and no verdict, severity, or merge decision.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-HANDOFF-PLATFORM",
+      "text": "Routes runner-fleet health, rulesets, and organization Actions policy to internal-github-platform.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-HARDEN-WORKFLOW",
+      "family": "workflow hardening",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-SHA-PIN",
+        "R-LEAST-PRIVILEGE",
+        "R-AUTHOR-WORKFLOW"
+      ],
+      "prompt": "Harden this release workflow before we enable it.",
+      "initial_state": "The defective workflow fixture is the target file.",
+      "expected_output": "A corrected workflow with SHA-pinned actions, least-privilege permissions, and an actionlint step in the validation notes.",
+      "files": [
+        "tests/evaluation/fixtures/workflow-unpinned-write-all.yml"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output YAML has every third-party uses: at a 40-character SHA and no write-all; actionlint passes on it.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "Each pin has an adjacent release comment.",
+          "critical": false
+        },
+        {
+          "id": "A-Q2",
+          "text": "Permissions name only the scopes the release job needs.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Keep tag-only action references.",
+        "Grant write-all."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/workflow-unpinned-write-all.yml"
+    },
+    {
+      "id": "C-HARDEN-COMPOSITE",
+      "family": "composite action hardening",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-COMPOSITE-ENV-FORWARD",
+        "R-INPUT-VALIDATION",
+        "R-COMPOSITE-OUTPUTS"
+      ],
+      "prompt": "Fix this composite action so it is safe and exposes the Terraform version as an output.",
+      "initial_state": "The defective composite action fixture is the target action.yml.",
+      "expected_output": "A corrected action.yml with env-forwarded inputs, bash strict mode, input validation, and an output mapped from $GITHUB_OUTPUT.",
+      "files": [
+        "tests/evaluation/fixtures/composite-direct-interpolation.yml"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output action.yml has no ${{ inputs.* }} inside run:, and every run: step declares shell: bash.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "The output is written to $GITHUB_OUTPUT and mapped under outputs.",
+          "critical": false
+        },
+        {
+          "id": "A-Q2",
+          "text": "The version input is validated before download.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Interpolate inputs directly in run:.",
+        "Add shell: to a uses: step."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/composite-direct-interpolation.yml"
+    },
+    {
+      "id": "C-PRT-FIX-IN-PR",
+      "family": "trigger semantics",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-PRT-DEFAULT-BRANCH"
+      ],
+      "prompt": "I fixed this pull_request_target workflow in my PR but re-running the check still fails. Why?",
+      "initial_state": "The PR modifies the pull_request_target workflow fixture.",
+      "expected_output": "An explanation that the run uses the default-branch definition and the fix takes effect after merge.",
+      "files": [
+        "tests/evaluation/fixtures/prt-fix-in-pr.yml"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Answer states that the PR run keeps using the default-branch definition until merge.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "Suggests validating the change after merge or on a fork-safe trigger.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Claim that re-running the PR check will pick up the edit."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/prt-fix-in-pr.yml"
+    },
+    {
+      "id": "C-RUN-TOKEN-SCOPE",
+      "family": "failed run diagnosis",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-RUN-DEBUG",
+        "R-TOKEN-SCOPE-OPTION"
+      ],
+      "prompt": "Run 9912 failed; find the cause and fix it.",
+      "initial_state": "The failed-run log fixture is the only evidence.",
+      "expected_output": "A diagnosis citing the Report coverage step and a fix that grants pull-requests: write or disables the comment option.",
+      "files": [
+        "tests/evaluation/fixtures/run-log-token-scope.txt"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Diagnosis cites the failing step's log line and either grants the named scope or disables the option.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "States that later steps were skipped, not failed.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Propose permissions: write-all.",
+        "Blame the Test step."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/run-log-token-scope.txt"
+    },
+    {
+      "id": "C-DISPATCH-INPUT",
+      "family": "input validation",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-INPUT-VALIDATION"
+      ],
+      "prompt": "Make this manual deploy workflow safe to run.",
+      "initial_state": "The dispatch workflow fixture is the target file.",
+      "expected_output": "A workflow that restricts the environment input and passes it through env: to the script.",
+      "files": [
+        "tests/evaluation/fixtures/dispatch-unvalidated-input.yml"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output validates the input against an allowlist before any shell or deploy step uses it.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "Uses a choice input or an explicit allowlist check.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Keep ${{ inputs.environment }} inside run:."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/dispatch-unvalidated-input.yml"
+    },
+    {
+      "id": "C-REUSE-CHOICE",
+      "family": "reuse selection",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-REUSE-SELECTION"
+      ],
+      "prompt": "Three workflows repeat the same build, test, and publish jobs with different runners. How should we share them?",
+      "initial_state": "Three workflows share job-level orchestration.",
+      "expected_output": "A reuse recommendation with the reason tied to the unit of reuse.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "The chosen pattern matches the unit of reuse.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "States what would change the choice.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Recommends a reusable workflow because jobs, runners, and permissions are shared."
+        ],
+        "fail": [
+          "Recommends a composite action for job-level orchestration.",
+          "Gives no reason."
+        ]
+      }
+    },
+    {
+      "id": "C-REVIEW-RECORD",
+      "family": "review contributor",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-REVIEW-CONTRIBUTOR-RECORD"
+      ],
+      "prompt": "Envelope: role domain-routing, parent internal-review-code, deliverable GitHub Actions contributor observations, evidence a diff adding a workflow step.",
+      "initial_state": "internal-review-code invokes the skill as a contributor.",
+      "expected_output": "One contributor record with the declared fields only.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output has exactly the contributor record fields and no verdict or severity.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "Observations cite changed lines.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Emit approve or request-changes.",
+        "Re-route to internal-review-code."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Returns domain, changed_contract_surfaces, observations, probes, applicable_validations, compatibility_risks, and evidence_gaps only."
+        ],
+        "fail": [
+          "Adds a verdict, severity, or merge recommendation."
+        ]
+      }
+    },
+    {
+      "id": "C-RUNNER-FLEET-HANDOFF",
+      "family": "boundary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-HANDOFF-PLATFORM"
+      ],
+      "prompt": "Jobs across the org wait 20 minutes for our self-hosted runners. Fix it.",
+      "initial_state": "No workflow file is implicated.",
+      "expected_output": "A handoff to internal-github-platform with the evidence needed.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output routes to internal-github-platform and does not edit workflow YAML.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Names internal-github-platform as owner and lists queue-time evidence to collect."
+        ],
+        "fail": [
+          "Edits runs-on labels in workflows as the fix."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-ADD-CI",
+        "query": "Add a CI workflow that runs pytest on every pull request.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-PIN-ACTIONS",
+        "query": "Pin all the actions in our release workflow to SHAs.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-COMPOSITE-NEW",
+        "query": "Create a composite action that sets up Terraform and exposes its version as an output.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-REUSABLE",
+        "query": "Turn the deploy job into a reusable workflow with typed inputs.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-FAILED-RUN",
+        "query": "The build workflow failed on main last night; find out why.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-PERMS",
+        "query": "Our workflow gets \"Resource not accessible by integration\"; fix the permissions.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-PRT-FIX",
+        "query": "I fixed the pull_request_target workflow in my PR but the run still fails.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-OIDC-YAML",
+        "query": "Switch the AWS deploy step to OIDC instead of access keys.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-OIDC-DEPLOY-WORKFLOW",
+        "query": "Write a workflow that deploys with OIDC.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-MATRIX",
+        "query": "Add a Python 3.12 and 3.13 matrix to the test job.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-CACHE",
+        "query": "Speed up the workflow with a pip cache keyed on the lockfile.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-DISPATCH",
+        "query": "Add a workflow_dispatch input for the target environment and validate it.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-ACTION-README",
+        "query": "Document the inputs and outputs of our composite action.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-N-REVIEW",
+        "query": "Review this PR diff that changes two workflows.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-review-code"
+      },
+      {
+        "id": "Q-N-ADO",
+        "query": "Write an Azure Pipelines YAML for this service.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-azure-devops"
+      },
+      {
+        "id": "Q-N-CODEQL",
+        "query": "Enable CodeQL default setup for this repository.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "awesome-copilot-codeql"
+      },
+      {
+        "id": "Q-N-RUNNER-FLEET",
+        "query": "Our self-hosted runner pool queues jobs for 20 minutes across the org.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-github-platform"
+      },
+      {
+        "id": "Q-N-RULESET",
+        "query": "Require two approvals on main for all repositories.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-github-platform"
+      },
+      {
+        "id": "Q-N-MERGE",
+        "query": "Merge PR 42 once checks are green.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-github-pr"
+      },
+      {
+        "id": "Q-N-DEPENDABOT",
+        "query": "Group Dependabot updates for GitHub Actions weekly.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "awesome-copilot-dependabot"
+      },
+      {
+        "id": "Q-N-BASH",
+        "query": "Refactor this standalone deploy.sh script.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-bash-script"
+      },
+      {
+        "id": "Q-N-PR-CHECKS",
+        "query": "My PR checks are failing; figure out why and fix them.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "openai-gh-fix-ci"
+      }
+    ]
+  }
+}

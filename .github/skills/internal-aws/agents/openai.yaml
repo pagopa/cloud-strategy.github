@@ -2,5 +2,5 @@ policy:
   allow_implicit_invocation: true
 interface:
   display_name: "internal-aws"
-  short_description: "Canonical entry point for every AWS request"
-  default_prompt: "Use $internal-aws to classify this AWS request and invoke the minimum specialist lane."
+  short_description: "AWS platform structure, controls, and evidence"
+  default_prompt: "Use $internal-aws to design, decide, review, or prove AWS Organizations placement, IAM and trust, SCP, RCP, and declarative controls, rollout evidence, or current AWS platform facts."

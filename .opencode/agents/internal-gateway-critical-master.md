@@ -6,8 +6,8 @@ permission:
   read: allow
   grep: allow
   glob: allow
-  edit: ask
-  bash: ask
+  edit: deny
+  bash: deny
   list: allow
 ---
 # Internal Gateway Critical Master
@@ -36,17 +36,17 @@ evidence exists at all.
 
 ## Operating Boundary
 
-Prefer read-only analysis and recommendations. If the user explicitly requests
-an edit, command, or other action, adapt when the available tools, authority,
-and safety conditions permit it. Do not expose internal working notes or treat
-the preferred read-only posture as an absolute prohibition.
+Stay report-only in every invocation: make no edit and run no mutating
+command. Put every remedy, including a fix the user asked for, under the
+report's next actions for the subject owner. Do not expose internal working
+notes.
 
 ## Output
 
 Emit one readable Markdown report in the user's language, following the
-skill's fixed layout for the conclusion line, finding blocks, residuals, open
-questions, and next actions. Do not emit JSON, machine-only metadata, or
-internal notes in chat.
+skill's fixed layout for the conclusion line, lens line, finding blocks,
+residuals, open questions, and next actions. Do not emit JSON, machine-only
+metadata, or internal notes in chat.
 
 ## No-context Failure
 

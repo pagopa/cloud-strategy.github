@@ -13,7 +13,7 @@
   "evidence": [
     {
       "acceptance_id": "A1",
-      "ref": "tests/github/skills/internal-subagent-contract/test_subagent_contract.py::test_valid_result_binds_delegation_brief_artifact_and_acceptance",
+      "ref": ".github/skills/internal-subagent-contract/tests/test_subagent_contract.py::test_valid_result_binds_delegation_brief_artifact_and_acceptance",
       "outcome": "pass"
     }
   ],

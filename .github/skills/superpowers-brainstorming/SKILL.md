@@ -1,27 +1,133 @@
 ---
 disable-model-invocation: true
 name: superpowers-brainstorming
-description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
+description: Use only when called directly to explore user intent, requirements, and design before implementation.
 ---
 
 # Brainstorming Ideas Into Designs
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
+Start by classifying how much process the request needs, then work
+through your path: understand the context, refine the idea, present a
+design, and get your human partner's approval.
+
+## Establish Shared Understanding
+
+The outcome of brainstorming is an understanding your human partner can
+recognize and correct, grounded in what they want to accomplish.
+
+1. **Discover intent.** Use the request and available context to identify
+   the intended outcome, who it is for, and what success looks like. When
+   that information is missing, ask one focused question about purpose or
+   intended use before proposing features or an approach. Knowing the app
+   genre does not tell you why your partner wants it. Gathering missing
+   requirements does not ask them to authorize the task again.
+2. **Write back your understanding.** Summarize the intended outcome,
+   relevant constraints, and success criteria in a short note your partner
+   can assess. Separate what they said from assumptions. Invite correction
+   and incorporate their answer before treating this as the design brief.
+3. **Carry intent into the design.** Preserve the agreed understanding in
+   the selected path's design artifact: the written spec for architectural
+   work, or the in-chat design/probe for bounded work and spikes. Check
+   proposed features and technical choices against that understanding.
+
+When the request already supplies the purpose and constraints, reflect
+that understanding instead of asking the same questions again. Keep the
+note concise; its accuracy and the opportunity to correct it matter.
 
 <HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+Before taking any implementation action, including invoking an
+implementation skill, writing product code, scaffolding, installing
+product dependencies, or creating an external project, complete the
+selected path's prerequisites:
+
+- Spike: the human partner approves the question and probe.
+- Bounded: the human partner approves the short in-chat design.
+- Architectural: the human partner reviews and approves the written spec,
+  then reviews the written implementation plan and selects its execution
+  method. Conversational design approval only permits writing the spec;
+  written-spec approval only permits invoking internal-gateway-writing-plans.
+
+A reply approves the stage actually presented. Approval of an idea or
+feature scope does not approve artifacts that do not exist yet. Resume
+at the earliest incomplete stage; do not turn one approval into permission
+to skip the rest of the selected path. Read-only project exploration is
+allowed while those prerequisites remain incomplete.
 </HARD-GATE>
 
-## Anti-Pattern: "This Is Too Simple To Need A Design"
+## Three Paths
 
-Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+Before your first question, classify the request and say the
+classification out loud — "this looks bounded, so I'll present a short
+design here rather than write a spec" — so your human partner can
+override it:
+
+- **Spike** — a feasibility question ("can we...", "is it possible...",
+  "quick and dirty is fine") whose output is an answer, not code you
+  keep. Present the question and what you'll try in 2-3 sentences, get
+  a nod, then find out as cheaply as correctness allows. No design
+  doc, no spec file. Report findings as a recommendation; anything you
+  built stays labeled throwaway.
+- **Bounded** — a well-scoped change to code that already exists in
+  this repo: a new flag, a small endpoint, a one-file fix.
+  Understanding the kind of app is not enough — bounded means the flow
+  you are changing is already here to read. If there is no existing
+  flow to change, the task is not bounded. Ask the clarifying
+  questions that matter, present a short design IN CHAT (a few
+  sentences to a few short paragraphs), and STOP. Implementation
+  starts only after your human partner says yes to that design — a
+  bounded task's approval is as hard a gate as an architectural
+  one. No spec file, no implementation plan document.
+- **Architectural** — new projects, new subsystems, changes that
+  restructure how components fit together or alter interfaces others
+  depend on. Follow the full process: questions, approaches, sectioned
+  design, written spec, then the internal-gateway-writing-plans skill.
+
+When in doubt between two paths, take the heavier one. The ratchet is
+one-way: hidden complexity discovered mid-task upgrades the path —
+stop, say so, and step up. Nothing downgrades mid-task.
+
+## Anti-Pattern: "Too Simple To Need Approval"
+
+Every path ends with your human partner approving the required design
+before implementation. A bounded change may need only two sentences in
+chat. A new todo-list project is architectural and requires the written
+spec and planning handoffs. Scale the artifact to the selected path;
+complete that path's reviews before implementation.
+
+## Red Flags
+
+| Thought | Reality |
+|---------|---------|
+| "This is too simple to need a design" | Follow the selected path: a bounded change gets a short chat design; an architectural change gets the written spec and planning handoffs. |
+| "I'll call it bounded and skip the spec" | Reaching for a label to skip work IS the doubt — take the heavier path. |
+| "It's bounded and the design is obvious — I'll start while they read it" | The gate is the approval, not the design's length. Present, then stop until you hear yes. |
+| "I understand this kind of app, so it's bounded" | Bounded measures the repo, not your familiarity. A new project has no existing flow — it is architectural. |
+| "The spike works, so I'll keep the code" | A spike's output is an answer. Keeping the code is a new request — classify it. |
+| "It grew, but I'm almost done — no need to re-classify" | Hidden complexity upgrades the path mid-task. Stop and say so. |
+| "They approved the spike, so the follow-up change is approved too" | Each task gets its own classification and its own approval. |
 
 ## Checklist
 
-You MUST create a task for each of these items and complete them in order:
+Classify first, announce the path, then create a task for each item on
+your path and complete them in order.
 
+**Spike:**
+1. **Explore project context** — enough to frame the probe
+2. **Present question + probe plan** — 2-3 sentences
+3. **Get approval** — a nod is enough
+4. **Investigate** — as cheaply as correctness allows
+5. **Report findings** — a recommendation; label anything built as throwaway
+
+**Bounded:**
+1. **Explore project context** — check files, docs, recent commits
+2. **Ask clarifying questions** — one at a time, the ones that matter
+3. **Present short design in chat** — approach, files touched, testing
+4. **Get approval** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
+5. **Implement** — proceed with the normal development workflow (TDD applies); no plan document
+
+**Architectural:**
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
@@ -30,12 +136,19 @@ You MUST create a task for each of these items and complete them in order:
 6. **Write design doc** — save to `tmp/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews written spec** — ask user to review the spec file before proceeding
-9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+9. **Transition to implementation** — invoke internal-gateway-writing-plans skill to create implementation plan
 
 ## Process Flow
 
 ```dot
 digraph brainstorming {
+    "Classify: spike / bounded / architectural" [shape=diamond];
+    "Present question + probe (2-3 sentences)" [shape=box];
+    "Ask clarifying questions (bounded)" [shape=box];
+    "Present short design in chat" [shape=box];
+    "Human approves?" [shape=diamond];
+    "Investigate; report recommendation" [shape=doublecircle];
+    "Implement via normal workflow (no plan doc)" [shape=doublecircle];
     "Explore project context" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
@@ -44,8 +157,18 @@ digraph brainstorming {
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
-    "Invoke writing-plans skill" [shape=doublecircle];
+    "Invoke internal-gateway-writing-plans skill" [shape=doublecircle];
+    "Hidden complexity? Upgrade path" [shape=box];
 
+    "Classify: spike / bounded / architectural" -> "Present question + probe (2-3 sentences)" [label="spike"];
+    "Classify: spike / bounded / architectural" -> "Ask clarifying questions (bounded)" [label="bounded"];
+    "Classify: spike / bounded / architectural" -> "Explore project context" [label="architectural"];
+    "Present question + probe (2-3 sentences)" -> "Human approves?";
+    "Ask clarifying questions (bounded)" -> "Present short design in chat";
+    "Present short design in chat" -> "Human approves?";
+    "Human approves?" -> "Investigate; report recommendation" [label="spike: yes"];
+    "Human approves?" -> "Implement via normal workflow (no plan doc)" [label="bounded: yes"];
+    "Hidden complexity? Upgrade path" -> "Classify: spike / bounded / architectural";
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
@@ -55,13 +178,24 @@ digraph brainstorming {
     "Write design doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
+    "User reviews spec?" -> "Invoke internal-gateway-writing-plans skill" [label="approved"];
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
+**Terminal states are path-bound.** Architectural: the ONLY skill you
+invoke after brainstorming is internal-gateway-writing-plans — never frontend-design,
+mcp-builder, or any other implementation skill. Bounded: after
+approval, implementation proceeds directly through the normal
+development workflow; no plan document. Spike: the terminal state is a
+reported recommendation.
 
 ## The Process
+
+The subsections below serve the bounded and architectural paths (a
+spike stops at "present the probe, get a nod"). Sections from
+**Exploring approaches** onward are architectural-path depth — for
+bounded work, context plus a few questions plus a short in-chat design
+is the whole process.
 
 **Understanding the idea:**
 
@@ -101,7 +235,7 @@ digraph brainstorming {
 - Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
 - Don't propose unrelated refactoring. Stay focused on what serves the current goal.
 
-## After the Design
+## After the Design (architectural path)
 
 **Documentation:**
 
@@ -129,8 +263,8 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 **Implementation:**
 
-- Invoke the writing-plans skill to create a detailed implementation plan
-- Do NOT invoke any other skill. writing-plans is the next step.
+- Invoke the internal-gateway-writing-plans skill to create a detailed implementation plan
+- Do NOT invoke any other skill. internal-gateway-writing-plans is the next step.
 
 ## Visual Companion
 
@@ -165,3 +299,37 @@ This repository-owned contract overrides any earlier instruction to ask one ques
 - Put unresolved follow-ups in another numbered block. If only one blocking
   question remains, present it as a numbered one-item block.
 <!-- local-sync:guided-questions:end -->
+
+<!-- local-sync:no-commit:start -->
+## Local no-commit contract
+
+This repository-owned contract overrides any earlier instruction in this skill,
+its bundled prompts, or its scripts to create Git commits.
+
+- Do not create, amend, squash, or push Git commits. Do not run `git commit`,
+  `git merge`, `git rebase`, `git cherry-pick`, or `git push`.
+- Leave every change uncommitted in the working tree. The user owns staging,
+  commits, and integration.
+- Where a step says to commit, run that step's validation instead, then report
+  the changed files and the `git status --short` summary.
+- Where a step or script needs a commit range such as `BASE..HEAD`, review the
+  uncommitted changes with `git diff <BASE>` instead.
+- Include this contract in every subagent brief dispatched from this skill.
+- Only an explicit user request in the current conversation authorizes a
+  commit, and only for that request.
+<!-- local-sync:no-commit:end -->
+
+<!-- local-sync:plan-gateway-routing:start -->
+## Local plan-gateway routing override
+
+This contract supersedes earlier conflicting next-skill and handoff instructions.
+Keep the rest of this skill's workflow unchanged.
+
+- Route an explicit plan request to `/internal-gateway-writing-plans`. Do not
+    treat spec approval alone as an explicit plan request.
+- Route inline execution to `/internal-gateway-execute-plans` only after the
+    user invoked that executor for an identified plan. Passing an internal
+    handoff does not create user approval or widen the plan's writable scope.
+- New implementation plans belong under `tmp/.plans/`. Existing plans and
+    historical runtime records stay where they are; do not migrate them.
+<!-- local-sync:plan-gateway-routing:end -->

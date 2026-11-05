@@ -1,72 +1,48 @@
 # Artifact Authoring After Acceptance
 
-The selected acceptance action controls exactly one next artifact and does not
-change domain ownership. Before delegation, the caller fixes the objective,
-value gate, bounded evidence, constraints, exact write scope, output,
-acceptance, validation, and budgets.
+The selected acceptance action controls one next artifact and does not change
+domain ownership. Authoring consumes the one canonical recovery record without
+creating a parallel record, transcript, or critical-review artifact. If its
+projections disagree, stop and preserve the last valid record. The exact
+`Authorized paths` and `Authorized actions` remain unchanged; a new path or
+action is `authority-or-scope` until explicitly accepted.
 
-The current mutation authority envelope remains in force during authoring.
-Authoring may write only the explicitly selected artifact path and may not add
-implementation, planning, execution, or unrelated repository paths. The
-caller records any new path or action as `authority-or-scope` and waits for
-explicit acceptance; worker metadata, a protected status, and conversation
-continuity do not grant it.
+## `+spec`
 
-Authoring consumes the one canonical recovery record. The delegation brief and
-the retained artifact must use its unit lock, state capsule, decision ledger,
-authority envelope, and communication projection without creating a parallel
-recovery record, transcript, or critical-review artifact. If the record is
-incomplete or its projections disagree, stop authoring and preserve the last
-valid record.
+Build one handoff from the recovery record containing the accepted decisions,
+labeled evidence, subject and decision focus, scope, anti-scope, critical-review
+dispositions, and exact authority envelope. Before invoking, require exact
+authority for the tracker destination, publication, and `ready-for-agent`
+label; otherwise block as `authority-or-scope`. Invoke `/mattpocock-to-spec`
+directly; if it is not loaded, stop and ask the user to mention it. The
+specialist owns the template, tracker, and label; do not
+duplicate output or ask a new design question.
 
-## Consolidated Analysis Spec + spec
+When the specialist returns, verify that the spec reference points to the
+active unit. If it exposes a content identity or version, bind and recheck it
+against accepted decisions. Otherwise compare observable accepted contents
+with the unit and decision IDs, recording only that comparison; never invent
+an identity, hash, or stronger guarantee. Unavailable or uncomparable content
+is not ready. Record the binding or comparison in the existing recovery event.
+Replay and `+plan` repeat this check; changed or unavailable content does not
+inherit `plan_authoring_ready: true`.
 
-Local authoring is the default for the one canonical analysis Markdown
-artifact: record `delegation.mode: none`, `worker: primary-owner`, and
-`result: not_applicable`, with no delegation brief, worker result, receipt, or
-retrospective worker claim. Delegate through `/internal-subagent-contract`
-only when the caller's value gate proves that one autonomous, bounded,
-verifiable evidence package is materially more useful than a local operation.
-The primary owner remains responsible for the final synthesis.
+Pass accepted Testing Decisions and boundaries directly to
+`/mattpocock-to-spec`; do not repeat an interview. A materially new test or
+specification decision returns through existing `/grill-me` eligibility and
+reevaluation before accepting the work spec. This adds no gate.
 
-The gateway retains the artifact's subject, field structure, scope, review,
-validation, and final acceptance. When delegation is used, it independently
-verifies the worker result before acceptance. The result remains one canonical
-analysis artifact; do not create a parallel transcript or critical report.
-
-## Consolidated Analysis Spec + plan
-
-Route to `/internal-gateway-writing-plans` for plan eligibility, structure,
-review, validation, and handoff. That owner uses the same local-first route:
-`delegation.mode: none`, `worker: primary-owner`, and
-`result: not_applicable` unless the caller proves a material value gate for
-one bounded delegated evidence package. A delegated plan authoring route uses
-`internal-luna-executor` through `/internal-subagent-contract` with one
-bounded `DelegationBrief`; final synthesis remains parent-owned.
-
-The user's explicit `+ plan` selection supplies the caller-owned route choice
-for this handoff. It does not override plan eligibility, review, validation, or
-safety boundaries.
-
-The plan owner retains final acceptance and the no-Git-mutation boundary. This
-gateway does not own implementation design or plan structure and must not start
+Only after that verification record `plan_authoring_ready: true` and wait for a
+later explicit `+plan`. This action never authorizes implementation or
 execution.
 
-`internal-luna-executor` is authoring metadata only. The primary owner and
-caller retain eligibility, classification, routing, authority, lifecycle,
-independent result verification, acceptance, closeout, and the sole post-
-approval handoff to `/internal-gateway-execute-plans`.
+## `+plan`
 
-If an explicitly selected worker is unavailable, record a caller-owned
-`LifecycleRecord` and stop as blocked. A local or manual continuation requires
-explicit caller authorization; when authorized, start a new local route with
-`delegation.mode: none` and `worker: primary-owner`. Do not preserve worker
-authorship metadata or fabricate a result or receipt for the unavailable run.
-
-## Closeout
-
-Both routes preserve the domain owner's independent review and validation.
-The primary owner authors locally by default; a delegated worker may provide
-only the bounded evidence package authorized by the value gate. The caller
-remains responsible for eligibility, routing, authority, lifecycle, result
-verification, acceptance, and closeout.
+Route to `/internal-gateway-writing-plans`. It wraps
+`/addyosmani-planning-and-task-breakdown`, which owns task decomposition,
+template, checkpoints, and planning quality. Pass the verified spec binding,
+accepted decisions, evidence, target, anti-scope, repository deltas, and
+authority unchanged. The writer returns the exact retained plan path and the
+actual task target; unresolved source or task references block the handoff.
+This gateway never starts execution. Only the user invokes
+`/internal-gateway-execute-plans`.

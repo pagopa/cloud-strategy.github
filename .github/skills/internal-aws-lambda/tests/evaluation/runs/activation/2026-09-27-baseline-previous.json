@@ -1,0 +1,251 @@
+{
+ "schema": "aws-activation-pilot/v1",
+ "date": "2026-09-27",
+ "configuration": "baseline-previous",
+ "host": "VS Code GitHub Copilot Chat; isolated read-only router subagents given a description-only catalog (less rigorous than a clean-catalog run)",
+ "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+ "trials": [
+  {
+   "attempt": "baseline-previous-r1-H04",
+   "query_id": "H04",
+   "sources": [
+    "internal-aws:Q-REGION",
+    "internal-aws-lambda:Q-REGION"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "baseline-previous-r1-H05",
+   "query_id": "H05",
+   "sources": [
+    "internal-aws:Q-LAMBDA-LIMIT",
+    "internal-aws-lambda:Q-LAMBDA-LIMIT"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r1-H08",
+   "query_id": "H08",
+   "sources": [
+    "internal-aws-lambda:Q-502"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r1-H09",
+   "query_id": "H09",
+   "sources": [
+    "internal-aws-lambda:Q-DLQ"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r1-H10",
+   "query_id": "H10",
+   "sources": [
+    "internal-aws-lambda:Q-VPC"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r1-H11",
+   "query_id": "H11",
+   "sources": [
+    "internal-aws-lambda:Q-PY-REFACTOR"
+   ],
+   "expected": "internal-python-project",
+   "chosen": "internal-python-project",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "baseline-previous-r1-H12",
+   "query_id": "H12",
+   "sources": [
+    "internal-aws-lambda:Q-COST"
+   ],
+   "expected": "antigravity-aws-cost-optimizer",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r2-H04",
+   "query_id": "H04",
+   "sources": [
+    "internal-aws:Q-REGION",
+    "internal-aws-lambda:Q-REGION"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "baseline-previous-r2-H05",
+   "query_id": "H05",
+   "sources": [
+    "internal-aws:Q-LAMBDA-LIMIT",
+    "internal-aws-lambda:Q-LAMBDA-LIMIT"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r2-H08",
+   "query_id": "H08",
+   "sources": [
+    "internal-aws-lambda:Q-502"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r2-H09",
+   "query_id": "H09",
+   "sources": [
+    "internal-aws-lambda:Q-DLQ"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r2-H10",
+   "query_id": "H10",
+   "sources": [
+    "internal-aws-lambda:Q-VPC"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r2-H11",
+   "query_id": "H11",
+   "sources": [
+    "internal-aws-lambda:Q-PY-REFACTOR"
+   ],
+   "expected": "internal-python-project",
+   "chosen": "internal-python-project",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "baseline-previous-r2-H12",
+   "query_id": "H12",
+   "sources": [
+    "internal-aws-lambda:Q-COST"
+   ],
+   "expected": "antigravity-aws-cost-optimizer",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r3-H04",
+   "query_id": "H04",
+   "sources": [
+    "internal-aws:Q-REGION",
+    "internal-aws-lambda:Q-REGION"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "baseline-previous-r3-H05",
+   "query_id": "H05",
+   "sources": [
+    "internal-aws:Q-LAMBDA-LIMIT",
+    "internal-aws-lambda:Q-LAMBDA-LIMIT"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r3-H08",
+   "query_id": "H08",
+   "sources": [
+    "internal-aws-lambda:Q-502"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r3-H09",
+   "query_id": "H09",
+   "sources": [
+    "internal-aws-lambda:Q-DLQ"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r3-H10",
+   "query_id": "H10",
+   "sources": [
+    "internal-aws-lambda:Q-VPC"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  },
+  {
+   "attempt": "baseline-previous-r3-H11",
+   "query_id": "H11",
+   "sources": [
+    "internal-aws-lambda:Q-PY-REFACTOR"
+   ],
+   "expected": "internal-python-project",
+   "chosen": "internal-python-project",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "baseline-previous-r3-H12",
+   "query_id": "H12",
+   "sources": [
+    "internal-aws-lambda:Q-COST"
+   ],
+   "expected": "antigravity-aws-cost-optimizer",
+   "chosen": "internal-aws",
+   "direct_owner": false,
+   "reached_via_router": true
+  }
+ ],
+ "summary": {
+  "trials": 21,
+  "direct_owner": 6,
+  "via_router": 15
+ }
+}

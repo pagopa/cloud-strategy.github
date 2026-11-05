@@ -1,0 +1,11 @@
+{
+  "schema": "knowledge-fixture-tree/v1", "id": "FS4",
+  "description": "Operational vendor evidence, analysis, and script drift under a legacy docs/domains Area; no migration approval.",
+  "files": {
+    "AGENTS.local.md": "# Local\n\nDocument-only workspace. Relay operations belong in work/relay/.\n",
+    "docs/domains/relay/README.md": "# Relay\n\nRelay vendor assessment.\n",
+    "docs/domains/relay/sources/offer.md": "abc",
+    "docs/domains/relay/analyses/assessment.md": "# Vendor assessment\n\nCite the unchanged offer.\n",
+    "docs/domains/relay/scripts/score.py": "print(3)\n"
+  }
+}

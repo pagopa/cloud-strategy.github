@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "role": "roles/editor",
+      "members": ["group:platform-devs@example.com"]
+    },
+    {
+      "role": "roles/storage.objectViewer",
+      "members": ["allUsers"]
+    },
+    {
+      "role": "roles/run.developer",
+      "members": ["serviceAccount:deployer@example-prod.iam.gserviceaccount.com"]
+    }
+  ],
+  "etag": "BwYexample=",
+  "version": 1
+}

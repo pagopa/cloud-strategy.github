@@ -1,0 +1,7 @@
+# DDD-inspired knowledge Areas and operational home
+
+Status: accepted  
+Level: strategic  
+Area: catalog-governance
+
+The `internal-knowledge` consumer layout uses the DDD-inspired plain vocabulary Area, Topic, Glossary, Rules, Glossary Map, and Shared Terms because ambiguous project and knowledge boundaries previously allowed operational work to enter durable knowledge. An Area states its Purpose; a Topic owns language and Rules and usually, but not necessarily, aligns with one Subdomain. DDD names identify only the closest DDD concept: Domain, Bounded Context, Ubiquitous Language, Invariants, Context Map, and Shared Kernel only when joint ownership is declared. Core, Supporting, and Commodity classify Topics, not Areas. Strategic and tactical knowledge stays in `docs/`; operational work uses `work/<area>/` in document-only workspaces, with a 1:1 Area mirror, or declared existing code paths in code repositories without moving code. Work records use visible `tracker/` instead of `.scratch/`, with templates in `tracker/_templates/`; durable work-to-knowledge promotion requires `align harvest` and human review. All ADRs remain in `docs/adr/`, new ADRs name their Area, and every declared Topic has a local Glossary and root Glossary Map. This separates accepted knowledge from operational evidence at the cost of explicit placement and promotion steps. It governs the skill's consumer contract and does not supersede [ADR-0002](0002-knowledge-domain-layout.md), which records this repository's own layout; migration of that layout is outside this decision.

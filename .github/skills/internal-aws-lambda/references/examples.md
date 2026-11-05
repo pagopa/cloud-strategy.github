@@ -38,7 +38,8 @@ function json(statusCode, payload) {
 
 Node.js note:
 
-- Set `context.callbackWaitsForEmptyEventLoop = false` only when open handles are intentional and understood.
+- Set `context.callbackWaitsForEmptyEventLoop = false` only when open handles
+  are intentional and understood.
 
 ## SQS batch consumer shape
 
@@ -81,11 +82,13 @@ Use this pattern when the function runs from EventBridge or another scheduler:
 
 - Accept that schedules can arrive late, retry, or overlap.
 - Make the target time window explicit in logs and downstream calls.
-- Protect side effects with idempotent markers or a coordination lock when overlap would be harmful.
+- Protect side effects with idempotent markers or a coordination lock when
+  overlap would be harmful.
 
 ## Packaging checklist
 
 - Keep one function package focused on one responsibility.
 - Prefer modular SDK clients over broad imports.
 - Measure init duration before assuming the bottleneck is invocation logic.
-- If multiple functions share the same large dependency, consider a versioned layer only after confirming the tradeoff is worth it.
+- If multiple functions share the same large dependency, consider a versioned
+  layer only after confirming the tradeoff is worth it.

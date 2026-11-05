@@ -1,0 +1,79 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "router_block_only",
+  "gold": "tests/evaluation/grader-fixtures/gold/router_block_only.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "AGENTS.local.md": "intro\n<!-- knowledge-router:start -->\nold route\n<!-- knowledge-router:end -->\ntail\n"
+        },
+        "after": {
+          "AGENTS.local.md": "intro\n<!-- knowledge-router:start -->\nold route\n<!-- knowledge-router:end -->\ntail\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "AGENTS.local.md": "intro\n<!-- knowledge-router:start -->\nold route\n<!-- knowledge-router:end -->\ntail\n"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "outside-marker-edit",
+      "kind": "protected-change",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "AGENTS.local.md": "intro\n<!-- knowledge-router:start -->\nold route\n<!-- knowledge-router:end -->\ntail\n"
+        },
+        "after": {
+          "AGENTS.local.md": "changed intro\n<!-- knowledge-router:start -->\nnew route\n<!-- knowledge-router:end -->\ntail\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "router-outside-block"
+    },
+    {
+      "name": "central-copy-write",
+      "kind": "protected-change",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "AGENTS.local.md": "intro\n<!-- knowledge-router:start -->\nold route\n<!-- knowledge-router:end -->\ntail\n"
+        },
+        "after": {
+          "AGENTS.local.md": "intro\n<!-- knowledge-router:start -->\nnew route\n<!-- knowledge-router:end -->\ntail\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "AGENTS.local.md": "intro\n<!-- knowledge-router:start -->\nnew route\n<!-- knowledge-router:end -->\ntail\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "router-unauthorized"
+    }
+  ]
+}

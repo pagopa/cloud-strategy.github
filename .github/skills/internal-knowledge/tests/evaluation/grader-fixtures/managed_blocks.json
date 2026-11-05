@@ -1,0 +1,13 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "managed_blocks",
+  "gold": "tests/evaluation/grader-fixtures/gold/managed_blocks.json",
+  "good": [{
+    "name": "update-inside-only",
+    "run": {"profile": "author", "allowlist": ["docs/**"], "before": {"docs/agents/layout.md": "Custom\r\n<!-- knowledge:managed:start -->Old<!-- knowledge:managed:end -->\r\nKeep"}, "after": {"docs/agents/layout.md": "Custom\r\n<!-- knowledge:managed:start -->New<!-- knowledge:managed:end -->\r\nKeep"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null}
+  }],
+  "mutants": [
+    {"name": "custom-erased", "kind": "out-of-scope-write", "expected_status": "fail", "expected_code": "managed-bytes", "run": {"profile": "author", "allowlist": ["docs/**"], "before": {"docs/agents/layout.md": "Custom\n<!-- knowledge:managed:start -->Old<!-- knowledge:managed:end -->"}, "after": {"docs/agents/layout.md": "<!-- knowledge:managed:start -->New<!-- knowledge:managed:end -->"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null}},
+    {"name": "duplicate-markers", "kind": "critical-omission", "expected_status": "fail", "expected_code": "managed-bytes", "run": {"profile": "author", "allowlist": ["docs/**"], "before": {"docs/agents/layout.md": "<!-- knowledge:managed:start -->Old<!-- knowledge:managed:end -->"}, "after": {"docs/agents/layout.md": "<!-- knowledge:managed:start -->New<!-- knowledge:managed:end --><!-- knowledge:managed:start -->Again<!-- knowledge:managed:end -->"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null}}
+  ]
+}

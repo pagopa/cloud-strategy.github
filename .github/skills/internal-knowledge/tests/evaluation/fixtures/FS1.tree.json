@@ -1,0 +1,14 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "FS1",
+  "description": "Two real project areas, including one with no README, share a single vocabulary owner.",
+  "files": {
+    "README.md": "# Portfolio\n\nRead [the project index](docs/README.md).\n",
+    "docs/README.md": "# Projects\n\n- [Relay](domains/relay/README.md)\n- [Archive](domains/archive/analysis.md)\n",
+    "docs/agents/domain.md": "# Domain Docs\n\nProject areas live in docs/domains/<slug>/. The shared vocabulary owner is root GLOSSARY.md. Project areas do not automatically define technical bounded contexts.\n",
+    "docs/agents/issue-tracker.md": "# Issue Tracker\n\nSpecifications and tickets belong under .scratch/<initiative>/.\n",
+    "docs/domains/relay/README.md": "# Relay\n\nCoordinate the message relay project.\n",
+    "docs/domains/archive/analysis.md": "# Archive\n\nAccepted purpose: assess archive retention requirements.\n",
+    "docs/principles.md": "# Principles\n\n<!-- knowledge:placeholder -->\n\nNo project principles are accepted yet.\n"
+  }
+}

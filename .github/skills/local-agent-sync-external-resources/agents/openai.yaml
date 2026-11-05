@@ -1,4 +1,4 @@
 interface:
   display_name: "local-agent-sync-external-resources"
-  short_description: "Audit, plan, or apply declared external resource refreshes."
-  default_prompt: "Use $local-agent-sync-external-resources when preparing, auditing, planning, or applying declared external resource refreshes through the staged sync CLI; plan and apply automatically prepare missing pinned snapshots under tmp/.cache/external-sync-resources-snapshots."
+  short_description: "Refresh pinned repository imports, not home installations."
+  default_prompt: "Use $local-agent-sync-external-resources for declared upstream refreshes into the repository. Resolve an unclear destination before fetching or writing; recommend the home-sync owner for missing runtime links without granting mutation authority. Report final changed_paths separately from normalized_paths, after overrides. Preserve ignored untracked local Python caches and restrictive Git safety. Plan and apply prepare missing pinned snapshots only within the existing authorization boundary."

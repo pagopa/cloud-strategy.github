@@ -1,0 +1,150 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "mermaid_static",
+  "gold": "tests/evaluation/grader-fixtures/gold/mermaid_static.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "theme-directive",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\ntheme dark\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\ntheme dark\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "mermaid-static"
+    },
+    {
+      "name": "missing-accdescr",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: Flow\napi --> auth\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: Flow\napi --> auth\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "mermaid-static"
+    },
+    {
+      "name": "sixteen-nodes",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: Big\naccDescr: Too many nodes.\nn0 --> n1\nn1 --> n2\nn2 --> n3\nn3 --> n4\nn4 --> n5\nn5 --> n6\nn6 --> n7\nn7 --> n8\nn8 --> n9\nn9 --> n10\nn10 --> n11\nn11 --> n12\nn12 --> n13\nn13 --> n14\nn14 --> n15\nn15[Last]\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: Big\naccDescr: Too many nodes.\nn0 --> n1\nn1 --> n2\nn2 --> n3\nn3 --> n4\nn4 --> n5\nn5 --> n6\nn6 --> n7\nn7 --> n8\nn8 --> n9\nn9 --> n10\nn10 --> n11\nn11 --> n12\nn12 --> n13\nn13 --> n14\nn14 --> n15\nn15[Last]\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "diagram-size"
+    },
+    {
+      "name": "third-block-no-derogation",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "diagram-cap"
+    },
+    {
+      "name": "legacy-graph-alias",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\ngraph TD\naccTitle: Legacy\naccDescr: Legacy graph.\na --> b\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\ngraph TD\naccTitle: Legacy\naccDescr: Legacy graph.\na --> b\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "mermaid-static"
+    }
+  ]
+}

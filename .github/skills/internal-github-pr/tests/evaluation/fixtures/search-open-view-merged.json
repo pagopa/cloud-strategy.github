@@ -1,0 +1,7 @@
+{
+  "_fixture": "Defective input: organization search right after merge still lists the PR as open; the repository-scoped view is authoritative.",
+  "gh_search_prs_org": [
+    {"repository": {"nameWithOwner": "example-org/service-a"}, "number": 91, "state": "open"}
+  ],
+  "gh_pr_view_repo": {"number": 91, "state": "MERGED", "mergedAt": "2026-09-27T08:14:03Z"}
+}

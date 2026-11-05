@@ -1,0 +1,14 @@
+{
+  "schema": "knowledge-fixture-gold/v1", "fixture": "FS3",
+  "components": [], "edges": [], "lifecycle_states": {},
+  "protected_paths": ["README.md"], "generated_paths": [],
+  "adr_dir": null, "ledger": null, "router": null, "expected_placements": {},
+  "sections": [], "must_write": ["docs/areas/relay/README.md", "work/relay/README.md", "docs/areas/relay/delivery/GLOSSARY.md", "GLOSSARY-MAP.md", "docs/agents/layout.md", "docs/agents/vocabulary.md", "docs/agents/promotion.md", "docs/agents/issue-tracker.md", "AGENTS.local.md"],
+  "facts": [], "readme_paths": ["docs/areas/relay/README.md", "work/relay/README.md"],
+  "owner_links": [
+    {"source": "docs/areas/relay/README.md", "target": "work/relay/README.md"},
+    {"source": "work/relay/README.md", "target": "docs/areas/relay/README.md"},
+    {"source": "GLOSSARY-MAP.md", "target": "docs/areas/relay/delivery/GLOSSARY.md"}
+  ],
+  "diagram_edges": {}, "aliases": {}, "diagram_triggers": []
+}

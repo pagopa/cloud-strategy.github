@@ -1,0 +1,5 @@
+# Unquoted scalars that a YAML parser converts to booleans.
+country_codes:
+  - no
+  - se
+feature_enabled: yes

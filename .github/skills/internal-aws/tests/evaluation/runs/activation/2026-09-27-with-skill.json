@@ -1,0 +1,251 @@
+{
+ "schema": "aws-activation-pilot/v1",
+ "date": "2026-09-27",
+ "configuration": "with-skill",
+ "host": "VS Code GitHub Copilot Chat; isolated read-only router subagents given a description-only catalog (less rigorous than a clean-catalog run)",
+ "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+ "trials": [
+  {
+   "attempt": "with-skill-r1-H01",
+   "query_id": "H01",
+   "sources": [
+    "internal-aws:Q-BOUNDARY"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r1-H02",
+   "query_id": "H02",
+   "sources": [
+    "internal-aws:Q-ROLLOUT"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r1-H03",
+   "query_id": "H03",
+   "sources": [
+    "internal-aws:Q-RESTORE"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r1-H04",
+   "query_id": "H04",
+   "sources": [
+    "internal-aws:Q-REGION",
+    "internal-aws-lambda:Q-REGION"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r1-H05",
+   "query_id": "H05",
+   "sources": [
+    "internal-aws:Q-LAMBDA-LIMIT",
+    "internal-aws-lambda:Q-LAMBDA-LIMIT"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws-lambda",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r1-H06",
+   "query_id": "H06",
+   "sources": [
+    "internal-aws:Q-CFN"
+   ],
+   "expected": "antigravity-cloudformation-best-practices",
+   "chosen": "antigravity-cloudformation-best-practices",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r1-H07",
+   "query_id": "H07",
+   "sources": [
+    "internal-aws:Q-PY-LAMBDA"
+   ],
+   "expected": "internal-python",
+   "chosen": "internal-python",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r2-H01",
+   "query_id": "H01",
+   "sources": [
+    "internal-aws:Q-BOUNDARY"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r2-H02",
+   "query_id": "H02",
+   "sources": [
+    "internal-aws:Q-ROLLOUT"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r2-H03",
+   "query_id": "H03",
+   "sources": [
+    "internal-aws:Q-RESTORE"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r2-H04",
+   "query_id": "H04",
+   "sources": [
+    "internal-aws:Q-REGION",
+    "internal-aws-lambda:Q-REGION"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r2-H05",
+   "query_id": "H05",
+   "sources": [
+    "internal-aws:Q-LAMBDA-LIMIT",
+    "internal-aws-lambda:Q-LAMBDA-LIMIT"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws-lambda",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r2-H06",
+   "query_id": "H06",
+   "sources": [
+    "internal-aws:Q-CFN"
+   ],
+   "expected": "antigravity-cloudformation-best-practices",
+   "chosen": "antigravity-cloudformation-best-practices",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r2-H07",
+   "query_id": "H07",
+   "sources": [
+    "internal-aws:Q-PY-LAMBDA"
+   ],
+   "expected": "internal-python",
+   "chosen": "internal-python",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r3-H01",
+   "query_id": "H01",
+   "sources": [
+    "internal-aws:Q-BOUNDARY"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r3-H02",
+   "query_id": "H02",
+   "sources": [
+    "internal-aws:Q-ROLLOUT"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r3-H03",
+   "query_id": "H03",
+   "sources": [
+    "internal-aws:Q-RESTORE"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r3-H04",
+   "query_id": "H04",
+   "sources": [
+    "internal-aws:Q-REGION",
+    "internal-aws-lambda:Q-REGION"
+   ],
+   "expected": "internal-aws",
+   "chosen": "internal-aws",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r3-H05",
+   "query_id": "H05",
+   "sources": [
+    "internal-aws:Q-LAMBDA-LIMIT",
+    "internal-aws-lambda:Q-LAMBDA-LIMIT"
+   ],
+   "expected": "internal-aws-lambda",
+   "chosen": "internal-aws-lambda",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r3-H06",
+   "query_id": "H06",
+   "sources": [
+    "internal-aws:Q-CFN"
+   ],
+   "expected": "antigravity-cloudformation-best-practices",
+   "chosen": "antigravity-cloudformation-best-practices",
+   "direct_owner": true,
+   "reached_via_router": false
+  },
+  {
+   "attempt": "with-skill-r3-H07",
+   "query_id": "H07",
+   "sources": [
+    "internal-aws:Q-PY-LAMBDA"
+   ],
+   "expected": "internal-python",
+   "chosen": "internal-python",
+   "direct_owner": true,
+   "reached_via_router": false
+  }
+ ],
+ "summary": {
+  "trials": 21,
+  "direct_owner": 21,
+  "via_router": 0
+ }
+}

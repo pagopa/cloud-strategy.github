@@ -1,7 +1,8 @@
-name: "21 🔬 Validate PR title"
+name: "21 🔖 Validate PR title"
 
 on:
-  pull_request_target:
+  # Title-only check with no checkout of PR code; the privileged trigger is needed to post statuses on fork PRs.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types:
       - opened
       - edited

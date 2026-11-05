@@ -2,3 +2,11 @@
 rules:
   key-duplicates:
     forbid-duplicated-merge-keys: true
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
+  truthy:
+    # Keys stay unchecked so platform keys such as the workflow `on:` key are not findings.
+    check-keys: false
+    allowed-values: ["true", "false"]
+    level: error

@@ -1,0 +1,12 @@
+{
+  "diagram_triggers": [
+    {
+      "doc": "docs/service/README.md",
+      "required": true
+    },
+    {
+      "doc": "libs/tiny/README.md",
+      "required": false
+    }
+  ]
+}

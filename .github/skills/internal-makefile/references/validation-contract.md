@@ -8,13 +8,13 @@ without changing the repository:
 go install github.com/checkmake/checkmake/cmd/checkmake@v0.3.2
 ```
 
-The checker is read-only, emits at most 100 findings, and returns `0` when
-checks passed within supported scope, `1` when the tool reports findings, and
-`2` for usage, dependency, file, or internal failures. It supports
-`--self-test` for the bundled fixtures and never invokes GNU Make or recipes.
+The checker is read-only, emits at most 100 findings, and uses the exit
+codes defined in `SKILL.md`. It supports `--self-test` for the bundled
+fixtures. Execution limits are defined in
+[Validation](../SKILL.md#validation).
 
 At `checkmake` 0.3.2 the bundle uses the parser and Make-specific rule
 families exposed by the tool, including `phonydeclared`, while configuring
-`maxbodylength` to 100. The wrapper does not claim to validate `$`/`$$` intent,
-parallelism, order-only prerequisites, recipe side effects, recursive Make,
-or domain behavior; those remain human review concerns.
+`maxbodylength` to 100. The wrapper does not claim to validate `$`/`$$`
+intent, parallelism, order-only prerequisites, recipe side effects,
+recursive Make, or domain behavior; those remain human review concerns.

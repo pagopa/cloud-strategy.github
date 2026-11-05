@@ -1,0 +1,13 @@
+{
+  "_fixture": "Defective input: gh pr view 88 --json number,author,reviewDecision,statusCheckRollup,mergeStateStatus,reviews. Checks are green but a non-author approval is still required.",
+  "number": 88,
+  "author": {"login": "dlagos"},
+  "reviewDecision": "REVIEW_REQUIRED",
+  "mergeStateStatus": "BLOCKED",
+  "statusCheckRollup": [
+    {"name": "pre-commit", "status": "COMPLETED", "conclusion": "SUCCESS"},
+    {"name": "code-analysis", "status": "COMPLETED", "conclusion": "SUCCESS"},
+    {"name": "pr-title", "status": "COMPLETED", "conclusion": "SUCCESS"}
+  ],
+  "reviews": []
+}

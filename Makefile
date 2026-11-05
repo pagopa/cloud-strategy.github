@@ -1,92 +1,84 @@
-PYTHON_VERSION_FILE := .python-version
-PYTHON_VERSION := $(strip $(shell head -n 1 $(PYTHON_VERSION_FILE) 2>/dev/null))
-PYTHON_MAJOR_MINOR := $(strip $(shell printf '%s' "$(PYTHON_VERSION)" | awk -F. 'NF >= 2 { print $$1 "." $$2 }'))
-PYTHON ?= $(if $(PYTHON_MAJOR_MINOR),python$(PYTHON_MAJOR_MINOR),python3)
-SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh)
-PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests
-SCRIPTS_RUNNER := ./.github/scripts/run.sh
-SCRIPTS_VENV := .github/scripts/.venv
-RUFF := $(if $(wildcard $(SCRIPTS_VENV)/bin/ruff),$(SCRIPTS_VENV)/bin/ruff,ruff)
-CATALOG_FAST_TESTS := tests/github/scripts/lib/test_inventory.py tests/github/scripts/lib/test_repo_paths.py tests/github/scripts/test_install_graphify_hooks.py tests/github/scripts/test_run_sh_dispatch.py tests/test_repository_test_layout_contract.py
+# Maintainer entrypoints. Run `make` to list targets.
+
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c
+.DEFAULT_GOAL := help
+.DELETE_ON_ERROR:
+MAKEFLAGS += --no-builtin-rules --no-print-directory
+
+TOOLS_RUNNER := ./.github/tools/run.sh
+TOOLS_PYTHON := .github/tools/.venv/bin/python
+VALIDATE_CODE := ./validate-code.sh
+TOOLS_READY := .github/tools/.venv/.make-ready
+VALIDATE_CODE_ARGS ?=
+CATALOG_FAST_TESTS := tests/github/tools/inventory/test-inventory.py tests/github/tools/common/test-repository.py tests/github/scripts/test-graphify-hooks.py tests/github/tools/test-runner.py tests/test_repository_test_layout_contract.py
 CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.22.1
-MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
+MARKDOWNLINT_GLOBS := "**/*.md"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint skill-change-scope docs-lint all
+.PHONY: help all lint catalog-lint docs-lint test validate-code clean \
+	catalog-fast-check catalog-check catalog-audit github-catalog-validation \
+	inventory-build token-risks skill-lint skill-change-scope
 
-help:
-	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint skill-change-scope docs-lint all'
+help: ## List targets
+	@awk 'BEGIN { FS = ":.*## " } /^##@ / { printf "\n%s\n", substr($$0, 5) } /^[a-z-]+:.*## / { printf "  %-26s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-python-version-check:
-	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
-	@$(PYTHON) -c 'import pathlib, sys; required = pathlib.Path("$(PYTHON_VERSION_FILE)").read_text().strip(); expected = ".".join(required.split(".")[:2]); actual = f"{sys.version_info.major}.{sys.version_info.minor}"; raise SystemExit(0 if actual == expected else f"Expected $(PYTHON) to resolve to Python {expected} from $(PYTHON_VERSION_FILE) ({required}), got {actual}.")'
+# The tools venv is rebuilt only when its pinned inputs change.
+$(TOOLS_READY): .github/tools/requirements.txt .python-version
+	@$(TOOLS_RUNNER) build-inventory --help >/dev/null
+	@touch $@
 
-scripts-bootstrap: python-version-check
-	@$(SCRIPTS_RUNNER) build_inventory --help >/dev/null
+##@ Code
 
-lint: python-version-check docs-lint
-	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
-	@if command -v shellcheck >/dev/null 2>&1; then shellcheck -s bash $(SHELL_SCRIPTS); else printf '%s\n' 'shellcheck not installed; skipping.'; fi
-	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
-	$(RUFF) check .github/scripts tools tests
+all: lint test catalog-check ## Run lint, tests, and catalog checks
 
-catalog-lint: python-version-check
-	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
-	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
-	$(RUFF) check .github/scripts tools tests
+lint: docs-lint catalog-lint ## Run Markdown lint and static code checks
 
-catalog-fast-check: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) build_inventory --root . --check
-	@$(SCRIPTS_RUNNER) check_catalog_consistency --root .
-	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
-	@$(SCRIPTS_VENV)/bin/python -m pytest -q $(CATALOG_FAST_TESTS)
-	@if [ "$(CATALOG_FAST_INCLUDE_TOKEN_RISKS)" = "1" ]; then \
-		$(SCRIPTS_RUNNER) detect_token_risks --root .; \
-	else \
-		printf '%s\n' 'Skipping token-risks; set CATALOG_FAST_INCLUDE_TOKEN_RISKS=1 for always-on or shared-contract changes.'; \
-	fi
+catalog-lint: $(TOOLS_READY) ## Run static code checks (Bash, Python, Ruff, actionlint, entrypoints)
+	@$(VALIDATE_CODE) static --compact
 
-github-catalog-validation: python-version-check
-	@$(SCRIPTS_RUNNER) github_catalog_validation --root .
-
-test: scripts-bootstrap
-	@$(SCRIPTS_VENV)/bin/python -m pytest tests -q
-
-catalog-check: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) check_catalog_consistency --root . --include-token-risks
-
-catalog-audit: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) audit_copilot_catalog --root .
-
-inventory-build: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) build_inventory --root .
-
-token-risks: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) detect_token_risks --root .
-
-skill-lint: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
-
-skill-change-scope: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) validate_skill_change_scope --root .
-
-docs-lint:
+docs-lint: ## Run Markdown lint (skipped without npx)
 	@if command -v npx >/dev/null 2>&1; then \
-		if [ -n "$${CI:-}" ]; then \
-			npx --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) $(MARKDOWNLINT_PATTERNS); \
-		elif npm exec --offline --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) -- --version >/dev/null 2>&1; then \
-			npm exec --offline --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) -- $(MARKDOWNLINT_PATTERNS); \
-		elif command -v markdownlint-cli2 >/dev/null 2>&1 \
-			&& markdownlint-cli2 --version 2>/dev/null | grep -Fq "markdownlint-cli2 v$(MARKDOWNLINT_VERSION)"; then \
-			markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
-		else \
-			printf '%s\n' 'markdownlint-cli2 is not installed or cached; skipping markdown lint outside CI.'; \
-		fi; \
-	elif command -v markdownlint-cli2 >/dev/null 2>&1 \
-		&& markdownlint-cli2 --version 2>/dev/null | grep -Fq "markdownlint-cli2 v$(MARKDOWNLINT_VERSION)"; then \
-		markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
+		npx --yes --prefer-offline markdownlint-cli2@$(MARKDOWNLINT_VERSION) $(MARKDOWNLINT_GLOBS); \
 	else \
-		printf '%s\n' 'npx not installed; skipping markdown lint.'; \
+		echo "npx not found; skipping Markdown lint."; \
 	fi
 
-all: lint test catalog-check
+test: $(TOOLS_READY) ## Run all Python tests in parallel shards
+	@$(VALIDATE_CODE) python --compact
+
+validate-code: $(TOOLS_READY) ## Run validate-code.sh; pass options in VALIDATE_CODE_ARGS
+	@$(VALIDATE_CODE) $(VALIDATE_CODE_ARGS)
+
+clean: ## Remove local validation caches
+	@rm -rf tmp/validate-code .pytest_cache .ruff_cache
+
+##@ Catalog
+
+catalog-fast-check: $(TOOLS_READY) ## Run the quick catalog loop (CATALOG_FAST_INCLUDE_TOKEN_RISKS=1 adds token risks)
+	@$(TOOLS_RUNNER) build-inventory --root . --check
+	@$(TOOLS_RUNNER) validate-catalog --root .
+	@$(TOOLS_RUNNER) validate-internal-skills --root . --strict
+	@$(TOOLS_PYTHON) -m pytest -q $(CATALOG_FAST_TESTS)
+	@if [[ "$(CATALOG_FAST_INCLUDE_TOKEN_RISKS)" == 1 ]]; then $(TOOLS_RUNNER) detect-token-risks --root .; fi
+
+catalog-check: $(TOOLS_READY) ## Validate the catalog, including token risks
+	@$(TOOLS_RUNNER) validate-catalog --root . --include-token-risks
+
+catalog-audit: $(TOOLS_READY) ## Run the deep catalog audit
+	@$(TOOLS_RUNNER) validate-catalog --root . --deep
+
+github-catalog-validation: $(TOOLS_READY) ## Run the full catalog gate with a compact summary option
+	@$(TOOLS_RUNNER) validate-github-catalog --root .
+
+inventory-build: $(TOOLS_READY) ## Rebuild .github/INVENTORY.md
+	@$(TOOLS_RUNNER) build-inventory --root .
+
+token-risks: $(TOOLS_READY) ## Scan for token-budget risks
+	@$(TOOLS_RUNNER) detect-token-risks --root .
+
+skill-lint: $(TOOLS_READY) ## Validate internal skills (strict)
+	@$(TOOLS_RUNNER) validate-internal-skills --root . --strict
+
+skill-change-scope: $(TOOLS_READY) ## Check that protected skills are unchanged
+	@$(TOOLS_RUNNER) validate-skill-change-scope --root .
