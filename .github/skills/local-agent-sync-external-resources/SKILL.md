@@ -1,6 +1,6 @@
 ---
 name: local-agent-sync-external-resources
-description: Use when preparing, auditing, planning, or applying declared external resource refreshes through the staged, manifest-driven sync CLI.
+description: Use when refreshing declared upstream resources into the repository through the pinned sync CLI, or auditing their manifest. Home installation belongs to local-agent-sync-install-ai-resources.
 ---
 
 # Local Agent Sync External Resources
@@ -11,6 +11,21 @@ This skill owns the manifest-driven CLI that stages, validates, and applies
 declared external resource refreshes safely. The single public entrypoint is
 `scripts/sync_external_resources.py`. Bundle siblings are `references/`,
 `patches/`, `agents/openai.yaml`, and `scripts/`.
+
+## Destination Before Mode
+
+Resolve the destination before preparing sources or selecting a mutating mode.
+
+- Repository: use this workflow for declared upstream imports into the
+  repository.
+- Home: route missing runtime links or installation under `~/.agents/skills/`
+  to /local-agent-sync-install-ai-resources. A repository audit does not inspect
+  the home projection.
+- Unclear: ask whether the missing resource is in the repository or the home
+  installation before fetching or writing. An explicit skill invocation alone
+  does not answer that question.
+- Authorization: routing does not authorize network access, home mutation,
+  dirty-target replacement, or changes to the declared catalog.
 
 ## Managed Source Inventory
 
@@ -103,6 +118,9 @@ transport for a validated candidate, not a retained customization patch.
 - Cold `prepare` fetches the declared SHA into the partial-clone cache, verifies
   the commit object, and atomically exports only declared paths.
 - Warm `prepare` reports `cached` with zero added bytes.
+- Address bare caches explicitly with `--git-dir`; keep
+  `safe.bareRepository=explicit` effective. Missing objects may trigger prepare;
+  configuration, access, and command failures remain blockers.
 - `--rebuild-cache` builds beside the active cache and reports `rebuilt` only
   after verified replacement.
 - Missing snapshots trigger pinned `prepare` automatically in `plan` and
@@ -113,7 +131,7 @@ transport for a validated candidate, not a retained customization patch.
 
 - `--format tsv` emits escaped, deterministic, lexically sorted records.
 - Header: `record\tkey\tstatus\tvalue`.
-- Record types: `summary`, `source`, `metric`, `change`, `override`,
+- Record types: `summary`, `source`, `metric`, `change`, `normalization`, `override`,
   `validation`, `blocker`.
 - Metric and per-source validation rows use key `<source_id>.<name>`, status
   `ok` or `fail`, and the value in `value`.
@@ -123,7 +141,27 @@ transport for a validated candidate, not a retained customization patch.
   `<source_id>.skills_count`; an undeclared tag or date is reported as `-`.
 - `summary.source_root` names the snapshot directory.
 - `--format text` is the default; `--format json` retains backward-compatible
-  keys and adds a `source_provenance` list.
+  keys and includes `source_provenance` and `normalized_paths` lists.
+
+## Delta And Normalization
+
+Report the final repository delta separately from candidate normalization.
+
+- `changed_paths` and TSV `change` rows describe the sorted, unique
+  candidate-versus-repository paths after normalizations and override replay.
+  This corrects the former normalization-only meaning of `changed_paths`.
+- `normalized_paths` and TSV `normalization` rows describe normalization work,
+  not repository drift. Both TSV summary counts and text counts stay separate.
+- Plan: report the proposed delta without modifying targets.
+- Apply: report the delta used to build the applied patch, including additions,
+  deletions, binary changes, and permission changes.
+- Prepare and audit: return empty path lists because they do not compare a
+  complete candidate. This is not proof of upstream equality or home alignment.
+- Local caches: omit ignored, untracked Python bytecode and `__pycache__`
+  contents only when the candidate does not own those paths. Preserve them on
+  disk without reading their contents. Keep tracked, candidate-owned,
+  nonignored, and non-cache content visible to the comparison.
+- Errors: failed comparisons are blockers, never an empty successful delta.
 
 ## Safety
 
@@ -138,7 +176,7 @@ transport for a validated candidate, not a retained customization patch.
 1. Run `audit` to validate the manifest, overrides, and local dirty state.
 2. Run `plan` with `--workspace` and confirm the candidate can be built.
 3. Review the changed-path summary, provenance rows, metrics, and override
-   replay results.
+   replay results. Keep normalization counts separate from actual changes.
 4. Run `apply` to produce and apply the validated repository patch.
 
 ## Canonical Commands
@@ -176,7 +214,10 @@ separate authorization.
 ## Output
 
 Report: mode, workspace, source root when used, managed count, changed paths,
-override results, provenance rows, source metrics, validation, and blockers.
+normalized paths, override results, provenance rows, source metrics, validation,
+and blockers. Lead with the bounded summary; disclose per-path or per-source
+detail when relevant, without dropping blockers or provenance from the full
+machine-readable report.
 
 ## Anti-Scope
 

@@ -79,8 +79,11 @@ def _metadata_resources() -> ManagedResources:
 
 
 def _run_git(cwd: Path, args: list[str]) -> None:
+    prefix = ["git"]
+    if (cwd / "objects").is_dir() and (cwd / "HEAD").is_file():
+        prefix.append(f"--git-dir={cwd}")
     subprocess.run(
-        ["git", *args],
+        [*prefix, *args],
         cwd=cwd,
         check=True,
         capture_output=True,
@@ -672,6 +675,56 @@ def test_read_commit_date_returns_none_without_cache() -> None:
         source_prepare_core.read_commit_date(Path("/nonexistent-cache"), _FULL_SHA40)
         is None
     )
+
+
+def test_restrictive_bare_cache_cold_warm_and_rebuild(
+    tmp_path: Path,
+    fixture_remote: tuple[Path, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    remote, sha = fixture_remote
+    resources = _single_source_resources(remote, sha)
+    workspace = tmp_path / "workspace"
+    sources = tmp_path / "sources"
+    monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
+    monkeypatch.setenv("GIT_CONFIG_KEY_0", "safe.bareRepository")
+    monkeypatch.setenv("GIT_CONFIG_VALUE_0", "explicit")
+
+    cold = prepare_sources(resources, workspace, sources)
+    cache = workspace / "cache/repositories" / _cache_key_for_repository(str(remote))
+    assert cold[0].cache_status == "fetched"
+    assert source_prepare_core._has_pin(cache, sha)
+    assert source_prepare_core.read_commit_date(cache, sha) is not None
+    warm = prepare_sources(resources, workspace, sources)
+    assert warm[0].cache_status == "cached"
+    assert warm[0].cache_bytes_added == 0
+    rebuilt = prepare_sources(resources, workspace, sources, rebuild_cache=True)
+    assert rebuilt[0].cache_status == "rebuilt"
+    assert (sources / "test-source/skills/target-skill/SKILL.md").is_file()
+
+
+@pytest.mark.parametrize("operation", ["pin", "date"])
+def test_bare_cache_errors_are_not_missing_objects(
+    tmp_path: Path, operation: str
+) -> None:
+    from sync_external_resources_core import SyncCommandError
+
+    cache = tmp_path / "broken.git"
+    cache.mkdir()
+    (cache / "HEAD").write_text("not a valid HEAD\n", encoding="utf-8")
+    with pytest.raises(SyncCommandError):
+        if operation == "pin":
+            source_prepare_core._has_pin(cache, _FULL_SHA40)
+        else:
+            source_prepare_core.read_commit_date(cache, _FULL_SHA40)
+
+
+def test_bare_cache_missing_objects_remain_optional(tmp_path: Path) -> None:
+    cache = tmp_path / "cache.git"
+    cache.mkdir()
+    _run_git(cache, ["init", "--bare"])
+    assert not source_prepare_core._has_pin(cache, _FULL_SHA40)
+    assert source_prepare_core.read_commit_date(cache, _FULL_SHA40) is None
 
 
 def test_prepare_sources_verifies_declared_commit_date(

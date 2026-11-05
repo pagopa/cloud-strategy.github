@@ -121,27 +121,27 @@ def _init_bare_cache(cache: Path, repository: str) -> None:
     cache.mkdir(parents=True, exist_ok=True)
     _run_command(["git", "init", "--bare"], cwd=cache)
     _run_command(
-        ["git", "config", "remote.origin.url", repository],
+        ["git", f"--git-dir={cache}", "config", "remote.origin.url", repository],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "remote.origin.fetch", ""],
+        ["git", f"--git-dir={cache}", "config", "remote.origin.fetch", ""],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "remote.origin.tagOpt", "--no-tags"],
+        ["git", f"--git-dir={cache}", "config", "remote.origin.tagOpt", "--no-tags"],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "core.repositoryFormatVersion", "1"],
+        ["git", f"--git-dir={cache}", "config", "core.repositoryFormatVersion", "1"],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "extensions.partialClone", "origin"],
+        ["git", f"--git-dir={cache}", "config", "extensions.partialClone", "origin"],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "remote.origin.promisor", "true"],
+        ["git", f"--git-dir={cache}", "config", "remote.origin.promisor", "true"],
         cwd=cache,
     )
 
@@ -150,23 +150,31 @@ def _pin_ref(sha: str) -> str:
     return f"refs/cache/pins/{sha}"
 
 
-def _has_pin(cache: Path, sha: str) -> bool:
-    pin = _pin_ref(sha)
+def _read_cache_ref(cache: Path, ref: str) -> str | None:
+    command = [
+        "git", f"--git-dir={cache}", "rev-parse", "--verify", "--quiet", ref,
+    ]
     result = subprocess.run(
-        ["git", "rev-parse", "--verify", pin],
+        command,
         cwd=cache,
         capture_output=True,
         text=True,
         check=False,
     )
+    if result.returncode == 1:
+        return None
     if result.returncode != 0:
-        return False
-    return result.stdout.strip() == sha
+        raise SyncCommandError(command, result.returncode, result.stderr)
+    return result.stdout.strip()
+
+
+def _has_pin(cache: Path, sha: str) -> bool:
+    return _read_cache_ref(cache, _pin_ref(sha)) == sha
 
 
 def _verify_commit(cache: Path, sha: str) -> None:
     result = _run_command(
-        ["git", "rev-parse", "--verify", f"{sha}^{{commit}}"],
+        ["git", f"--git-dir={cache}", "rev-parse", "--verify", f"{sha}^{{commit}}"],
         cwd=cache,
     )
     resolved = result.stdout.strip()
@@ -175,7 +183,7 @@ def _verify_commit(cache: Path, sha: str) -> None:
             f"commit verification mismatch: expected {sha}, got {resolved}"
         )
     type_result = _run_command(
-        ["git", "cat-file", "-t", sha],
+        ["git", f"--git-dir={cache}", "cat-file", "-t", sha],
         cwd=cache,
     )
     obj_type = type_result.stdout.strip()
@@ -191,15 +199,12 @@ def read_commit_date(cache: Path, sha: str) -> str | None:
     """
     if not (cache / "HEAD").exists():
         return None
-    result = subprocess.run(
-        ["git", "show", "-s", "--format=%cI", sha],
-        cwd=cache,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if result.returncode != 0:
+    if _read_cache_ref(cache, f"{sha}^{{commit}}") is None:
         return None
+    result = _run_command(
+        ["git", f"--git-dir={cache}", "show", "-s", "--format=%cI", sha],
+        cwd=cache,
+    )
     return result.stdout.strip() or None
 
 
@@ -242,19 +247,21 @@ def verify_commit_dates_against_cache(
 
 def _write_pin(cache: Path, sha: str) -> None:
     _run_command(
-        ["git", "update-ref", _pin_ref(sha), sha],
+        ["git", f"--git-dir={cache}", "update-ref", _pin_ref(sha), sha],
         cwd=cache,
     )
 
 
 def _fetch_sha(cache: Path, sha: str) -> None:
     cmd = _build_fetch_command(sha)
+    cmd.insert(1, f"--git-dir={cache}")
     _run_command(cmd, cwd=cache, timeout=NETWORK_COMMAND_TIMEOUT_SECONDS)
 
 
 def _fetch_advertised_ref(cache: Path, ref: str) -> None:
     cmd = [
         "git",
+        f"--git-dir={cache}",
         "-c",
         "fetch.fsckObjects=true",
         "fetch",
@@ -323,8 +330,7 @@ def _export_paths(
 
     cmd = [
         "git",
-        "-C",
-        str(cache),
+        f"--git-dir={cache}",
         "archive",
         source.ref,
         "--",

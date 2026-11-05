@@ -14,6 +14,196 @@ from sync_external_resources_core import (
 )
 
 
+@pytest.fixture
+def delta_case(tmp_path: Path, run_git, commit_all):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    run_git(repo, ["init"])
+    run_git(repo, ["config", "user.email", "test@test.com"])
+    run_git(repo, ["config", "user.name", "Test"])
+    target = repo / ".github/skills/example"
+    target.mkdir(parents=True)
+    content = "---\nname: example\n---\nContent.\n"
+    (target / "SKILL.md").write_text(content, encoding="utf-8")
+    (repo / ".gitignore").write_text("__pycache__/\n*.pyc\n", encoding="utf-8")
+    commit_all(repo)
+    resources = ManagedResources(
+        sources=(ManagedSource(
+            source_id="test-source", repository="https://example.com/repo.git",
+            ref="a" * 40, advertised_ref=None,
+            assets=(ManagedAsset(
+                source="test-source", upstream="skills/upstream",
+                local=".github/skills/example", canonical_name="example",
+            ),),
+        ),),
+        replacements=(), watchlist=(),
+    )
+    sources = tmp_path / "sources"
+    upstream = sources / "test-source/skills/upstream"
+    upstream.mkdir(parents=True)
+    (upstream / "SKILL.md").write_text(content, encoding="utf-8")
+    _write_source_metadata_for_fixture(
+        sources, "test-source", "https://example.com/repo.git", "a" * 40,
+        "skills/upstream",
+    )
+    overrides = tmp_path / "overrides.yaml"
+    overrides.write_text("version: 1\noverrides: []\n", encoding="utf-8")
+    return repo, tmp_path / "workspace", resources, overrides, sources, upstream
+
+
+def test_plan_distinguishes_normalization_from_repository_delta(delta_case) -> None:
+    from sync_external_resources import _plan
+
+    repo, workspace, resources, overrides, sources, upstream = delta_case
+    (upstream / "SKILL.md").write_text(
+        "---\nname: upstream\n---\nContent.\n", encoding="utf-8",
+    )
+    outcome = _plan(repo, workspace, resources, overrides, sources)
+    assert outcome.changed_paths == ()
+    assert outcome.to_dict()["normalized_paths"] == [".github/skills/example/SKILL.md"]
+
+
+def test_plan_reports_override_only_delta(delta_case, monkeypatch) -> None:
+    import sync_external_resources as cli
+
+    repo, workspace, resources, overrides, sources, _ = delta_case
+
+    def replay(candidate, entries, bundle):
+        (candidate / ".github/skills/example/SKILL.md").write_text(
+            "---\nname: example\n---\nOverride.\n", encoding="utf-8",
+        )
+        return ()
+
+    monkeypatch.setattr(cli, "replay_overrides", replay)
+    outcome = cli._plan(repo, workspace, resources, overrides, sources)
+    assert outcome.changed_paths == (".github/skills/example/SKILL.md",)
+
+
+def test_plan_and_apply_report_final_delta_and_preserve_local_cache(delta_case) -> None:
+    from sync_external_resources import _apply, _plan
+
+    repo, workspace, resources, overrides, sources, upstream = delta_case
+    cache = repo / ".github/skills/example/__pycache__/local.pyc"
+    cache.parent.mkdir()
+    cache.write_bytes(b"local bytecode")
+    (upstream / "SKILL.md").write_text(
+        "---\nname: example\n---\nChanged.\n", encoding="utf-8",
+    )
+    proposed = _plan(repo, workspace, resources, overrides, sources)
+    applied = _apply(repo, workspace, resources, overrides, sources, False)
+    assert proposed.changed_paths == (".github/skills/example/SKILL.md",)
+    assert applied.changed_paths == proposed.changed_paths
+    assert applied.to_dict()["normalized_paths"] == []
+    assert cache.read_bytes() == b"local bytecode"
+    assert _plan(repo, workspace, resources, overrides, sources).changed_paths == ()
+
+
+@pytest.mark.parametrize("kind", ["tracked", "candidate", "nonignored", "noncache"])
+def test_cache_filter_preserves_source_and_noncache_delta(
+    delta_case, run_git, kind: str,
+) -> None:
+    from sync_external_resources import _plan
+
+    repo, workspace, resources, overrides, sources, upstream = delta_case
+    name = "local.pyc" if kind != "noncache" else "local.dat"
+    target = repo / ".github/skills/example" / name
+    target.write_bytes(b"old")
+    if kind == "tracked":
+        run_git(repo, ["add", "-f", str(target)])
+    elif kind == "candidate":
+        (upstream / name).write_bytes(b"new")
+    elif kind == "nonignored":
+        (repo / ".gitignore").write_text("", encoding="utf-8")
+    else:
+        (repo / ".gitignore").write_text("*.dat\n", encoding="utf-8")
+    outcome = _plan(repo, workspace, resources, overrides, sources)
+    assert f".github/skills/example/{name}" in outcome.changed_paths
+
+
+def test_delta_includes_deletions_binary_modes_and_spaces(delta_case, commit_all) -> None:
+    from sync_external_resources import _plan
+
+    repo, workspace, resources, overrides, sources, upstream = delta_case
+    target = repo / ".github/skills/example"
+    (target / "removed.txt").write_text("remove\n", encoding="utf-8")
+    (target / "run.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+    (upstream / "run.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+    (upstream / "run.sh").chmod(0o755)
+    (upstream / "binary file.bin").write_bytes(b"\x00new")
+    commit_all(repo)
+    outcome = _plan(repo, workspace, resources, overrides, sources)
+    assert outcome.changed_paths == (
+        ".github/skills/example/binary file.bin",
+        ".github/skills/example/removed.txt",
+        ".github/skills/example/run.sh",
+    )
+
+
+def test_candidate_diff_failure_is_a_blocker(delta_case, monkeypatch) -> None:
+    import sync_external_resources as cli
+    from sync_external_resources_core import SyncCommandError
+
+    repo, workspace, resources, _, _, _ = delta_case
+    candidate = workspace / "candidate"
+    candidate.mkdir(parents=True)
+    original = subprocess.run
+
+    def fail_diff(command, **kwargs):
+        if command[:2] == ["git", "diff"]:
+            return subprocess.CompletedProcess(command, 128, "", "diff failed")
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(cli.subprocess, "run", fail_diff)
+    with pytest.raises(SyncCommandError, match="diff failed"):
+        cli._build_candidate_patch(repo, candidate, resources)
+
+
+def test_apply_does_not_read_excluded_cache(delta_case, monkeypatch) -> None:
+    from sync_external_resources import _apply
+
+    repo, workspace, resources, overrides, sources, upstream = delta_case
+    cache = repo / ".github/skills/example/local.pyc"
+    cache.write_bytes(b"private local cache")
+    (upstream / "SKILL.md").write_text(
+        "---\nname: example\n---\nChanged.\n", encoding="utf-8",
+    )
+    original = Path.open
+
+    def reject_cache_read(path, *args, **kwargs):
+        if path == cache:
+            raise AssertionError("excluded cache contents must not be read")
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", reject_cache_read)
+    outcome = _apply(repo, workspace, resources, overrides, sources, False)
+    assert outcome.repository_changed
+
+
+def test_apply_accepts_mode_only_delta(delta_case, commit_all) -> None:
+    from sync_external_resources import _apply
+
+    repo, workspace, resources, overrides, sources, upstream = delta_case
+    target = repo / ".github/skills/example/run.sh"
+    target.write_text("#!/bin/sh\n", encoding="utf-8")
+    (upstream / "run.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+    (upstream / "run.sh").chmod(0o755)
+    commit_all(repo)
+    outcome = _apply(repo, workspace, resources, overrides, sources, False)
+    assert outcome.changed_paths == (".github/skills/example/run.sh",)
+    assert outcome.repository_changed
+    assert target.stat().st_mode & 0o111
+
+
+def test_identical_source_symlinks_do_not_create_delta(delta_case, commit_all) -> None:
+    from sync_external_resources import _plan
+
+    repo, workspace, resources, overrides, sources, upstream = delta_case
+    (repo / ".github/skills/example/alias.md").symlink_to("SKILL.md")
+    (upstream / "alias.md").symlink_to("SKILL.md")
+    commit_all(repo)
+    assert _plan(repo, workspace, resources, overrides, sources).changed_paths == ()
+
+
 def _write_source_metadata_for_fixture(
     sources_root: Path, source_id: str, repository: str, ref: str, upstream: str
 ) -> None:

@@ -3,6 +3,26 @@
   "skill": "local-agent-sync-external-resources",
   "requirements": [
     {
+      "id": "R-DESTINATION",
+      "text": "Select source refresh only for a repository destination; recommend the home owner for explicit home links, and clarify unspecified missing-skill destinations before fetch or mutation.",
+      "source": "SKILL.md#Destination Before Mode"
+    },
+    {
+      "id": "R-FINAL-DELTA",
+      "text": "Report actual candidate-versus-repository paths after overrides in changed_paths and normalization work separately in normalized_paths across JSON, TSV, and text; comparison errors are blockers.",
+      "source": "SKILL.md#Delta And Normalization"
+    },
+    {
+      "id": "R-LOCAL-CACHE",
+      "text": "Ignore only untracked ignored local Python cache paths absent from the candidate, preserve them without reading contents, and retain tracked, candidate-owned, nonignored, and non-cache differences.",
+      "source": "SKILL.md#Delta And Normalization"
+    },
+    {
+      "id": "R-BARE-GIT",
+      "text": "Operate on caches with explicit Git directories under safe.bareRepository=explicit; preserve cold, warm, and rebuild behavior and expose operational failures instead of treating them as missing objects.",
+      "source": "SKILL.md#Workspace And Snapshot Flow"
+    },
+    {
       "id": "R-CODEX-DEFAULT-STRIP",
       "text": "For a managed asset that declares no codex.allow_implicit_invocation, the candidate agents/openai.yaml carries no upstream allow_implicit_invocation; other policy fields are kept and an empty policy is dropped. The Matt source leaves implement, research, setup-matt-pocock-skills, to-spec, to-tickets, handoff, and domain-modeling model-invocable in Codex.",
       "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
@@ -37,6 +57,84 @@
     }
   ],
   "cases": [
+    {
+      "id": "C-DESTINATION-BEFORE-FETCH",
+      "family": "permission-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-DESTINATION", "R-PINNED-OFFLINE"],
+      "prompt": "/local-agent-sync-external-resources allinea le skill perché ne mancano alcune di Addy",
+      "initial_state": "The destination is unspecified. Repository bundles may exist while home links are missing.",
+      "expected_output": "Clarify the destination before preparing sources or writing. If the user identifies home links, recommend the home-sync owner without implying execution permission.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-DESTINATION", "text": "Explicit invocation is not treated as proof of the intended destination.", "critical": true},
+        {"id": "A-AUTHORITY", "text": "No fetch or mutation occurs before resolving destination and authorization.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim home alignment from repository presence.", "Treat a missing answer as consent."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript resolves repository versus home before dependent operations."],
+        "fail": ["The agent runs upstream preparation merely because the external skill was named."]
+      }
+    },
+    {
+      "id": "C-NORMALIZED-NOOP-REPORT",
+      "family": "public-output",
+      "kind": "deterministic",
+      "requirement_ids": ["R-FINAL-DELTA"],
+      "prompt": "Il piano ha riscritto il nome upstream ma il file locale era già corretto. Mostrami cosa cambierebbe davvero.",
+      "initial_state": "The fixture repository already contains canonical content; normalization restores that same content in the candidate.",
+      "expected_output": "changed_paths is empty and normalized_paths contains the skill path. A separate override-only or raw content change is present in changed_paths. Format producers retain the distinction and errors block.",
+      "files": ["tests/scripts/test_cli.py", "tests/scripts/test_output.py", "tests/evaluation/fixtures/defective-sync-report.json"],
+      "assertions": [
+        {"id": "A-NO-FALSE-DELTA", "text": "Normalization of an already-aligned file is not a proposed repository change.", "critical": true},
+        {"id": "A-FINAL", "text": "Native tests cover post-override differences, raw deltas, all formats, and diff failures.", "critical": true}
+      ],
+      "forbidden_actions": ["Apply a refresh based only on normalization counts.", "Hide a failed comparison behind an empty delta."],
+      "status": "generated",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/defective-sync-report.json"
+    },
+    {
+      "id": "C-PRESERVE-LOCAL-CACHES",
+      "family": "filesystem-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-LOCAL-CACHE", "R-FINAL-DELTA"],
+      "prompt": "Controlla il delta con bytecode locale presente; non leggere né cancellare le cache.",
+      "initial_state": "Synthetic repositories contain ignored untracked caches, tracked bytecode, candidate-owned bytecode, and ignored non-cache content.",
+      "expected_output": "Native tests prove only eligible local caches are omitted and preserved without reads; all other source deltas remain visible.",
+      "files": ["tests/scripts/test_cli.py"],
+      "assertions": [{"id": "A-SCOPE", "text": "Synthetic filesystem tests verify preservation, no-read behavior, and neighboring nonexcluded content.", "critical": true}],
+      "forbidden_actions": ["Inspect restricted real cache contents.", "Delete caches to make a plan clean."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Native tests report ignored-cache preservation and the nonexcluded source cases passing."],
+        "fail": ["Caches are read or removed, or source differences disappear under a broad exclusion."]
+      }
+    },
+    {
+      "id": "C-RESTRICTIVE-BARE-CACHE",
+      "family": "environment-compatibility",
+      "kind": "rubric",
+      "requirement_ids": ["R-BARE-GIT", "R-PINNED-OFFLINE"],
+      "prompt": "Verifica la cache con Git configurato per accettare soltanto repository bare indicati esplicitamente.",
+      "initial_state": "A temporary local remote supplies a pinned commit. Restrictive Git configuration applies to production cache operations.",
+      "expected_output": "Native tests cover cold, cached, rebuilt, pin/date, missing-object and command-error outcomes without relaxing safety or contacting live sources.",
+      "files": ["tests/scripts/test_source_prepare.py", "tests/scripts/test_cli.py"],
+      "assertions": [
+        {"id": "A-RESTRICTIVE", "text": "The restrictive setting remains active and cache reuse and date reads succeed.", "critical": true},
+        {"id": "A-FAILURES", "text": "Operational failures surface rather than becoming false cache misses.", "critical": true}
+      ],
+      "forbidden_actions": ["Set safe.bareRepository=all.", "Change global Git configuration.", "Use live upstream fetches as test fixtures."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Temporary-remote regressions pass with restrictive Git configuration and explicit failure-path evidence."],
+        "fail": ["The check depends on permissive configuration or disguises command errors as missing objects."]
+      }
+    },
     {
       "id": "C-RETRO-REFERENCE",
       "family": "dependency-resolution",
@@ -152,6 +250,8 @@
   ],
   "triggers": {
     "queries": [
+      {"id": "Q-MISSING-HOME", "query": "Mi mancano due link Addy sotto ~/.agents/skills, installali dal checkout.", "should_trigger": false, "split": "held-out", "competing_owner": "local-agent-sync-install-ai-resources"},
+      {"id": "Q-FINAL-DELTA", "query": "Mostra il diff effettivo degli import dopo gli override, separandolo dalle normalizzazioni.", "should_trigger": true, "split": "train"},
       {"id": "Q-01", "query": "Audit the external skill manifest and tell me which managed targets are dirty.", "should_trigger": true, "split": "train"},
       {"id": "Q-02", "query": "Plan a refresh of the mattpocock-skills source into the external workspace.", "should_trigger": true, "split": "train"},
       {"id": "Q-03", "query": "Apply the pinned obra-superpowers refresh and rebuild inventory.", "should_trigger": true, "split": "train"},

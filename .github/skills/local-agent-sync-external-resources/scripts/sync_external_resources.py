@@ -63,6 +63,7 @@ class SyncOutcome:
     validations: tuple[str, ...]
     blockers: tuple[str, ...]
     repository_changed: bool
+    normalized_paths: tuple[str, ...] = ()
     source_results: tuple[PrepareSourceResult, ...] = ()
     source_root: str | None = None
     source_provenance: tuple[SourceProvenance, ...] = ()
@@ -73,6 +74,7 @@ class SyncOutcome:
             "workspace": self.workspace,
             "managed_assets": self.managed_assets,
             "changed_paths": list(self.changed_paths),
+            "normalized_paths": list(self.normalized_paths),
             "override_results": [
                 {
                     "override_id": r.override_id,
@@ -133,6 +135,11 @@ class SyncOutcome:
         )
         records.append(
             OutputRecord(
+                "summary", "normalized_paths", "ok", str(len(self.normalized_paths))
+            )
+        )
+        records.append(
+            OutputRecord(
                 "summary",
                 "override_results",
                 "ok",
@@ -167,6 +174,8 @@ class SyncOutcome:
             records.append(
                 OutputRecord("change", path, "ok", "")
             )
+        for path in self.normalized_paths:
+            records.append(OutputRecord("normalization", path, "ok", ""))
         for result in self.override_results:
             records.append(
                 OutputRecord(
@@ -340,8 +349,36 @@ def _run_git(repo_root: Path, args: list[str]) -> subprocess.CompletedProcess[st
 
 
 def _materialize_managed_repo_snapshot(
-    repo_root: Path, resources: ManagedResources, snapshot: Path
+    repo_root: Path, resources: ManagedResources, snapshot: Path, candidate: Path
 ) -> None:
+    ignored_caches: set[str] = set()
+    if (repo_root / ".git").exists():
+        ignored = _run_git(
+            repo_root,
+            [
+                "ls-files", "--others", "--ignored", "--exclude-standard", "-z",
+                "--", *(asset.local for asset in resources.assets),
+            ],
+        ).stdout.split("\0")
+        ignored_caches = {
+            path for path in ignored
+            if "__pycache__" in Path(path).parts
+            or Path(path).suffix in {".pyc", ".pyo"}
+        }
+
+    def omit_local_caches(directory: str, names: list[str]) -> list[str]:
+        omitted = []
+        for name in names:
+            relative = (Path(directory) / name).relative_to(repo_root).as_posix()
+            source_path = candidate / relative
+            if (
+                relative in ignored_caches
+                and not source_path.exists()
+                and not source_path.is_symlink()
+            ):
+                omitted.append(name)
+        return omitted
+
     snapshot.mkdir(parents=True, exist_ok=True)
     for asset in resources.assets:
         src = repo_root / asset.local
@@ -350,9 +387,12 @@ def _materialize_managed_repo_snapshot(
             continue
         dst.parent.mkdir(parents=True, exist_ok=True)
         if src.is_dir():
-            shutil.copytree(src, dst, dirs_exist_ok=True)
+            shutil.copytree(
+                src, dst, dirs_exist_ok=True, ignore=omit_local_caches,
+            )
         else:
-            shutil.copy2(src, dst)
+            if not omit_local_caches(str(src.parent), [src.name]):
+                shutil.copy2(src, dst)
 
 
 def _build_candidate_patch(
@@ -360,22 +400,20 @@ def _build_candidate_patch(
 ) -> str:
     with tempfile.TemporaryDirectory(prefix="sync-snapshot-") as raw_snapshot:
         snapshot = Path(raw_snapshot) / "snapshot"
-        _materialize_managed_repo_snapshot(repo_root, resources, snapshot)
+        _materialize_managed_repo_snapshot(repo_root, resources, snapshot, candidate)
+        command = [
+            "git", "diff", "--no-index", "--no-renames", "--binary", "--",
+            str(snapshot), str(candidate),
+        ]
         diff_result = subprocess.run(
-            [
-                "git",
-                "diff",
-                "--no-index",
-                "--binary",
-                "--",
-                str(snapshot),
-                str(candidate),
-            ],
+            command,
             cwd=repo_root,
             check=False,
             capture_output=True,
             text=True,
         )
+        if diff_result.returncode not in (0, 1):
+            raise SyncCommandError(command, diff_result.returncode, diff_result.stderr)
     return _rewrite_patch_paths(
         diff_result.stdout, str(snapshot), str(candidate)
     )
@@ -384,63 +422,34 @@ def _build_candidate_patch(
 def _rewrite_patch_paths(
     patch_text: str, snapshot_prefix: str, candidate_prefix: str
 ) -> str:
-    prefixes = (
-        "a" + snapshot_prefix,
-        "b" + snapshot_prefix,
-        "a" + candidate_prefix,
-        "b" + candidate_prefix,
-        snapshot_prefix,
-        candidate_prefix,
-    )
-
-    def _to_relative(path: str) -> str:
-        if path == "/dev/null":
-            return path
-        value = path.strip().strip('"')
-        for prefix in prefixes:
-            if value.startswith(prefix):
-                return value[len(prefix) :].lstrip("/")
-        if value.startswith("a/") or value.startswith("b/"):
-            return value[2:].lstrip("/")
-        return value.lstrip("/")
-
-    lines = patch_text.splitlines(keepends=True)
     result: list[str] = []
-    for line in lines:
+    in_header = False
+    for line in patch_text.splitlines(keepends=True):
         if line.startswith("diff --git "):
-            parts = line.strip().split()
-            if len(parts) >= 4:
-                old_path = _to_relative(parts[2])
-                new_path = _to_relative(parts[3])
-                line = f"diff --git a/{old_path} b/{new_path}\n"
-            result.append(line)
-        elif line.startswith("--- "):
-            path = line[4:].strip()
-            relative = _to_relative(path)
-            if relative == "/dev/null":
-                result.append("--- /dev/null\n")
-            else:
-                result.append(f"--- a/{relative}\n")
-        elif line.startswith("+++ "):
-            path = line[4:].strip()
-            relative = _to_relative(path)
-            if relative == "/dev/null":
-                result.append("+++ /dev/null\n")
-            else:
-                result.append(f"+++ b/{relative}\n")
-        elif line.startswith("Binary files ") and " and " in line and " differ" in line:
-            payload = line[len("Binary files ") :].rstrip("\n")
-            left, right = payload.removesuffix(" differ").split(" and ", 1)
-            left_rel = _to_relative(left)
-            right_rel = _to_relative(right)
-            if left_rel != "/dev/null":
-                left_rel = f"a/{left_rel}"
-            if right_rel != "/dev/null":
-                right_rel = f"b/{right_rel}"
-            result.append(f"Binary files {left_rel} and {right_rel} differ\n")
-        else:
-            result.append(line)
+            in_header = True
+        elif line.startswith(("@@", "GIT binary patch")):
+            in_header = False
+        if in_header:
+            for prefix in (snapshot_prefix, candidate_prefix):
+                for side in ("a", "b"):
+                    line = line.replace(f"{side}{prefix}/", f"{side}/")
+        result.append(line)
     return "".join(result)
+
+
+def _changed_paths_from_patch(repo_root: Path, patch_text: str) -> tuple[str, ...]:
+    if not patch_text.strip():
+        return ()
+    command = ["git", "apply", "--numstat", "-z", "-"]
+    result = subprocess.run(
+        command, cwd=repo_root, input=patch_text, capture_output=True,
+        text=True, check=False,
+    )
+    if result.returncode != 0:
+        raise SyncCommandError(command, result.returncode, result.stderr)
+    return tuple(sorted({
+        row.split("\t", 2)[2] for row in result.stdout.split("\0") if row
+    }))
 
 
 def _sha256_file(path: Path) -> str:
@@ -452,23 +461,20 @@ def _sha256_file(path: Path) -> str:
 
 
 def _snapshot_managed_targets(
-    repo_root: Path, resources: ManagedResources
-) -> dict[str, str]:
-    snapshot: dict[str, str] = {}
-    for asset in resources.assets:
-        target = repo_root / asset.local
-        if target.is_file():
-            snapshot[asset.local] = _sha256_file(target)
-        elif target.is_dir():
-            for file_path in sorted(target.rglob("*")):
-                if file_path.is_file():
-                    rel = file_path.relative_to(repo_root).as_posix()
-                    snapshot[rel] = _sha256_file(file_path)
+    repo_root: Path, changed_paths: tuple[str, ...]
+) -> dict[str, tuple[int, str]]:
+    snapshot: dict[str, tuple[int, str]] = {}
+    for relative in changed_paths:
+        target = repo_root / relative
+        if target.is_symlink():
+            snapshot[relative] = (target.lstat().st_mode, str(target.readlink()))
+        elif target.is_file():
+            snapshot[relative] = (target.stat().st_mode, _sha256_file(target))
     return snapshot
 
 
 def _apply_candidate_patch(
-    repo_root: Path, patch_text: str, resources: ManagedResources
+    repo_root: Path, patch_text: str, changed_paths: tuple[str, ...]
 ) -> bool:
     if not patch_text.strip():
         return False
@@ -482,7 +488,7 @@ def _apply_candidate_patch(
     )
     if result.returncode != 0:
         raise ValueError(f"Patch check failed: {result.stderr[:500]}")
-    before = _snapshot_managed_targets(repo_root, resources)
+    before = _snapshot_managed_targets(repo_root, changed_paths)
     subprocess.run(
         ["git", "apply", "-"],
         cwd=repo_root,
@@ -491,7 +497,7 @@ def _apply_candidate_patch(
         capture_output=True,
         text=True,
     )
-    after = _snapshot_managed_targets(repo_root, resources)
+    after = _snapshot_managed_targets(repo_root, changed_paths)
     if before != after:
         return True
     raise ValueError(
@@ -638,11 +644,13 @@ def _plan(
         validate_override_patches(overrides, bundle_root)
         override_results = replay_overrides(candidate, overrides, bundle_root)
 
+    patch_text = _build_candidate_patch(repo_root, candidate, resources)
     return SyncOutcome(
         mode="plan",
         workspace=str(workspace),
         managed_assets=len(resources.assets),
-        changed_paths=tuple(changed),
+        changed_paths=_changed_paths_from_patch(repo_root, patch_text),
+        normalized_paths=tuple(sorted(set(changed))),
         override_results=override_results,
         validations=validations,
         blockers=(),
@@ -702,13 +710,15 @@ def _apply(
         override_results = replay_overrides(candidate, overrides, bundle_root)
 
     patch_text = _build_candidate_patch(repo_root, candidate, resources)
-    repository_changed = _apply_candidate_patch(repo_root, patch_text, resources)
+    changed_paths = _changed_paths_from_patch(repo_root, patch_text)
+    repository_changed = _apply_candidate_patch(repo_root, patch_text, changed_paths)
 
     return SyncOutcome(
         mode="apply",
         workspace=str(workspace),
         managed_assets=len(resources.assets),
-        changed_paths=tuple(changed),
+        changed_paths=changed_paths,
+        normalized_paths=tuple(sorted(set(changed))),
         override_results=override_results,
         validations=validations,
         blockers=(),
@@ -725,6 +735,7 @@ def _format_text(outcome: SyncOutcome) -> str:
         f"Workspace: {outcome.workspace or 'n/a'}",
         f"Managed assets: {outcome.managed_assets}",
         f"Changed paths: {len(outcome.changed_paths)}",
+        f"Normalized paths: {len(outcome.normalized_paths)}",
         f"Override results: {len(outcome.override_results)}",
         f"Validations: {', '.join(outcome.validations) or 'none'}",
         f"Repository changed: {outcome.repository_changed}",

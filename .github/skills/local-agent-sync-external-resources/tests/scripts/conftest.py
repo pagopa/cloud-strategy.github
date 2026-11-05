@@ -17,8 +17,11 @@ if SCRIPT_DIR.as_posix() not in sys.path:
 
 
 def _run_git(cwd: Path, args: list[str]) -> None:
+    prefix = ["git"]
+    if (cwd / "objects").is_dir() and (cwd / "HEAD").is_file():
+        prefix.append(f"--git-dir={cwd}")
     subprocess.run(
-        ["git", *args],
+        [*prefix, *args],
         cwd=cwd,
         check=True,
         capture_output=True,

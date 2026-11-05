@@ -55,3 +55,23 @@ def test_render_tsv_escapes_values() -> None:
     assert len(data_lines) == 1
     assert "has\\ttab" in data_lines[0]
     assert "\t" not in data_lines[0].split("\t")[3]
+
+
+def test_outcome_separates_delta_and_normalization_across_formats() -> None:
+    from sync_external_resources import SyncOutcome, _format_text
+
+    outcome = SyncOutcome(
+        mode="plan", workspace="/tmp/workspace", managed_assets=1,
+        changed_paths=("changed.txt",), normalized_paths=("normalized.txt",),
+        override_results=(), validations=(), blockers=(), repository_changed=False,
+    )
+    payload = outcome.to_dict()
+    assert payload["changed_paths"] == ["changed.txt"]
+    assert payload["normalized_paths"] == ["normalized.txt"]
+    records = outcome.to_records()
+    assert OutputRecord("change", "changed.txt", "ok", "") in records
+    assert OutputRecord("normalization", "normalized.txt", "ok", "") in records
+    assert OutputRecord("summary", "normalized_paths", "ok", "1") in records
+    text = _format_text(outcome)
+    assert "Changed paths: 1" in text
+    assert "Normalized paths: 1" in text

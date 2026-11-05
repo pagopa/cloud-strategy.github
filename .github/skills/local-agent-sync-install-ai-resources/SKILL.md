@@ -1,6 +1,6 @@
 ---
 name: local-agent-sync-install-ai-resources
-description: Use when planning, auditing, or applying repository-owned AI resources or the portable AGENTS.md baseline to local home runtimes.
+description: Use when repository skills are missing from the home installation, or when planning, auditing, or applying repository-owned AI resources and the portable AGENTS.md baseline to home runtimes.
 ---
 
 # Local Agent Sync Home AI Resources
@@ -9,6 +9,20 @@ Use this skill as the operating engine for `.github/agents/local-sync-install-ai
 The repository is the only source of truth for managed resources. Home is a
 runtime projection: a write through a managed skill link writes the repository
 bundle directly.
+
+## Destination Before Mode
+
+Distinguish installation drift from upstream catalog drift before selecting a mode.
+
+- Home: use this workflow when repository bundles exist but their home links
+  are absent or stale. A skills-only request selects only the skills target.
+- Upstream: route declared external-source refreshes into the repository to
+  /local-agent-sync-external-resources instead of installing home links.
+- Unclear: ask whether the missing resource is in the repository or the home
+  installation before fetching or writing. Naming an external-sync skill does
+  not establish the destination.
+- Authorization: inspection or a routing recommendation does not authorize
+  real-home mutation. Preserve the explicit home-change requirement below.
 
 ## Scope
 

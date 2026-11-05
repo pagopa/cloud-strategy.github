@@ -1,0 +1,13 @@
+{
+  "repository_content": "---\nname: example\n---\nContent.\n",
+  "upstream_content": "---\nname: upstream\n---\nContent.\n",
+  "canonical_name": "example",
+  "defective_report": {
+    "changed_paths": [".github/skills/example/SKILL.md"],
+    "normalized_paths": []
+  },
+  "expected_report": {
+    "changed_paths": [],
+    "normalized_paths": [".github/skills/example/SKILL.md"]
+  }
+}
