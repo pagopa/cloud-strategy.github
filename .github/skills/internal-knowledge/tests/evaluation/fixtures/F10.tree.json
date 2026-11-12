@@ -1,0 +1,9 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "F10",
+  "description": "Two evidenced semantic contexts with one glossary realized and one authorized lazy glossary.",
+  "files": {
+    "docs/domain/distribution/GLOSSARY.md": "# Distribution\n\n## Language\n\n**Release**: A version approved for distribution.\n\n_Avoid_: build\n",
+    "docs/agents/domain.md": "# Domain documentation\n\nDistribution owns approved releases. Review owns candidate evaluation.\nThe vocabulary convention uses root GLOSSARY-MAP.md and lazy context glossaries.\nNo reading links are declared until those files exist.\n"
+  }
+}

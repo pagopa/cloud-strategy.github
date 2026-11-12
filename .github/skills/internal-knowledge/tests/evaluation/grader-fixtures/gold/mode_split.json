@@ -1,0 +1,8 @@
+{
+  "sections": [
+    {
+      "marker": "## Setup",
+      "dest": "docs/setup.md"
+    }
+  ]
+}

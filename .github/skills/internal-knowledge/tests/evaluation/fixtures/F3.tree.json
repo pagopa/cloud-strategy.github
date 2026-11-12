@@ -1,0 +1,12 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "F3",
+  "description": "Managed policy repository with a central copy, attested local router, generated index and external glossary format.",
+  "files": {
+    "AGENTS.md": "Central policy copy.\nLoads AGENTS.local.md for repository-specific rules.\n",
+    "AGENTS.local.md": "# Local instructions\n\n## Change-Type Routing\n<!-- knowledge-router:start -->\nRoute repository changes by kind.\n<!-- knowledge-router:end -->\n",
+    "docs/README.md": "<!-- generated:start -->\nGenerated index.\n<!-- generated:end -->\n",
+    "docs/domain/billing/CONTEXT.md": "## Language\n\n**Settlement** means final account reconciliation.\n\n## Relationships\nBilling depends on the API.\n",
+    "docs/domain/billing/README.md": "# Billing\n\nBilling context.\n"
+  }
+}

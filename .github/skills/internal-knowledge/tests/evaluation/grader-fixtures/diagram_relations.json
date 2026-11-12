@@ -1,0 +1,78 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "diagram_relations",
+  "gold": "tests/evaluation/grader-fixtures/gold/diagram_relations.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\napi --> auth\n```\n"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "inverted-edge",
+      "kind": "false-relation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\nauth --> api\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: API flow\naccDescr: API calls move to auth.\nauth --> api\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "false-relation"
+    },
+    {
+      "name": "missing-edge",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: Empty\naccDescr: No edge.\napi[API]\n```\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/arch.md": "```mermaid\nflowchart LR\naccTitle: Empty\naccDescr: No edge.\napi[API]\n```\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "critical-omission"
+    }
+  ]
+}

@@ -23,7 +23,7 @@ This document provides detailed CI/CD workflow templates and optimization strate
 
 ```yaml
 # .github/workflows/terraform.yml
-name: terraform-terraform-skill
+name: antonbabenko-terraform-skill
 
 on:
   push:

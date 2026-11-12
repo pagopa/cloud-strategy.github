@@ -1,7 +1,7 @@
 ---
 name: antigravity-grafana-dashboards
 description: "Create and manage production-ready Grafana dashboards for comprehensive system observability."
-risk: unknown
+risk: critical
 source: community
 date_added: "2026-02-27"
 ---
@@ -61,6 +61,8 @@ Design effective Grafana dashboards for monitoring applications, infrastructure,
 
 ### API Monitoring Dashboard
 
+The following JSON uses legacy graph panels and embedded alert fields. It illustrates query intent, not a portable current provisioning artifact. Export supported panel JSON from the target Grafana version; configure alert rules separately through its supported alerting interface. Test missing/zero traffic and verify datasource UIDs before deployment.
+
 ```json
 {
   "dashboard": {
@@ -117,7 +119,7 @@ Design effective Grafana dashboards for monitoring applications, infrastructure,
 }
 ```
 
-**Reference:** See `assets/api-dashboard.json`
+**Reference:** See [inline example](#api-monitoring-dashboard)
 
 ## Panel Types
 
@@ -306,7 +308,7 @@ providers:
 - Pod count by namespace
 - Node status
 
-**Reference:** See `assets/infrastructure-dashboard.json`
+**Reference:** See [inline example](#infrastructure-dashboard)
 
 ### Database Dashboard
 
@@ -319,7 +321,7 @@ providers:
 - Replication lag
 - Slow queries
 
-**Reference:** See `assets/database-dashboard.json`
+**Reference:** See [inline example](#database-dashboard)
 
 ### Application Dashboard
 
@@ -373,9 +375,9 @@ resource "grafana_folder" "monitoring" {
 
 ## Reference Files
 
-- `assets/api-dashboard.json` - API monitoring dashboard
-- `assets/infrastructure-dashboard.json` - Infrastructure dashboard
-- `assets/database-dashboard.json` - Database monitoring dashboard
+- [inline example](#api-monitoring-dashboard) - API monitoring dashboard
+- [inline example](#infrastructure-dashboard) - Infrastructure dashboard
+- [inline example](#database-dashboard) - Database monitoring dashboard
 - `references/dashboard-design.md` - Dashboard design guide
 
 ## Related Skills

@@ -1,5 +1,5 @@
 ---
-description: Bash scripting standards for safe execution, guard clauses, and consistent runtime logs.
+description: Shell script review checks for strict mode, quoting, input handling, destructive commands, and download verification.
 applyTo: "**/*.sh"
 excludeAgent: "cloud-agent"
 ---
@@ -16,3 +16,4 @@ This file is optimized for Copilot code review and should produce only evidenced
 - Flag silent failure paths, swallowed exit codes, or ignored command results.
 - Check temporary-file and cleanup handling for leak and collision risks.
 - Report unsafe external input use in command construction.
+- Report downloaded content that runs without verification against a trusted digest or signature.

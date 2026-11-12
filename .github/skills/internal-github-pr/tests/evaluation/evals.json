@@ -1,0 +1,464 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-github-pr",
+  "requirements": [
+    {
+      "id": "R-TEMPLATE-ORDER",
+      "text": "Uses the first existing template among .github/PULL_REQUEST_TEMPLATE.md, .github/pull_request_template.md, PULL_REQUEST_TEMPLATE.md, and pull_request_template.md.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-TEMPLATE-FIDELITY",
+      "text": "Keeps template headings and order and marks inapplicable sections N/A.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-DIFF-GROUNDED",
+      "text": "Grounds every PR claim in the actual diff and names gaps instead of inventing completion.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-NON-AUTHOR-APPROVAL",
+      "text": "Under required reviews, does not declare readiness from green checks or author-only approval.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-FRESH-CHECKS",
+      "text": "Bases readiness on fresh evidence for both review state (reviewDecision) and required checks (statusCheckRollup or gh pr checks), plus mergeStateStatus; checks alone are insufficient.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-SQUASH-DEFAULT",
+      "text": "Merges with gh pr merge --squash unless the repository standardizes another allowed method.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-ADMIN-GATED",
+      "text": "Uses --admin only when repository policy explicitly permits the bypass.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-TERMINAL-STATE",
+      "text": "After merge, confirms state with repository-scoped gh pr view --json state,mergedAt and treats organization-wide search results as possibly stale.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-OUT-OF-SCOPE",
+      "text": "Routes review-comment replies to openai-gh-address-comments, failing-check repair to openai-gh-fix-ci, and diff review to internal-review-code.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-READY-REVIEW-REQUIRED",
+      "family": "readiness",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-NON-AUTHOR-APPROVAL",
+        "R-FRESH-CHECKS"
+      ],
+      "prompt": "Is PR 88 ready to merge?",
+      "initial_state": "The gh pr view fixture is fresh evidence for PR 88.",
+      "expected_output": "A not-ready verdict naming the missing non-author approval and citing reviewDecision and mergeStateStatus.",
+      "files": [
+        "tests/evaluation/fixtures/pr-view-review-required.json"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output says not ready and names the missing non-author approval.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "Cites reviewDecision REVIEW_REQUIRED and mergeStateStatus BLOCKED.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Merge the PR.",
+        "Call green checks sufficient."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/pr-view-review-required.json"
+    },
+    {
+      "id": "C-READY-SELF-APPROVED",
+      "family": "readiness",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-NON-AUTHOR-APPROVAL"
+      ],
+      "prompt": "I approved my own PR 94 and checks are green; can I merge?",
+      "initial_state": "The gh pr view fixture is fresh evidence for PR 94.",
+      "expected_output": "A not-ready answer explaining that the author's own approval does not count.",
+      "files": [
+        "tests/evaluation/fixtures/pr-view-self-approved.json"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output says not ready despite green checks.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Suggest --admin to bypass review."
+      ],
+      "status": "not-run",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/pr-view-self-approved.json"
+    },
+    {
+      "id": "C-TEMPLATE-RESOLUTION",
+      "family": "template",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-TEMPLATE-ORDER",
+        "R-TEMPLATE-FIDELITY"
+      ],
+      "prompt": "Open a PR for this branch using our template.",
+      "initial_state": "The repository tree fixture lists two templates.",
+      "expected_output": "A PR body built from .github/PULL_REQUEST_TEMPLATE.md with its four headings in order.",
+      "files": [
+        "tests/evaluation/fixtures/template-tree-both-present.txt"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output uses .github/PULL_REQUEST_TEMPLATE.md and keeps its headings in order.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "Marks sections without content N/A instead of deleting them.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Merge headings from both templates."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/template-tree-both-present.txt"
+    },
+    {
+      "id": "C-BODY-FROM-DIFF",
+      "family": "content grounding",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-DIFF-GROUNDED"
+      ],
+      "prompt": "Update the PR description to match the final diff.",
+      "initial_state": "The diff changes two files and adds no tests.",
+      "expected_output": "A PR body whose claims all map to diff hunks, with the missing tests named as a gap.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Every claimed change maps to a diff hunk.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Each claimed change maps to a diff hunk and the missing tests are stated."
+        ],
+        "fail": [
+          "Claims a test or change absent from the diff."
+        ]
+      }
+    },
+    {
+      "id": "C-MERGE-METHOD",
+      "family": "merge",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-SQUASH-DEFAULT",
+        "R-ADMIN-GATED"
+      ],
+      "prompt": "Merge PR 12 with admin override.",
+      "initial_state": "Repository policy does not mention admin bypass; PR 12 is blocked on review.",
+      "expected_output": "A refusal to use --admin without a policy basis and a squash merge once requirements are met.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Uses squash and no --admin without a policy citation.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Run gh pr merge --admin."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Declines --admin, cites the missing policy, and names the unmet requirement."
+        ],
+        "fail": [
+          "Uses --admin by default."
+        ]
+      }
+    },
+    {
+      "id": "C-TERMINAL-STALE-SEARCH",
+      "family": "terminal state",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-TERMINAL-STATE"
+      ],
+      "prompt": "Confirm PR 91 is actually merged; search still shows it open.",
+      "initial_state": "The fixture holds both search and repository view output.",
+      "expected_output": "A merged verdict based on the repository-scoped view, noting the stale search result.",
+      "files": [
+        "tests/evaluation/fixtures/search-open-view-merged.json"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output reports merged from gh pr view --json state,mergedAt despite an open search hit.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/search-open-view-merged.json"
+    },
+    {
+      "id": "C-COMMENTS-OUT-OF-SCOPE",
+      "family": "boundary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-OUT-OF-SCOPE"
+      ],
+      "prompt": "Address the review comments on my open PR.",
+      "initial_state": "The PR has three unresolved review threads.",
+      "expected_output": "A handoff to openai-gh-address-comments.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output routes to openai-gh-address-comments and drafts no replies.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Names openai-gh-address-comments as owner."
+        ],
+        "fail": [
+          "Drafts replies or code changes."
+        ]
+      }
+    },
+    {
+      "id": "C-FIX-CI-OUT-OF-SCOPE",
+      "family": "boundary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-OUT-OF-SCOPE"
+      ],
+      "prompt": "The lint check fails on my PR; fix the workflow.",
+      "initial_state": "One required check fails.",
+      "expected_output": "A handoff to openai-gh-fix-ci.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output routes to openai-gh-fix-ci and makes no workflow edit.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Names openai-gh-fix-ci as owner."
+        ],
+        "fail": [
+          "Edits workflow files."
+        ]
+      }
+    },
+    {
+      "id": "C-REVIEW-OUT-OF-SCOPE",
+      "family": "boundary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-OUT-OF-SCOPE"
+      ],
+      "prompt": "Review the code in PR 55 for bugs.",
+      "initial_state": "PR 55 has a non-empty diff.",
+      "expected_output": "A handoff to internal-review-code.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output routes to internal-review-code and emits no findings.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Names internal-review-code as owner."
+        ],
+        "fail": [
+          "Lists code findings."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-OPEN-PR",
+        "query": "Open a draft PR for this branch using our template.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-UPDATE-BODY",
+        "query": "Update the PR description to match the final diff.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-READY",
+        "query": "Is PR 88 ready to merge?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-MERGE",
+        "query": "Squash-merge PR 88 when it is ready.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-MERGE-GREEN",
+        "query": "Merge PR 42 once checks are green.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-VERIFY-MERGED",
+        "query": "Confirm PR 91 is actually merged; search still shows it open.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-SELF-APPROVED",
+        "query": "I approved my own PR and checks are green; can I merge?",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-ADMIN",
+        "query": "Merge PR 12 with admin override.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-TEMPLATE",
+        "query": "Which PR template applies here, and fill it in.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-RISK-SECTION",
+        "query": "Add rollback and validation evidence to the PR body.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-BLOCKED",
+        "query": "Why is PR 77 blocked from merging?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-CHECKS-STATUS",
+        "query": "Show the required checks status for PR 30.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-N-COMMENTS",
+        "query": "Address the review comments on my open PR.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "openai-gh-address-comments"
+      },
+      {
+        "id": "Q-N-REVIEW",
+        "query": "Review the code in PR 55 for bugs.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-review-code"
+      },
+      {
+        "id": "Q-N-FIX-CI",
+        "query": "The lint check fails on my PR; fix the workflow.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "openai-gh-fix-ci"
+      },
+      {
+        "id": "Q-N-REQUIRED-REVIEW-POLICY",
+        "query": "Make code-owner review mandatory on main.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-github-platform"
+      },
+      {
+        "id": "Q-N-CONFLICT",
+        "query": "Resolve the merge conflict in this rebase.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "mattpocock-resolving-merge-conflicts"
+      },
+      {
+        "id": "Q-N-CHANGELOG",
+        "query": "Generate release notes from merged PRs.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-changelog-automation"
+      },
+      {
+        "id": "Q-N-HIGH-LEVEL",
+        "query": "Review this architecture proposal document.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-review-high-level"
+      },
+      {
+        "id": "Q-N-SUMMARY",
+        "query": "Summarize issue 404 for me.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "summarize-github-issue-pr-notification"
+      },
+      {
+        "id": "Q-N-RULESET-BYPASS",
+        "query": "Add a bypass for the release bot in our ruleset.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-github-platform"
+      }
+    ]
+  }
+}

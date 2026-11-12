@@ -1,2 +1,0 @@
-# Direct runtime dependency for the executor bundle.
-PyYAML==6.0.3

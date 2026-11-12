@@ -1,0 +1,30 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "fixture": "F9",
+  "components": [],
+  "edges": [],
+  "lifecycle_states": {},
+  "protected_paths": [
+    "docs/adr/0001-distribution.md"
+  ],
+  "generated_paths": [],
+  "adr_dir": "docs/adr",
+  "ledger": null,
+  "router": null,
+  "expected_placements": {},
+  "sections": [],
+  "must_write": [],
+  "facts": [],
+  "readme_paths": [
+    "README.md"
+  ],
+  "owner_links": [
+    {
+      "source": "README.md",
+      "target": "CONTEXT.md"
+    }
+  ],
+  "diagram_edges": {},
+  "aliases": {},
+  "diagram_triggers": []
+}

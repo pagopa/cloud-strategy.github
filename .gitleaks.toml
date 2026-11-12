@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated, gitignored output"
+paths = ['''^(tmp|graphify-out)/''']

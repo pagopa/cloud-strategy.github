@@ -1,0 +1,12 @@
+Defective input: repository tree with two pull request templates.
+A wrong resolver picks the root file or merges both.
+
+.github/PULL_REQUEST_TEMPLATE.md
+  ## Summary
+  ## Changes
+  ## Risk and rollback
+  ## Validation
+
+pull_request_template.md
+  ## What
+  ## Why

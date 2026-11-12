@@ -1,5 +1,5 @@
 ---
-description: Best practices for Kubernetes YAML manifests including labeling conventions, security contexts, pod security, resource management, probes, and validation commands
+description: Kubernetes manifest review checks for labels, security context, resources, probes, exposure, and rollout safety.
 applyTo: "k8s/**/*.yaml,k8s/**/*.yml,manifests/**/*.yaml,manifests/**/*.yml,deploy/**/*.yaml,deploy/**/*.yml,charts/**/templates/**/*.yaml,charts/**/templates/**/*.yml"
 excludeAgent: "cloud-agent"
 ---

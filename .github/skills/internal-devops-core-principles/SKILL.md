@@ -5,19 +5,16 @@ description: Use when the task is about delivery-system strategy, release safety
 
 # Internal DevOps Core Principles
 
-## Referenced skills
-
-- None.
-
-Use this skill for end-to-end delivery-system thinking, not for one-off YAML syntax questions or provider-specific command lookup.
-
 ## When to use
 
-- The task is about delivery-system strategy, release safety, operational readiness, or incident learning across the software-delivery lifecycle.
-- The main need is DevOps tradeoff framing rather than one-off workflow syntax or provider commands.
-- A repository or platform decision must be evaluated through CALMS, DORA, rollout safety, or operational controls.
+- The task is about delivery-system strategy, release safety, operational
+  readiness, or incident learning across the software-delivery lifecycle.
+- The main need is DevOps tradeoff framing rather than one-off workflow syntax
+  or provider-specific commands.
+- A repository or platform decision must be evaluated through CALMS, DORA,
+  rollout safety, or operational controls.
 
-## Core Lens
+## Core lens
 
 Apply CALMS in this order:
 
@@ -27,41 +24,28 @@ Apply CALMS in this order:
 4. Measurement: use DORA and operational metrics.
 5. Sharing: document runbooks, incidents, and patterns.
 
-## Infinity Loop Scope
-
-- Load `references/practice-checklists.md` for the checklist matching the current lifecycle stage or control question.
-
-## Delivery Rules
+## Delivery rules
 
 - Prefer small, frequent, reversible changes.
 - Optimize for lead time and mean time to recovery, not ceremony.
 - Use automated checks as the default quality gate.
-- Keep code, infrastructure, environments, builds, tests, releases, and deployments reproducible.
+- Keep code, infrastructure, environments, builds, tests, releases, and
+  deployments reproducible.
 - Design rollouts for rollback, not just for first success.
-- Prefer progressive delivery, feature flags, or other blast-radius controls over all-at-once production changes.
-- Treat observability and incident readiness as delivery requirements, not as post-deploy chores.
-- Use approvals only when they reduce measurable risk that automation cannot already cover.
+- Prefer progressive delivery, feature flags, or other blast-radius controls
+  over all-at-once production changes.
+- Treat observability and incident readiness as delivery requirements, not as
+  post-deploy chores.
+- Use approvals only when they reduce measurable risk that automation cannot
+  already cover.
 
-## DORA Focus
+## DORA focus
 
-Always consider:
+Always consider deployment frequency, lead time for changes, change failure
+rate, and mean time to recovery. If a workflow harms one of these, call it out
+explicitly.
 
-- Deployment frequency
-- Lead time for changes
-- Change failure rate
-- Mean time to recovery
-
-If a workflow harms one of these, call it out explicitly.
-
-## Minimum Operational Controls
-
-- Load `references/practice-checklists.md` for the checklist matching the current lifecycle stage or control question.
-
-## What Good Looks Like
-
-- Load `references/practice-checklists.md` for the checklist matching the current lifecycle stage or control question.
-
-## Anti-Patterns
+## Anti-patterns
 
 - Large release trains as the default.
 - Manual copy-paste deployments.
@@ -71,11 +55,19 @@ If a workflow harms one of these, call it out explicitly.
 - Approval chains with no measurable risk reduction.
 - Treating DevOps as a team name instead of an operating model.
 
-## Output Expectations
+## Output expectations
 
 When giving guidance:
 
 - State which Infinity Loop phases plus CALMS and DORA concerns apply.
 - Name the current bottleneck with its evidence.
-- Identify missing controls in testing, release safety, deployment safety, operations, or observability when they matter, with supporting evidence.
-- Recommend the minimum process and automation changes that improve flow, with the expected improvement stated.
+- Identify missing controls in testing, release safety, deployment safety,
+  operations, or observability when they matter, with supporting evidence.
+- Recommend the minimum process and automation changes that improve flow,
+  with the expected improvement stated.
+
+## References
+
+- [`references/practice-checklists.md`](references/practice-checklists.md):
+  Infinity Loop scope, minimum operational controls, and what good looks like.
+  Load the checklist matching the current lifecycle stage or control question.

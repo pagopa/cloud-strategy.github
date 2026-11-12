@@ -1,0 +1,265 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gcp",
+  "requirements": [
+    {"id": "R-SCOPE", "text": "State organization, folder, or project scope for every recommendation.", "source": "SKILL.md: Baseline; Completion criteria"},
+    {"id": "R-BASELINE-PRIMITIVE", "text": "Reject basic roles and public principals unless a governed exception is recorded.", "source": "SKILL.md: Baseline"},
+    {"id": "R-WIF-OVER-KEYS", "text": "Prefer workload identity federation with an attribute condition over service-account keys.", "source": "SKILL.md: Baseline; references/governance.md: Workload identity"},
+    {"id": "R-CONTROL-EFFECT", "text": "State whether each control grants, constrains, or prevents access.", "source": "SKILL.md: Baseline"},
+    {"id": "R-DRY-RUN", "text": "Stage Org Policy and VPC Service Controls through dry-run where the control supports it; otherwise use a documented staged unit.", "source": "SKILL.md: Workflow step 4; references/governance.md: Org Policy, VPC Service Controls"},
+    {"id": "R-DENY-LAYER", "text": "Compose allow narrowing, IAM deny, and Principal Access Boundary with a stated reason and never present PAB as a grant.", "source": "references/governance.md: Policy composition"},
+    {"id": "R-PLACEMENT", "text": "Name the Shared VPC host and service-project relationship and billing ownership when placement is in scope.", "source": "references/structure.md: Connectivity, Billing ownership"},
+    {"id": "R-ROLLOUT-UNIT", "text": "Name the smallest rollout unit, rollback trigger, and widening condition.", "source": "SKILL.md: Workflow step 4"},
+    {"id": "R-EVIDENCE-SPLIT", "text": "Separate expected from observed evidence, include restore integrity for stateful scope, and report missing evidence.", "source": "SKILL.md: Workflow step 6; references/operations.md"},
+    {"id": "R-EXCEPTION", "text": "Record exceptions with owner, scope, compensating control, expiry, and closure condition.", "source": "SKILL.md: Workflow step 5"},
+    {"id": "R-SEQUENCE", "text": "Settle placement before governance and governance before operational proof when they depend on each other.", "source": "SKILL.md: Workflow step 2"},
+    {"id": "R-DECISION-MODE", "text": "For comparisons, evaluate two or three realistic options and recommend one under stated assumptions.", "source": "SKILL.md: Decision mode"},
+    {"id": "R-FRESHNESS", "text": "Flag constraint identifiers, dry-run support, launch stage, and availability as facts to verify.", "source": "SKILL.md: Freshness"},
+    {"id": "R-BOUNDARY", "text": "Hand off policy definition content, Terraform code, and GKE manifests to their owners while keeping the GCP side.", "source": "SKILL.md: When to use"}
+  ],
+  "cases": [
+    {
+      "id": "C-IAM-REVIEW",
+      "family": "fixture-anchored-review",
+      "kind": "rubric",
+      "requirement_ids": ["R-BASELINE-PRIMITIVE", "R-SCOPE", "R-CONTROL-EFFECT"],
+      "prompt": "Review the IAM policy in tests/evaluation/fixtures/iam-policy-primitive-allusers.json for the example-prod project and tell us what to change.",
+      "initial_state": "The fixture grants roles/editor to a group, roles/storage.objectViewer to allUsers, and a scoped role to a deployer service account.",
+      "expected_output": "Both baseline violations are named with replacements, the scoped binding is left alone, and each change states its scope and effect.",
+      "files": ["tests/evaluation/fixtures/iam-policy-primitive-allusers.json"],
+      "assertions": [
+        {"id": "A-EDITOR", "text": "The response flags roles/editor on the group and proposes predefined or custom roles instead.", "critical": true},
+        {"id": "A-ALLUSERS", "text": "The response flags the allUsers binding and proposes removal or a governed exception.", "critical": true},
+        {"id": "A-NO-INVENTED", "text": "The response does not flag the roles/run.developer binding as a baseline violation.", "critical": false}
+      ],
+      "forbidden_actions": ["Accept roles/editor because the group is internal.", "Leave the allUsers binding without an exception record."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Names the roles/editor defect with a replacement role.", "Names the allUsers defect with removal or exception.", "States project scope and the effect of each change."],
+        "fail": ["Misses either baseline defect.", "Invents a defect in the scoped deployer binding."]
+      }
+    },
+    {
+      "id": "C-WIF-CI",
+      "family": "fixture-anchored-review",
+      "kind": "rubric",
+      "requirement_ids": ["R-WIF-OVER-KEYS", "R-SCOPE"],
+      "prompt": "Our CI deploys to example-prod with the workload identity setup in tests/evaluation/fixtures/wif-provider-no-attribute-condition.tf.txt. Is the GCP trust design sound?",
+      "initial_state": "The provider maps attribute.repository but has no attribute_condition, and the binding grants the whole pool.",
+      "expected_output": "The response names both trust defects, proposes an attribute condition and a narrow principalSet, and hands HCL edits to internal-terraform.",
+      "files": ["tests/evaluation/fixtures/wif-provider-no-attribute-condition.tf.txt"],
+      "assertions": [
+        {"id": "A-CONDITION", "text": "The response flags the missing attribute_condition on the provider.", "critical": true},
+        {"id": "A-POOL-WIDE", "text": "The response flags that the binding trusts every identity in the pool and proposes a narrower principalSet.", "critical": true},
+        {"id": "A-NO-KEYS", "text": "The response does not propose service-account keys as the fix.", "critical": false}
+      ],
+      "forbidden_actions": ["Recommend a downloaded service-account key.", "Approve the design without an attribute condition."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Names the missing attribute condition.", "Names the pool-wide binding and narrows it.", "Keeps the trust design here and routes HCL changes to internal-terraform."],
+        "fail": ["Misses either trust defect.", "Suggests keys as the remedy."]
+      }
+    },
+    {
+      "id": "C-ORGPOL-ROLLOUT",
+      "family": "fixture-anchored-review",
+      "kind": "rubric",
+      "requirement_ids": ["R-DRY-RUN", "R-ROLLOUT-UNIT", "R-EXCEPTION", "R-FRESHNESS"],
+      "prompt": "Plan the rollout of the Org Policy in tests/evaluation/fixtures/org-policy-enforce-without-plan.yaml across our production folder.",
+      "initial_state": "The fixture enforces legacy iam.disableServiceAccountKeyCreation at organization scope immediately, with no exception, although one project still uses a key.",
+      "expected_output": "A staged plan starts from a small unit, uses the managed equivalent for dry-run or a staged folder rollout, records an exception for the legacy project, and names rollback and widening conditions.",
+      "files": ["tests/evaluation/fixtures/org-policy-enforce-without-plan.yaml"],
+      "assertions": [
+        {"id": "A-SCOPE-FIRST", "text": "The response rejects immediate organization-wide enforcement and starts from one folder or project set.", "critical": true},
+        {"id": "A-DRY-RUN-SUPPORT", "text": "The response does not claim dry-run for the legacy constraint; it proposes the managed equivalent or a staged unit.", "critical": true},
+        {"id": "A-EXCEPTION", "text": "The response records an exception for example-legacy-etl with owner, expiry, and closure condition.", "critical": true},
+        {"id": "A-ROLLBACK", "text": "The response names a rollback trigger and a widening condition.", "critical": false}
+      ],
+      "forbidden_actions": ["Enforce at organization scope first.", "Claim the legacy boolean constraint supports dry-run."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Stages from a small unit with rollback and widening conditions.", "Handles dry-run support correctly for the legacy constraint.", "Records the legacy-project exception with expiry."],
+        "fail": ["Keeps organization-wide immediate enforcement.", "Asserts dry-run for the legacy constraint as fact.", "Ignores the known key user."]
+      }
+    },
+    {
+      "id": "C-DENY-PAB",
+      "family": "control-composition",
+      "kind": "rubric",
+      "requirement_ids": ["R-DENY-LAYER", "R-CONTROL-EFFECT", "R-SCOPE"],
+      "prompt": "Contractors must never reach our production projects, whatever roles someone grants them later. Design the GCP controls.",
+      "initial_state": "Contractors are in a dedicated Google group; production projects sit under one folder.",
+      "expected_output": "The response composes controls: IAM deny at the production folder for the contractor group, or PAB limiting eligible resources, with allow narrowing; it states that neither grants access.",
+      "files": [],
+      "assertions": [
+        {"id": "A-DENY-OR-PAB", "text": "The response uses IAM deny at the folder or a Principal Access Boundary for the contractor principals, with a reason for the choice.", "critical": true},
+        {"id": "A-PAB-NOT-GRANT", "text": "The response does not present PAB or deny as a way to grant access.", "critical": true},
+        {"id": "A-LIMITS", "text": "The response notes that only supported permissions can be denied or blocked.", "critical": false}
+      ],
+      "forbidden_actions": ["Rely only on removing current allow bindings.", "Describe PAB as granting access."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Composes deny or PAB with allow narrowing at the right scope.", "States the effect and limits of each layer."],
+        "fail": ["Relies on allow bindings alone.", "Misstates PAB or deny semantics."]
+      }
+    },
+    {
+      "id": "C-SEQUENCE",
+      "family": "dependency-order",
+      "kind": "rubric",
+      "requirement_ids": ["R-SEQUENCE", "R-PLACEMENT", "R-EVIDENCE-SPLIT"],
+      "prompt": "Create a GCP folder for a newly regulated business unit, define its guardrails, and prove the rollout worked.",
+      "initial_state": "Placement, guardrails, and proof depend on each other; no Shared VPC decision exists yet.",
+      "expected_output": "The plan settles folder, billing, and Shared VPC placement first, then guardrails, then expected and observed evidence.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ORDER", "text": "The response orders placement before guardrails and guardrails before operational proof.", "critical": true},
+        {"id": "A-HOST", "text": "The response names the Shared VPC host and service-project relationship and billing ownership.", "critical": true},
+        {"id": "A-EVIDENCE", "text": "The response separates expected evidence from observed evidence.", "critical": false}
+      ],
+      "forbidden_actions": ["Collect rollout evidence before placement and guardrails are defined."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Gives the dependency order with the unlocking deliverable for each step.", "Names host, service projects, and billing owner."],
+        "fail": ["Starts with evidence or guardrails before placement.", "Omits billing or host ownership."]
+      }
+    },
+    {
+      "id": "C-VPCSC",
+      "family": "control-rollout",
+      "kind": "rubric",
+      "requirement_ids": ["R-DRY-RUN", "R-CONTROL-EFFECT", "R-FRESHNESS"],
+      "prompt": "Prevent data exfiltration from our analytics projects that use BigQuery and Cloud Storage.",
+      "initial_state": "Analytics projects share a folder; external partners read some exports today.",
+      "expected_output": "A VPC Service Controls perimeter starts in dry-run, partner access uses ingress or egress rules or access levels, and service support is flagged for verification.",
+      "files": [],
+      "assertions": [
+        {"id": "A-DRY-RUN", "text": "The response starts the perimeter in dry-run mode and reviews violations before enforcement.", "critical": true},
+        {"id": "A-PARTNER", "text": "The response handles partner access through ingress or egress rules or access levels.", "critical": true},
+        {"id": "A-VERIFY", "text": "The response flags service support or restricted VIP coverage as a fact to verify.", "critical": false}
+      ],
+      "forbidden_actions": ["Enforce the perimeter directly without dry-run.", "Claim IAM alone prevents exfiltration."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Uses dry-run first and plans partner flows.", "States what the perimeter does and does not protect."],
+        "fail": ["Enforces immediately.", "Ignores existing partner reads."]
+      }
+    },
+    {
+      "id": "C-SHARED-VPC",
+      "family": "placement",
+      "kind": "rubric",
+      "requirement_ids": ["R-PLACEMENT", "R-ROLLOUT-UNIT"],
+      "prompt": "Place Shared VPC host and service projects for three business units with separate budgets.",
+      "initial_state": "One network team operates connectivity; each business unit owns its spend.",
+      "expected_output": "The response names host and service projects, separates network and billing ownership, and names the first rollout unit.",
+      "files": [],
+      "assertions": [
+        {"id": "A-OWNERSHIP", "text": "The response names network ownership and billing ownership separately.", "critical": true},
+        {"id": "A-FIRST-UNIT", "text": "The response names one host project with one low-risk service-project set as the first unit.", "critical": true}
+      ],
+      "forbidden_actions": ["Merge billing and network ownership without stating it."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Explicit host and service-project placement.", "Separate billing and network ownership with a first rollout unit."],
+        "fail": ["No ownership split.", "No rollout unit."]
+      }
+    },
+    {
+      "id": "C-RECOVERY",
+      "family": "evidence",
+      "kind": "rubric",
+      "requirement_ids": ["R-EVIDENCE-SPLIT"],
+      "prompt": "Prove that our Cloud SQL platform can recover from deletion or ransomware.",
+      "initial_state": "Automated backups exist; no restore has been exercised; no vault retention is set.",
+      "expected_output": "The response separates backup posture from restore proof, requires an exercised restore with integrity check and observed recovery times, and reports the missing vault retention as a gap.",
+      "files": [],
+      "assertions": [
+        {"id": "A-RESTORE", "text": "The response requires an exercised restore with an integrity check and observed recovery time and point.", "critical": true},
+        {"id": "A-GAP", "text": "The response reports missing tamper-resistant retention as a gap rather than a pass.", "critical": true}
+      ],
+      "forbidden_actions": ["Treat backup success alone as recovery proof."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Separates expected and observed evidence.", "Names restore integrity and the retention gap."],
+        "fail": ["Accepts backup success as proof.", "Omits integrity verification."]
+      }
+    },
+    {
+      "id": "C-DECISION",
+      "family": "decision",
+      "kind": "rubric",
+      "requirement_ids": ["R-DECISION-MODE", "R-FRESHNESS"],
+      "prompt": "Should we run one central Shared VPC host project or one host project per product line? Recommend one.",
+      "initial_state": "Twelve product lines, one small network team, two regulated products.",
+      "expected_output": "A decision note compares two or three realistic options, recommends one under stated assumptions, and names the fact to verify.",
+      "files": [],
+      "assertions": [
+        {"id": "A-OPTIONS", "text": "The response compares at least two realistic options on cost, operational burden, blast radius, and reversibility.", "critical": true},
+        {"id": "A-RECOMMEND", "text": "The response recommends one option and ties it to stated assumptions.", "critical": true},
+        {"id": "A-VERIFY", "text": "The response names at least one fact that still needs verification.", "critical": false}
+      ],
+      "forbidden_actions": ["Hand the decision to another skill as owner.", "Recommend without stating assumptions."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Two or three options with concrete tradeoffs.", "One recommendation with assumptions and a verification fact."],
+        "fail": ["No recommendation.", "Strawman options only."]
+      }
+    },
+    {
+      "id": "C-BOUNDARY",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-BOUNDARY"],
+      "prompt": "Write the Terraform for a custom Org Policy constraint that blocks public Cloud SQL IPs in our analytics folder.",
+      "initial_state": "The deliverable is HCL plus custom constraint content; the GCP scope is known.",
+      "expected_output": "The response keeps scope and rollout here, routes constraint content to internal-cloud-policy, and routes the HCL to internal-terraform.",
+      "files": [],
+      "assertions": [
+        {"id": "A-TF-OWNER", "text": "The response routes the HCL deliverable to internal-terraform.", "critical": true},
+        {"id": "A-POLICY-OWNER", "text": "The response routes the constraint condition content to internal-cloud-policy.", "critical": true},
+        {"id": "A-GCP-SIDE", "text": "The response keeps folder scope and rollout staging as GCP decisions.", "critical": false}
+      ],
+      "forbidden_actions": ["Author the full Terraform module inside this skill."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Splits ownership across GCP, policy, and Terraform owners correctly."],
+        "fail": ["Writes the HCL here.", "Drops the GCP scope and rollout side."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Design the folder layout for our new GCP organization.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Should analytics projects sit inside a VPC Service Controls perimeter?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-03", "query": "Design the GCP workload identity pool and attribute condition for our CI deployer.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Plan the rollout of the legacy iam.disableServiceAccountKeyCreation constraint across folders.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Which evidence proves our GCP backups are restorable?", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Central Shared VPC or one host project per product?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-07", "query": "Set up aggregated audit log sinks for the GCP organization.", "should_trigger": true, "split": "train"},
+      {"id": "Q-08", "query": "Give on-call engineers temporary elevated access in production GCP projects.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Split billing ownership between platform and business units in GCP.", "should_trigger": true, "split": "train"},
+      {"id": "Q-10", "query": "Use Cloud Asset Inventory to detect drift after the IAM change.", "should_trigger": true, "split": "train"},
+      {"id": "Q-11", "query": "Write the YAML for a custom Org Policy constraint.", "should_trigger": false, "split": "train", "competing_owner": "internal-cloud-policy"},
+      {"id": "Q-12", "query": "Fix the Terraform state lock on our GCP project module.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-13", "query": "Write a Deployment and HPA for our GKE service.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-kubernetes"},
+      {"id": "Q-14", "query": "Design the AWS OU structure for the new landing zone.", "should_trigger": false, "split": "train", "competing_owner": "internal-aws"},
+      {"id": "Q-15", "query": "Assign Azure RBAC at the management-group level.", "should_trigger": false, "split": "train", "competing_owner": "internal-azure"},
+      {"id": "Q-16", "query": "Compare SCPs, Azure Policy, and Org Policy definitions for region restriction.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-cloud-policy"},
+      {"id": "Q-17", "query": "Configure the GitHub OIDC sub claim for deployment environments.", "should_trigger": false, "split": "train", "competing_owner": "internal-github-platform"},
+      {"id": "Q-18", "query": "Stress-test our multi-cloud migration plan before we commit.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-critical-master"},
+      {"id": "Q-19", "query": "Import existing GCP projects into Terraform state.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-terraform"},
+      {"id": "Q-20", "query": "Which org-level guardrails should a new GCP landing zone enforce first?", "should_trigger": true, "split": "train"}
+    ]
+  }
+}

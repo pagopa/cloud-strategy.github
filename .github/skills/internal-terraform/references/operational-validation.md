@@ -1,9 +1,10 @@
-# Repository-Specific Operational Validation
+# Operational Validation Overlay
 
 Use this reference only when `/internal-terraform` selects an operational,
 mixed, testing, CI, provider, state, recovery, or infrastructure-diagnosis
-branch. It supplies repository-specific gates; Anton remains primary for
-unoverridden Terraform/OpenTofu operational depth.
+branch. It supplies gates and corrections that `antonbabenko-terraform-skill`
+lacks; that skill remains authoritative for unoverridden Terraform/OpenTofu
+operational depth.
 
 ## Root Runner and CI Reachability
 
@@ -20,6 +21,25 @@ observe it. Python or another external-language check must not replace native
 resource, module, provider, plan, or assertion checks. A repository-specific
 static contract is allowed only when no native equivalent exists and its
 cross-boundary purpose is recorded.
+
+Mock and override values accept partial objects; the runner fills omitted
+attributes with random values. Set every attribute the configuration parses,
+such as resource IDs, and omit the rest. An `override_data` whose target
+instance is outside the run's scope is a silent no-op.
+
+If a plan-time filter depends on unknown values under a mock provider, the test
+may need `command = apply`, or `override_during = plan` in `mock_provider` if
+plan-time mock values fit the test. Check support in the selected Terraform
+version; neither option fixes every unknown-value error. See the
+[mock timing documentation](https://developer.hashicorp.com/terraform/language/tests/mocking).
+
+For resources inside a child module, root-test assertions must use the child's
+outputs, or select the child itself as the module under test. See the
+[test module documentation](https://developer.hashicorp.com/terraform/language/tests#modules).
+
+A negative run passes when any check on its `expect_failures` target fails.
+Prove that each negative run trips its intended check: disable the other
+checks on the same target once, or give each check its own checkable object.
 
 ## Provider and Import Guard Gates
 
@@ -38,8 +58,26 @@ existing `github_repository` before import. The guard must also fail closed
 when identity, ownership, authority, or recovery facts are missing or
 ambiguous. Stop rather than guessing or silently mutating live resources.
 
+## Plan Delta Interpretation
+
+A non-empty plan is not evidence of a defect in the repository. The default
+reading, that the configuration is wrong, is the one worth distrusting, because
+the other case is common: the configuration is right and the live objects have
+diverged from it. Only the first case is closed by a repository change. An
+allowlist, plan checker, or migration script that already tolerates the
+difference is a prior judgment that the divergence was expected, and a field
+recording provenance, a timestamp, or a generated label tends to differ across
+every managed object at once.
+
+Editing correct configuration until the delta disappears converts an expected
+divergence into a real defect. Where neither reading is supported, report the
+delta as undecided rather than choosing the cheaper one. Route the
+reconciliation mechanics to `/antonbabenko-terraform-skill` once the delta is
+classified.
+
 ## Handoff
 
-State the selected primary owner, the repository-specific gate being applied,
-the evidence context, and the narrowest validation. Anton remains the owner of
-general Terraform/OpenTofu provider procedures and operational depth.
+State the selected primary owner, the overlay gate being applied,
+the evidence context, and the narrowest validation.
+`antonbabenko-terraform-skill` remains the owner of general Terraform/OpenTofu
+provider procedures and operational depth.

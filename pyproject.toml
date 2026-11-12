@@ -2,7 +2,7 @@
 line-length = 88
 target-version = "py313"
 exclude = [
-    ".github/scripts/.venv",
+    ".github/tools/.venv",
 ]
 
 [tool.ruff.lint]
