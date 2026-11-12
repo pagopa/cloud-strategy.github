@@ -171,7 +171,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Imported Skill Provenance
 
-### addyosmani/agent-skills — ref 84ee50673804 · tag 0.6.9 · 2026-09-04 · 4 skills
+### addyosmani/agent-skills — ref 8bfcc1f9916f · tag 0.6.15 · 2026-10-30 · 4 skills
 
 - `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
 - `.github/skills/addyosmani-code-simplification/SKILL.md`
@@ -182,18 +182,18 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 - `.github/skills/anthropic-frontend-design/SKILL.md`
 
-### anthropics/skills — ref 41bbe19d1a1a · 2026-09-03 · 4 skills
+### anthropics/skills — ref ca45fc496a34 · 2026-10-28 · 4 skills
 
 - `.github/skills/anthropic-docx/SKILL.md`
 - `.github/skills/anthropic-pdf/SKILL.md`
 - `.github/skills/anthropic-pptx/SKILL.md`
 - `.github/skills/anthropic-xlsx/SKILL.md`
 
-### antonbabenko/terraform-skill — ref 0a3a4a66e990 · 2026-07-03 · 1 skills
+### antonbabenko/terraform-skill — ref 9c1e92d962a5 · 2026-10-24 · 1 skills
 
 - `.github/skills/antonbabenko-terraform-skill/SKILL.md`
 
-### atlassian/atlassian-mcp-server — ref 798f8138c976 · 2026-09-03 · 1 skills
+### atlassian/atlassian-mcp-server — ref 37e57a78b193 · 2026-10-29 · 1 skills
 
 - `.github/skills/search-company-knowledge/SKILL.md`
 
@@ -210,7 +210,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/awesome-copilot-security-review/SKILL.md`
 
-### mattpocock/skills — ref 24fe0ef7737e · tag v1.3.1 · 2026-10-04 · 25 skills
+### mattpocock/skills — ref d1478fcb140d · tag v1.3.2 · 2026-10-29 · 25 skills
 
 - `.github/skills/grill-me/SKILL.md`
 - `.github/skills/grilling/SKILL.md`
@@ -262,11 +262,11 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 - `.github/skills/openai-docs/SKILL.md`
 
-### pbakaus/impeccable — ref 9fadc41729c3 · 2026-11-02 · 1 skills
+### pbakaus/impeccable — ref c8891a9ae865 · 2026-11-05 · 1 skills
 
 - `.github/skills/pbakaus-impeccable/SKILL.md`
 
-### sickn33/antigravity-awesome-skills — ref b1aebac60a88 · tag v16.9.1 · 2026-09-06 · 7 skills
+### sickn33/antigravity-awesome-skills — ref 739c84148058 · tag v20.6.0 · 2026-11-05 · 7 skills
 
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
@@ -280,7 +280,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 - `.github/skills/vercel-web-design-guidelines/SKILL.md`
 
-### vercel-labs/skills — ref 1682051d48c3 · tag v1.5.24 · 2026-09-06 · 1 skills
+### vercel-labs/skills — ref 7a5e920bead4 · tag v1.7.6 · 2026-11-03 · 1 skills
 
 - `.github/skills/vercel-find-skills/SKILL.md`
 

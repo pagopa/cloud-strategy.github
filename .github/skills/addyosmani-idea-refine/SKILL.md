@@ -5,7 +5,17 @@ description: Refines raw ideas into sharp, actionable concepts through structure
 
 # Idea Refine
 
+## Overview
+
 Refines raw ideas into sharp, actionable concepts worth building through structured divergent and convergent thinking.
+
+## When to Use
+
+- Use when an idea is still vague and needs shaping before it can become a plan
+- Use when you need to stress-test assumptions before committing to a direction
+- Use when you want to expand options before converging on one
+- Trigger phrases: "Help me refine this idea", "Ideate on [concept]", "Stress-test my plan"
+- Not for: a user who is unsure what they want at all (use `interview-me`), or a direction already chosen that needs a spec (use `spec-driven-development`)
 
 ## How It Works
 
@@ -18,14 +28,11 @@ Refines raw ideas into sharp, actionable concepts worth building through structu
 This skill is primarily an interactive dialogue. Invoke it with an idea, and the agent will guide you through the process.
 
 ```bash
-# Optional: Initialize the ideas directory
-bash skills/idea-refine/scripts/idea-refine.sh
+# Optional. Run from the project root so this creates ./docs/ideas.
+# <skill-dir> is the directory that contains this SKILL.md
+# (for example .agents/skills/idea-refine or .cursor/skills/idea-refine).
+bash <skill-dir>/scripts/idea-refine.sh
 ```
-
-**Trigger Phrases:**
-- "Help me refine this idea"
-- "Ideate on [concept]"
-- "Stress-test my plan"
 
 ## Output
 
@@ -155,6 +162,16 @@ Direct, thoughtful, slightly provocative. You're a sharp thinking partner, not a
 
 Read `examples.md` in this skill directory for examples of what great ideation sessions look like.
 
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| I'll generate 20+ ideas to cover all bases | 5-8 well-considered variations beat 20 shallow ones. Quality over quantity. |
+| The user just needs encouragement, not critique | A yes-machine produces weak ideas. Push back with specificity and kindness. |
+| Who this is for is obvious — no need to ask | Every good idea starts with a person and their problem. Skipping it means designing for nobody. |
+| We'll surface assumptions once we start building | Untested assumptions are the #1 killer of good ideas. Surface them before committing. |
+| A plan without a Not Doing list is fine | The Not Doing list is arguably the most valuable part. Make trade-offs explicit. |
+
 ## Red Flags
 
 - Generating 20+ shallow variations instead of 5-8 considered ones
@@ -184,10 +201,10 @@ Apply this local override instead of any earlier conflicting workspace or
 output-path instructions in this skill and its bundled resources.
 
 - Keep every generated artifact under `tmp/ideas/` in the current project root,
-   including drafts, supporting notes, and final one-pagers.
+    including drafts, supporting notes, and final one-pagers.
 - Save the final one-pager to `tmp/ideas/[idea-name].md` only after user
-   confirmation. Alternative filenames and subdirectories must stay inside
-   `tmp/ideas/`.
+    confirmation. Alternative filenames and subdirectories must stay inside
+    `tmp/ideas/`.
 - Run the initialization script from the project root. Do not create idea
-   artifacts outside `tmp/ideas/`.
+    artifacts outside `tmp/ideas/`.
 <!-- local-sync:idea-refine-workspace:end -->

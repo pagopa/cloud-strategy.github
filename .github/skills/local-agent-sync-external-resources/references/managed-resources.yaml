@@ -6,20 +6,20 @@ version: 1
 # managed-sources-summary:start
 # | source | repository | ref (sha) | tag | commit_date | skills |
 # |---|---|---|---|---|---|
-# | addyosmani-agent-skills | addyosmani/agent-skills | 84ee50673804 | 0.6.9 | 2026-09-04 | 5 |
+# | addyosmani-agent-skills | addyosmani/agent-skills | 8bfcc1f9916f | 0.6.15 | 2026-10-30 | 5 |
 # | anthropic-frontend-design | anthropics/skills | ca45fc496a34 | - | 2026-10-28 | 1 |
-# | anthropic-skills | anthropics/skills | 41bbe19d1a1a | - | 2026-09-03 | 4 |
-# | antonbabenko-terraform-skill | antonbabenko/terraform-skill | 0a3a4a66e990 | - | 2026-07-03 | 1 |
-# | atlassian-mcp-server | atlassian/atlassian-mcp-server | 798f8138c976 | - | 2026-09-03 | 1 |
+# | anthropic-skills | anthropics/skills | ca45fc496a34 | - | 2026-10-28 | 4 |
+# | antonbabenko-terraform-skill | antonbabenko/terraform-skill | 9c1e92d962a5 | - | 2026-10-24 | 1 |
+# | atlassian-mcp-server | atlassian/atlassian-mcp-server | 37e57a78b193 | - | 2026-10-29 | 1 |
 # | github-awesome-copilot | github/awesome-copilot | f38fb6cf039b | - | 2026-09-07 | 10 |
-# | mattpocock-skills | mattpocock/skills | 24fe0ef7737e | v1.3.1 | 2026-10-04 | 25 |
+# | mattpocock-skills | mattpocock/skills | d1478fcb140d | v1.3.2 | 2026-10-29 | 25 |
 # | obra-superpowers | obra/superpowers | 8ca22dba9a94 | v6.4.2 | 2026-09-25 | 12 |
 # | openai-skills-curated | openai/skills | 49f948faa925 | - | 2026-06-23 | 2 |
 # | openai-skills-retained-doc | openai/skills | 49f948faa925 | - | 2026-06-23 | 1 |
-# | pbakaus-impeccable | pbakaus/impeccable | 9fadc41729c3 | - | 2026-11-02 | 1 |
-# | sickn33-antigravity | sickn33/antigravity-awesome-skills | b1aebac60a88 | v16.9.1 | 2026-09-06 | 7 |
+# | pbakaus-impeccable | pbakaus/impeccable | c8891a9ae865 | - | 2026-11-05 | 1 |
+# | sickn33-antigravity | sickn33/antigravity-awesome-skills | 739c84148058 | v20.6.0 | 2026-11-05 | 7 |
 # | vercel-labs-agent-skills | vercel-labs/agent-skills | 1a2c79d4e6c4 | - | 2026-10-27 | 1 |
-# | vercel-labs-skills | vercel-labs/skills | 1682051d48c3 | v1.5.24 | 2026-09-06 | 1 |
+# | vercel-labs-skills | vercel-labs/skills | 7a5e920bead4 | v1.7.6 | 2026-11-03 | 1 |
 # managed-sources-summary:end
 sources:
   anthropic-frontend-design:
@@ -32,8 +32,8 @@ sources:
         canonical_name: anthropic-frontend-design
   pbakaus-impeccable:
     repository: https://github.com/pbakaus/impeccable.git
-    ref: 9fadc41729c38fd47d7ae622b501558653f9d2e9
-    commit_date: 2026-11-02
+    ref: c8891a9ae865d6ee311836ae5199bfce0fe115b1
+    commit_date: 2026-11-05
     assets:
       - upstream: .agents/skills/impeccable
         local: .github/skills/pbakaus-impeccable
@@ -48,9 +48,9 @@ sources:
         canonical_name: vercel-web-design-guidelines
   addyosmani-agent-skills:
     repository: https://github.com/addyosmani/agent-skills.git
-    ref: 84ee50673804b95c287d1e4eb4f1c1dad7c5188a
-    commit_date: 2026-09-04
-    advertised_ref: 0.6.9
+    ref: 8bfcc1f9916f2eea55494d8c1fa7f4bde867dd9e
+    commit_date: 2026-10-30
+    advertised_ref: 0.6.15
     assets:
       - upstream: skills/code-simplification
         local: .github/skills/addyosmani-code-simplification
@@ -69,8 +69,8 @@ sources:
         canonical_name: addyosmani-idea-refine
   anthropic-skills:
     repository: https://github.com/anthropics/skills.git
-    ref: 41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f
-    commit_date: 2026-09-03
+    ref: ca45fc496a3436251f191354091d557da31c15b5
+    commit_date: 2026-10-28
     rewrite_skill_references: true
     ensure_python_shebangs: true
     assets:
@@ -88,16 +88,16 @@ sources:
         canonical_name: anthropic-xlsx
   antonbabenko-terraform-skill:
     repository: https://github.com/antonbabenko/terraform-skill.git
-    ref: 0a3a4a66e99001347d36a41e10260a825be3ab62
-    commit_date: 2026-07-03
+    ref: 9c1e92d962a5407c227e5566416e962a2f057240
+    commit_date: 2026-10-24
     assets:
       - upstream: skills/terraform-skill
         local: .github/skills/antonbabenko-terraform-skill
         canonical_name: antonbabenko-terraform-skill
   atlassian-mcp-server:
     repository: https://github.com/atlassian/atlassian-mcp-server.git
-    ref: 798f8138c976599aa91075f3fc0bb481c3818848
-    commit_date: 2026-09-03
+    ref: 37e57a78b1938a099d1dcffdfc5a61154068c15e
+    commit_date: 2026-10-29
     assets:
       - upstream: skills/search-company-knowledge
         local: .github/skills/search-company-knowledge
@@ -139,9 +139,9 @@ sources:
         canonical_name: awesome-copilot-security-review
   mattpocock-skills:
     repository: https://github.com/mattpocock/skills.git
-    ref: 24fe0ef7737efae15c87225755e9f6f5965e4888
-    commit_date: 2026-10-04
-    advertised_ref: v1.3.1
+    ref: d1478fcb140db0b93c0c8df17bcfd311844749d0
+    commit_date: 2026-10-29
+    advertised_ref: v1.3.2
     rewrite_skill_references: true
     backtick_skill_references:
       - code-review
@@ -344,9 +344,9 @@ sources:
         canonical_name: openai-docs
   sickn33-antigravity:
     repository: https://github.com/sickn33/antigravity-awesome-skills.git
-    ref: b1aebac60a88dffa0f5723cb3816f22cc0af6b13
-    commit_date: 2026-09-06
-    advertised_ref: v16.9.1
+    ref: 739c841480587361c3cb2047f5b34cdca69a0623
+    commit_date: 2026-11-05
+    advertised_ref: v20.6.0
     assets:
       - upstream: skills/api-design-principles
         local: .github/skills/antigravity-api-design-principles
@@ -371,9 +371,9 @@ sources:
         canonical_name: antigravity-network-engineer
   vercel-labs-skills:
     repository: https://github.com/vercel-labs/skills.git
-    ref: 1682051d48c34f5eb135e6475c1a965dce05e820
-    commit_date: 2026-09-06
-    advertised_ref: v1.5.24
+    ref: 7a5e920bead4b1039a6d6df5d7e1163b7b09423a
+    commit_date: 2026-11-03
+    advertised_ref: v1.7.6
     assets:
       - upstream: skills/find-skills
         local: .github/skills/vercel-find-skills

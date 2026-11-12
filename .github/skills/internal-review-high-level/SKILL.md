@@ -55,18 +55,25 @@ Use one adaptive method for standalone targets and changes:
 1. Establish the review frame.
 2. Select only applicable profiles and local lenses that can change the
    verdict for the declared use.
-3. Inspect the target and immediate consumers or governing surfaces.
-4. Compare declared intent with the observed artifact.
-5. For a change, apply plan-to-change mapping and scope or governance drift
+3. Build a Bounded Context Pack before judging: the contract surface the
+   target exposes, 1-hop adjacencies (immediate consumers, examples, and
+   defaults, plus test or mock reality versus runtime reality), and 5-15 line
+   verbatim evidence anchors with `path:line`. Stop expanding at one hop unless
+   a decisive question requires more. Syntax, formatting, and line-by-line code
+   correctness stay with `/internal-review-code`.
+4. Inspect the target and immediate consumers or governing surfaces.
+5. Compare declared intent with the observed artifact.
+6. For a change, apply plan-to-change mapping and scope or governance drift
    checks only when a declared baseline exists.
-6. Trace relevant triggers, actors, inputs, outputs, decisions, handoffs,
+7. Trace relevant triggers, actors, inputs, outputs, decisions, handoffs,
    completion, failure, and recovery when the declared scope includes a flow.
-7. Test the strongest contrary explanation, including whether a concern is
+8. Test the strongest contrary explanation, including whether a concern is
    unsupported or better reported as an evidence gap.
-8. Separate observations, supported inferences, material findings, and
+9. Separate observations, supported inferences, material findings, and
    unknowns. Keep the evidence outcome independent from the review verdict.
-9. Report by materiality and stop when suitability, evidence gaps, and
-   residual risk are clear.
+10. Report by materiality and stop when suitability, evidence gaps, and
+    residual risk are clear. Formulate substantive recommendations when a
+    proposal is in scope; keep the chat report concise.
 
 Use
 [`references/analysis-dimensions.md`](references/analysis-dimensions.md) for
@@ -140,6 +147,16 @@ that scope, report it as an evidence gap.
 Load [`references/report-layout.md`](references/report-layout.md) when
 composing the report; it defines the finding, evidence-gap, open, next, and
 Mermaid shapes for this order.
+
+### On-request `report.md`
+
+Keep the chat report compact. Write `.review/<YYYYMMDD>-review-<slug>/report.md`
+only when the user explicitly requested a file or a deep report. Never create
+it by default. When it is requested, follow
+[`references/extended-report-md.md`](references/extended-report-md.md) for the
+full layout, including the metadata header, framing table, Mermaid diagrams,
+conditional recommendations, findings with verbatim `path:line` snippets, and
+the evidence register.
 
 ## Completion
 

@@ -228,6 +228,32 @@
       },
       "status": "not-run",
       "held_out": true
+    },
+    {
+      "id": "C-BOUNDED-CONTEXT-REPORT",
+      "family": "non-code boundary and on-request deep report",
+      "kind": "rubric",
+      "requirement_ids": ["R-BOUNDARY", "R-METHOD", "R-COMPLETION"],
+      "prompt": "Review this proposed architecture document and write the deep report.md file I asked for.",
+      "initial_state": "English chat. The user explicitly requested a report.md file. Target is a non-code architecture document.",
+      "expected_output": "A Bounded Context Pack limits the review to the document and its one-hop anchors, with 5-15 line anchors; the report.md is written under .review/<YYYYMMDD>-review-<slug>/ only because it was requested. Any code-level question is routed to /internal-review-code.",
+      "files": [
+        "SKILL.md",
+        "references/report-layout.md",
+        "references/extended-report-md.md"
+      ],
+      "assertions": [
+        {"id": "A-BOUNDED-PACK", "text": "A Bounded Context Pack with one-hop anchors is built before the review starts.", "critical": true},
+        {"id": "A-REPORT-ON-REQUEST", "text": "report.md is written only at .review/<YYYYMMDD>-review-<slug>/report.md because the user asked for it.", "critical": true},
+        {"id": "A-CODE-ROUTING", "text": "Code-level questions are routed to /internal-review-code rather than reviewed here.", "critical": false}
+      ],
+      "forbidden_actions": ["Creating report.md when the user did not request it", "Reviewing code files as part of the non-code boundary"],
+      "rubric": {
+        "pass": ["The context pack, the on-request report.md path, and the code routing all appear as specified."],
+        "fail": ["report.md is created by default, or the review expands beyond the bounded context pack."]
+      },
+      "status": "not-run",
+      "held_out": false
     }
   ],
   "triggers": {

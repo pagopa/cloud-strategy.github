@@ -217,3 +217,65 @@ def test_scorer_ignores_report_prose_and_scores_structured_fields_only() -> None
     result = scorer.score(benchmark, run)
 
     assert result["accepted"] is True
+
+
+SKILL_ROOT = HERE.parent
+SKILL_MD = SKILL_ROOT / "SKILL.md"
+REPORT_LAYOUT = SKILL_ROOT / "references" / "report-layout.md"
+EXTENDED_REPORT = SKILL_ROOT / "references" / "extended-report-md.md"
+EVALS = EVALUATION / "evals.json"
+EXTENDED_REPORT_SECTIONS = (
+    "Metadata header",
+    "Executive summary",
+    "Framing table",
+    "End-to-end diagram",
+    "Recommendations",
+    "Before/After",
+    "Tradeoffs",
+    "Conclusion",
+    "Coverage matrix",
+    "Numbered findings",
+    "Action",
+    "Verbatim snippet",
+    "Notes and counter-validation",
+    "Evidence and checks register",
+    "Order of work",
+)
+
+
+def test_skill_defines_bounded_context_pack_within_non_code_boundary() -> None:
+    text = SKILL_MD.read_text(encoding="utf-8")
+
+    assert "Bounded Context Pack" in text
+    assert "contract surface" in text
+    assert "1-hop" in text
+    assert "5-15 line" in text or "5–15 line" in text
+    assert "/internal-review-code" in text
+
+
+def test_report_md_is_written_only_when_explicitly_requested() -> None:
+    skill = SKILL_MD.read_text(encoding="utf-8")
+    layout = REPORT_LAYOUT.read_text(encoding="utf-8")
+
+    assert ".review/<YYYYMMDD>-review-<slug>/report.md" in skill
+    assert "explicitly requested" in skill
+    assert "references/extended-report-md.md" in skill
+    assert "references/extended-report-md.md" in layout
+
+
+def test_extended_report_reference_defines_the_full_report_md_layout() -> None:
+    assert EXTENDED_REPORT.is_file()
+    text = EXTENDED_REPORT.read_text(encoding="utf-8")
+
+    for section in EXTENDED_REPORT_SECTIONS:
+        assert section in text, f"missing section: {section}"
+    assert "```mermaid" in text
+    assert "Before" in text and "After" in text
+    assert "only when" in text.lower()
+
+
+def test_eval_pack_covers_bounded_context_and_on_request_report_md() -> None:
+    text = EVALS.read_text(encoding="utf-8")
+
+    assert "Bounded Context" in text
+    assert "report.md" in text

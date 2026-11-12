@@ -123,3 +123,10 @@ fixed semantic fills or color as the only meaning carrier. If no compatible
 Mermaid renderer was used, say that the diagram is unverified in adjacent
 prose. The controlling conclusion, provenance, and evidence remain
 understandable when the diagram is not rendered.
+
+## On-request deep report
+
+Use this compact layout in chat. Write a deep report file only when the user
+explicitly requests it, and then follow
+[`references/extended-report-md.md`](extended-report-md.md) for its `report.md`
+layout.
