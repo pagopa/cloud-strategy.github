@@ -27,7 +27,8 @@ declared source.
   canonical reference rewriting. Build the canonical `grill-me` skill with its
   own frontmatter and metadata plus the `grilling` body, so the interview needs
   no second skill invocation. Publish the same normalized interview body,
-  including the scope and convergence guardrail, in `grilling`. Preserve each
+  including the scope and convergence guardrail and its chat-only round
+  delivery rule (no `ask_user` or popup question tools), in `grilling`. Preserve each
   skill's own frontmatter, metadata, and invocation policy; neither entrypoint
   delegates to the other. Expand an already-normalized legacy `grilling` alias
   from the self-contained `grill-me` body. Fail candidate creation if the

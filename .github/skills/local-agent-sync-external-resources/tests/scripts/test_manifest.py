@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 import yaml
 from sync_external_resources_core import (
+    _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_CONTRACT,
     _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END,
     _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START,
     load_managed_resources,
@@ -597,3 +598,20 @@ def test_live_grill_me_has_one_scope_convergence_block(repo_root: Path) -> None:
 
     assert content.count(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_START) == 1
     assert content.count(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_END) == 1
+
+
+def test_live_interview_skills_deliver_rounds_in_chat(repo_root: Path) -> None:
+    for skill in ("grill-me", "grilling"):
+        content = (repo_root / f".github/skills/{skill}/SKILL.md").read_text(
+            encoding="utf-8"
+        )
+
+        assert _MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_CONTRACT in content, skill
+    contract = " ".join(_MATTPOCOCK_GRILL_ME_SCOPE_CONVERGENCE_CONTRACT.split())
+    assert "Deliver every round as one plain Markdown chat message" in contract
+    assert (
+        "Do not use `ask_user`, elicitation forms, popups, or any other "
+        "interactive question tool for rounds, single questions, or the final "
+        "confirmation." in contract
+    )
+    assert "End the turn after the round" in contract

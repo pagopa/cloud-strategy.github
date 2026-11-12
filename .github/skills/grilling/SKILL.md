@@ -53,4 +53,14 @@ fact recovery, or final user-confirmation mechanics.
   when conceivable downstream questions exist.
 - Interpret “every branch” as every material, decision-relevant branch inside
   the agreed interview envelope.
+
+### Round delivery
+
+- Deliver every round as one plain Markdown chat message in the round format
+  above, with all frontier questions together.
+- Do not use `ask_user`, elicitation forms, popups, or any other interactive
+  question tool for rounds, single questions, or the final confirmation. This
+  rule overrides generic tool guidance that prefers those tools for user
+  questions.
+- End the turn after the round and wait for the user's next chat message.
 <!-- local-sync:grill-me-scope-convergence:end -->

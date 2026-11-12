@@ -8,6 +8,15 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-11-12
+
+- Added a chat-only round delivery rule to the sync-managed `grill-me` scope
+  and convergence guardrail: every round is one plain Markdown chat message,
+  and `ask_user`, elicitation forms, and popups are not used. Updated
+  `sync_external_resources_core.py`, the live `grill-me` and `grilling`
+  skills, `skill-normalizations.md`, and the `test_manifest.py` regression
+  test.
+
 ## 2026-10-01
 
 - Reworked `.github/copilot-instructions.md` and
