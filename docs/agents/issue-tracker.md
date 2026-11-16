@@ -1,24 +1,35 @@
 # Issue tracker: Local Markdown
 
 Specs (also called PRDs) live as Markdown files in the project-root `.specs/`.
-Ordinary issues live in `tmp/.issues/`. Wayfinder efforts use the self-contained
+Ordinary issues live in the project-root `.issues/`. Wayfinder efforts use the self-contained
 workspace described below. Do not create a root `tracker/` directory.
 
 ## Conventions
 
 - The spec is `.specs/<feature-slug>/spec.md`, not `docs/.specs/`
-- Implementation issues are one file per ticket at `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
+- Implementation issues are one file per ticket at `.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
 - Each ticket links to its source spec; do not duplicate the spec in the issue directory
-- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
+- Triage state is recorded as a `Status:` line near the top of each spec and issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
 ## When a skill says "publish to the issue tracker"
 
 For a spec, create `.specs/<feature-slug>/spec.md`. For an implementation
-ticket, create `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`.
+ticket, create `.issues/<feature-slug>/issues/<NN>-<slug>.md`.
 Create only the directories needed for the requested artifact.
 Preserve existing records in their current locations; these defaults do not
 authorize moving, overwriting, or deleting them.
+
+Specs and ordinary tickets are durable work records. Keep them eligible for
+version control; report conflicting ignore rules rather than claiming ignored
+files are shared. Do not stage or commit without an explicit request.
+
+## Local triage discovery
+
+Scan both `.specs/*/spec.md` and `.issues/*/issues/*.md` for triage states.
+Implementation ticket frontiers scan only the issue files. Exclude reusable
+templates from both scans. Existing legacy records stay where they are and
+must be read through their explicit references until migration is approved.
 
 ## When a skill says "fetch the relevant ticket"
 

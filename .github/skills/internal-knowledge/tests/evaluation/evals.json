@@ -3,6 +3,11 @@
   "skill": "internal-knowledge",
   "requirements": [
     {
+      "id": "R-LOCAL-WORK-HOMES",
+      "text": "New unconfigured local Markdown trackers use root .specs for durable specs and .issues for tickets, with separate templates, configured Status roles and discovery across both. Preserve custom and remote owners and existing records. Report ignore conflicts; do not promise Obsidian visibility or modify hidden-file preferences.",
+      "source": "references/complete-setup.md#Complete Workspace Setup; templates/issue-tracker.md; references/obsidian-vault.md"
+    },
+    {
       "id": "R-MODE",
       "text": "Resolve exactly one supported skill mode and report it.",
       "source": "SKILL workflow 1; DL-18"
@@ -249,6 +254,27 @@
     }
   ],
   "cases": [
+    {
+      "id": "C-SETUP-LOCAL-WORK-HOMES",
+      "family": "setup",
+      "kind": "rubric",
+      "requirement_ids": ["R-LOCAL-WORK-HOMES", "R-ALLOWLIST"],
+      "prompt": "Prepara il workspace con un tracker Markdown locale, senza creare lavoro fittizio. Voglio usare anche Obsidian e non perdere i miei percorsi se rilancio il setup.",
+      "initial_state": "FS3 declares an Area and Topic but no tracker paths. The user selects local Markdown and approves only the tracker guide and spec/issue templates, then repeats setup. Ignore-rule compatibility and Obsidian work-record visibility have not been observed; neither may be assumed.",
+      "expected_output": "After exact-path approval, the guide and templates use split durable homes, matching the Matt setup. Triage scans specs and tickets with configured Status roles; implementation frontiers exclude specs and templates. Existing destinations win. Ignore conflicts and unverified viewer access are reported without migration, live records, duplicate files, staging or commits.",
+      "files": ["tests/evaluation/fixtures/FS3.tree.json", "tests/evaluation/gold/FS3.gold.json", "references/complete-setup.md", "templates/issue-tracker.md", "references/obsidian-vault.md"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "All split-home, retention, preservation and viewer-limit anchors hold.", "critical": true},
+        {"id": "rubric-fail", "text": "No destination override or unsupported persistence/viewer claim occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Migrate existing records or override a configured tracker.", "Create live synthetic tickets or local copies of remote records.", "Stage or commit work, change viewer preferences, or create a visible duplicate tracker."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["New specs and tickets are independently routed to .specs/<feature>/spec.md and .issues/<feature>/issues/<NN>-<slug>.md; templates use _templates under their respective roots.", "The generated guide defines Status on both record types, triage discovery across both, and ticket-only implementation frontiers.", "The transcript preserves explicit custom/remote owners and existing bytes, reports ignored homes without claiming records are shared, and states Obsidian visibility is unverified."],
+        "fail": ["Both setup owners produce incompatible locations, a new default uses disposable tmp, or legacy records are moved automatically.", "An ignored record is claimed to be shared, a hidden path is claimed to be visible without evidence, or viewer preferences or duplicate tracker copies are written.", "Setup creates active work, stages or commits files, or writes before exact-path approval."]
+      }
+    },
     {
       "id": "C-SETUP-AREA-TOPIC", "family": "setup", "kind": "deterministic",
       "requirement_ids": ["R-AREA-SETUP", "R-NO-CODE", "R-ALLOWLIST"],

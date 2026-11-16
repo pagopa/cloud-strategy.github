@@ -1,6 +1,15 @@
 {
   "schema": "knowledge-eval-bindings/v1",
   "cases": {
+    "C-SETUP-LOCAL-WORK-HOMES": {
+      "fixture": "FS3",
+      "gold": "tests/evaluation/gold/FS3.gold.json",
+      "profile": "author",
+      "graders": [],
+      "runs": 2,
+      "allowlist": ["docs/agents/issue-tracker.md", ".specs/_templates/spec.md", ".issues/_templates/issue.md"],
+      "gold_overrides": {"expected_mode": "setup", "must_write": ["docs/agents/issue-tracker.md", ".specs/_templates/spec.md", ".issues/_templates/issue.md"]}
+    },
     "C-SETUP-AREA-TOPIC": {
       "fixture": "FS3", "gold": "tests/evaluation/gold/FS3.gold.json",
       "profile": "author",
@@ -66,7 +75,7 @@
       "profile": "author",
       "graders": [],
       "runs": 1,
-      "allowlist": ["README.md", "GLOSSARY.md", "docs/README.md", "AGENTS.local.md", "docs/agents/layout.md", "docs/agents/vocabulary.md", "docs/agents/promotion.md", "docs/agents/issue-tracker.md", "tracker/_templates/spec.md", "tracker/_templates/issue.md", "docs/areas/mock/README.md", "work/mock/README.md", "tracker/_templates/examples/spec.md", "tracker/_templates/examples/issue.md"],
+      "allowlist": ["README.md", "GLOSSARY.md", "docs/README.md", "AGENTS.local.md", "docs/agents/layout.md", "docs/agents/vocabulary.md", "docs/agents/promotion.md", "docs/agents/issue-tracker.md", ".specs/_templates/spec.md", ".issues/_templates/issue.md", "docs/areas/mock/README.md", "work/mock/README.md", ".specs/_templates/examples/spec.md", ".issues/_templates/examples/issue.md"],
       "gold_overrides": {"expected_mode": "setup"}
     },
     "C-SETUP-REAL": {
@@ -75,7 +84,7 @@
       "profile": "author",
       "graders": [],
       "runs": 1,
-      "allowlist": ["GLOSSARY.md", "docs/README.md", "AGENTS.local.md", "docs/agents/layout.md", "docs/agents/vocabulary.md", "docs/agents/promotion.md", "docs/agents/issue-tracker.md", "tracker/_templates/spec.md", "tracker/_templates/issue.md"],
+      "allowlist": ["GLOSSARY.md", "docs/README.md", "AGENTS.local.md", "docs/agents/layout.md", "docs/agents/vocabulary.md", "docs/agents/promotion.md", "docs/agents/issue-tracker.md", ".specs/_templates/spec.md", ".issues/_templates/issue.md"],
       "gold_overrides": {"expected_mode": "setup"}
     },
     "C-SETUP-REPEAT": {

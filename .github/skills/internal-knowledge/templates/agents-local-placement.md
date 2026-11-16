@@ -6,7 +6,7 @@
 | --- | --- |
 | Knowledge | `docs/areas/<area>/`, all ADRs in `docs/adr/` |
 | Operations | {{operational_home_declaration}} |
-| Work records / templates | `tracker/<feature-slug>/` / `tracker/_templates/` |
+| Local work records / templates | `.specs/` and `.issues/`, each with `_templates/`; declared tracker overrides win |
 | Transient | `tmp/`; never durable evidence |
 
 {{layout_guide_link}} · {{vocabulary_guide_link}}

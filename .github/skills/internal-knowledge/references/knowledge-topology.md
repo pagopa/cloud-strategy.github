@@ -124,8 +124,10 @@ work/<area>/                       # document-only operational home
   sources/                         # append-only external inputs
   research/
   <deliverables>
-tracker/<feature-slug>/             # operational work records
-tracker/_templates/                # reusable spec and issue templates
+.specs/<feature-slug>/spec.md       # durable local specifications
+.specs/_templates/                 # reusable specification templates
+.issues/<feature-slug>/issues/     # durable local implementation tickets
+.issues/_templates/                # reusable issue templates
 tmp/                               # disposable, never durable evidence
 ```
 
@@ -133,6 +135,9 @@ tmp/                               # disposable, never durable evidence
 vendor offers, research, sources, or execution records. Managed guides and
 optional views are navigation support, not accepted knowledge. Existing
 evidence-backed knowledge owners such as `docs/project.md` remain valid.
+The local record paths are defaults, not migrations: retain declared custom
+paths and remote tracker workflows. Local specs and tickets must remain
+eligible for version control; report conflicting ignore rules.
 
 In document-only workspaces, the operational root defaults to `work/` and may
 be overridden in `AGENTS.local.md`. Mirror each `docs/areas/<area>/` with exactly

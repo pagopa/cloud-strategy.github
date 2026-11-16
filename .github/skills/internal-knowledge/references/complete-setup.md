@@ -53,7 +53,8 @@ Identify real Areas and their Topics from intent and evidence, not folder counts
   declare existing code paths under `Operational home:`; nothing is moved.
   `AGENTS.local.md` may override the operational root name.
 - Zero real Areas: propose a synthetic Area README only with approval and a
-  small linked example specification and issue under `tracker/_templates/examples/`.
+  small linked examples under `.specs/_templates/examples/spec.md` and
+  `.issues/_templates/examples/issue.md`.
   Mark every
   example `Status: example` and state that it is synthetic. Keep the example
   self-contained; do not publish fictional tickets to the real tracker.
@@ -84,13 +85,21 @@ Install structure without claiming that its content is resolved.
   owner and the concrete reader need it supports. Do not generate all nine
   knowledge types, numbered ADRs, or rules to fill a checklist. A blank section
   guides future input and is not an unresolved candidate claim.
-- Operational support: use `tracker/<feature-slug>/`, renamed from legacy
-  `.scratch/`. Reuse an established local convention until migration is
-  approved. When it has no templates, propose `tracker/_templates/spec.md`
-  and `tracker/_templates/issue.md`; the spec includes `Area: <area>`,
-  outcome, scope, acceptance checks, and evidence prompts as appropriate.
-  Keep these reusable forms outside live work records and explain where
-  copies belong. Preserve established paths, fields, and status conventions.
+- Operational support: read the declared tracker before installing its guide.
+  Preserve configured local paths and remote workflows; do not replace them
+  with defaults or create local copies of remote records. For a selected local
+  Markdown tracker with no declared paths, specs use
+  `.specs/<feature-slug>/spec.md` and tickets use
+  `.issues/<feature-slug>/issues/<NN>-<slug>.md`, with links to their source spec.
+  These are durable work records, not disposable `tmp/` content. Keep them
+  eligible for version control and report conflicting ignore rules; this
+  grants no permission to stage or commit.
+  When templates are missing, propose `.specs/_templates/spec.md` and
+  `.issues/_templates/issue.md`. Specs include `Area: <area>`, outcome, scope,
+  acceptance checks, and evidence prompts as appropriate. Specs and tickets
+  carry the configured `Status:` roles; triage discovers both record homes.
+  Keep reusable forms outside live records. Preserve existing paths, fields,
+  lifecycle, and status conventions until migration is explicitly approved.
 - Index: link prepared knowledge separately from confirmed owners, with its
   placeholder status visible. Link operational support separately from
   knowledge coverage. Do not present a template or example as an accepted

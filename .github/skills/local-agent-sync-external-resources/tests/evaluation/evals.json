@@ -52,7 +52,12 @@
     {"id": "R-TO-SPEC-TESTING", "text": "Refresh reapplies the testing-decisions marked override only to Matt To Spec, preserves unrelated content and neighbors, replaces stale notes and is idempotent.", "source": "references/skill-normalizations.md: To Spec Testing Decisions Override"},
     {
       "id": "R-LOCAL-SPEC-PATHS",
-      "text": "Normalize legacy root tracker defaults only in the four declared Matt bundles: local specs use .specs/<feature>/spec.md and tickets use tmp/.issues/. Preserve neighboring paths, resources, invocation policy and second-pass stability, and restore current producer/reader notes after refresh.",
+      "text": "Normalize legacy root tracker defaults only in the four declared Matt bundles: local specs use .specs/<feature>/spec.md and tickets use .issues/. Preserve neighboring paths, resources, invocation policy and second-pass stability, and restore current producer/reader notes after refresh.",
+      "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
+    },
+    {
+      "id": "R-LOCAL-TRACKER-SEED",
+      "text": "Produce an unambiguous local tracker guide with independent spec and durable ticket homes, retention and triage discovery. Own only the intro and publication sections; preserve unrelated content, remove stale meta notes, and reject missing or ambiguous producer structure without writing the file.",
       "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
     },
     {
@@ -88,13 +93,32 @@
   ],
   "cases": [
     {
+      "id": "C-LOCAL-TRACKER-SEED",
+      "family": "tracker-template-producer",
+      "kind": "deterministic",
+      "requirement_ids": ["R-LOCAL-TRACKER-SEED", "R-LOCAL-SPEC-PATHS"],
+      "prompt": "Aggiorna il template del tracker: non deve dire di salvare le specifiche nella cartella dei ticket e non deve perdere le istruzioni Wayfinder.",
+      "initial_state": "The upstream-style seed places all work under tracker/. Its introduction and publication prose may change; a stale meta override may exist, or the title or publication heading may be absent or repeated.",
+      "expected_output": "The native normalizer emits the exact split-home guide, retention and Status/discovery rules, preserves unrelated sections, removes the stale note and is idempotent. Unknown producer shapes raise ValueError with the source file unchanged.",
+      "files": ["tests/scripts/test_candidate.py", "tests/evaluation/fixtures/upstream-local-tracker-template.md"],
+      "assertions": [
+        {"id": "A-PRODUCED-GUIDE", "text": "Compare the complete generated consumer guide with an independent expected output for both upstream prose variants.", "critical": true},
+        {"id": "A-FAIL-CLOSED", "text": "Missing or duplicate titles and publication headings fail explicitly without writing the seed.", "critical": true},
+        {"id": "A-PRESERVE-REPEAT", "text": "Unrelated sections survive and a second pass changes nothing.", "critical": true}
+      ],
+      "forbidden_actions": ["Append skill-author meta instructions to a generated consumer guide.", "Silently normalize an unknown producer shape.", "Change invocation metadata or consumer records."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-local-tracker-template.md"
+    },
+    {
       "id": "C-LOCAL-SPEC-PATH-REFRESH",
       "family": "source-path-normalization",
       "kind": "deterministic",
       "requirement_ids": ["R-LOCAL-SPEC-PATHS"],
       "prompt": "Refresh the Matt helpers while retaining separate locations for specs and tickets instead of recreating the old tracker directory.",
       "initial_state": "The native candidate tests use the path fixture in Markdown, nested references and executable-script paths, with selected and neighboring bundles. Producer and reader notes are absent or stale.",
-      "expected_output": "Declared source defaults normalize to root .specs for specs and tmp/.issues for tickets. Nested/archive paths and neighboring resources survive; the generated notes match published skills, stale notes are replaced at the end, and repeated normalization changes nothing.",
+      "expected_output": "Declared source defaults normalize to root .specs for specs and .issues for tickets. Nested/archive paths and neighboring resources survive; the generated notes match published skills, stale notes are replaced at the end, and repeated normalization changes nothing.",
       "files": ["tests/scripts/test_candidate.py", "tests/evaluation/fixtures/upstream-local-tracker-paths.md"],
       "assertions": [
         {"id": "A-SPLIT", "text": "Spec paths and ticket paths normalize to different agreed destinations.", "critical": true},
@@ -113,7 +137,7 @@
       "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
       "prompt": "Salva la specifica concordata per il rinnovo abbonamenti, poi crea i ticket approvati e recupera la spec per la revisione.",
       "initial_state": "An isolated consumer uses a local Markdown tracker without custom paths. Setup, To Spec, To Tickets and Code Review have the refreshed contracts. Separate already-approved inputs establish the spec and ticket content; legacy tracker records exist.",
-      "expected_output": "The spec is saved at .specs/<feature>/spec.md, approved tickets are separate files under tmp/.issues/<feature>/issues/ and link to it, and review retrieves that same spec. Legacy records remain untouched and no root tracker or docs/.specs directory is created.",
+      "expected_output": "The spec is saved at .specs/<feature>/spec.md, approved tickets are separate files under .issues/<feature>/issues/ and link to it, and review retrieves that same spec. Both carry the configured Status roles and are discovered by triage; implementation frontiers consider only tickets. Legacy records remain untouched and no root tracker or docs/.specs directory is created.",
       "files": ["references/skill-normalizations.md"],
       "assertions": [
         {"id": "A-WRITER-READER", "text": "Spec publication and later discovery agree on the root .specs destination.", "critical": true},
@@ -124,7 +148,7 @@
       "status": "not-run",
       "held_out": true,
       "rubric": {
-        "pass": ["The transcript and file deltas show one spec in .specs, separate linked tickets in tmp/.issues, correct review discovery and preserved legacy files."],
+        "pass": ["The transcript and file deltas show one spec in .specs, separate linked tickets in .issues, Status on both record types, both triage scans, ticket-only frontiers, correct review discovery and preserved legacy files.", "Records are outside disposable tmp; conflicting ignore rules are reported without staging or committing."],
         "fail": ["Writer and reader disagree, specs are placed with tickets or under docs, or legacy files are migrated automatically."]
       }
     },
@@ -147,7 +171,7 @@
       "held_out": true,
       "rubric": {
         "pass": ["Recorded configuration and publication/lookup actions match the explicit custom or remote contract with no unsolicited local artifacts."],
-        "fail": ["The agent forces .specs or tmp/.issues over an explicit owner, recreates tracker, or silently changes tracker type."]
+        "fail": ["The agent forces .specs or .issues over an explicit owner, recreates tracker, or silently changes tracker type."]
       }
     },
     {

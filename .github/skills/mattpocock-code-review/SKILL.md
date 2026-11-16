@@ -28,7 +28,7 @@ Look for the originating spec, in this order:
 
 1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched via the workflow in the tracker doc.
 2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `tmp/.issues/` matching the branch name or feature.
+3. A spec file under `docs/`, `specs/`, or `.issues/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
 
 ### 3. Identify the standards sources
@@ -99,8 +99,15 @@ and spec lookup instructions above.
   override examples and defaults; do not infer them from folder existence.
 - For a selected local Markdown tracker without declared paths, save new specs
   at `.specs/<feature-slug>/spec.md` in the project root and tickets at
-  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
+  `.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
   Link tickets to their source spec instead of copying it into the issue folder.
+- Local specs and tickets are durable work records, not disposable `tmp/`
+  artifacts. Keep them eligible for version control; report conflicting ignore
+  rules instead of claiming ignored records are shared. Do not stage or commit
+  without a user request.
+- Use the configured `Status:` roles on both specs and tickets. Local triage
+  scans both `.specs/*/spec.md` and `.issues/*/issues/*.md`; implementation
+  ticket frontiers scan only the issue files.
 - Setup must retain existing tracker choices and custom paths. For a new local
   setup, record the separate spec and ticket defaults above. Do not create
   `tracker/` or `docs/.specs/` as a fallback; create only directories needed for

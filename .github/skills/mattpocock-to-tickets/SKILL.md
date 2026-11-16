@@ -59,7 +59,7 @@ Iterate until the user approves the breakdown.
 
 Publish the approved tickets. **How** depends on the tracker `/mattpocock-setup-matt-pocock-skills` configured; the tickets are the same either way, only the shape of the blocking edges changes:
 
-- **Local files** → write one file per ticket under `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below: one ticket per file, never a single combined file.
+- **Local files** → write one file per ticket under `.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below: one ticket per file, never a single combined file.
 - **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. If the source was an existing issue, make each ticket its sub-issue (tracker doc's operation). Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
@@ -115,8 +115,15 @@ and spec lookup instructions above.
   override examples and defaults; do not infer them from folder existence.
 - For a selected local Markdown tracker without declared paths, save new specs
   at `.specs/<feature-slug>/spec.md` in the project root and tickets at
-  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
+  `.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
   Link tickets to their source spec instead of copying it into the issue folder.
+- Local specs and tickets are durable work records, not disposable `tmp/`
+  artifacts. Keep them eligible for version control; report conflicting ignore
+  rules instead of claiming ignored records are shared. Do not stage or commit
+  without a user request.
+- Use the configured `Status:` roles on both specs and tickets. Local triage
+  scans both `.specs/*/spec.md` and `.issues/*/issues/*.md`; implementation
+  ticket frontiers scan only the issue files.
 - Setup must retain existing tracker choices and custom paths. For a new local
   setup, record the separate spec and ticket defaults above. Do not create
   `tracker/` or `docs/.specs/` as a fallback; create only directories needed for

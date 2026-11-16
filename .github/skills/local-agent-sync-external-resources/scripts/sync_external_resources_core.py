@@ -710,16 +710,15 @@ _MATTPOCOCK_TRACKER_SKILLS = frozenset(
     }
 )
 _MATTPOCOCK_TRACKER_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_./-])(?:\./)?(?:\.scratch|tracker)/"
+    r"(?<![A-Za-z0-9_./-])(?:\./)?(?:\.scratch|tracker|tmp/\.issues)/"
 )
 _MATTPOCOCK_SPEC_PATH_RE = re.compile(
-    r"""(?<![A-Za-z0-9_./-])tmp/\.issues/(?P<feature>[^\s/`"']+)/spec\.md"""
+    r"""(?<![A-Za-z0-9_./-])\.issues/(?P<feature>[^\s/`"']+)/spec\.md"""
     r"(?![A-Za-z0-9_.-])"
 )
 _MATTPOCOCK_SPEC_TRACKER_FILES = frozenset(
     {
         ("mattpocock-setup-matt-pocock-skills", "SKILL.md"),
-        ("mattpocock-setup-matt-pocock-skills", "issue-tracker-local.md"),
         ("mattpocock-to-tickets", "SKILL.md"),
         ("mattpocock-code-review", "SKILL.md"),
     }
@@ -736,8 +735,15 @@ _SPEC_TRACKER_BODY = """\
   override examples and defaults; do not infer them from folder existence.
 - For a selected local Markdown tracker without declared paths, save new specs
   at `.specs/<feature-slug>/spec.md` in the project root and tickets at
-  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
+  `.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
   Link tickets to their source spec instead of copying it into the issue folder.
+- Local specs and tickets are durable work records, not disposable `tmp/`
+  artifacts. Keep them eligible for version control; report conflicting ignore
+  rules instead of claiming ignored records are shared. Do not stage or commit
+  without a user request.
+- Use the configured `Status:` roles on both specs and tickets. Local triage
+  scans both `.specs/*/spec.md` and `.issues/*/issues/*.md`; implementation
+  ticket frontiers scan only the issue files.
 - Setup must retain existing tracker choices and custom paths. For a new local
   setup, record the separate spec and ticket defaults above. Do not create
   `tracker/` or `docs/.specs/` as a fallback; create only directories needed for
@@ -758,6 +764,20 @@ and spec lookup instructions above.
 
 {_SPEC_TRACKER_BODY}
 {_SPEC_TRACKER_END}"""
+_LOCAL_TRACKER_INTRO = """\
+Specs live in the project-root `.specs/`; tickets live in `.issues/`.
+Both are durable work records, separate from disposable `tmp/`."""
+_LOCAL_TRACKER_PUBLICATION = """\
+For a spec, create `.specs/<feature-slug>/spec.md`. For a ticket, create
+`.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, and
+link it to its source spec. Create only directories needed for the request.
+Use `Status:` on both specs and tickets, with the configured triage roles.
+Triage scans both `.specs/*/spec.md` and `.issues/*/issues/*.md`;
+implementation ticket frontiers scan only the issue files.
+
+Keep these records eligible for version control; do not stage or commit
+without a user request. If ignore rules exclude them, report the conflict
+instead of claiming they are shared. Do not migrate existing records."""
 _MATTPOCOCK_GRILL_ME_SKILL = "grill-me"
 _MATTPOCOCK_GRILLING_SKILL = "grilling"
 _MATTPOCOCK_GRILLING_MERGE_FILES = frozenset(
@@ -1259,6 +1279,29 @@ def _normalize_mattpocock_retained_paths(
     return content
 
 
+def _normalize_local_tracker_template(content: str) -> str:
+    content = _SPEC_TRACKER_RE.sub("", content).rstrip() + "\n"
+    title_count = len(re.findall(r"(?m)^# ", content))
+    content, titles = re.subn(
+        r"\A(# [^\n]+\n).*?(?=^## |\Z)",
+        lambda match: match[1] + "\n" + _LOCAL_TRACKER_INTRO + "\n\n",
+        content,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    content, publications = re.subn(
+        r'(^## When a skill says "publish to the issue tracker"\n).*?(?=^## |\Z)',
+        lambda match: match[1] + "\n" + _LOCAL_TRACKER_PUBLICATION + "\n\n",
+        content,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    if title_count != 1 or titles != 1 or publications != 1:
+        raise ValueError(
+            "Unrecognized local tracker template: expected one title and "
+            "one publication section."
+        )
+    return content.rstrip() + "\n"
+
+
 def _redirect_mattpocock_grilling_consumers(
     canonical_name: str,
     content: str,
@@ -1592,7 +1635,7 @@ def normalize_candidate(
 
             if asset.source == _MATTPOCOCK_SOURCE:
                 if asset.canonical_name in _MATTPOCOCK_TRACKER_SKILLS:
-                    content = _MATTPOCOCK_TRACKER_PATH_RE.sub("tmp/.issues/", content)
+                    content = _MATTPOCOCK_TRACKER_PATH_RE.sub(".issues/", content)
                     content = _MATTPOCOCK_SPEC_PATH_RE.sub(
                         r".specs/\g<feature>/spec.md", content
                     )
@@ -1602,6 +1645,11 @@ def normalize_candidate(
                     relative_path,
                     content,
                 )
+                if (
+                    asset.canonical_name == "mattpocock-setup-matt-pocock-skills"
+                    and relative_path == "issue-tracker-local.md"
+                ):
+                    content = _normalize_local_tracker_template(content)
                 if (asset.canonical_name, relative_path) in _MATTPOCOCK_SPEC_TRACKER_FILES:
                     content = _enforce_marked_contract(
                         _SPEC_TRACKER_RE.sub("", content).rstrip(),

@@ -42,10 +42,14 @@ Check these additional drift classes only within the inspected perimeter:
   workspaces use `work/<area>/`; in code repositories keep existing code paths.
 - Mirrors: when the home is `work/` (or its approved root-name override), each
   Area needs exactly one mirror; `_`-prefixed names never participate.
-- Tracker: `.scratch/` is the legacy name for `tracker/`;
-  `docs/templates/` operational forms move to `tracker/_templates/`.
-  Existing tracker records permit path and link rewrites only, not content
-  rewrites. Preserve their facts, state, and wording.
+- Tracker: `.scratch/`, `tracker/`, and `tmp/.issues/` may be established
+  record homes. New unconfigured local trackers default to root `.specs/`
+  for specs and `.issues/` for tickets, with `_templates/` under each.
+  Preserve configured paths and remote workflows; a different default alone
+  does not authorize migration. Propose exact per-file destinations for
+  operational forms in `docs/templates/` or mixed legacy record homes.
+  Approved transfers permit path and link rewrites only, not content rewrites.
+  Preserve records' facts, state, and wording.
 - ADRs: all ADRs belong in `docs/adr/`. Area READMEs link there rather than
   creating Area-local ADR directories. Preserve accepted bodies.
 

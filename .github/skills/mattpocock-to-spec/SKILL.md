@@ -86,8 +86,15 @@ and readiness instructions above.
   override examples and defaults; do not infer them from folder existence.
 - For a selected local Markdown tracker without declared paths, save new specs
   at `.specs/<feature-slug>/spec.md` in the project root and tickets at
-  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
+  `.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
   Link tickets to their source spec instead of copying it into the issue folder.
+- Local specs and tickets are durable work records, not disposable `tmp/`
+  artifacts. Keep them eligible for version control; report conflicting ignore
+  rules instead of claiming ignored records are shared. Do not stage or commit
+  without a user request.
+- Use the configured `Status:` roles on both specs and tickets. Local triage
+  scans both `.specs/*/spec.md` and `.issues/*/issues/*.md`; implementation
+  ticket frontiers scan only the issue files.
 - Setup must retain existing tracker choices and custom paths. For a new local
   setup, record the separate spec and ticket defaults above. Do not create
   `tracker/` or `docs/.specs/` as a fallback; create only directories needed for

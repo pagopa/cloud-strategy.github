@@ -152,33 +152,45 @@ declared source.
   `mattpocock-setup-matt-pocock-skills`, `mattpocock-ask-matt`,
   `mattpocock-to-tickets`, and `mattpocock-code-review` bundles.
 - Search every UTF-8 text file in those bundles, including nested references
-  and executable scripts. Replace project-root `.scratch/` and `tracker/`,
-  optionally prefixed by `./`, with `tmp/.issues/`, preserving suffixes and
+  and executable scripts. Replace project-root `.scratch/`, `tracker/`, and
+  `tmp/.issues/`, optionally prefixed by `./`, with `.issues/`, preserving suffixes and
   neighboring text. The match must not follow a letter, digit, underscore, dot,
   slash, or hyphen. Preserve nested paths, archive names, and bare directory
   names.
-- After that rewrite, move exact root `tmp/.issues/<feature>/spec.md`
+- After that rewrite, move exact root `.issues/<feature>/spec.md`
   references to `.specs/<feature>/spec.md`. Match one feature path segment,
   including placeholders, and preserve filename suffixes such as `.backup`.
   This updates source defaults, not user records or consumer configuration.
 - Apply this idempotent path rule through `normalize_candidate` on every
   refresh. Do not add a replay patch or override-registry entry.
 - Append or replace one trailing `local-sync:spec-tracker-paths` note in the
-  Setup, To Tickets, and Code Review `SKILL.md` files and Setup's
-  `issue-tracker-local.md`. Incorporate the same path contract into To Spec's
+  Setup, To Tickets, and Code Review `SKILL.md` files. Incorporate the same path contract into To Spec's
   existing testing-decisions note rather than creating a second override.
+- Setup's `issue-tracker-local.md` is a consumer guide, not another skill
+  override. Normalize its introductory section and its single
+  `When a skill says "publish to the issue tracker"` section structurally,
+  independent of upstream prose, and remove any obsolete path override note.
+  Fail explicitly before writing that file when the title or publication
+  section is missing or ambiguous. Preserve conventions, fetch, Wayfinding,
+  and other unrelated sections except for the bounded path rewrites above.
 - The contract requires reading consumer policy and tracker configuration.
   Selected local Markdown trackers default to root
   `.specs/<feature-slug>/spec.md` for specs and
-  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md` for tickets, with a link to
+  `.issues/<feature-slug>/issues/<NN>-<slug>.md` for tickets, with a link to
   their source spec. Existing explicit paths and remote tracker workflows win.
   Setup preserves custom choices; readers honor explicit spec references
   before configured/default locations. Do not infer ownership from existing
   folders, create `tracker/` or `docs/.specs/` as a fallback, duplicate remote
   artifacts locally, or migrate existing records automatically.
-- Run `tests/scripts/test_candidate.py -k 'tracker_paths or spec_tracker_contract or to_spec_testing'`
+- Local specs and tickets are durable work records eligible for version
+  control, unlike disposable `tmp/`; report conflicting ignore rules. This
+  does not authorize staging or committing. Both record types carry configured
+  `Status:` roles. Triage scans `.specs/*/spec.md` and `.issues/*/issues/*.md`;
+  implementation frontiers scan only tickets, never reusable templates.
+- Run `tests/scripts/test_candidate.py -k 'tracker_paths or spec_tracker_contract or local_tracker_template or to_spec_testing'`
   for rewrites, declared scope, neighboring-path preservation, publication
-  parity, stale-note replacement, and repeat-run checks; then run the full
+  parity, seed-section production, fail-closed shape checks, stale-note
+  replacement, and repeat-run checks; then run the full
   native sync suite. Concrete downstream local/custom/remote scenarios stay
   separate from transformation tests and remain `not-run` without model runs.
 

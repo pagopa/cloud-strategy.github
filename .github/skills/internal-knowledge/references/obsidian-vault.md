@@ -177,8 +177,13 @@ visibility, `file.inFolder()` results, and `tmp/` exclusion from Search/Graph
 while its files remain on disk. Official UI semantics are verified above;
 JSON key persistence, ignore-filter matching, graph entry serialization, and
 installed Bases rendering remain unverified. Dot-folder visibility is not
-established by those pages; do not rely on `.scratch/` being visible.
-Use visible `tracker/` and leave hidden-file preferences untouched.
+established by those pages; do not claim that the default `.specs/` and
+`.issues/` work-record folders are visible or indexed in Obsidian. Agents
+discover those records through the filesystem and tracker configuration, not
+Search, Graph, or Bases. Leave hidden-file preferences untouched; do not
+create a visible `tracker/` copy or migrate records to make a viewer work.
+When viewer access to work records is required, propose an explicit visible
+tracker-path override and verify it separately.
 
 Report unavailable checks explicitly. Optional viewer verification must not
 block ordinary knowledge maintenance or widen the approved allowlist.

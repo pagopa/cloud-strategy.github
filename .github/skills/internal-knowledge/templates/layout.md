@@ -19,8 +19,10 @@ Keep durable knowledge separate from operational work.
   names are reserved and never mirrored. Code repositories declare
   `Operational home:` code paths in each Area README; do not move code.
 - Operations: sources, research, analyses, data, scripts, and deliverables
-  belong to the operational home, never `docs/`. Tracker records belong to
-  `tracker/<feature-slug>/`, templates to `tracker/_templates/`.
+  belong to the operational home, never `docs/`. New local tracker defaults
+  are `.specs/<feature-slug>/spec.md` and
+  `.issues/<feature-slug>/issues/`, with `_templates/` under each root.
+  Preserve declared local paths and remote workflows; do not migrate records.
   `tmp/` is disposable and must not be cited as durable evidence.
 - Autonomy: agents may write in `work/<area>/` except `sources/` is add-only
   and generated files change only through their generator. Writes to `docs/`,
