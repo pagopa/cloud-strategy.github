@@ -42,14 +42,11 @@ Check these additional drift classes only within the inspected perimeter:
   workspaces use `work/<area>/`; in code repositories keep existing code paths.
 - Mirrors: when the home is `work/` (or its approved root-name override), each
   Area needs exactly one mirror; `_`-prefixed names never participate.
-- Tracker: `.scratch/`, `tracker/`, and `tmp/.issues/` may be established
-  record homes. New unconfigured local trackers default to root `.specs/`
-  for specs and `.issues/` for tickets, with `_templates/` under each.
-  Preserve configured paths and remote workflows; a different default alone
-  does not authorize migration. Propose exact per-file destinations for
-  operational forms in `docs/templates/` or mixed legacy record homes.
-  Approved transfers permit path and link rewrites only, not content rewrites.
-  Preserve records' facts, state, and wording.
+- Tracker: flat scoped specs, `.scratch/`, `tracker/`, and implementation
+  tickets under durable `.issues/` are old standard layouts. Apply
+  [required tracker migration](#required-tracker-migration) before affected
+  tracker writes. `tmp/.issues/` is the current implementation-ticket home,
+  not intrinsically legacy. Incoming issues and templates remain durable.
 - ADRs: verify the [scoped archive](adr-maintenance.md#archive-placement).
   Misplaced flat records and ADRs outside `docs/adr/` require the mandatory
   migration below. Root records with cross-Area or repository-wide scope
@@ -58,6 +55,34 @@ Check these additional drift classes only within the inspected perimeter:
 These are migration proposals, not automatic renames. A new approved Topic
 requires its glossary and root map even with no resolved terms; zero Topics
 requires neither. User-approved Topic removal archives it, never deletes it.
+
+## Required tracker migration
+
+Preserve durable requirements before relocating temporary execution work.
+
+Report old standard layouts as necessary migration, even when a local guide
+still declares the old default. Preserve genuinely custom local paths and
+remote workflows; do not classify by folder existence alone. Classify each
+record by purpose before proposing a move: specs/PRDs stay in scoped `.specs/`,
+incoming requests stay durable in `.issues/`, and implementation tickets use
+scoped `tmp/.issues/`. Use approved Areas/Topics and the nearest common scope
+from the [tracker template](../templates/issue-tracker.md).
+
+Before affected tracker writes, the tracker owner must obtain approval for
+each source, destination, old-path removal and reference repair. Retain any
+unique requirements and acceptance criteria in an authorized durable spec or
+equivalent source before moving implementation tickets into `tmp/`. That
+retention step needs its own destination authority; preserve original facts,
+state, IDs and wording during transfer. Do not convert an incoming request
+into temporary execution work merely because both were called issues.
+
+Without approval or a resolved scope, affected tracker writes stop. Read-only
+operations report the requirement; unrelated documentation stays unblocked.
+Knowledge setup may prepare the authorized guides and templates and report
+the migration dependency, but never migrates live records itself. No automatic
+deletion, implicit staging, commit, Wayfinder move or plan reorganization is
+authorized. Apply transfer verification and interruption reporting below
+within the tracker owner's authority.
 
 ## Mandatory ADR migration
 

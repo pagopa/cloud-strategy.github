@@ -106,6 +106,18 @@ These are anchored rubric cases with `not-run` status, not executable proof
 that a model migrates correctly. Native tests validate their fixture schemas,
 bindings, isolation and coverage. No runtime comparison is authorized.
 
+## Scoped work records
+
+The user-approved tracker revision replaces the former durable-ticket default:
+specs use approved Area/Topic scopes under `.specs/`; incoming issues and
+templates stay durable in `.issues/`; implementation tickets use `tmp/.issues/`.
+C-SETUP-LOCAL-WORK-HOMES checks guide and template preparation, recursive
+discovery, durable requirements before temporary tickets, custom/remote
+ownership, and the required migration handoff without live-record writes.
+Unrelated docs remain unblocked. Its rubric is `not-run`; transformation and
+consumer parity checks belong to the external-resource sync native suite.
+The FH holdout tree, gold and seal remain unchanged.
+
 ## Holdout and live runs
 
 Do not open FH or its gold while tuning graders, prompts or expected outputs.

@@ -31,8 +31,13 @@ interface:
     and require root GLOSSARY-MAP.md even without resolved terms. Zero Topics
     means no Area glossary; root GLOSSARY.md remains only without declared Areas.
     Create mock only when no real Area is declared or evidenced and approved.
-    Keep tracker records in tracker/<feature-slug>/ and operational templates
-    in tracker/_templates/, never in docs/. Setup may install the four managed
+    Keep scoped durable specs in .specs/, incoming issues and templates in
+    durable .issues/, and implementation tickets in tmp/.issues/, never docs/.
+    Use approved Area/Topic scopes; preserve genuine custom and remote owners.
+    Legacy standard trackers require approved migration before affected
+    tracker writes, not unrelated docs. Setup hands live-record migration to
+    the tracker owner and prepares guides and templates only.
+    Setup may install the four managed
     docs/agents/ guides and an AGENTS.local.md placement block of at most 15
     lines. Preserve every byte outside managed blocks. Enable the Obsidian
     module only for Knowledge viewer: obsidian; manage only approved app keys,

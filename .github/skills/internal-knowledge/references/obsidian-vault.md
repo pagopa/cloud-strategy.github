@@ -178,7 +178,8 @@ while its files remain on disk. Official UI semantics are verified above;
 JSON key persistence, ignore-filter matching, graph entry serialization, and
 installed Bases rendering remain unverified. Dot-folder visibility is not
 established by those pages; do not claim that the default `.specs/` and
-`.issues/` work-record folders are visible or indexed in Obsidian. Agents
+`.issues/` durable folders or temporary `tmp/.issues/` tickets are visible or
+indexed in Obsidian. Agents
 discover those records through the filesystem and tracker configuration, not
 Search, Graph, or Bases. Leave hidden-file preferences untouched; do not
 create a visible `tracker/` copy or migrate records to make a viewer work.

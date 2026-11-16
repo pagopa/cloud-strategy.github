@@ -707,20 +707,25 @@ _MATTPOCOCK_TRACKER_SKILLS = frozenset(
         "mattpocock-ask-matt",
         "mattpocock-to-tickets",
         "mattpocock-code-review",
+        "mattpocock-to-spec",
     }
 )
 _MATTPOCOCK_TRACKER_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_./-])(?:\./)?(?:\.scratch|tracker|tmp/\.issues)/"
+    r"(?<![A-Za-z0-9_./-])(?:\./)?(?:\.scratch|tracker)/"
 )
 _MATTPOCOCK_SPEC_PATH_RE = re.compile(
-    r"""(?<![A-Za-z0-9_./-])\.issues/(?P<feature>[^\s/`"']+)/spec\.md"""
+    r"""(?<![A-Za-z0-9_./-])(?:\./)?(?:tmp/)?\.issues/(?P<feature>[^\s/`"']+(?:/[^\s/`"']+){0,2})/spec\.md"""
     r"(?![A-Za-z0-9_.-])"
+)
+_MATTPOCOCK_TICKET_PATH_RE = re.compile(
+    r"""(?<![A-Za-z0-9_./-])(?:\./)?(?:tmp/)?\.issues/(?P<feature>[^\s/`"']+(?:/[^\s/`"']+){0,2})/issues/"""
 )
 _MATTPOCOCK_SPEC_TRACKER_FILES = frozenset(
     {
         ("mattpocock-setup-matt-pocock-skills", "SKILL.md"),
         ("mattpocock-to-tickets", "SKILL.md"),
         ("mattpocock-code-review", "SKILL.md"),
+        ("mattpocock-ask-matt", "SKILL.md"),
     }
 )
 _SPEC_TRACKER_START = "<!-- local-sync:spec-tracker-paths:start -->"
@@ -731,30 +736,41 @@ _SPEC_TRACKER_RE = re.compile(
 )
 _SPEC_TRACKER_BODY = """\
 - Read applicable repository policy and `docs/agents/issue-tracker.md` before
-  publishing or locating a spec or ticket. Declared tracker types and paths
-  override examples and defaults; do not infer them from folder existence.
-- For a selected local Markdown tracker without declared paths, save new specs
-  at `.specs/<feature-slug>/spec.md` in the project root and tickets at
-  `.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
-  Link tickets to their source spec instead of copying it into the issue folder.
-- Local specs and tickets are durable work records, not disposable `tmp/`
-  artifacts. Keep them eligible for version control; report conflicting ignore
-  rules instead of claiming ignored records are shared. Do not stage or commit
-  without a user request.
-- Use the configured `Status:` roles on both specs and tickets. Local triage
-  scans both `.specs/*/spec.md` and `.issues/*/issues/*.md`; implementation
-  ticket frontiers scan only the issue files.
-- Setup must retain existing tracker choices and custom paths. For a new local
-  setup, record the separate spec and ticket defaults above. Do not create
-  `tracker/` or `docs/.specs/` as a fallback; create only directories needed for
-  the requested artifacts.
-- For a configured remote tracker, use its publication and lookup workflow.
-  Do not create a duplicate local spec or ticket unless the user requests it.
-- Readers must honor an explicit spec reference first, then the configured
-  source; for local defaults, look in `.specs/<feature-slug>/spec.md`.
-  Use legacy locations only when evidenced, and clarify ambiguous matches.
-- Do not move, delete, overwrite, or migrate existing specs, issues, or tracker
-  configuration merely to adopt these defaults."""
+  publishing or locating records. Preserve intentional custom paths and remote
+  workflows; an old standard-default declaration is not a custom exception.
+- Local defaults: specs use `.specs/<area>/<topic>/<feature>/spec.md`;
+  implementation tickets use `tmp/.issues/<area>/<topic>/<feature>/<NN>-<slug>.md`,
+  numbered from `01` per feature, with a link to their durable source.
+  Incoming issues stay durable under `.issues/`; templates stay in
+  `.specs/_templates/` and `.issues/_templates/`.
+- Scope: use the nearest common approved Area/Topic. Omit Topic for Area-wide
+  work and Area for cross-Area work or when no Areas are declared. Keep
+  `Area:` with all affected values and `Topic:` when applicable. Uncertain
+  applicability blocks publication; report it without inventing scope or
+  starting a new interview. Feature directories are leaves, not scope parents;
+  resolve path collisions before writing. Create no empty scope trees.
+- Discovery: recursively scan `.specs/**/spec.md`, configured incoming issue
+  records under `.issues/`, and `tmp/.issues/**/*.md` for configured `Status:`
+  roles. Exclude every `_`-prefixed path segment, templates and examples.
+  Implementation frontiers include only the selected feature's tickets.
+- Retention: keep specs, incoming issues and templates eligible for version
+  control; report conflicting ignore rules. Ticket comments and execution state
+  in `tmp/` are temporary. Requirements and acceptance criteria must already
+  have an authorized durable spec or equivalent source; otherwise propose it
+  and stop until approved. Durable records must not depend on temporary tickets
+  to retain their meaning. Never stage, commit or delete records automatically.
+- Migration: old standard-default records require migration before affected
+  tracker writes, even when a guide still declares the old default. Obtain
+  approval for each source, destination, removal and reference repair, preserve
+  state and content, and retain unique requirements durably before moving
+  implementation tickets into `tmp/`. Without approval, stop affected writes.
+  Read-only operations only report the requirement; unrelated docs stay unblocked.
+  Preserve genuine custom paths and remote trackers; do not modify Wayfinder
+  or plans in `tmp/.plans/`.
+- Readers honor an explicit source reference first, then configured lookup;
+  default spec lookup is recursive under `.specs/`, never inferred from folder
+  existence. Report ambiguous matches. Do not duplicate remote records locally,
+  create `tracker/` or `docs/.specs/`, or copy specs into ticket directories."""
 _SPEC_TRACKER_CONTRACT = f"""\
 {_SPEC_TRACKER_START}
 ## Local specification and tracker paths
@@ -765,19 +781,17 @@ and spec lookup instructions above.
 {_SPEC_TRACKER_BODY}
 {_SPEC_TRACKER_END}"""
 _LOCAL_TRACKER_INTRO = """\
-Specs live in the project-root `.specs/`; tickets live in `.issues/`.
-Both are durable work records, separate from disposable `tmp/`."""
-_LOCAL_TRACKER_PUBLICATION = """\
-For a spec, create `.specs/<feature-slug>/spec.md`. For a ticket, create
-`.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, and
-link it to its source spec. Create only directories needed for the request.
-Use `Status:` on both specs and tickets, with the configured triage roles.
-Triage scans both `.specs/*/spec.md` and `.issues/*/issues/*.md`;
-implementation ticket frontiers scan only the issue files.
-
-Keep these records eligible for version control; do not stage or commit
-without a user request. If ignore rules exclude them, report the conflict
-instead of claiming they are shared. Do not migrate existing records."""
+Keep requirements in durable `.specs/`, incoming issues and reusable templates
+in durable `.issues/`, and implementation tickets in disposable `tmp/.issues/`."""
+_LOCAL_TRACKER_CONVENTIONS = """\
+- Specs: `.specs/<area>/<topic>/<feature>/spec.md`.
+- Implementation tickets: `tmp/.issues/<area>/<topic>/<feature>/<NN>-<slug>.md`,
+  numbered from `01` per feature; link each ticket to its durable source.
+- Omit Topic for Area-wide work and Area for cross-Area work or no declared
+  Areas. Use only approved scopes; never invent an Area or Topic.
+- Incoming issues keep their configured durable home under `.issues/`.
+  Templates stay in `.specs/_templates/` and `.issues/_templates/`.
+- Use configured `Status:` roles and append comments under `## Comments`."""
 _MATTPOCOCK_GRILL_ME_SKILL = "grill-me"
 _MATTPOCOCK_GRILLING_SKILL = "grilling"
 _MATTPOCOCK_GRILLING_MERGE_FILES = frozenset(
@@ -1288,18 +1302,39 @@ def _normalize_local_tracker_template(content: str) -> str:
         content,
         flags=re.MULTILINE | re.DOTALL,
     )
-    content, publications = re.subn(
-        r'(^## When a skill says "publish to the issue tracker"\n).*?(?=^## |\Z)',
-        lambda match: match[1] + "\n" + _LOCAL_TRACKER_PUBLICATION + "\n\n",
+    content, conventions = re.subn(
+        r"(^## Conventions\n).*?(?=^## |\Z)",
+        lambda match: match[1] + "\n" + _LOCAL_TRACKER_CONVENTIONS + "\n\n",
         content,
         flags=re.MULTILINE | re.DOTALL,
     )
-    if title_count != 1 or titles != 1 or publications != 1:
+    content, publications = re.subn(
+        r'(^## When a skill says "publish to the issue tracker"\n).*?(?=^## |\Z)',
+        lambda match: match[1] + "\n" + _SPEC_TRACKER_BODY + "\n\n",
+        content,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    if title_count != 1 or titles != 1 or conventions != 1 or publications != 1:
         raise ValueError(
             "Unrecognized local tracker template: expected one title and "
-            "one publication section."
+            "one conventions section and one publication section."
         )
     return content.rstrip() + "\n"
+
+
+def _normalize_mattpocock_tracker_paths(content: str) -> str:
+    sections = re.split(r"(?m)(?=^## )", content)
+    for index, section in enumerate(sections):
+        if section.startswith("## Wayfinding operations\n"):
+            continue
+        section = _MATTPOCOCK_TRACKER_PATH_RE.sub(".issues/", section)
+        section = _MATTPOCOCK_SPEC_PATH_RE.sub(
+            r".specs/\g<feature>/spec.md", section
+        )
+        sections[index] = _MATTPOCOCK_TICKET_PATH_RE.sub(
+            r"tmp/.issues/\g<feature>/", section
+        )
+    return "".join(sections)
 
 
 def _redirect_mattpocock_grilling_consumers(
@@ -1635,10 +1670,7 @@ def normalize_candidate(
 
             if asset.source == _MATTPOCOCK_SOURCE:
                 if asset.canonical_name in _MATTPOCOCK_TRACKER_SKILLS:
-                    content = _MATTPOCOCK_TRACKER_PATH_RE.sub(".issues/", content)
-                    content = _MATTPOCOCK_SPEC_PATH_RE.sub(
-                        r".specs/\g<feature>/spec.md", content
-                    )
+                    content = _normalize_mattpocock_tracker_paths(content)
                 relative_path = file_path.relative_to(asset_dir).as_posix()
                 content = _normalize_mattpocock_retained_paths(
                     asset.canonical_name,

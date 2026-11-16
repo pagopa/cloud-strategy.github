@@ -150,49 +150,78 @@ declared source.
 
 - Target only the `mattpocock-skills` source's canonical
   `mattpocock-setup-matt-pocock-skills`, `mattpocock-ask-matt`,
-  `mattpocock-to-tickets`, and `mattpocock-code-review` bundles.
+  `mattpocock-to-tickets`, `mattpocock-to-spec`, and `mattpocock-code-review`
+  bundles.
 - Search every UTF-8 text file in those bundles, including nested references
-  and executable scripts. Replace project-root `.scratch/`, `tracker/`, and
-  `tmp/.issues/`, optionally prefixed by `./`, with `.issues/`, preserving suffixes and
-  neighboring text. The match must not follow a letter, digit, underscore, dot,
+  and executable scripts. Replace project-root `.scratch/` and `tracker/`,
+  optionally prefixed by `./`, with `.issues/`, preserving suffixes and
+  neighboring text. Do not rewrite canonical `tmp/.issues/` to a durable home.
+  The match must not follow a letter, digit, underscore, dot,
   slash, or hyphen. Preserve nested paths, archive names, and bare directory
   names.
-- After that rewrite, move exact root `.issues/<feature>/spec.md`
-  references to `.specs/<feature>/spec.md`. Match one feature path segment,
-  including placeholders, and preserve filename suffixes such as `.backup`.
+- After that rewrite, move exact root `.issues/<scope>/<feature>/spec.md`
+  references, including legacy `tmp/.issues/` spec paths, to `.specs/` with
+  their relative scope preserved. Match zero to two Area/Topic segments plus
+  the feature, including placeholders. Preserve filename suffixes such as
+  `.backup`. Rewrite `.issues/<scope>/<feature>/issues/` to
+  `tmp/.issues/<scope>/<feature>/`, including the old temporary variant.
+  Leave incoming issue paths without that ticket leaf unchanged.
+  Preserve each `## Wayfinding operations` section byte-for-byte, including
+  paths; apply tracker rewrites again after the next level-two heading.
   This updates source defaults, not user records or consumer configuration.
 - Apply this idempotent path rule through `normalize_candidate` on every
   refresh. Do not add a replay patch or override-registry entry.
 - Append or replace one trailing `local-sync:spec-tracker-paths` note in the
-  Setup, To Tickets, and Code Review `SKILL.md` files. Incorporate the same path contract into To Spec's
+  Setup, Ask Matt, To Tickets, and Code Review `SKILL.md` files. Incorporate the same path contract into To Spec's
   existing testing-decisions note rather than creating a second override.
 - Setup's `issue-tracker-local.md` is a consumer guide, not another skill
-  override. Normalize its introductory section and its single
+  override. Normalize its introductory section, `Conventions`, and its single
   `When a skill says "publish to the issue tracker"` section structurally,
   independent of upstream prose, and remove any obsolete path override note.
   Fail explicitly before writing that file when the title or publication
-  section is missing or ambiguous. Preserve conventions, fetch, Wayfinding,
-  and other unrelated sections except for the bounded path rewrites above.
+  section or conventions section is missing or ambiguous. Preserve fetch,
+  Wayfinding and unrelated sections; the three owned sections state the
+  current scoped tracker contract.
 - The contract requires reading consumer policy and tracker configuration.
-  Selected local Markdown trackers default to root
-  `.specs/<feature-slug>/spec.md` for specs and
-  `.issues/<feature-slug>/issues/<NN>-<slug>.md` for tickets, with a link to
-  their source spec. Existing explicit paths and remote tracker workflows win.
-  Setup preserves custom choices; readers honor explicit spec references
-  before configured/default locations. Do not infer ownership from existing
-  folders, create `tracker/` or `docs/.specs/` as a fallback, duplicate remote
-  artifacts locally, or migrate existing records automatically.
-- Local specs and tickets are durable work records eligible for version
-  control, unlike disposable `tmp/`; report conflicting ignore rules. This
-  does not authorize staging or committing. Both record types carry configured
-  `Status:` roles. Triage scans `.specs/*/spec.md` and `.issues/*/issues/*.md`;
-  implementation frontiers scan only tickets, never reusable templates.
+  Specs use `.specs/<area>/<topic>/<feature>/spec.md`; implementation tickets
+  use `tmp/.issues/<area>/<topic>/<feature>/<NN>-<slug>.md`. Use the nearest
+  common approved scope: omit Topic for Area-wide work and Area for cross-Area
+  work or no declared Areas. Keep `Area:` with all affected values and `Topic:`
+  when applicable. Uncertain applicability blocks publication without a new
+  interview or invented boundaries. Feature directories are leaves; resolve
+  collisions and do not scaffold empty scope trees.
+- Keep incoming issues and templates durable in `.issues/`, spec templates
+  in `.specs/_templates/`, and requirements/acceptance criteria in an
+  authorized durable spec or equivalent source before generating temporary
+  tickets. If absent, propose the source and stop until approved. Durable
+  records never rely on temporary tickets for retained meaning.
+- Recursive discovery scans `.specs/**/spec.md`, configured incoming issue
+  records, and `tmp/.issues/**/*.md` for configured `Status:` roles. Exclude
+  every `_`-prefixed path segment, templates and examples. Frontiers use only
+  the selected feature's implementation tickets. Honor explicit spec references
+  before configured lookup and resolve ambiguous matches.
+- Old standard-default layouts require approved migration before affected
+  tracker writes, including obsolete declarations. Preserve genuine custom
+  local paths and remote workflows; never infer the tracker from folders.
+  Migration requires each source, destination, removal and reference repair
+  approved, preserved state/content and unique requirements retained durably
+  before implementation tickets move into `tmp/`. Without approval, stop
+  affected writes; read-only operations only report the requirement and
+  unrelated docs remain unblocked. Do not migrate consumer records through the
+  normalizer, duplicate remote records, stage, commit, delete automatically,
+  or alter Wayfinder or `tmp/.plans/`.
 - Run `tests/scripts/test_candidate.py -k 'tracker_paths or spec_tracker_contract or local_tracker_template or to_spec_testing'`
   for rewrites, declared scope, neighboring-path preservation, publication
-  parity, seed-section production, fail-closed shape checks, stale-note
+  parity, all three seed sections, fail-closed shape checks, stale-note
   replacement, and repeat-run checks; then run the full
   native sync suite. Concrete downstream local/custom/remote scenarios stay
   separate from transformation tests and remain `not-run` without model runs.
+
+The scoped tracker revision intentionally replaces the old durable-ticket and
+no-migration criteria after explicit user approval. The downstream cases in
+this bundle cover all five imported consumers; those imports have no separate
+bundle-local eval packs. Native tests prove candidate transformation and
+published parity, not model publication, retention or migration compliance.
 
 ## To Spec Testing Decisions Override
 

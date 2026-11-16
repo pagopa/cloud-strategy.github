@@ -47,9 +47,10 @@
 
 ### Issue tracker
 
-Specs and PRDs use `.specs/<feature-slug>/spec.md`. Ordinary issues use
-`.issues/<feature-slug>/issues/`. Wayfinder maps, tickets, and analysis
-assets share `tmp/.wayfinder/<analysis-slug>/`. See `docs/agents/issue-tracker.md`.
+Specs and incoming issues are durable; implementation tickets are temporary.
+See `docs/agents/issue-tracker.md` for scoped paths and required migrations.
+Wayfinder maps, tickets, and analysis assets share
+`tmp/.wayfinder/<analysis-slug>/`.
 
 ### Triage labels
 

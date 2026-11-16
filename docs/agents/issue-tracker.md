@@ -1,35 +1,59 @@
 # Issue tracker: Local Markdown
 
-Specs (also called PRDs) live as Markdown files in the project-root `.specs/`.
-Ordinary issues live in the project-root `.issues/`. Wayfinder efforts use the self-contained
-workspace described below. Do not create a root `tracker/` directory.
+Keep specs/PRDs in durable `.specs/`, incoming issues and reusable templates in
+durable `.issues/`, and implementation tickets in disposable `tmp/.issues/`.
+Wayfinder retains its separate workspace below.
 
 ## Conventions
 
-- The spec is `.specs/<feature-slug>/spec.md`, not `docs/.specs/`
-- Implementation issues are one file per ticket at `.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
+- Specs use `.specs/<area>/<topic>/<feature>/spec.md`.
+- Implementation tickets use `tmp/.issues/<area>/<topic>/<feature>/<NN>-<slug>.md`,
+  numbered from `01` per feature, with no trailing `issues/` directory.
+- Use the nearest common approved scope. Omit Topic for Area-wide work and
+  Area for cross-Area work or no declared Areas. Keep `Area:` with all affected
+  values and `Topic:` when applicable. Unknown scope blocks publication;
+  never invent an Area or Topic. Feature directories are leaves, not scope
+  parents; resolve collisions before writing and create no empty scope trees.
+- Incoming issues retain their configured durable home under `.issues/`;
+  templates use `.specs/_templates/` and `.issues/_templates/`.
 - Each ticket links to its source spec; do not duplicate the spec in the issue directory
 - Triage state is recorded as a `Status:` line near the top of each spec and issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
 ## When a skill says "publish to the issue tracker"
 
-For a spec, create `.specs/<feature-slug>/spec.md`. For an implementation
-ticket, create `.issues/<feature-slug>/issues/<NN>-<slug>.md`.
-Create only the directories needed for the requested artifact.
-Preserve existing records in their current locations; these defaults do not
-authorize moving, overwriting, or deleting them.
+Use the conventions above for local publication. Preserve intentional custom
+paths and remote workflows; a declaration of the old standard default does
+not make it a custom exception. Do not infer the tracker from folder existence
+or create `tracker/`, `docs/.specs/` or local duplicates of remote records.
 
-Specs and ordinary tickets are durable work records. Keep them eligible for
-version control; report conflicting ignore rules rather than claiming ignored
-files are shared. Do not stage or commit without an explicit request.
+Before creating implementation tickets, requirements and acceptance criteria
+must have an authorized durable spec or equivalent source. If missing, propose
+that source and stop until approved. Tickets link to it; durable records must
+not depend on temporary tickets for their meaning. Keep specs, incoming issues
+and templates eligible for version control and report ignore conflicts.
+Ticket state and comments in `tmp/` are temporary. Never delete records
+automatically or stage or commit without a user request.
+
+Old standard-default records require migration before affected tracker
+writes, including old paths still declared in a guide. Obtain approval for
+each source, destination, removal and reference repair. Preserve content,
+state and IDs; retain unique requirements durably before moving implementation
+tickets into `tmp/`. Without approval, stop affected writes. Read-only
+operations report the requirement; unrelated docs stay unblocked. This does
+not authorize a migration or alter genuine custom paths, remote trackers,
+Wayfinder or plans in `tmp/.plans/`.
 
 ## Local triage discovery
 
-Scan both `.specs/*/spec.md` and `.issues/*/issues/*.md` for triage states.
-Implementation ticket frontiers scan only the issue files. Exclude reusable
-templates from both scans. Existing legacy records stay where they are and
-must be read through their explicit references until migration is approved.
+Recursively scan `.specs/**/spec.md`, configured incoming issue records under
+`.issues/`, and `tmp/.issues/**/*.md` for configured `Status:` roles. Exclude
+every `_`-prefixed path segment, templates and examples. Implementation
+frontiers scan only the selected feature's implementation tickets.
+Readers honor an explicit source reference first, then configured lookup;
+default spec lookup is recursive under `.specs/`. Report ambiguous matches.
+Legacy records remain readable through explicit references while migration
+approval is pending; that does not authorize further legacy-layout writes.
 
 ## When a skill says "fetch the relevant ticket"
 

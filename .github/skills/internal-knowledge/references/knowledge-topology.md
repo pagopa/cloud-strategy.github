@@ -130,20 +130,25 @@ work/<area>/                       # document-only operational home
   sources/                         # append-only external inputs
   research/
   <deliverables>
-.specs/<feature-slug>/spec.md       # durable local specifications
+.specs/<area>/<topic>/<feature>/spec.md # durable specs; omit non-applicable scopes
 .specs/_templates/                 # reusable specification templates
-.issues/<feature-slug>/issues/     # durable local implementation tickets
+.issues/                           # durable incoming issues, not execution tickets
 .issues/_templates/                # reusable issue templates
 tmp/                               # disposable, never durable evidence
+  .issues/<area>/<topic>/<feature>/ # temporary implementation tickets
 ```
 
 `docs/` holds strategic and tactical knowledge, not analyses, data, scripts,
 vendor offers, research, sources, or execution records. Managed guides and
 optional views are navigation support, not accepted knowledge. Existing
 evidence-backed knowledge owners such as `docs/project.md` remain valid.
-The local record paths are defaults, not migrations: retain declared custom
-paths and remote tracker workflows. Local specs and tickets must remain
-eligible for version control; report conflicting ignore rules.
+Preserve genuine custom paths and remote tracker workflows. Old standard
+tracker layouts require approved migration before affected tracker writes,
+not automatic moves; see [legacy migration](legacy-migration.md).
+Specs, incoming issues and templates must remain eligible for version control;
+report ignore conflicts. Implementation tickets in `tmp/.issues/` are
+temporary and link to a durable requirements source. Scope and recursive
+discovery follow the [tracker guide template](../templates/issue-tracker.md).
 
 In document-only workspaces, the operational root defaults to `work/` and may
 be overridden in `AGENTS.local.md`. Mirror each `docs/areas/<area>/` with exactly

@@ -90,10 +90,11 @@ For paths, search the declared target bundle and apply bounded path
 replacements without depending on surrounding prose or line numbers. Record
 the scope, search rule, destination, and checks in the normalization reference
 and candidate normalizer so every later refresh reapplies them.
-The local issue-tracker normalization separates spec and ticket defaults and
-rewrites legacy project-root tracker paths only in the four Matt Pocock bundles
-declared in that reference. Producer and reader overrides preserve each
-consumer repository's configured tracker.
+The local tracker normalization keeps scoped specs and incoming issues durable,
+and implementation tickets temporary under `tmp/.issues/`. It rewrites legacy
+standard paths only in the five declared Matt Pocock bundles, preserves
+Wayfinding sections, and restores scope, recursive discovery, source retention
+and approved-migration gates. Genuine custom and remote trackers stay unchanged.
 The plan-output normalization keeps implementation plans in `tmp/.plans/`
 with one embedded task list and automatic checkpoints. The two retired
 Superpowers plan skills are no longer imported; their authorized callers route

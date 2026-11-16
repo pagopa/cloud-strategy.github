@@ -86,20 +86,29 @@ Install structure without claiming that its content is resolved.
   knowledge types, numbered ADRs, or rules to fill a checklist. A blank section
   guides future input and is not an unresolved candidate claim.
 - Operational support: read the declared tracker before installing its guide.
-  Preserve configured local paths and remote workflows; do not replace them
-  with defaults or create local copies of remote records. For a selected local
-  Markdown tracker with no declared paths, specs use
-  `.specs/<feature-slug>/spec.md` and tickets use
-  `.issues/<feature-slug>/issues/<NN>-<slug>.md`, with links to their source spec.
-  These are durable work records, not disposable `tmp/` content. Keep them
-  eligible for version control and report conflicting ignore rules; this
-  grants no permission to stage or commit.
+  Preserve intentional custom paths and remote workflows; do not create local
+  copies of remote records. An old standard-default declaration is not a custom
+  exception. Local specs use `.specs/<area>/<topic>/<feature>/spec.md`;
+  implementation tickets use `tmp/.issues/<area>/<topic>/<feature>/<NN>-<slug>.md`.
+  Omit Topic for Area-wide work and Area for cross-Area work or no declared
+  Areas. Resolve approved scope before publication; do not invent boundaries.
+  Incoming issues remain durable under `.issues/`. Specs, incoming issues and
+  templates remain eligible for version control; implementation tickets are
+  temporary. Requirements and acceptance criteria must have an authorized
+  durable source before tickets are created. Missing authority or ambiguous
+  scope blocks publication; propose the missing decision without guessing.
+  Report conflicting ignore rules; this grants no staging or commit permission.
   When templates are missing, propose `.specs/_templates/spec.md` and
-  `.issues/_templates/issue.md`. Specs include `Area: <area>`, outcome, scope,
-  acceptance checks, and evidence prompts as appropriate. Specs and tickets
-  carry the configured `Status:` roles; triage discovers both record homes.
-  Keep reusable forms outside live records. Preserve existing paths, fields,
-  lifecycle, and status conventions until migration is explicitly approved.
+  `.issues/_templates/issue.md`. Specs include `Area:` with all affected values,
+  `Topic:` when applicable, outcome, scope, acceptance checks and evidence.
+  Records carry configured `Status:` roles; discovery is recursive and excludes
+  `_`-prefixed path segments, templates and examples. Implementation frontiers
+  include only the selected feature's tickets. Feature folders are leaves,
+  not scope parents; resolve collisions before writing and create no empty
+  scope trees. Follow the [tracker template](../templates/issue-tracker.md)
+  and [tracker migration](legacy-migration.md#required-tracker-migration).
+  Setup prepares support only: required live-record migration is a handoff to
+  the tracker owner, not permission to move records or block unrelated docs.
 - Index: link prepared knowledge separately from confirmed owners, with its
   placeholder status visible. Link operational support separately from
   knowledge coverage. Do not present a template or example as an accepted

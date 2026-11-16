@@ -268,6 +268,7 @@ def test_normalization_rewrites_mattpocock_legacy_workspace_paths(
         "mattpocock-ask-matt",
         "mattpocock-to-tickets",
         "mattpocock-code-review",
+        "mattpocock-to-spec",
     ],
 )
 @pytest.mark.parametrize(
@@ -315,16 +316,26 @@ def test_normalization_rewrites_mattpocock_tracker_paths(
     assert second_changed == ()
     expected = (
         "Upstream path: `.issues/<feature>/`\n"
-        "Root path: '.issues/<feature>/issues/01-task.md'\n"
+        "Root path: 'tmp/.issues/<feature>/01-task.md'\n"
         "Spec: `.specs/<feature-slug>/spec.md`\n"
         "Old spec: `.specs/<feature>/spec.md`\n"
         "Already normalized spec: `.specs/<feature>/spec.md`\n"
         "Keep other/.scratch/<feature>/ and other/tracker/ and .scratch-archive/ and tracker-archive/\n"
-        "Keep .scratch and tracker and .specs/ and .issues/<feature>/issues/01-task.md\n"
+        "Keep .scratch and tracker and .specs/ and tmp/.issues/<feature>/01-task.md\n"
+        "Nested spec: `.specs/atlas/ingest/intake/spec.md`\n"
+        "Nested ticket: `tmp/.issues/atlas/ingest/intake/01-check.md`\n"
+        "Area ticket: `tmp/.issues/atlas/shared/02-check.md`\n"
+        "Current ticket: `tmp/.issues/atlas/ingest/intake/01-check.md`\n"
+        "Incoming issue: `.issues/intake/report.md`\n"
+        "Keep custom/.issues/intake/issues/01-check.md and .issues-archive/intake/issues/\n"
+        "\n## Wayfinding operations\n\n"
+        "Keep `.issues/<effort>/map.md` and `.issues/<effort>/issues/NN-question.md`.\n"
+        "\n## Other guidance\n\n"
+        "Ticket: `tmp/.issues/intake/01-check.md`\n"
     )
     content = target.read_text(encoding="utf-8")
     if (
-        file_name == "SKILL.md" and canonical_name != "mattpocock-ask-matt"
+        file_name == "SKILL.md"
     ):
         assert content.startswith(expected)
     else:
@@ -338,6 +349,7 @@ def test_normalization_rewrites_mattpocock_tracker_paths(
         ("mattpocock-to-spec", "SKILL.md", "to-spec-testing-decisions"),
         ("mattpocock-to-tickets", "SKILL.md", "spec-tracker-paths"),
         ("mattpocock-code-review", "SKILL.md", "spec-tracker-paths"),
+        ("mattpocock-ask-matt", "SKILL.md", "spec-tracker-paths"),
     ],
 )
 @pytest.mark.parametrize("stale_note", [False, True])
@@ -417,36 +429,19 @@ def test_normalization_produces_unambiguous_local_tracker_template(
 
     assert normalize_candidate(resources, candidate) == (local,)
     content = target.read_text(encoding="utf-8")
-    assert content == (
-        "# Issue tracker: Local Markdown\n\n"
-        "Specs live in the project-root `.specs/`; tickets live in `.issues/`.\n"
-        "Both are durable work records, separate from disposable `tmp/`.\n\n"
-        "## Conventions\n\n"
-        "- The spec is `.specs/<feature-slug>/spec.md`\n"
-        "- Implementation issues are one file per ticket at "
-        "`.issues/<feature-slug>/issues/<NN>-<slug>.md`\n"
-        "- Comments append to the record.\n\n"
-        '## When a skill says "publish to the issue tracker"\n\n'
-        "For a spec, create `.specs/<feature-slug>/spec.md`. For a ticket, create\n"
-        "`.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, and\n"
-        "link it to its source spec. Create only directories needed for the request.\n"
-        "Use `Status:` on both specs and tickets, with the configured triage roles.\n"
-        "Triage scans both `.specs/*/spec.md` and `.issues/*/issues/*.md`;\n"
-        "implementation ticket frontiers scan only the issue files.\n\n"
-        "Keep these records eligible for version control; do not stage or commit\n"
-        "without a user request. If ignore rules exclude them, report the conflict\n"
-        "instead of claiming they are shared. Do not migrate existing records.\n\n"
-        '## When a skill says "fetch the relevant ticket"\n\n'
-        "Keep the upstream fetch instructions.\n\n"
-        "## Wayfinding operations\n\n"
-        "Keep the upstream blocking and frontier instructions.\n"
-    )
+    expected = (
+        bundle / "tests/evaluation/fixtures/expected-scoped-tracker-template.md"
+    ).read_text(encoding="utf-8")
+    assert content == expected
     assert normalize_candidate(resources, candidate) == ()
 
 
 @pytest.mark.parametrize(
     "mutation",
-    ["missing-publication", "duplicate-publication", "missing-title", "duplicate-title"],
+    [
+        "missing-publication", "duplicate-publication", "missing-title",
+        "duplicate-title", "missing-conventions", "duplicate-conventions",
+    ],
 )
 def test_normalization_rejects_unrecognized_local_tracker_template(
     tmp_path: Path, repo_root: Path, mutation: str,
@@ -468,8 +463,12 @@ def test_normalization_rejects_unrecognized_local_tracker_template(
         original += "\n" + heading + "\n\nDuplicate.\n"
     elif mutation == "missing-title":
         original = original.replace("# Issue tracker: Local Markdown\n", "", 1)
-    else:
+    elif mutation == "duplicate-title":
         original = "# Duplicate title\n\n" + original
+    elif mutation == "missing-conventions":
+        original = original.replace("## Conventions", "## Changed conventions")
+    else:
+        original += "\n## Conventions\n\nDuplicate.\n"
     target.write_text(original, encoding="utf-8")
 
     with pytest.raises(ValueError, match="local tracker template"):

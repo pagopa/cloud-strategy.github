@@ -52,17 +52,17 @@
     {"id": "R-TO-SPEC-TESTING", "text": "Refresh reapplies the testing-decisions marked override only to Matt To Spec, preserves unrelated content and neighbors, replaces stale notes and is idempotent.", "source": "references/skill-normalizations.md: To Spec Testing Decisions Override"},
     {
       "id": "R-LOCAL-SPEC-PATHS",
-      "text": "Normalize legacy root tracker defaults only in the four declared Matt bundles: local specs use .specs/<feature>/spec.md and tickets use .issues/. Preserve neighboring paths, resources, invocation policy and second-pass stability, and restore current producer/reader notes after refresh.",
+      "text": "Normalize legacy defaults only in the five declared Matt bundles: preserve scoped specs under .specs, incoming issues under durable .issues, and implementation tickets under tmp/.issues without a duplicate issues leaf. Preserve Wayfinding sections, neighboring paths, invocation policy and second-pass stability; restore producer and reader notes.",
       "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
     },
     {
       "id": "R-LOCAL-TRACKER-SEED",
-      "text": "Produce an unambiguous local tracker guide with independent spec and durable ticket homes, retention and triage discovery. Own only the intro and publication sections; preserve unrelated content, remove stale meta notes, and reject missing or ambiguous producer structure without writing the file.",
+      "text": "Produce an unambiguous guide for durable scoped specs, incoming issues and templates, and temporary implementation tickets. Own only intro, conventions and publication sections, including recursive discovery and migration gates; preserve unrelated sections, remove stale notes and fail before writing unknown structure.",
       "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
     },
     {
       "id": "R-SPEC-TRACKER-OWNERS",
-      "text": "Refreshed setup, spec writers, ticket writers and reviewers read the consuming repository's tracker configuration, preserve explicit custom and remote destinations, separate local specs from tickets, and never migrate existing artifacts or create tracker/ as a fallback.",
+      "text": "Refreshed setup, writers, reviewers and navigation use approved scopes and recursive discovery excluding reserved segments. Preserve genuine custom/remote owners. Require approved migration of old standard layouts before affected writes, retain requirements durably before temporary tickets, and block uncertain scope or missing authority without automatic moves.",
       "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
     },
     {
@@ -99,11 +99,11 @@
       "requirement_ids": ["R-LOCAL-TRACKER-SEED", "R-LOCAL-SPEC-PATHS"],
       "prompt": "Aggiorna il template del tracker: non deve dire di salvare le specifiche nella cartella dei ticket e non deve perdere le istruzioni Wayfinder.",
       "initial_state": "The upstream-style seed places all work under tracker/. Its introduction and publication prose may change; a stale meta override may exist, or the title or publication heading may be absent or repeated.",
-      "expected_output": "The native normalizer emits the exact split-home guide, retention and Status/discovery rules, preserves unrelated sections, removes the stale note and is idempotent. Unknown producer shapes raise ValueError with the source file unchanged.",
-      "files": ["tests/scripts/test_candidate.py", "tests/evaluation/fixtures/upstream-local-tracker-template.md"],
+      "expected_output": "The native normalizer emits the scoped durable-source/temporary-ticket guide with recursive Status discovery, source retention and approved migration. Three owned sections update while fetch and Wayfinding remain unchanged. Missing or duplicate owned headings raise ValueError before writing; repeat normalization is unchanged.",
+      "files": ["tests/scripts/test_candidate.py", "tests/evaluation/fixtures/upstream-local-tracker-template.md", "tests/evaluation/fixtures/expected-scoped-tracker-template.md"],
       "assertions": [
         {"id": "A-PRODUCED-GUIDE", "text": "Compare the complete generated consumer guide with an independent expected output for both upstream prose variants.", "critical": true},
-        {"id": "A-FAIL-CLOSED", "text": "Missing or duplicate titles and publication headings fail explicitly without writing the seed.", "critical": true},
+        {"id": "A-FAIL-CLOSED", "text": "Missing or duplicate titles, conventions and publication headings fail explicitly without writing the seed.", "critical": true},
         {"id": "A-PRESERVE-REPEAT", "text": "Unrelated sections survive and a second pass changes nothing.", "critical": true}
       ],
       "forbidden_actions": ["Append skill-author meta instructions to a generated consumer guide.", "Silently normalize an unknown producer shape.", "Change invocation metadata or consumer records."],
@@ -118,7 +118,7 @@
       "requirement_ids": ["R-LOCAL-SPEC-PATHS"],
       "prompt": "Refresh the Matt helpers while retaining separate locations for specs and tickets instead of recreating the old tracker directory.",
       "initial_state": "The native candidate tests use the path fixture in Markdown, nested references and executable-script paths, with selected and neighboring bundles. Producer and reader notes are absent or stale.",
-      "expected_output": "Declared source defaults normalize to root .specs for specs and .issues for tickets. Nested/archive paths and neighboring resources survive; the generated notes match published skills, stale notes are replaced at the end, and repeated normalization changes nothing.",
+      "expected_output": "Source examples preserve scope under .specs, route only implementation ticket leaves to tmp/.issues, keep incoming issues durable, preserve canonical temporary paths and Wayfinding sections, and resume rewriting in subsequent sections. Neighbor/archive paths survive; notes match all five published skills and normalization is idempotent.",
       "files": ["tests/scripts/test_candidate.py", "tests/evaluation/fixtures/upstream-local-tracker-paths.md"],
       "assertions": [
         {"id": "A-SPLIT", "text": "Spec paths and ticket paths normalize to different agreed destinations.", "critical": true},
@@ -136,20 +136,20 @@
       "kind": "rubric",
       "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
       "prompt": "Salva la specifica concordata per il rinnovo abbonamenti, poi crea i ticket approvati e recupera la spec per la revisione.",
-      "initial_state": "An isolated consumer uses a local Markdown tracker without custom paths. Setup, To Spec, To Tickets and Code Review have the refreshed contracts. Separate already-approved inputs establish the spec and ticket content; legacy tracker records exist.",
-      "expected_output": "The spec is saved at .specs/<feature>/spec.md, approved tickets are separate files under .issues/<feature>/issues/ and link to it, and review retrieves that same spec. Both carry the configured Status roles and are discovered by triage; implementation frontiers consider only tickets. Legacy records remain untouched and no root tracker or docs/.specs directory is created.",
+      "initial_state": "An isolated local consumer has approved Area billing and Topic renewals and no legacy records requiring migration or custom paths. The five refreshed helpers share this contract. Content and exact scoped spec/ticket destinations are authorized. Templates and examples exist under reserved path segments.",
+      "expected_output": "Save .specs/billing/renewals/renewal/spec.md and linked implementation tickets under tmp/.issues/billing/renewals/renewal/, with no duplicate issues leaf. Review finds the same durable spec recursively. Status discovery excludes templates and examples, frontiers select only feature tickets, and no permanent meaning depends on temporary files.",
       "files": ["references/skill-normalizations.md"],
       "assertions": [
         {"id": "A-WRITER-READER", "text": "Spec publication and later discovery agree on the root .specs destination.", "critical": true},
-        {"id": "A-TICKETS", "text": "Tickets use their separate local issue directory and reference the source spec.", "critical": true},
-        {"id": "A-NO-MIGRATION", "text": "Existing records are not moved, deleted, overwritten or duplicated.", "critical": true}
+        {"id": "A-TICKETS", "text": "Implementation tickets use the scoped temporary directory and reference a durable source retaining all requirements and acceptance criteria.", "critical": true},
+        {"id": "A-NO-MIGRATION", "text": "No unapproved record or template is moved, deleted, overwritten or duplicated.", "critical": true}
       ],
       "forbidden_actions": ["Recreate tracker/ as the default.", "Save specs under docs/.specs/.", "Migrate legacy artifacts without authorization."],
       "status": "not-run",
       "held_out": true,
       "rubric": {
-        "pass": ["The transcript and file deltas show one spec in .specs, separate linked tickets in .issues, Status on both record types, both triage scans, ticket-only frontiers, correct review discovery and preserved legacy files.", "Records are outside disposable tmp; conflicting ignore rules are reported without staging or committing."],
-        "fail": ["Writer and reader disagree, specs are placed with tickets or under docs, or legacy files are migrated automatically."]
+        "pass": ["The deltas show the approved nested spec and temporary ticket destinations, consistent Area/Topic metadata, recursive source lookup and Status discovery excluding reserved paths.", "Only the selected feature's implementation tickets enter its frontier; incoming issues and templates stay durable and requirements remain understandable after temporary tickets are absent.", "Ignore conflicts for durable records are reported; temporary tickets are not promised version control, and no staging or commit occurs."],
+        "fail": ["Writer and reader disagree, ticket paths retain a second issues leaf, templates enter frontiers, requirements exist only in tmp, or records move without approval."]
       }
     },
     {
@@ -171,7 +171,49 @@
       "held_out": true,
       "rubric": {
         "pass": ["Recorded configuration and publication/lookup actions match the explicit custom or remote contract with no unsolicited local artifacts."],
-        "fail": ["The agent forces .specs or .issues over an explicit owner, recreates tracker, or silently changes tracker type."]
+        "fail": ["The agent forces default homes over a genuine custom owner, recreates tracker, or silently changes tracker type."]
+      }
+    },
+    {
+      "id": "C-SPEC-TRACKER-MIGRATION-GATE",
+      "family": "downstream-migration-authority",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
+      "prompt": "Crea i ticket implementativi dalla nostra conversazione. La guida usa ancora la vecchia cartella e non autorizzo spostamenti o nuove specifiche.",
+      "initial_state": "A consumer declares the old standard .specs/<feature>/spec.md and .issues/<feature>/issues/ defaults. Approved Area atlas and Topic ingest apply, but the spec is still flat and the old tickets contain unique acceptance criteria. No durable source or migration write is authorized.",
+      "expected_output": "Stop affected publication. Identify required scoped migration and the missing authorized durable source, propose exact transfers and retained criteria, preserve all files, and do not treat the obsolete standard declaration as a custom exception. Read-only inspection and unrelated docs remain possible.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-GATE", "text": "No affected tracker writes occur without source and transfer approval.", "critical": true},
+        {"id": "A-RETENTION", "text": "Unique requirements and acceptance criteria are proposed for durable retention before any ticket move into tmp.", "critical": true}
+      ],
+      "forbidden_actions": ["Create an unauthorized spec.", "Move records automatically.", "Keep writing the old default as if conformant."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The response names the old standard layout, missing source authority, exact migration need and retained criteria while making zero tracker writes.", "The migration gate does not block unrelated docs or mutate remote/custom owners."],
+        "fail": ["A spec is created implicitly, implementation tickets are generated without durable requirements, or existing tickets are de-versioned without approval."]
+      }
+    },
+    {
+      "id": "C-SPEC-TRACKER-SCOPE",
+      "family": "downstream-scope-selection",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
+      "prompt": "Pubblica le tre specifiche concordate: una del Topic ingest, una comune ai Topic ingest ed export, una condivisa dalle Aree atlas e beacon. Per la quarta non abbiamo ancora stabilito l'ambito.",
+      "initial_state": "The approved taxonomy is atlas/ingest, atlas/export and beacon without Topics. Exact first-three destinations are authorized, no legacy migration is required, and the fourth has unresolved applicability. A feature slug colliding with an existing scope parent is also proposed.",
+      "expected_output": "Use .specs/atlas/ingest/<feature>/spec.md, .specs/atlas/<feature>/spec.md and .specs/<feature>/spec.md respectively. Keep Area metadata with all affected values. Block the fourth and the colliding destination without inventing scope or starting an interview in To Spec.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-SCOPE", "text": "Each settled spec uses the nearest approved common scope and preserves applicability metadata.", "critical": true},
+        {"id": "A-UNKNOWN", "text": "Unknown scope and feature/scope collisions block publication at those destinations rather than forcing root fallback.", "critical": true}
+      ],
+      "forbidden_actions": ["Invent Area or Topic names.", "Use root as a catch-all for ambiguous scope.", "Publish into a feature directory used as a scope parent."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Three settled examples use distinct correct path depths, and the cross-Area record names both Areas.", "No fourth record, colliding destination or empty scope tree is created; the missing decision is reported."],
+        "fail": ["The writer guesses scope, creates a boundary or confuses Area-wide and Topic-specific placement."]
       }
     },
     {

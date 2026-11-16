@@ -24,8 +24,8 @@
     },
     {
       "id": "R-LOCAL-WORK-HOMES",
-      "text": "New unconfigured local Markdown trackers use root .specs for durable specs and .issues for tickets, with separate templates, configured Status roles and discovery across both. Preserve custom and remote owners and existing records. Report ignore conflicts; do not promise Obsidian visibility or modify hidden-file preferences.",
-      "source": "references/complete-setup.md#Complete Workspace Setup; templates/issue-tracker.md; references/obsidian-vault.md"
+      "text": "Local standard trackers use scoped durable specs in .specs, durable incoming issues and templates in .issues, and temporary implementation tickets in tmp/.issues. Reuse approved Area/Topic scopes, omit non-applicable levels, discover recursively excluding reserved segments, preserve genuine custom/remote owners and require approved legacy migration before affected tracker writes. Retain requirements durably; setup hands off live migration and never creates live work. Do not promise Obsidian visibility.",
+      "source": "references/complete-setup.md#Scaffolds and authority; references/legacy-migration.md#Required tracker migration; templates/issue-tracker.md"
     },
     {
       "id": "R-MODE",
@@ -365,7 +365,7 @@
       "requirement_ids": ["R-LOCAL-WORK-HOMES", "R-ALLOWLIST"],
       "prompt": "Prepara il workspace con un tracker Markdown locale, senza creare lavoro fittizio. Voglio usare anche Obsidian e non perdere i miei percorsi se rilancio il setup.",
       "initial_state": "FS3 declares an Area and Topic but no tracker paths. The user selects local Markdown and approves only the tracker guide and spec/issue templates, then repeats setup. Ignore-rule compatibility and Obsidian work-record visibility have not been observed; neither may be assumed.",
-      "expected_output": "After exact-path approval, the guide and templates use split durable homes, matching the Matt setup. Triage scans specs and tickets with configured Status roles; implementation frontiers exclude specs and templates. Existing destinations win. Ignore conflicts and unverified viewer access are reported without migration, live records, duplicate files, staging or commits.",
+      "expected_output": "After exact-path approval, prepare matching scoped tracker guides and durable templates without live records. Describe temporary implementation tickets, durable specs/incoming issues, required source retention, recursive discovery and approved standard-layout migration handoff. Preserve custom/remote owners; report ignore conflicts and unverified viewer access.",
       "files": ["tests/evaluation/fixtures/FS3.tree.json", "tests/evaluation/gold/FS3.gold.json", "references/complete-setup.md", "templates/issue-tracker.md", "references/obsidian-vault.md"],
       "assertions": [
         {"id": "rubric-pass", "text": "All split-home, retention, preservation and viewer-limit anchors hold.", "critical": true},
@@ -375,8 +375,8 @@
       "status": "not-run",
       "held_out": false,
       "rubric": {
-        "pass": ["New specs and tickets are independently routed to .specs/<feature>/spec.md and .issues/<feature>/issues/<NN>-<slug>.md; templates use _templates under their respective roots.", "The generated guide defines Status on both record types, triage discovery across both, and ticket-only implementation frontiers.", "The transcript preserves explicit custom/remote owners and existing bytes, reports ignored homes without claiming records are shared, and states Obsidian visibility is unverified."],
-        "fail": ["Both setup owners produce incompatible locations, a new default uses disposable tmp, or legacy records are moved automatically.", "An ignored record is claimed to be shared, a hidden path is claimed to be visible without evidence, or viewer preferences or duplicate tracker copies are written.", "Setup creates active work, stages or commits files, or writes before exact-path approval."]
+        "pass": ["Guide examples use .specs/relay/delivery/<feature>/spec.md and tmp/.issues/relay/delivery/<feature>/<NN>-<slug>.md; incoming issues and templates remain durable in .issues, and spec templates stay in .specs/_templates.", "The guide defines recursive Status discovery excluding reserved segments and examples, feature-ticket-only frontiers, settled scope and authorized durable requirements before ticket creation.", "Custom/remote owners and existing bytes are preserved; legacy-standard migration is required before affected tracker writes but handed off without blocking unrelated docs or moving live records.", "Ignored durable homes are reported without claiming shared persistence, and Obsidian visibility remains unverified."],
+        "fail": ["The two setup producers disagree, requirements or templates are placed only in tmp, implementation tickets default to durable .issues, or records are moved automatically.", "An ignored durable record is claimed shared, a hidden path is claimed visible without evidence, or viewer preferences or duplicate tracker copies are written.", "Setup creates active work, invents scope, stages or commits files, or writes before exact-path approval."]
       }
     },
     {

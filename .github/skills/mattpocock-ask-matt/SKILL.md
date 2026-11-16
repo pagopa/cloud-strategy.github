@@ -23,7 +23,7 @@ The route most work travels. You have an idea and want it built.
    - **`/mattpocock-handoff`** back what you learned, and reference it from the original idea thread.
 3. **Branch: is this a multi-session build?**
    - **Yes** → **`/mattpocock-to-spec`** (turn the thread into a spec), then **`/mattpocock-to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. Then work the tickets one of two ways:
-     - **`/mattpocock-implement`** per ticket, **`/clear`ing context between each one**. On a local tracker that's one file per ticket under `.issues/<feature>/issues/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed. Each ticket is self-contained, so the last one's context is disposable.
+     - **`/mattpocock-implement`** per ticket, **`/clear`ing context between each one**. On a local tracker that's one file per ticket under `tmp/.issues/<feature>/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed. Each ticket is self-contained, so the last one's context is disposable.
      - **`/implement-spec`** for the whole spec in one run. It reads the tickets as a **task graph**, runs implementer subagents across the ready **frontier** in parallel, and lands everything on one **integration branch**. Reach for it when you'd rather orchestrate the build than drive each ticket yourself.
    - **No** → **`/mattpocock-implement`** right here, in the same context window.
 
@@ -95,3 +95,47 @@ Off the main flow entirely.
 ## Precondition
 
 **`/mattpocock-setup-matt-pocock-skills`**: run before your first engineering flow to configure the issue tracker, triage labels, and doc layout the other skills assume. Custom issue trackers also work.
+
+<!-- local-sync:spec-tracker-paths:start -->
+## Local specification and tracker paths
+
+This contract overrides conflicting storage defaults, publication destinations,
+and spec lookup instructions above.
+
+- Read applicable repository policy and `docs/agents/issue-tracker.md` before
+  publishing or locating records. Preserve intentional custom paths and remote
+  workflows; an old standard-default declaration is not a custom exception.
+- Local defaults: specs use `.specs/<area>/<topic>/<feature>/spec.md`;
+  implementation tickets use `tmp/.issues/<area>/<topic>/<feature>/<NN>-<slug>.md`,
+  numbered from `01` per feature, with a link to their durable source.
+  Incoming issues stay durable under `.issues/`; templates stay in
+  `.specs/_templates/` and `.issues/_templates/`.
+- Scope: use the nearest common approved Area/Topic. Omit Topic for Area-wide
+  work and Area for cross-Area work or when no Areas are declared. Keep
+  `Area:` with all affected values and `Topic:` when applicable. Uncertain
+  applicability blocks publication; report it without inventing scope or
+  starting a new interview. Feature directories are leaves, not scope parents;
+  resolve path collisions before writing. Create no empty scope trees.
+- Discovery: recursively scan `.specs/**/spec.md`, configured incoming issue
+  records under `.issues/`, and `tmp/.issues/**/*.md` for configured `Status:`
+  roles. Exclude every `_`-prefixed path segment, templates and examples.
+  Implementation frontiers include only the selected feature's tickets.
+- Retention: keep specs, incoming issues and templates eligible for version
+  control; report conflicting ignore rules. Ticket comments and execution state
+  in `tmp/` are temporary. Requirements and acceptance criteria must already
+  have an authorized durable spec or equivalent source; otherwise propose it
+  and stop until approved. Durable records must not depend on temporary tickets
+  to retain their meaning. Never stage, commit or delete records automatically.
+- Migration: old standard-default records require migration before affected
+  tracker writes, even when a guide still declares the old default. Obtain
+  approval for each source, destination, removal and reference repair, preserve
+  state and content, and retain unique requirements durably before moving
+  implementation tickets into `tmp/`. Without approval, stop affected writes.
+  Read-only operations only report the requirement; unrelated docs stay unblocked.
+  Preserve genuine custom paths and remote trackers; do not modify Wayfinder
+  or plans in `tmp/.plans/`.
+- Readers honor an explicit source reference first, then configured lookup;
+  default spec lookup is recursive under `.specs/`, never inferred from folder
+  existence. Report ambiguous matches. Do not duplicate remote records locally,
+  create `tracker/` or `docs/.specs/`, or copy specs into ticket directories.
+<!-- local-sync:spec-tracker-paths:end -->
