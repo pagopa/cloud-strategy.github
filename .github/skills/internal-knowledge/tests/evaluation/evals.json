@@ -3,6 +3,26 @@
   "skill": "internal-knowledge",
   "requirements": [
     {
+      "id": "R-ADR-SCOPED-ARCHIVE",
+      "text": "Keep one ADR at the nearest common approved Area/Topic scope under docs/adr; root records cover cross-Area or repository-wide decisions. Do not invent scopes, duplicate decisions or create empty scope directories.",
+      "source": "references/adr-maintenance.md#Archive placement"
+    },
+    {
+      "id": "R-ADR-GLOBAL-IDENTITY",
+      "text": "Allocate ADR-nnnn globally by recursively inspecting the archive and any unmigrated records; preserve IDs and filenames on moves and never reuse a historical number.",
+      "source": "references/adr-maintenance.md#Identity and numbering"
+    },
+    {
+      "id": "R-ADR-SCOPED-INDEX",
+      "text": "Use a compact root ADR index for root decisions and Area indexes, then Area and Topic indexes for their records and applicable shared decisions. Preserve local record format; accepted bodies need no discovery metadata rewrite.",
+      "source": "references/adr-maintenance.md#Applicability And Indexing"
+    },
+    {
+      "id": "R-ADR-REQUIRED-MIGRATION",
+      "text": "Treat misplaced flat or Area-local ADRs as mandatory migration, including local flat declarations. In writing modes stop until exact moves, removals, indexes and reference repairs are approved and complete; read-only modes report without writing. Preserve accepted history and surface unresolved scope or external-link dependencies.",
+      "source": "references/legacy-migration.md#Mandatory ADR migration; references/knowledge-scope.md#ADR conformance gate"
+    },
+    {
       "id": "R-LOCAL-WORK-HOMES",
       "text": "New unconfigured local Markdown trackers use root .specs for durable specs and .issues for tickets, with separate templates, configured Status roles and discovery across both. Preserve custom and remote owners and existing records. Report ignore conflicts; do not promise Obsidian visibility or modify hidden-file preferences.",
       "source": "references/complete-setup.md#Complete Workspace Setup; templates/issue-tracker.md; references/obsidian-vault.md"
@@ -254,6 +274,90 @@
     }
   ],
   "cases": [
+    {
+      "id": "C-ADR-MIGRATION-GATE",
+      "family": "adr",
+      "kind": "rubric",
+      "requirement_ids": ["R-ADR-REQUIRED-MIGRATION", "R-ALLOWLIST"],
+      "prompt": "Aggiungi soltanto docs/adr/0013-intake-policy.md per il Topic ingest di atlas. Non autorizzo spostamenti, cancellazioni o modifiche agli indici. La guida locale dice di tenere tutto nella cartella principale.",
+      "initial_state": "FA has a local flat declaration and two misplaced accepted records. Only the requested new path is authorized; the user declines migration.",
+      "expected_output": "Explain the mandatory ADR migration and stop authoring without writes. Present exact needed scope for approval rather than following the flat declaration or silently widening targeted mode. Do not report the archive as aligned.",
+      "files": ["tests/evaluation/fixtures/FA.tree.json", "tests/evaluation/gold/FA.gold.json"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "Every anchored pass condition holds.", "critical": true},
+        {"id": "rubric-fail", "text": "No anchored failure condition occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Write the flat-path ADR.", "Move existing records without approval."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Zero writes; the response identifies mandatory migration, the missing exact-path authority and the conflicting local declaration.", "The proposal moves 0005 to docs/adr/atlas/ and 0007 to docs/adr/atlas/ingest/; 0003 is correctly retained at root and nested 0012 is retained."],
+        "fail": ["Adds an ADR before migration, treats refusal as permission, or labels the legacy archive compliant.", "Requires moving every root ADR even when its explicit scope spans Areas."]
+      }
+    },
+    {
+      "id": "C-ADR-AUDIT-MIGRATION",
+      "family": "adr",
+      "kind": "rubric",
+      "requirement_ids": ["R-ADR-REQUIRED-MIGRATION", "R-AUDIT"],
+      "prompt": "Controlla in sola lettura docs/adr, docs/areas e docs/agents/layout.md. Questa organizzazione delle decisioni reggerà con molti record?",
+      "initial_state": "FA is inspected only; no authoring or migration is authorized.",
+      "expected_output": "Report mandatory migration of misplaced scoped records, not optional advice, while keeping legitimate cross-Area root records and all files unchanged.",
+      "files": ["tests/evaluation/fixtures/FA.tree.json", "tests/evaluation/gold/FA.gold.json"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "Every anchored pass condition holds.", "critical": true},
+        {"id": "rubric-fail", "text": "No anchored failure condition occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Create indexes or move files in audit mode."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Reports 0005 and 0007 as misplaced and migration as mandatory; 0003 and 0012 are already correctly placed.", "No transient or persistent writes; authoring remains a separate approved action."],
+        "fail": ["Calls migration optional because the local declaration is flat, or starts migration from the audit."]
+      }
+    },
+    {
+      "id": "C-ADR-MIGRATE-AND-CREATE",
+      "family": "adr",
+      "kind": "rubric",
+      "requirement_ids": ["R-ADR-SCOPED-ARCHIVE", "R-ADR-GLOBAL-IDENTITY", "R-ADR-SCOPED-INDEX", "R-ADR-REQUIRED-MIGRATION"],
+      "prompt": "Riorganizza le decisioni e poi registra queste tre scelte già concordate, nell'ordine: ingest convalida le ricevute prima di accettarle; ingest ed export condividono la versione dello schema; atlas e beacon concordano il calendario di conservazione. Mantieni i testi storici e mostrami una navigazione leggibile.",
+      "initial_state": "FA. After the concrete transfer table, the user approves moving and deleting only docs/adr/0005-boundary.md to docs/adr/atlas/0005-boundary.md and docs/adr/0007-intake.md to docs/adr/atlas/ingest/0007-intake.md; updating docs/agents/layout.md, both Area READMEs and docs/adr/README.md; creating docs/adr/atlas/README.md, docs/adr/atlas/ingest/README.md and docs/adr/beacon/README.md; and creating proposed records atlas/ingest/0013-receipt-validation.md, atlas/0014-schema-version.md and 0015-retention-calendar.md under docs/adr. No external incoming references are evidenced. Then repeat with identical inputs.",
+      "expected_output": "Complete the approved migration before adding the three proposed ADRs. Preserve all accepted record bytes, filenames and IDs. Allocate 0013 after nested 0012, then 0014 and 0015. Keep root navigation compact, link applicable shared decisions, avoid empty export directories and produce zero writes on repeat.",
+      "files": ["tests/evaluation/fixtures/FA.tree.json", "tests/evaluation/gold/FA.gold.json"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "Every anchored pass condition holds.", "critical": true},
+        {"id": "rubric-fail", "text": "No anchored failure condition occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Rewrite accepted decisions.", "Restart numbering per folder.", "Create duplicate ADR copies or empty scope directories.", "Claim unverified external link compatibility."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["0005 and 0007 move once with byte-identical bodies and original filenames; 0003 and 0012 remain unchanged; all authorized incoming links resolve.", "New proposed records use the approved filenames and nearest common scopes; global numbering includes nested 0012.", "The root index lists root decisions and links to Area indexes, not all nested records; atlas links its own decisions and ingest index, and beacon links applicable root decisions.", "Area/Topic indexes carry evidenced applicability and preserve the house record format; no accepted body gains metadata.", "The repeated run makes zero writes and creates no export ADR directory or new boundary."],
+        "fail": ["Writes new ADRs before completing migration or exceeds the approved files and deletions.", "Assigns a reused number, scatters ADRs under docs/areas, duplicates a shared decision, or changes historical content.", "Leaves stale local flat instructions, broken links, or a root catalog enumerating all nested decisions."]
+      }
+    },
+    {
+      "id": "C-ADR-MIGRATION-UNKNOWN",
+      "family": "adr",
+      "kind": "rubric",
+      "requirement_ids": ["R-ADR-REQUIRED-MIGRATION", "R-ADR-SCOPED-ARCHIVE"],
+      "prompt": "Sposta le ADR nei rispettivi ambiti, ma non indovinare a chi si applicano. Il verbale esterno rimanda ancora ai vecchi percorsi e non posso aggiornarlo ora.",
+      "initial_state": "FA, except that authoritative scope for 0007 is disputed by the user. An external incoming reference to its old path is known and cannot currently be repaired. No complete transfer table has been approved.",
+      "expected_output": "Keep migration required but blocked. Surface the applicability conflict and external-reference dependency before moving; request the missing scope decision and link handling authority without inventing scope, a compatibility page or approval.",
+      "files": ["tests/evaluation/fixtures/FA.tree.json", "tests/evaluation/gold/FA.gold.json"],
+      "assertions": [
+        {"id": "rubric-pass", "text": "Every anchored pass condition holds.", "critical": true},
+        {"id": "rubric-fail", "text": "No anchored failure condition occurs.", "critical": true}
+      ],
+      "forbidden_actions": ["Infer applicability solely from a filename or directory.", "Promise external links still work.", "Create unapproved redirects or copies."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["No writes before scope and reference handling are settled and the coherent transfer unit is authorized.", "Names both blockers and distinguishes mandatory migration from permission to perform it."],
+        "fail": ["Moves the disputed decision, silently leaves it as a valid root decision, or claims automatic compatibility with external references."]
+      }
+    },
     {
       "id": "C-SETUP-LOCAL-WORK-HOMES",
       "family": "setup",

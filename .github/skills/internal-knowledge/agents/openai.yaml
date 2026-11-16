@@ -8,7 +8,14 @@ interface:
     and setup. Audit is bounded, read-only, and non-persistent by default; it
     includes the alignment check. Invoke align explicitly with cascade or
     harvest; it returns proposals and writes no files. Targeted uses only the
-    supplied destinations; sync applies to a realized declared layout; setup
+    supplied destinations, but every writing mode first checks ADR conformance.
+    Keep one ADR at its nearest common Area/Topic scope under docs/adr/,
+    root decisions for cross-Area or repository scope, global IDs and scoped
+    indexes. Misplaced records require migration before other writes; obtain
+    exact-path approval for moves, removals and reference repairs or stop.
+    Local flat-placement declarations are not conformant exceptions.
+    Read-only modes report required migration without writing.
+    Sync applies to a realized declared layout; setup
     applies to explicit whole-workspace installation or when the layout is
     absent, incomplete, contradicted, or legacy. Follow
     SKILL.md and bundle references: knowledge-scope.md owns modes and

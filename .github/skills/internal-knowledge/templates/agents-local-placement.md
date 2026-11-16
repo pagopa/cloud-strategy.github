@@ -4,7 +4,7 @@
 
 | Artifact | Home |
 | --- | --- |
-| Knowledge | `docs/areas/<area>/`, all ADRs in `docs/adr/` |
+| Knowledge | `docs/areas/<area>/`; ADRs under `docs/adr/` by Area/Topic, shared decisions at their common scope |
 | Operations | {{operational_home_declaration}} |
 | Local work records / templates | `.specs/` and `.issues/`, each with `_templates/`; declared tracker overrides win |
 | Transient | `tmp/`; never durable evidence |

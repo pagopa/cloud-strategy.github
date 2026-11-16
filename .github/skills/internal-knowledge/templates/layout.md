@@ -5,8 +5,16 @@ Keep durable knowledge separate from operational work.
 
 - Knowledge: `docs/README.md` indexes strategic and tactical owners.
   `docs/areas/<area>/README.md` states Purpose, scope, boundary, Topics, their
-  Core/Supporting/Commodity roles, and links to decisions. All ADRs live in
-  `docs/adr/`; new ADRs carry `Area:`. `docs/agents/` contains these guides;
+  Core/Supporting/Commodity roles, and a link to its ADR scope index.
+  Keep one ADR at its nearest common scope: `docs/adr/<area>/<topic>/`,
+  `docs/adr/<area>/`, or `docs/adr/` for cross-Area and repository decisions.
+  Use the approved Area/Topic names, create no empty scope trees, and keep
+  numbering global. New ADRs state affected Areas and Topics in their local
+  format. The root ADR index links root decisions and Area indexes; Area and
+  Topic indexes link applicable shared decisions without copying them.
+  Misplaced ADRs require migration before knowledge authoring continues:
+  approve exact moves, removals and reference repairs first; otherwise stop.
+  Preserve IDs, filenames and accepted bodies. `docs/agents/` contains these guides;
   optional `docs/views/*.base` files are navigation indexes.
 - Topics: use `docs/areas/<area>/<topic>/{GLOSSARY,RULES}.md`; create Rules only
   when evidenced. At least one Topic requires root `GLOSSARY-MAP.md`, even for

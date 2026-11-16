@@ -50,12 +50,42 @@ Check these additional drift classes only within the inspected perimeter:
   operational forms in `docs/templates/` or mixed legacy record homes.
   Approved transfers permit path and link rewrites only, not content rewrites.
   Preserve records' facts, state, and wording.
-- ADRs: all ADRs belong in `docs/adr/`. Area READMEs link there rather than
-  creating Area-local ADR directories. Preserve accepted bodies.
+- ADRs: verify the [scoped archive](adr-maintenance.md#archive-placement).
+  Misplaced flat records and ADRs outside `docs/adr/` require the mandatory
+  migration below. Root records with cross-Area or repository-wide scope
+  remain valid. Preserve accepted bodies.
 
 These are migration proposals, not automatic renames. A new approved Topic
 requires its glossary and root map even with no resolved terms; zero Topics
 requires neither. User-approved Topic removal archives it, never deletes it.
+
+## Mandatory ADR migration
+
+Treat scoped ADR placement as required conformance, not optional cleanup.
+
+Apply the [ADR conformance gate](knowledge-scope.md#adr-conformance-gate) in
+every writing mode. Classify misplaced records as `Necessary for the requested
+result`, even when a local guide still declares flat placement. Read-only
+modes report the requirement without writing. Preserve local record format,
+IDs, filenames and accepted decision bodies; change location and navigation,
+not the decision or its evidenced applicability.
+
+Before moving, present the concrete transfer table and obtain approval for
+every destination, old-path removal, index and incoming-reference repair.
+Update conflicting placement declarations within their owning authority.
+If an accepted ADR mandates the old paths, use the existing supersession and
+acceptance process; mandatory migration does not override decision authority.
+An unresolved scope, protected owner or required change outside the approved
+perimeter blocks the coherent migration unit and subsequent authoring.
+
+Identify known external incoming references and unverifiable reference
+coverage before moving. Report the risk and obtain explicit agreement on
+their handling; do not promise automatic link compatibility, create an
+unapproved redirect or retain duplicate ADRs. If required references cannot
+be resolved within approved authority, stop and report the dependency.
+After approval, complete and verify the migration before other writes.
+Without approval, leave the files unchanged and authoring blocked; do not
+report a conformant layout or continue appending to the flat archive.
 
 ## Activation and scope
 
@@ -84,7 +114,10 @@ Perform one coherent migration unit:
 1. Verify the transfer table against current files and incoming references.
    For a non-git workspace, first create and verify a tar backup in the
    approved persistent location. Record an exact old path → new path manifest
-   with sha256 values; sources and relocated ADRs must remain byte-identical.
+   with sha256 values; sources and relocated ADRs remain byte-identical except
+   for explicitly approved path-only link maintenance inside ADRs. For that
+   exception, retain the original digest and verify the exact link-only diff;
+   never treat a changed hash alone as proof of preservation.
    Keep this migration evidence outside durable knowledge.
 2. Create or update canonical destinations, preserving meanings, stable IDs,
    evidence links and required history. Extract only vocabulary into a glossary;

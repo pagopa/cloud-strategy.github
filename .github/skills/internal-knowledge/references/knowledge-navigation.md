@@ -73,6 +73,14 @@ not duplicate the detail held by linked owners. If an index target is outside
 the requested bucket or approved plan, report it as excluded rather than
 widening the allowlist.
 
+For ADRs, route the knowledge index to `docs/adr/README.md` and Area
+documentation to its ADR scope index. Follow
+[ADR applicability and indexing](adr-maintenance.md#applicability-and-indexing):
+root decisions and Area links at the archive root, Area decisions and Topic
+links below it, then Topic decisions. Keep applicable shared decisions as
+links, not copied records or a mandatory second exhaustive catalog.
+Missing scope indexes require their own authorized destinations.
+
 ## Maintained Owners
 
 Route each link to the existing maintained owner supported by repository

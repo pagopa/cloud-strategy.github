@@ -92,6 +92,20 @@ This checkout has no Makefile regeneration target or generated source-hash
 file. Update the authored requirement anchor and run `make skill-lint` plus
 the pack checker above; do not invent a hash refresh step.
 
+## Scoped ADR archive coverage
+
+FA and C-ADR-* cover mandatory migration despite a local flat declaration or
+a targeted request, read-only reporting, an approved move followed by new
+records, and unresolved applicability or external incoming references.
+Root cross-Area decisions remain in place; Area and Topic records move to
+their nearest common scope. The creation case checks global numbering past a
+higher nested ID, compact scope indexes, shared links, accepted-byte
+preservation, no empty scope trees and zero writes on repeat.
+
+These are anchored rubric cases with `not-run` status, not executable proof
+that a model migrates correctly. Native tests validate their fixture schemas,
+bindings, isolation and coverage. No runtime comparison is authorized.
+
 ## Holdout and live runs
 
 Do not open FH or its gold while tuning graders, prompts or expected outputs.

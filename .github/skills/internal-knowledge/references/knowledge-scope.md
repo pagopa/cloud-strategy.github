@@ -10,6 +10,7 @@ Use this reference to decide **what the skill may touch** before any drafting st
 - [Buckets](#buckets)
 - [Help mode](#help-mode)
 - [Layout declaration and drift](#layout-declaration-and-drift)
+- [ADR conformance gate](#adr-conformance-gate)
 - [Significant components](#significant-components)
 - [Write allowlist](#write-allowlist)
 - [Protected paths and metadata](#protected-paths-and-metadata)
@@ -50,7 +51,7 @@ in [alignment](alignment.md), report `nothing to promote`.
 
 `sync` aligns documents to repository evidence and is not a sync contract over managed copies. When the request is about managed-copy state, blockers, or apply flows, stop and ask which run applies before resolving a mode.
 
-The layout check runs in `sync` and in a provisional `setup`, never in `help`, `audit`, or `targeted`. Derive the evidenced Area and Topic set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. Optional vocabulary absence is classified as described below before selecting drift. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
+The general layout check runs in `sync` and in a provisional `setup`, never in `help`, `audit`, or `targeted`. Derive the evidenced Area and Topic set, compare it with the declared layout, and escalate `sync` to `setup` when the two disagree. The escalation inherits the requested bucket: a bucketed `sync` escalates to the same bucket in `setup`, and a bucketed run never starts a layout migration. The separate [ADR conformance gate](#adr-conformance-gate) may block authoring, not widen its scope. Optional vocabulary absence is classified as described below before selecting drift. The check only escalates: it never returns `setup` to `sync`, and it never widens `targeted`.
 
 `targeted` never widens into `sync`. A request naming three directories stays at three directories even when the repository clearly needs more; report the wider gap instead of acting on it.
 
@@ -126,6 +127,7 @@ Compare the declaration against reality and classify the result:
   Areas, or operational content inside `docs/`. Missing `work/` Area mirrors,
   when that operational root applies, are also drift. Propose a separate
   migration wave; preserve meanings and follow [legacy migration](legacy-migration.md).
+  Misplaced ADRs are also legacy drift, with the mandatory authoring gate below.
 
 The declared layout also covers knowledge types. In `sync` and `setup`, give each of the nine [knowledge types](knowledge-types.md) one outcome: `existing owner`, `planned`, `considered, not evidenced`, or `explicit exclusion`. A missing canonical index, an index row that names an absent owner, or a type with neither an owner nor a recorded exclusion is `unrealized`. Record an approved exclusion as an index row with its reason; it settles later invocations until the evidence changes. A `considered, not evidenced` type outcome is provisional: propose it as an exclusion row for approval, because only a written row stops the type from reappearing as `unrealized`.
 
@@ -145,6 +147,31 @@ Changing a declaration is a documentation change like any other. It enters the p
 
 A repeated `understated` finding is a decision waiting to be recorded, not a report to reissue. When the user keeps the narrower layout, propose an ADR that records the Area and Topic set with its evidence; that record then answers the question for every later invocation.
 
+## ADR conformance gate
+
+Complete required ADR migration before ordinary knowledge authoring.
+
+- Inspect: in every writing mode (`targeted`, `sync`, `setup`), inventory
+  `docs/adr/` recursively and any declared legacy ADR locations, their local
+  placement contract and directly necessary scope evidence. This bounded ADR
+  check is not a full layout audit and creates no absent archive or index.
+- Classify: follow [archive placement](adr-maintenance.md#archive-placement).
+  A root record is valid when its evidenced scope is cross-Area or
+  repository-wide; a flat collection alone does not prove every record must
+  move. Unknown applicability is a blocker, not inferred conformance.
+- Migrate: when records are misplaced or local placement instructions conflict,
+  apply [mandatory ADR migration](legacy-migration.md#mandatory-adr-migration)
+  before any other writes. Approve exact destinations, old-path removals,
+  indexes, declarations and reference repairs first.
+- Stop: if authority, applicability, required reference handling or approval is
+  missing, report the dependency and make no authoring writes. A targeted
+  destination or bucket never authorizes extra paths; request the missing
+  scope explicitly. Declining or deferring migration leaves authoring blocked,
+  not permission to add more flat records or call the repository aligned.
+- Read-only: `help`, `audit` and `align` preserve their read boundaries and
+  report required migration only where evidenced. They never migrate or
+  dispatch authoring automatically.
+
 ## Buckets
 
 A request may name a bucket: `only the READMEs` or `only the docs`. The bucket filters the derived document set in `sync` and `setup`; it never replaces the layout check, the plan gate, or the waves.
@@ -154,7 +181,7 @@ The readme bucket is classified by file name: every `README.md` belongs to it ex
 Bucket membership never overrides the always-excluded paths, the ownership evidence, or the two entry points rule: each excluded member lands in the exclusion ledger with its reason, exactly like any other excluded target.
 
 The derived gaps `sync` fills inside a bucket are a closed list: a component
-README, `RULES.md`, `docs/adr/README.md`, the root `README.md`, and resolved
+README, `RULES.md`, scoped ADR indexes under `docs/adr/`, the root `README.md`, and resolved
 definitions in an approved Topic glossary or legacy vocabulary owner.
 Creating a Topic and its required glossary/map pair is shape and selects
 `setup`; it is not an implicit `sync` gap. Every other missing artifact,

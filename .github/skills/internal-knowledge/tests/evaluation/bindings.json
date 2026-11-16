@@ -1,6 +1,40 @@
 {
   "schema": "knowledge-eval-bindings/v1",
   "cases": {
+    "C-ADR-MIGRATION-GATE": {
+      "fixture": "FA", "gold": "tests/evaluation/gold/FA.gold.json",
+      "profile": "author", "graders": [], "runs": 1,
+      "allowlist": ["docs/adr/0013-intake-policy.md"],
+      "gold_overrides": {}
+    },
+    "C-ADR-AUDIT-MIGRATION": {
+      "fixture": "FA", "gold": "tests/evaluation/gold/FA.gold.json",
+      "profile": "audit", "graders": [], "runs": 1,
+      "allowlist": [], "gold_overrides": {}
+    },
+    "C-ADR-MIGRATE-AND-CREATE": {
+      "fixture": "FA", "gold": "tests/evaluation/gold/FA.gold.json",
+      "profile": "author", "graders": [], "runs": 2,
+      "allowlist": [
+        "docs/adr/0005-boundary.md", "docs/adr/atlas/0005-boundary.md",
+        "docs/adr/0007-intake.md", "docs/adr/atlas/ingest/0007-intake.md",
+        "docs/agents/layout.md", "docs/areas/atlas/README.md", "docs/areas/beacon/README.md",
+        "docs/adr/README.md", "docs/adr/atlas/README.md", "docs/adr/atlas/ingest/README.md", "docs/adr/beacon/README.md",
+        "docs/adr/atlas/ingest/0013-receipt-validation.md", "docs/adr/atlas/0014-schema-version.md", "docs/adr/0015-retention-calendar.md"
+      ],
+      "gold_overrides": {
+        "protected_paths": ["docs/adr/0003-retention.md", "docs/adr/atlas/ingest/0012-receipts.md"],
+        "expected_placements": {
+          "docs/adr/0005-boundary.md": "docs/adr/atlas/0005-boundary.md",
+          "docs/adr/0007-intake.md": "docs/adr/atlas/ingest/0007-intake.md"
+        }
+      }
+    },
+    "C-ADR-MIGRATION-UNKNOWN": {
+      "fixture": "FA", "gold": "tests/evaluation/gold/FA.gold.json",
+      "profile": "author", "graders": [], "runs": 1,
+      "allowlist": [], "gold_overrides": {}
+    },
     "C-SETUP-LOCAL-WORK-HOMES": {
       "fixture": "FS3",
       "gold": "tests/evaluation/gold/FS3.gold.json",

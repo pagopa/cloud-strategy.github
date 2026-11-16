@@ -1,0 +1,15 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "FA",
+  "description": "Mixed flat and scoped ADR archive with explicit applicability, local house format and a higher nested ID.",
+  "files": {
+    "docs/agents/layout.md": "# Layout\n\nApproved Areas: atlas (Topics ingest and export), beacon (zero Topics).\nADRs are kept directly in docs/adr/ under the existing flat convention.\n",
+    "docs/adr/README.md": "# Decisions\n\nHouse format: title, Status, Area, optional Topic, Decision. No frontmatter. Accepted decisions are immutable; supersession uses a new global ADR ID. Filenames use NNNN-slug.md.\n\n- [ADR-0003 Shared retention](0003-retention.md): atlas and beacon.\n- [ADR-0005 Atlas boundary](0005-boundary.md): atlas, ingest and export.\n- [ADR-0007 Intake ownership](0007-intake.md): atlas, ingest.\n- [ADR-0012 Intake receipts](atlas/ingest/0012-receipts.md): atlas, ingest.\n",
+    "docs/adr/0003-retention.md": "# Shared retention\n\nStatus: accepted\nArea: atlas, beacon\n\n## Decision\n\nBoth Areas retain accepted records for the agreed retention period.\n",
+    "docs/adr/0005-boundary.md": "# Atlas boundary\n\nStatus: accepted\nArea: atlas\nTopic: ingest, export\n\n## Decision\n\nIngest validates incoming records; export owns delivery.\n",
+    "docs/adr/0007-intake.md": "# Intake ownership\n\nStatus: accepted\nArea: atlas\nTopic: ingest\n\n## Decision\n\nThe ingest Topic owns intake acceptance.\n",
+    "docs/adr/atlas/ingest/0012-receipts.md": "# Intake receipts\n\nStatus: accepted\nArea: atlas\nTopic: ingest\n\n## Decision\n\nIngest issues a receipt after acceptance.\n",
+    "docs/areas/atlas/README.md": "# Atlas\n\nOwns record exchange. Topics: ingest and export.\n\nDecisions: [boundary](../../adr/0005-boundary.md), [intake](../../adr/0007-intake.md), [retention](../../adr/0003-retention.md).\n",
+    "docs/areas/beacon/README.md": "# Beacon\n\nOwns retention oversight. No Topics.\n\nDecision: [retention](../../adr/0003-retention.md).\n"
+  }
+}

@@ -24,9 +24,14 @@ owns the mapping from type to file. Retire an ID with one line in a final
 section of its owner, for example: ``DIR-03` — retired, replaced by `DIR-07`.``
 
 New ADRs state `Level: strategic` or `Level: tactical` next to `Status:`.
-They also carry `Area: <area>` in the body and live in `docs/adr/`.
+They also carry affected `Area:` values and, when Topic-specific, `Topic:` in
+the body, preserving an established equivalent format. Their nearest common
+scope under `docs/adr/` and global numbering follow
+[ADR maintenance](adr-maintenance.md). Repository-wide records need no
+invented Area.
 Accepted ADR bodies are historical records and must not be edited. Put their
-historical `Level` and `Serves` values in columns of the ADR index instead.
+historical `Level` and `Serves` values in columns of the owning scope's ADR
+index instead.
 
 ## `Serves:` links
 

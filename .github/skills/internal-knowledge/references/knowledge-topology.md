@@ -111,7 +111,13 @@ local policy, with their existing owners.
 GLOSSARY-MAP.md                     # required as soon as one Topic exists
 docs/
   README.md                        # strategic and tactical knowledge index
-  adr/                             # ALL ADRs; new records carry Area:
+  adr/
+    README.md                      # root decisions and links to Area indexes
+    NNNN-<slug>.md                  # cross-Area or repository-wide decisions
+    <area>/README.md               # Area decisions, shared links, Topic indexes
+    <area>/NNNN-<slug>.md           # Area or cross-Topic decisions
+    <area>/<topic>/README.md        # Topic decisions and applicable shared links
+    <area>/<topic>/NNNN-<slug>.md    # Topic decisions; one global ADR sequence
   agents/                          # managed agent placement and promotion guides
   views/                           # optional Obsidian .base navigation indexes
   areas/
@@ -149,7 +155,7 @@ require a `work/` mirror. The skill writes only the Area README scaffold in
 
 Area READMEs list Purpose, scope, boundary, Topics with their
 Core/Supporting/Commodity classification, operational home, and links to
-decisions in `docs/adr/`. Topics, not Areas, receive that classification.
+their scope index under `docs/adr/`. Topics, not Areas, receive that classification.
 When the optional viewer is enabled, Area status is authoritative on the
 docs side; the work README mirrors it. See [Obsidian vault](obsidian-vault.md).
 
@@ -157,9 +163,12 @@ Preserve an existing canonical layout until migration is explicitly authorized.
 A legacy layout is `legacy` drift: propose its format-only migration as a
 separate wave.
 For new Topics use `docs/areas/<area>/<topic>/GLOSSARY.md`. Use `RULES.md` only
-for evidenced normative rules. All ADRs belong in `docs/adr/`; never create an
-Area-local ADR directory. Existing accepted ADR bodies remain unchanged.
-Legacy ADR locations need an approved migration, not an automatic move.
+for evidenced normative rules. Place each ADR at its nearest common Area/Topic
+scope under `docs/adr/`, following [ADR maintenance](adr-maintenance.md).
+The tree shows possible paths, not empty directories to scaffold.
+Misplaced ADRs require [mandatory migration](legacy-migration.md#mandatory-adr-migration)
+before authoring can continue; retaining a flat scoped archive is not an
+alternative conformant layout. Existing accepted ADR bodies remain unchanged.
 An Area or Topic boundary change follows the ADR owner and acceptance authority.
 
 Do not invent Topics to prepare a glossary. As soon as one Topic is approved,
