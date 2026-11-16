@@ -24,7 +24,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root, and the legacy `CONTEXT.md` / `CONTEXT-MAP.md`. If a legacy file exists, offer to `git mv` it to its `GLOSSARY` name and rewrite those names in `docs/agents/domain.md`.
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/`: does this skill's prior output already exist?
-- `tracker/`: a sign that a local-markdown issue tracker convention is already in use
+- `tmp/.issues/`: a sign that a local-markdown issue tracker convention is already in use
 - Is the `triage` skill installed? (a `triage` skill folder alongside this one, or `triage` in your available skills.) This decides whether Section B runs at all.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
 
@@ -36,13 +36,13 @@ Lead each section with the recommended answer so the user can accept it in a wor
 
 **Section A: Issue tracker.**
 
-> Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-tickets`, `triage`, and `mattpocock-to-spec` read from and write to it. They need to know whether to call `gh issue create`, write a markdown file under `tracker/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
+> Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-tickets`, `triage`, and `mattpocock-to-spec` read from and write to it. They need to know whether to call `gh issue create`, write a markdown file under `tmp/.issues/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
 
 Default posture: these skills were designed for GitHub. If a `git remote` points at GitHub, propose that. If a `git remote` points at GitLab (`gitlab.com` or a self-hosted host), propose GitLab. Otherwise (or if the user prefers), offer:
 
 - **GitHub**: issues live in the repo's GitHub Issues (uses the `gh` CLI)
 - **GitLab**: issues live in the repo's GitLab Issues (uses the [`glab`](https://gitlab.com/gitlab-org/cli) CLI)
-- **Local markdown**: issues live as files under `tracker/<feature>/` in this repo (good for solo projects or repos without a remote)
+- **Local markdown**: issues live as files under `tmp/.issues/<feature>/` in this repo (good for solo projects or repos without a remote)
 - **Other** (Jira, Linear, etc.): ask the user to describe the workflow in one paragraph; the skill will record it as freeform prose
 
 Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
@@ -117,3 +117,29 @@ For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch us
 ### 5. Done
 
 Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
+
+<!-- local-sync:spec-tracker-paths:start -->
+## Local specification and tracker paths
+
+This contract overrides conflicting storage defaults, publication destinations,
+and spec lookup instructions above.
+
+- Read applicable repository policy and `docs/agents/issue-tracker.md` before
+  publishing or locating a spec or ticket. Declared tracker types and paths
+  override examples and defaults; do not infer them from folder existence.
+- For a selected local Markdown tracker without declared paths, save new specs
+  at `.specs/<feature-slug>/spec.md` in the project root and tickets at
+  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
+  Link tickets to their source spec instead of copying it into the issue folder.
+- Setup must retain existing tracker choices and custom paths. For a new local
+  setup, record the separate spec and ticket defaults above. Do not create
+  `tracker/` or `docs/.specs/` as a fallback; create only directories needed for
+  the requested artifacts.
+- For a configured remote tracker, use its publication and lookup workflow.
+  Do not create a duplicate local spec or ticket unless the user requests it.
+- Readers must honor an explicit spec reference first, then the configured
+  source; for local defaults, look in `.specs/<feature-slug>/spec.md`.
+  Use legacy locations only when evidenced, and clarify ambiguous matches.
+- Do not move, delete, overwrite, or migrate existing specs, issues, or tracker
+  configuration merely to adopt these defaults.
+<!-- local-sync:spec-tracker-paths:end -->

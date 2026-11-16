@@ -74,10 +74,35 @@ Any further notes about the feature.
 </spec-template>
 
 <!-- local-sync:to-spec-testing-decisions:start -->
-## Local testing-decisions contract
+## Local specification and testing contract
 
-This contract overrides conflicting seam-confirmation, testing, and readiness
-instructions above. Apply it in the spec's `Testing Decisions` section.
+This contract overrides conflicting publication, seam-confirmation, testing,
+and readiness instructions above.
+
+### Specification and tracker paths
+
+- Read applicable repository policy and `docs/agents/issue-tracker.md` before
+  publishing or locating a spec or ticket. Declared tracker types and paths
+  override examples and defaults; do not infer them from folder existence.
+- For a selected local Markdown tracker without declared paths, save new specs
+  at `.specs/<feature-slug>/spec.md` in the project root and tickets at
+  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
+  Link tickets to their source spec instead of copying it into the issue folder.
+- Setup must retain existing tracker choices and custom paths. For a new local
+  setup, record the separate spec and ticket defaults above. Do not create
+  `tracker/` or `docs/.specs/` as a fallback; create only directories needed for
+  the requested artifacts.
+- For a configured remote tracker, use its publication and lookup workflow.
+  Do not create a duplicate local spec or ticket unless the user requests it.
+- Readers must honor an explicit spec reference first, then the configured
+  source; for local defaults, look in `.specs/<feature-slug>/spec.md`.
+  Use legacy locations only when evidenced, and clarify ambiguous matches.
+- Do not move, delete, overwrite, or migrate existing specs, issues, or tracker
+  configuration merely to adopt these defaults.
+
+### Testing decisions
+
+Apply these rules in the spec's `Testing Decisions` section.
 
 - Separate accepted mandatory checks, optional evaluations, and proposed test
   seams. Synthesize decisions already made; do not invent mandatory checks.

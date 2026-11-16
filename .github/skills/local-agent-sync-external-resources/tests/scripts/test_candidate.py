@@ -275,6 +275,7 @@ def test_normalization_rewrites_mattpocock_legacy_workspace_paths(
 )
 def test_normalization_rewrites_mattpocock_tracker_paths(
     tmp_path: Path,
+    repo_root: Path,
     canonical_name: str,
     file_name: str,
 ) -> None:
@@ -283,10 +284,9 @@ def test_normalization_rewrites_mattpocock_tracker_paths(
     target = candidate / local / file_name
     target.parent.mkdir(parents=True)
     original = (
-        "Upstream path: `.scratch/<feature>/`\n"
-        "Root path: './.scratch/<feature>/issues/01-task.md'\n"
-        "Keep other/.scratch/<feature>/ and .scratch-archive/ and .scratch\n"
-    )
+        repo_root / ".github/skills/local-agent-sync-external-resources"
+        / "tests/evaluation/fixtures/upstream-local-tracker-paths.md"
+    ).read_text(encoding="utf-8")
     target.write_text(original, encoding="utf-8")
     asset = ManagedAsset(
         source="mattpocock-skills",
@@ -313,11 +313,84 @@ def test_normalization_rewrites_mattpocock_tracker_paths(
 
     assert first_changed == (f"{local}/{file_name}",)
     assert second_changed == ()
-    assert target.read_text(encoding="utf-8") == (
-        "Upstream path: `tracker/<feature>/`\n"
-        "Root path: 'tracker/<feature>/issues/01-task.md'\n"
-        "Keep other/.scratch/<feature>/ and .scratch-archive/ and .scratch\n"
+    expected = (
+        "Upstream path: `tmp/.issues/<feature>/`\n"
+        "Root path: 'tmp/.issues/<feature>/issues/01-task.md'\n"
+        "Spec: `.specs/<feature-slug>/spec.md`\n"
+        "Old spec: `.specs/<feature>/spec.md`\n"
+        "Already normalized spec: `.specs/<feature>/spec.md`\n"
+        "Keep other/.scratch/<feature>/ and other/tracker/ and .scratch-archive/ and tracker-archive/\n"
+        "Keep .scratch and tracker and .specs/ and tmp/.issues/<feature>/issues/01-task.md\n"
     )
+    content = target.read_text(encoding="utf-8")
+    if (
+        file_name == "SKILL.md" and canonical_name != "mattpocock-ask-matt"
+    ) or (
+        file_name == "issue-tracker-local.md"
+        and canonical_name == "mattpocock-setup-matt-pocock-skills"
+    ):
+        assert content.startswith(expected)
+    else:
+        assert content == expected
+
+
+@pytest.mark.parametrize(
+    ("canonical_name", "filename", "marker"),
+    [
+        ("mattpocock-setup-matt-pocock-skills", "SKILL.md", "spec-tracker-paths"),
+        (
+            "mattpocock-setup-matt-pocock-skills",
+            "issue-tracker-local.md",
+            "spec-tracker-paths",
+        ),
+        ("mattpocock-to-spec", "SKILL.md", "to-spec-testing-decisions"),
+        ("mattpocock-to-tickets", "SKILL.md", "spec-tracker-paths"),
+        ("mattpocock-code-review", "SKILL.md", "spec-tracker-paths"),
+    ],
+)
+@pytest.mark.parametrize("stale_note", [False, True])
+def test_normalization_restores_spec_tracker_contract(
+    tmp_path: Path,
+    repo_root: Path,
+    canonical_name: str,
+    filename: str,
+    marker: str,
+    stale_note: bool,
+) -> None:
+    bundle = repo_root / ".github/skills/local-agent-sync-external-resources"
+    resources = load_managed_resources(bundle / "references/managed-resources.yaml")
+    candidate = tmp_path / "candidate"
+    local = f".github/skills/{canonical_name}/{filename}"
+    target = candidate / local
+    target.parent.mkdir(parents=True)
+    start = f"<!-- local-sync:{marker}:start -->"
+    end = f"<!-- local-sync:{marker}:end -->"
+    original = "Upstream guidance without a fixed storage location.\n"
+    if filename == "SKILL.md":
+        original = f"---\nname: {canonical_name}\n---\n" + original
+        metadata = target.parent / "agents/openai.yaml"
+        if (repo_root / metadata.relative_to(candidate)).exists():
+            metadata.parent.mkdir()
+            metadata.write_bytes(
+                (repo_root / metadata.relative_to(candidate)).read_bytes()
+            )
+    if stale_note:
+        original += f"\n{start}\nObsolete storage rules.\n{end}\n"
+    original += "\nNew upstream guidance must survive.\n"
+    target.write_text(original, encoding="utf-8")
+    neighbor = target.with_name("UNCHANGED.md")
+    neighbor.write_text("Use custom/tasks/ and custom/specs/.\n", encoding="utf-8")
+
+    assert normalize_candidate(resources, candidate) == (local,)
+    content = target.read_text(encoding="utf-8")
+    assert content.count(start) == content.count(end) == 1
+    assert content.endswith(end + "\n")
+    assert "Obsolete storage rules." not in content
+    assert "New upstream guidance must survive." in content
+    published = (repo_root / local).read_text(encoding="utf-8")
+    assert content[content.index(start):] == published[published.index(start):]
+    assert neighbor.read_text(encoding="utf-8") == "Use custom/tasks/ and custom/specs/.\n"
+    assert normalize_candidate(resources, candidate) == ()
 
 
 @pytest.mark.parametrize(
@@ -332,7 +405,10 @@ def test_normalization_preserves_tracker_paths_outside_declared_bundles(
     local = f".github/skills/{canonical_name}"
     target = candidate / local / "references/tracker.md"
     target.parent.mkdir(parents=True)
-    original = "Upstream path: `.scratch/<feature>/`\n"
+    original = (
+        "Upstream path: `.scratch/<feature>/` and `tracker/<feature>/`\n"
+        "Spec: `tracker/<feature>/spec.md`\n"
+    )
     target.write_text(original, encoding="utf-8")
     asset = ManagedAsset(
         source="mattpocock-skills",
@@ -1347,6 +1423,107 @@ def test_normalization_restores_retro_reference_after_refresh(
         "Keep `writing-for-agents-extra` and `unmanaged` unchanged.\n"
     )
     assert neighbor.read_text(encoding="utf-8") == neighbor_content
+    assert normalize_candidate(resources, candidate) == ()
+
+
+def test_normalization_restores_grill_with_docs_domain_dependency(
+    tmp_path: Path,
+    repo_root: Path,
+) -> None:
+    bundle = repo_root / ".github/skills/local-agent-sync-external-resources"
+    resources = load_managed_resources(bundle / "references/managed-resources.yaml")
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/mattpocock-grill-with-docs/SKILL.md"
+    skill = candidate / local
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\ndisable-model-invocation: true\nname: grill-with-docs\n---\n"
+        'Call the Skill tool twice, for "grilling" and "domain-modeling".\n',
+        encoding="utf-8",
+    )
+    metadata = skill.parent / "agents/openai.yaml"
+    metadata.parent.mkdir()
+    metadata.write_bytes(
+        (repo_root / skill.parent.relative_to(candidate) / "agents/openai.yaml")
+        .read_bytes()
+    )
+    neighbor = skill.with_name("REFERENCE.md")
+    neighbor_text = 'Keep "domain-modeling" and "domain-modeling-extra".\n'
+    neighbor.write_text(neighbor_text, encoding="utf-8")
+
+    assert normalize_candidate(resources, candidate) == (local,)
+    assert skill.read_text(encoding="utf-8") == (
+        "---\ndisable-model-invocation: true\n"
+        "name: mattpocock-grill-with-docs\n---\n"
+        'Call the Skill tool twice, for "grilling" and '
+        '"mattpocock-domain-modeling".\n'
+    )
+    dependency = next(
+        asset for asset in resources.assets
+        if asset.canonical_name == "mattpocock-domain-modeling"
+    )
+    dependency_frontmatter = yaml.safe_load(
+        (repo_root / dependency.local / "SKILL.md")
+        .read_text(encoding="utf-8").split("---", 2)[1]
+    )
+    assert dependency_frontmatter["name"] == dependency.canonical_name
+    assert dependency_frontmatter.get("disable-model-invocation") is not True
+    assert neighbor.read_text(encoding="utf-8") == neighbor_text
+    assert normalize_candidate(resources, candidate) == ()
+
+
+@pytest.mark.parametrize(
+    ("filename", "fixture", "marker"),
+    [
+        ("SKILL.md", "upstream-domain-modeling.md", "domain-knowledge"),
+        ("ADR-FORMAT.md", "upstream-domain-adr-format.md", "domain-adr-format"),
+    ],
+)
+@pytest.mark.parametrize("stale_override", [False, True])
+def test_normalization_restores_domain_knowledge_contracts(
+    tmp_path: Path,
+    repo_root: Path,
+    filename: str,
+    fixture: str,
+    marker: str,
+    stale_override: bool,
+) -> None:
+    bundle = repo_root / ".github/skills/local-agent-sync-external-resources"
+    resources = load_managed_resources(bundle / "references/managed-resources.yaml")
+    candidate = tmp_path / "candidate"
+    local = f".github/skills/mattpocock-domain-modeling/{filename}"
+    target = candidate / local
+    target.parent.mkdir(parents=True)
+    start = f"<!-- local-sync:{marker}:start -->"
+    end = f"<!-- local-sync:{marker}:end -->"
+    original = (bundle / "tests/evaluation/fixtures" / fixture).read_text(
+        encoding="utf-8"
+    )
+    if stale_override:
+        original += f"\n{start}\nOutdated override.\n{end}\n"
+    original += "\n## Upstream addition\n\nKeep this new guidance.\n"
+    target.write_text(original, encoding="utf-8")
+    neighbor = target.with_name("GLOSSARY-FORMAT.md")
+    neighbor_text = "Keep the original glossary reference unchanged.\n"
+    neighbor.write_text(neighbor_text, encoding="utf-8")
+    unmanaged = candidate / f".github/skills/unmanaged/{filename}"
+    unmanaged.parent.mkdir(parents=True)
+    unmanaged.write_text(original, encoding="utf-8")
+
+    assert normalize_candidate(resources, candidate) == (local,)
+    content = target.read_text(encoding="utf-8")
+    assert content.count(start) == content.count(end) == 1
+    assert content.endswith(end + "\n")
+    assert "Outdated override." not in content
+    assert "## Upstream addition\n\nKeep this new guidance." in content
+    published = (repo_root / local).read_text(encoding="utf-8")
+    assert content[content.index(start):] == published[published.index(start):]
+    if filename == "SKILL.md":
+        assert "└── docs/adr/" not in content
+        assert "│   └── adr/" in content
+        assert "Use `GLOSSARY-FORMAT.md`." in content
+    assert neighbor.read_text(encoding="utf-8") == neighbor_text
+    assert unmanaged.read_text(encoding="utf-8") == original
     assert normalize_candidate(resources, candidate) == ()
 
 
@@ -2389,7 +2566,7 @@ def test_to_spec_testing_contract_refresh_is_scoped_and_idempotent(
             local=f".github/skills/mattpocock-{name}",
             canonical_name=f"mattpocock-{name}",
         )
-        for name in ("to-spec", "to-tickets")
+        for name in ("to-spec", "triage")
     )
     resources = ManagedResources(
         sources=(ManagedSource(
@@ -2417,6 +2594,6 @@ def test_to_spec_testing_contract_refresh_is_scoped_and_idempotent(
     assert "Obsolete test contract." not in first
     assert (candidate / assets[1].local / "SKILL.md").read_text(
         encoding="utf-8"
-    ) == originals["mattpocock-to-tickets"]
+    ) == originals["mattpocock-triage"]
     assert normalize_candidate(resources, candidate) == ()
     assert target.read_text(encoding="utf-8") == first

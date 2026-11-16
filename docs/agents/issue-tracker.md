@@ -1,20 +1,24 @@
 # Issue tracker: Local Markdown
 
-Ordinary issues and specs (you may know a spec as a PRD) for this repo live as
-Markdown files in `tmp/.issues/`. Wayfinder efforts use the self-contained
-workspace described below.
+Specs (also called PRDs) live as Markdown files in the project-root `.specs/`.
+Ordinary issues live in `tmp/.issues/`. Wayfinder efforts use the self-contained
+workspace described below. Do not create a root `tracker/` directory.
 
 ## Conventions
 
-- One feature per directory: `tmp/.issues/<feature-slug>/`
-- The spec is `tmp/.issues/<feature-slug>/spec.md`
+- The spec is `.specs/<feature-slug>/spec.md`, not `docs/.specs/`
 - Implementation issues are one file per ticket at `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
+- Each ticket links to its source spec; do not duplicate the spec in the issue directory
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
 ## When a skill says "publish to the issue tracker"
 
-Create a new file under `tmp/.issues/<feature-slug>/` (creating the directory if needed).
+For a spec, create `.specs/<feature-slug>/spec.md`. For an implementation
+ticket, create `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`.
+Create only the directories needed for the requested artifact.
+Preserve existing records in their current locations; these defaults do not
+authorize moving, overwriting, or deleting them.
 
 ## When a skill says "fetch the relevant ticket"
 

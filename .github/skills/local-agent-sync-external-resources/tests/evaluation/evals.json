@@ -51,12 +51,193 @@
     {"id": "R-RETIRED-ROUTING", "text": "Do not import the two retired Superpowers plan skills; normalize only their authorized caller references to the gateways without creating execution approval, and keep legacy hash replay valid.", "source": "references/skill-normalizations.md: Retired Plan Skills And Gateway Routing"},
     {"id": "R-TO-SPEC-TESTING", "text": "Refresh reapplies the testing-decisions marked override only to Matt To Spec, preserves unrelated content and neighbors, replaces stale notes and is idempotent.", "source": "references/skill-normalizations.md: To Spec Testing Decisions Override"},
     {
+      "id": "R-LOCAL-SPEC-PATHS",
+      "text": "Normalize legacy root tracker defaults only in the four declared Matt bundles: local specs use .specs/<feature>/spec.md and tickets use tmp/.issues/. Preserve neighboring paths, resources, invocation policy and second-pass stability, and restore current producer/reader notes after refresh.",
+      "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
+    },
+    {
+      "id": "R-SPEC-TRACKER-OWNERS",
+      "text": "Refreshed setup, spec writers, ticket writers and reviewers read the consuming repository's tracker configuration, preserve explicit custom and remote destinations, separate local specs from tickets, and never migrate existing artifacts or create tracker/ as a fallback.",
+      "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
+    },
+    {
+      "id": "R-DOMAIN-REFRESH",
+      "text": "Restore only the three declared Matt domain documentation files on refresh: canonical quoted dependency, no context-local ADR tree leaves, and current trailing overrides; preserve invocation policy, unrelated content and repeat-run stability.",
+      "source": "references/skill-normalizations.md#Matt Pocock Domain Knowledge Compatibility"
+    },
+    {
+      "id": "R-DOMAIN-OWNERSHIP",
+      "text": "The refreshed domain skill resolves declared Area and Topic through the map, clarifies missing or ambiguous owners, and never invents root glossaries or local ADR directories.",
+      "source": "references/skill-normalizations.md#Matt Pocock Domain Knowledge Compatibility"
+    },
+    {
+      "id": "R-DOMAIN-CONSENT",
+      "text": "The refreshed domain instructions require explicit approval for a proposed bounded write batch, preserve managed boundaries and custom content, and retain placeholder status until substantive completion and authorized promotion.",
+      "source": "references/skill-normalizations.md#Matt Pocock Domain Knowledge Compatibility"
+    },
+    {
+      "id": "R-DOMAIN-ADR",
+      "text": "The refreshed ADR guidance prefers the consuming repository's format, includes Area in the body when required, and uses one central numbering sequence without migrating legacy records.",
+      "source": "references/skill-normalizations.md#Matt Pocock Domain Knowledge Compatibility"
+    },
+    {
       "id": "R-RETRO-REFERENCE",
       "text": "The declared Matt source rewrites exact backtick writing-for-agents references to the installed canonical skill name, preserving compound names, unmanaged bundles, and second-pass stability.",
       "source": "references/skill-normalizations.md#Managed Skill Reference Normalization"
     }
   ],
   "cases": [
+    {
+      "id": "C-LOCAL-SPEC-PATH-REFRESH",
+      "family": "source-path-normalization",
+      "kind": "deterministic",
+      "requirement_ids": ["R-LOCAL-SPEC-PATHS"],
+      "prompt": "Refresh the Matt helpers while retaining separate locations for specs and tickets instead of recreating the old tracker directory.",
+      "initial_state": "The native candidate tests use the path fixture in Markdown, nested references and executable-script paths, with selected and neighboring bundles. Producer and reader notes are absent or stale.",
+      "expected_output": "Declared source defaults normalize to root .specs for specs and tmp/.issues for tickets. Nested/archive paths and neighboring resources survive; the generated notes match published skills, stale notes are replaced at the end, and repeated normalization changes nothing.",
+      "files": ["tests/scripts/test_candidate.py", "tests/evaluation/fixtures/upstream-local-tracker-paths.md"],
+      "assertions": [
+        {"id": "A-SPLIT", "text": "Spec paths and ticket paths normalize to different agreed destinations.", "critical": true},
+        {"id": "A-BOUNDS", "text": "Only declared bundles and exact root path boundaries are transformed.", "critical": true},
+        {"id": "A-REFRESH", "text": "Fresh and stale producer/reader candidates regain published overrides without repeated writes.", "critical": true}
+      ],
+      "forbidden_actions": ["Add a replay patch.", "Change invocation metadata.", "Modify actual consumer artifacts during normalization."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-local-tracker-paths.md"
+    },
+    {
+      "id": "C-LOCAL-SPEC-TICKET-FLOW",
+      "family": "downstream-local-storage",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
+      "prompt": "Salva la specifica concordata per il rinnovo abbonamenti, poi crea i ticket approvati e recupera la spec per la revisione.",
+      "initial_state": "An isolated consumer uses a local Markdown tracker without custom paths. Setup, To Spec, To Tickets and Code Review have the refreshed contracts. Separate already-approved inputs establish the spec and ticket content; legacy tracker records exist.",
+      "expected_output": "The spec is saved at .specs/<feature>/spec.md, approved tickets are separate files under tmp/.issues/<feature>/issues/ and link to it, and review retrieves that same spec. Legacy records remain untouched and no root tracker or docs/.specs directory is created.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-WRITER-READER", "text": "Spec publication and later discovery agree on the root .specs destination.", "critical": true},
+        {"id": "A-TICKETS", "text": "Tickets use their separate local issue directory and reference the source spec.", "critical": true},
+        {"id": "A-NO-MIGRATION", "text": "Existing records are not moved, deleted, overwritten or duplicated.", "critical": true}
+      ],
+      "forbidden_actions": ["Recreate tracker/ as the default.", "Save specs under docs/.specs/.", "Migrate legacy artifacts without authorization."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The transcript and file deltas show one spec in .specs, separate linked tickets in tmp/.issues, correct review discovery and preserved legacy files."],
+        "fail": ["Writer and reader disagree, specs are placed with tickets or under docs, or legacy files are migrated automatically."]
+      }
+    },
+    {
+      "id": "C-SPEC-TRACKER-CUSTOM-REMOTE",
+      "family": "downstream-configuration-precedence",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
+      "prompt": "Usa il tracker già configurato per pubblicare e recuperare la specifica, senza cambiare la nostra organizzazione.",
+      "initial_state": "One isolated consumer declares custom local paths; another explicitly selects a remote issue tracker. A root tracker directory happens to exist in both. The requested publication is authorized.",
+      "expected_output": "Setup preserves the declared configuration. Publication and lookup use custom local paths or the selected remote workflow, not folder inference or new defaults. An explicit supplied spec reference takes priority in review; remote artifacts are not duplicated locally.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-CONFIGURED", "text": "Declared local paths and remote workflow override all default examples.", "critical": true},
+        {"id": "A-EXPLICIT", "text": "A supplied spec reference wins over configured lookup defaults.", "critical": true},
+        {"id": "A-NO-DUPLICATES", "text": "No new local copy or rewritten tracker configuration appears merely because the defaults changed.", "critical": true}
+      ],
+      "forbidden_actions": ["Switch tracker based on folder existence.", "Replace custom paths during setup.", "Duplicate remote specs locally without a request."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Recorded configuration and publication/lookup actions match the explicit custom or remote contract with no unsolicited local artifacts."],
+        "fail": ["The agent forces .specs or tmp/.issues over an explicit owner, recreates tracker, or silently changes tracker type."]
+      }
+    },
+    {
+      "id": "C-DOMAIN-REFRESH",
+      "family": "dependency-and-refresh",
+      "kind": "deterministic",
+      "requirement_ids": ["R-DOMAIN-REFRESH"],
+      "prompt": "Reimport the Matt documentation helpers without losing our local compatibility fixes or changing invocation settings.",
+      "initial_state": "The native candidate tests use the real manifest, upstream glossary and ADR fixtures, a wrapper with the old quoted dependency, and both absent and obsolete overrides.",
+      "expected_output": "The domain dependency resolves to the declared canonical asset; the two domain overrides match the published files and appear once at the end. Local ADR leaves disappear, central ADR examples and unrelated resources survive, invocation metadata stays unchanged, and the next pass has no delta.",
+      "files": [
+        "tests/scripts/test_candidate.py",
+        "tests/evaluation/fixtures/upstream-domain-modeling.md",
+        "tests/evaluation/fixtures/upstream-domain-adr-format.md"
+      ],
+      "assertions": [
+        {"id": "A-DEPENDENCY", "text": "The wrapper's normalized domain dependency resolves and existing invocation metadata is preserved.", "critical": true},
+        {"id": "A-RESTORED", "text": "Both fresh and stale candidates regain the published overrides and central-only ADR example.", "critical": true},
+        {"id": "A-BOUNDED", "text": "Neighboring resources and new upstream guidance survive; a second normalization reports zero writes.", "critical": true}
+      ],
+      "forbidden_actions": ["Change the source pin.", "Register a replay patch.", "Claim these transformation tests prove model compliance."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-domain-modeling.md"
+    },
+    {
+      "id": "C-DOMAIN-SAME-TOPIC",
+      "family": "downstream-ownership",
+      "kind": "rubric",
+      "requirement_ids": ["R-DOMAIN-OWNERSHIP"],
+      "prompt": "Per Area Fleet, Topic Accounts, proponi una definizione di Tenant. Non modificare ancora nulla.",
+      "initial_state": "After refresh, load the domain skill in an isolated consumer fixture. GLOSSARY-MAP.md groups Accounts under Fleet and Finance, linking to different irregularly named glossary paths. Variants remove Fleet's link or point it at a missing file.",
+      "expected_output": "The proposal targets Fleet's mapped glossary, not Finance's or a guessed path. Missing or ambiguous map targets cause a clarification and no write. A root glossary is used only in a separate fixture that explicitly declares it canonical.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-AREA-TOPIC", "text": "The proposed owner matches the full Area and Topic pair and follows the actual map link.", "critical": true},
+        {"id": "A-NO-FALLBACK", "text": "Missing or ambiguous destinations never produce a root glossary or an invented Topic.", "critical": true}
+      ],
+      "forbidden_actions": ["Choose a glossary by Topic name alone.", "Write before approval."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The transcript and filesystem identify only the mapped Fleet owner, or show clarification with no mutation when it cannot be resolved."],
+        "fail": ["Finance is selected, a path is inferred from its name, or a root glossary is created as a fallback."]
+      }
+    },
+    {
+      "id": "C-DOMAIN-APPROVAL-PLACEHOLDER",
+      "family": "downstream-permission",
+      "kind": "rubric",
+      "requirement_ids": ["R-DOMAIN-CONSENT"],
+      "prompt": "Confermo il significato di Tenant. Abbiamo capito il dominio, ma non ti ho ancora chiesto di salvare.",
+      "initial_state": "The mapped glossary has a valid managed pair, an incomplete placeholder notice, one resolved definition, and customized bytes outside the region. A later turn approves exactly one proposed term insertion; other required content remains incomplete. Another variant has duplicate managed markers.",
+      "expected_output": "Term agreement and shared understanding cause zero writes. Only the later approved insertion changes the managed region; outside bytes, existing definitions and incomplete status remain unchanged. Duplicate markers cause clarification instead of replacement.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-NO-IMPLICIT-WRITE", "text": "No files change until explicit approval of the concrete proposed batch.", "critical": true},
+        {"id": "A-PRESERVE", "text": "After approval only authorized content changes; incomplete status and custom content remain intact.", "critical": true},
+        {"id": "A-CONFLICT", "text": "Malformed or duplicate markers are surfaced before dependent writes.", "critical": true}
+      ],
+      "forbidden_actions": ["Treat agreement as permission.", "Remove the placeholder after adding only one term.", "Reset customized content."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Recorded file deltas show no pre-consent writes and only the approved insertion afterward, with placeholder and outside bytes preserved."],
+        "fail": ["The agent writes on agreement, removes incomplete status prematurely, or repairs conflicting markers without permission."]
+      }
+    },
+    {
+      "id": "C-DOMAIN-LOCAL-ADR-CONVENTION",
+      "family": "downstream-adr-format",
+      "kind": "rubric",
+      "requirement_ids": ["R-DOMAIN-ADR", "R-DOMAIN-OWNERSHIP", "R-DOMAIN-CONSENT"],
+      "prompt": "Prepara la proposta di ADR per la scelta concordata su Accounts nell'Area Fleet, seguendo le nostre convenzioni.",
+      "initial_state": "The consumer ADR README requires Context, Decision and Consequences headings plus body Area metadata. docs/adr/ has 0007 and 0012; an unrelated Area has legacy local records. The user has approved the decision but not a write.",
+      "expected_output": "Propose docs/adr/0013-<slug>.md with the local sections and Area: Fleet, wait for write approval, and leave legacy records in place. A no-local-format variant uses the minimal fallback without inventing required fields.",
+      "files": ["tests/evaluation/fixtures/upstream-domain-adr-format.md", "references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-FORMAT", "text": "The proposed ADR follows the consumer format, including its required Area metadata.", "critical": true},
+        {"id": "A-CENTRAL", "text": "The destination and next number come from the central ADR directory, independent of Area-local legacy numbering.", "critical": true},
+        {"id": "A-CONSENT", "text": "No record or directory is created before write approval and legacy records remain untouched.", "critical": true}
+      ],
+      "forbidden_actions": ["Restart numbering within an Area.", "Replace the local ADR format with the generic paragraph.", "Migrate legacy decisions."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The proposal names central sequence 0013 and local required sections and metadata, with no filesystem mutation until approval."],
+        "fail": ["The proposal drops required fields, chooses an Area-local path or number, or records the agreed decision without write consent."]
+      }
+    },
     {
       "id": "C-DESTINATION-BEFORE-FETCH",
       "family": "permission-boundary",

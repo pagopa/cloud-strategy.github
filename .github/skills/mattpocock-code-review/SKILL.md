@@ -28,7 +28,7 @@ Look for the originating spec, in this order:
 
 1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched via the workflow in the tracker doc.
 2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `tracker/` matching the branch name or feature.
+3. A spec file under `docs/`, `specs/`, or `tmp/.issues/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
 
 ### 3. Identify the standards sources
@@ -87,3 +87,29 @@ A change can pass one axis and fail the other:
 - Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Standards fail.**
 
 Reporting them separately stops one axis from masking the other.
+
+<!-- local-sync:spec-tracker-paths:start -->
+## Local specification and tracker paths
+
+This contract overrides conflicting storage defaults, publication destinations,
+and spec lookup instructions above.
+
+- Read applicable repository policy and `docs/agents/issue-tracker.md` before
+  publishing or locating a spec or ticket. Declared tracker types and paths
+  override examples and defaults; do not infer them from folder existence.
+- For a selected local Markdown tracker without declared paths, save new specs
+  at `.specs/<feature-slug>/spec.md` in the project root and tickets at
+  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
+  Link tickets to their source spec instead of copying it into the issue folder.
+- Setup must retain existing tracker choices and custom paths. For a new local
+  setup, record the separate spec and ticket defaults above. Do not create
+  `tracker/` or `docs/.specs/` as a fallback; create only directories needed for
+  the requested artifacts.
+- For a configured remote tracker, use its publication and lookup workflow.
+  Do not create a duplicate local spec or ticket unless the user requests it.
+- Readers must honor an explicit spec reference first, then the configured
+  source; for local defaults, look in `.specs/<feature-slug>/spec.md`.
+  Use legacy locations only when evidenced, and clarify ambiguous matches.
+- Do not move, delete, overwrite, or migrate existing specs, issues, or tracker
+  configuration merely to adopt these defaults.
+<!-- local-sync:spec-tracker-paths:end -->

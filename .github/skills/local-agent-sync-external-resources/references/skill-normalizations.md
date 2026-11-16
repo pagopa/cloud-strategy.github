@@ -152,21 +152,43 @@ declared source.
   `mattpocock-setup-matt-pocock-skills`, `mattpocock-ask-matt`,
   `mattpocock-to-tickets`, and `mattpocock-code-review` bundles.
 - Search every UTF-8 text file in those bundles, including nested references
-  and executable scripts. Replace project-root `.scratch/` and `./.scratch/`
-  with `tracker/`, preserving suffixes and neighboring text. The match must
-  not follow a letter, digit, underscore, dot, slash, or hyphen. Preserve nested
-  paths such as `other/.scratch/`, `.scratch-archive/`, and bare `.scratch`.
+  and executable scripts. Replace project-root `.scratch/` and `tracker/`,
+  optionally prefixed by `./`, with `tmp/.issues/`, preserving suffixes and
+  neighboring text. The match must not follow a letter, digit, underscore, dot,
+  slash, or hyphen. Preserve nested paths, archive names, and bare directory
+  names.
+- After that rewrite, move exact root `tmp/.issues/<feature>/spec.md`
+  references to `.specs/<feature>/spec.md`. Match one feature path segment,
+  including placeholders, and preserve filename suffixes such as `.backup`.
+  This updates source defaults, not user records or consumer configuration.
 - Apply this idempotent path rule through `normalize_candidate` on every
   refresh. Do not add a replay patch or override-registry entry.
-- Run `tests/scripts/test_candidate.py -k 'tracker_paths or retired_mattpocock_paths'`
-  for rewrite, scope, neighboring-path preservation, and repeat-run checks;
-  then run the full native sync test suite.
+- Append or replace one trailing `local-sync:spec-tracker-paths` note in the
+  Setup, To Tickets, and Code Review `SKILL.md` files and Setup's
+  `issue-tracker-local.md`. Incorporate the same path contract into To Spec's
+  existing testing-decisions note rather than creating a second override.
+- The contract requires reading consumer policy and tracker configuration.
+  Selected local Markdown trackers default to root
+  `.specs/<feature-slug>/spec.md` for specs and
+  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md` for tickets, with a link to
+  their source spec. Existing explicit paths and remote tracker workflows win.
+  Setup preserves custom choices; readers honor explicit spec references
+  before configured/default locations. Do not infer ownership from existing
+  folders, create `tracker/` or `docs/.specs/` as a fallback, duplicate remote
+  artifacts locally, or migrate existing records automatically.
+- Run `tests/scripts/test_candidate.py -k 'tracker_paths or spec_tracker_contract or to_spec_testing'`
+  for rewrites, declared scope, neighboring-path preservation, publication
+  parity, stale-note replacement, and repeat-run checks; then run the full
+  native sync suite. Concrete downstream local/custom/remote scenarios stay
+  separate from transformation tests and remain `not-run` without model runs.
 
 ## To Spec Testing Decisions Override
 
 - Target only `mattpocock-skills` / canonical `mattpocock-to-spec` / `SKILL.md`.
-- Append or replace the `local-sync:to-spec-testing-decisions` marked note.
-  It overrides upstream seam confirmation and applies to `Testing Decisions`.
+- Append or replace the trailing `local-sync:to-spec-testing-decisions` marked
+  note. Its path section carries the shared local spec/tracker contract above;
+  its testing section overrides upstream seam confirmation and applies to
+  `Testing Decisions`.
 - Keep accepted mandatory checks separate from optional evaluations and
   proposed seams. Behavioral evaluation is optional unless explicitly required;
   missing optional runtime does not block publication or planning.
@@ -176,6 +198,34 @@ declared source.
 - Preserve unrelated upstream content and neighboring bundles. Verify fresh
   injection, stale-note replacement, and idempotence with
   `tests/scripts/test_candidate.py -k to_spec_testing`.
+
+## Matt Pocock Domain Knowledge Compatibility
+
+- Target only `mattpocock-skills` and the three files below. Preserve invocation
+  policy, the source pin, neighboring bundles, and other bundle resources.
+- In `mattpocock-grill-with-docs/SKILL.md`, replace the exact quoted or
+  backtick-delimited `domain-modeling` dependency with
+  `mattpocock-domain-modeling`. Leave the other dependency unchanged.
+- In `mattpocock-domain-modeling/SKILL.md`, remove context-local `docs/adr/`
+  tree leaves adjacent to a same-indent `GLOSSARY.md` leaf, preserving the
+  glossary and the central `docs/adr/` example. Match paths and tree delimiters,
+  not explanatory prose or line numbers. Append or replace the
+  `local-sync:domain-knowledge` note at the end.
+- That note overrides conflicting inline-write and glossary-format guidance:
+  resolve declared Area plus Topic through the map, clarify missing or
+  ambiguous owners, require explicit approval for a proposed write batch, and
+  preserve managed regions, customized content, and incomplete placeholders.
+  Root glossaries require an explicitly declared canonical owner.
+- In `mattpocock-domain-modeling/ADR-FORMAT.md`, append or replace the
+  `local-sync:domain-adr-format` note at the end. Prefer the consumer's ADR
+  format, include body `Area:` metadata when required, and keep new records and
+  numbering central under `docs/adr/`, with approval before writing.
+- Run `tests/scripts/test_candidate.py -k 'restores_grill_with_docs_domain_dependency or restores_domain_knowledge_contracts'`
+  for fresh upstream restoration, stale-note replacement, publication parity,
+  preserved neighboring content and invocation policy, and repeat-run stability.
+  Then run the full native sync suite. These tests establish transformation
+  behavior, not an agent's glossary selection or consent compliance; the eval
+  pack records those concrete scenarios separately as `not-run`.
 
 ## Idea Refine Output Override
 

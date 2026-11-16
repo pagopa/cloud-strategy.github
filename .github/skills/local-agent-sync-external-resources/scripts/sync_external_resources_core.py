@@ -710,8 +710,54 @@ _MATTPOCOCK_TRACKER_SKILLS = frozenset(
     }
 )
 _MATTPOCOCK_TRACKER_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_./-])(?:\./)?\.scratch/"
+    r"(?<![A-Za-z0-9_./-])(?:\./)?(?:\.scratch|tracker)/"
 )
+_MATTPOCOCK_SPEC_PATH_RE = re.compile(
+    r"""(?<![A-Za-z0-9_./-])tmp/\.issues/(?P<feature>[^\s/`"']+)/spec\.md"""
+    r"(?![A-Za-z0-9_.-])"
+)
+_MATTPOCOCK_SPEC_TRACKER_FILES = frozenset(
+    {
+        ("mattpocock-setup-matt-pocock-skills", "SKILL.md"),
+        ("mattpocock-setup-matt-pocock-skills", "issue-tracker-local.md"),
+        ("mattpocock-to-tickets", "SKILL.md"),
+        ("mattpocock-code-review", "SKILL.md"),
+    }
+)
+_SPEC_TRACKER_START = "<!-- local-sync:spec-tracker-paths:start -->"
+_SPEC_TRACKER_END = "<!-- local-sync:spec-tracker-paths:end -->"
+_SPEC_TRACKER_RE = re.compile(
+    re.escape(_SPEC_TRACKER_START) + r".*?" + re.escape(_SPEC_TRACKER_END),
+    re.DOTALL,
+)
+_SPEC_TRACKER_BODY = """\
+- Read applicable repository policy and `docs/agents/issue-tracker.md` before
+  publishing or locating a spec or ticket. Declared tracker types and paths
+  override examples and defaults; do not infer them from folder existence.
+- For a selected local Markdown tracker without declared paths, save new specs
+  at `.specs/<feature-slug>/spec.md` in the project root and tickets at
+  `tmp/.issues/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`.
+  Link tickets to their source spec instead of copying it into the issue folder.
+- Setup must retain existing tracker choices and custom paths. For a new local
+  setup, record the separate spec and ticket defaults above. Do not create
+  `tracker/` or `docs/.specs/` as a fallback; create only directories needed for
+  the requested artifacts.
+- For a configured remote tracker, use its publication and lookup workflow.
+  Do not create a duplicate local spec or ticket unless the user requests it.
+- Readers must honor an explicit spec reference first, then the configured
+  source; for local defaults, look in `.specs/<feature-slug>/spec.md`.
+  Use legacy locations only when evidenced, and clarify ambiguous matches.
+- Do not move, delete, overwrite, or migrate existing specs, issues, or tracker
+  configuration merely to adopt these defaults."""
+_SPEC_TRACKER_CONTRACT = f"""\
+{_SPEC_TRACKER_START}
+## Local specification and tracker paths
+
+This contract overrides conflicting storage defaults, publication destinations,
+and spec lookup instructions above.
+
+{_SPEC_TRACKER_BODY}
+{_SPEC_TRACKER_END}"""
 _MATTPOCOCK_GRILL_ME_SKILL = "grill-me"
 _MATTPOCOCK_GRILLING_SKILL = "grilling"
 _MATTPOCOCK_GRILLING_MERGE_FILES = frozenset(
@@ -778,6 +824,75 @@ _MATTPOCOCK_RETAINED_PATHS = {
     ): (("./tmp/codebase-improve/", "./tmp/.codebase-improve/"),),
 }
 _MATTPOCOCK_GRILLING_REDIRECT_EXCLUSIONS = frozenset({"grill-me", "grilling"})
+_DOMAIN_LOCAL_ADR_TREE_RE = re.compile(
+    r"(?m)^(?P<indent>[│ ]+)[├└]── GLOSSARY\.md\n"
+    r"(?P=indent)[├└]── docs/adr/[^\n]*(?:\n|$)"
+)
+_DOMAIN_KNOWLEDGE_START = "<!-- local-sync:domain-knowledge:start -->"
+_DOMAIN_KNOWLEDGE_END = "<!-- local-sync:domain-knowledge:end -->"
+_DOMAIN_KNOWLEDGE_RE = re.compile(
+    re.escape(_DOMAIN_KNOWLEDGE_START) + r".*?" + re.escape(_DOMAIN_KNOWLEDGE_END),
+    re.DOTALL,
+)
+_DOMAIN_KNOWLEDGE_CONTRACT = f"""\
+{_DOMAIN_KNOWLEDGE_START}
+## Repository knowledge contract
+
+This contract overrides conflicting placement, inference, creation, and inline
+writing instructions above and in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md).
+
+- Resolve ownership first: read the repository's declared Area and Topic and
+  follow their exact entry in `GLOSSARY-MAP.md`. Resolve links relative to the
+  map, not by guessing directory names. Topic names are not globally unique:
+  the same Topic in two Areas has two distinct owners.
+- Missing or ambiguous owner: ask before any dependent write when the map,
+  Area, Topic, or linked glossary is missing, ambiguous, or contradictory.
+  Never invent an Area, Topic, or root glossary as a fallback. Use a root
+  `GLOSSARY.md` only when the repository explicitly declares it canonical.
+  Preserve declared legacy homes without migration or duplicate definitions.
+- Obtain write approval: show the exact files and proposed changes, then
+  obtain explicit approval for that bounded batch before creating or editing
+  a glossary, map, or ADR. Agreement on terminology or shared understanding is
+  not write authorization. Changes outside the approved batch need new consent.
+- Preserve prepared glossaries: retain the
+  `<!-- knowledge:managed:start -->` / `<!-- knowledge:managed:end -->` pair
+  and every byte outside it. Missing markers do not authorize adopting the
+  whole file; malformed or repeated markers require clarification. Preserve
+  resolved definitions and custom content rather than resetting the scaffold.
+- Preserve incomplete status: keep `<!-- knowledge:placeholder -->` and
+  `Status: placeholder` while required content remains incomplete. Remove the
+  notice only when the glossary is substantively complete and that promotion
+  is part of the approved batch. Add only resolved, authorized terms; never
+  invent definitions to fill a placeholder.
+- Keep ADRs central: create new records only in `docs/adr/`, including
+  Area-scoped decisions. Follow [ADR-FORMAT.md](./ADR-FORMAT.md), use the
+  repository's ADR format and required Area metadata, and keep one central
+  numbering sequence. Do not create context-local or Area-local ADR folders.
+{_DOMAIN_KNOWLEDGE_END}"""
+_DOMAIN_ADR_START = "<!-- local-sync:domain-adr-format:start -->"
+_DOMAIN_ADR_END = "<!-- local-sync:domain-adr-format:end -->"
+_DOMAIN_ADR_RE = re.compile(
+    re.escape(_DOMAIN_ADR_START) + r".*?" + re.escape(_DOMAIN_ADR_END),
+    re.DOTALL,
+)
+_DOMAIN_ADR_CONTRACT = f"""\
+{_DOMAIN_ADR_START}
+## Repository ADR contract
+
+This contract overrides conflicting format or metadata guidance above.
+
+- Read `docs/adr/README.md` and the repository's declared ADR template or
+  existing convention first. Preserve its headings, metadata, status,
+  language, and section order. Use the minimal template above only when the
+  repository has no established ADR format.
+- When the declared layout requires it, include `Area: <area>` in the body;
+  name all affected Areas for a cross-Area decision.
+- Create every new ADR in `docs/adr/`. Scan that central directory for the
+  highest existing number and increment it; never restart numbering per Area
+  or Topic, or create a local ADR folder. Do not migrate legacy records.
+- Before any write, obtain explicit approval for the proposed files and
+  changes. Agreement on a decision alone does not authorize recording it.
+{_DOMAIN_ADR_END}"""
 _TO_SPEC_TESTING_START = "<!-- local-sync:to-spec-testing-decisions:start -->"
 _TO_SPEC_TESTING_END = "<!-- local-sync:to-spec-testing-decisions:end -->"
 _TO_SPEC_TESTING_RE = re.compile(
@@ -786,10 +901,18 @@ _TO_SPEC_TESTING_RE = re.compile(
 )
 _TO_SPEC_TESTING_CONTRACT = f"""\
 {_TO_SPEC_TESTING_START}
-## Local testing-decisions contract
+## Local specification and testing contract
 
-This contract overrides conflicting seam-confirmation, testing, and readiness
-instructions above. Apply it in the spec's `Testing Decisions` section.
+This contract overrides conflicting publication, seam-confirmation, testing,
+and readiness instructions above.
+
+### Specification and tracker paths
+
+{_SPEC_TRACKER_BODY}
+
+### Testing decisions
+
+Apply these rules in the spec's `Testing Decisions` section.
 
 - Separate accepted mandatory checks, optional evaluations, and proposed test
   seams. Synthesize decisions already made; do not invent mandatory checks.
@@ -1469,12 +1592,47 @@ def normalize_candidate(
 
             if asset.source == _MATTPOCOCK_SOURCE:
                 if asset.canonical_name in _MATTPOCOCK_TRACKER_SKILLS:
-                    content = _MATTPOCOCK_TRACKER_PATH_RE.sub("tracker/", content)
+                    content = _MATTPOCOCK_TRACKER_PATH_RE.sub("tmp/.issues/", content)
+                    content = _MATTPOCOCK_SPEC_PATH_RE.sub(
+                        r".specs/\g<feature>/spec.md", content
+                    )
+                relative_path = file_path.relative_to(asset_dir).as_posix()
                 content = _normalize_mattpocock_retained_paths(
                     asset.canonical_name,
-                    file_path.relative_to(asset_dir).as_posix(),
+                    relative_path,
                     content,
                 )
+                if (asset.canonical_name, relative_path) in _MATTPOCOCK_SPEC_TRACKER_FILES:
+                    content = _enforce_marked_contract(
+                        _SPEC_TRACKER_RE.sub("", content).rstrip(),
+                        _SPEC_TRACKER_RE,
+                        _SPEC_TRACKER_CONTRACT,
+                    )
+                if (
+                    asset.canonical_name == "mattpocock-grill-with-docs"
+                    and relative_path == "SKILL.md"
+                ):
+                    content = re.sub(
+                        r'(["`])domain-modeling\1',
+                        r"\1mattpocock-domain-modeling\1",
+                        content,
+                    )
+                if asset.canonical_name == "mattpocock-domain-modeling":
+                    if relative_path == "SKILL.md":
+                        content = _DOMAIN_LOCAL_ADR_TREE_RE.sub(
+                            r"\g<indent>└── GLOSSARY.md\n", content
+                        )
+                        content = _enforce_marked_contract(
+                            _DOMAIN_KNOWLEDGE_RE.sub("", content).rstrip(),
+                            _DOMAIN_KNOWLEDGE_RE,
+                            _DOMAIN_KNOWLEDGE_CONTRACT,
+                        )
+                    elif relative_path == "ADR-FORMAT.md":
+                        content = _enforce_marked_contract(
+                            _DOMAIN_ADR_RE.sub("", content).rstrip(),
+                            _DOMAIN_ADR_RE,
+                            _DOMAIN_ADR_CONTRACT,
+                        )
 
             if asset.canonical_name == _IDEA_REFINE_SKILL:
                 content = _IDEA_REFINE_PATH_RE.sub("tmp/ideas", content)
@@ -1512,7 +1670,9 @@ def normalize_candidate(
                 and file_path == asset_dir / "SKILL.md"
             ):
                 content = _enforce_marked_contract(
-                    content, _TO_SPEC_TESTING_RE, _TO_SPEC_TESTING_CONTRACT,
+                    _TO_SPEC_TESTING_RE.sub("", content).rstrip(),
+                    _TO_SPEC_TESTING_RE,
+                    _TO_SPEC_TESTING_CONTRACT,
                 )
             if (
                 asset.source == _MATTPOCOCK_SOURCE
