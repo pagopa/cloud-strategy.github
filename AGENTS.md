@@ -1,172 +1,129 @@
 # AGENTS.md - Repository Operating Core
 
-`AGENTS.md` is the always-on, portable policy baseline for coding agents. Keep
-it generic enough to reuse in any repository; keep repository-specific rules in
-`AGENTS.local.md` and specialized guidance with the nearest owner.
+Keep this baseline portable across repositories.
 
 ## Scope And Precedence
 
-**The narrowest applicable owner decides.**
-
-- Local policy: when `AGENTS.local.md` exists next to this file, you must read
-  it before you act and apply it after this baseline. Its rules override
-  baseline defaults, subject to the limits below. When it does not exist,
-  continue without error and do not create it.
+- The optional sibling `AGENTS.local.md` owns local policy. If it exists,
+  read it before acting and apply it after this baseline. Otherwise proceed
+  without creating it.
 - Direct user instructions win for the current task unless they require unsafe,
   destructive, or impossible behavior.
-- Apply the smallest relevant owner. Narrower, target-specific rules override
-  broader defaults when they conflict.
-- Local policy and narrower owners must not weaken `Boundaries` or
-  `Protected Skill Boundary`, or override direct user instructions.
-- Keep one active primary owner per execution lane. That owner retains material
-  decisions and final acceptance; load narrower owners only when evidence shows
-  they are needed.
-- Use only policy that exists on disk. Removed files, generated output,
-  historical aliases, and past automation are not active policy.
+- The narrowest applicable owner overrides broader defaults. Local and narrower
+  rules must respect user instructions, [Boundaries](#boundaries), and the
+  [Protected Skill Boundary](#protected-skill-boundary).
+- Keep one active primary owner per execution lane. It makes material decisions
+  and accepts the result. Load a narrower owner only when evidence calls for it.
+- Apply current policy from its owning file on disk. Exclude removed files,
+  generated output, historical aliases, and past automation as policy sources.
 
 ## Boundaries
 
-**Hard limits come first.**
-
-- Always: keep secrets out of code and history.
-- Ask first: destructive or irreversible actions, and policy or public-contract
-  changes.
-- Never: force-push or delete others' work. Never commit unless the user
-  requests a commit in the current turn.
-- A user request in the current turn authorizes its own action. An answer to
-  your own question authorizes no item in `Never`: a "yes" to "shall I run the
-  tests?" is not permission to commit.
+- Keep secrets out of code and history.
+- Ask before destructive or irreversible actions and before changing policy or
+  a public contract.
+- Never force-push or delete others' work.
+- Within these limits, a request in the current turn authorizes the action it
+  names. Commit only if the user requests a commit in that turn. An answer to
+  a question you initiated cannot authorize a commit.
 
 ## Think Before Coding
 
-**Surface the decision before the edit.**
-
-- Proceed: bias toward caution over speed, yet proceed directly on
-  deterministic, low-risk, reversible work, and on any task where every
-  reading produces the same change.
-- Scope: identify the target, nearest owner, bounded evidence, and validation
-  path before broad reading or commands. Match tool depth to scope and honor
-  explicit scope limits. For known files or symbols, inspect only those. Search
-  wider only to find an unknown component or call path. Use graph or index
-  tools only when `AGENTS.local.md` or a loaded skill directs it.
-- Proportion: keep a small, declared policy-only change with the nearest owner
-  and its adjacent checks. A one-line change in a known config needs that file
-  and one adjacent check, not a critical review. Load heavy workflows only on
+- Before broad reading or commands, identify the target, its nearest owner,
+  and the evidence you need. Name the closest executable check and its expected
+  result, or an observable condition for prose-only work. For multi-step work,
+  write a plan before editing and pair each step with its check.
+- Honor explicit scope limits. Inspect known files or symbols directly. Widen
+  the search only to locate an unknown component or call path. Use a graph or
+  index only when `AGENTS.local.md` or a loaded skill directs it.
+- Keep review in proportion to the change. A small policy edit needs its
+  nearest owner and adjacent checks. For a one-line change in a known config,
+  the file and one adjacent check suffice. Use a heavy workflow only for a
   concrete ambiguity or contradiction.
-- State: before editing non-trivial work, state the assumptions, target state,
-  non-goals, and tradeoffs, and name what is unclear. Name the rejected reading
-  in one line: `Assumption: <X>. Rejected: <Y>.` Push back when a simpler
-  approach exists.
-- Ask: when two plausible readings produce materially different changes, or
-  when `Boundaries` require it, ask one specific question and include your
-  recommendation.
-- Stop: with no user channel, stop at the decision and report the blocker.
-- Snapshot: on a dirty working tree, record the initial state without
-  modifying it and declare the task file allowlist before editing.
+- Before a non-trivial edit, state the intended result, non-goals, tradeoffs,
+  and open questions. Give the assumption and rejected reading on one line
+  using `Assumption: <X>. Rejected: <Y>.` Propose a simpler approach when one
+  meets the goal.
+- When plausible readings lead to materially different edits or an action
+  needs approval, ask one specific question with your recommendation and wait
+  for the answer. If you cannot reach the user, stop at that decision and
+  report the blocker.
+- With no decision pending, proceed directly on deterministic, low-risk,
+  reversible work or when every reading leads to the same change. Favor
+  caution when the risk is unclear.
+- On a dirty working tree, take a read-only snapshot of the initial state
+  and declare the task file allowlist before editing.
 
 ## Build Simple And Surgical
 
-**Build what the request names. Touch only what you must.**
-
-- Write the least code that meets the goal, with the fewest abstractions,
-  options, and states that internal invariants leave reachable. Add no
-  abstraction for single-use code. Validate external boundaries. When 200
-  lines could be 50, or a senior engineer would call it overcomplicated,
-  rewrite it.
-- Keep every changed line surgical: it traces to the request, matches the
-  existing style even when you would write it differently, and leaves
-  formatting, comments, and working code untouched, even inside touched
-  functions.
-- Report unrelated dead code and leave it in place unless the user asks to
-  remove it. Remove only the imports, variables, and functions that your own
-  change orphaned.
+- Write the least code that meets the request. Keep new single-use logic inline,
+  omit speculative options, and handle only reachable internal states.
+  Validate data at external boundaries.
+- Match the surrounding style. Every changed line must trace to the request,
+  including comments and formatting inside a function you edit.
+- Remove imports, variables, and functions your change makes unused. Report
+  unrelated dead code and leave it in place unless the user requests removal.
 
 ## Prove With Checks
 
-**Define done as checks that can fail, then loop until they pass.**
+- Test executable or evaluable behavior first. Reproduce bugs with a failing
+  check before fixing them. For new validation, start with failing tests for
+  invalid inputs. For refactors, run the same checks before and after.
+- After editing, run the closest check first, then any broader checks the
+  change requires. Fix failures caused by the change and rerun affected checks.
+- Investigate each failure. Keep failures in code the diff touches or calls
+  in scope. Classify other failures as pre-existing only with baseline
+  evidence, such as the same failure on untouched `HEAD`. Report unresolved
+  causes explicitly.
+- When policy or a contract changes, align the owning tests, validators, and
+  documentation. Enforce hard guarantees with permissions, validators, hooks,
+  or CI.
+- Compare the final diff with the initial state. Remove your own out-of-scope
+  hunks and simplify speculative code you introduced. Preserve pre-existing
+  edits. If clarification came after editing began, report it and confirm the
+  diff matches the clarified request.
+- Re-read changed files from the working tree before reporting. Ground claims
+  about behavior, runtimes, validators, sync, tests, and policy in repository
+  evidence. Report actual check results, unavailable checks, and evidence gaps.
 
-- A check is a command with an expected result or, for prose-only work, an
-  observable condition on the artifact. "Make it work" is not a check; "the
-  date parser rejects 2026-13-01" is.
-- Test first for executable or evaluable behavior. Fix a bug: go red by
-  reproducing it with a failing check before the fix. Add validation: write
-  tests for invalid inputs, then make them pass. Refactor: run the same checks
-  before and after.
-- For multi-step work, write the plan before editing, one check per step.
-  Strong checks let you loop without asking; weak checks force clarifying
-  questions.
+## Human-Facing Responses
 
-  ```text
-  1. <step> -> verify: <check>
-  2. <step> -> verify: <check>
-  ```
-
-- Name the closest executable validation early, run it after the change, and
-  report unavailable checks or evidence gaps explicitly.
-- Run targeted checks before global ones. Treat a failure as pre-existing only
-  when baseline evidence supports it, such as the same check failing on
-  untouched HEAD. A failure in code the diff touches or calls is not
-  pre-existing. Otherwise report its cause as unresolved.
-- Ground every statement about runtimes, validators, sync flows, tests, and
-  policy in repository evidence. When evidence is missing, say so.
-- When policy or a contract changes, align its owning tests, validators, and
-  documentation so stale checks cannot restore the old behavior.
-- Treat prose as guidance, not enforcement. Put hard guarantees in permissions,
-  validators, hooks, or CI.
-- Before handoff, review your changes against the recorded initial state.
-  Revert only your own hunks that do not trace to the request, and preserve
-  all pre-existing changes. Collapse speculative options and single-use
-  abstractions that your task introduced. A clarification that surfaced only
-  after editing came too late: report it and confirm the diff still matches
-  the clarified intent.
-- Before the final answer, re-read the changed files from the working tree
-  and compare them with the answer. Report only checks, content, and behavior
-  that the final state contains.
-
-### Human-Facing Responses
-
-- A direct user-requested format or an applicable skill-owned output contract
-  controls the response; apply these defaults only where it is silent.
-- Lead with the outcome in compact output that fits one screen. Preserve
-  material errors, security warnings, blockers, risks, uncertainty, validation
-  gaps, and the next required action.
-- Create an artifact only when the work needs one. When a retained artifact
-  owns full evidence, keep the response to outcome, delta, risk, and next
-  action.
+- Use the format the user requests. Where the user leaves it open, follow the
+  applicable skill's output contract, then the defaults here.
+- Lead with the outcome and fit the response on one screen. Include material
+  errors, security warnings, blockers, risks, uncertainty, gaps in validation,
+  and the next required action.
+- Create an artifact only when the task needs one. If it holds the full
+  evidence, summarize the outcome, changes, risks, and next action.
 
 ## Skill Resolution
 
-- The injected skill catalog is discovery evidence, not proof that a skill is
-  unavailable. When the user or a loaded skill names a skill, search only the
-  declared skill roots for it before declaring it unavailable.
-- For filesystem-backed skills, follow symbolic links within permission and
-  trust boundaries and verify the exact resolved `SKILL.md`. A readable file
-  proves the skill is present, even when the catalog omits it; it does not
-  prove the runtime can invoke it.
-- Resolve relative resources from the skill's canonical directory. Use
-  provider-specific discovery for skills that are not filesystem-backed.
-  Report the concrete failure: missing skill, broken link, unreadable file, or
-  unavailable execution capability.
+- For a filesystem skill named by the user or a loaded skill, verify the exact
+  resolved `SKILL.md`. If you need to locate it, search only the declared
+  skill roots, even when the catalog omits it. Follow symlinks within permission
+  and trust boundaries. Resolve relative resources from its canonical directory.
+- Use provider-specific discovery for other skills. Report the specific blocker
+  when a skill is missing, a link is broken, a file is unreadable, or the
+  runtime cannot invoke a present skill.
 
 ## Protected Skill Boundary
 
-- Imported or third-party skill bundles are protected and read-only by default.
-  Where a repository uses origin prefixes, treat bundles whose names do not
-  start with `internal-` or `local-` as protected.
-- Only an explicit instruction in the current user conversation naming the
-  exact protected skill or path authorizes an edit, limited to the requested
-  files, purpose, and turn. "Update the vendored bundle's description" names
-  no skill: stop. Invocation, wrapping, synchronization, dependency, or
-  perceived necessity implies no authorization.
-- An unapproved protected-skill finding is a stop condition; do not create an
-  allowlist to bypass it.
+- Imported and third-party bundles are read-only by default. In repositories
+  with origin prefixes, also protect every bundle whose name lacks an
+  `internal-` or `local-` prefix.
+- Edit a protected bundle only on an explicit user instruction in the current
+  conversation naming the exact skill or path. Limit the edit to the requested
+  files, purpose, and turn. Using, wrapping, syncing, or depending on a skill
+  grants no edit permission.
+- Stop on any unapproved protected-skill finding. Never add an allowlist entry
+  to bypass it.
 
 ## Placement And Authoring
 
-- Keep detailed procedures, checklists, file-shape recipes, command playbooks,
-  and tool-specific workflows in their owning skills or files.
-- Use Plain Technical English for repository-owned prose unless a narrower owner
-  overrides it: short sentences, stable terms, active voice, and explicit
-  `must`, `should`, and `may`. Keep required technical names unchanged.
-- Place native tests with the component and runner that own the behavior. Use
-  repository-root `tests/` only for real non-native or cross-boundary behavior.
+- Keep detailed procedures, checklists, file layouts, command playbooks, and
+  tool-specific workflows in their owning skills or files.
+- Use Plain Technical English for repository-owned prose unless a narrower
+  owner specifies otherwise. Use short sentences, stable terms, active voice,
+  and explicit `must`, `should`, and `may`. Preserve required technical names.
+- Place native tests with the component and runner that own the behavior.
+  Reserve repository-root `tests/` for non-native or cross-boundary behavior.
