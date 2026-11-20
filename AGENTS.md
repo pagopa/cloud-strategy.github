@@ -30,9 +30,10 @@ Keep this baseline portable across repositories.
 ## Think Before Coding
 
 - Before broad reading or commands, identify the target, its nearest owner,
-  and the evidence you need. Name the closest executable check and its expected
-  result, or an observable condition for prose-only work. For multi-step work,
-  write a plan before editing and pair each step with its check.
+  and the evidence you need. If an executable check applies, name the closest
+  one and its expected result. For prose-only work, define an observable
+  condition on the final text. For multi-step work, write a plan before
+  editing and pair each step with its check.
 - Honor explicit scope limits. Inspect known files or symbols directly. Widen
   the search only to locate an unknown component or call path. Use a graph or
   index only when `AGENTS.local.md` or a loaded skill directs it.
@@ -44,10 +45,11 @@ Keep this baseline portable across repositories.
   and open questions. Give the assumption and rejected reading on one line
   using `Assumption: <X>. Rejected: <Y>.` Propose a simpler approach when one
   meets the goal.
-- When plausible readings lead to materially different edits or an action
-  needs approval, ask one specific question with your recommendation and wait
-  for the answer. If you cannot reach the user, stop at that decision and
-  report the blocker.
+- Ask one specific question with your recommendation when plausible readings
+  lead to materially different edits, a simpler alternative would materially
+  change the design the user requested, or an action needs approval. Wait for
+  the user's answer before making the affected edit or taking the action.
+  If you cannot reach the user, stop at that decision and report the blocker.
 - With no decision pending, proceed directly on deterministic, low-risk,
   reversible work or when every reading leads to the same change. Favor
   caution when the risk is unclear.
@@ -69,12 +71,14 @@ Keep this baseline portable across repositories.
 - Test executable or evaluable behavior first. Reproduce bugs with a failing
   check before fixing them. For new validation, start with failing tests for
   invalid inputs. For refactors, run the same checks before and after.
-- After editing, run the closest check first, then any broader checks the
-  change requires. Fix failures caused by the change and rerun affected checks.
+- After editing, run the closest applicable executable check if available.
+  For prose-only work, also verify the stated condition on the final text.
+  Run any broader checks the change requires. Fix failures caused by the
+  change and rerun affected checks.
 - Investigate each failure. Keep failures in code the diff touches or calls
-  in scope. Classify other failures as pre-existing only with baseline
-  evidence, such as the same failure on untouched `HEAD`. Report unresolved
-  causes explicitly.
+  in scope and never classify them as pre-existing. For other failures, use
+  that label only with baseline evidence, such as the same failure on
+  untouched `HEAD`. Report unresolved causes explicitly.
 - When policy or a contract changes, align the owning tests, validators, and
   documentation. Enforce hard guarantees with permissions, validators, hooks,
   or CI.
@@ -85,6 +89,9 @@ Keep this baseline portable across repositories.
 - Re-read changed files from the working tree before reporting. Ground claims
   about behavior, runtimes, validators, sync, tests, and policy in repository
   evidence. Report actual check results, unavailable checks, and evidence gaps.
+- In comparative evaluations, report regressions separately from unmet
+  improvement targets. Identify which results come from actual runs of the
+  system under test.
 
 ## Human-Facing Responses
 
