@@ -1,8 +1,18 @@
 # Existing-Infrastructure Adoption Safety Delta
 
 Use this reference only when a request adopts existing infrastructure or
-reconstructs management of resources that already exist. It provides guidance
-and routing context; the selected owner and native runtime remain authoritative.
+reconstructs management of resources that already exist.
+
+## Contents
+
+- [Reconcile Before Mutation](#reconcile-before-mutation)
+- [Ownership and Mutation Policy](#ownership-and-mutation-policy)
+- [Five Ordered Phase Gates](#five-ordered-phase-gates)
+- [Runtime-Aware Evidence](#runtime-aware-evidence)
+- [Bounded Recovery](#bounded-recovery)
+- [Handoff Output](#handoff-output)
+- [Anti-Scope](#anti-scope)
+- [Temporary Local Override and Sunset](#temporary-local-override-and-sunset)
 
 ## Reconcile Before Mutation
 
@@ -99,13 +109,13 @@ explicitly:
 This reference does not provide provider-specific procedures, automatic
 import-everything behavior, fixed quotas or universal thresholds, a combined
 adoption/convergence apply, a new plan parser, or runtime enforcement. It does
-not replace Anton's read-only Terraform domain ownership or `/internal-tf`'s
-language and HCL ownership.
+not replace the read-only Terraform domain ownership of
+`antonbabenko-terraform-skill` or the language and HCL ownership of `internal-tf`.
 
 ## Temporary Local Override and Sunset
 
-A local override is permitted only for a uniquely repository-specific adoption
-edge. It must name its owner and a sunset trigger or date, must not alter the
-imported bundle, and must be removed when the upstream capability covers the
-safety delta. Temporary analysis or handoff artifacts are not runtime
-dependencies.
+A local override is permitted for an adoption safety delta that
+`antonbabenko-terraform-skill` lacks. It must name its owner and a sunset
+trigger or date, must not alter the imported bundle, and must be removed when
+the upstream capability covers the safety delta. Temporary analysis or handoff
+artifacts are not runtime dependencies.

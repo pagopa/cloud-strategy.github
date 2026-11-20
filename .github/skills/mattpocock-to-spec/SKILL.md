@@ -1,11 +1,11 @@
 ---
 name: mattpocock-to-spec
-description: Turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed.
+description: "Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed."
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a spec (you may know this document as a PRD). Do NOT interview the user — just synthesize what you already know.
+This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you — run `/mattpocock-setup-matt-pocock-skills` if not.
+The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/mattpocock-setup-matt-pocock-skills`.
 
 ## Process
 
@@ -53,7 +53,7 @@ A list of implementation decisions that were made. This can include:
 
 Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
 
-Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it within the relevant decision and note briefly that it came from a prototype. Trim to the decision-rich parts — not a working demo, just the important bits.
+Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it within the relevant decision and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
 
 ## Testing Decisions
 
@@ -73,11 +73,69 @@ Any further notes about the feature.
 
 </spec-template>
 
-<!-- local-sync:mattpocock-git-autonomy:start -->
-## Local Git-autonomy contract
+<!-- local-sync:to-spec-testing-decisions:start -->
+## Local specification and testing contract
 
-- Keep completed changes in the working tree for user review.
-- You may stage only changes owned by the current task when staging helps inspect the exact diff.
-- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
-- Keep pre-existing or unrelated user changes out of the index.
-<!-- local-sync:mattpocock-git-autonomy:end -->
+This contract overrides conflicting publication, seam-confirmation, testing,
+and readiness instructions above.
+
+### Specification and tracker paths
+
+- Read applicable repository policy and `docs/agents/issue-tracker.md` before
+  publishing or locating records. Preserve intentional custom paths and remote
+  workflows; an old standard-default declaration is not a custom exception.
+- Local defaults: specs use `.specs/<area>/<topic>/<feature>/spec.md`;
+  implementation tickets use `tmp/.issues/<area>/<topic>/<feature>/<NN>-<slug>.md`,
+  numbered from `01` per feature, with a link to their durable source.
+  Incoming issues stay durable under `.issues/`; templates stay in
+  `.specs/_templates/` and `.issues/_templates/`.
+- Scope: use the nearest common approved Area/Topic. Omit Topic for Area-wide
+  work and Area for cross-Area work or when no Areas are declared. Keep
+  `Area:` with all affected values and `Topic:` when applicable. Uncertain
+  applicability blocks publication; report it without inventing scope or
+  starting a new interview. Feature directories are leaves, not scope parents;
+  resolve path collisions before writing. Create no empty scope trees.
+- Discovery: recursively scan `.specs/**/spec.md`, configured incoming issue
+  records under `.issues/`, and `tmp/.issues/**/*.md` for configured `Status:`
+  roles. Exclude every `_`-prefixed path segment, templates and examples.
+  Implementation frontiers include only the selected feature's tickets.
+- Retention: keep specs, incoming issues and templates eligible for version
+  control; report conflicting ignore rules. Ticket comments and execution state
+  in `tmp/` are temporary. Requirements and acceptance criteria must already
+  have an authorized durable spec or equivalent source; otherwise propose it
+  and stop until approved. Durable records must not depend on temporary tickets
+  to retain their meaning. Never stage, commit or delete records automatically.
+- Migration: old standard-default records require migration before affected
+  tracker writes, even when a guide still declares the old default. Obtain
+  approval for each source, destination, removal and reference repair, preserve
+  state and content, and retain unique requirements durably before moving
+  implementation tickets into `tmp/`. Without approval, stop affected writes.
+  Read-only operations only report the requirement; unrelated docs stay unblocked.
+  Preserve genuine custom paths and remote trackers; do not modify Wayfinder
+  or plans in `tmp/.plans/`.
+- Readers honor an explicit source reference first, then configured lookup;
+  default spec lookup is recursive under `.specs/`, never inferred from folder
+  existence. Report ambiguous matches. Do not duplicate remote records locally,
+  create `tracker/` or `docs/.specs/`, or copy specs into ticket directories.
+
+### Testing decisions
+
+Apply these rules in the spec's `Testing Decisions` section.
+
+- Separate accepted mandatory checks, optional evaluations, and proposed test
+  seams. Synthesize decisions already made; do not invent mandatory checks.
+  Agreement on a seam or test design alone does not require its execution.
+- Prefer existing runnable checks. Behavioral skill evaluations, including
+  writer-to-executor trials, are optional unless the user explicitly requires
+  them. A missing optional runner must not block spec publication or planning.
+  Record unperformed behavioral evaluation as `not-run`; structural validation
+  does not prove behavior.
+- For an explicitly required evaluation, record the established runner,
+  invocation, access, judge, result-capture path, and initial spending limit
+  when paid. Where evidence is missing, name the unresolved prerequisite;
+  preserve the requirement without inventing availability, silently waiving it,
+  or presenting the spec as ready for executable planning.
+- Do not conduct a new interview or request routine seam confirmation while
+  synthesizing. Record proposals and unknowns in `Testing Decisions`; a
+  `ready-for-agent` label must not conceal unresolved mandatory prerequisites.
+<!-- local-sync:to-spec-testing-decisions:end -->

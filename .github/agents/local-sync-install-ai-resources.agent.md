@@ -28,6 +28,10 @@ repository-local `AGENTS.local.md` file.
 
 ## Routing Rules
 
+- Resolve the destination before mode selection. Missing links in an explicit
+  home installation belong here; ambiguous missing-skill requests need
+  clarification before fetching or writing. Recommend the external-sync owner
+  for upstream refreshes. Routing does not grant mutation or network authority.
 - Use this agent for repository-to-home sync of skills, Copilot agents,
   native Codex agents, and the managed `~/.agents/AGENTS.md` projection,
   including drift inspection and readiness checks.

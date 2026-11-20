@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyExternalKmsAccess",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": ["kms:*", "ec2:ModifyImageAttribute"],
+      "Resource": [
+        "arn:aws:kms:*:*:alias/aws/s3",
+        "*"
+      ],
+      "Condition": {
+        "StringNotEqualsIfExists": {
+          "aws:PrincipalOrgID": "o-exampleorgid"
+        },
+        "BoolIfExists": {
+          "aws:PrincipalIsAWSService": "false"
+        }
+      }
+    }
+  ]
+}

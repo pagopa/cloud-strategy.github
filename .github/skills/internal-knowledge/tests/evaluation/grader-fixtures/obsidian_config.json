@@ -1,0 +1,13 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "obsidian_config",
+  "gold": "tests/evaluation/grader-fixtures/gold/obsidian_config.json",
+  "good": [{
+    "name": "merge-managed-keys-preserve-user-settings",
+    "run": {"profile": "author", "allowlist": [".obsidian/app.json", ".obsidian/graph.json", "docs/views/active-areas.base"], "before": {"AGENTS.local.md": "Knowledge viewer: obsidian\n", ".obsidian/app.json": "{\"custom\":7,\"userIgnoreFilters\":[\"private/\"]}", ".obsidian/graph.json": "{\"showTags\":false}"}, "after": {"AGENTS.local.md": "Knowledge viewer: obsidian\n", ".obsidian/app.json": "{\"custom\":7,\"userIgnoreFilters\":[\"private/\",\"tmp/\"],\"useMarkdownLinks\":true,\"newLinkFormat\":\"relative\"}", ".obsidian/graph.json": "{\"showTags\":false,\"colorGroups\":[]}", "docs/views/active-areas.base": "filters:\n  and:\n    - 'file.inFolder(\"docs/areas\")'\nviews:\n  - type: table\n    name: Active Areas\n"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null}
+  }],
+  "mutants": [
+    {"name": "erase-user-app-setting", "kind": "out-of-scope-write", "expected_status": "fail", "expected_code": "obsidian-ownership", "run": {"profile": "author", "allowlist": [".obsidian/app.json"], "before": {"AGENTS.local.md": "Knowledge viewer: obsidian\n", ".obsidian/app.json": "{\"custom\":7}"}, "after": {"AGENTS.local.md": "Knowledge viewer: obsidian\n", ".obsidian/app.json": "{\"userIgnoreFilters\":[\"tmp/\"],\"useMarkdownLinks\":true,\"newLinkFormat\":\"relative\"}"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null}},
+    {"name": "overwrite-workspace", "kind": "out-of-scope-write", "expected_status": "fail", "expected_code": "obsidian-ownership", "run": {"profile": "author", "allowlist": [".obsidian/workspace.json"], "before": {"AGENTS.local.md": "Knowledge viewer: obsidian\n", ".obsidian/workspace.json": "{\"layout\":\"mine\"}"}, "after": {"AGENTS.local.md": "Knowledge viewer: obsidian\n", ".obsidian/workspace.json": "{}"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": null}}
+  ]
+}

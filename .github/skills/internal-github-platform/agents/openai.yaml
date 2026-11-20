@@ -1,0 +1,6 @@
+interface:
+  display_name: "internal-github-platform"
+  short_description: "GitHub controls, identity, runners, and rollout proof"
+  default_prompt: "Use $internal-github-platform in decide, control, or prove mode for GitHub rulesets, CODEOWNERS, environments, Apps and tokens, GitHub-side OIDC trust, runners, audit evidence, security-feature rollout, or Copilot policy; state scope and exception paths, cite current docs for platform facts, and hand workflow YAML to /internal-github-actions and cloud trust policies to the cloud owner."
+policy:
+  allow_implicit_invocation: true

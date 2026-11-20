@@ -5,11 +5,6 @@ description: Use when Java language or source correctness, readability, resource
 
 # Internal Java
 
-## Referenced files
-
-- `references/review-anti-patterns.md`: Evidence-oriented Java review defects.
-  Load when a review needs Java-specific defect depth.
-
 ## When to use
 
 - Java source edits or reviews where language-level correctness, readability,
@@ -22,11 +17,12 @@ description: Use when Java language or source correctness, readability, resource
 
 ## When not to use
 
-- Module, package, domain, API, collaborator, or concurrency architecture is
-  the main concern; route it to /internal-java-project.
-- Framework-managed wiring, configuration, lifecycle, transactions, test
-  contexts, or runtime semantics determine correctness; route Spring Boot
-  runtime semantics to /internal-java-spring-boot-development.
+- Package, module, domain, API, collaborator, or concurrency structure drives
+  the work; route it to `/internal-java-project`.
+- Framework-specific parent, plugin, BOM, starter, bean, configuration,
+  adapter, transaction, scheduling, test-context, service-connection,
+  lifecycle, or runtime semantics determine correctness; route Spring Boot
+  runtime semantics to `/internal-java-spring-boot-development`.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
 ## Working contract
@@ -43,14 +39,15 @@ description: Use when Java language or source correctness, readability, resource
 - Keep compiler, toolchain, dependency-intent, plugin, and reproducibility
   guidance aligned with the repository's existing build. Prefer the checked-in
   wrapper and the repository's established validation tasks.
-- Keep application and library architecture outside this skill when package,
-  module, domain, API, collaborator, or concurrency structure drives the work.
-- Keep framework-specific parent, plugin, BOM, starter, bean, configuration,
-  adapter, transaction, scheduling, test-context, service-connection, and
-  runtime semantics outside this skill.
 
 ## Validation
 
 - Run the nearest Maven or Gradle command already used by the repository.
 - For build-file-only edits, run the closest syntax, dependency, or test task
   that proves the change.
+
+## References
+
+- [`references/review-anti-patterns.md`](references/review-anti-patterns.md):
+  evidence-oriented Java review defects. Load when a review needs
+  Java-specific defect depth.

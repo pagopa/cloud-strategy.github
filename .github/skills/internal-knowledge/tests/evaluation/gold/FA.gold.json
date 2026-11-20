@@ -1,0 +1,30 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "fixture": "FA",
+  "components": [],
+  "edges": [],
+  "lifecycle_states": {},
+  "protected_paths": [
+    "docs/adr/0003-retention.md",
+    "docs/adr/0005-boundary.md",
+    "docs/adr/0007-intake.md",
+    "docs/adr/atlas/ingest/0012-receipts.md"
+  ],
+  "generated_paths": [],
+  "adr_dir": "docs/adr",
+  "ledger": null,
+  "router": null,
+  "expected_placements": {},
+  "sections": [],
+  "must_write": [],
+  "facts": [],
+  "readme_paths": [
+    "docs/adr/README.md",
+    "docs/areas/atlas/README.md",
+    "docs/areas/beacon/README.md"
+  ],
+  "owner_links": [],
+  "diagram_edges": {},
+  "aliases": {},
+  "diagram_triggers": []
+}

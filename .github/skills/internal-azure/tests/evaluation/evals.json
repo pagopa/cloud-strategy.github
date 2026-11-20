@@ -1,0 +1,256 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-azure",
+  "requirements": [
+    {"id": "R-CLASSIFY", "text": "Classify the primary concern as structure, governance, or operations, load its reference, and load supporting references only when the same deliverable uses them.", "source": "Azure consolidation spec 2026-09-27, section 4 Workflow step 1"},
+    {"id": "R-SCOPE", "text": "State the Azure scope level and the affected principals or workloads.", "source": "Azure consolidation spec, section 4 Workflow step 2; retired governance and organization-structure workflows"},
+    {"id": "R-MECHANISM", "text": "Name the Azure mechanism, such as management group, subscription, landing zone, RBAC, managed identity, federation, PIM, or Policy, and why it fits.", "source": "Azure consolidation spec, section 4 Workflow step 3; retired lane pattern sections"},
+    {"id": "R-IDENTITY-SPLIT", "text": "Keep workload identity separate from human access and prefer managed identity or federation over long-lived secrets.", "source": "former Azure governance lane patterns and guardrail-map workload identity table"},
+    {"id": "R-EXCEPTION", "text": "Record exceptions with the typed fields for policy exemptions, temporary elevation, and managed-identity gaps.", "source": "retired guardrail-map Exception evidence table"},
+    {"id": "R-ROLLOUT", "text": "For shared-blast-radius changes, name the first safe unit, the widening condition, and the rollback trigger.", "source": "retired topology-map Safe rollout examples and validation-and-evidence Stage-aware evidence"},
+    {"id": "R-EVIDENCE", "text": "Separate confirmed from inferred evidence and distinguish backup, restore, and DR proof.", "source": "former Azure operations lane evidence patterns"},
+    {"id": "R-DECISION-MODE", "text": "Produce a comparative decision note only when two or more options remain viable, and state reversibility.", "source": "former Azure strategic lane proportional output and lens-playbook depth control"},
+    {"id": "R-LENSES", "text": "Activate FinOps or BC/DR lenses when cost or recovery is material, even with one viable option.", "source": "retired lens-playbook activation signals and BC/DR activation"},
+    {"id": "R-HANDOFF", "text": "Route policy definitions, IaC code, pricing, role selection, resource health, Azure DevOps pipelines, GitHub Actions workflows, and application code to their owners.", "source": "retired routing-matrix Adjacent-owner cases; Azure consolidation spec section 6"},
+    {"id": "R-FRESHNESS", "text": "Use current Microsoft documentation for freshness-sensitive facts, through Microsoft Learn MCP when available, or state the evidence gap.", "source": "Azure consolidation spec, section 4 Freshness"},
+    {"id": "R-OUTPUT", "text": "Return the recommendation, material risk, and next validation action, and add other fields only when material.", "source": "Azure consolidation spec, section 4 Output; decision D3"},
+    {"id": "R-BASELINE", "text": "Do not recommend standing Owner or User Access Administrator at subscription or wider scope, name the narrowest assignment scope, and prefer managed identity or federation over service principal secrets unless a typed exception is recorded.", "source": ".github/security-baseline.md Azure line; parity with internal-gcp Baseline"}
+  ],
+  "cases": [
+    {
+      "id": "C-MG-LAYOUT",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-CLASSIFY", "R-SCOPE", "R-MECHANISM", "R-ROLLOUT", "R-OUTPUT"],
+      "prompt": "We have three business units, a shared platform team, and a sandbox need. Propose the Azure management-group and subscription layout and how to introduce it without breaking current subscriptions.",
+      "initial_state": "Forty subscriptions sit directly under the tenant root group with no intermediate management groups.",
+      "expected_output": "A structure recommendation with platform, landing-zone, and sandbox branches, platform subscriptions separated from workload subscriptions, a first low-risk subscription family as the rollout unit, and a rollback trigger.",
+      "files": ["references/structure.md", "references/operations.md"],
+      "assertions": [
+        {"id": "A-HIERARCHY", "text": "The response proposes management-group branches that separate platform, workload landing zones, and sandbox.", "critical": true},
+        {"id": "A-FIRST-UNIT", "text": "The response moves one low-risk subscription family first and names the condition for widening.", "critical": true},
+        {"id": "A-ROLLBACK", "text": "The response states a rollback trigger for the move.", "critical": false}
+      ],
+      "forbidden_actions": ["Move all subscriptions in one step.", "Write Terraform or Policy JSON as the main deliverable."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Hierarchy, rollout unit, widening condition, and rollback trigger are all explicit.", "Platform and workload ownership stay separate."],
+        "fail": ["The layout has no staged move.", "The response mixes platform services into workload subscriptions without a reason."]
+      }
+    },
+    {
+      "id": "C-WORKLOAD-IDENTITY",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-IDENTITY-SPLIT", "R-MECHANISM", "R-SCOPE", "R-BASELINE"],
+      "prompt": "Our Function Apps use client secrets stored in app settings to reach Storage and Key Vault. Operators also share the same service principal. Fix the access model.",
+      "initial_state": "One service principal with a client secret is used both by workloads and by human operators.",
+      "expected_output": "Managed identity per workload with RBAC scoped to the target resources, separate human access through groups and PIM, and secret retirement.",
+      "files": ["references/governance.md"],
+      "assertions": [
+        {"id": "A-MI", "text": "The response moves workloads to managed identity with resource-scoped RBAC.", "critical": true},
+        {"id": "A-HUMAN-SPLIT", "text": "The response separates human operator access from workload identity.", "critical": true},
+        {"id": "A-NO-STANDING-OWNER", "text": "The response does not grant standing Owner at subscription scope to workloads or operators.", "critical": true}
+      ],
+      "forbidden_actions": ["Keep a shared secret for both humans and workloads.", "Grant Owner at subscription scope to the workload."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Managed identity, narrow scope, and a human path through PIM or groups are explicit."],
+        "fail": ["The response only rotates the secret.", "The response leaves humans and workloads on one principal."]
+      }
+    },
+    {
+      "id": "C-POLICY-EXCEPTION",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-EXCEPTION", "R-HANDOFF"],
+      "prompt": "A legacy subscription cannot comply with our allowed-locations guardrail for six months. Define how we grant and govern the exception.",
+      "initial_state": "The allowed-locations assignment exists at the landing-zones management group.",
+      "expected_output": "A scoped policy exemption record with business reason, owner, scope, compensating controls, and expiry or review date; any concrete Policy JSON is routed to the policy owner.",
+      "files": ["references/governance.md", "references/adjacent-owners.md"],
+      "assertions": [
+        {"id": "A-TYPED-FIELDS", "text": "The exception record contains reason, owner, scope, compensating control, and expiry or review date.", "critical": true},
+        {"id": "A-POLICY-HANDOFF", "text": "Concrete Policy or exemption definition authoring is routed to internal-cloud-policy rather than written here as the main deliverable.", "critical": false}
+      ],
+      "forbidden_actions": ["Remove the policy assignment for the whole management group.", "Grant an exception without expiry."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The exemption is scoped and time-bound with compensating controls."],
+        "fail": ["The exception is open-ended or unscoped."]
+      }
+    },
+    {
+      "id": "C-RESTORE-PROOF",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-EVIDENCE", "R-OUTPUT"],
+      "prompt": "Audit says our Azure Backup is fine because every job succeeded last month. Is that enough to claim we can recover the order database?",
+      "initial_state": "Backup job history is green; no restore has ever been tested.",
+      "expected_output": "Job success proves backup posture only; restore viability needs a restore exercise with observed recovery time and integrity check; DR needs a separate continuity exercise.",
+      "files": ["references/operations.md"],
+      "assertions": [
+        {"id": "A-BACKUP-NOT-RESTORE", "text": "The response states that backup job success does not prove restore viability.", "critical": true},
+        {"id": "A-RESTORE-PLAN", "text": "The response defines a restore exercise with recovery time and integrity evidence.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim recoverability from job success alone."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Backup, restore, and DR proof are kept distinct."],
+        "fail": ["The response treats green backup jobs as recovery proof."]
+      }
+    },
+    {
+      "id": "C-HUB-VS-VWAN",
+      "family": "held-out-downstream-work",
+      "kind": "rubric",
+      "requirement_ids": ["R-DECISION-MODE", "R-FRESHNESS", "R-CLASSIFY"],
+      "prompt": "We are expanding to four regions with about 60 spokes and branch offices on SD-WAN. Hub-spoke with our own NVAs or Virtual WAN?",
+      "initial_state": "One region runs a customer-managed hub-spoke topology today.",
+      "expected_output": "A comparative decision note with both options, a recommendation under stated assumptions, reversibility, and a statement that current service limits and pricing must be checked in current Microsoft documentation.",
+      "files": ["references/decision-mode.md", "references/structure.md"],
+      "assertions": [
+        {"id": "A-TWO-OPTIONS", "text": "The response compares both viable options and recommends one under stated assumptions.", "critical": true},
+        {"id": "A-REVERSIBILITY", "text": "The response states how reversible the choice is.", "critical": true},
+        {"id": "A-FRESH", "text": "The response flags limits or capability facts to verify in current Microsoft documentation, or states the evidence gap.", "critical": false}
+      ],
+      "forbidden_actions": ["Present exact current limits or prices as facts without a source."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Options, recommendation, reversibility, and freshness caveat are present."],
+        "fail": ["Only one option is described.", "Service limits are asserted without source."]
+      }
+    },
+    {
+      "id": "C-POLICY-JSON-HANDOFF",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF"],
+      "prompt": "Write the Azure Policy definition JSON that denies public IP addresses on network interfaces.",
+      "initial_state": "The request asks only for a concrete policy artifact.",
+      "expected_output": "The concrete policy definition is routed to internal-cloud-policy; Azure control-model guidance is offered only if separately requested.",
+      "files": ["references/adjacent-owners.md"],
+      "assertions": [
+        {"id": "A-ROUTE-POLICY", "text": "The response routes the policy definition to internal-cloud-policy.", "critical": true}
+      ],
+      "forbidden_actions": ["Run a full governance workflow for a single policy artifact."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The artifact owner is named and used."],
+        "fail": ["The Azure skill keeps ownership of the policy JSON."]
+      }
+    },
+    {
+      "id": "C-SMALL-QUESTION",
+      "family": "bounded-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-OUTPUT"],
+      "prompt": "Should the shared Log Analytics workspace live in the management subscription or in each workload subscription?",
+      "initial_state": "A platform landing zone with a management subscription exists.",
+      "expected_output": "A short answer with the recommendation, the material risk, and the next validation action, without a long fixed field list.",
+      "files": [],
+      "assertions": [
+        {"id": "A-THREE-FIELDS", "text": "The response contains a recommendation, a material risk, and a next validation action.", "critical": true},
+        {"id": "A-PROPORTIONAL", "text": "The response does not add empty or irrelevant sections such as exception path or rollout unit.", "critical": false}
+      ],
+      "forbidden_actions": ["Emit a mandatory six-to-eight field template for a narrow question."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The answer is proportional and contains the three required fields."],
+        "fail": ["The answer pads with irrelevant fields or omits the risk or next validation."]
+      }
+    },
+    {
+      "id": "C-APP-CODE-NO-TRIGGER",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-HANDOFF"],
+      "prompt": "Refactor the Express routes of our Node.js API that runs on Azure App Service to use async handlers.",
+      "initial_state": "The task is application code; hosting on Azure is incidental.",
+      "expected_output": "No Azure platform workflow; the application owner handles the code change.",
+      "files": ["references/adjacent-owners.md"],
+      "assertions": [
+        {"id": "A-NO-PLATFORM", "text": "The response does not apply the Azure platform workflow to application code.", "critical": true}
+      ],
+      "forbidden_actions": ["Add management-group, RBAC, or rollout analysis to an application refactor."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The application owner is used; Azure hosting is treated as context only."],
+        "fail": ["The response produces Azure platform recommendations."]
+      }
+    },
+    {
+      "id": "C-FINOPS-SINGLE-OPTION",
+      "family": "regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-LENSES", "R-MECHANISM"],
+      "prompt": "We must enable Microsoft Defender for Cloud plans on all production subscriptions for compliance. Plan it.",
+      "initial_state": "Compliance leaves only one viable direction; cost impact is material across 25 subscriptions.",
+      "expected_output": "A single-direction plan that still surfaces the cost impact and how to estimate it, without inventing alternative options.",
+      "files": ["references/decision-mode.md"],
+      "assertions": [
+        {"id": "A-COST-SURFACED", "text": "The response surfaces the material cost impact even though only one option is viable.", "critical": true},
+        {"id": "A-NO-FAKE-OPTIONS", "text": "The response does not invent alternatives to fill a comparison template.", "critical": false}
+      ],
+      "forbidden_actions": ["State current plan prices as facts without a pricing source."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["FinOps lens is active and pricing is routed to a current source."],
+        "fail": ["Cost is ignored because there is no option comparison."]
+      }
+    },
+    {
+      "id": "C-BCDR-REGION",
+      "family": "held-out-downstream-work",
+      "kind": "rubric",
+      "requirement_ids": ["R-LENSES", "R-EVIDENCE"],
+      "prompt": "We are moving our payment platform to a single Azure region to simplify operations. What should we check?",
+      "initial_state": "The payment platform is business-critical with a stated RTO of one hour.",
+      "expected_output": "The BC/DR lens is active: regional failure risk against the RTO, and the recovery proof needed before the move.",
+      "files": ["references/decision-mode.md", "references/operations.md"],
+      "assertions": [
+        {"id": "A-BCDR-ACTIVE", "text": "The response raises regional continuity risk against the stated RTO.", "critical": true},
+        {"id": "A-DR-PROOF", "text": "The response names the recovery exercise evidence required before or after the move.", "critical": false}
+      ],
+      "forbidden_actions": ["Approve the single-region move without discussing recovery posture."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Continuity risk and recovery proof are explicit."],
+        "fail": ["The response only discusses operational simplicity."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "Design a management-group hierarchy for three business units and a sandbox in our Azure tenant.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Should shared connectivity live in an Azure platform subscription or in each workload subscription?", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Define an Azure RBAC operating model with PIM for production subscriptions.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Replace client secrets with managed identity for our Azure Function Apps.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "How do we roll out an allowed-locations Azure Policy guardrail safely across 40 subscriptions?", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "What evidence proves our Azure Backup restores actually work?", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Hub-spoke or Virtual WAN for four Azure regions?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Plan an Azure landing-zone residency split for EU-regulated workloads.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Which Log Analytics signals confirm an Azure Policy rollout did not break deployments?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-10", "query": "Is Azure Site Recovery worth the cost for this tier-2 application?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-11", "query": "Write the Azure Policy JSON that denies public IPs.", "should_trigger": false, "split": "train", "competing_owner": "internal-cloud-policy"},
+      {"id": "Q-12", "query": "Fix this azurerm_role_assignment Terraform block.", "should_trigger": false, "split": "train", "competing_owner": "internal-terraform"},
+      {"id": "Q-13", "query": "What does a D4s v5 VM cost per month in West Europe?", "should_trigger": false, "split": "train", "competing_owner": "awesome-copilot-azure-pricing"},
+      {"id": "Q-14", "query": "Which built-in role lets a pipeline read one storage account?", "should_trigger": false, "split": "train", "competing_owner": "awesome-copilot-azure-role-selector"},
+      {"id": "Q-15", "query": "Why is my App Service returning 503 right now?", "should_trigger": false, "split": "held-out", "competing_owner": "awesome-copilot-azure-resource-health-diagnose"},
+      {"id": "Q-16", "query": "Add a stage with an approval to our azure-pipelines.yml.", "should_trigger": false, "split": "train", "competing_owner": "internal-azure-devops"},
+      {"id": "Q-17", "query": "Write a GitHub Actions workflow that deploys to Azure with OIDC.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-github-actions"},
+      {"id": "Q-18", "query": "Refactor a Node.js API hosted on App Service.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-nodejs-project"},
+      {"id": "Q-19", "query": "Design an AWS OU layout for regulated workloads.", "should_trigger": false, "split": "train", "competing_owner": "internal-aws"},
+      {"id": "Q-20", "query": "Choose a GCP folder layout for three business units.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gcp"}
+    ]
+  }
+}

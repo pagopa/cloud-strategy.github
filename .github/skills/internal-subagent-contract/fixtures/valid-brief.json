@@ -36,7 +36,7 @@
     {
       "id": "V1",
       "owner": "worker",
-      "command": "python3 -m pytest -q tests/github/skills/internal-subagent-contract",
+      "command": "python3 -m pytest -q .github/skills/internal-subagent-contract/tests",
       "pass_signal": "exit-code-0"
     }
   ],

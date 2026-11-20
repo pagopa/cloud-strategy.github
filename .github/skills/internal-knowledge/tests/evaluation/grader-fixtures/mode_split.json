@@ -1,0 +1,80 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "mode_split",
+  "gold": "tests/evaluation/grader-fixtures/gold/mode_split.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/setup.md": "# Setup\n\n## Setup\nDo this."
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/setup.md": "# Setup\n\n## Setup\nDo this."
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "marker-missing",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/setup.md": "# Setup\n"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/setup.md": "# Setup\n"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "mode-mixed"
+    },
+    {
+      "name": "duplicate-section",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "docs/setup.md": "## Setup",
+          "docs/other.md": "## Setup"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "docs/setup.md": "## Setup",
+          "docs/other.md": "## Setup"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "mode-mixed"
+    }
+  ]
+}

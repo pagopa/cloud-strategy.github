@@ -1,0 +1,21 @@
+{
+  "schema": "knowledge-fixture-gold/v1",
+  "fixture": "FS1",
+  "components": [],
+  "edges": [],
+  "lifecycle_states": {},
+  "protected_paths": [],
+  "generated_paths": [],
+  "adr_dir": null,
+  "ledger": null,
+  "router": null,
+  "expected_placements": {},
+  "sections": [],
+  "must_write": ["GLOSSARY.md", "docs/templates/spec.md", "docs/templates/issue.md"],
+  "facts": [],
+  "readme_paths": ["README.md", "docs/README.md", "docs/domains/relay/README.md"],
+  "owner_links": [],
+  "diagram_edges": {},
+  "aliases": {},
+  "diagram_triggers": []
+}

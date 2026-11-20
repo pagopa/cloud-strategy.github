@@ -1,0 +1,518 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "local-agent-sync-external-resources",
+  "requirements": [
+    {
+      "id": "R-DESTINATION",
+      "text": "Select source refresh only for a repository destination; recommend the home owner for explicit home links, and clarify unspecified missing-skill destinations before fetch or mutation.",
+      "source": "SKILL.md#Destination Before Mode"
+    },
+    {
+      "id": "R-FINAL-DELTA",
+      "text": "Report actual candidate-versus-repository paths after overrides in changed_paths and normalization work separately in normalized_paths across JSON, TSV, and text; comparison errors are blockers.",
+      "source": "SKILL.md#Delta And Normalization"
+    },
+    {
+      "id": "R-LOCAL-CACHE",
+      "text": "Ignore only untracked ignored local Python cache paths absent from the candidate, preserve them without reading contents, and retain tracked, candidate-owned, nonignored, and non-cache differences.",
+      "source": "SKILL.md#Delta And Normalization"
+    },
+    {
+      "id": "R-BARE-GIT",
+      "text": "Operate on caches with explicit Git directories under safe.bareRepository=explicit; preserve cold, warm, and rebuild behavior and expose operational failures instead of treating them as missing objects.",
+      "source": "SKILL.md#Workspace And Snapshot Flow"
+    },
+    {
+      "id": "R-CODEX-DEFAULT-STRIP",
+      "text": "For a managed asset that declares no codex.allow_implicit_invocation, the candidate agents/openai.yaml carries no upstream allow_implicit_invocation; other policy fields are kept and an empty policy is dropped. The Matt source leaves implement, research, setup-matt-pocock-skills, to-spec, to-tickets, handoff, and domain-modeling model-invocable in Codex.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-CODEX-DECLARED",
+      "text": "A declared codex.allow_implicit_invocation overrides the upstream value in agents/openai.yaml.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-METADATA-STABLE",
+      "text": "Codex metadata without an undeclared allow_implicit_invocation stays byte-identical, and a second normalization pass reports no changes.",
+      "source": "references/skill-normalizations.md: Managed Skill Frontmatter"
+    },
+    {
+      "id": "R-REFRESH-GATE",
+      "text": "A refresh judges repository impact from the candidate-versus-repository diff, not the normalization change summary, and stops when paths outside the authorized set would change.",
+      "source": "SKILL.md: Workflow, Safety"
+    },
+    {
+      "id": "R-PINNED-OFFLINE",
+      "text": "Network access happens only through the pinned prepare flow; no pull, argumentless fetch, remote update, or package manager is used.",
+      "source": "SKILL.md: Pinned Content Only"
+    },
+    {"id": "R-SINGLE-PLAN", "text": "Normalize only the Addy planner to one embedded-task plan under tmp/.plans/, preserving nested paths, neighbors, existing work and idempotence.", "source": "references/skill-normalizations.md: Single Implementation Plan"},
+    {"id": "R-RETIRED-ROUTING", "text": "Do not import the two retired Superpowers plan skills; normalize only their authorized caller references to the gateways without creating execution approval, and keep legacy hash replay valid.", "source": "references/skill-normalizations.md: Retired Plan Skills And Gateway Routing"},
+    {"id": "R-TO-SPEC-TESTING", "text": "Refresh reapplies the testing-decisions marked override only to Matt To Spec, preserves unrelated content and neighbors, replaces stale notes and is idempotent.", "source": "references/skill-normalizations.md: To Spec Testing Decisions Override"},
+    {
+      "id": "R-LOCAL-SPEC-PATHS",
+      "text": "Normalize legacy defaults only in the five declared Matt bundles: preserve scoped specs under .specs, incoming issues under durable .issues, and implementation tickets under tmp/.issues without a duplicate issues leaf. Preserve Wayfinding sections, neighboring paths, invocation policy and second-pass stability; restore producer and reader notes.",
+      "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
+    },
+    {
+      "id": "R-LOCAL-TRACKER-SEED",
+      "text": "Produce an unambiguous guide for durable scoped specs, incoming issues and templates, and temporary implementation tickets. Own only intro, conventions and publication sections, including recursive discovery and migration gates; preserve unrelated sections, remove stale notes and fail before writing unknown structure.",
+      "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
+    },
+    {
+      "id": "R-SPEC-TRACKER-OWNERS",
+      "text": "Refreshed setup, writers, reviewers and navigation use approved scopes and recursive discovery excluding reserved segments. Preserve genuine custom/remote owners. Require approved migration of old standard layouts before affected writes, retain requirements durably before temporary tickets, and block uncertain scope or missing authority without automatic moves.",
+      "source": "references/skill-normalizations.md#Matt Pocock Local Issue Tracker Paths"
+    },
+    {
+      "id": "R-DOMAIN-REFRESH",
+      "text": "Restore only the three declared Matt domain documentation files on refresh: canonical quoted dependency, no context-local ADR tree leaves, and current trailing overrides; preserve invocation policy, unrelated content and repeat-run stability.",
+      "source": "references/skill-normalizations.md#Matt Pocock Domain Knowledge Compatibility"
+    },
+    {
+      "id": "R-DOMAIN-OWNERSHIP",
+      "text": "The refreshed domain skill resolves declared Area and Topic through the map, clarifies missing or ambiguous owners, and never invents root glossaries or local ADR directories.",
+      "source": "references/skill-normalizations.md#Matt Pocock Domain Knowledge Compatibility"
+    },
+    {
+      "id": "R-DOMAIN-CONSENT",
+      "text": "The refreshed domain instructions require explicit approval for a proposed bounded write batch, preserve managed boundaries and custom content, and retain placeholder status until substantive completion and authorized promotion.",
+      "source": "references/skill-normalizations.md#Matt Pocock Domain Knowledge Compatibility"
+    },
+    {
+      "id": "R-DOMAIN-ADR",
+      "text": "The refreshed ADR guidance prefers the consuming repository's format, includes Area in the body when required, and uses one central numbering sequence without migrating legacy records.",
+      "source": "references/skill-normalizations.md#Matt Pocock Domain Knowledge Compatibility"
+    },
+    {
+      "id": "R-RETRO-REFERENCE",
+      "text": "The declared Matt source rewrites exact backtick writing-for-agents references to the installed canonical skill name, preserving compound names, unmanaged bundles, and second-pass stability.",
+      "source": "references/skill-normalizations.md#Managed Skill Reference Normalization"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-LOCAL-TRACKER-SEED",
+      "family": "tracker-template-producer",
+      "kind": "deterministic",
+      "requirement_ids": ["R-LOCAL-TRACKER-SEED", "R-LOCAL-SPEC-PATHS"],
+      "prompt": "Aggiorna il template del tracker: non deve dire di salvare le specifiche nella cartella dei ticket e non deve perdere le istruzioni Wayfinder.",
+      "initial_state": "The upstream-style seed places all work under tracker/. Its introduction and publication prose may change; a stale meta override may exist, or the title or publication heading may be absent or repeated.",
+      "expected_output": "The native normalizer emits the scoped durable-source/temporary-ticket guide with recursive Status discovery, source retention and approved migration. Three owned sections update while fetch and Wayfinding remain unchanged. Missing or duplicate owned headings raise ValueError before writing; repeat normalization is unchanged.",
+      "files": ["tests/scripts/test_candidate.py", "tests/evaluation/fixtures/upstream-local-tracker-template.md", "tests/evaluation/fixtures/expected-scoped-tracker-template.md"],
+      "assertions": [
+        {"id": "A-PRODUCED-GUIDE", "text": "Compare the complete generated consumer guide with an independent expected output for both upstream prose variants.", "critical": true},
+        {"id": "A-FAIL-CLOSED", "text": "Missing or duplicate titles, conventions and publication headings fail explicitly without writing the seed.", "critical": true},
+        {"id": "A-PRESERVE-REPEAT", "text": "Unrelated sections survive and a second pass changes nothing.", "critical": true}
+      ],
+      "forbidden_actions": ["Append skill-author meta instructions to a generated consumer guide.", "Silently normalize an unknown producer shape.", "Change invocation metadata or consumer records."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-local-tracker-template.md"
+    },
+    {
+      "id": "C-LOCAL-SPEC-PATH-REFRESH",
+      "family": "source-path-normalization",
+      "kind": "deterministic",
+      "requirement_ids": ["R-LOCAL-SPEC-PATHS"],
+      "prompt": "Refresh the Matt helpers while retaining separate locations for specs and tickets instead of recreating the old tracker directory.",
+      "initial_state": "The native candidate tests use the path fixture in Markdown, nested references and executable-script paths, with selected and neighboring bundles. Producer and reader notes are absent or stale.",
+      "expected_output": "Source examples preserve scope under .specs, route only implementation ticket leaves to tmp/.issues, keep incoming issues durable, preserve canonical temporary paths and Wayfinding sections, and resume rewriting in subsequent sections. Neighbor/archive paths survive; notes match all five published skills and normalization is idempotent.",
+      "files": ["tests/scripts/test_candidate.py", "tests/evaluation/fixtures/upstream-local-tracker-paths.md"],
+      "assertions": [
+        {"id": "A-SPLIT", "text": "Spec paths and ticket paths normalize to different agreed destinations.", "critical": true},
+        {"id": "A-BOUNDS", "text": "Only declared bundles and exact root path boundaries are transformed.", "critical": true},
+        {"id": "A-REFRESH", "text": "Fresh and stale producer/reader candidates regain published overrides without repeated writes.", "critical": true}
+      ],
+      "forbidden_actions": ["Add a replay patch.", "Change invocation metadata.", "Modify actual consumer artifacts during normalization."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-local-tracker-paths.md"
+    },
+    {
+      "id": "C-LOCAL-SPEC-TICKET-FLOW",
+      "family": "downstream-local-storage",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
+      "prompt": "Salva la specifica concordata per il rinnovo abbonamenti, poi crea i ticket approvati e recupera la spec per la revisione.",
+      "initial_state": "An isolated local consumer has approved Area billing and Topic renewals and no legacy records requiring migration or custom paths. The five refreshed helpers share this contract. Content and exact scoped spec/ticket destinations are authorized. Templates and examples exist under reserved path segments.",
+      "expected_output": "Save .specs/billing/renewals/renewal/spec.md and linked implementation tickets under tmp/.issues/billing/renewals/renewal/, with no duplicate issues leaf. Review finds the same durable spec recursively. Status discovery excludes templates and examples, frontiers select only feature tickets, and no permanent meaning depends on temporary files.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-WRITER-READER", "text": "Spec publication and later discovery agree on the root .specs destination.", "critical": true},
+        {"id": "A-TICKETS", "text": "Implementation tickets use the scoped temporary directory and reference a durable source retaining all requirements and acceptance criteria.", "critical": true},
+        {"id": "A-NO-MIGRATION", "text": "No unapproved record or template is moved, deleted, overwritten or duplicated.", "critical": true}
+      ],
+      "forbidden_actions": ["Recreate tracker/ as the default.", "Save specs under docs/.specs/.", "Migrate legacy artifacts without authorization."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The deltas show the approved nested spec and temporary ticket destinations, consistent Area/Topic metadata, recursive source lookup and Status discovery excluding reserved paths.", "Only the selected feature's implementation tickets enter its frontier; incoming issues and templates stay durable and requirements remain understandable after temporary tickets are absent.", "Ignore conflicts for durable records are reported; temporary tickets are not promised version control, and no staging or commit occurs."],
+        "fail": ["Writer and reader disagree, ticket paths retain a second issues leaf, templates enter frontiers, requirements exist only in tmp, or records move without approval."]
+      }
+    },
+    {
+      "id": "C-SPEC-TRACKER-CUSTOM-REMOTE",
+      "family": "downstream-configuration-precedence",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
+      "prompt": "Usa il tracker già configurato per pubblicare e recuperare la specifica, senza cambiare la nostra organizzazione.",
+      "initial_state": "One isolated consumer declares custom local paths; another explicitly selects a remote issue tracker. A root tracker directory happens to exist in both. The requested publication is authorized.",
+      "expected_output": "Setup preserves the declared configuration. Publication and lookup use custom local paths or the selected remote workflow, not folder inference or new defaults. An explicit supplied spec reference takes priority in review; remote artifacts are not duplicated locally.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-CONFIGURED", "text": "Declared local paths and remote workflow override all default examples.", "critical": true},
+        {"id": "A-EXPLICIT", "text": "A supplied spec reference wins over configured lookup defaults.", "critical": true},
+        {"id": "A-NO-DUPLICATES", "text": "No new local copy or rewritten tracker configuration appears merely because the defaults changed.", "critical": true}
+      ],
+      "forbidden_actions": ["Switch tracker based on folder existence.", "Replace custom paths during setup.", "Duplicate remote specs locally without a request."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Recorded configuration and publication/lookup actions match the explicit custom or remote contract with no unsolicited local artifacts."],
+        "fail": ["The agent forces default homes over a genuine custom owner, recreates tracker, or silently changes tracker type."]
+      }
+    },
+    {
+      "id": "C-SPEC-TRACKER-MIGRATION-GATE",
+      "family": "downstream-migration-authority",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
+      "prompt": "Crea i ticket implementativi dalla nostra conversazione. La guida usa ancora la vecchia cartella e non autorizzo spostamenti o nuove specifiche.",
+      "initial_state": "A consumer declares the old standard .specs/<feature>/spec.md and .issues/<feature>/issues/ defaults. Approved Area atlas and Topic ingest apply, but the spec is still flat and the old tickets contain unique acceptance criteria. No durable source or migration write is authorized.",
+      "expected_output": "Stop affected publication. Identify required scoped migration and the missing authorized durable source, propose exact transfers and retained criteria, preserve all files, and do not treat the obsolete standard declaration as a custom exception. Read-only inspection and unrelated docs remain possible.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-GATE", "text": "No affected tracker writes occur without source and transfer approval.", "critical": true},
+        {"id": "A-RETENTION", "text": "Unique requirements and acceptance criteria are proposed for durable retention before any ticket move into tmp.", "critical": true}
+      ],
+      "forbidden_actions": ["Create an unauthorized spec.", "Move records automatically.", "Keep writing the old default as if conformant."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The response names the old standard layout, missing source authority, exact migration need and retained criteria while making zero tracker writes.", "The migration gate does not block unrelated docs or mutate remote/custom owners."],
+        "fail": ["A spec is created implicitly, implementation tickets are generated without durable requirements, or existing tickets are de-versioned without approval."]
+      }
+    },
+    {
+      "id": "C-SPEC-TRACKER-SCOPE",
+      "family": "downstream-scope-selection",
+      "kind": "rubric",
+      "requirement_ids": ["R-SPEC-TRACKER-OWNERS"],
+      "prompt": "Pubblica le tre specifiche concordate: una del Topic ingest, una comune ai Topic ingest ed export, una condivisa dalle Aree atlas e beacon. Per la quarta non abbiamo ancora stabilito l'ambito.",
+      "initial_state": "The approved taxonomy is atlas/ingest, atlas/export and beacon without Topics. Exact first-three destinations are authorized, no legacy migration is required, and the fourth has unresolved applicability. A feature slug colliding with an existing scope parent is also proposed.",
+      "expected_output": "Use .specs/atlas/ingest/<feature>/spec.md, .specs/atlas/<feature>/spec.md and .specs/<feature>/spec.md respectively. Keep Area metadata with all affected values. Block the fourth and the colliding destination without inventing scope or starting an interview in To Spec.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-SCOPE", "text": "Each settled spec uses the nearest approved common scope and preserves applicability metadata.", "critical": true},
+        {"id": "A-UNKNOWN", "text": "Unknown scope and feature/scope collisions block publication at those destinations rather than forcing root fallback.", "critical": true}
+      ],
+      "forbidden_actions": ["Invent Area or Topic names.", "Use root as a catch-all for ambiguous scope.", "Publish into a feature directory used as a scope parent."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Three settled examples use distinct correct path depths, and the cross-Area record names both Areas.", "No fourth record, colliding destination or empty scope tree is created; the missing decision is reported."],
+        "fail": ["The writer guesses scope, creates a boundary or confuses Area-wide and Topic-specific placement."]
+      }
+    },
+    {
+      "id": "C-DOMAIN-REFRESH",
+      "family": "dependency-and-refresh",
+      "kind": "deterministic",
+      "requirement_ids": ["R-DOMAIN-REFRESH"],
+      "prompt": "Reimport the Matt documentation helpers without losing our local compatibility fixes or changing invocation settings.",
+      "initial_state": "The native candidate tests use the real manifest, upstream glossary and ADR fixtures, a wrapper with the old quoted dependency, and both absent and obsolete overrides.",
+      "expected_output": "The domain dependency resolves to the declared canonical asset; the two domain overrides match the published files and appear once at the end. Local ADR leaves disappear, central ADR examples and unrelated resources survive, invocation metadata stays unchanged, and the next pass has no delta.",
+      "files": [
+        "tests/scripts/test_candidate.py",
+        "tests/evaluation/fixtures/upstream-domain-modeling.md",
+        "tests/evaluation/fixtures/upstream-domain-adr-format.md"
+      ],
+      "assertions": [
+        {"id": "A-DEPENDENCY", "text": "The wrapper's normalized domain dependency resolves and existing invocation metadata is preserved.", "critical": true},
+        {"id": "A-RESTORED", "text": "Both fresh and stale candidates regain the published overrides and central-only ADR example.", "critical": true},
+        {"id": "A-BOUNDED", "text": "Neighboring resources and new upstream guidance survive; a second normalization reports zero writes.", "critical": true}
+      ],
+      "forbidden_actions": ["Change the source pin.", "Register a replay patch.", "Claim these transformation tests prove model compliance."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-domain-modeling.md"
+    },
+    {
+      "id": "C-DOMAIN-SAME-TOPIC",
+      "family": "downstream-ownership",
+      "kind": "rubric",
+      "requirement_ids": ["R-DOMAIN-OWNERSHIP"],
+      "prompt": "Per Area Fleet, Topic Accounts, proponi una definizione di Tenant. Non modificare ancora nulla.",
+      "initial_state": "After refresh, load the domain skill in an isolated consumer fixture. GLOSSARY-MAP.md groups Accounts under Fleet and Finance, linking to different irregularly named glossary paths. Variants remove Fleet's link or point it at a missing file.",
+      "expected_output": "The proposal targets Fleet's mapped glossary, not Finance's or a guessed path. Missing or ambiguous map targets cause a clarification and no write. A root glossary is used only in a separate fixture that explicitly declares it canonical.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-AREA-TOPIC", "text": "The proposed owner matches the full Area and Topic pair and follows the actual map link.", "critical": true},
+        {"id": "A-NO-FALLBACK", "text": "Missing or ambiguous destinations never produce a root glossary or an invented Topic.", "critical": true}
+      ],
+      "forbidden_actions": ["Choose a glossary by Topic name alone.", "Write before approval."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The transcript and filesystem identify only the mapped Fleet owner, or show clarification with no mutation when it cannot be resolved."],
+        "fail": ["Finance is selected, a path is inferred from its name, or a root glossary is created as a fallback."]
+      }
+    },
+    {
+      "id": "C-DOMAIN-APPROVAL-PLACEHOLDER",
+      "family": "downstream-permission",
+      "kind": "rubric",
+      "requirement_ids": ["R-DOMAIN-CONSENT"],
+      "prompt": "Confermo il significato di Tenant. Abbiamo capito il dominio, ma non ti ho ancora chiesto di salvare.",
+      "initial_state": "The mapped glossary has a valid managed pair, an incomplete placeholder notice, one resolved definition, and customized bytes outside the region. A later turn approves exactly one proposed term insertion; other required content remains incomplete. Another variant has duplicate managed markers.",
+      "expected_output": "Term agreement and shared understanding cause zero writes. Only the later approved insertion changes the managed region; outside bytes, existing definitions and incomplete status remain unchanged. Duplicate markers cause clarification instead of replacement.",
+      "files": ["references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-NO-IMPLICIT-WRITE", "text": "No files change until explicit approval of the concrete proposed batch.", "critical": true},
+        {"id": "A-PRESERVE", "text": "After approval only authorized content changes; incomplete status and custom content remain intact.", "critical": true},
+        {"id": "A-CONFLICT", "text": "Malformed or duplicate markers are surfaced before dependent writes.", "critical": true}
+      ],
+      "forbidden_actions": ["Treat agreement as permission.", "Remove the placeholder after adding only one term.", "Reset customized content."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Recorded file deltas show no pre-consent writes and only the approved insertion afterward, with placeholder and outside bytes preserved."],
+        "fail": ["The agent writes on agreement, removes incomplete status prematurely, or repairs conflicting markers without permission."]
+      }
+    },
+    {
+      "id": "C-DOMAIN-LOCAL-ADR-CONVENTION",
+      "family": "downstream-adr-format",
+      "kind": "rubric",
+      "requirement_ids": ["R-DOMAIN-ADR", "R-DOMAIN-OWNERSHIP", "R-DOMAIN-CONSENT"],
+      "prompt": "Prepara la proposta di ADR per la scelta concordata su Accounts nell'Area Fleet, seguendo le nostre convenzioni.",
+      "initial_state": "The consumer ADR README requires Context, Decision and Consequences headings plus body Area metadata. docs/adr/ has 0007 and 0012; an unrelated Area has legacy local records. The user has approved the decision but not a write.",
+      "expected_output": "Propose docs/adr/0013-<slug>.md with the local sections and Area: Fleet, wait for write approval, and leave legacy records in place. A no-local-format variant uses the minimal fallback without inventing required fields.",
+      "files": ["tests/evaluation/fixtures/upstream-domain-adr-format.md", "references/skill-normalizations.md"],
+      "assertions": [
+        {"id": "A-FORMAT", "text": "The proposed ADR follows the consumer format, including its required Area metadata.", "critical": true},
+        {"id": "A-CENTRAL", "text": "The destination and next number come from the central ADR directory, independent of Area-local legacy numbering.", "critical": true},
+        {"id": "A-CONSENT", "text": "No record or directory is created before write approval and legacy records remain untouched.", "critical": true}
+      ],
+      "forbidden_actions": ["Restart numbering within an Area.", "Replace the local ADR format with the generic paragraph.", "Migrate legacy decisions."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The proposal names central sequence 0013 and local required sections and metadata, with no filesystem mutation until approval."],
+        "fail": ["The proposal drops required fields, chooses an Area-local path or number, or records the agreed decision without write consent."]
+      }
+    },
+    {
+      "id": "C-DESTINATION-BEFORE-FETCH",
+      "family": "permission-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-DESTINATION", "R-PINNED-OFFLINE"],
+      "prompt": "/local-agent-sync-external-resources allinea le skill perché ne mancano alcune di Addy",
+      "initial_state": "The destination is unspecified. Repository bundles may exist while home links are missing.",
+      "expected_output": "Clarify the destination before preparing sources or writing. If the user identifies home links, recommend the home-sync owner without implying execution permission.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-DESTINATION", "text": "Explicit invocation is not treated as proof of the intended destination.", "critical": true},
+        {"id": "A-AUTHORITY", "text": "No fetch or mutation occurs before resolving destination and authorization.", "critical": true}
+      ],
+      "forbidden_actions": ["Claim home alignment from repository presence.", "Treat a missing answer as consent."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript resolves repository versus home before dependent operations."],
+        "fail": ["The agent runs upstream preparation merely because the external skill was named."]
+      }
+    },
+    {
+      "id": "C-NORMALIZED-NOOP-REPORT",
+      "family": "public-output",
+      "kind": "deterministic",
+      "requirement_ids": ["R-FINAL-DELTA"],
+      "prompt": "Il piano ha riscritto il nome upstream ma il file locale era già corretto. Mostrami cosa cambierebbe davvero.",
+      "initial_state": "The fixture repository already contains canonical content; normalization restores that same content in the candidate.",
+      "expected_output": "changed_paths is empty and normalized_paths contains the skill path. A separate override-only or raw content change is present in changed_paths. Format producers retain the distinction and errors block.",
+      "files": ["tests/scripts/test_cli.py", "tests/scripts/test_output.py", "tests/evaluation/fixtures/defective-sync-report.json"],
+      "assertions": [
+        {"id": "A-NO-FALSE-DELTA", "text": "Normalization of an already-aligned file is not a proposed repository change.", "critical": true},
+        {"id": "A-FINAL", "text": "Native tests cover post-override differences, raw deltas, all formats, and diff failures.", "critical": true}
+      ],
+      "forbidden_actions": ["Apply a refresh based only on normalization counts.", "Hide a failed comparison behind an empty delta."],
+      "status": "generated",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/defective-sync-report.json"
+    },
+    {
+      "id": "C-PRESERVE-LOCAL-CACHES",
+      "family": "filesystem-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-LOCAL-CACHE", "R-FINAL-DELTA"],
+      "prompt": "Controlla il delta con bytecode locale presente; non leggere né cancellare le cache.",
+      "initial_state": "Synthetic repositories contain ignored untracked caches, tracked bytecode, candidate-owned bytecode, and ignored non-cache content.",
+      "expected_output": "Native tests prove only eligible local caches are omitted and preserved without reads; all other source deltas remain visible.",
+      "files": ["tests/scripts/test_cli.py"],
+      "assertions": [{"id": "A-SCOPE", "text": "Synthetic filesystem tests verify preservation, no-read behavior, and neighboring nonexcluded content.", "critical": true}],
+      "forbidden_actions": ["Inspect restricted real cache contents.", "Delete caches to make a plan clean."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["Native tests report ignored-cache preservation and the nonexcluded source cases passing."],
+        "fail": ["Caches are read or removed, or source differences disappear under a broad exclusion."]
+      }
+    },
+    {
+      "id": "C-RESTRICTIVE-BARE-CACHE",
+      "family": "environment-compatibility",
+      "kind": "rubric",
+      "requirement_ids": ["R-BARE-GIT", "R-PINNED-OFFLINE"],
+      "prompt": "Verifica la cache con Git configurato per accettare soltanto repository bare indicati esplicitamente.",
+      "initial_state": "A temporary local remote supplies a pinned commit. Restrictive Git configuration applies to production cache operations.",
+      "expected_output": "Native tests cover cold, cached, rebuilt, pin/date, missing-object and command-error outcomes without relaxing safety or contacting live sources.",
+      "files": ["tests/scripts/test_source_prepare.py", "tests/scripts/test_cli.py"],
+      "assertions": [
+        {"id": "A-RESTRICTIVE", "text": "The restrictive setting remains active and cache reuse and date reads succeed.", "critical": true},
+        {"id": "A-FAILURES", "text": "Operational failures surface rather than becoming false cache misses.", "critical": true}
+      ],
+      "forbidden_actions": ["Set safe.bareRepository=all.", "Change global Git configuration.", "Use live upstream fetches as test fixtures."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Temporary-remote regressions pass with restrictive Git configuration and explicit failure-path evidence."],
+        "fail": ["The check depends on permissive configuration or disguises command errors as missing objects."]
+      }
+    },
+    {
+      "id": "C-RETRO-REFERENCE",
+      "family": "dependency-resolution",
+      "kind": "deterministic",
+      "requirement_ids": ["R-RETRO-REFERENCE"],
+      "prompt": "Keep the retrospective's writing-guide dependency usable after the next Matt import.",
+      "initial_state": "The candidate contains the upstream retrospective fixture and an unmanaged neighboring bundle mentioning the same guide.",
+      "expected_output": "The real manifest and candidate normalizer produce canonical guide references in Retro, retain unrelated names and unmanaged content, and report no changes on a second pass.",
+      "files": [
+        "references/managed-resources.yaml",
+        "tests/scripts/test_candidate.py",
+        "tests/evaluation/fixtures/upstream-retro-reference.md"
+      ],
+      "assertions": [
+        {"id": "A-RESOLVABLE", "text": "Both guide references in the normalized Retro resolve to the canonical declared asset.", "critical": true},
+        {"id": "A-SCOPED", "text": "Compound names and unmanaged neighboring content remain unchanged.", "critical": true},
+        {"id": "A-STABLE", "text": "Repeated normalization reports zero changed paths.", "critical": true}
+      ],
+      "forbidden_actions": ["Register a replay patch.", "Change the pinned upstream revision."],
+      "status": "generated",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-retro-reference.md"
+    },
+    {
+      "id": "C-STRIP-UNDECLARED",
+      "family": "bounded-revision",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CODEX-DEFAULT-STRIP"],
+      "prompt": "Refresh the Matt source; upstream grill-me ships policy.allow_implicit_invocation: false.",
+      "initial_state": "grill-me has no invocation_policy in managed-resources.yaml; the upstream snapshot contains fixtures/upstream-restricted-openai.yaml.",
+      "expected_output": "The candidate grill-me agents/openai.yaml equals fixtures/expected-unrestricted-openai.yaml.",
+      "files": [
+        "tests/evaluation/fixtures/upstream-restricted-openai.yaml",
+        "tests/evaluation/fixtures/expected-unrestricted-openai.yaml"
+      ],
+      "assertions": [
+        {"id": "A-NO-POLICY", "text": "The candidate metadata has no policy key.", "critical": true},
+        {"id": "A-INTERFACE-KEPT", "text": "display_name and short_description keep the upstream values.", "critical": true}
+      ],
+      "forbidden_actions": ["Hand-edit the committed file instead of normalizing the candidate."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/defective-retained-policy-openai.yaml"
+    },
+    {
+      "id": "C-DECLARED-POLICY",
+      "family": "neighboring-regression",
+      "kind": "deterministic",
+      "requirement_ids": ["R-CODEX-DECLARED"],
+      "prompt": "Refresh the Matt source and confirm grilling stays user-invoked in Codex.",
+      "initial_state": "grilling declares codex.allow_implicit_invocation: false; upstream grilling metadata has no policy.",
+      "expected_output": "The candidate grilling agents/openai.yaml contains policy.allow_implicit_invocation: false.",
+      "files": ["tests/evaluation/fixtures/upstream-restricted-openai.yaml"],
+      "assertions": [
+        {"id": "A-DECLARED-VALUE", "text": "The declared value is present after normalization.", "critical": true}
+      ],
+      "forbidden_actions": ["Strip a policy that the manifest declares."],
+      "status": "generated",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/defective-overwritten-declared-openai.yaml"
+    },
+    {
+      "id": "C-STABLE-METADATA",
+      "family": "neighboring-regression",
+      "kind": "deterministic",
+      "requirement_ids": ["R-METADATA-STABLE"],
+      "prompt": "Run plan twice on an unchanged source.",
+      "initial_state": "A managed asset whose upstream metadata already lacks allow_implicit_invocation.",
+      "expected_output": "The metadata stays byte-identical and the second pass reports no normalization changes.",
+      "files": ["tests/evaluation/fixtures/expected-unrestricted-openai.yaml"],
+      "assertions": [
+        {"id": "A-BYTE-IDENTICAL", "text": "The file content is unchanged.", "critical": true},
+        {"id": "A-IDEMPOTENT", "text": "A second normalization pass reports no changed paths.", "critical": true}
+      ],
+      "forbidden_actions": ["Re-serialize metadata that needs no change."],
+      "status": "generated",
+      "held_out": true,
+      "defective_fixture": "tests/evaluation/fixtures/upstream-restricted-openai.yaml"
+    },
+    {
+      "id": "C-REFRESH-REPORT",
+      "family": "delegation-boundary",
+      "kind": "rubric",
+      "requirement_ids": ["R-REFRESH-GATE", "R-PINNED-OFFLINE"],
+      "prompt": "Regenerate the Matt source metadata fix for Codex model invocation; only implement, to-spec, to-tickets, and handoff metadata may change.",
+      "initial_state": "The pinned SHA and pin ref exist in the workspace cache; the plan summary lists many normalization changes.",
+      "expected_output": "The agent compares the candidate with the repository, finds changes only in the four authorized agents/openai.yaml files, applies with network protocols blocked, and reports any extra path as a stop condition.",
+      "files": [],
+      "assertions": [
+        {"id": "A-REAL-DIFF", "text": "Repository impact is taken from the candidate-versus-repository diff.", "critical": true},
+        {"id": "A-OFFLINE", "text": "Plan and apply run without a mutable or unpinned fetch.", "critical": true}
+      ],
+      "forbidden_actions": [
+        "Treat the normalization change summary as the repository change set.",
+        "Run git pull, an argumentless git fetch, or git remote update."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "The transcript shows a candidate-versus-repository diff limited to the four authorized metadata files before or after apply.",
+          "Commands run with network protocols blocked or only through pinned prepare."
+        ],
+        "fail": [
+          "The agent approves the refresh from the normalization summary alone.",
+          "The agent fetches upstream outside pinned prepare."
+        ]
+      }
+    }
+    ,{"id": "C-PLANNER-UPSTREAM-DRIFT", "family": "normalization-boundary", "kind": "rubric", "requirement_ids": ["R-SINGLE-PLAN", "R-METADATA-STABLE"], "prompt": "Refresh Addy after an upstream section rename and added task-list guidance.", "initial_state": "The pinned candidate has tasks/plan.md, ./tasks/todo.md, a nested other/tasks/plan.md and unrelated neighboring bundles; a previous local override is followed by new upstream text.", "expected_output": "Bounded root-path replacements and one trailing override retain the single-plan contract without modifying nested paths or neighbors; a second pass produces no changes. The candidate test exercises the real normalizer.", "files": ["tests/scripts/test_candidate.py"], "assertions": [{"id": "A-SCOPE", "text": "Only the planner's project-root default outputs are rewritten.", "critical": true}, {"id": "A-CONVERGENCE", "text": "Exactly one effective override remains last and repeated normalization is stable.", "critical": true}], "forbidden_actions": ["Depend on exact upstream prose or line numbers.", "Rewrite neighboring bundles."], "status": "not-run", "held_out": true, "rubric": {"pass": ["Native candidate tests show bounded replacement and stable repeated output."], "fail": ["Upstream text additions restore separate artifacts or the override is duplicated."]}},
+    {"id": "C-RETIRE-AND-REFRESH", "family": "retirement", "kind": "rubric", "requirement_ids": ["R-RETIRED-ROUTING", "R-PINNED-OFFLINE"], "prompt": "Refresh Superpowers after retiring writing-plans and executing-plans.", "initial_state": "The manifest excludes both bundles, caller resources still mention bare and prefixed legacy names, and brainstorming has a legacy description patch with a final content hash.", "expected_output": "Neither bundle is materialized. Only brainstorming and subagent-driven routing references are redirected, internal calls do not create user approval, the updated legacy hash verifies, and repeated normalization remains stable. Stale source-path attestations are rebuilt rather than bypassed.", "files": ["tests/scripts/test_candidate.py", "tests/scripts/test_manifest.py", "references/managed-resources.yaml", "references/imported-asset-overrides.yaml"], "assertions": [{"id": "A-RETIRED", "text": "Retired bundles are absent from declared and materialized assets.", "critical": true}, {"id": "A-HANDOFF", "text": "Routing preserves explicit user authority and unrelated workflow content.", "critical": true}, {"id": "A-REPLAY", "text": "Legacy patch verification remains valid without weakening snapshot identity checks.", "critical": true}], "forbidden_actions": ["Reimport retired skills.", "Treat an internal handoff as user approval.", "Disable hash or source-attestation checks."], "status": "not-run", "held_out": false, "rubric": {"pass": ["Manifest, native candidate tests and offline audit verify the bounded output and existing override hash."], "fail": ["A refresh restores retired entrypoints or needs disabled integrity checks."]}},
+    {"id": "C-TO-SPEC-TESTING", "family": "bounded-revision", "kind": "rubric", "requirement_ids": ["R-TO-SPEC-TESTING"], "prompt": "Refresh the Matt source while retaining the approved To Spec testing-decision override.", "initial_state": "The candidate contains upstream To Spec and To Tickets. To Spec has either no local note or an obsolete marked note.", "expected_output": "Only To Spec gains the current marked note; unrelated upstream content and To Tickets stay unchanged. A second pass reports no changes.", "files": [], "assertions": [{"id": "A-SCOPED", "text": "Only the authorized To Spec note changes.", "critical": true}, {"id": "A-IDEMPOTENT", "text": "One current note remains and a second pass makes no changes.", "critical": true}], "forbidden_actions": ["Modify neighboring skills.", "Register a new replay patch."], "status": "not-run", "held_out": true, "rubric": {"pass": ["The native candidate regression tests pass for fresh and stale-note inputs."], "fail": ["A note is missing or duplicated, a stale note survives, or neighboring content changes."]}}
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-MISSING-HOME", "query": "Mi mancano due link Addy sotto ~/.agents/skills, installali dal checkout.", "should_trigger": false, "split": "held-out", "competing_owner": "local-agent-sync-install-ai-resources"},
+      {"id": "Q-FINAL-DELTA", "query": "Mostra il diff effettivo degli import dopo gli override, separandolo dalle normalizzazioni.", "should_trigger": true, "split": "train"},
+      {"id": "Q-01", "query": "Audit the external skill manifest and tell me which managed targets are dirty.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "Plan a refresh of the mattpocock-skills source into the external workspace.", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "Apply the pinned obra-superpowers refresh and rebuild inventory.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "Prepare snapshots for the pinned sources without applying anything.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "Why does the sync keep re-adding policy.allow_implicit_invocation to grill-me?", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "Re-pin github-awesome-copilot to a new commit and record its commit_date.", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Add a replay override for an imported skill line the normalizer cannot handle.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "Run the sync plan in TSV and show provenance rows for sickn33-antigravity.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "Install our internal skills into ~/.codex and ~/.copilot.", "should_trigger": false, "split": "train", "competing_owner": "local-agent-sync-install-ai-resources"},
+      {"id": "Q-10", "query": "Align the consumer repository's managed instructions with this baseline.", "should_trigger": false, "split": "train", "competing_owner": "local-sync-repos"},
+      {"id": "Q-11", "query": "Rewrite the description of internal-bash to narrow its trigger.", "should_trigger": false, "split": "train", "competing_owner": "internal-skill-creator"},
+      {"id": "Q-12", "query": "Why is the pytest job failing in GitHub Actions on this PR?", "should_trigger": false, "split": "train", "competing_owner": "openai-gh-fix-ci"},
+      {"id": "Q-13", "query": "Find a community skill for Grafana dashboards I could install.", "should_trigger": false, "split": "held-out", "competing_owner": "vercel-find-skills"},
+      {"id": "Q-14", "query": "Sync my AGENTS.md baseline to the local home runtime.", "should_trigger": false, "split": "held-out", "competing_owner": "local-agent-sync-install-ai-resources"}
+    ]
+  }
+}

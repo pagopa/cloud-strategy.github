@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "delegation_id": "delegation-valid-brief",
+  "status": "completed",
+  "value_delivered": true,
+  "summary": "The bounded artifact contract was validated against the supplied evidence.",
+  "artifacts": [
+    {
+      "path": ".github/skills/internal-subagent-contract/fixtures/valid-brief.json",
+      "kind": "input"
+    }
+  ],
+  "evidence": [
+    {
+      "acceptance_id": "A1",
+      "ref": ".github/skills/internal-subagent-contract/tests/test_subagent_contract.py::test_valid_result_binds_delegation_brief_artifact_and_acceptance",
+      "outcome": "pass"
+    }
+  ],
+  "non_blocking_findings": [],
+  "remaining": [],
+  "retry": {
+    "recommended": false,
+    "reason": "All declared acceptance evidence is present.",
+    "required_new_input": null
+  },
+  "brief_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "progress_signature": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "budgets_used": {
+    "wall_seconds": null,
+    "attempts": 1,
+    "context_refills": 0
+  }
+}

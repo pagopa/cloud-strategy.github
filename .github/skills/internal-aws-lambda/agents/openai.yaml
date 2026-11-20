@@ -1,6 +1,6 @@
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true
 interface:
   display_name: "internal-aws-lambda"
   short_description: "AWS Lambda runtime and event-source patterns"
-  default_prompt: "Use $internal-aws-lambda for this routed AWS Lambda task."
+  default_prompt: "Use $internal-aws-lambda for AWS Lambda handler, event-source, runtime, packaging, retry, concurrency, or cold-start work."

@@ -1,0 +1,13 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "F8",
+  "description": "Personal study repository with durable purpose, a subject glossary, and a recurring review principle, without software components.",
+  "files": {
+    "README.md": "# Coastal Studies\n\nReading notes and concepts for a personal study of coastal erosion.\n",
+    "docs/README.md": "# Knowledge Index\n\nStudy purpose, terms, and principles.\n",
+    "docs/project.md": "# Purpose\n\nPUR — Build a durable understanding of coastal erosion for personal study.\n",
+    "docs/domain/coastal-processes/CONTEXT.md": "# Coastal Processes\n\n## Terms\n\n### Littoral transport\nSediment movement along a shoreline, as used in this study.\n",
+    "docs/principles.md": "# Study Principles\n\nPRI-01 — Compare claims against at least two cited primary sources.\n",
+    "notes/reading-log.md": "# Reading Log\n\nEntries record what was read and when.\n"
+  }
+}

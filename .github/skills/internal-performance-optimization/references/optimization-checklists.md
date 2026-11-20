@@ -1,5 +1,7 @@
 # Optimization Checklists
 
+Load the section that matches the measured bottleneck.
+
 ## Frontend
 
 - Re-render frequency
@@ -25,13 +27,14 @@
 - Offset pagination on large tables
 - Repeated aggregations that should be consolidated
 
-## PostgreSQL-Specific
+## PostgreSQL-specific
 
 - `EXPLAIN ANALYZE` and `pg_stat_statements`
 - JSONB with GIN indexes only when the workload truly benefits
 - Partial and expression indexes for selective predicates
 - Full-text search when text filtering outgrows `LIKE`
-- Extension choices only when they are explicit, justified, and operationally supportable
+- Extension choices only when they are explicit, justified, and operationally
+  supportable
 
 ## Memory and CPU
 

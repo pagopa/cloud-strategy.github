@@ -1,0 +1,13 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "setup_repeat",
+  "gold": "tests/evaluation/grader-fixtures/gold/setup_repeat.json",
+  "good": [{
+    "name": "zero-writes-including-repeat",
+    "run": {"profile": "author", "allowlist": [], "before": {"docs/README.md": "same"}, "after": {"docs/README.md": "same"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": {"docs/README.md": "same"}}
+  }],
+  "mutants": [
+    {"name": "no-op-write-attempt", "kind": "transient-write", "expected_status": "fail", "expected_code": "setup-rewrite", "run": {"profile": "author", "allowlist": [], "before": {"docs/README.md": "same"}, "after": {"docs/README.md": "same"}, "steps": [{"docs/README.md": "same"}], "trace": [{"step": 0, "tool": "write", "kind": "write", "path": "docs/README.md"}], "trace_complete": true, "report": "", "second_after": {"docs/README.md": "same"}}},
+    {"name": "second-run-rewrite", "kind": "critical-omission", "expected_status": "fail", "expected_code": "setup-rewrite", "run": {"profile": "author", "allowlist": [], "before": {"docs/README.md": "same"}, "after": {"docs/README.md": "same"}, "steps": [], "trace": [], "trace_complete": true, "report": "", "second_after": {"docs/README.md": "rewritten"}}}
+  ]
+}

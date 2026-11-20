@@ -1,0 +1,45 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "fixture-skill",
+  "requirements": [
+    {"id": "R-OUTPUT", "text": "Produce a checked output.", "source": "fixture specification"}
+  ],
+  "cases": [
+    {
+      "id": "C-DETERMINISTIC",
+      "family": "deterministic output",
+      "kind": "deterministic",
+      "requirement_ids": ["R-OUTPUT"],
+      "prompt": "Create the expected output.",
+      "initial_state": "The fixture skill is available.",
+      "expected_output": "A checked output is returned.",
+      "files": [],
+      "assertions": [{"id": "A-OUTPUT", "text": "The output is present.", "critical": true}],
+      "forbidden_actions": [],
+      "defective_fixture": "fixtures/eval-packs/defective-packs.json",
+      "status": "generated",
+      "held_out": false
+    },
+    {
+      "id": "C-RUBRIC",
+      "family": "judgment quality",
+      "kind": "rubric",
+      "requirement_ids": ["R-OUTPUT"],
+      "prompt": "Explain the decision.",
+      "initial_state": "The fixture skill is available.",
+      "expected_output": "A clear explanation with evidence.",
+      "files": [],
+      "assertions": [{"id": "A-CLEAR", "text": "The explanation is clear.", "critical": true}],
+      "forbidden_actions": [],
+      "rubric": {"pass": ["Explains the decision and evidence."], "fail": ["Omits the reason or evidence."]},
+      "status": "not-run",
+      "held_out": true
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-IN", "query": "Use the fixture skill for this task.", "should_trigger": true, "split": "train"},
+      {"id": "Q-OUT", "query": "This unrelated task should not use the fixture skill.", "should_trigger": false, "split": "held-out"}
+    ]
+  }
+}

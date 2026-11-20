@@ -1,0 +1,9 @@
+{
+  "schema": "knowledge-fixture-gold/v1", "fixture": "FS4",
+  "components": [], "edges": [], "lifecycle_states": {},
+  "protected_paths": ["docs/domains/relay/sources/offer.md", "docs/domains/relay/analyses/assessment.md", "docs/domains/relay/scripts/score.py"],
+  "generated_paths": [], "adr_dir": null, "ledger": null, "router": null,
+  "expected_placements": {}, "sections": [], "must_write": [], "facts": [],
+  "readme_paths": ["docs/domains/relay/README.md"], "owner_links": [],
+  "diagram_edges": {}, "aliases": {}, "diagram_triggers": []
+}

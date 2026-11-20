@@ -1,0 +1,75 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "router_ownership_gap",
+  "gold": "tests/evaluation/grader-fixtures/gold/router_ownership_gap.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "AGENTS.md": "central"
+        },
+        "after": {
+          "AGENTS.md": "central"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "No changes were made.\nNo changes were made.\nknowledge-report/v1\nmode: audit\nrouter: gap\n",
+        "second_after": {}
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "central-copy-written",
+      "kind": "protected-change",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "AGENTS.md": "central"
+        },
+        "after": {
+          "AGENTS.md": "edited"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "No changes were made.\nNo changes were made.\nknowledge-report/v1\nmode: sync\nrouter: written\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "router-gap-missing"
+    },
+    {
+      "name": "gap-not-reported",
+      "kind": "format-violation",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**"
+        ],
+        "before": {
+          "AGENTS.md": "central"
+        },
+        "after": {
+          "AGENTS.md": "central"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "No changes were made.\nNo changes were made.\nknowledge-report/v1\nmode: audit\nrouter: unchanged\n",
+        "second_after": {}
+      },
+      "expected_status": "fail",
+      "expected_code": "router-gap-missing"
+    }
+  ]
+}

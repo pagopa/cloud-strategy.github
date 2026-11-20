@@ -3,7 +3,7 @@
 ## Scope
 
 - This standard applies to repository-owned Terraform or OpenTofu root configurations.
-- Reusable modules keep the module layout documented in `SKILL.md`; they do not use numbered root files.
+- Reusable modules do not use numbered root files.
 - Use this as the default for new root configurations unless the target repository or folder already has another credible structure.
 
 ## Default root layout

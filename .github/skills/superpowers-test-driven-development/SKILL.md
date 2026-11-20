@@ -182,6 +182,16 @@ Confirm:
 
 **Other tests fail?** Fix now.
 
+**"Other tests" means the project's suite, not just your file.** A
+green run of the test you wrote is not a green suite. Before you call
+the change done, run the project's test command (bare `pytest`,
+`npm test`, `cargo test` — whatever the repo uses) even when your task
+named only one test file. A scope statement in your task bounds the
+deliverable, not your verification. Any failure that run shows —
+including one you didn't cause — goes in your report by name; a red
+test you watched scroll past and didn't mention is a report falsified
+by omission.
+
 ### REFACTOR - Clean Up
 
 After green only:
@@ -318,3 +328,22 @@ Otherwise → not TDD
 ```
 
 No exceptions without your human partner's permission.
+
+<!-- local-sync:no-commit:start -->
+## Local no-commit contract
+
+This repository-owned contract overrides any earlier instruction in this skill,
+its bundled prompts, or its scripts to create Git commits.
+
+- Do not create, amend, squash, or push Git commits. Do not run `git commit`,
+  `git merge`, `git rebase`, `git cherry-pick`, or `git push`.
+- Leave every change uncommitted in the working tree. The user owns staging,
+  commits, and integration.
+- Where a step says to commit, run that step's validation instead, then report
+  the changed files and the `git status --short` summary.
+- Where a step or script needs a commit range such as `BASE..HEAD`, review the
+  uncommitted changes with `git diff <BASE>` instead.
+- Include this contract in every subagent brief dispatched from this skill.
+- Only an explicit user request in the current conversation authorizes a
+  commit, and only for that request.
+<!-- local-sync:no-commit:end -->

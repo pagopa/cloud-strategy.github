@@ -1,32 +1,30 @@
 ---
-description: Global defect-first Copilot code review baseline for repository changes.
+description: Severity anchors and cross-cutting security and change-hygiene checks for every changed file.
 applyTo: "**"
 excludeAgent: "cloud-agent"
 ---
 
-# Review Objective
+# Cross-Cutting Review Checks
 
 This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-- Find correctness bugs, security issues, regressions, and missing validation/tests before merge.
-- Keep findings concise, severity-ordered, and tied to concrete file evidence.
-- Prioritize: correctness, security, simplicity, maintainability.
+## Severity Anchors
 
-## Required Output Shape
+- Critical: secret exposure, remote code execution, data loss, an unguarded destructive action, or a merge-blocking contract break.
+- Major: a correctness bug, security weakness, broken validator or CI gate, behavior regression, or changed behavior without tests.
+- Minor: an edge-case, resilience, observability, or maintainability risk worth fixing before merge.
+- Nit: an optional clarity issue. Raise it only when it can cause misreading.
 
-- Use severity buckets: `Critical`, `Major`, `Minor`, `Nit`, `Notes`.
-- For each finding include: file/location, impact, and concrete fix guidance.
-- Focus on actionable issues; avoid policy restatement without evidence.
+## Security
 
-## Required Checks
+- Least privilege and no hardcoded secrets are merge-blocking expectations.
+- Flag new permissions, roles, token scopes, or network exposure broader than the change needs.
+- Flag credentials, tokens, keys, and tenant or account identifiers in code, configuration, fixtures, logs, or docs.
+- Flag untrusted input that reaches shell commands, file paths, templates, queries, or deserialization without validation.
+- Flag delete, overwrite, force-push, or state-removal operations without a guard, dry run, or explicit confirmation.
 
-- Least privilege and no hardcoded secrets.
-- Input validation, unsafe execution paths, and destructive behavior controls.
-- Contract alignment with repository owners, validators, and active tests.
-- Missing test coverage for changed behavior and missing docs for behavior changes.
+## Change Hygiene
 
-## Review Discipline
-
-- Do not rewrite large unaffected areas to satisfy style-only preferences.
-- Escalate repeated anti-patterns (3+ occurrences in one diff) by one severity level.
-- Prefer the smallest safe remediation that preserves requested behavior.
+- Flag rewrites of unaffected code, dead code, and leftover debug output.
+- Flag dependency additions that are unpinned, unused, or broader than the change needs.
+- Flag user-visible behavior changes without matching docs, changelog, or migration notes when the repository keeps them.

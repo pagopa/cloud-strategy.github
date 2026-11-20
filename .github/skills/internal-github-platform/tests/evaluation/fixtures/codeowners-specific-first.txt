@@ -1,0 +1,5 @@
+# Defective input: specific paths first, catch-all last.
+# GitHub uses the last matching pattern, so "*" shadows every rule above it.
+/.github/workflows/   @example-org/platform
+/infra/               @example-org/infra
+*                     @example-org/maintainers

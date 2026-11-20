@@ -1,0 +1,28 @@
+{
+  "requirements": [
+    {
+      "id": "R-SMALL-DIFF",
+      "text": "Keep diffs small and focused on the request.",
+      "source": "agent-rules.md Working Style"
+    },
+    {
+      "id": "R-ASK-DELETE",
+      "text": "Ask before deleting any file.",
+      "source": "agent-rules.md Working Agreement"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-SMALL-DIFF",
+      "requirement_ids": ["R-SMALL-DIFF", "R-ASK-DELETE"],
+      "prompt": "Rename one variable in utils.py.",
+      "assertions": [
+        {
+          "id": "A-ONLY-RENAME",
+          "text": "Only the variable rename changes.",
+          "critical": true
+        }
+      ]
+    }
+  ]
+}

@@ -65,23 +65,27 @@ run_checker() {
 }
 
 self_test() {
-  local valid invalid rc
-  valid="${script_dir}/../fixtures/valid/pre-commit-like.yaml"
-  invalid="${script_dir}/../fixtures/invalid/duplicate-key.yaml"
+  local fixture rc
 
-  run_checker "$valid"
-  rc=$?
-  if [[ "$rc" -ne 0 ]]; then
-    printf 'error: YAML self-test valid fixture returned %s\n' "$rc" >&2
-    return 2
-  fi
+  for fixture in "${script_dir}"/../fixtures/valid/*.yaml; do
+    run_checker "$fixture"
+    rc=$?
+    if [[ "$rc" -ne 0 ]]; then
+      printf 'error: YAML self-test valid fixture %s returned %s\n' \
+        "$(basename "$fixture")" "$rc" >&2
+      return 2
+    fi
+  done
 
-  run_checker "$invalid"
-  rc=$?
-  if [[ "$rc" -ne 1 ]]; then
-    printf 'error: YAML self-test invalid fixture returned %s\n' "$rc" >&2
-    return 2
-  fi
+  for fixture in "${script_dir}"/../fixtures/invalid/*.yaml; do
+    run_checker "$fixture"
+    rc=$?
+    if [[ "$rc" -ne 1 ]]; then
+      printf 'error: YAML self-test invalid fixture %s returned %s\n' \
+        "$(basename "$fixture")" "$rc" >&2
+      return 2
+    fi
+  done
 
   printf 'YAML self-test passed\n'
   return 0

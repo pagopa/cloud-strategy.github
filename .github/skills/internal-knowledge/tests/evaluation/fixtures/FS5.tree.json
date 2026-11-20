@@ -1,0 +1,15 @@
+{
+  "schema": "knowledge-fixture-tree/v1", "id": "FS5",
+  "description": "Opt-in viewer with user settings, exclusions, accepted ADR and source bytes that must survive setup.",
+  "files": {
+    "AGENTS.local.md": "# Local\n\nKnowledge viewer: obsidian\n",
+    ".obsidian/app.json": "{\"custom\":7,\"userIgnoreFilters\":[\"private/\"]}",
+    ".obsidian/graph.json": "{\"showTags\":false,\"colorGroups\":[]}",
+    ".obsidian/workspace.json": "{\"layout\":\"mine\"}\n",
+    ".obsidian/appearance.json": "{\"theme\":\"mine\"}\n",
+    ".obsidian/core-plugins.json": "[\"file-explorer\"]\n",
+    "docs/areas/relay/README.md": "<!-- knowledge:managed:start -->\n# Relay\nOperational home: work/relay/.\n<!-- knowledge:managed:end -->\n",
+    "docs/adr/0001-choice.md": "# Keep the vendor\n\nStatus: Accepted\n\nAccepted bytes must not change.\n",
+    "work/relay/sources/offer.md": "Vendor evidence\r\n"
+  }
+}

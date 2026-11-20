@@ -1,0 +1,10 @@
+{
+  "diagram_edges": {
+    "docs/arch.md": [
+      [
+        "api",
+        "auth"
+      ]
+    ]
+  }
+}

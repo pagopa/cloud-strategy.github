@@ -1,5 +1,5 @@
 ---
-description: Rules for editing the repository retained-learning ledger without turning it into canonical policy.
+description: Review checks that keep the retained-learning ledger concise, owned, and free of canonical policy.
 applyTo: "LESSONS_LEARNED.md"
 excludeAgent: "cloud-agent"
 ---

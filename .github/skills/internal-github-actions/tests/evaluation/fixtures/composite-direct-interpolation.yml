@@ -1,0 +1,17 @@
+# Defective fixture: inputs interpolated into run, missing shell, no strict mode, unmapped output.
+name: setup-terraform-version
+description: Install Terraform and report its version.
+inputs:
+  version:
+    description: Terraform version to install.
+    required: true
+outputs:
+  terraform-version:
+    description: Installed Terraform version.
+runs:
+  using: composite
+  steps:
+    - run: |
+        curl -fsSL "https://releases.hashicorp.com/terraform/${{ inputs.version }}/terraform_${{ inputs.version }}_linux_amd64.zip" -o tf.zip
+        unzip tf.zip -d "$HOME/bin"
+        echo "version=$(terraform version -json | jq -r .terraform_version)" >> "$GITHUB_ENV"

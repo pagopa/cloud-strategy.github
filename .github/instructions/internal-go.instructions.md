@@ -1,5 +1,5 @@
 ---
-description: Instructions for writing Go code following idiomatic Go practices and community standards
+description: Go review checks for error handling, context use, concurrency safety, API contracts, and dependency scope.
 applyTo: "**/*.go,**/go.mod,**/go.sum"
 excludeAgent: "cloud-agent"
 ---

@@ -1,0 +1,7 @@
+interface:
+  display_name: "internal-microsoft-markitdown"
+  short_description: "Direct markitdown conversion entry point"
+  default_prompt: >-
+    Use $internal-microsoft-markitdown whenever a file, URL, or YouTube video
+    must be converted to Markdown with markitdown, including transcript
+    extraction and extras or plugin setup decisions.

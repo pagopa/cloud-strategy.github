@@ -1,0 +1,382 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-debugging",
+  "requirements": [
+    {
+      "id": "R-LOOP",
+      "text": "Before any fix, name one command that drives the failing path and asserts the user's exact symptom, run it at least once, and show its redacted invocation and output.",
+      "source": "internal-debugging SKILL.md: Baseline step 1"
+    },
+    {
+      "id": "R-RELIABILITY",
+      "text": "Record the reproduction rate; for a flaky failure, raise it with controlled repetition or narrowed timing and record the repetition count.",
+      "source": "internal-debugging SKILL.md: Baseline step 2"
+    },
+    {
+      "id": "R-NO-LOOP",
+      "text": "When no loop can be built, stop, list the attempts, and ask for environment access, a redacted artifact, or permission for temporary instrumentation instead of hypothesising.",
+      "source": "internal-debugging SKILL.md: Baseline step 3"
+    },
+    {
+      "id": "R-HYPOTHESES",
+      "text": "Rank three to five falsifiable hypotheses with predictions, probe one variable at a time, and apply no fix before evidence identifies the root cause.",
+      "source": "internal-debugging SKILL.md: Baseline step 4"
+    },
+    {
+      "id": "R-PROBES",
+      "text": "Tag temporary instrumentation with a unique DEBUG- marker and remove every tagged probe before completion.",
+      "source": "internal-debugging SKILL.md: Baseline steps 5 and 7"
+    },
+    {
+      "id": "R-REGRESSION-ORDER",
+      "text": "With a correct seam, observe the regression check fail on the bug before the fix and pass after it; without one, record the seam gap as a finding. This holds when no sibling skill is available.",
+      "source": "internal-debugging SKILL.md: Baseline step 6"
+    },
+    {
+      "id": "R-CLOSE",
+      "text": "Rerun the original loop at the recorded repetition count before claiming a fix; one green run of a flaky loop is not proof.",
+      "source": "internal-debugging SKILL.md: Baseline step 7"
+    },
+    {
+      "id": "R-REDACT",
+      "text": "Replace every secret with <REDACTED> in shown commands, output, and artifacts.",
+      "source": "internal-debugging SKILL.md: Baseline step 8"
+    },
+    {
+      "id": "R-DEPTH-OPTIONAL",
+      "text": "Use /mattpocock-diagnosing-bugs only as optional technique depth; when it is unavailable or no longer describes a feedback-loop discipline, continue with the baseline and report the gap.",
+      "source": "internal-debugging SKILL.md: Technique depth"
+    },
+    {
+      "id": "R-OVR-COMMIT",
+      "text": "Create no commit; state the winning hypothesis in the final report even when the core asks for a commit or PR message.",
+      "source": "internal-debugging SKILL.md: Repository overrides"
+    },
+    {
+      "id": "R-OVR-PERF",
+      "text": "Route measured slowness or throughput to /internal-performance-optimization instead of the core performance branch.",
+      "source": "internal-debugging SKILL.md: When not to use, Repository overrides"
+    },
+    {
+      "id": "R-OVR-TDD",
+      "text": "Use /internal-tdd for the regression-test workflow when the seam is meaningful, without dropping the baseline regression order.",
+      "source": "internal-debugging SKILL.md: Repository overrides"
+    },
+    {
+      "id": "R-OVR-CONTEXT",
+      "text": "Read CONTEXT-MAP.md, docs/, and docs/adr/ for domain context instead of a CONTEXT.md file.",
+      "source": "internal-debugging SKILL.md: Repository overrides"
+    },
+    {
+      "id": "R-OVR-ARCH",
+      "text": "Report architecture follow-ups as findings and hand off only on user request.",
+      "source": "internal-debugging SKILL.md: Repository overrides"
+    },
+    {
+      "id": "R-PRECEDENCE",
+      "text": "When the core text conflicts with this skill, follow this skill regardless of load order.",
+      "source": "internal-debugging SKILL.md: Repository overrides"
+    },
+    {
+      "id": "R-VERIFY-OPTIONAL",
+      "text": "Meet the completion requirements from recorded evidence even when /superpowers-verification-before-completion is unavailable.",
+      "source": "internal-debugging SKILL.md: Completion requirements"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-VALIDATOR-FAIL",
+      "family": "baseline-diagnosis",
+      "kind": "rubric",
+      "requirement_ids": ["R-LOOP", "R-HYPOTHESES", "R-PROBES", "R-CLOSE"],
+      "prompt": "The catalog validator now fails with 'hollow reference: internal-foo' after my last edit. Find out why and fix it.",
+      "initial_state": "A repository-owned validator reproduces the error locally; the cause is unknown.",
+      "expected_output": "A named validator command is run and shows the exact error before any edit; ranked hypotheses with predictions are shown; probes are one variable at a time; the fix is followed by a rerun of the same command and removal of any DEBUG- probe.",
+      "files": [],
+      "assertions": [
+        {"id": "A-LOOP-FIRST", "text": "The failing command and its output appear before any file change.", "critical": true},
+        {"id": "A-HYPOTHESES", "text": "Three to five hypotheses, each with a prediction, precede probing.", "critical": false},
+        {"id": "A-RERUN", "text": "The same command is rerun after the fix and passes.", "critical": true}
+      ],
+      "forbidden_actions": ["Edit the validator or catalog before reproducing the exact error."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript shows the red command, a ranked hypothesis list, a root-cause statement, and a green rerun of the same command."],
+        "fail": ["A fix is applied from reading code alone, or a different nearby failure is fixed."]
+      }
+    },
+    {
+      "id": "C-SYNC-DRIFT",
+      "family": "baseline-diagnosis",
+      "kind": "rubric",
+      "requirement_ids": ["R-LOOP", "R-OVR-CONTEXT"],
+      "prompt": "The external-resource sync reports drift for a skill I did not touch. Diagnose it.",
+      "initial_state": "The sync CLI plan mode reproduces the drift; the repository has CONTEXT-MAP.md and docs/adr/ but no CONTEXT.md.",
+      "expected_output": "The sync plan command is used as the loop and asserts the reported drift; domain context is read from CONTEXT-MAP.md, docs/, or docs/adr/; no search for or creation of CONTEXT.md occurs.",
+      "files": [],
+      "assertions": [
+        {"id": "A-DRIFT-LOOP", "text": "The loop asserts the specific drift signal the user reported.", "critical": true},
+        {"id": "A-CONTEXT-SOURCE", "text": "Context comes from CONTEXT-MAP.md, docs/, or docs/adr/.", "critical": false}
+      ],
+      "forbidden_actions": ["Create a CONTEXT.md file."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The drift is reproduced with a named command and context citations point to CONTEXT-MAP.md or docs/."],
+        "fail": ["The agent stalls on a missing CONTEXT.md or creates one."]
+      }
+    },
+    {
+      "id": "C-NO-LOOP",
+      "family": "missing-dependency",
+      "kind": "rubric",
+      "requirement_ids": ["R-NO-LOOP"],
+      "prompt": "The nightly workflow fails only on the self-hosted runner. Figure out the cause.",
+      "initial_state": "No local reproduction is possible; runner access and logs are not available in the session.",
+      "expected_output": "The agent states it cannot build a loop, lists what it tried, and asks for runner access, a redacted log artifact, or permission for temporary instrumentation.",
+      "files": [],
+      "assertions": [
+        {"id": "A-STOP", "text": "The agent stops before proposing a root cause.", "critical": true},
+        {"id": "A-ASK", "text": "The request names access, a redacted artifact, or instrumentation permission.", "critical": true}
+      ],
+      "forbidden_actions": ["Propose or apply a fix without a loop."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The reply lists attempts and a concrete request for one of the three unblockers."],
+        "fail": ["The reply offers a speculative cause or patch."]
+      }
+    },
+    {
+      "id": "C-FLAKY-FALSE-GREEN",
+      "family": "flaky-failure",
+      "kind": "rubric",
+      "requirement_ids": ["R-RELIABILITY", "R-CLOSE"],
+      "prompt": "test_sync_lock fails about one run in five. I changed the timeout; it passed once. Is it fixed?",
+      "initial_state": "The test is flaky with a recorded failure rate near 20 percent.",
+      "expected_output": "The agent records the reproduction rate, reruns the test at a comparable repetition count after the change, and refuses to call it fixed from one green run.",
+      "files": [],
+      "assertions": [
+        {"id": "A-RATE", "text": "A reproduction rate and repetition count are recorded.", "critical": true},
+        {"id": "A-NO-SINGLE-GREEN", "text": "A single passing run is rejected as proof.", "critical": true}
+      ],
+      "forbidden_actions": ["Declare the flaky test fixed after one passing run."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript shows repeated runs before and after the change with comparable counts."],
+        "fail": ["The agent accepts the single green run."]
+      }
+    },
+    {
+      "id": "C-REGRESSION-STANDALONE",
+      "family": "missing-dependency",
+      "kind": "rubric",
+      "requirement_ids": ["R-REGRESSION-ORDER", "R-DEPTH-OPTIONAL", "R-VERIFY-OPTIONAL"],
+      "prompt": "Diagnose and fix the inventory builder dropping symlinked skills.",
+      "initial_state": "Only internal-debugging is available; mattpocock-diagnosing-bugs, internal-tdd, and superpowers-verification-before-completion cannot be loaded. A pytest seam exists beside the builder.",
+      "expected_output": "The agent reports the unavailable skills, still writes a regression test that fails on the bug before the fix, applies the fix, shows it passing, reruns the original loop, and closes with recorded evidence.",
+      "files": [],
+      "assertions": [
+        {"id": "A-RED-BEFORE-FIX", "text": "The regression test fails before the production change.", "critical": true},
+        {"id": "A-GAP-REPORTED", "text": "Unavailable skills are reported as a gap, not as a blocker.", "critical": false}
+      ],
+      "forbidden_actions": ["Skip the regression order because internal-tdd is unavailable."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["A red test run precedes the fix diff and a green run follows it."],
+        "fail": ["The test is written after the fix, or diagnosis stops because siblings are missing."]
+      }
+    },
+    {
+      "id": "C-PERF-ROUTE",
+      "family": "competing-owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-OVR-PERF"],
+      "prompt": "The catalog build went from 4 s to 40 s last week. Find what made it slow.",
+      "initial_state": "A timing measurement is available; nothing fails functionally.",
+      "expected_output": "The agent routes the work to /internal-performance-optimization instead of running the core performance branch.",
+      "files": [],
+      "assertions": [
+        {"id": "A-ROUTE-PERF", "text": "The work is routed to /internal-performance-optimization.", "critical": true}
+      ],
+      "forbidden_actions": ["Run a performance bisection under this skill."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The reply names /internal-performance-optimization as owner."],
+        "fail": ["The agent profiles or bisects under internal-debugging."]
+      }
+    },
+    {
+      "id": "C-NO-COMMIT",
+      "family": "core-override",
+      "kind": "rubric",
+      "requirement_ids": ["R-OVR-COMMIT", "R-PRECEDENCE"],
+      "prompt": "Fix the failing plan validator test and wrap up as the diagnosing-bugs skill says.",
+      "initial_state": "mattpocock-diagnosing-bugs is loaded before internal-debugging and asks to state the winning hypothesis in the commit or PR message.",
+      "expected_output": "The agent creates no commit and states the winning hypothesis in its final report.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-COMMIT", "text": "No git commit, amend, or push command runs.", "critical": true},
+        {"id": "A-HYPOTHESIS-IN-REPORT", "text": "The final report states the winning hypothesis.", "critical": true}
+      ],
+      "forbidden_actions": ["Run git commit, git commit --amend, or git push."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The working tree stays uncommitted and the report carries the hypothesis."],
+        "fail": ["A commit is created to carry the hypothesis."]
+      }
+    },
+    {
+      "id": "C-TDD-HANDOFF",
+      "family": "core-override",
+      "kind": "rubric",
+      "requirement_ids": ["R-OVR-TDD", "R-REGRESSION-ORDER"],
+      "prompt": "The root cause is found: the manifest parser drops trailing entries. Lock it down and fix it.",
+      "initial_state": "internal-tdd is available and a native pytest seam exists.",
+      "expected_output": "The agent uses /internal-tdd for the regression-test workflow and still shows the red run before the fix.",
+      "files": [],
+      "assertions": [
+        {"id": "A-TDD-USED", "text": "/internal-tdd drives the regression-test workflow.", "critical": false},
+        {"id": "A-RED-FIRST", "text": "The red run precedes the fix.", "critical": true}
+      ],
+      "forbidden_actions": ["Write the regression test only after the fix."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The transcript shows /internal-tdd routing and a red run before the fix diff."],
+        "fail": ["The core's own test step replaces /internal-tdd, or red-first is skipped."]
+      }
+    },
+    {
+      "id": "C-ARCH-FINDING",
+      "family": "core-override",
+      "kind": "rubric",
+      "requirement_ids": ["R-OVR-ARCH", "R-REGRESSION-ORDER"],
+      "prompt": "The bug is fixed, but no test seam could reproduce the multi-caller chain. What next?",
+      "initial_state": "The fix is in; the only available test seam is too shallow for the bug pattern.",
+      "expected_output": "The agent records the seam gap and the architecture follow-up as findings and does not hand off to an architecture skill unless the user asks.",
+      "files": [],
+      "assertions": [
+        {"id": "A-SEAM-GAP", "text": "The seam gap is recorded as a finding.", "critical": true},
+        {"id": "A-NO-AUTO-HANDOFF", "text": "No architecture skill is invoked without a user request.", "critical": true}
+      ],
+      "forbidden_actions": ["Invoke an architecture-improvement skill automatically."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The report lists the seam gap and proposes the architecture follow-up as an optional next step."],
+        "fail": ["The agent starts an architecture handoff on its own."]
+      }
+    },
+    {
+      "id": "C-CORE-FIRST-CONFLICT",
+      "family": "core-override",
+      "kind": "rubric",
+      "requirement_ids": ["R-PRECEDENCE", "R-OVR-PERF"],
+      "prompt": "Debug why the sync run got slower and started failing intermittently.",
+      "initial_state": "mattpocock-diagnosing-bugs is loaded first and its performance branch suggests bisecting timings; internal-debugging is loaded second.",
+      "expected_output": "The agent splits the functional failure from the slowness, diagnoses the failure under the baseline, and routes the slowness to /internal-performance-optimization despite the earlier core instruction.",
+      "files": [],
+      "assertions": [
+        {"id": "A-WRAPPER-WINS", "text": "The wrapper routing is followed even though the core loaded first.", "critical": true}
+      ],
+      "forbidden_actions": ["Follow the core performance branch for the slowness."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["The reply separates the two symptoms and routes slowness to the performance owner."],
+        "fail": ["The core performance branch is executed."]
+      }
+    },
+    {
+      "id": "C-WRAPPER-FIRST-CONFLICT",
+      "family": "core-override",
+      "kind": "rubric",
+      "requirement_ids": ["R-PRECEDENCE", "R-OVR-COMMIT"],
+      "prompt": "Diagnose the failing token-budget test and finish the job.",
+      "initial_state": "internal-debugging is loaded first; mattpocock-diagnosing-bugs is loaded later and its post-mortem asks for a commit message.",
+      "expected_output": "The agent keeps the no-commit override after loading the core and reports the winning hypothesis in chat.",
+      "files": [],
+      "assertions": [
+        {"id": "A-OVERRIDE-HOLDS", "text": "No commit is created after the core is loaded.", "critical": true}
+      ],
+      "forbidden_actions": ["Create a commit after the core loads."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The final report carries the hypothesis with no commit."],
+        "fail": ["The later-loaded core instruction wins."]
+      }
+    },
+    {
+      "id": "C-CORE-DRIFT",
+      "family": "missing-dependency",
+      "kind": "rubric",
+      "requirement_ids": ["R-DEPTH-OPTIONAL", "R-LOOP"],
+      "prompt": "Diagnose the failing inventory test.",
+      "initial_state": "The refreshed core no longer requires a feedback loop and suggests reading code to form a theory first.",
+      "expected_output": "The agent notices the core no longer describes a loop discipline, stops using it, and follows the baseline loop requirement.",
+      "files": [],
+      "assertions": [
+        {"id": "A-BASELINE-HOLDS", "text": "A red-capable loop is built before hypotheses.", "critical": true},
+        {"id": "A-DRIFT-REPORTED", "text": "The core drift is reported as a gap.", "critical": false}
+      ],
+      "forbidden_actions": ["Hypothesise from code reading before a loop exists."],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": ["The loop precedes hypotheses and the drift is named."],
+        "fail": ["The agent follows the drifted core and skips the loop."]
+      }
+    },
+    {
+      "id": "C-REDACT",
+      "family": "baseline-diagnosis",
+      "kind": "rubric",
+      "requirement_ids": ["R-REDACT", "R-LOOP"],
+      "prompt": "The GitHub API call in the report script returns 401. Debug it; my token is in GH_TOKEN.",
+      "initial_state": "The failing curl output includes an Authorization header.",
+      "expected_output": "The loop reads the token from the environment and every shown command or output replaces the token with <REDACTED>.",
+      "files": [],
+      "assertions": [
+        {"id": "A-NO-SECRET", "text": "No token value appears in the transcript.", "critical": true}
+      ],
+      "forbidden_actions": ["Print the token or an unredacted Authorization header."],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": ["Only <REDACTED> appears where the token or header value would be."],
+        "fail": ["Any token fragment is shown."]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-01", "query": "The catalog validator fails with a hollow reference error after my rename; find the root cause.", "should_trigger": true, "split": "train"},
+      {"id": "Q-02", "query": "make skill-change-scope started failing on a skill I did not touch. Why?", "should_trigger": true, "split": "train"},
+      {"id": "Q-03", "query": "The external sync plan shows drift for three imported skills; diagnose before we fix anything.", "should_trigger": true, "split": "train"},
+      {"id": "Q-04", "query": "pytest test_manifest fails intermittently on CI but passes locally. Help me debug it.", "should_trigger": true, "split": "train"},
+      {"id": "Q-05", "query": "The GitHub Actions workflow for docs-lint broke after the last merge; what is wrong?", "should_trigger": true, "split": "train"},
+      {"id": "Q-06", "query": "The inventory builder silently drops symlinked skills; figure out why.", "should_trigger": true, "split": "train"},
+      {"id": "Q-07", "query": "Our generated INVENTORY.md is missing entries after the refresh; reproduce and diagnose.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-08", "query": "The build script exits 2 with no message on macOS only. Debug it.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-09", "query": "A review found that the eval checker accepts a duplicate case ID; confirm with a reproducer before we fix it.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-10", "query": "The token-budget test regressed yesterday; find what changed.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-11", "query": "The catalog build takes ten times longer than last week; profile it.", "should_trigger": false, "split": "train", "competing_owner": "internal-performance-optimization"},
+      {"id": "Q-12", "query": "Add a --dry-run flag to the sync CLI with tests.", "should_trigger": false, "split": "train", "competing_owner": "internal-tdd"},
+      {"id": "Q-13", "query": "Rewrite the README introduction to be shorter.", "should_trigger": false, "split": "train"},
+      {"id": "Q-14", "query": "Review this pull request for correctness before merge.", "should_trigger": false, "split": "train", "competing_owner": "internal-review-code"},
+      {"id": "Q-15", "query": "I already know the parser drops trailing entries; write the failing test and fix it.", "should_trigger": false, "split": "train", "competing_owner": "internal-tdd"},
+      {"id": "Q-16", "query": "Reduce p95 latency of the report endpoint.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-performance-optimization"},
+      {"id": "Q-17", "query": "Stress-test my plan for splitting the sync CLI before I start.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-gateway-critical-master"},
+      {"id": "Q-18", "query": "Update CODEOWNERS for the new tools directory.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-19", "query": "Revise the description of internal-debugging to route performance elsewhere.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-skill-creator"},
+      {"id": "Q-20", "query": "Fix the markdown lint warnings in docs/guides.", "should_trigger": false, "split": "held-out"}
+    ]
+  }
+}

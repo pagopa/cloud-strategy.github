@@ -1,34 +1,33 @@
-# Repository Knowledge Documents
+# Strategic and Tactical Knowledge Index
 
-This directory holds consumer-local repository knowledge for humans and AI
-agents. The files are descriptive and evidence-based. They do not override
-binding policy in `AGENTS.md`, `.github/copilot-instructions.md`,
-`.github/instructions/copilot-code-review.instructions.md`, skills,
-agents, validators, or owned files.
+This index maps each evidenced knowledge type to its current owner. Read the
+linked document for detail; this index does not override `AGENTS.md`, policy,
+skills, validators, or other authoritative owners.
 
-## Required Documents
+## Knowledge types
 
-| File | Primary function | Must not become |
+| Type | Owner | Load when |
 | --- | --- | --- |
-| `docs/repository-context.md` | Repository purpose, responsibilities, stakeholders, goals, and vocabulary. | An architecture spec, technology inventory, or policy owner. |
-| `docs/architecture.md` | Current boundaries, components, interfaces, flows, and risks. | Proposed architecture presented as current state or a policy file. |
-| `docs/tech.md` | Runtimes, tooling, dependencies, and technical constraints. | A lockfile mirror or universal technical policy owner. |
-| `docs/structure.md` | Top-level layout, path responsibilities, and generated vs authored boundaries. | A complete inventory dump or architecture narrative. |
+| Purpose (`PUR`) | [Repository context](repository-context.md) | Reviewing the repository's role, scope, stakeholders, or goals. |
+| Principles (`PRI-nn`) | Not evidenced — no distinct cross-cycle Principles owner exists. | A stable repository principle needs to be applied. |
+| Direction (`DIR-nn`, `RSK-nn`) | Not evidenced — no time-boxed direction owner or review horizon exists. | Reviewing strategic priorities or risks. |
+| Language | [Catalog Governance context](domain/catalog-governance/CONTEXT.md); [Source Synchronization context](domain/source-synchronization/CONTEXT.md) | Interpreting catalog, synchronization, and ownership terms. |
+| Strategic decisions (`ADR-nnnn`) | [ADR index](adr/README.md), especially [ADR-0002](adr/0002-knowledge-domain-layout.md) | Changing the repository's durable knowledge-domain layout. |
+| Tactical decisions (`ADR-nnnn`) | [ADR index](adr/README.md), especially [ADR-0001](adr/0001-terraform-skill-routing-boundaries.md) | Changing Terraform skill routing or its implementation boundary. |
+| Rules | [Catalog Governance rules](domain/catalog-governance/RULES.md); [Source Synchronization rules](domain/source-synchronization/RULES.md) | Changing catalog ownership, validation, or source-to-target preservation. |
+| Standards (`STD-<area>-nn`) | Not evidenced — `tech.md` describes observed tooling but is not a shared standards owner. | Applying a repository-wide convention or naming grammar. |
+| Structure | [Repository structure](structure.md); [Architecture](architecture.md) | Finding repository areas, boundaries, components, or flows. |
 
-## Diagram Standard
+## Alignment contract
 
-When a diagram clarifies relationships that prose alone does not, use Mermaid.
-Keep diagrams small and directly tied to current repository evidence.
+Operational work cites the knowledge IDs it realizes. The `internal-knowledge`
+skill reads operational artifacts only as evidence. `docs/` contains no reverse
+registry of operational work. See the [alignment contract](../.github/skills/internal-knowledge/references/alignment.md)
+for IDs, `Serves:`, precedence, and audit outcomes.
 
-## Question Routing
+## Other references
 
-- What does this repository do and why: `docs/repository-context.md`
-- How components and flows are organized: `docs/architecture.md`
-- Which technologies and validators are in use: `docs/tech.md`
-- Where content belongs in the tree: `docs/structure.md`
-
-## Maintenance Expectations
-
-- Update the smallest valid document when repository evidence changes.
-- Keep unknown facts explicit as `Unknown / To verify`.
-- Link to canonical owners instead of duplicating binding policy.
+- [Technology and validation reference](tech.md) describes the observed stack
+  and maintainer checks.
+- [Source synchronization guide](guides/source-sync.md) describes an
+  operational workflow; its detailed contracts remain with the owning skills.

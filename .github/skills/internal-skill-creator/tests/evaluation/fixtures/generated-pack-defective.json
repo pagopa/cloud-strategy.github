@@ -1,0 +1,66 @@
+{
+  "pack": {
+    "schema": "skill-eval-pack/v1",
+    "skill": "fixture-skill",
+    "requirements": [
+      {
+        "id": "R-OUTPUT",
+        "text": "Produce a pack.",
+        "source": "fixture specification"
+      }
+    ],
+    "cases": [
+      {
+        "id": "C-UNSAFE",
+        "family": "unsafe fixture path",
+        "kind": "rubric",
+        "requirement_ids": [
+          "R-OUTPUT"
+        ],
+        "prompt": "Inspect the supplied path.",
+        "initial_state": "The pack contains a traversal path.",
+        "expected_output": "Reject the path.",
+        "files": [
+          "../outside.txt"
+        ],
+        "assertions": [
+          {
+            "id": "A-PATH",
+            "text": "Traversal is rejected.",
+            "critical": true
+          }
+        ],
+        "forbidden_actions": [],
+        "rubric": {
+          "pass": [
+            "The unsafe path is rejected."
+          ],
+          "fail": [
+            "The path is accepted."
+          ]
+        },
+        "status": "generated",
+        "held_out": false
+      }
+    ],
+    "triggers": {
+      "queries": [
+        {
+          "id": "Q-UNSAFE-IN",
+          "query": "Validate a pack with an unsafe file path.",
+          "should_trigger": true,
+          "split": "train"
+        },
+        {
+          "id": "Q-UNSAFE-OUT",
+          "query": "Handle an unrelated request.",
+          "should_trigger": false,
+          "split": "held-out"
+        }
+      ]
+    }
+  },
+  "expected_codes": [
+    "eval-pack-unsafe-path"
+  ]
+}

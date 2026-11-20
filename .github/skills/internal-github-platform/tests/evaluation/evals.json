@@ -1,0 +1,612 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-github-platform",
+  "requirements": [
+    {
+      "id": "R-MODE-SELECTION",
+      "text": "Produces the output shape of the right mode: decide gives options, criteria, and one recommendation; control gives mechanism, trust boundary, and exception path; prove gives preflight, rollout unit, rollback trigger, and evidence.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-SCOPE-EXPLICIT",
+      "text": "States the scope: enterprise, organization, repository set, repository, or environment.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-RULESET-VS-PROTECTION",
+      "text": "Chooses between rulesets and classic branch protection with a stated reason such as layering, organization targeting, evaluate mode, or bypass lists.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-APP-OVER-PAT",
+      "text": "Prefers GITHUB_TOKEN or a GitHub App over a PAT and states installation scope and permissions.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-OIDC-SUB-CLAIM",
+      "text": "Constrains OIDC trust by the sub claim (repository plus environment or ref) with a matching cloud-side condition and no repository wildcard.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-ENV-PROTECTION",
+      "text": "Protects production deployment secrets with an environment that has required reviewers and a branch or tag deployment policy; a wait timer is optional and never replaces reviewers.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-RUNNER-FORK-RISK",
+      "text": "Rejects persistent self-hosted runners for public repositories or fork PRs, and prefers ephemeral runners and runner groups.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-EXCEPTION-PATH",
+      "text": "Gives every non-universal control an exception path with owner, reason, duration, review date, and rollback.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-AUDIT-EVIDENCE",
+      "text": "Proves rollout with audit-log or API evidence and separates confirmed from inferred signals.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-GET-METHOD-TRAP",
+      "text": "Forces --method GET when gh api form fields target a read endpoint.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-GHAS-ROUTING",
+      "text": "Routes CodeQL, Dependabot, and secret-scanning configuration to the matching awesome-copilot-* skill.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-FRESHNESS",
+      "text": "Verifies freshness-sensitive platform facts against current GitHub documentation and cites them.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-NO-TEMPLATE-PLACEHOLDER",
+      "text": "Generated CODEOWNERS or policy output uses only owner handles supplied by the user or found in the repository, and flags unresolved placeholders instead of emitting them.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-CODEOWNERS-ORDER",
+      "text": "Orders CODEOWNERS with broad patterns first and specific paths later, because the last matching pattern wins, and gives critical paths explicit owners.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    },
+    {
+      "id": "R-REPO-MODEL",
+      "text": "For repository-model or org-layout decisions, compares realistic options on ownership, ruleset scope, and blast radius and recommends one.",
+      "source": "tmp/superpowers/specs/2026-09-27-github-skills-consolidation-design.md Appendix A"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-RULESET-CHOICE",
+      "family": "control choice",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MODE-SELECTION",
+        "R-SCOPE-EXPLICIT",
+        "R-RULESET-VS-PROTECTION"
+      ],
+      "prompt": "Should we move from branch protection to rulesets for our 60 production repositories?",
+      "initial_state": "The org uses classic branch protection per repository.",
+      "expected_output": "A decision note with scope, options, a GitHub-specific reason, and one recommendation.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "States scope, picks rulesets or branch protection with a GitHub-specific reason, and gives one recommendation.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "Mentions evaluate mode or a staged rollout.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "States org scope, recommends org rulesets citing layering or targeting, and names a staged rollout."
+        ],
+        "fail": [
+          "Generic comparison with no scope or no recommendation."
+        ]
+      }
+    },
+    {
+      "id": "C-APP-VS-PAT",
+      "family": "identity",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-APP-OVER-PAT",
+        "R-EXCEPTION-PATH"
+      ],
+      "prompt": "Our release bot pushes tags to 12 repositories with a personal token. What should replace it?",
+      "initial_state": "A classic PAT owned by a former employee is in use.",
+      "expected_output": "A GitHub App recommendation with named permissions and installation scope, plus an exception path if a PAT stays.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Recommends a GitHub App with named permissions and installation scope.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Recommends a GitHub App with contents: write on the 12 repositories and an exception path with owner and expiry for any PAT."
+        ],
+        "fail": [
+          "Keeps a PAT without owner or expiry."
+        ]
+      }
+    },
+    {
+      "id": "C-OIDC-SUB",
+      "family": "identity",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-OIDC-SUB-CLAIM",
+        "R-ENV-PROTECTION"
+      ],
+      "prompt": "Design the OIDC trust between GitHub and our Azure subscription for prod only.",
+      "initial_state": "Deploys run from example-org/service-a through a production environment.",
+      "expected_output": "A trust design binding the sub claim to the repository and production environment, with environment reviewers.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "The sub condition names the repository and environment or ref, with no wildcard repository.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Binds sub to the repository and production environment, in the legacy form repo:example-org/service-a:environment:production or the immutable form repo:example-org@ID/service-a@ID:environment:production, and requires reviewers on the environment."
+        ],
+        "fail": [
+          "Uses repo:example-org/* or omits environment protection."
+        ]
+      }
+    },
+    {
+      "id": "C-PUBLIC-SELF-HOSTED",
+      "family": "runners",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-RUNNER-FORK-RISK"
+      ],
+      "prompt": "Can we use our self-hosted runners on this public repository?",
+      "initial_state": "The repository accepts fork pull requests.",
+      "expected_output": "A rejection of persistent self-hosted runners with safer alternatives.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Rejects persistent self-hosted runners on the public repository and offers hosted or ephemeral isolated runners.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Explains fork code execution risk and proposes hosted or ephemeral isolated runners in a restricted group."
+        ],
+        "fail": [
+          "Approves with only a label restriction."
+        ]
+      }
+    },
+    {
+      "id": "C-AUDIT-GET-TRAP",
+      "family": "evidence",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-GET-METHOD-TRAP",
+        "R-AUDIT-EVIDENCE"
+      ],
+      "prompt": "Prove who changed the ruleset last week using this command.",
+      "initial_state": "The command fixture is the operator's draft.",
+      "expected_output": "A corrected read-only audit query and an evidence statement marked confirmed or inferred.",
+      "files": [
+        "tests/evaluation/fixtures/gh-api-audit-post.sh"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output command uses --method GET or query-string filters.",
+          "critical": true
+        },
+        {
+          "id": "A-Q1",
+          "text": "Separates confirmed audit entries from inferred conclusions.",
+          "critical": false
+        }
+      ],
+      "forbidden_actions": [
+        "Run a mutating API call."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/gh-api-audit-post.sh"
+    },
+    {
+      "id": "C-GHAS-ROUTE",
+      "family": "boundary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-GHAS-ROUTING"
+      ],
+      "prompt": "Plan GitHub Advanced Security rollout across 200 repositories.",
+      "initial_state": "No security features are enabled yet.",
+      "expected_output": "A rollout plan that routes feature configuration to the matching awesome-copilot skills.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Routes each feature's configuration to the matching awesome-copilot-* skill and keeps only the rollout plan.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Plans waves and routes CodeQL, Dependabot, and secret scanning setup to their skills."
+        ],
+        "fail": [
+          "Writes CodeQL or Dependabot configuration inline."
+        ]
+      }
+    },
+    {
+      "id": "C-FRESH-FACT",
+      "family": "freshness",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-FRESHNESS"
+      ],
+      "prompt": "Can a push ruleset block files larger than 10 MB in our org today?",
+      "initial_state": "The answer depends on current GitHub capability.",
+      "expected_output": "An answer that cites current GitHub documentation with an access date.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Cites a current GitHub documentation URL with an access date for the platform fact.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Cites a docs.github.com URL and access date."
+        ],
+        "fail": [
+          "Asserts the fact without a source."
+        ]
+      }
+    },
+    {
+      "id": "C-NO-PLACEHOLDER",
+      "family": "output hygiene",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-NO-TEMPLATE-PLACEHOLDER"
+      ],
+      "prompt": "Finalize this CODEOWNERS for our repository.",
+      "initial_state": "The CODEOWNERS fixture carries a template handle; the repository owners are not given.",
+      "expected_output": "A CODEOWNERS draft that flags the missing real owner instead of keeping the placeholder.",
+      "files": [
+        "tests/evaluation/fixtures/codeowners-template-handle.txt"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output CODEOWNERS contains no @your-org/ handle and flags the missing owner instead.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [
+        "Emit @your-org/ handles."
+      ],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/codeowners-template-handle.txt"
+    },
+    {
+      "id": "C-ROLLOUT-PROOF",
+      "family": "prove mode",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-MODE-SELECTION",
+        "R-AUDIT-EVIDENCE",
+        "R-EXCEPTION-PATH"
+      ],
+      "prompt": "We enabled the new org ruleset on five repositories. Prove it is safe to widen.",
+      "initial_state": "Five repositories are in the first wave; one has a bypass for the release bot.",
+      "expected_output": "A proof plan with rollout unit, rollback trigger, audit evidence, and the bypass exception reviewed.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Names rollout unit, rollback trigger, and audit evidence, marked confirmed or inferred.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Names the wave, rollback trigger, audit queries, and the bypass owner and review date."
+        ],
+        "fail": [
+          "Says to monitor after rollout with no evidence."
+        ]
+      }
+    },
+    {
+      "id": "C-CODEOWNERS-ORDER",
+      "family": "control correctness",
+      "kind": "deterministic",
+      "requirement_ids": [
+        "R-CODEOWNERS-ORDER"
+      ],
+      "prompt": "Why does the platform team never get review requests for workflow changes?",
+      "initial_state": "The CODEOWNERS fixture is the repository file.",
+      "expected_output": "A diagnosis that the trailing catch-all shadows earlier rules and a reordered file.",
+      "files": [
+        "tests/evaluation/fixtures/codeowners-specific-first.txt"
+      ],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Output places * before specific paths and leaves no specific rule shadowed by a later catch-all.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "defective_fixture": "tests/evaluation/fixtures/codeowners-specific-first.txt"
+    },
+    {
+      "id": "C-REPO-MODEL",
+      "family": "decide mode",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-REPO-MODEL",
+        "R-MODE-SELECTION"
+      ],
+      "prompt": "Should we move our 40 services into a monorepo?",
+      "initial_state": "Services have separate owners and release cadences.",
+      "expected_output": "A decision note comparing realistic options and recommending one.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "Compares at least two realistic options on ownership, ruleset scope, and blast radius, and recommends one.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": false,
+      "rubric": {
+        "pass": [
+          "Compares monorepo and multi-repo on ownership, ruleset scope, and blast radius and recommends one."
+        ],
+        "fail": [
+          "Gives no recommendation."
+        ]
+      }
+    },
+    {
+      "id": "C-CLOUD-TRUST-HANDOFF",
+      "family": "boundary",
+      "kind": "rubric",
+      "requirement_ids": [
+        "R-OIDC-SUB-CLAIM"
+      ],
+      "prompt": "Write the AWS IAM trust policy for our GitHub OIDC deploy role.",
+      "initial_state": "The GitHub side uses a production environment.",
+      "expected_output": "The required claim conditions and a handoff of the IAM policy to internal-aws.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "text": "States the required claim conditions and routes the cloud trust policy to the cloud owner without authoring it.",
+          "critical": true
+        }
+      ],
+      "forbidden_actions": [],
+      "status": "not-run",
+      "held_out": true,
+      "rubric": {
+        "pass": [
+          "Lists aud and sub conditions and names internal-aws for the policy."
+        ],
+        "fail": [
+          "Writes the full IAM trust policy JSON."
+        ]
+      }
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {
+        "id": "Q-RULESET-DESIGN",
+        "query": "Design an org ruleset that protects main in all production repositories.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-RULESET-VS-BP",
+        "query": "Should we move from branch protection to rulesets?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-APP-VS-PAT",
+        "query": "Our release bot uses a PAT; what should replace it?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-OIDC-TRUST",
+        "query": "Design the OIDC trust between GitHub and our Azure subscription for prod only.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-ENV-APPROVAL",
+        "query": "Require approvals before deploying to the production environment.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-RUNNERS",
+        "query": "Should we adopt ARC or larger hosted runners?",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-PUBLIC-RUNNER",
+        "query": "Can we use our self-hosted runners on this public repository?",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-AUDIT",
+        "query": "Prove who changed the ruleset last week.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-DRIFT",
+        "query": "Check whether all repositories still match our baseline settings.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-CODEOWNERS",
+        "query": "Set up CODEOWNERS so the platform team owns .github/.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-COPILOT-POLICY",
+        "query": "Limit Copilot to a pilot group in the org.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-GHAS-PLAN",
+        "query": "Plan GitHub Advanced Security rollout across 200 repositories.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-REPO-MODEL",
+        "query": "Should we move our 40 services into a monorepo?",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-RUNNER-QUEUE",
+        "query": "Our self-hosted runner pool queues jobs for 20 minutes across the org.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-TWO-APPROVALS",
+        "query": "Require two approvals on main for all repositories.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-CODE-OWNER-REVIEW",
+        "query": "Make code-owner review mandatory on main.",
+        "should_trigger": true,
+        "split": "held-out"
+      },
+      {
+        "id": "Q-RULESET-BYPASS",
+        "query": "Add a bypass for the release bot in our ruleset.",
+        "should_trigger": true,
+        "split": "train"
+      },
+      {
+        "id": "Q-N-WORKFLOW",
+        "query": "Write a workflow that deploys with OIDC.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-github-actions"
+      },
+      {
+        "id": "Q-N-PR-READY",
+        "query": "Is PR 88 ready to merge?",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-github-pr"
+      },
+      {
+        "id": "Q-N-SECRET-ALERT",
+        "query": "Remediate this secret scanning alert.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "awesome-copilot-secret-scanning"
+      },
+      {
+        "id": "Q-N-TF-PROVIDER",
+        "query": "Manage our GitHub repositories with the Terraform provider.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-terraform"
+      },
+      {
+        "id": "Q-N-AWS-TRUST",
+        "query": "Write the AWS IAM trust policy for the GitHub OIDC role.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-aws"
+      },
+      {
+        "id": "Q-N-COPILOT-FACT",
+        "query": "Does Copilot code review support custom instructions today?",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-copilot-docs-research"
+      },
+      {
+        "id": "Q-N-AZURE-POLICY",
+        "query": "Create an Azure Policy that denies public IPs.",
+        "should_trigger": false,
+        "split": "train",
+        "competing_owner": "internal-azure"
+      },
+      {
+        "id": "Q-N-FAILED-RUN",
+        "query": "The build workflow failed on main last night; find out why.",
+        "should_trigger": false,
+        "split": "held-out",
+        "competing_owner": "internal-github-actions"
+      }
+    ]
+  }
+}

@@ -25,6 +25,9 @@ contract instead of reproducing its procedure here.
 ## Decision Contract
 
 - Load and follow the core skill for every in-scope operation.
+- Resolve the destination before mode selection. Recommend the home-sync owner
+  for missing home links; clarify ambiguous missing-skill requests before any
+  fetch or mutation. Skill invocation alone does not establish a destination.
 - Preserve the requested mode. Bare `sync` means `apply`; never promote
   `audit` or `plan` into a mutating mode.
 - `plan` and `apply` use
@@ -67,6 +70,9 @@ contract instead of reproducing its procedure here.
 
 Report the core skill's complete result without optimistic compression:
 selected mode, workspace, source root when used, managed asset count, changed
-paths, per-source metrics, override results, validation evidence, and blockers.
+paths, normalized paths, per-source metrics, override results, validation
+evidence, and blockers. Keep final repository differences separate from
+normalization work and state the scope of an audit. Lead with a bounded summary
+while retaining the complete machine-readable evidence.
 State why the selected mode was authorized and name any exact user action
 required before a blocked network or mutation step.

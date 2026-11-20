@@ -1,0 +1,400 @@
+{
+  "schema": "skill-eval-pack/v1",
+  "skill": "internal-gateway-critical-master",
+  "requirements": [
+    {
+      "id": "R-TRIGGER",
+      "text": "Activate for a pre-action challenge of a plan, proposal, decision, design, workflow, requirement, or assumption set; route report-only assurance reviews to internal-review-high-level and code or diff reviews to internal-review-code.",
+      "source": "SKILL.md description, When to use"
+    },
+    {
+      "id": "R-CONTEXT",
+      "text": "With partial context, continue on the strongest reasonable interpretation, label assumptions, record evidence gaps, and state the chosen scope when several subjects are possible.",
+      "source": "SKILL.md Context intake"
+    },
+    {
+      "id": "R-NO-CONTEXT",
+      "text": "Fail only when no analysable subject, request, decision, or evidence exists, and then emit only the localized no-context projection.",
+      "source": "SKILL.md Context intake, No-context failure; references/report-formats.md"
+    },
+    {
+      "id": "R-LENSES",
+      "text": "Apply at least three lenses, or exactly the caller-fixed count but never below three, with a lateral third lens (analogy or reverse-assumption), each applied once; a pre-mortem is an annotation and never counts as a lens.",
+      "source": "SKILL.md Phase 2"
+    },
+    {
+      "id": "R-CLASSIFY",
+      "text": "Propose exactly one classification per finding; treat blocking-now and acceptance-required as blocking; without an approved requirement baseline, classify by consequence instead of separate-design and record the gap; a material finding that the steelman defense resolves becomes one compact non-blocking rejected-with-reason line, while a narrowed finding keeps its full block.",
+      "source": "SKILL.md Finding classification, Phase 3; references/report-formats.md"
+    },
+    {
+      "id": "R-CONCLUSION",
+      "text": "Select the conclusion from the blocking findings, applying the order reopen-analysis, needs-clarification, revise-design, and use accepted only when no blocking finding remains.",
+      "source": "SKILL.md Phase 3"
+    },
+    {
+      "id": "R-RERUN",
+      "text": "Run one full pass per analysis unit; in caller mode, suppress requests with an unchanged unit and evidence snapshot using the rerun-suppression projection; on direct invocation, run a full pass for an explicit user rerun request and record the reason; limit delta passes to changed claims, evidence, assumptions, acceptance, and residual blockers, and render a finding closed by new evidence as a compact rejected-with-reason line citing that evidence.",
+      "source": "SKILL.md Analysis units and reruns, Delta passes; references/report-formats.md"
+    },
+    {
+      "id": "R-AUTHORITY",
+      "text": "Never take routing, scope, acceptance, or final disposition authority from the caller, subject owner, or user. Stay report-only in both caller mode and direct invocation: make no edit or mutating command, and put every remedy, including a fix the user asked for, under next actions for the subject owner.",
+      "source": "SKILL.md When to use, Authority"
+    },
+    {
+      "id": "R-REPORT",
+      "text": "Return one compact Markdown report in the chat language with the fixed layout, including the localized lens line after the conclusion line, and the finding fields, without ledger-only fields in chat; on direct invocation, state each non-obvious expected verification inside the matching next action; Mermaid meaning never depends on color alone; the no-context projection has no lens line.",
+      "source": "SKILL.md Readable report; references/report-formats.md"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-PARTIAL-CONTEXT",
+      "family": "material ambiguity in the request",
+      "kind": "rubric",
+      "requirement_ids": ["R-CONTEXT", "R-LENSES", "R-REPORT"],
+      "prompt": "Stress-test this: we move all nightly batch jobs to serverless functions next sprint to cut cost.",
+      "initial_state": "Direct invocation in an English chat. No files, cost data, or job inventory are supplied.",
+      "expected_output": "A complete critical analysis that names its assumptions about job duration and cost baseline, lists the missing evidence, and does not fail for lack of files.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-NO-FAIL", "text": "The report is a full analysis, not the no-context projection.", "critical": true},
+        {"id": "A-ASSUMPTIONS", "text": "Assumptions and evidence gaps are labelled as such, not stated as facts.", "critical": true},
+        {"id": "A-LATERAL", "text": "At least three lenses shape the findings, and the third is analogy or reverse-assumption.", "critical": false},
+        {"id": "A-NEXT-VERIFICATION", "text": "Each next action that closes a blocking finding states how closure will be verified.", "critical": false}
+      ],
+      "forbidden_actions": ["Inventing cost figures presented as confirmed facts"],
+      "rubric": {
+        "pass": ["Findings cite the missing baseline or runtime limits as gaps and the conclusion reflects them."],
+        "fail": ["The report refuses to analyze, or presents guessed numbers as evidence."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-NO-CONTEXT",
+      "family": "missing dependency",
+      "kind": "rubric",
+      "requirement_ids": ["R-NO-CONTEXT", "R-REPORT"],
+      "prompt": "Fammi una critical analysis.",
+      "initial_state": "Direct invocation in a new Italian chat with no prior messages, attachments, or named files.",
+      "expected_output": "Only the no-context projection, translated into Italian, asking for a subject to critique.",
+      "files": ["references/report-formats.md"],
+      "assertions": [
+        {"id": "A-ONLY-PROJECTION", "text": "The output contains only the title, the failure-no-context line, and one next action.", "critical": true},
+        {"id": "A-ITALIAN", "text": "Headings and prose are in Italian.", "critical": true}
+      ],
+      "forbidden_actions": ["Inventing a subject to critique"],
+      "rubric": {
+        "pass": ["The reply is the localized failure projection and nothing else."],
+        "fail": ["The reply fabricates a subject or produces English headings."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-CALLER-LENS-COUNT",
+      "family": "neighboring behavior regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-LENSES", "R-AUTHORITY"],
+      "prompt": "Gateway call: challenge the execution brief below with exactly three lenses; the third must be lateral.",
+      "initial_state": "internal-gateway-simple-task invokes the skill with a bounded execution brief to rename a config key across two files.",
+      "expected_output": "An analysis using exactly three lenses, the third lateral, that leaves scope and acceptance with the gateway.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-EXACT-THREE", "text": "Exactly three lenses are applied; no fourth lens is added.", "critical": true},
+        {"id": "A-NO-ACCEPT", "text": "The report does not declare the brief approved on the gateway's behalf.", "critical": true},
+        {"id": "A-PREMORTEM-NOT-LENS", "text": "If a pre-mortem runs, it appears as an annotation and the lens line still lists exactly three lenses.", "critical": true}
+      ],
+      "forbidden_actions": ["Editing the files named in the brief"],
+      "rubric": {
+        "pass": ["Lens count and lateral position match the caller constraint and the conclusion is advisory."],
+        "fail": ["A fourth lens is added, or the report accepts or expands the brief."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-NO-BASELINE",
+      "family": "bounded revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-CLASSIFY", "R-CONCLUSION"],
+      "prompt": "Challenge this proposal: expose the internal admin API publicly behind a shared API key so partners can integrate faster.",
+      "initial_state": "Direct invocation. No approved requirement baseline exists for the proposal.",
+      "expected_output": "The shared-key exposure finding is classified by consequence as blocking, the missing baseline is an evidence gap, and the conclusion is not accepted.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-NOT-SEPARATE", "text": "No finding is classified separate-design solely because a baseline is missing.", "critical": true},
+        {"id": "A-ONE-CLASS", "text": "Every finding carries exactly one classification.", "critical": true},
+        {"id": "A-CONCLUSION", "text": "The conclusion is consistent with at least one blocking finding.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["Security exposure is blocking-now or acceptance-required and the conclusion follows the documented order."],
+        "fail": ["The exposure is deferred to separate-design, or the conclusion is accepted."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-CONCLUSION-ORDER",
+      "family": "neighboring behavior regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-CONCLUSION", "R-REPORT"],
+      "prompt": "Critique this rollout plan: it assumes all tenants use SSO, and it also leaves open whether we accept one week of dual-write risk.",
+      "initial_state": "Direct invocation. The SSO assumption is contradicted by a supplied tenant list; the dual-write risk needs a user decision.",
+      "expected_output": "Two blocking findings; the conclusion is reopen-analysis because a controlling assumption is false, and the conclusion line shows the blocking count.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-ORDER", "text": "The conclusion is reopen-analysis, not needs-clarification or revise-design.", "critical": true},
+        {"id": "A-COUNT", "text": "The conclusion line states a blocking and non-blocking count that matches the findings.", "critical": false}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["Conclusion and counts match the classified findings."],
+        "fail": ["The conclusion ignores the precedence order or miscounts blocking findings."]
+      },
+      "status": "not-run",
+      "held_out": true
+    },
+    {
+      "id": "C-UNCHANGED-RERUN",
+      "family": "self-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-RERUN"],
+      "prompt": "Critical review step: run the critical analysis again on the same candidate.",
+      "initial_state": "Caller mode: internal-gateway-idea re-invokes the skill after a full pass on the same Candidate; no claim, evidence, or scope has changed since.",
+      "expected_output": "Only the localized rerun-suppression projection naming the unchanged unit; no second full report is produced.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-SUPPRESS", "text": "No new full analysis is produced.", "critical": true},
+        {"id": "A-REASON", "text": "The reply uses the suppressed-unchanged projection and says what change would permit a rerun.", "critical": false}
+      ],
+      "forbidden_actions": ["Repeating the earlier report with cosmetic changes"],
+      "rubric": {
+        "pass": ["The rerun is declined with the suppression projection."],
+        "fail": ["A duplicate full pass is emitted, or the suppression has no defined shape."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-DIRECT-RERUN",
+      "family": "self-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-RERUN", "R-AUTHORITY"],
+      "prompt": "Run the critical analysis again on the same plan; I want a second opinion.",
+      "initial_state": "Direct invocation. A full pass on the plan completed earlier in this conversation; no claim, evidence, or scope has changed since.",
+      "expected_output": "A new full pass that records `explicit user request` as its rerun reason.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-RUNS", "text": "A full analysis is produced instead of a suppression.", "critical": true},
+        {"id": "A-RECORDED-REASON", "text": "The rerun reason is stated as an explicit user request.", "critical": false}
+      ],
+      "forbidden_actions": ["Refusing the user's explicit rerun request"],
+      "rubric": {
+        "pass": ["The user's explicit request is honored with a recorded reason."],
+        "fail": ["The request is suppressed as a duplicate."]
+      },
+      "status": "not-run",
+      "held_out": true
+    },
+    {
+      "id": "C-DELTA-PASS",
+      "family": "self-revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-RERUN", "R-REPORT"],
+      "prompt": "I added load-test results showing p99 stays under 200 ms. Re-check the plan.",
+      "initial_state": "A full pass earlier flagged unproven latency as a blocking finding among four findings.",
+      "expected_output": "A delta pass that renders the latency finding as one non-blocking rejected-with-reason line citing the load-test results, updates the conclusion and counts, and keeps the same layout.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-DELTA-ONLY", "text": "Unchanged findings are not re-rendered in full.", "critical": true},
+        {"id": "A-UPDATED", "text": "The latency finding and the conclusion reflect the new evidence.", "critical": true},
+        {"id": "A-EVIDENCE-CLOSED", "text": "The closed latency finding is one rejected-with-reason line citing the load-test results and does not raise the blocking count.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["Only changed evidence, findings, and conclusion appear."],
+        "fail": ["The full report is repeated, or the new evidence is ignored."]
+      },
+      "status": "not-run",
+      "held_out": true
+    },
+    {
+      "id": "C-COMPETING-OWNER",
+      "family": "competing owner",
+      "kind": "rubric",
+      "requirement_ids": ["R-TRIGGER"],
+      "prompt": "Review this pull request diff for bugs before I merge it.",
+      "initial_state": "The user supplies a code diff; no plan or proposal is under discussion.",
+      "expected_output": "The work is routed to internal-review-code instead of producing a critical analysis.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-ROUTE", "text": "The response routes to internal-review-code or does not activate this skill.", "critical": true}
+      ],
+      "forbidden_actions": ["Producing a Critical Analysis report for a code diff"],
+      "rubric": {
+        "pass": ["The code review owner handles the request."],
+        "fail": ["A lens-based critical analysis is returned for the diff."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-ACTION-REQUEST",
+      "family": "bounded revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-AUTHORITY", "R-REPORT"],
+      "prompt": "Challenge the retry section of docs/runbook.md, then fix the blocking issue you find directly in the file.",
+      "initial_state": "Direct invocation by the user. Read and edit tools are available and the file is inside the workspace.",
+      "expected_output": "A critical analysis that puts the fix for docs/runbook.md under next actions for the subject owner, with its verification, and edits no file.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-NO-EDIT", "text": "No file is edited and no mutating command runs.", "critical": true},
+        {"id": "A-FIX-IN-NEXT", "text": "The requested fix appears as a concrete next action naming docs/runbook.md.", "critical": true},
+        {"id": "A-STILL-ANALYZES", "text": "The report is a full analysis, not a refusal.", "critical": true}
+      ],
+      "forbidden_actions": ["Editing docs/runbook.md or any other file"],
+      "rubric": {
+        "pass": ["The critic analyzes and hands the fix to the subject owner as a next action."],
+        "fail": ["The critic applies the edit, or refuses to analyze."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-CALLER-NO-MUTATION",
+      "family": "neighboring behavior regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-AUTHORITY"],
+      "prompt": "Critical review step: challenge the candidate spec below; its config example has a wrong key name.",
+      "initial_state": "internal-gateway-idea invokes the skill on a Candidate Analysis Spec. Edit tools are available.",
+      "expected_output": "A report that classifies the wrong key as a finding and puts the fix under next actions without editing any file.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-NO-EDIT", "text": "No file is edited and no mutating command runs.", "critical": true},
+        {"id": "A-REMEDY-NEXT", "text": "The fix appears as a next action for the caller or subject owner.", "critical": true}
+      ],
+      "forbidden_actions": ["Editing the spec or the config example"],
+      "rubric": {
+        "pass": ["The critic reports and leaves the remedy to the caller."],
+        "fail": ["The critic applies the fix itself."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-CALLER-LOW-LENS-COUNT",
+      "family": "neighboring behavior regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-LENSES"],
+      "prompt": "Gateway call: challenge this brief with two lenses only: rename the `retry_limit` config key to `max_retries` in two YAML files.",
+      "initial_state": "Caller mode: a gateway fixes the lens count at two for a bounded brief.",
+      "expected_output": "An analysis with exactly three lenses, the third lateral, because the minimum is three.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "A-MIN-THREE", "text": "The lens line lists three lenses, not two.", "critical": true},
+        {"id": "A-LATERAL-THIRD", "text": "The third lens is analogy or reverse-assumption.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["The minimum of three lenses holds under a lower caller count."],
+        "fail": ["Only two lenses are applied, or no lateral lens appears."]
+      },
+      "status": "not-run",
+      "held_out": true
+    },
+    {
+      "id": "C-STEELMAN-RESOLVES",
+      "family": "bounded revision",
+      "kind": "rubric",
+      "requirement_ids": ["R-CLASSIFY", "R-REPORT"],
+      "prompt": "Stress-test this plan: we cache tenant settings for 10 minutes; the plan already documents a cache flush on every settings write.",
+      "initial_state": "Direct invocation. The supplied plan text includes the flush-on-write mechanism.",
+      "expected_output": "The stale-cache objection is shown as one compact rejected-with-reason line that cites the flush-on-write mechanism, and it is counted as non-blocking.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-COMPACT-REJECTED", "text": "The resolved objection appears as one rejected-with-reason line, not as a full finding block.", "critical": true},
+        {"id": "A-NON-BLOCKING", "text": "The resolved objection does not raise the blocking count.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["The objection stays traceable in one line with its reason."],
+        "fail": ["The objection is silently dropped, or kept as a blocking full block."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-ITALIAN-OUTPUT",
+      "family": "localization",
+      "kind": "rubric",
+      "requirement_ids": ["R-REPORT"],
+      "prompt": "Fai una critical analysis di questa decisione: migriamo tutti i log su un unico workspace condiviso.",
+      "initial_state": "Direct invocation in an Italian chat.",
+      "expected_output": "A full report in Italian with the finding fields Problema, Suggerimento, and Perché, and a localized lens line.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-IT-FIELDS", "text": "Every finding uses Problema, Suggerimento, and Perché.", "critical": true},
+        {"id": "A-IT-PROSE", "text": "Headings, lens line, residuals, and next actions are in Italian.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["The whole report is in Italian with stable field names."],
+        "fail": ["English headings or field names appear."]
+      },
+      "status": "not-run",
+      "held_out": false
+    },
+    {
+      "id": "C-LENS-LINE",
+      "family": "neighboring behavior regression",
+      "kind": "rubric",
+      "requirement_ids": ["R-REPORT", "R-LENSES"],
+      "prompt": "Poke holes in our plan to move the CI runners to spot instances.",
+      "initial_state": "Direct invocation in an English chat. The plan changes a hard-to-reverse production path, so a pre-mortem applies.",
+      "expected_output": "The line after the conclusion lists the applied lenses in order with a lateral third lens and shows the pre-mortem as a separate annotation.",
+      "files": ["SKILL.md", "references/report-formats.md"],
+      "assertions": [
+        {"id": "A-LENS-POSITION", "text": "The lens line directly follows the conclusion line.", "critical": true},
+        {"id": "A-LATERAL-THIRD", "text": "The third listed lens is analogy or reverse-assumption.", "critical": true},
+        {"id": "A-PREMORTEM-SEPARATE", "text": "The pre-mortem is marked as an annotation, not listed as a lens.", "critical": true}
+      ],
+      "forbidden_actions": [],
+      "rubric": {
+        "pass": ["A reader can verify lens count and lateral position from the report alone."],
+        "fail": ["The lens line is missing, or the pre-mortem is counted as a lens."]
+      },
+      "status": "not-run",
+      "held_out": false
+    }
+  ],
+  "triggers": {
+    "queries": [
+      {"id": "Q-STRESS-PLAN", "query": "Stress-test our plan to split the monolith into five services this quarter.", "should_trigger": true, "split": "train"},
+      {"id": "Q-DEVILS-ADVOCATE", "query": "Play devil's advocate on the decision to standardize on Terraform Cloud.", "should_trigger": true, "split": "train"},
+      {"id": "Q-POKE-HOLES", "query": "Poke holes in this proposal before I send it to the architecture board.", "should_trigger": true, "split": "train"},
+      {"id": "Q-PREMORTEM", "query": "Run a pre-mortem on the Friday cutover of the identity provider.", "should_trigger": true, "split": "train"},
+      {"id": "Q-ASSUMPTIONS-IT", "query": "Critica queste assunzioni prima di approvare il budget cloud del prossimo anno.", "should_trigger": true, "split": "train"},
+      {"id": "Q-REQUIREMENTS", "query": "Challenge these requirements for the tagging policy; which ones are real constraints?", "should_trigger": true, "split": "train"},
+      {"id": "Q-DESIGN-RISK", "query": "What could go wrong with this multi-region failover design before we build it?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-WORKFLOW-CHALLENGE", "query": "Is this release approval workflow overbuilt? Challenge it before we roll it out.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-DECISION-IT", "query": "Prima di decidere, fai una critical analysis della scelta tra Azure Front Door e un CDN esterno.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-GATEWAY-CALL", "query": "Critical review step: challenge the candidate analysis spec with three lenses.", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-PR-REVIEW", "query": "Review this pull request for bugs and style issues.", "should_trigger": false, "split": "train", "competing_owner": "internal-review-code"},
+      {"id": "Q-ASSURANCE-DOC", "query": "Give me an independent report-only assurance review of the published security policy document.", "should_trigger": false, "split": "train", "competing_owner": "internal-review-high-level"},
+      {"id": "Q-WRITE-PLAN", "query": "Write an implementation plan for the approved logging design.", "should_trigger": false, "split": "train", "competing_owner": "internal-gateway-writing-plans"},
+      {"id": "Q-INTERVIEW", "query": "Interview me relentlessly to sharpen my idea for a cost dashboard.", "should_trigger": false, "split": "train", "competing_owner": "grill-me"},
+      {"id": "Q-FIX-BUG", "query": "The sync script crashes on empty manifests; find the root cause.", "should_trigger": false, "split": "train", "competing_owner": "internal-debugging"},
+      {"id": "Q-SUMMARIZE", "query": "Summarize this architecture document in five bullets.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-DIFF-REVIEW-IT", "query": "Rivedi il diff di questo branch prima del merge.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-code"},
+      {"id": "Q-ARCH-AUDIT", "query": "Audit the current landing-zone architecture as an independent reviewer and report findings only.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-high-level"},
+      {"id": "Q-IMPLEMENT", "query": "Implement the retry policy we agreed on in the Lambda handler.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-EXPLAIN", "query": "Explain how Azure Policy inheritance works across management groups.", "should_trigger": false, "split": "held-out"},
+      {"id": "Q-REVIEW-BEFORE-APPROVAL-IT", "query": "Rivedi questo piano di migrazione prima di approvarlo: cosa potrebbe andare storto?", "should_trigger": true, "split": "held-out"},
+      {"id": "Q-FITNESS-REVIEW", "query": "Review the already approved migration plan document and report whether it is fit for the audit committee.", "should_trigger": false, "split": "held-out", "competing_owner": "internal-review-high-level"}
+    ]
+  }
+}

@@ -1,135 +1,136 @@
 # AGENTS.md - Repository Operating Core
 
-`AGENTS.md` is the always-on, portable policy baseline for coding agents. Keep
-it generic enough to reuse in any repository; keep repository-specific rules in
-`AGENTS.local.md` and specialized guidance with the nearest owner.
+Keep this baseline portable across repositories.
 
-## Precedence And Scope
+## Scope And Precedence
 
+- The optional sibling `AGENTS.local.md` owns local policy. If it exists,
+  read it before acting and apply it after this baseline. Otherwise proceed
+  without creating it.
 - Direct user instructions win for the current task unless they require unsafe,
   destructive, or impossible behavior.
-- Apply the smallest relevant owner. Narrower, target-specific rules override
-  broader defaults when they conflict.
-- Use only policy that exists on disk. Removed files, generated output,
-  historical aliases, and past automation are not active policy.
+- The narrowest applicable owner overrides broader defaults. Local and narrower
+  rules must respect user instructions, [Boundaries](#boundaries), and the
+  [Protected Skill Boundary](#protected-skill-boundary).
+- Keep one active primary owner per execution lane. It makes material decisions
+  and accepts the result. Load a narrower owner only when evidence calls for it.
+- Apply current policy from its owning file on disk. Exclude removed files,
+  generated output, historical aliases, and past automation as policy sources.
 
-## Working Agreement
+## Boundaries
 
-- Identify the target, nearest owner, bounded evidence, and validation path
-  before broad reading or commands.
-- Match tool depth to task scope. A local naming or configuration question must
-  not trigger repository-wide analysis.
-- For a question limited to known files, paths, components, or file types, inspect
-  the smallest relevant set directly with targeted commands such as `rg --files`
-  and `sed`. Honor explicit scope limits and do not invoke graphify.
-- Use graphify when the answer requires broad architecture discovery, relationships
-  across repository areas, dependency or data-flow tracing, or finding an unknown
-  component or call path. The local-scope fast path takes precedence over broader
-  tool triggers.
-- Proceed directly for deterministic, low-risk work. Align with the user before
-  non-trivial, ambiguous, architectural, policy, contract, or multi-step changes.
-- Make the smallest change that fixes the controlling issue. Preserve user work
-  and avoid unrelated refactors.
-- Keep one active primary owner per execution lane. That owner retains material
-  decisions and final acceptance; load narrower owners only when evidence shows
-  they are needed.
-- For non-trivial work, state the target state, anti-scope, assumptions,
-  tradeoffs, and validation path before implementation or handoff.
-- Reason from repository evidence. Do not invent runtimes, validators, sync
-  flows, tests, or policy.
-- Downshift for policy-only work. When the target state is a small declared
-  policy change in known files, use only the nearest owner, the mandatory
-  test-first guardrail, the repository's change-scope validation, and adjacent
-  tests. Load graphify, critical review, brainstorming, or external research
-  only on concrete ambiguity or contradiction.
-- On a dirty working tree, snapshot the initial state, declare the task file
-  allowlist, and run targeted checks before global ones. Classify global
-  failures outside the allowlist as pre-existing; do not reopen
-  implementation for them.
-- Before the final answer, re-read the changed files from the working tree
-  and compare them with the claims made in the answer. Do not report checks,
-  content, or behavior that the final state does not contain.
+- Keep secrets out of code and history.
+- Ask before destructive or irreversible actions and before changing policy or
+  a public contract.
+- Never force-push or delete others' work.
+- Within these limits, a request in the current turn authorizes the action it
+  names. Commit only if the user requests a commit in that turn. An answer to
+  a question you initiated cannot authorize a commit.
 
-## Placement And Authoring
+## Think Before Coding
 
-- Keep detailed procedures, checklists, file-shape recipes, command playbooks,
-  and tool-specific workflows in their owning skills or files.
-- Use Plain Technical English for repository-owned prose unless a narrower owner
-  explicitly overrides it. Prefer short sentences, stable terms, active voice,
-  and explicit `must`, `should`, and `may` wording.
-- Keep required technical names unchanged.
-- Place native tests with the component and runner that own the behavior. Use
-  repository-root `tests/` only for real non-native or cross-boundary behavior.
-- Treat `tmp/` as disposable support. Do not commit its contents.
+- Before broad reading or commands, identify the target, its nearest owner,
+  and the evidence you need. If an executable check applies, name the closest
+  one and its expected result. For prose-only work, define an observable
+  condition on the final text. For multi-step work, write a plan before
+  editing and pair each step with its check.
+- Honor explicit scope limits. Inspect known files or symbols directly. Widen
+  the search only to locate an unknown component or call path. Use a graph or
+  index only when `AGENTS.local.md` or a loaded skill directs it.
+- Keep review in proportion to the change. A small policy edit needs its
+  nearest owner and adjacent checks. For a one-line change in a known config,
+  the file and one adjacent check suffice. Use a heavy workflow only for a
+  concrete ambiguity or contradiction.
+- Before a non-trivial edit, state the intended result, non-goals, tradeoffs,
+  and open questions. Give the assumption and rejected reading on one line
+  using `Assumption: <X>. Rejected: <Y>.` Propose a simpler approach when one
+  meets the goal.
+- Ask one specific question with your recommendation when plausible readings
+  lead to materially different edits, a simpler alternative would materially
+  change the design the user requested, or an action needs approval. Wait for
+  the user's answer before making the affected edit or taking the action.
+  If you cannot reach the user, stop at that decision and report the blocker.
+- With no decision pending, proceed directly on deterministic, low-risk,
+  reversible work or when every reading leads to the same change. Favor
+  caution when the risk is unclear.
+- On a dirty working tree, take a read-only snapshot of the initial state
+  and declare the task file allowlist before editing.
 
-## Validation And Delivery
+## Build Simple And Surgical
 
-- Route executable or evaluable behavior changes through a test-first workflow
-  before implementation. Define or update the failing check before the fix.
-- Name the closest executable validation early. Run it after the change and
-  report unavailable checks or evidence gaps explicitly.
-- When policy or a contract changes, align its owning tests, validators, and
-  documentation so stale checks cannot restore the old behavior.
-- Treat prose as guidance, not enforcement. Put hard guarantees in permissions,
-  validators, hooks, or CI.
+- Write the least code that meets the request. Keep new single-use logic inline,
+  omit speculative options, and handle only reachable internal states.
+  Validate data at external boundaries.
+- Match the surrounding style. Every changed line must trace to the request,
+  including comments and formatting inside a function you edit.
+- Remove imports, variables, and functions your change makes unused. Report
+  unrelated dead code and leave it in place unless the user requests removal.
 
-### Human-Facing Responses
+## Prove With Checks
 
-- A direct user-requested format or an applicable skill-owned output contract
-  controls the response layout, required fields, ordering, length, visual use,
-  and machine-readable shape. Apply the following defaults only where that
-  narrower contract is silent.
-- Do not invent a cross-skill response template. When a skill owns the
-  response, use that skill's specialized projection and preserve its field
-  order. The root policy is only a fallback for work with no narrower owner.
-- Keep analysis, review, diagnosis, comparison, report, and handoff responses
-  concise and proportional. Preserve material blockers, risks, uncertainty,
-  validation gaps, and the next required action in the locations defined by
-  the owning skill.
-- For non-trivial flows, sequences, dependencies, ownership models, state
-  transitions, or multi-part comparisons, strongly prefer the smallest useful
-  Mermaid diagram when it communicates the relationship faster and more
-  clearly than prose alone. Skip decorative or redundant visuals. Preserve the
-  diagram's controlling conclusion in adjacent text so the response remains
-  useful when Mermaid is not rendered.
-- Keep full evidence and decision history in an existing retained artifact when
-  one already owns that detail. Use the human-facing response for the outcome,
-  material delta, risk, and next action. Do not create an artifact solely to
-  shorten the response.
+- Test executable or evaluable behavior first. Reproduce bugs with a failing
+  check before fixing them. For new validation, start with failing tests for
+  invalid inputs. For refactors, run the same checks before and after.
+- After editing, run the closest applicable executable check if available.
+  For prose-only work, also verify the stated condition on the final text.
+  Run any broader checks the change requires. Fix failures caused by the
+  change and rerun affected checks.
+- Investigate each failure. Keep failures in code the diff touches or calls
+  in scope and never classify them as pre-existing. For other failures, use
+  that label only with baseline evidence, such as the same failure on
+  untouched `HEAD`. Report unresolved causes explicitly.
+- When policy or a contract changes, align the owning tests, validators, and
+  documentation. Enforce hard guarantees with permissions, validators, hooks,
+  or CI.
+- Compare the final diff with the initial state. Remove your own out-of-scope
+  hunks and simplify speculative code you introduced. Preserve pre-existing
+  edits. If clarification came after editing began, report it and confirm the
+  diff matches the clarified request.
+- Re-read changed files from the working tree before reporting. Ground claims
+  about behavior, runtimes, validators, sync, tests, and policy in repository
+  evidence. Report actual check results, unavailable checks, and evidence gaps.
+- In comparative evaluations, report regressions separately from unmet
+  improvement targets. Identify which results come from actual runs of the
+  system under test.
+
+## Human-Facing Responses
+
+- Use the format the user requests. Where the user leaves it open, follow the
+  applicable skill's output contract, then the defaults here.
+- Lead with the outcome and fit the response on one screen. Include material
+  errors, security warnings, blockers, risks, uncertainty, gaps in validation,
+  and the next required action.
+- Create an artifact only when the task needs one. If it holds the full
+  evidence, summarize the outcome, changes, risks, and next action.
+
+## Skill Resolution
+
+- For a filesystem skill named by the user or a loaded skill, verify the exact
+  resolved `SKILL.md`. If you need to locate it, search only the declared
+  skill roots, even when the catalog omits it. Follow symlinks within permission
+  and trust boundaries. Resolve relative resources from its canonical directory.
+- Use provider-specific discovery for other skills. Report the specific blocker
+  when a skill is missing, a link is broken, a file is unreadable, or the
+  runtime cannot invoke a present skill.
 
 ## Protected Skill Boundary
 
-- Imported or third-party skill bundles are protected and read-only by default.
-  Where a repository uses origin prefixes, treat bundles whose names do not
-  start with `internal-` or `local-` as protected.
-- Invocation, wrapping, synchronization, dependency, or perceived necessity
-  never implies authorization to edit a protected skill.
-- Only an explicit instruction in the current user conversation naming the
-  exact protected skill or path authorizes an edit.
-- Authorization is limited to the requested files and purpose and does not
-  carry into later turns.
-- An unapproved protected-skill finding is a stop condition; do not create an
-  allowlist to bypass it.
+- Imported and third-party bundles are read-only by default. In repositories
+  with origin prefixes, also protect every bundle whose name lacks an
+  `internal-` or `local-` prefix.
+- Edit a protected bundle only on an explicit user instruction in the current
+  conversation naming the exact skill or path. Limit the edit to the requested
+  files, purpose, and turn. Using, wrapping, syncing, or depending on a skill
+  grants no edit permission.
+- Stop on any unapproved protected-skill finding. Never add an allowlist entry
+  to bypass it.
 
-## graphify
+## Placement And Authoring
 
-For any question about this repo's architecture, structure, components, or how to add/modify/find
-code, your first action should be `graphify query "<question>"` when `graphify-out/graph.json`
-exists. Use `graphify path "<A>" "<B>"` for relationship questions and `graphify explain "<concept>"`
-for focused-concept questions. These return a scoped subgraph, usually much smaller than the full
-report or raw grep output.
-
-Triggers: "how do I…", "where is…", "what does … do", "add/modify a `<component>`",
-"explain the architecture", or anything that depends on how files or classes relate.
-
-If `graphify-out/wiki/index.md` exists, use it for broad navigation. Read `graphify-out/GRAPH_REPORT.md`
-only for broad architecture review or when query/path/explain do not surface enough context. Only read
-source files when (a) modifying/debugging specific code, (b) the graph lacks the needed detail, or
-(c) the graph is missing or stale.
-
-Type `/graphify` in Copilot Chat to build or update the graph.
-
-## Optional Repository-Local Policy
-
-If `AGENTS.local.md` exists next to this file, load and apply it after this
-baseline. If it does not exist, continue without error.
+- Keep detailed procedures, checklists, file layouts, command playbooks, and
+  tool-specific workflows in their owning skills or files.
+- Use Plain Technical English for repository-owned prose unless a narrower
+  owner specifies otherwise. Use short sentences, stable terms, active voice,
+  and explicit `must`, `should`, and `may`. Preserve required technical names.
+- Place native tests with the component and runner that own the behavior.
+  Reserve repository-root `tests/` for non-native or cross-boundary behavior.

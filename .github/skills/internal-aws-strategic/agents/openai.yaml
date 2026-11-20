@@ -1,6 +1,0 @@
-policy:
-  allow_implicit_invocation: false
-interface:
-  display_name: "internal-aws-strategic"
-  short_description: "AWS option, tradeoff, and risk decisions"
-  default_prompt: "Use $internal-aws-strategic for this routed AWS decision task."

@@ -1,5 +1,5 @@
 ---
-description: Use when editing internal/local skill references; owns deep reusable detail without duplicating paired agent or SKILL.md contracts.
+description: Review checks for internal and local skill references covering SKILL.md duplication, resolvable links, and current procedures.
 applyTo: ".github/skills/internal-*/references/**/*.md,.github/skills/local-*/references/**/*.md"
 excludeAgent: "cloud-agent"
 ---

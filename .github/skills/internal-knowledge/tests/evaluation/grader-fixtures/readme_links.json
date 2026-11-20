@@ -1,0 +1,82 @@
+{
+  "schema": "knowledge-grader-fixture/v1",
+  "grader": "readme_links",
+  "gold": "tests/evaluation/grader-fixtures/gold/readme_links.json",
+  "good": [
+    {
+      "name": "good",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "README.md": "# Project\n\n[Owner](docs/owner.md)",
+          "docs/owner.md": "# Owner"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "README.md": "# Project\n\n[Owner](docs/owner.md)",
+          "docs/owner.md": "# Owner"
+        }
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "name": "broken-relative-link",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "README.md": "# Project\n\n[Bad](docs/missing.md)"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "README.md": "# Project\n\n[Bad](docs/missing.md)"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "broken-link"
+    },
+    {
+      "name": "missing-owner-link",
+      "kind": "critical-omission",
+      "run": {
+        "profile": "author",
+        "allowlist": [
+          "docs/**",
+          "README.md"
+        ],
+        "before": {},
+        "after": {
+          "README.md": "# Project\n\nSummary.",
+          "docs/owner.md": "# Owner"
+        },
+        "steps": [],
+        "trace": [],
+        "trace_complete": true,
+        "report": "",
+        "second_after": {
+          "README.md": "# Project\n\nSummary.",
+          "docs/owner.md": "# Owner"
+        }
+      },
+      "expected_status": "fail",
+      "expected_code": "missing-owner-link"
+    }
+  ]
+}

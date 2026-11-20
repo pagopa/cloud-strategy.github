@@ -49,10 +49,25 @@ def import_records(source_path: Path, output_path: Path) -> ImportSummary:
 ## Adapter rendering
 
 Adapters translate results into the boundary's output contract. The JSON
-adapter returns plain data; the human adapter may use the script reporting
-owner or `rich` when the CLI contract owns that dependency.
+adapter returns plain data; the human adapter depends on a small reporter
+protocol that the CLI owns, and may implement it with `rich` when the CLI
+contract owns that dependency.
 
 ```python
+from collections.abc import Mapping, Sequence
+from typing import Protocol
+
+
+class SummaryReporter(Protocol):
+    def summary(
+        self,
+        *,
+        status: str,
+        counts: Mapping[str, int],
+        produced_files: Sequence[Path],
+    ) -> None: ...
+
+
 def summary_to_json(summary: ImportSummary) -> dict[str, object]:
     return {
         "imported_count": summary.imported_count,
@@ -61,12 +76,11 @@ def summary_to_json(summary: ImportSummary) -> dict[str, object]:
     }
 
 
-def render_human_summary(summary: ImportSummary, reporter: object) -> None:
+def render_human_summary(summary: ImportSummary, reporter: SummaryReporter) -> None:
     reporter.summary(
         status="completed",
         counts={"imported": summary.imported_count, "skipped": summary.skipped_count},
         produced_files=[summary.output_path],
-        diagnostics=[],
     )
 ```
 

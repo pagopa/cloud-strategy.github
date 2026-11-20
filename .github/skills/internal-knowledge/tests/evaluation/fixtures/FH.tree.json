@@ -1,0 +1,15 @@
+{
+  "schema": "knowledge-fixture-tree/v1",
+  "id": "FH",
+  "description": "Sealed downstream holdout with ingest, transform and publish services and job lifecycle.",
+  "files": {
+    "README.md": "A data delivery system.\n",
+    "services/ingest/README.md": "# Ingest\n\nReceives source events.\n",
+    "services/transform/README.md": "# Transform\n\nNormalizes events.\n",
+    "services/publish/README.md": "# Publish\n\nDelivers curated events.\n",
+    "jobs/README.md": "# Jobs\n\nJob lifecycle is queued, running, done or failed.\n",
+    "services/ingest/main.py": "def ingest(event):\n    return event\n",
+    "services/transform/main.py": "def transform(event):\n    return event\n",
+    "services/publish/main.py": "def publish(event):\n    return event\n"
+  }
+}

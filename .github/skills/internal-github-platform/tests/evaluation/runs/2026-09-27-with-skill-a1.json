@@ -1,0 +1,22 @@
+{
+  "schema": "skill-eval-run/v1",
+  "skill": "internal-github-platform",
+  "date": "2026-09-27",
+  "host": "VS Code GitHub Copilot Chat; isolated read-only subagents with skill text supplied by path and assertions withheld (less rigorous than a clean-catalog run)",
+  "model": "Claude Opus 5.5 (session default, inherited by subagents)",
+  "configuration": "with-skill",
+  "case_results": [
+    {
+      "case_id": "C-CODEOWNERS-ORDER",
+      "status": "passed",
+      "transcript_ref": "copilot-chat session 5094548d-863d-4434-93c5-7ee097630583, subagent 'Case pilot with-skill platform'",
+      "assertions": [
+        {
+          "id": "A-CRITICAL",
+          "passed": true,
+          "evidence": "Corrected file puts '*' first, then /.github/, /.github/workflows/, /infra/; no specific rule follows a catch-all."
+        }
+      ]
+    }
+  ]
+}

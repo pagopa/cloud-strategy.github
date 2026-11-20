@@ -7,7 +7,6 @@ import os
 import shutil
 import subprocess
 import tarfile
-import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,7 +19,6 @@ from sync_external_resources_core import (
     _run_command,
     compute_prepared_source_paths_sha256,
 )
-
 
 NETWORK_COMMAND_TIMEOUT_SECONDS = 1800
 
@@ -123,27 +121,27 @@ def _init_bare_cache(cache: Path, repository: str) -> None:
     cache.mkdir(parents=True, exist_ok=True)
     _run_command(["git", "init", "--bare"], cwd=cache)
     _run_command(
-        ["git", "config", "remote.origin.url", repository],
+        ["git", f"--git-dir={cache}", "config", "remote.origin.url", repository],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "remote.origin.fetch", ""],
+        ["git", f"--git-dir={cache}", "config", "remote.origin.fetch", ""],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "remote.origin.tagOpt", "--no-tags"],
+        ["git", f"--git-dir={cache}", "config", "remote.origin.tagOpt", "--no-tags"],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "core.repositoryFormatVersion", "1"],
+        ["git", f"--git-dir={cache}", "config", "core.repositoryFormatVersion", "1"],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "extensions.partialClone", "origin"],
+        ["git", f"--git-dir={cache}", "config", "extensions.partialClone", "origin"],
         cwd=cache,
     )
     _run_command(
-        ["git", "config", "remote.origin.promisor", "true"],
+        ["git", f"--git-dir={cache}", "config", "remote.origin.promisor", "true"],
         cwd=cache,
     )
 
@@ -152,23 +150,31 @@ def _pin_ref(sha: str) -> str:
     return f"refs/cache/pins/{sha}"
 
 
-def _has_pin(cache: Path, sha: str) -> bool:
-    pin = _pin_ref(sha)
+def _read_cache_ref(cache: Path, ref: str) -> str | None:
+    command = [
+        "git", f"--git-dir={cache}", "rev-parse", "--verify", "--quiet", ref,
+    ]
     result = subprocess.run(
-        ["git", "rev-parse", "--verify", pin],
+        command,
         cwd=cache,
         capture_output=True,
         text=True,
         check=False,
     )
+    if result.returncode == 1:
+        return None
     if result.returncode != 0:
-        return False
-    return result.stdout.strip() == sha
+        raise SyncCommandError(command, result.returncode, result.stderr)
+    return result.stdout.strip()
+
+
+def _has_pin(cache: Path, sha: str) -> bool:
+    return _read_cache_ref(cache, _pin_ref(sha)) == sha
 
 
 def _verify_commit(cache: Path, sha: str) -> None:
     result = _run_command(
-        ["git", "rev-parse", "--verify", f"{sha}^{{commit}}"],
+        ["git", f"--git-dir={cache}", "rev-parse", "--verify", f"{sha}^{{commit}}"],
         cwd=cache,
     )
     resolved = result.stdout.strip()
@@ -177,7 +183,7 @@ def _verify_commit(cache: Path, sha: str) -> None:
             f"commit verification mismatch: expected {sha}, got {resolved}"
         )
     type_result = _run_command(
-        ["git", "cat-file", "-t", sha],
+        ["git", f"--git-dir={cache}", "cat-file", "-t", sha],
         cwd=cache,
     )
     obj_type = type_result.stdout.strip()
@@ -185,21 +191,77 @@ def _verify_commit(cache: Path, sha: str) -> None:
         raise ValueError(f"object {sha} is {obj_type}, expected commit")
 
 
+def read_commit_date(cache: Path, sha: str) -> str | None:
+    """Read the committer date of a pinned commit from a local cache.
+
+    Local read only: never fetches. Returns None when the cache or the
+    commit object is unavailable.
+    """
+    if not (cache / "HEAD").exists():
+        return None
+    if _read_cache_ref(cache, f"{sha}^{{commit}}") is None:
+        return None
+    result = _run_command(
+        ["git", f"--git-dir={cache}", "show", "-s", "--format=%cI", sha],
+        cwd=cache,
+    )
+    return result.stdout.strip() or None
+
+
+def _commit_date_mismatch_message(
+    source: ManagedSource, actual_date: str
+) -> str:
+    return (
+        f"source {source.source_id} commit_date mismatch: manifest declares "
+        f"{source.commit_date}, commit {source.ref[:12]} is dated {actual_date}. "
+        "Update commit_date in the manifest or re-pin the ref."
+    )
+
+
+def _verify_declared_commit_date(cache: Path, source: ManagedSource) -> None:
+    if source.commit_date is None:
+        return
+    actual = read_commit_date(cache, source.ref)
+    if actual is None:
+        raise ValueError(
+            f"source {source.source_id}: cannot verify commit_date "
+            f"{source.commit_date}: commit {source.ref[:12]} not in cache."
+        )
+    if actual[:10] != source.commit_date:
+        raise ValueError(_commit_date_mismatch_message(source, actual[:10]))
+
+
+def verify_commit_dates_against_cache(
+    resources: ManagedResources, workspace: Path
+) -> None:
+    for source in resources.sources:
+        if source.commit_date is None:
+            continue
+        cache = _cache_dir(workspace, source.repository)
+        actual = read_commit_date(cache, source.ref)
+        if actual is None:
+            continue
+        if actual[:10] != source.commit_date:
+            raise ValueError(_commit_date_mismatch_message(source, actual[:10]))
+
+
 def _write_pin(cache: Path, sha: str) -> None:
     _run_command(
-        ["git", "update-ref", _pin_ref(sha), sha],
+        ["git", f"--git-dir={cache}", "update-ref", _pin_ref(sha), sha],
         cwd=cache,
     )
 
 
 def _fetch_sha(cache: Path, sha: str) -> None:
     cmd = _build_fetch_command(sha)
+    cmd.insert(1, f"--git-dir={cache}")
     _run_command(cmd, cwd=cache, timeout=NETWORK_COMMAND_TIMEOUT_SECONDS)
 
 
 def _fetch_advertised_ref(cache: Path, ref: str) -> None:
     cmd = [
         "git",
+        f"--git-dir={cache}",
         "-c",
         "fetch.fsckObjects=true",
         "fetch",
@@ -268,8 +330,7 @@ def _export_paths(
 
     cmd = [
         "git",
-        "-C",
-        str(cache),
+        f"--git-dir={cache}",
         "archive",
         source.ref,
         "--",
@@ -398,6 +459,8 @@ def _prepare_one_source(
             before = _cache_size(cache)
             cache_status, fetch_strategy = _fetch_source(cache, source)
             bytes_added = max(0, _cache_size(cache) - before)
+
+        _verify_declared_commit_date(cache, source)
 
         staging_dir = sources_root.parent / f".{source.source_id}.staging"
         if staging_dir.exists():
